@@ -4,6 +4,7 @@ import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
+  findAccessRequests,
   getAccessRequestsByModel,
   getCurrentUserPermissionsByAccessRequest,
   getModelAccessRequestsForUser,
@@ -19,14 +20,43 @@ const modelMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
+const modelModelMocks = vi.hoisted(() => {
+  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Model.js', () => ({ default: modelModelMocks }))
+
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
+const mockAuthentication = vi.hoisted(() => ({
+  hasRole: vi.fn(),
+  getEntities: vi.fn(() => ['user:testUser']),
+}))
+vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
+
 const accessRequestModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
+  obj.aggregate = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
@@ -134,6 +164,69 @@ describe('services > accessRequest', () => {
     ])
 
     const accessRequests = await getAccessRequestsByModel({} as any, 'modelId')
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequests > no filters', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+        model: {
+          id: 'modelId',
+        },
+      },
+    ])
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
+
+    const accessRequests = await findAccessRequests({} as any, [], '', true, false)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequests > all filters', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+        model: {
+          id: 'modelId',
+        },
+      },
+    ])
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
+
+    const accessRequests = await findAccessRequests({} as any, ['modelId'], 'schemaId', false, false)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequests > admin access without auth', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    await expect(() => findAccessRequests({} as any, [], '', true, true)).rejects.toThrowError(
+      /^You do not have the required role./,
+    )
+  })
+
+  test('findAccessRequests > admin access with auth', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(true)
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+      },
+    ])
+
+    const accessRequests = await findAccessRequests({} as any, [], '', true, true)
     expect(accessRequests).toMatchSnapshot()
   })
 

@@ -23,7 +23,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
 
-  const { mutateModel } = useGetModel(entry.id, entry.kind)
+  const { mutateModel } = useGetModel(entry.id)
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -40,6 +40,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   }, [entry])
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
+    setEntryTagUpdateErrorMessage('')
     const response = await patchModel(entry.id, { tags: newTags })
     if (!response.ok) {
       setEntryTagUpdateErrorMessage(await getErrorMessage(response))

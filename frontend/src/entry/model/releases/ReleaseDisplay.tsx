@@ -158,12 +158,18 @@ export default function ReleaseDisplay({
                 View Model Card
               </Button>
             </Stack>
-            <Typography variant='caption' sx={{ mb: 2 }}>
-              Created by {<UserDisplay dn={release.createdBy} />} on
+            <Stack direction='row' alignItems='center' spacing={0.5}>
+              <Typography variant='caption' sx={{ mb: 2 }}>
+                Created by
+              </Typography>
+              <UserDisplay dn={release.createdBy} />
+              <Typography variant='caption' sx={{ mb: 2 }}>
+                on
+              </Typography>
               <Typography variant='caption' fontWeight='bold'>
                 {` ${formatDateString(release.createdAt)}`}
               </Typography>
-            </Typography>
+            </Stack>
             <MarkdownDisplay>{release.notes}</MarkdownDisplay>
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
@@ -179,12 +185,13 @@ export default function ReleaseDisplay({
                   <AccordionDetails>
                     <Paginate
                       list={release.files}
-                      defaultSortProperty='name'
+                      defaultSortProperty='createdAt'
                       searchFilterProperty='name'
                       searchPlaceholderText='Search by filename'
                       emptyListText='No files found'
                       sortingProperties={[
                         { value: 'name', title: 'Name', iconKind: 'text' },
+                        { value: 'size', title: 'Size', iconKind: 'size' },
                         { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
                         { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
                       ]}
