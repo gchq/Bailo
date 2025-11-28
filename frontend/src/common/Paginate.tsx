@@ -1,4 +1,4 @@
-import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from '@mui/icons-material'
+import { CalendarMonth, Check, ExpandLess, ExpandMore, LineWeight, Sort, SortByAlpha } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -41,7 +41,7 @@ export type SortingDirectionKeys = (typeof SortingDirection)[keyof typeof Sortin
 export interface SortingProperty<T> {
   value: keyof T
   title: string
-  iconKind: 'text' | 'date'
+  iconKind: 'text' | 'date' | 'size'
 }
 
 export default function Paginate<T>({
@@ -121,6 +121,8 @@ export default function Paginate<T>({
         return <SortByAlpha color='primary' />
       case 'date':
         return <CalendarMonth color='primary' />
+      case 'size':
+        return <LineWeight color='primary' />
       default:
         return <SortByAlpha color='primary' />
     }
