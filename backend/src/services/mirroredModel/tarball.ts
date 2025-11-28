@@ -112,8 +112,6 @@ export async function extractTarGzStream(
     let importer: BaseImporter
     const { ungzipStream, untarStream } = createUnTarGzStreams()
 
-    tarGzStream.pipe(ungzipStream).pipe(untarStream)
-
     // this error event is expected to always call `reject`
     async function onErrorHandler(error: unknown) {
       if (importer?.errorListener) {
@@ -126,6 +124,12 @@ export async function extractTarGzStream(
         }
       }
     }
+
+    ungzipStream.on('error', async (error) => {
+      log.error({ error, ...logData }, 'Error occurred in `zlib.Gunzip` stream. Aborting extraction.')
+      // Pass the error into the untarStream to trigger the error listener
+      untarStream.destroy(error)
+    })
 
     untarStream.on('error', async (error) => {
       await onErrorHandler(error)
@@ -144,9 +148,7 @@ export async function extractTarGzStream(
       try {
         log.debug(
           {
-            name: entry.name,
-            type: entry.type,
-            size: entry.size,
+            entry,
             ...logData,
           },
           'Processing un-tarred entry.',
@@ -160,6 +162,7 @@ export async function extractTarGzStream(
             })
           }
           metadata = mirrorMetadataSchema.parse(await json(stream))
+          log.trace({ metadata, ...logData }, `Extracted metadata file '${config.modelMirror.metadataFile}'.`)
 
           // Only check auth once we know what the model is
           const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
@@ -185,5 +188,7 @@ export async function extractTarGzStream(
         await onErrorHandler(error)
       }
     })
+
+    tarGzStream.pipe(ungzipStream).pipe(untarStream)
   })
 }
