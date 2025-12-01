@@ -178,7 +178,7 @@ export async function findAccessRequests(
   }
 
   if (schemaId) {
-    query.schemaId = { $in: schemaId }
+    query.schemaId = { $eq: schemaId }
   }
 
   if (mine) {

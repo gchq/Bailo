@@ -1,3 +1,4 @@
+import qs from 'querystring'
 import useSWR from 'swr'
 import { AccessRequestInterface, AccessRequestUserPermissions } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
@@ -15,6 +16,38 @@ export function useGetAccessRequestsForModelId(modelId?: string) {
   return {
     mutateAccessRequests: mutate,
     accessRequests: data ? data.accessRequests : emptyAccessRequestList,
+    isAccessRequestsLoading: isLoading,
+    isAccessRequestsError: error,
+  }
+}
+
+export function useGetAccessRequests(
+  modelId: string[] = [],
+  schemaId: string[] = [],
+  mine?: boolean,
+  adminAccess?: boolean,
+) {
+  const queryParams = {
+    ...(modelId.length > 0 && { modelId }),
+    ...(schemaId.length > 0 && { schemaId }),
+    ...(mine && { mine }),
+    ...(adminAccess && { adminAccess }),
+  }
+
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      accessRequests: AccessRequestInterface[]
+    },
+    ErrorInfo
+  >(
+    Object.entries(queryParams).length > 0 ? `/api/v2/access-requests/search?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
+
+  return {
+    mutateAccessRequests: mutate,
+    accessRequests: data ? data.accessRequests : emptyAccessRequestList,
+    errors: data ? data.accessRequests : {},
     isAccessRequestsLoading: isLoading,
     isAccessRequestsError: error,
   }
