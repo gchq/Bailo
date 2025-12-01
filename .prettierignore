@@ -1,13 +1,47 @@
+# dependencies
+node_modules
+backend/node_modules
+frontend/node_modules
+
+# misc
+.DS_Store
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MLFlow
+mlartifacts/
+mlruns/
+
+# config dirs
 .github
 .husky
 .vscode
+
+# backend build components
+backend/coverage
 backend/dist
-backend/node_modules
 backend/docs
+
+# frontend build components
 frontend/.next
 frontend/dist
-frontend/node_modules
+
+# lib/landing build components
+lib/landing/.next
+lib/landing/.scannerwork
+lib/landing/coverage
+lib/landing/dist
+
+# infrastructure dir
 infrastructure
-node_modules
+
+# lib dirs
+lib/modelscan_api
+lib/python
+
+# Other files
+*env
 .dockerignore
-backend/coverage
