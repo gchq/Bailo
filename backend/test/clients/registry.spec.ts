@@ -34,6 +34,23 @@ global.fetch = vi.fn()
 // workaround TS being difficult
 const fetchMock: Mock = global.fetch as Mock
 
+class AbortControllerMock {
+  signal: { aborted: boolean; onabort: ((...args: any[]) => void) | null }
+  constructor() {
+    this.signal = {
+      aborted: false,
+      onabort: null,
+    }
+  }
+  abort() {
+    this.signal.aborted = true
+    if (typeof this.signal.onabort === 'function') {
+      this.signal.onabort()
+    }
+  }
+}
+global.AbortController = AbortControllerMock as any
+
 describe('clients > registry', () => {
   beforeEach(() => {
     // globals (e.g. `fetch`) persist changes between tests so always reset to the default mock
