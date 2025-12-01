@@ -16,13 +16,27 @@ const s3Mocks = vi.hoisted(() => {
 
   return {
     send,
-    GetObjectCommand: vi.fn(() => ({})),
-    HeadObjectCommand: vi.fn(() => ({})),
-    HeadBucketCommand: vi.fn(() => ({})),
-    CreateBucketCommand: vi.fn(() => ({})),
-    CreateMultipartUploadCommand: vi.fn(() => ({})),
-    CompleteMultipartUploadCommand: vi.fn(() => ({})),
-    UploadPartCommand: vi.fn(() => ({})),
+    GetObjectCommand: vi.fn(function GetObjectCommand() {
+      return {}
+    }),
+    HeadObjectCommand: vi.fn(function HeadObjectCommand() {
+      return {}
+    }),
+    HeadBucketCommand: vi.fn(function HeadBucketCommand() {
+      return {}
+    }),
+    CreateBucketCommand: vi.fn(function CreateBucketCommand() {
+      return {}
+    }),
+    CreateMultipartUploadCommand: vi.fn(function CreateMultipartUploadCommand() {
+      return {}
+    }),
+    CompleteMultipartUploadCommand: vi.fn(function CompleteMultipartUploadCommand() {
+      return {}
+    }),
+    UploadPartCommand: vi.fn(function UploadPartCommand() {
+      return {}
+    }),
     S3Client: vi.fn(() => ({ send })),
   }
 })

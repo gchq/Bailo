@@ -180,7 +180,9 @@ vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
-  hasRole: vi.fn(() => ({})),
+  hasRole: vi.fn(function hasRole() {
+    return {}
+  }),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,

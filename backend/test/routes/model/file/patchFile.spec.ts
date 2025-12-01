@@ -9,7 +9,9 @@ vi.mock('../../../../src/connectors/audit/index.js')
 describe('routes > file > patchFile', () => {
   test('200 > ok', async () => {
     vi.mock('../../../../src/services/file.js', () => ({
-      updateFile: vi.fn(() => ({})),
+      updateFile: vi.fn(function updateFile() {
+        return {}
+      }),
     }))
 
     const fixture = createFixture(patchFileSchema)

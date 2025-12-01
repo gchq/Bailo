@@ -29,9 +29,15 @@ const cognitoMock = vi.hoisted(() => {
 
   return {
     send,
-    ListUsersCommand: vi.fn(() => ({})),
-    CognitoIdentityProviderClient: vi.fn(() => ({ send })),
-    ListUsersInGroupCommand: vi.fn(() => ({})),
+    ListUsersCommand: vi.fn(function ListUsersCommand() {
+      return {}
+    }),
+    CognitoIdentityProviderClient: vi.fn(function CognitoIdentityProviderClient() {
+      return { send }
+    }),
+    ListUsersInGroupCommand: vi.fn(function ListUsersInGroupCommand() {
+      return {}
+    }),
   }
 })
 vi.mock('@aws-sdk/client-cognito-identity-provider', () => cognitoMock)
