@@ -60,7 +60,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.11",
     "outdent": "^0.8.0",
-    "p-queue": "^9.0.0",
+    "p-queue": "^9.0.1",
     "pretty-bytes": "^7.1.0",
     "proxy-agent": "^6.5.0",
     "qs": "^6.14.0",
