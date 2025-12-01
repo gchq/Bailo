@@ -2,18 +2,22 @@
 
 exports[`services > model > removeModel > success empty 1`] = `
 [
+  [
+    [],
+    [],
+    undefined,
+    [],
+    undefined,
+  ],
   {
     "modelId": "modelId",
     "semvers": [],
   },
-  [],
-  undefined,
-  [],
-  undefined,
-  [],
-  undefined,
-  [],
-  undefined,
+  [
+    undefined,
+    undefined,
+    [],
+  ],
   {
     "aggregate": [MockFunction spy],
     "append": [MockFunction spy],
@@ -73,6 +77,118 @@ exports[`services > model > removeModel > success empty 1`] = `
 
 exports[`services > model > removeModel > success entries 1`] = `
 [
+  [
+    [
+      undefined,
+      undefined,
+      undefined,
+    ],
+    [
+      {
+        "findByIdAndDelete": [MockFunction spy] {
+          "calls": [
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+      },
+      {
+        "findByIdAndDelete": [MockFunction spy] {
+          "calls": [
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+      },
+      {
+        "findByIdAndDelete": [MockFunction spy] {
+          "calls": [
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+            [
+              "6776901b879d08e34b599d7e",
+              undefined,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+      },
+    ],
+    undefined,
+    [
+      undefined,
+      undefined,
+      undefined,
+    ],
+    undefined,
+  ],
   {
     "modelId": "modelId",
     "semvers": [
@@ -84,123 +200,15 @@ exports[`services > model > removeModel > success entries 1`] = `
   [
     undefined,
     undefined,
-    undefined,
+    [
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ],
   ],
-  undefined,
-  [
-    {
-      "findByIdAndDelete": [MockFunction spy] {
-        "calls": [
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-        ],
-      },
-    },
-    {
-      "findByIdAndDelete": [MockFunction spy] {
-        "calls": [
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-        ],
-      },
-    },
-    {
-      "findByIdAndDelete": [MockFunction spy] {
-        "calls": [
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-        ],
-      },
-    },
-  ],
-  undefined,
-  [
-    undefined,
-    undefined,
-    undefined,
-  ],
-  undefined,
-  [
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ],
-  undefined,
   {
     "aggregate": [MockFunction spy],
     "append": [MockFunction spy],
