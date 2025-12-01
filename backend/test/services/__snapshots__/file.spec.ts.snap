@@ -3,7 +3,7 @@
 exports[`services > file > downloadFile > success 1`] = `
 {
   "Body": {
-    "pipe": [MockFunction spy],
+    "pipe": [MockFunction],
   },
 }
 `;
@@ -12,10 +12,10 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
 {
   "_id": "mockFileId",
   "avScan": {
-    "aggregate": [MockFunction spy],
-    "delete": [MockFunction spy],
-    "deleteMany": [MockFunction spy],
-    "find": [MockFunction spy] {
+    "aggregate": [MockFunction],
+    "delete": [MockFunction],
+    "deleteMany": [MockFunction],
+    "find": [MockFunction] {
       "calls": [
         [
           {
@@ -30,7 +30,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
         },
       ],
     },
-    "findOne": [MockFunction spy],
+    "findOne": [MockFunction],
   },
   "complete": true,
   "createdAt": 2024-01-01T00:00:00.000Z,
@@ -49,7 +49,7 @@ exports[`services > file > getFilesByIds > success 1`] = `
 [
   {
     "_id": {
-      "toString": [MockFunction spy],
+      "toString": [MockFunction],
     },
     "avScan": [],
     "example": "file",
@@ -87,7 +87,7 @@ exports[`services > file > getFilesByModel > success 1`] = `
 [
   {
     "_id": {
-      "toString": [MockFunction spy],
+      "toString": [MockFunction],
     },
     "example": "file",
   },
@@ -97,7 +97,7 @@ exports[`services > file > getFilesByModel > success 1`] = `
 exports[`services > file > removeFile > success 1`] = `
 {
   "_id": {
-    "toString": [MockFunction spy] {
+    "toString": [MockFunction] {
       "calls": [
         [],
       ],
@@ -139,7 +139,7 @@ exports[`services > file > removeFiles > success 2`] = `
 [
   {
     "_id": {
-      "toString": [MockFunction spy] {
+      "toString": [MockFunction] {
         "calls": [
           [],
         ],
@@ -156,7 +156,7 @@ exports[`services > file > removeFiles > success 2`] = `
   },
   {
     "_id": {
-      "toString": [MockFunction spy] {
+      "toString": [MockFunction] {
         "calls": [
           [],
         ],
@@ -199,7 +199,7 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
 [
   {
     "_id": {
-      "toString": [MockFunction spy] {
+      "toString": [MockFunction] {
         "calls": [
           [],
         ],
@@ -216,7 +216,7 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
   },
   {
     "_id": {
-      "toString": [MockFunction spy] {
+      "toString": [MockFunction] {
         "calls": [
           [],
         ],
@@ -248,21 +248,21 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
   ],
   "file": {
     "_id": "mockFileId",
-    "aggregate": [MockFunction spy],
+    "aggregate": [MockFunction],
     "complete": true,
     "createdAt": 2024-01-01T00:00:00.000Z,
-    "delete": [MockFunction spy],
-    "find": [MockFunction spy],
-    "findById": [MockFunction spy],
-    "findOneAndDelete": [MockFunction spy],
-    "findOneAndUpdate": [MockFunction spy],
-    "group": [MockFunction spy],
-    "match": [MockFunction spy],
+    "delete": [MockFunction],
+    "find": [MockFunction],
+    "findById": [MockFunction],
+    "findOneAndDelete": [MockFunction],
+    "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
+    "match": [MockFunction],
     "mime": "mock/mime",
     "modelId": "mockModelId",
     "name": "mockFileName",
     "path": "/mock/path",
-    "save": [MockFunction spy] {
+    "save": [MockFunction] {
       "calls": [
         [],
       ],
@@ -275,7 +275,7 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
     },
     "size": 100,
     "tags": [],
-    "toObject": [MockFunction spy],
+    "toObject": [MockFunction],
     "updatedAt": 2024-01-02T00:00:00.000Z,
   },
   "uploadId": "uploadId",
@@ -285,7 +285,7 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
 exports[`services > file > updateFile > success 1`] = `
 {
   "_id": {
-    "toString": [MockFunction spy] {
+    "toString": [MockFunction] {
       "calls": [
         [],
         [],
@@ -310,7 +310,7 @@ exports[`services > file > updateFile > success 1`] = `
 exports[`services > file > updateFile > success multiple params 1`] = `
 {
   "_id": {
-    "toString": [MockFunction spy] {
+    "toString": [MockFunction] {
       "calls": [
         [],
         [],
@@ -336,10 +336,10 @@ exports[`services > file > uploadFile > success 1`] = `
 {
   "_id": "mockFileId",
   "avScan": {
-    "aggregate": [MockFunction spy],
-    "delete": [MockFunction spy],
-    "deleteMany": [MockFunction spy],
-    "find": [MockFunction spy] {
+    "aggregate": [MockFunction],
+    "delete": [MockFunction],
+    "deleteMany": [MockFunction],
+    "find": [MockFunction] {
       "calls": [
         [
           {
@@ -354,7 +354,7 @@ exports[`services > file > uploadFile > success 1`] = `
         },
       ],
     },
-    "findOne": [MockFunction spy],
+    "findOne": [MockFunction],
   },
   "complete": true,
   "createdAt": 2024-01-01T00:00:00.000Z,
@@ -373,10 +373,10 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
 {
   "_id": "mockFileId",
   "avScan": {
-    "aggregate": [MockFunction spy],
-    "delete": [MockFunction spy],
-    "deleteMany": [MockFunction spy],
-    "find": [MockFunction spy] {
+    "aggregate": [MockFunction],
+    "delete": [MockFunction],
+    "deleteMany": [MockFunction],
+    "find": [MockFunction] {
       "calls": [
         [
           {
@@ -391,7 +391,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
         },
       ],
     },
-    "findOne": [MockFunction spy],
+    "findOne": [MockFunction],
   },
   "complete": true,
   "createdAt": 2024-01-01T00:00:00.000Z,

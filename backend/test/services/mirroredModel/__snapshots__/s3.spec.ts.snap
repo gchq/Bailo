@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`services > mirroredModel > s3 > uploadToS3 > handle getObjectFromTemporaryS3Location error 1`] = `
-[MockFunction spy] {
+[MockFunction] {
   "calls": [
     [
       {

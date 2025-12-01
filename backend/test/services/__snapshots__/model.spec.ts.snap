@@ -15,9 +15,9 @@ exports[`services > model > removeModel > success empty 1`] = `
   [],
   undefined,
   {
-    "aggregate": [MockFunction spy],
-    "append": [MockFunction spy],
-    "delete": [MockFunction spy] {
+    "aggregate": [MockFunction],
+    "append": [MockFunction],
+    "delete": [MockFunction] {
       "calls": [
         [
           undefined,
@@ -30,9 +30,9 @@ exports[`services > model > removeModel > success empty 1`] = `
         },
       ],
     },
-    "find": [MockFunction spy],
-    "findByIdAndUpdate": [MockFunction spy],
-    "findOne": [MockFunction spy] {
+    "find": [MockFunction],
+    "findByIdAndUpdate": [MockFunction],
+    "findOne": [MockFunction] {
       "calls": [
         [
           {
@@ -56,17 +56,17 @@ exports[`services > model > removeModel > success empty 1`] = `
         },
       ],
     },
-    "findOneAndUpdate": [MockFunction spy],
-    "lookup": [MockFunction spy],
-    "match": [MockFunction spy],
-    "save": [MockFunction spy],
+    "findOneAndUpdate": [MockFunction],
+    "lookup": [MockFunction],
+    "match": [MockFunction],
+    "save": [MockFunction],
     "settings": {
       "mirror": {
         "sourceModelId": "",
       },
     },
-    "sort": [MockFunction spy],
-    "updateOne": [MockFunction spy],
+    "sort": [MockFunction],
+    "updateOne": [MockFunction],
   },
 ]
 `;
@@ -89,7 +89,7 @@ exports[`services > model > removeModel > success entries 1`] = `
   undefined,
   [
     {
-      "findByIdAndDelete": [MockFunction spy] {
+      "findByIdAndDelete": [MockFunction] {
         "calls": [
           [
             "6776901b879d08e34b599d7e",
@@ -121,7 +121,7 @@ exports[`services > model > removeModel > success entries 1`] = `
       },
     },
     {
-      "findByIdAndDelete": [MockFunction spy] {
+      "findByIdAndDelete": [MockFunction] {
         "calls": [
           [
             "6776901b879d08e34b599d7e",
@@ -153,7 +153,7 @@ exports[`services > model > removeModel > success entries 1`] = `
       },
     },
     {
-      "findByIdAndDelete": [MockFunction spy] {
+      "findByIdAndDelete": [MockFunction] {
         "calls": [
           [
             "6776901b879d08e34b599d7e",
@@ -202,9 +202,9 @@ exports[`services > model > removeModel > success entries 1`] = `
   ],
   undefined,
   {
-    "aggregate": [MockFunction spy],
-    "append": [MockFunction spy],
-    "delete": [MockFunction spy] {
+    "aggregate": [MockFunction],
+    "append": [MockFunction],
+    "delete": [MockFunction] {
       "calls": [
         [
           undefined,
@@ -217,9 +217,9 @@ exports[`services > model > removeModel > success entries 1`] = `
         },
       ],
     },
-    "find": [MockFunction spy],
-    "findByIdAndUpdate": [MockFunction spy],
-    "findOne": [MockFunction spy] {
+    "find": [MockFunction],
+    "findByIdAndUpdate": [MockFunction],
+    "findOne": [MockFunction] {
       "calls": [
         [
           {
@@ -243,17 +243,17 @@ exports[`services > model > removeModel > success entries 1`] = `
         },
       ],
     },
-    "findOneAndUpdate": [MockFunction spy],
-    "lookup": [MockFunction spy],
-    "match": [MockFunction spy],
-    "save": [MockFunction spy],
+    "findOneAndUpdate": [MockFunction],
+    "lookup": [MockFunction],
+    "match": [MockFunction],
+    "save": [MockFunction],
     "settings": {
       "mirror": {
         "sourceModelId": "",
       },
     },
-    "sort": [MockFunction spy],
-    "updateOne": [MockFunction spy],
+    "sort": [MockFunction],
+    "updateOne": [MockFunction],
   },
 ]
 `;

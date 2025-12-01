@@ -249,7 +249,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
   [
     "https://localhost:5000/v2/url&digest=digest",
     {
-      "body": [MockFunction spy],
+      "body": [MockFunction],
       "dispatcher": "mock agent",
       "duplex": "half",
       "headers": {
