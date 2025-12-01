@@ -8,13 +8,13 @@ import { CSSProperties, ReactElement, useState } from 'react'
 type PartialChipSelectorProps =
   | {
       multiple: true
-      options: string[]
+      options: [string, boolean][] | string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
-      options: string[]
+      options: [string, boolean][] | string[]
       selectedChips: string
       onChange: (value: string) => void
     }
@@ -64,20 +64,37 @@ export default function ChipSelector({
     setExpanded(!expanded)
   }
 
-  const allOptions = options.map((option) => (
-    <ChipItem
-      key={option.toString()}
-      chip={option}
-      size={size}
-      activeChip={selectedChips.includes(option)}
-      handleChange={handleChange}
-      chipTooltipTitle={chipTooltipTitle}
-      ariaLabel={ariaLabel}
-      variant={variant}
-      icon={icon}
-      style={style}
-    />
-  ))
+  const allOptions =
+    typeof options[0] === 'string'
+      ? options.map((option) => (
+          <ChipItem
+            key={option.toString()}
+            chip={option}
+            size={size}
+            activeChip={selectedChips.includes(option)}
+            handleChange={handleChange}
+            chipTooltipTitle={chipTooltipTitle}
+            ariaLabel={ariaLabel}
+            variant={variant}
+            icon={icon}
+            style={style}
+          />
+        ))
+      : (options as [string, boolean][]).map(([key, value]) => (
+          <ChipItem
+            key={key.toString()}
+            chip={key}
+            size={size}
+            activeChip={selectedChips.includes(key)}
+            handleChange={handleChange}
+            chipTooltipTitle={value ? chipTooltipTitle : 'This is unreachable.'}
+            ariaLabel={ariaLabel}
+            variant={variant}
+            icon={icon}
+            style={style}
+            disabled={!value}
+          />
+        ))
 
   if (accordion) {
     return (
@@ -127,6 +144,7 @@ type ChipItemProps = {
   variant?: 'filled' | 'outlined'
   icon?: ReactElement
   style?: CSSProperties
+  disabled?: boolean
 }
 
 function ChipItem({
@@ -139,21 +157,25 @@ function ChipItem({
   variant = 'filled',
   icon = <></>,
   style = {},
+  disabled = false,
 }: ChipItemProps) {
   return (
     <Tooltip title={chipTooltipTitle}>
-      <Chip
-        color={activeChip ? 'secondary' : 'default'}
-        size={size}
-        key={chip}
-        sx={{ mx: 0.5, mb: 1, ...style }}
-        label={chip}
-        data-test={`chipOption-${chip}`}
-        onClick={() => handleChange(chip)}
-        aria-label={ariaLabel}
-        variant={variant}
-        icon={icon}
-      />
+      <span>
+        <Chip
+          color={activeChip ? 'secondary' : 'default'}
+          size={size}
+          key={chip}
+          sx={{ mx: 0.5, mb: 1, ...style }}
+          label={chip}
+          data-test={`chipOption-${chip}`}
+          onClick={() => handleChange(chip)}
+          aria-label={ariaLabel}
+          variant={variant}
+          icon={icon}
+          disabled={disabled}
+        />
+      </span>
     </Tooltip>
   )
 }

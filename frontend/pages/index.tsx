@@ -41,7 +41,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
-import { isReachable } from 'utils/peerUtils'
+import { isEnabled, isReachable } from 'utils/peerUtils'
 
 interface KeyAndLabel {
   key: string
@@ -196,11 +196,11 @@ export default function Marketplace() {
     [roleOptions],
   )
 
-  const reachablePeerList = useMemo(() => {
+  const reachablePeerList: [string, boolean][] = useMemo(() => {
     if (!peers) return []
     return Array.from(peers.entries())
-      .filter(([, value]) => isReachable(value))
-      .map(([key]) => key)
+      .filter(([, value]) => isEnabled(value))
+      .map(([key, value]) => [key, isReachable(value)])
   }, [peers])
 
   const organisationList = useMemo(() => {
