@@ -29,6 +29,9 @@ type PartialButtonMessageAlertProps =
 
 type MessageAlertProps = {
   message?: string
+  id?: string
+  code?: number
+  status?: number
   severity?: AlertProps['severity']
   'data-test'?: string
   slimView?: boolean
@@ -38,6 +41,9 @@ type MessageAlertProps = {
 
 export default function MessageAlert({
   message = '',
+  id = '',
+  code = -1,
+  status = -1,
   severity,
   linkText,
   href,
@@ -49,6 +55,14 @@ export default function MessageAlert({
 }: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
   const [showContactMessage, setShowContactMessage] = useState(false)
+
+  let statusCode = -1
+  if (code > 0) {
+    statusCode = code
+  }
+  if (status > 0) {
+    statusCode = status
+  }
 
   useEffect(() => {
     if (!disableScrollToView && message && alertRef.current && alertRef.current.scrollIntoView) {
@@ -62,11 +76,13 @@ export default function MessageAlert({
     setShowContactMessage(!showContactMessage)
   }
 
+  const displayButton = buttonText && buttonAction
+
   if (!message) return null
 
   return (
     <Alert
-      severity={severity}
+      severity={'info'}
       sx={{
         my: 2,
         maxHeight: slimView ? '70px' : 'none',
@@ -74,9 +90,18 @@ export default function MessageAlert({
       }}
       ref={alertRef}
       data-test={dataTest}
+      action={
+        displayButton && (
+          <Button size='small' onClick={buttonAction}>
+            {buttonText}
+          </Button>
+        )
+      }
     >
       <Stack spacing={1}>
         <Stack direction='row' spacing={1} alignItems='center'>
+          {id && <Typography fontWeight={'bold'}>{id}</Typography>}
+          {statusCode > 0 && <Typography fontWeight={'bold'}>{statusCode}</Typography>}
           <Typography>{message}</Typography>
           {severity === 'error' && (
             <CopyToClipboardButton
@@ -85,7 +110,6 @@ export default function MessageAlert({
               ariaLabel='copy error message to clipboard'
             />
           )}
-          {buttonText && <Button onClick={buttonAction}>{buttonText}</Button>}
         </Stack>
         {!!(href && linkText) && (
           <Typography>

@@ -22,12 +22,86 @@ export function softDeletionPlugin(schema: Schema) {
     if (user) {
       this.deletedBy = user
     }
-    return await this.save(session)
+    return await this.save({ session })
+  }
+
+  schema.statics.deleteOne = async function (
+    filter: Record<string, any>,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    return this.updateOne(filter, update, { session })
+  }
+
+  schema.statics.deleteMany = async function (
+    filter: Record<string, any>,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    return this.updateMany(filter, update, { session })
+  }
+
+  schema.statics.findByIdAndDelete = async function (
+    id: Types.ObjectId | string,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    const options: Record<string, any> = { new: true }
+    if (session) {
+      options.session = session
+    }
+
+    return this.findByIdAndUpdate(id, update, options)
+  }
+
+  schema.statics.findOneAndDelete = async function (
+    filter: Record<string, any>,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    const options: Record<string, any> = { new: true }
+    if (session) {
+      options.session = session
+    }
+
+    return this.findOneAndUpdate(filter, update, options)
   }
 
   schema.methods.restore = async function (session: ClientSession | undefined) {
     this.deleted = false
-    return await this.save(session)
+    return await this.save({ session })
   }
 
   schema.pre('find', function (next: CallbackWithoutResultAndOptionalError) {
@@ -35,7 +109,7 @@ export function softDeletionPlugin(schema: Schema) {
       this.where('deleted').equals(this['_conditions'].deleted)
       next()
     } else {
-      this.where('deleted').equals(false)
+      this.or([{ deleted: { $exists: false } }, { deleted: false }])
       next()
     }
   })
@@ -45,7 +119,7 @@ export function softDeletionPlugin(schema: Schema) {
       this.where('deleted').equals(this['_conditions'].deleted)
       next()
     } else {
-      this.where('deleted').equals(false)
+      this.or([{ deleted: { $exists: false } }, { deleted: false }])
       next()
     }
   })

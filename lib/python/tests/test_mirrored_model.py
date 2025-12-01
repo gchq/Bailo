@@ -41,7 +41,7 @@ def test_mirrored_model(local_mirrored_model):
         ),
     ],
 )
-def test_create_get_from_id_and_update(
+def test_create_get_from_id_update_and_delete_mirrored_model(
     name: str,
     description: str,
     sourceModelId: str,
@@ -75,6 +75,9 @@ def test_create_get_from_id_and_update(
     assert get_mirrored_model.description == "testing-1234"
 
     assert mirroredModel.model_id == get_mirrored_model.model_id
+
+    # Check that the mirroredModel is deleted
+    assert mirroredModel.delete()
 
 
 @pytest.mark.integration

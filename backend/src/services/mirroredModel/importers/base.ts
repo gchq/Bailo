@@ -3,14 +3,16 @@ import { PassThrough, Readable } from 'node:stream'
 import { Headers } from 'tar-stream'
 
 import { isBailoError } from '../../../types/error.js'
+import { MirrorImportLogData } from '../../../types/types.js'
 import { InternalError } from '../../../utils/error.js'
-import { MirrorLogData } from '../mirroredModel.js'
+import log from '../../log.js'
 
 export type BaseMirrorMetadata = {
   schemaVersion: number
   sourceModelId: string
   mirroredModelId: string
   exporter: string
+  exportId: string
 }
 
 /**
@@ -35,7 +37,7 @@ export abstract class BaseImporter {
   abstract processEntry(entry: Headers, stream: PassThrough | Readable): Promise<void> | void
 
   protected readonly metadata: BaseMirrorMetadata
-  protected readonly logData: MirrorLogData
+  protected readonly logData: MirrorImportLogData
 
   /**
    * Creates a new importer instance.
@@ -43,9 +45,11 @@ export abstract class BaseImporter {
    * @param metadata - Base mirror metadata describing the import's source and format.
    * @param logData - Additional logging context for traceability and debugging.
    */
-  constructor(metadata: BaseMirrorMetadata, logData: MirrorLogData) {
+  constructor(metadata: BaseMirrorMetadata, logData: MirrorImportLogData) {
     this.metadata = metadata
     this.logData = { importerType: this.constructor.name, ...logData }
+
+    log.trace({ metadata: this.metadata, ...this.logData }, `Constructed new ${this.constructor.name}.`)
   }
 
   getMetadata() {

@@ -21,11 +21,12 @@ import {
   Tab,
   Tabs,
   Typography,
-} from '@mui/material/'
+} from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { useGetPopularEntryTags, useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
+import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -36,9 +37,11 @@ import Loading from 'src/common/Loading'
 import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
+import { isReachable } from 'utils/peerUtils'
 
 interface KeyAndLabel {
   key: string
@@ -48,42 +51,51 @@ interface KeyAndLabel {
 const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 
 export default function Marketplace() {
-  // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
-  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
-  const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { peers, isPeersLoading, isPeersError } = useGetPeers()
+  const { status, isStatusLoading, isStatusError } = useGetStatus()
 
-  const { models, isModelsError, isModelsLoading } = useListModels(
+  const {
+    models,
+    errors: modelsErrors,
+    isModelsError,
+    isModelsLoading,
+  } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    selectedTags,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const {
     models: dataCards,
+    errors: dataCardsErrors,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
   } = useListModels(
     EntryKind.DATA_CARD,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    [],
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const {
@@ -93,14 +105,16 @@ export default function Marketplace() {
   } = useListModels(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    selectedTags,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
+  const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
   const theme = useTheme()
   const router = useRouter()
@@ -108,22 +122,22 @@ export default function Marketplace() {
   const {
     filter: filterFromQuery,
     task: taskFromQuery,
-    libraries: librariesFromQuery,
+    peers: peersFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
+    tags: tagsFromQuery,
   } = router.query
 
   useEffect(() => {
     if (filterFromQuery) setFilter(filterFromQuery as string)
-    if (taskFromQuery) setSelectedTask(taskFromQuery as string)
-    if (librariesFromQuery) {
-      let librariesAsArray: string[] = []
-      if (typeof librariesFromQuery === 'string') {
-        librariesAsArray.push(librariesFromQuery)
+    if (tagsFromQuery) {
+      let tagsAsArray: string[] = []
+      if (typeof tagsFromQuery === 'string') {
+        tagsAsArray.push(tagsFromQuery)
       } else {
-        librariesAsArray = [...librariesFromQuery]
+        tagsAsArray = [...tagsFromQuery]
       }
-      setSelectedLibraries([...librariesAsArray])
+      setSelectedTags([...tagsAsArray])
     }
     if (organisationsFromQuery) {
       let organisationsAsArray: string[] = []
@@ -143,7 +157,17 @@ export default function Marketplace() {
       }
       setSelectedStates([...statesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
+
+    if (peersFromQuery) {
+      let peersAsArray: string[] = []
+      if (typeof peersFromQuery === 'string') {
+        peersAsArray.push(peersFromQuery)
+      } else {
+        peersAsArray = [...peersFromQuery]
+      }
+      setSelectedPeers([...peersAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, tagsFromQuery, organisationsFromQuery, statesFromQuery, peersFromQuery])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -172,6 +196,13 @@ export default function Marketplace() {
     [roleOptions],
   )
 
+  const reachablePeerList = useMemo(() => {
+    if (!peers) return []
+    return Array.from(peers.entries())
+      .filter(([, value]) => isReachable(value))
+      .map(([key]) => key)
+  }, [peers])
+
   const organisationList = useMemo(() => {
     return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
   }, [uiConfig])
@@ -184,6 +215,14 @@ export default function Marketplace() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
       updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handlePeersOnChange = useCallback(
+    (peers: string[]) => {
+      setSelectedPeers(peers)
+      updateQueryParams('peers', peers)
     },
     [updateQueryParams],
   )
@@ -204,18 +243,10 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
-  const handleTaskOnChange = useCallback(
-    (task: string) => {
-      setSelectedTask(task)
-      updateQueryParams('task', task)
-    },
-    [updateQueryParams],
-  )
-
-  const handleLibrariesOnChange = useCallback(
-    (libraries: string[]) => {
-      setSelectedLibraries(libraries as string[])
-      updateQueryParams('libraries', libraries)
+  const handlePopularTagsOnChange = useCallback(
+    (selectedTags: string[]) => {
+      setSelectedTags(selectedTags as string[])
+      updateQueryParams('tags', selectedTags)
     },
     [updateQueryParams],
   )
@@ -225,11 +256,11 @@ export default function Marketplace() {
   }
 
   const handleResetFilters = () => {
-    setSelectedTask('')
-    setSelectedLibraries([])
     setSelectedOrganisations([])
+    setSelectedTags([])
     setSelectedStates([])
     setSelectedRoles([])
+    setSelectedPeers([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -256,8 +287,16 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading || isUiConfigLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
+  }
+
+  if (isPeersError) {
+    return <ErrorWrapper message={isPeersError.info.message} />
+  }
+
+  if (isStatusError) {
+    return <ErrorWrapper message={isStatusError.info.message} />
   }
 
   if (isReviewRolesError) {
@@ -268,12 +307,19 @@ export default function Marketplace() {
     return <ErrorWrapper message={isUiConfigError.info.message} />
   }
 
+  if (isTagsError) {
+    return <ErrorWrapper message={isTagsError.info.message} />
+  }
+
+  // Only show peer/sources when not actively disabled
+  const federationEnabled = 'disabled' != status?.federation?.state
+
   return (
     <>
       <Title text='Marketplace' />
       <Container maxWidth='xl'>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Stack spacing={2} sx={{ maxWidth: '300px' }}>
+        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
+          <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '300px' } }}>
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
@@ -288,16 +334,16 @@ export default function Marketplace() {
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  maxWidth: '400px',
+                  maxWidth: { sm: 'unset', md: '400px' },
                   mb: 3,
                   my: 2,
                 }}
                 variant='filled'
                 onSubmit={onFilterSubmit}
               >
-                <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
+                <InputLabel htmlFor='entry-filter-input'>Advanced Search</InputLabel>
                 <FilledInput
-                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
+                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
                   id='entry-filter-input'
                   value={filter}
                   disableUnderline
@@ -310,6 +356,11 @@ export default function Marketplace() {
                     </InputAdornment>
                   }
                 />
+                {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
+                  <Typography variant='caption' color='error'>
+                    Please enter at least three characters
+                  </Typography>
+                )}
               </FormControl>
               <Stack divider={<Divider flexItem />}>
                 {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
@@ -344,39 +395,33 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
+                {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='External Repositories'
+                      chipTooltipTitle={'Include external repostories'}
+                      options={reachablePeerList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedPeers}
+                      onChange={handlePeersOnChange}
+                      size='small'
+                      ariaLabel='add external repository to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
                 <Box>
                   <ChipSelector
-                    label='Tasks'
-                    chipTooltipTitle={'Filter by task'}
-                    // TODO fetch all model tags
-                    options={[
-                      'Translation',
-                      'Image Classification',
-                      'Summarization',
-                      'Tokenisation',
-                      'Text to Speech',
-                      'Tabular Regression',
-                    ]}
-                    expandThreshold={10}
-                    selectedChips={selectedTask}
-                    onChange={handleTaskOnChange}
-                    size='small'
-                    ariaLabel='add task to search filter'
-                    accordion
-                  />
-                </Box>
-                <Box>
-                  <ChipSelector
-                    label='Libraries'
-                    chipTooltipTitle={'Filter by library'}
-                    // TODO fetch all model libraries
-                    options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+                    label='Popular Tags'
+                    chipTooltipTitle={'Filter by frequently used tags'}
+                    options={tags}
                     expandThreshold={10}
                     multiple
-                    selectedChips={selectedLibraries}
-                    onChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onChange={handlePopularTagsOnChange}
                     size='small'
-                    ariaLabel='add library to search filter'
+                    ariaLabel='add tag to search filter'
                     accordion
                   />
                 </Box>
@@ -418,7 +463,13 @@ export default function Marketplace() {
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
-                <Tabs value={selectedTab} indicatorColor='secondary'>
+                <Tabs
+                  value={selectedTab}
+                  indicatorColor='secondary'
+                  allowScrollButtonsMobile
+                  scrollButtons='auto'
+                  variant='scrollable'
+                >
                   <Tab
                     label={`Models ${models ? `(${models.length})` : ''}`}
                     value={EntryKind.MODEL}
@@ -431,34 +482,44 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading || (isMirroredModelsLoading && <Loading />)}
+              {(isModelsLoading || isMirroredModelsLoading) && <Loading />}
+              {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
                     entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels]}
                     entriesErrorMessage={combinedModelErrorMessage || ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    selectedPeers={selectedPeers}
+                    onSelectedPeersChange={handlePeersOnChange}
                     displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
                     displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
+                    displayPeers={federationEnabled}
+                    peers={peers}
                   />
                 </div>
               )}
+              {selectedTab === EntryKind.DATA_CARD &&
+                dataCardsErrors &&
+                MultipleErrorWrapper('Error with data-card search', dataCardsErrors)}
               {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
                 <div data-test='dataCardListBox'>
                   <EntryList
                     entries={dataCards}
                     entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    selectedPeers={selectedPeers}
+                    onSelectedPeersChange={handlePeersOnChange}
                   />
                 </div>
               )}

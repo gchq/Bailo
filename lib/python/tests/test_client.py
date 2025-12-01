@@ -89,6 +89,17 @@ def test_patch_model(requests_mock):
     assert result == {"success": True}
 
 
+def test_delete_model(requests_mock):
+    requests_mock.delete("https://example.com/api/v2/model/test_id", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.delete_model(
+        model_id="test_id",
+    )
+
+    assert result == {"success": True}
+
+
 def test_get_model_card(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/model-card/v1", json={"success": True})
 

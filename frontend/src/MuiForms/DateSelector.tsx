@@ -3,7 +3,7 @@ import 'dayjs/locale/en-gb'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
@@ -15,14 +15,14 @@ interface DateSelectorProps {
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: FormContextType
+  registry?: Registry
   value: string
   onChange: (newValue: string | undefined) => void
   InputProps?: any
   id: string
 }
 
-export default function DateSelector({ onChange, value, label, formContext, required, id }: DateSelectorProps) {
+export default function DateSelector({ onChange, value, label, registry, required, id }: DateSelectorProps) {
   const theme = useTheme()
 
   const handleChange = (dateInput: Dayjs | null) => {
@@ -33,7 +33,7 @@ export default function DateSelector({ onChange, value, label, formContext, requ
     }
   }
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
@@ -42,16 +42,17 @@ export default function DateSelector({ onChange, value, label, formContext, requ
       <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
         {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
-      {formContext.editMode && (
+      {registry.formContext.editMode && (
         <DatePicker
           value={value ? dayjs(value) : undefined}
           aria-label={`date input field for ${label}`}
           onChange={handleChange}
+          label={label}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
         />
       )}
-      {!formContext.editMode && (
+      {!registry.formContext.editMode && (
         <Typography
           sx={{
             fontStyle: value ? 'unset' : 'italic',

@@ -88,7 +88,7 @@ oauth:
 # Used for aws storage
 aws:
   enabled: false
-  storageName: "sc-gp2"
+  storageName: "bailo-ebs-sc"
   pvcMinioName: "bailo-minio"
   pvcMinioStorage: 20Gi
   pvcMongoName: "bailo-mongodb"
@@ -159,7 +159,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnamilegacy/mongodb
-    tag: 8.0.13
+    tag: 8.0.13-debian-12-r0
 
 # MinIO Dependencies
 minio:
@@ -178,9 +178,6 @@ minio:
   uploadBucket: uploads # required for Bailo
   registryBucket: registry # required for Bailo
   host: "bailo-minio"
-  service:
-    ports:
-      api: 31111 # default 9000
   # skip the security verification check https://github.com/bitnami/charts/issues/30850
   global:
     security:
@@ -198,7 +195,7 @@ minio:
   image:
     registry: docker.io
     repository: bitnamilegacy/minio
-    tag: 2025.7.23
+    tag: 2025.7.23-debian-12-r1
     debug: true
 
 # Registry Dependencies
@@ -215,6 +212,19 @@ registry:
   jwksFile: jwks.json
   keyFile: key.pem
   serviceAccount: ''
+
+federation:
+  id: 'localBailo'
+  state: 'disabled'
+  peers:
+    - name: 'huggingface'
+      state: 'enabled'
+      baseUrl: 'https://huggingface.co'
+      label: 'Hugging Face'
+      kind: 'huggingfacehub'
+      cacheQuery: 60
+      statusModelName: 'openai/whisper-large-v3'
+      statusModelId: '654a84cadff2f49007ce6c37'
 
 # Nginx Dependencies
 nginxAuth:
@@ -238,6 +248,8 @@ openshift:
 
 # Instance Settings
 config:
+  log:
+    level: trace
   ui:
     banner:
       enabled: false

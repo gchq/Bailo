@@ -11,9 +11,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import * as _ from 'lodash-es'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'
@@ -34,20 +34,24 @@ interface MetricsProps {
   onChange: (newValue: MetricValue[]) => void
   value: MetricValue[]
   label: string
-  formContext?: FormContextType
+  registry?: Registry
   required?: boolean
 }
 
-export default function Metrics({ onChange, value, label, formContext, required }: MetricsProps) {
+export default function Metrics({ onChange, value, label, registry, required }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
   const theme = useTheme()
+
+  const onSetMetricsWithIds = useEffectEvent((newMetrics: MetricValueWithId[]) => {
+    setMetricsWithIds(newMetrics)
+  })
 
   useEffect(() => {
     const updatedMetricsWithIds = value.map((metric) => ({
       ...metric,
       id: uuidv4(),
     }))
-    setMetricsWithIds(updatedMetricsWithIds)
+    onSetMetricsWithIds(updatedMetricsWithIds)
   }, [value])
 
   const handleChange = useCallback(
@@ -98,13 +102,13 @@ export default function Metrics({ onChange, value, label, formContext, required 
     ))
   }, [value])
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (
     <>
-      {formContext && formContext.editMode && (
+      {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
           <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
@@ -116,7 +120,7 @@ export default function Metrics({ onChange, value, label, formContext, required 
           </Button>
         </Stack>
       )}
-      {formContext && !formContext.editMode && (
+      {registry.formContext && !registry.formContext.editMode && (
         <>
           <Typography fontWeight='bold'>
             {label}

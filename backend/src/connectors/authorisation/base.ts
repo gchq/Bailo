@@ -287,6 +287,18 @@ export class BasicAuthorisationConnector {
           return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
         }
 
+        if (
+          !isNamed &&
+          !(await this.model(user, model, ModelAction.View)).success &&
+          ([AccessRequestAction.View] as AccessRequestActionKeys[]).includes(action)
+        ) {
+          return {
+            success: false,
+            info: 'You cannot view an access request for a model you cannot view.',
+            id: request.id,
+          }
+        }
+
         // Otherwise they either own the model, access request or this is a read-only action.
         return { success: true, id: request.id }
       }),
@@ -385,15 +397,17 @@ export class BasicAuthorisationConnector {
           }
         })
 
-        // Don't allow anything beyond pushing and pulling actions.
+        // Don't allow anything beyond pushing, pulling and deleting actions.
         if (
           !actions.every((action) =>
-            ([ImageAction.Push, ImageAction.Pull, ImageAction.List] as ImageActionKeys[]).includes(action),
+            ([ImageAction.Push, ImageAction.Pull, ImageAction.Delete, ImageAction.List] as ImageActionKeys[]).includes(
+              action,
+            ),
           )
         ) {
           return {
             success: false,
-            info: 'You are not allowed to complete any actions beyond `push` or `pull` on an image.',
+            info: 'You are not allowed to complete any actions beyond `push`, `pull` or `delete` on an image.',
             id: access.name,
           }
         }

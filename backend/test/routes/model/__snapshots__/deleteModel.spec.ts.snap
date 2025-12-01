@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > deleteModel > 200 > ok 1`] = `
+{
+  "message": "Successfully removed model.",
+}
+`;
+
+exports[`routes > model > deleteModel > audit > expected call 1`] = `"expedita"`;
+
+exports[`routes > model > deleteModel > audit > expected call 2`] = `undefined`;

@@ -1,3 +1,4 @@
+import { ClientSession } from 'mongoose'
 import semver from 'semver'
 import { Optional } from 'utility-types'
 
@@ -6,6 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import ReleaseModel from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import Review, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -15,7 +17,6 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
-import { useTransaction } from '../utils/transactions.js'
 import { arrayOfObjectsHasKeysOfType, hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
@@ -523,33 +524,49 @@ function convertSemverQueryToMongoQuery(querySemver: string, modelID: string) {
   return combinedQuery
 }
 
-export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
+export async function deleteReleases(
+  user: UserInterface,
+  modelId: string,
+  semvers: string[],
+  deleteMirroredModel: boolean = false,
+  session?: ClientSession | undefined,
+) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot delete a release on a mirrored model.`)
+  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
+    throw BadReq('Cannot delete a release on a mirrored model.')
   }
-  const release = await getReleaseBySemver(user, model, semver)
+  for (const semver of semvers) {
+    const release = await getReleaseBySemver(user, model, semver)
 
-  const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+    const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
+    if (!auth.success) {
+      throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+    }
+
+    const reviewsForRelease: ReviewDoc[] = await Review.find({
+      modelId,
+      semver,
+    })
+
+    release.delete(session)
+    removeReleaseReviews(modelId, semver, session)
+    removeResponsesByParentIds(
+      [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
+      session,
+    )
   }
 
-  const reviewsForRelease: ReviewDoc[] = await Review.find({
-    modelId,
-    semver,
-  })
+  return { modelId, semvers }
+}
 
-  await useTransaction([
-    (session) => release.delete(session),
-    (session) => removeReleaseReviews(modelId, semver, session),
-    (session) =>
-      removeResponsesByParentIds(
-        [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
-        session,
-      ),
-  ])
-
+export async function deleteRelease(
+  user: UserInterface,
+  modelId: string,
+  semver: string,
+  deleteMirroredModel: boolean = false,
+  session?: ClientSession | undefined,
+) {
+  await deleteReleases(user, modelId, [semver], deleteMirroredModel, session)
   return { modelId, semver }
 }
 
@@ -628,4 +645,24 @@ export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
     // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
     return release
   }
+}
+
+export async function findAndDeleteImageFromReleases(
+  user: UserInterface,
+  modelId: string,
+  imageRef: ImageRefInterface,
+  session?: ClientSession | undefined,
+) {
+  // Handles auth
+  await getModelById(user, modelId)
+
+  await ReleaseModel.updateMany(
+    { modelId },
+    {
+      $pull: {
+        images: { ...imageRef },
+      },
+    },
+    { session },
+  )
 }

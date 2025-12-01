@@ -8,13 +8,14 @@ import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { UserInterface } from '../../models/User.js'
 import { isBailoError } from '../../types/error.js'
+import { MirrorExportLogData, MirrorImportLogData, MirrorInformation, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
-import { getImporter, MirrorInformation, MirrorLogData, MirrorMetadata } from './mirroredModel.js'
+import { getImporter } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 
 function createTarGzStreams() {
@@ -23,7 +24,7 @@ function createTarGzStreams() {
   return { gzipStream, tarStream }
 }
 
-export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMetadata, logData: MirrorLogData) {
+export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMetadata, logData: MirrorExportLogData) {
   const { gzipStream, tarStream } = createTarGzStreams()
   // It is safer to have an extra PassThrough for handling backpressure and explicitly closing on error(s)
   const uploadStream = new PassThrough()
@@ -60,9 +61,16 @@ export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promis
 type TarEntry =
   | { type: 'text'; filename: string; content: string }
   | { type: 'stream'; filename: string; stream: Readable; size?: number }
-export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData: MirrorLogData) {
+export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData: MirrorExportLogData) {
   const entryName = `${config.modelMirror.contentDirectory}/${entry.filename}`
-  log.debug({ entryName, entry, ...logData }, 'Adding entry to tarball.')
+  log.debug(
+    {
+      entryName,
+      entry: { type: entry.type, filename: entry.filename },
+      ...logData,
+    },
+    'Adding entry to tarball.',
+  )
 
   if (entry.type === 'text') {
     const contentBuffer = Buffer.from(entry.content, 'utf8')
@@ -97,14 +105,12 @@ export function createUnTarGzStreams() {
 export async function extractTarGzStream(
   tarGzStream: Readable,
   user: UserInterface,
-  logData: MirrorLogData,
+  logData: MirrorImportLogData,
 ): Promise<MirrorInformation> {
   return new Promise((resolve, reject) => {
     let metadata: MirrorMetadata
     let importer: BaseImporter
     const { ungzipStream, untarStream } = createUnTarGzStreams()
-
-    tarGzStream.pipe(ungzipStream).pipe(untarStream)
 
     // this error event is expected to always call `reject`
     async function onErrorHandler(error: unknown) {
@@ -118,6 +124,12 @@ export async function extractTarGzStream(
         }
       }
     }
+
+    ungzipStream.on('error', async (error) => {
+      log.error({ error, ...logData }, 'Error occurred in `zlib.Gunzip` stream. Aborting extraction.')
+      // Pass the error into the untarStream to trigger the error listener
+      untarStream.destroy(error)
+    })
 
     untarStream.on('error', async (error) => {
       await onErrorHandler(error)
@@ -136,9 +148,7 @@ export async function extractTarGzStream(
       try {
         log.debug(
           {
-            name: entry.name,
-            type: entry.type,
-            size: entry.size,
+            entry,
             ...logData,
           },
           'Processing un-tarred entry.',
@@ -152,6 +162,7 @@ export async function extractTarGzStream(
             })
           }
           metadata = mirrorMetadataSchema.parse(await json(stream))
+          log.trace({ metadata, ...logData }, `Extracted metadata file '${config.modelMirror.metadataFile}'.`)
 
           // Only check auth once we know what the model is
           const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
@@ -160,7 +171,7 @@ export async function extractTarGzStream(
             throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, ...logData })
           }
 
-          importer = getImporter(metadata, user, { entry, ...logData })
+          importer = getImporter(metadata, user, logData)
 
           // Drain and continue
           next()
@@ -177,5 +188,7 @@ export async function extractTarGzStream(
         await onErrorHandler(error)
       }
     })
+
+    tarGzStream.pipe(ungzipStream).pipe(untarStream)
   })
 }

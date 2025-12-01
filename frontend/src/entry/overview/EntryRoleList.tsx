@@ -1,8 +1,7 @@
-import { Grid2, Stack } from '@mui/material'
+import { Grid, Stack } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import { Fragment, useMemo } from 'react'
 import Loading from 'src/common/Loading'
-import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryRolesChipSet from 'src/entry/overview/EntryRolesChipSet'
 import MessageAlert from 'src/MessageAlert'
@@ -18,15 +17,14 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
     () =>
       entry.collaborators.map((collaborator) => (
         <Fragment key={collaborator.entity}>
-          <Grid2 size={{ xs: 6 }}>
+          <Grid size={{ xs: 6 }}>
             <Stack direction='row' alignItems='center' spacing={1}>
-              <EntityIcon entryCollaborator={collaborator} />
               <EntityNameDisplay entryCollaborator={collaborator} />
             </Stack>
-          </Grid2>
-          <Grid2 size={{ xs: 6 }}>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
             <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={modelRoles} />
-          </Grid2>
+          </Grid>
         </Fragment>
       )),
     [entry.collaborators, modelRoles],
@@ -41,10 +39,10 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
   }
 
   return (
-    <Grid2 container spacing={2}>
-      <Grid2 size={{ xs: 6 }}>Entity</Grid2>
-      <Grid2 size={{ xs: 6 }}>Roles</Grid2>
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 6 }}>Entity</Grid>
+      <Grid size={{ xs: 6 }}>Roles</Grid>
       {rows}
-    </Grid2>
+    </Grid>
   )
 }

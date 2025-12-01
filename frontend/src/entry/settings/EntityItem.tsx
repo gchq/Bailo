@@ -2,7 +2,6 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
 import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
-import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import { CollaboratorEntry, SystemRole, SystemRoleKeys } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
@@ -40,7 +39,6 @@ export default function EntityItem({
     <TableRow>
       <TableCell>
         <Stack direction='row' alignItems='center' spacing={1}>
-          <EntityIcon entryCollaborator={entity} />
           <EntityNameDisplay entryCollaborator={entity} />
         </Stack>
       </TableCell>

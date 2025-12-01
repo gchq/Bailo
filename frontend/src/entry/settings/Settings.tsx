@@ -1,7 +1,7 @@
 import { Container, Divider, List, Stack } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
@@ -40,7 +40,11 @@ function isSettingsCategory(
         value === SettingsCategory.MIRRORED_MODELS
       )
     case EntryKind.DATA_CARD:
-      return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.DANGER
+      )
     case EntryKind.MIRRORED_MODEL:
       return (
         value === SettingsCategory.DETAILS ||
@@ -65,11 +69,15 @@ export default function Settings({ entry }: SettingsProps) {
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
+  const onSelectedCategoryChange = useEffectEvent((category: SettingsCategoryKeys) => {
+    setSelectedCategory(category)
+  })
+
   useEffect(() => {
     if (isSettingsCategory(category, entry)) {
-      setSelectedCategory(category)
+      onSelectedCategoryChange(category)
     } else if (category) {
-      setSelectedCategory(SettingsCategory.DETAILS)
+      onSelectedCategoryChange(SettingsCategory.DETAILS)
       router.replace({
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })
@@ -132,14 +140,14 @@ export default function Settings({ entry }: SettingsProps) {
                 Mirrored Models
               </SimpleListItemButton>
             )}
-            <SimpleListItemButton
-              selected={selectedCategory === SettingsCategory.DANGER}
-              onClick={() => handleListItemClick(SettingsCategory.DANGER)}
-            >
-              Danger Zone
-            </SimpleListItemButton>
           </>
         )}
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.DANGER}
+          onClick={() => handleListItemClick(SettingsCategory.DANGER)}
+        >
+          Danger Zone
+        </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}

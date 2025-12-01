@@ -1,4 +1,5 @@
-import { PeerConfigStatus } from '../../types/types.js'
+import { UserInterface } from '../../models/User.js'
+import { EntrySearchOptionsParams, EntrySearchResultWithErrors, PeerConfigStatus } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
@@ -12,26 +13,44 @@ export class PeerConnectorWrapper {
   }
 
   async init() {
-    this.peers.forEach((peer) => peer.init())
+    await Promise.all(Array.from(this.peers.values()).map((peer) => peer.init()))
   }
 
   async status(peersToQuery: Array<string> = this.peerIds): Promise<Map<string, PeerConfigStatus>> {
-    const results = new Map<string, PeerConfigStatus>()
-    const validPeers = peersToQuery.every((q) => this.peers.has(q))
-    if (!validPeers) {
+    if (!peersToQuery.every((q) => this.peers.has(q))) {
       throw InternalError('Invalid peer IDs provided to wrapper')
     }
-    for (const id of peersToQuery) {
-      const peer = this.peers.get(id)
-      if (!peer) {
-        throw InternalError(`Peer connector not found: ${id}`)
-      }
-      results.set(id, {
-        status: await peer.getPeerStatus(),
-        config: peer.getConfig(),
-      })
-    }
+    const entries = await Promise.all(
+      peersToQuery.map(async (id) => {
+        const peer = this.peers.get(id)!
+        return [
+          id,
+          {
+            status: await peer.getPeerStatus(),
+            config: peer.getConfig(),
+          } as PeerConfigStatus,
+        ] as [string, PeerConfigStatus]
+      }),
+    )
+    return new Map<string, PeerConfigStatus>(entries)
+  }
 
-    return results
+  async searchEntries(
+    user: UserInterface,
+    opts: EntrySearchOptionsParams,
+  ): Promise<Array<EntrySearchResultWithErrors>> {
+    if (!opts.peers) {
+      return []
+    }
+    if (!opts.peers.every((q) => this.peers.has(q))) {
+      throw InternalError('Invalid peer IDs provided to wrapper')
+    }
+    const results = await Promise.all(
+      opts.peers.map((id) => {
+        const peer = this.peers.get(id)!
+        return peer.searchEntries(user, opts)
+      }),
+    )
+    return results.flat()
   }
 }

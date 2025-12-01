@@ -4,16 +4,16 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
@@ -39,13 +39,19 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onDeleteModel(req: Request, modelId: string) {
+    this.checkEventType(AuditInfo.DeleteModel, req)
+    const event = this.generateEvent(req, { id: modelId })
+    req.log.info(event, req.audit.description)
+  }
+
   onUpdateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.UpdateModel, req)
     const event = this.generateEvent(req, { id: model.id })
     req.log.info(event, req.audit.description)
   }
 
-  onSearchModel(req: Request, models: ModelSearchResult[]) {
+  onSearchModel(req: Request, models: EntrySearchResult[]) {
     this.checkEventType(AuditInfo.SearchModels, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
@@ -308,6 +314,11 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     })
     req.log.info(event, req.audit.description)
   }
+  onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.checkEventType(AuditInfo.DeleteImage, req)
+    const event = this.generateEvent(req, { modelId, image })
+    req.log.info(event, req.audit.description)
+  }
 
   onViewInference(req: Request, inference: InferenceDoc) {
     this.checkEventType(AuditInfo.ViewInference, req)
@@ -396,11 +407,24 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
     req.log.info(event, req.audit.description)
   }
+
+  onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.UpdateSchemaMigration, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
+    req.log.info(event, req.audit.description)
+  }
+
   onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
     this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
     const event = this.generateEvent(req, {
       results: schemaMigrations.map((schemaMigration) => schemaMigration.name),
     })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
     req.log.info(event, req.audit.description)
   }
 }

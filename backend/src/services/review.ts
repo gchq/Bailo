@@ -354,10 +354,10 @@ export async function findReviewRoles(schemaId?: string | string[]): Promise<Rev
     }
     if (schemas.length > 0) {
       const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
-      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles }).lean()
+      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
     }
   } else {
-    reviewRoles = await ReviewRoleModel.find().lean()
+    reviewRoles = await ReviewRoleModel.find()
   }
   return reviewRoles
 }

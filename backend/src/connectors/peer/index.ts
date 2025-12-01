@@ -4,10 +4,12 @@ import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BailoPeerConnector } from './bailo.js'
 import { BasePeerConnector } from './base.js'
+import { HuggingFaceHubConnector } from './huggingface.js'
 import { PeerConnectorWrapper } from './wrapper.js'
 
 export const PeerKind = {
   Bailo: 'bailo',
+  HuggingFaceHub: 'huggingfacehub',
 } as const
 export type PeerKindKeys = (typeof PeerKind)[keyof typeof PeerKind]
 
@@ -37,13 +39,14 @@ function validate(id: string, cfg: RemoteFederationConfig): void {
   }
 }
 
-export default async function getPeerConnectors(cache = true): Promise<PeerConnectorWrapper> {
+export async function getPeerConnectors(cache = true): Promise<PeerConnectorWrapper> {
   if (peerWrapper && cache) {
     return peerWrapper
   }
   // If not globally disabled, setup each peer
   if (FederationState.DISABLED === config.federation.state) {
     log.debug('Federation is disabled, skipping setup of peers')
+    return new PeerConnectorWrapper(peers)
   }
   for (const [id, cfg] of Object.entries(config.federation.peers)) {
     validate(id, cfg)
@@ -57,6 +60,14 @@ export default async function getPeerConnectors(cache = true): Promise<PeerConne
           throw ConfigurationError('Could not configure or initialise Bailo connector', { error })
         }
         break
+      case PeerKind.HuggingFaceHub:
+        try {
+          const connector = new HuggingFaceHubConnector(id, cfg)
+          peers.set(id, connector)
+        } catch (error) {
+          throw ConfigurationError('Could not configure or initialise HuggingFace connector', { error })
+        }
+        break
       default:
         throw ConfigurationError(`'${cfg.kind}' is not a valid peer connector kind.`, {
           validKinds: Object.values(PeerKind),
@@ -68,3 +79,5 @@ export default async function getPeerConnectors(cache = true): Promise<PeerConne
   await peerWrapper.init()
   return peerWrapper
 }
+
+export default await getPeerConnectors()

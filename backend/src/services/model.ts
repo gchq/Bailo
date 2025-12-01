@@ -2,24 +2,40 @@ import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
+import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
-import Model, { ModelInterface } from '../models/Model.js'
+import peers from '../connectors/peer/index.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { EntityKind, EntryUserPermissions } from '../types/types.js'
+import { isBailoError } from '../types/error.js'
+import {
+  EntityKind,
+  EntrySearchOptionsParams,
+  EntrySearchResultWithErrors,
+  EntryUserPermissions,
+} from '../types/types.js'
+import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { MirrorLogData } from './mirroredModel/mirroredModel.js'
+import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
+import { getFilesByModel, removeFiles } from './file.js'
+import { getInferencesByModel, removeInferences } from './inference.js'
+import { listModelImages, softDeleteImage } from './registry.js'
+import { deleteReleases, getModelReleases } from './release.js'
+import { findReviews } from './review.js'
 import { getSchemaById } from './schema.js'
+import { dropModelIdFromTokens, getTokensForModel } from './token.js'
+import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -28,6 +44,7 @@ export function checkModelRestriction(model: ModelInterface) {
 }
 
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
+
 export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
@@ -66,7 +83,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ]
   }
 
-  const model = new Model({
+  const model = new ModelModel({
     ...modelParams,
     id: modelId,
     collaborators,
@@ -88,13 +105,13 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 }
 
 export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
   })
 
   if (!model) {
-    throw NotFound(`The requested entry was not found.`, { modelId })
+    throw NotFound('The requested entry was not found.', { modelId })
   }
 
   const auth = await authorisation.model(user, model, ModelAction.View)
@@ -103,6 +120,89 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   }
 
   return model
+}
+
+export async function removeModel(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
+  const model = await ModelModel.findOne({
+    id: modelId,
+    ...(kind && { kind }),
+  })
+
+  if (!model) {
+    throw NotFound('The requested entry was not found.', { modelId })
+  }
+
+  const auth = await authorisation.model(user, model, ModelAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const allModelReviews = await findReviews(user, false, undefined, modelId)
+  const allModelImages = await listModelImages(user, modelId)
+  const allModelReleases = await getModelReleases(user, modelId)
+  const allModelTokens = await getTokensForModel(user, modelId)
+  const allModelWebhooks = await getWebhooksByModel(user, modelId)
+  const allModelCardRevisions = await getModelCardRevisions(user, modelId)
+  const allModelFiles = await getFilesByModel(user, modelId)
+  const allModelInferences = await getInferencesByModel(user, modelId)
+  const allModelAccessRequests = await getAccessRequestsByModel(user, modelId)
+
+  return await useTransaction([
+    (session) =>
+      deleteReleases(
+        user,
+        modelId,
+        allModelReleases.flatMap((release) => release.semver),
+        true,
+        session,
+      ),
+    (session) => Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
+    (session) =>
+      removeAccessRequests(
+        user,
+        allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
+        session,
+      ),
+    (session) => Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
+    (session) => dropModelIdFromTokens(user, modelId, allModelTokens, session),
+    (session) => Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
+    (session) =>
+      removeFiles(
+        user,
+        modelId,
+        allModelFiles.flatMap((file) => file.id),
+        true,
+        session,
+      ),
+    (session) =>
+      Promise.all(
+        allModelImages.flatMap((modelImage) =>
+          modelImage.tags.map((tag) =>
+            softDeleteImage(
+              user,
+              {
+                repository: modelImage.repository,
+                name: modelImage.name,
+                tag,
+              },
+              true,
+              session,
+            ),
+          ),
+        ),
+      ),
+    (session) =>
+      removeInferences(
+        user,
+        allModelInferences.flatMap((inference) => ({
+          modelId: inference.modelId,
+          image: inference.image,
+          tag: inference.tag,
+        })),
+        session,
+      ),
+    (session) => model.delete(session),
+  ])
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -120,56 +220,124 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 
 export async function searchModels(
   user: UserInterface,
-  kind: EntryKindKeys,
-  libraries: Array<string>,
-  organisations: Array<string>,
-  states: Array<string>,
-  filters: Array<string>,
-  search: string,
-  task?: string,
-  allowTemplating?: boolean,
-  schemaId?: string,
-): Promise<Array<ModelInterface>> {
+  opts: EntrySearchOptionsParams,
+): Promise<EntrySearchResultWithErrors> {
+  const results: EntrySearchResultWithErrors = {
+    models: [],
+  }
+
+  const localModelsPromise = searchLocalModels(user, opts)
+
+  localModelsPromise.catch((e) => {
+    if (!results.errors) {
+      results.errors = {}
+    }
+    if (isBailoError(e)) {
+      results.errors['local'] = e
+    } else {
+      results.errors['local'] = InternalError('Search error', { err: e })
+    }
+  })
+
+  const processLocalModels = localModelsPromise.then((localModels) => {
+    results.models.push(
+      ...localModels.map((model) => ({
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        tags: model.tags,
+        kind: model.kind,
+        organisation: model.organisation,
+        state: model.state,
+        collaborators: model.collaborators,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        sourceModelId: model.settings.mirror.sourceModelId,
+        visibility: model.visibility,
+      })),
+    )
+  })
+
+  const promises: Promise<any>[] = [processLocalModels]
+
+  if (opts.peers && opts.peers.length > 0) {
+    const remotePromise = peers.searchEntries(user, opts)
+
+    const processRemoteModels = remotePromise.then((remoteResponses) => {
+      for (const response of remoteResponses.flat()) {
+        if (response.models) {
+          results.models.push(...response.models)
+        }
+        if (response.errors) {
+          for (const [peerId, error] of Object.entries(response.errors)) {
+            if (!results.errors) results.errors = {}
+            results.errors[peerId] = error
+            results.errors[peerId].message = error.message
+          }
+        }
+      }
+    })
+    promises.push(processRemoteModels)
+  }
+
+  await Promise.all(promises)
+
+  return results
+}
+
+async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsParams): Promise<Array<ModelInterface>> {
   const query: any = {}
 
-  if (kind) {
-    query['kind'] = { $all: kind }
-  }
-
-  if (organisations.length) {
-    query.organisation = { $in: organisations }
-  }
-
-  if (states.length) {
-    query.state = { $in: states }
-  }
-
-  if (libraries.length) {
-    query.tags = { $all: libraries }
-  }
-
-  if (task) {
-    if (query.tags) {
-      query.tags.$all.push(task)
-    } else {
-      query.tags = { $all: [task] }
+  if (opts.adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
     }
   }
 
-  if (search) {
-    query.$text = { $search: search }
+  if (opts.kind) {
+    query['kind'] = { $all: opts.kind }
   }
 
-  if (schemaId) {
-    query['card.schemaId'] = { $all: schemaId }
+  if (opts.organisations?.length) {
+    query.organisation = { $in: opts.organisations }
   }
 
-  if (allowTemplating) {
+  if (opts.states?.length) {
+    query.state = { $in: opts.states }
+  }
+
+  if (opts.libraries?.length) {
+    query.tags = { $all: opts.libraries }
+  }
+
+  if (opts.task) {
+    if (query.tags) {
+      query.tags.$all.push(opts.task)
+    } else {
+      query.tags = { $all: [opts.task] }
+    }
+  }
+
+  if (opts.search) {
+    if (opts.search.length > 0 && opts.search.length < 3) {
+      throw BadReq(`Search query too short - must be at least 3 characters`)
+    }
+    query.$text = { $search: opts.search }
+  }
+
+  if (opts.schemaId) {
+    query['card.schemaId'] = { $all: opts.schemaId }
+  }
+
+  if (opts.allowTemplating) {
     query['settings.allowTemplating'] = true
   }
 
-  if (filters.length > 0) {
-    if (filters.includes('mine')) {
+  if (opts.filters && opts.filters.length > 0) {
+    if (opts.filters?.includes('mine')) {
       query.collaborators = {
         $elemMatch: {
           entity: { $in: await authentication.getEntities(user) },
@@ -178,7 +346,7 @@ export async function searchModels(
     } else {
       query.collaborators = {
         $elemMatch: {
-          roles: { $elemMatch: { $in: filters } },
+          roles: { $elemMatch: { $in: opts.filters } },
           entity: { $in: await authentication.getEntities(user) },
         },
       }
@@ -189,7 +357,7 @@ export async function searchModels(
     // Find only matching documents
     .find(query)
 
-  if (!search) {
+  if (!opts.search) {
     // Sort by last updated
     cursor = cursor.sort({ updatedAt: -1 })
   } else {
@@ -198,6 +366,10 @@ export async function searchModels(
   }
 
   const results = await cursor
+  //Auth already checked, so just need to check if they require admin access
+  if (opts.adminAccess) {
+    return results
+  }
   const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
 }
@@ -543,8 +715,12 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
-export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, logData: MirrorLogData) {
-  const model = await Model.findOne({
+export async function validateMirroredModel(
+  mirroredModelId: string,
+  sourceModelId: string,
+  logData: MirrorImportLogData,
+) {
+  const model = await ModelModel.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
@@ -628,4 +804,9 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
     .filter((collaborator) => entities.includes(collaborator.entity))
     .map((collaborator) => collaborator.roles)
     .flat()
+}
+
+export async function popularTagsForEntries() {
+  const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  return tags.map((tag) => tag._id) as string[]
 }

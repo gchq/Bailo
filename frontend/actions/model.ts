@@ -2,6 +2,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import {
+  BailoError,
   EntryForm,
   EntryInterface,
   EntryKindKeys,
@@ -24,9 +25,11 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
   organisation?: string
   state?: string
+  peerId?: string
   visibility: EntryVisibilityKeys
   createdAt: Date
   updatedAt: Date
+  sourceModelId?: string
 }
 
 export interface ModelExportRequest {
@@ -38,29 +41,34 @@ export interface ModelExportRequest {
 //This is tech debt that is repeating throughout this file and other parts of the codebase.
 export function useListModels(
   kind?: EntryKindKeys,
-  filters: string[] = [],
+  roles: string[] = [],
   task = '',
   libraries: string[] = [],
   organisations: string[] = [],
   states: string[] = [],
+  peers: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
+  viewAllPrivate?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
-    ...(filters.length > 0 && { filters }),
+    ...(roles.length > 0 && { filters: roles }),
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
     ...(organisations.length > 0 && { organisations }),
     ...(states.length > 0 && { states }),
+    ...(peers.length > 0 && { peers }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
+    ...(viewAllPrivate && { viewAllPrivate }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
+      errors: Record<string, BailoError>
     },
     ErrorInfo
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
@@ -68,6 +76,7 @@ export function useListModels(
   return {
     mutateModels: mutate,
     models: data ? data.models : emptyModelList,
+    errors: data ? data.errors : {},
     isModelsLoading: isLoading,
     isModelsError: error,
   }
@@ -75,7 +84,7 @@ export function useListModels(
 
 export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
-    kind,
+    ...(kind && { kind }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<
@@ -192,10 +201,33 @@ export async function patchModel(
   })
 }
 
+export async function deleteModel(id: string) {
+  return fetch(`/api/v2/model/${id}`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export async function postModelExportToS3(id: string, modelExport: ModelExportRequest) {
   return fetch(`/api/v2/model/${id}/export/s3`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(modelExport),
   })
+}
+
+export function useGetPopularEntryTags() {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      tags: string[]
+    },
+    ErrorInfo
+  >('/api/v2/models/tags', fetcher)
+
+  return {
+    mutateTags: mutate,
+    tags: data ? data.tags : [],
+    isTagsLoading: isLoading,
+    isTagsError: error,
+  }
 }

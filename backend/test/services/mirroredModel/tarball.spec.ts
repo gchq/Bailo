@@ -1,4 +1,4 @@
-import { PassThrough } from 'node:stream'
+import { PassThrough, Readable } from 'node:stream'
 import zlib from 'node:zlib'
 
 import { extract, pack } from 'tar-stream'
@@ -21,8 +21,10 @@ const authMocks = vi.hoisted(() => ({
 vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const logMocks = vi.hoisted(() => ({
-  info: vi.fn(),
+  trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
+  error: vi.fn(),
 }))
 vi.mock('../../../src/services/log.js', async () => ({
   default: logMocks,
@@ -202,6 +204,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -225,6 +228,7 @@ describe('service > mirroredModel > tarball', () => {
         importKind: mirroredModelMocks.MirrorKind.File,
         filePath: 'test/file',
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -248,6 +252,7 @@ describe('service > mirroredModel > tarball', () => {
         importKind: mirroredModelMocks.MirrorKind.Image,
         distributionPackageName: 'model/image:tag',
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -280,6 +285,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -298,6 +304,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -330,6 +337,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -354,6 +362,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -385,6 +394,12 @@ describe('service > mirroredModel > tarball', () => {
       badStream.end(gzippedJunk)
 
       const promise = extractTarGzStream(badStream, { dn: 'user' }, {} as any)
+
+      await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+    })
+
+    test('error gzip stream is invalid', async () => {
+      const promise = extractTarGzStream(Readable.from(['']), { dn: 'user' }, {} as any)
 
       await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
     })

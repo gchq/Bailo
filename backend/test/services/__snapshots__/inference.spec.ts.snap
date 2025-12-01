@@ -12,3 +12,245 @@ exports[`services > inference > getInferenceByModel > good 1`] = `
   },
 ]
 `;
+
+exports[`services > inference > removeInferences > success 1`] = `
+[
+  {
+    "aggregate": [MockFunction spy],
+    "append": [MockFunction spy],
+    "delete": [MockFunction spy] {
+      "calls": [
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "filter": [MockFunction spy],
+    "find": [MockFunction spy],
+    "findOne": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "image": "image",
+            "modelId": "model",
+            "tag": "tag",
+          },
+        ],
+        [
+          {
+            "image": "image2",
+            "modelId": "model",
+            "tag": "tag",
+          },
+        ],
+        [
+          {
+            "image": "image",
+            "modelId": "model2",
+            "tag": "tag",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOneAndUpdate": [MockFunction spy],
+    "lookup": [MockFunction spy],
+    "match": [MockFunction spy],
+    "save": [MockFunction spy],
+    "sort": [MockFunction spy],
+    "updateMany": [MockFunction spy],
+    "updateOne": [MockFunction spy],
+  },
+  {
+    "aggregate": [MockFunction spy],
+    "append": [MockFunction spy],
+    "delete": [MockFunction spy] {
+      "calls": [
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "filter": [MockFunction spy],
+    "find": [MockFunction spy],
+    "findOne": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "image": "image",
+            "modelId": "model",
+            "tag": "tag",
+          },
+        ],
+        [
+          {
+            "image": "image2",
+            "modelId": "model",
+            "tag": "tag",
+          },
+        ],
+        [
+          {
+            "image": "image",
+            "modelId": "model2",
+            "tag": "tag",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOneAndUpdate": [MockFunction spy],
+    "lookup": [MockFunction spy],
+    "match": [MockFunction spy],
+    "save": [MockFunction spy],
+    "sort": [MockFunction spy],
+    "updateMany": [MockFunction spy],
+    "updateOne": [MockFunction spy],
+  },
+  {
+    "aggregate": [MockFunction spy],
+    "append": [MockFunction spy],
+    "delete": [MockFunction spy] {
+      "calls": [
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "filter": [MockFunction spy],
+    "find": [MockFunction spy],
+    "findOne": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "image": "image",
+            "modelId": "model",
+            "tag": "tag",
+          },
+        ],
+        [
+          {
+            "image": "image2",
+            "modelId": "model",
+            "tag": "tag",
+          },
+        ],
+        [
+          {
+            "image": "image",
+            "modelId": "model2",
+            "tag": "tag",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOneAndUpdate": [MockFunction spy],
+    "lookup": [MockFunction spy],
+    "match": [MockFunction spy],
+    "save": [MockFunction spy],
+    "sort": [MockFunction spy],
+    "updateMany": [MockFunction spy],
+    "updateOne": [MockFunction spy],
+  },
+]
+`;

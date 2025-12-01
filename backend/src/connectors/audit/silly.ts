@@ -4,16 +4,16 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
 
 export class SillyAuditConnector extends BaseAuditConnector {
@@ -24,7 +24,8 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateModel(_req: Request, _model: ModelDoc) {}
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
-  onSearchModel(_req: Request, _models: ModelSearchResult[]) {}
+  onDeleteModel(_req: Request, _modelId: string) {}
+  onSearchModel(_req: Request, _models: EntrySearchResult[]) {}
   onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onUpdateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
@@ -55,6 +56,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateSchema(_req: Request, _schema: SchemaDoc) {}
   onViewSchema(_req: Request, _schema: SchemaInterface) {}
   onViewModelImages(_req: Request, _modelId: string, _images: { repository: string; name: string; tags: string[] }[]) {}
+  onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   onViewInferences(_req: Request, _inferences: InferenceDoc[]) {}
   onViewInference(_req: Request, _inferences: InferenceDoc) {}
   onUpdateInference(_req: Request, _inferences: InferenceDoc) {}
@@ -77,5 +79,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
   onCreateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
+  onUpdateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
   onViewSchemaMigrations(_req: Request, _schemaMigrations: SchemaMigrationInterface[]) {}
+  onViewSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
 }

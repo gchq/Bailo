@@ -66,7 +66,7 @@ export default function ChipSelector({
 
   const allOptions = options.map((option) => (
     <ChipItem
-      key={option}
+      key={option.toString()}
       chip={option}
       size={size}
       activeChip={selectedChips.includes(option)}
@@ -88,6 +88,11 @@ export default function ChipSelector({
         <AccordionDetails sx={{ p: 0 }}>
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
+            {allOptions.length === 0 && (
+              <Typography color='text.secondary' textAlign={'center'}>
+                No items available
+              </Typography>
+            )}
             {expanded && allOptions}
             {options.length > expandThreshold && (
               <Button onClick={toggleExpansion}>{expanded ? 'Show less' : 'Show more...'}</Button>

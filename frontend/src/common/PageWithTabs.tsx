@@ -1,9 +1,9 @@
 import { Box, Button, darken, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors/'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
@@ -51,9 +51,13 @@ export default function PageWithTabs({
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
   const theme = useTheme()
 
+  const currentTabChanged = useEffectEvent((newTab: string) => {
+    setCurrentTab(newTab)
+  })
+
   useEffect(() => {
     if (!tabs.length) return
-    setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+    currentTabChanged(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
   const tabsList = useMemo(
@@ -120,11 +124,11 @@ export default function PageWithTabs({
   return (
     <>
       <Stack
-        direction='row'
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
+        direction={{ xs: 'column', sm: 'row' }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
           <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
@@ -174,6 +178,7 @@ export default function PageWithTabs({
         indicatorColor='secondary'
         scrollButtons='auto'
         variant='scrollable'
+        allowScrollButtonsMobile
       >
         {tabsList}
       </Tabs>

@@ -5,7 +5,7 @@ module.exports = {
   },
 
   mongo: {
-    uri: 'mongodb://mongo:27017/bailo',
+    uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
   },
 
   app: {
@@ -35,6 +35,8 @@ module.exports = {
     rejectUnauthorized: true,
 
     automaticallyCreateBuckets: true,
+
+    multipartChunkSize: 5 * 1024 * 1024,
 
     // Names of buckets that Bailo uses
     buckets: {
@@ -82,6 +84,26 @@ module.exports = {
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
+    },
+  },
+
+  federation: {
+    id: 'localBailo',
+    state: 'enabled',
+    peers: {
+      huggingface: {
+        state: 'enabled',
+        baseUrl: 'https://huggingface.co',
+        label: 'Hugging Face',
+        kind: 'huggingfacehub',
+        cache: {
+          query: 60,
+        },
+        extra: {
+          statusModelName: 'openai/whisper-large-v3',
+          statusModelId: '654a84cadff2f49007ce6c37',
+        },
+      },
     },
   },
 }

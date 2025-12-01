@@ -2,23 +2,31 @@ import { ArrowBack, Delete, Forward, InfoOutlined, MoveDown } from '@mui/icons-m
 import { Autocomplete, Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
+import { postSchemaMigration } from 'actions/schemaMigration'
+import { useRouter } from 'next/router'
 import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
-import { CombinedSchema, SchemaInterface } from 'types/types'
+import { CombinedSchema, QuestionMigration, SchemaInterface } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
 
 export default function SchemaMigrationSelector() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
+  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
+  const [submitErrorText, setSubmitErrorText] = useState('')
   const [isMigrationPlannerActive, setIsMigrationPlannerActive] = useState(false)
   const [sourceSchema, setSourceSchema] = useState<CombinedSchema>()
   const [targetSchema, setTargetSchema] = useState<CombinedSchema>()
   const [errorText, setErrorText] = useState('')
+  const [migrationName, setMigrationName] = useState('')
+  const [migrationDescription, setMigrationDescription] = useState('')
 
+  const router = useRouter()
   const theme = useTheme()
 
   const handleSourceSchemaChange = useCallback(
@@ -63,6 +71,32 @@ export default function SchemaMigrationSelector() {
     }
   }
 
+  const handleSubmitMigrationPlan = async (draft: boolean) => {
+    setSubmitErrorText('')
+    if (migrationName === '') {
+      return setSubmitErrorText('You must set a name for this migration plan')
+    }
+    if (questionMigrations.length === 0) {
+      return setSubmitErrorText('You must have at least one action before submitting a migration plan.')
+    }
+    if (!sourceSchema || !targetSchema) {
+      return setSubmitErrorText('You need both a source and target schema.')
+    }
+    const res = await postSchemaMigration({
+      name: migrationName,
+      description: migrationDescription,
+      sourceSchema: sourceSchema.schema.id,
+      targetSchema: targetSchema.schema.id,
+      questionMigrations: questionMigrations,
+      draft: draft,
+    })
+    if (!res.ok) {
+      setSubmitErrorText(await getErrorMessage(res))
+    } else {
+      router.push('/schemas/list?tab=migrations')
+    }
+  }
+
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
   }
@@ -87,7 +121,18 @@ export default function SchemaMigrationSelector() {
               >
                 Back to schema selection
               </Button>
-              <SchemaMigrator sourceSchema={sourceSchema} targetSchema={targetSchema} />
+              <SchemaMigrator
+                questionMigrations={questionMigrations}
+                setQuestionMigrations={setQuestionMigrations}
+                sourceSchema={sourceSchema}
+                targetSchema={targetSchema}
+                handleSubmitMigrationPlan={handleSubmitMigrationPlan}
+                submitErrorText={submitErrorText}
+                migrationName={migrationName}
+                setMigrationName={setMigrationName}
+                migrationDescription={migrationDescription}
+                setMigrationDescription={setMigrationDescription}
+              />
             </Stack>
           </Paper>
         </Container>
@@ -101,13 +146,18 @@ export default function SchemaMigrationSelector() {
                     size='small'
                     sx={{ width: 'fit-content', pb: 2 }}
                     startIcon={<ArrowBack />}
-                    aria-label={'Return to schema select button'}
+                    aria-label={'Back to schema migrations list select button'}
                   >
-                    Back to schema list
+                    Back to schema migrations list
                   </Button>
                 </Link>
               </Box>
-              <Stack direction='row' spacing={6} justifyContent='center' alignItems='center'>
+              <Stack
+                direction={{ sm: 'column', md: 'row' }}
+                spacing={{ sm: 2, md: 6 }}
+                justifyContent='center'
+                alignItems='center'
+              >
                 <Autocomplete
                   disablePortal
                   options={schemas}
