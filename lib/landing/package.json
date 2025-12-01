@@ -40,7 +40,7 @@
     "swiper": "^8.4.5"
   },
   "devDependencies": {
-    "@types/node": "24.9.2",
+    "@types/node": "24.10.1",
     "@types/react": "18.3.3",
     "@types/styled-components": "^5.1.36",
     "eslint": "9.36.0",
