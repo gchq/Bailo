@@ -137,7 +137,7 @@ async function registryRequest(
   }
 
   return {
-    headers: res.headers ? Object.fromEntries(res.headers) : {},
+    headers: Object.fromEntries(res.headers),
     body: returnRawBody ? undefined : body,
     stream: returnRawBody ? (stream instanceof ReadableStream ? Readable.fromWeb(stream) : stream) : undefined,
     abort: () => controller.abort(),
