@@ -50,6 +50,10 @@ export const toKebabCase = (value: string): string => {
     .toLowerCase()
 }
 
+export const camelCasetoKebabCase = (value: string): string => {
+  return value.replaceAll(/([a-z]+)([A-Z]+[a-z]*)/g, '$1-$2').toLowerCase()
+}
+
 export const truncateText = (text: string | undefined, limit: number = 100) => {
   if (!text) {
     return ''

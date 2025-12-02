@@ -4,9 +4,9 @@ import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mu
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
-import EntryListDialog from 'src/schemas/EntryListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
-import { SchemaInterface, SchemaKind } from 'types/types'
+import UsageListDialog from 'src/schemas/UsageListDialog'
+import { SchemaInterface } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface
@@ -109,12 +109,7 @@ export default function SchemaListItem({
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
             {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
           </MenuItem>
-          {
-            //Temporary: awaiting access request endpoint
-            schema.kind !== 'accessRequest' && (
-              <MenuItem onClick={() => setEntriesListOpen(true)}>View schema usage</MenuItem>
-            )
-          }
+          <MenuItem onClick={() => setEntriesListOpen(true)}>View schema usage</MenuItem>
           <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
           <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
         </Menu>
@@ -124,12 +119,7 @@ export default function SchemaListItem({
         onClose={handleReviewRolesDialogClose}
         schema={schema}
       />
-      {
-        //Temporary: After access request endpoint is created, this should be ternary routing to either EntryListDialog or (new) AccessRequestListDialog
-        schema.kind !== SchemaKind.ACCESS_REQUEST && (
-          <EntryListDialog open={entriesListOpen} schema={schema} onClose={handleEntriesListDialogClose} />
-        )
-      }
+      <UsageListDialog open={entriesListOpen} schema={schema} onClose={handleEntriesListDialogClose} />
     </ListItem>
   )
 }
