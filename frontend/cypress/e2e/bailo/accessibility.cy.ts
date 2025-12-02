@@ -43,8 +43,8 @@ describe('Check A11y violations', () => {
 
   it('Check A11y violations, Review Roles Page', () => {
     cy.get('a[href="/reviewRoles/view"]').click()
-    // Temporarily allows fails due to Cypress flakiness in pipelines
-    cy.checkA11y(undefined, undefined, printA11yViolations, true)
+    cy.get('[data-test=ReviewRolesTitle]').should('be.visible')
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Settings Page', () => {
