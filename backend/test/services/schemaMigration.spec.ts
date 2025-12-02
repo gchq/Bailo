@@ -16,19 +16,43 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const mockSchemaMigration = vi.hoisted(() => {
   const obj: any = {}
 
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.aggregate = vi.fn(function () {
+    return obj
+  })
+  obj.match = vi.fn(function () {
+    return obj
+  })
+  obj.sort = vi.fn(function () {
+    return obj
+  })
+  obj.lookup = vi.fn(function () {
+    return obj
+  })
+  obj.append = vi.fn(function () {
+    return obj
+  })
+  obj.find = vi.fn(function () {
+    return obj
+  })
+  obj.findOne = vi.fn(function () {
+    return obj
+  })
+  obj.findOneAndUpdate = vi.fn(function () {
+    return obj
+  })
+  obj.updateOne = vi.fn(function () {
+    return obj
+  })
+  obj.save = vi.fn(function () {
+    return obj
+  })
+  obj.findByIdAndUpdate = vi.fn(function () {
+    return obj
+  })
 
-  const model: any = vi.fn(() => obj)
+  const model: any = vi.fn(function () {
+    return obj
+  })
   Object.assign(model, obj)
 
   return model
@@ -45,19 +69,43 @@ vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 const modelMocks = vi.hoisted(() => {
   const obj: any = { settings: { mirror: { sourceModelId: '' } } }
 
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.aggregate = vi.fn(function () {
+    return obj
+  })
+  obj.match = vi.fn(function () {
+    return obj
+  })
+  obj.sort = vi.fn(function () {
+    return obj
+  })
+  obj.lookup = vi.fn(function () {
+    return obj
+  })
+  obj.append = vi.fn(function () {
+    return obj
+  })
+  obj.find = vi.fn(function () {
+    return obj
+  })
+  obj.findOne = vi.fn(function () {
+    return obj
+  })
+  obj.findOneAndUpdate = vi.fn(function () {
+    return obj
+  })
+  obj.updateOne = vi.fn(function () {
+    return obj
+  })
+  obj.save = vi.fn(function () {
+    return obj
+  })
+  obj.findByIdAndUpdate = vi.fn(function () {
+    return obj
+  })
 
-  const model: any = vi.fn(() => obj)
+  const model: any = vi.fn(function () {
+    return obj
+  })
   Object.assign(model, obj)
 
   return model
@@ -67,19 +115,43 @@ vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 const schemaMocks = vi.hoisted(() => {
   const obj: any = { settings: { mirror: { sourceModelId: '' } } }
 
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.aggregate = vi.fn(function () {
+    return obj
+  })
+  obj.match = vi.fn(function () {
+    return obj
+  })
+  obj.sort = vi.fn(function () {
+    return obj
+  })
+  obj.lookup = vi.fn(function () {
+    return obj
+  })
+  obj.append = vi.fn(function () {
+    return obj
+  })
+  obj.find = vi.fn(function () {
+    return obj
+  })
+  obj.findOne = vi.fn(function () {
+    return obj
+  })
+  obj.findOneAndUpdate = vi.fn(function () {
+    return obj
+  })
+  obj.updateOne = vi.fn(function () {
+    return obj
+  })
+  obj.save = vi.fn(function () {
+    return obj
+  })
+  obj.findByIdAndUpdate = vi.fn(function () {
+    return obj
+  })
 
-  const model: any = vi.fn(() => obj)
+  const model: any = vi.fn(function () {
+    return obj
+  })
   Object.assign(model, obj)
 
   return model
@@ -128,7 +200,11 @@ describe('services > schemaMigration', () => {
     modelMocks.findOne.mockResolvedValueOnce({
       _id: '1241',
       id: 'test-model',
-      toObject: vi.fn(() => ({ _id: 'test' })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+        }
+      }),
     })
     await expect(() =>
       runModelSchemaMigration({} as UserInterface, 'my-model-123', 'my-migration-plan-123'),
@@ -139,7 +215,12 @@ describe('services > schemaMigration', () => {
     modelMocks.findOne.mockResolvedValueOnce({
       _id: '1241',
       id: 'test-model',
-      toObject: vi.fn(() => ({ _id: 'test', card: { testProperty: 'test' } })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          card: { testProperty: 'test' },
+        }
+      }),
     })
     mockSchemaMigration.findOne.mockResolvedValueOnce(undefined)
     await expect(() =>
@@ -151,7 +232,12 @@ describe('services > schemaMigration', () => {
     modelMocks.findOne.mockResolvedValueOnce({
       _id: '1241',
       id: 'test-model',
-      toObject: vi.fn(() => ({ _id: 'test', card: { testProperty: 'test', schemaId: 'invalid-schema-id' } })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          card: { testProperty: 'test', schemaId: 'invalid-schema-id' },
+        }
+      }),
     })
     mockSchemaMigration.findOne.mockResolvedValueOnce(testSchemaMigration)
     schemaMocks.findOne.mockResolvedValueOnce(undefined)
@@ -166,10 +252,12 @@ describe('services > schemaMigration', () => {
       _id: '1241',
       id: 'test-model',
       card: sourceCard,
-      toObject: vi.fn(() => ({
-        _id: 'test',
-        card: sourceCard,
-      })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          card: sourceCard,
+        }
+      }),
       set: vi.fn(),
       save: vi.fn(),
     }

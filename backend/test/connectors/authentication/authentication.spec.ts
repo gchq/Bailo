@@ -16,10 +16,18 @@ vi.mock('../../../src/utils/config.js', () => ({
 
 vi.mock('../../../src/connectors/authentication/Base.js', () => ({ BaseAuthenticationConnector: vi.fn() }))
 vi.mock('../../../src/connectors/authentication/silly.js', () => ({
-  SillyAuthenticationConnector: vi.fn(() => ({ constructor: { name: 'silly' } })),
+  SillyAuthenticationConnector: vi.fn(function () {
+    return {
+      constructor: { name: 'silly' },
+    }
+  }),
 }))
 vi.mock('../../../src/connectors/authentication/oauth.js', () => ({
-  OauthAuthenticationConnector: vi.fn(() => ({ constructor: { name: 'oauth' } })),
+  OauthAuthenticationConnector: vi.fn(function () {
+    return {
+      constructor: { name: 'oauth' },
+    }
+  }),
 }))
 
 describe('connectors > authentication', () => {

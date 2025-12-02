@@ -12,7 +12,9 @@ import {
 } from '../../src/clients/s3.js'
 
 const s3Mocks = vi.hoisted(() => {
-  const send = vi.fn(() => 'response')
+  const send = vi.fn(function () {
+    return 'response'
+  })
 
   return {
     send,
@@ -37,14 +39,23 @@ const s3Mocks = vi.hoisted(() => {
     UploadPartCommand: vi.fn(function UploadPartCommand() {
       return {}
     }),
-    S3Client: vi.fn(() => ({ send })),
+    S3Client: vi.fn(function () {
+      return {
+        send,
+      }
+    }),
   }
 })
 vi.mock('@aws-sdk/client-s3', () => s3Mocks)
 
 const s3UploadMocks = vi.hoisted(() => {
   return {
-    Upload: vi.fn(() => ({ on: vi.fn(), done: vi.fn() })),
+    Upload: vi.fn(function () {
+      return {
+        on: vi.fn(),
+        done: vi.fn(),
+      }
+    }),
   }
 })
 vi.mock('@aws-sdk/lib-storage', () => s3UploadMocks)

@@ -26,19 +26,36 @@ const modelServiceMock = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelServiceMock)
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({ ok: true })),
+  default: vi.fn(function () {
+    return {
+      ok: true,
+    }
+  }),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
 const webhookModelMock = vi.hoisted(() => {
   const obj: any = {}
 
-  obj.find = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findOneAndDelete = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.find = vi.fn(function () {
+    return obj
+  })
+  obj.save = vi.fn(function () {
+    return obj
+  })
+  obj.findOneAndDelete = vi.fn(function () {
+    return obj
+  })
+  obj.findOneAndUpdate = vi.fn(function () {
+    return obj
+  })
 
-  const model: any = vi.fn((params) => ({ ...obj, ...params }))
+  const model: any = vi.fn(function (params) {
+    return {
+      ...obj,
+      ...params,
+    }
+  })
   Object.assign(model, obj)
 
   return model

@@ -14,30 +14,68 @@ import { testAccessRequestReview, testReleaseReview } from '../testUtils/testMod
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
-  default: { getEntities: vi.fn(() => ['user:test']) },
+  default: {
+    getEntities: vi.fn(function () {
+      return ['user:test']
+    }),
+  },
 }))
 
 const responseModelMock = vi.hoisted(() => {
   const obj: any = {}
 
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
+  obj.aggregate = vi.fn(function () {
+    return obj
+  })
+  obj.match = vi.fn(function () {
+    return obj
+  })
+  obj.sort = vi.fn(function () {
+    return obj
+  })
+  obj.lookup = vi.fn(function () {
+    return obj
+  })
+  obj.append = vi.fn(function () {
+    return obj
+  })
+  obj.find = vi.fn(function () {
+    return obj
+  })
+  obj.findOne = vi.fn(function () {
+    return obj
+  })
+  obj.findOneAndUpdate = vi.fn(function () {
+    return obj
+  })
+  obj.findByIdAndUpdate = vi.fn(function () {
+    return obj
+  })
+  obj.updateOne = vi.fn(function () {
+    return obj
+  })
+  obj.save = vi.fn(function () {
+    return obj
+  })
+  obj.limit = vi.fn(function () {
+    return obj
+  })
+  obj.unwind = vi.fn(function () {
+    return obj
+  })
+  obj.at = vi.fn(function () {
+    return obj
+  })
+  obj.map = vi.fn(function () {
+    return []
+  })
+  obj.filter = vi.fn(function () {
+    return []
+  })
 
-  const model: any = vi.fn(() => obj)
+  const model: any = vi.fn(function () {
+    return obj
+  })
   Object.assign(model, obj)
 
   return model
@@ -49,16 +87,28 @@ vi.mock('../../src/models/Response.js', async () => ({
 }))
 
 const smtpMock = vi.hoisted(() => ({
-  notifyReviewResponseForAccess: vi.fn(() => Promise.resolve()),
-  notifyReviewResponseForRelease: vi.fn(() => Promise.resolve()),
-  requestReviewForRelease: vi.fn(() => Promise.resolve()),
-  requestReviewForAccessRequest: vi.fn(() => Promise.resolve()),
+  notifyReviewResponseForAccess: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  notifyReviewResponseForRelease: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  requestReviewForRelease: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  requestReviewForAccessRequest: vi.fn(function () {
+    return Promise.resolve()
+  }),
 }))
 vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const reviewMock = vi.hoisted(() => ({
-  findReviewsForAccessRequests: vi.fn(() => [testReleaseReview]),
-  findReviewForResponse: vi.fn(() => testReleaseReview),
+  findReviewsForAccessRequests: vi.fn(function () {
+    return [testReleaseReview]
+  }),
+  findReviewForResponse: vi.fn(function () {
+    return testReleaseReview
+  }),
 }))
 vi.mock('../../src/services/review.js', async () => reviewMock)
 
