@@ -185,12 +185,13 @@ export default function ReleaseDisplay({
                   <AccordionDetails>
                     <Paginate
                       list={release.files}
-                      defaultSortProperty='name'
+                      defaultSortProperty='createdAt'
                       searchFilterProperty='name'
                       searchPlaceholderText='Search by filename'
                       emptyListText='No files found'
                       sortingProperties={[
                         { value: 'name', title: 'Name', iconKind: 'text' },
+                        { value: 'size', title: 'Size', iconKind: 'size' },
                         { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
                         { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
                       ]}

@@ -29,6 +29,13 @@ export default function SchemaCompare() {
           newValue={JSON.stringify(afterSchema, null, 2)}
           splitView={true}
           compareMethod={DiffMethod.WORDS}
+          styles={{
+            gutter: {
+              pre: {
+                opacity: 1,
+              },
+            },
+          }}
         />
       )
     } else {

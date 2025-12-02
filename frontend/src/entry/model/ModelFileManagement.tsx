@@ -96,11 +96,12 @@ export default function Files({ model }: FilesProps) {
             searchFilterProperty='name'
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
+              { value: 'size', title: 'Size', iconKind: 'size' },
               { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
               { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
             ]}
             searchPlaceholderText='Search by file name'
-            defaultSortProperty='name'
+            defaultSortProperty='createdAt'
           >
             {EntryListItem}
           </Paginate>

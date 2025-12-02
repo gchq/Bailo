@@ -71,6 +71,13 @@ class Entry:
 
         logger.info("ID %s updated locally and on server.", self.id)
 
+    def delete(self) -> Any:
+        """Delete the entry from Bailo."""
+        res = self.client.delete_model(self.id)
+        logger.info("Model %s successfully deleted.", self.id)
+
+        return res
+
     def card_from_schema(self, schema_id: str | None = None) -> None:
         """Create a card using a schema on Bailo.
 
