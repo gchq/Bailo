@@ -1,8 +1,9 @@
 import { EntrySearchResult } from 'actions/model'
 import qs from 'querystring'
 import useSWR from 'swr'
+import { camelCasetoKebabCase } from 'utils/stringUtils'
 
-import { AccessRequestInterface, EntryKind, SchemaInterface, SchemaKind, SchemaKindKeys } from '../types/types'
+import { AccessRequestInterface, SchemaInterface, SchemaKind, SchemaKindKeys } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptySchemaList = []
@@ -57,9 +58,7 @@ export function useGetUsageBySchema(kind: SchemaKindKeys, schemaId: string) {
   const queryParams = {
     schemaId,
     adminAccess: true,
-    ...(kind !== SchemaKind.ACCESS_REQUEST && {
-      kind: kind === SchemaKind.DATA_CARD ? EntryKind.DATA_CARD : EntryKind.MODEL,
-    }),
+    ...(kind != SchemaKind.ACCESS_REQUEST && { kind: camelCasetoKebabCase(kind) }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<

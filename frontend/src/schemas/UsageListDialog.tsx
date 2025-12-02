@@ -83,17 +83,15 @@ export default function UsageListDialog({ open = false, onClose, schema }: Schem
     return <MessageAlert message={isDataError.info.message} severity='error' />
   }
 
+  if (isDataLoading) {
+    return <Loading />
+  }
+
   return (
     <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
       <DialogTitle>{`${camelCaseToTitleCase(schema.kind)}s associated to schema (${data.length})`}</DialogTitle>
       <DialogContent>
-        {isDataLoading ? (
-          <Loading />
-        ) : data.length ? (
-          dataList
-        ) : (
-          <EmptyBlob text={`No associated ${camelCaseToTitleCase(schema.kind)}s`} />
-        )}
+        {data.length ? dataList : <EmptyBlob text={`No associated ${camelCaseToTitleCase(schema.kind)}s`} />}
       </DialogContent>
       <DialogActions>
         <Button variant='contained' onClick={onClose}>
