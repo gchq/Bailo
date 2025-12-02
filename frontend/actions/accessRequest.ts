@@ -22,14 +22,14 @@ export function useGetAccessRequestsForModelId(modelId?: string) {
 }
 
 export function useGetAccessRequests(
-  modelId: string[] = [],
-  schemaId: string[] = [],
+  modelIds: string[] = [],
+  schemaId: string = '',
   mine?: boolean,
   adminAccess?: boolean,
 ) {
   const queryParams = {
-    ...(modelId.length > 0 && { modelId }),
-    ...(schemaId.length > 0 && { schemaId }),
+    ...(modelIds.length > 0 && { modelIds }),
+    ...(schemaId.length && { schemaId }),
     ...(mine && { mine }),
     ...(adminAccess && { adminAccess }),
   }

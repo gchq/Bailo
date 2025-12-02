@@ -157,7 +157,7 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
 
 export async function findAccessRequests(
   user: UserInterface,
-  modelId: Array<string>,
+  modelIds: Array<string>,
   schemaId: string,
   mine: boolean,
   adminAccess?: boolean,
@@ -173,8 +173,8 @@ export async function findAccessRequests(
 
   const query: any = {}
 
-  if (modelId.length) {
-    query.modelId = { $in: modelId }
+  if (modelIds.length) {
+    query.modelId = { $in: modelIds }
   }
 
   if (schemaId) {
