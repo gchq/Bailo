@@ -28,7 +28,7 @@ jobs:
         working-directory: backend/docs
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install pandoc
         run: sudo apt install pandoc
@@ -62,7 +62,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download Python Docs
         uses: actions/download-artifact@v6
