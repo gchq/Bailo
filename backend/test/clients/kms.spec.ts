@@ -13,31 +13,32 @@ const kmsMocks = vi.hoisted(() => {
     SignCommand: vi.fn(function SignCommand() {
       return {}
     }),
-    KMSClient: vi.fn(() => ({ send })),
+    KMSClient: vi.fn(function () {
+      return { send }
+    }),
   }
 })
 vi.mock('@aws-sdk/client-kms', () => kmsMocks)
 
-const configMock = vi.hoisted(
-  () =>
-    ({
-      modelMirror: {
-        export: {
-          maxSize: 100,
-          kmsSignature: {
-            keyId: '123-456',
-            KMSClient: {
-              region: 'eu-west-2',
-              credentials: {
-                accessKeyId: 'access',
-                secretAccessKey: 'secret',
-              },
+const configMock = vi.hoisted(function () {
+  return {
+    modelMirror: {
+      export: {
+        maxSize: 100,
+        kmsSignature: {
+          keyId: '123-456',
+          KMSClient: {
+            region: 'eu-west-2',
+            credentials: {
+              accessKeyId: 'access',
+              secretAccessKey: 'secret',
             },
           },
         },
       },
-    }) as any,
-)
+    },
+  } as any
+})
 vi.mock('../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMock,
@@ -77,12 +78,19 @@ describe('clients > s3', () => {
   })
 
   test('sign > cannot get signature', async () => {
-    kmsMocks.send.mockResolvedValueOnce({
-      KeyMetadata: {
-        SigningAlgorithms: ['abc'],
-      },
+    const sendMock = vi.fn()
+    sendMock
+      .mockResolvedValueOnce({
+        KeyMetadata: {
+          SigningAlgorithms: ['abc'],
+        },
+      })
+      .mockResolvedValueOnce({
+        Signature: undefined,
+      })
+    kmsMocks.KMSClient.mockImplementation(function () {
+      return { send: sendMock }
     })
-    kmsMocks.send.mockResolvedValueOnce({})
 
     const response = sign('hash123')
 
