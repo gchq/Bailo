@@ -371,7 +371,7 @@ export default function Marketplace() {
                 onSubmit={onFilterSubmit}
               >
                 <InputLabel htmlFor='entry-filter-input'>
-                  {titleOnly ? 'Search by name' : 'Search by full text'}
+                  {titleOnly ? 'Search by title (partial)' : 'Search by full text (exact)'}
                 </InputLabel>
                 <FilledInput
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
