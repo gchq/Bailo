@@ -92,8 +92,6 @@ vi.mock('../../src/utils/config.js', () => ({
   default: configMock,
 }))
 
-const dummyModel: any = { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] }
-
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
@@ -126,7 +124,10 @@ describe('services > review', () => {
   test('createReleaseReviews > No entities found for required roles', async () => {
     SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
     ReviewRoleModelMock.find.mockResolvedValueOnce([])
-    const result: Promise<void> = createReleaseReviews(dummyModel, {} as any)
+    const result: Promise<void> = createReleaseReviews(
+      { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] } as any,
+      {} as any,
+    )
 
     await expect(result).resolves.not.toThrowError()
     expect(smtpMock.requestReviewForRelease).not.toBeCalled()
