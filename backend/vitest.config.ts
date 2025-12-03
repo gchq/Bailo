@@ -5,7 +5,12 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     restoreMocks: true,
-    setupFiles: ['./test/testUtils/zod.ts', './test/testUtils/setupTestConfig.ts', './test/testUtils/clearMocks.ts'],
+    setupFiles: [
+      './test/testUtils/zod.ts',
+      './test/testUtils/setupTestConfig.ts',
+      './test/testUtils/clearMocks.ts',
+      './test/testUtils/setupMongooseModelMocks.ts',
+    ],
     include: ['test/**/*.spec.ts'],
     coverage: {
       enabled: true,

@@ -15,6 +15,9 @@ exports[`services > model > removeModel > success empty 1`] = `
   [],
   undefined,
   {
+    "_id": {
+      "toString": [Function],
+    },
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "delete": [MockFunction] {
@@ -30,42 +33,22 @@ exports[`services > model > removeModel > success empty 1`] = `
         },
       ],
     },
+    "deleteMany": [MockFunction],
+    "deleteOne": [MockFunction],
     "find": [MockFunction],
-    "findByIdAndUpdate": [MockFunction],
-    "findOne": [MockFunction] {
-      "calls": [
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
+    "findById": [MockFunction],
+    "findByIdAndDelete": [MockFunction],
+    "findOne": [MockFunction],
+    "findOneAndDelete": [MockFunction],
     "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
     "lookup": [MockFunction],
     "match": [MockFunction],
     "save": [MockFunction],
-    "settings": {
-      "mirror": {
-        "sourceModelId": "",
-      },
-    },
     "sort": [MockFunction],
+    "toObject": [MockFunction],
+    "update": [MockFunction],
+    "updateMany": [MockFunction],
     "updateOne": [MockFunction],
   },
 ]
@@ -88,102 +71,9 @@ exports[`services > model > removeModel > success entries 1`] = `
   ],
   undefined,
   [
-    {
-      "findByIdAndDelete": [MockFunction] {
-        "calls": [
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-        ],
-      },
-    },
-    {
-      "findByIdAndDelete": [MockFunction] {
-        "calls": [
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-        ],
-      },
-    },
-    {
-      "findByIdAndDelete": [MockFunction] {
-        "calls": [
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-          [
-            "6776901b879d08e34b599d7e",
-            undefined,
-          ],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-          {
-            "type": "return",
-            "value": [Circular],
-          },
-        ],
-      },
-    },
+    undefined,
+    undefined,
+    undefined,
   ],
   undefined,
   [
@@ -202,6 +92,9 @@ exports[`services > model > removeModel > success entries 1`] = `
   ],
   undefined,
   {
+    "_id": {
+      "toString": [Function],
+    },
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "delete": [MockFunction] {
@@ -217,42 +110,22 @@ exports[`services > model > removeModel > success entries 1`] = `
         },
       ],
     },
+    "deleteMany": [MockFunction],
+    "deleteOne": [MockFunction],
     "find": [MockFunction],
-    "findByIdAndUpdate": [MockFunction],
-    "findOne": [MockFunction] {
-      "calls": [
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
+    "findById": [MockFunction],
+    "findByIdAndDelete": [MockFunction],
+    "findOne": [MockFunction],
+    "findOneAndDelete": [MockFunction],
     "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
     "lookup": [MockFunction],
     "match": [MockFunction],
     "save": [MockFunction],
-    "settings": {
-      "mirror": {
-        "sourceModelId": "",
-      },
-    },
     "sort": [MockFunction],
+    "toObject": [MockFunction],
+    "update": [MockFunction],
+    "updateMany": [MockFunction],
     "updateOne": [MockFunction],
   },
 ]
