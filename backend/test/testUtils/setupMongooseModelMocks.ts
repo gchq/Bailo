@@ -2,123 +2,157 @@ import { beforeEach, type MockedFunction, MockInstance, vi } from 'vitest'
 
 const CHAINABLE_METHODS = [
   'aggregate',
-  'match',
-  'group',
-  'sort',
+  'append',
+  'delete',
+  'deleteMany',
+  'deleteOne',
   'find',
   'findById',
   'findByIdAndDelete',
   'findOne',
   'findOneAndDelete',
   'findOneAndUpdate',
+  'group',
   'lookup',
-  'update',
-  'updateOne',
-  'updateMany',
-  'delete',
-  'deleteOne',
-  'deleteMany',
+  'match',
   'save',
+  'sort',
+  'update',
+  'updateMany',
+  'updateOne',
+] as const
+
+const QUERY_LIKE_METHODS = [
+  'aggregate',
+  'find',
   'append',
+  'filter',
+  'group',
+  'lookup',
+  'map',
+  'match',
+  'sort',
+  'unwind',
 ] as const
 
 type MethodNames = (typeof CHAINABLE_METHODS)[number]
 
+type InstanceType<TDoc> = Partial<TDoc> &
+  Record<MethodNames | 'toObject', any> & {
+    _id: { toString: () => string }
+  }
+
+type ModelMock<TDoc extends { _id?: any }> = MockInstance & {
+  new (doc?: Partial<TDoc>): TDoc & InstanceType<TDoc>
+} & Record<MethodNames, MockedFunction<any>> & {
+    findById: MockedFunction<(id: any) => Promise<TDoc & InstanceType<TDoc>>>
+    findOne: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
+    findOneAndDelete: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
+    findOneAndUpdate: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
+    countDocuments: MockedFunction<(filter?: any) => Promise<number>>
+    reset(): void
+  }
+
+const createId = (idValue: string = 'mock-id') => ({
+  toString: () => idValue,
+})
+
+function createMockFns(): Record<MethodNames, MockedFunction<any>> {
+  return CHAINABLE_METHODS.reduce(
+    (acc, method) => {
+      acc[method] = vi.fn()
+      return acc
+    },
+    {} as Record<MethodNames, MockedFunction<any>>,
+  )
+}
+
+function createInstance<TDoc extends { _id?: any }>(
+  toObjectValue: Partial<TDoc>,
+  doc: Partial<TDoc> | undefined,
+  chainMocks: Record<MethodNames, MockedFunction<any>>,
+): InstanceType<TDoc> {
+  const instance: InstanceType<TDoc> = {
+    _id: createId(),
+    toObject: vi.fn(() => ({ ...toObjectValue, ...doc })),
+  } as InstanceType<TDoc>
+
+  for (const method of CHAINABLE_METHODS) {
+    instance[method] = chainMocks[method].mockImplementation(() => instance)
+  }
+
+  Object.assign(instance, doc)
+  return instance
+}
+
+function attachQueryLikeMethods(target: any, queryMockSet: Record<string, MockedFunction<any>>): void {
+  for (const method of QUERY_LIKE_METHODS) {
+    queryMockSet[method] = vi.fn(() => queryMockSet)
+    target[method] = queryMockSet[method]
+  }
+}
+
+function attachFinderMethods<TDoc extends { _id?: any }>(
+  target: any,
+  createInstanceFn: () => InstanceType<TDoc>,
+): void {
+  target.findById = vi.fn(async () => createInstanceFn())
+  target.findOne = vi.fn(async () => createInstanceFn())
+  target.findOneAndUpdate = vi.fn(async () => createInstanceFn())
+  target.findOneAndDelete = vi.fn(async () => createInstanceFn())
+  target.countDocuments = vi.fn().mockResolvedValue(0) as MockedFunction<(filter?: any) => Promise<number>>
+}
+
+function attachResetFunction(
+  target: any,
+  chainMocks: Record<MethodNames, MockedFunction<any>>,
+  queryMocks: Record<string, MockedFunction<any>>,
+): void {
+  target.reset = () => {
+    for (const m of Object.keys(chainMocks)) {
+      chainMocks[m].mockClear()
+      chainMocks[m].mockReset()
+    }
+    for (const m of ['findById', 'findOne', 'findOneAndUpdate', 'findOneAndDelete', 'countDocuments'] as const) {
+      const fn = target[m]
+      if (typeof fn === 'function' && 'mockClear' in fn) {
+        fn.mockClear()
+        fn.mockReset?.()
+      }
+    }
+    for (const m of Object.keys(queryMocks)) {
+      queryMocks[m].mockClear()
+      queryMocks[m].mockReset()
+    }
+  }
+}
+
 export function createMongooseModelMock<TDoc extends { _id?: any }>(
   name = 'MockModel',
   toObjectValue: Partial<TDoc> = {},
-) {
-  type InstanceType = Partial<TDoc> & Record<MethodNames | 'toObject', any> & { _id: { toString: () => string } }
+): ModelMock<TDoc> {
+  const chainMocks = createMockFns()
+  const queryMocks: Record<string, MockedFunction<any>> = {}
 
-  const makeId = (idValue: string = 'mock-id') => ({
-    toString: () => idValue,
-  })
-
-  // Master set of mocks shared between static and every instance
-  const mockFns: Record<MethodNames, MockedFunction<any>> = {} as any
-  for (const m of CHAINABLE_METHODS) {
-    mockFns[m] = vi.fn()
-  }
-
-  const createInstance = (doc?: Partial<TDoc>): InstanceType => {
-    const inst: InstanceType = {
-      _id: makeId(),
-      toObject: vi.fn(() => ({ ...toObjectValue, ...doc })),
-    } as InstanceType
-    for (const m of CHAINABLE_METHODS) {
-      inst[m] = mockFns[m].mockImplementation(() => inst)
-    }
-    Object.assign(inst, doc)
-    return inst
-  }
+  const createInstanceFn = (doc?: Partial<TDoc>) => createInstance(toObjectValue, doc, chainMocks)
 
   const Model = vi.fn(function (doc?: Partial<TDoc>) {
-    return createInstance(doc)
-  }) as unknown as {
-    new (doc?: Partial<TDoc>): TDoc & InstanceType
-  }
-
-  // Attach static methods: share same mocks for instance methods
-  for (const m of CHAINABLE_METHODS) {
-    ;(Model as any)[m] = mockFns[m]
-  }
-
-  // Chainable query-like methods for aggregate/match/group
-  const queryLike: any = {}
-  for (const m of [
-    'aggregate',
-    'find',
-    'match',
-    'group',
-    'sort',
-    'map',
-    'filter',
-    'unwind',
-    'lookup',
-    'append',
-  ] as const) {
-    queryLike[m] = vi.fn(() => queryLike)
-    ;(Model as any)[m] = queryLike[m]
-  }
-
-  // Finder statics returning new instances
-  ;(Model as any).findById = vi.fn(async () => createInstance())
-  ;(Model as any).findOne = vi.fn(async () => createInstance())
-  ;(Model as any).findOneAndUpdate = vi.fn(async () => createInstance())
-  ;(Model as any).findOneAndDelete = vi.fn(async () => createInstance())
-  ;(Model as any).countDocuments = vi.fn().mockResolvedValue(0) as MockedFunction<(filter?: any) => Promise<number>>
-
-  // Reset function to clear all mocks
-  ;(Model as any).reset = () => {
-    for (const key of Object.keys(mockFns)) {
-      mockFns[key].mockClear()
-      mockFns[key].mockReset()
-    }
-    for (const key of ['findById', 'findOne', 'findOneAndUpdate', 'findOneAndDelete', 'countDocuments'] as const) {
-      const val = (Model as any)[key]
-      if (typeof val === 'function' && 'mockClear' in val) {
-        val.mockClear()
-        val.mockReset?.()
-      }
-    }
-    for (const key of Object.keys(queryLike)) {
-      queryLike[key].mockClear()
-      queryLike[key].mockReset()
-    }
-  }
+    return createInstanceFn(doc)
+  }) as unknown as { new (doc?: Partial<TDoc>): TDoc & InstanceType<TDoc> }
 
   Object.defineProperty(Model, 'name', { value: name })
 
-  return Model as MockInstance & {
-    new (doc?: Partial<TDoc>): TDoc & InstanceType
-  } & Record<MethodNames, MockedFunction<any>> & {
-      findById: MockedFunction<(id: any) => Promise<TDoc & InstanceType>>
-      findOne: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType>>
-      findOneAndDelete: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType>>
-      findOneAndUpdate: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType>>
-      countDocuments: MockedFunction<(filter?: any) => Promise<number>>
-      reset(): void
-    }
+  // Attach chainable static methods to the model itself
+  for (const method of CHAINABLE_METHODS) {
+    ;(Model as any)[method] = chainMocks[method]
+  }
+
+  // Attach query-like and finder methods
+  attachQueryLikeMethods(Model, queryMocks)
+  attachFinderMethods(Model, () => createInstanceFn())
+  attachResetFunction(Model, chainMocks, queryMocks)
+
+  return Model as ModelMock<TDoc>
 }
 
 // Sadly, it is not possible to dynamically load and use a programmatic loop here as `vi.mock` is hoisted so runtime variables would not be initialised
@@ -152,7 +186,6 @@ export const modelMocks = {
   WebhookModel: createMongooseModelMock('WebhookModel'),
 }
 
-// Apply mocks using vi.mock
 vi.mock('../../src/models/AccessRequest.ts', () => ({ default: modelMocks.AccessRequestModel }))
 vi.mock('../../src/models/File.ts', () => ({ default: modelMocks.FileModel }))
 vi.mock('../../src/models/Inference.ts', () => ({ default: modelMocks.InferenceModel }))
