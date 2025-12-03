@@ -14,6 +14,7 @@ import {
   getModelCardRevision,
   isModelCardRevisionDoc,
   popularTagsForEntries,
+  removeModel,
   saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
@@ -24,10 +25,56 @@ import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
+const accessRequestMock = vi.hoisted(() => ({
+  getAccessRequestsByModel: vi.fn(() => [] as any[]),
+  removeAccessRequests: vi.fn(),
+}))
+vi.mock('../../src/services/accessRequest.js', async () => accessRequestMock)
+
+const fileMock = vi.hoisted(() => ({
+  getFilesByModel: vi.fn(() => [] as any[]),
+  removeFiles: vi.fn(),
+}))
+vi.mock('../../src/services/file.js', async () => fileMock)
+
+const inferenceMock = vi.hoisted(() => ({
+  getInferencesByModel: vi.fn(() => [] as any[]),
+  removeInferences: vi.fn(),
+}))
+vi.mock('../../src/services/inference.js', async () => inferenceMock)
+
+const registryMock = vi.hoisted(() => ({
+  listModelImages: vi.fn(() => [] as any[]),
+  softDeleteImage: vi.fn(),
+}))
+vi.mock('../../src/services/registry.js', async () => registryMock)
+
+const releaseMock = vi.hoisted(() => ({
+  deleteReleases: vi.fn((_user, modelId, semvers, _session?) => ({ modelId, semvers })),
+  getModelReleases: vi.fn(() => [] as any[]),
+}))
+vi.mock('../../src/services/release.js', async () => releaseMock)
+
+const reviewMock = vi.hoisted(() => ({
+  findReviews: vi.fn(() => [] as any[]),
+}))
+vi.mock('../../src/services/review.js', async () => reviewMock)
+
 const schemaMock = vi.hoisted(() => ({
   getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
+
+const tokenMock = vi.hoisted(() => ({
+  dropModelIdFromTokens: vi.fn(),
+  getTokensForModel: vi.fn(() => [] as any[]),
+}))
+vi.mock('../../src/services/token.js', async () => tokenMock)
+
+const webhookMock = vi.hoisted(() => ({
+  getWebhooksByModel: vi.fn(() => [] as any[]),
+}))
+vi.mock('../../src/services/webhook.js', async () => webhookMock)
 
 const validatorType = vi.hoisted(() => ({
   isValidatorResultError: vi.fn(() => true),
@@ -67,16 +114,17 @@ const modelMocks = vi.hoisted(() => {
   const obj: any = { settings: { mirror: { sourceModelId: '' } } }
 
   obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
   obj.append = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -116,6 +164,18 @@ const reviewRoleModelMocks = vi.hoisted(() => {
   return model
 })
 vi.mock('../../src/models/ReviewRole.js', () => ({ default: reviewRoleModelMocks }))
+
+const reviewModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.findByIdAndDelete = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
@@ -183,6 +243,118 @@ describe('services > model', () => {
     modelMocks.findOne.mockResolvedValueOnce(undefined)
 
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested entry was not found/)
+  })
+
+  describe('removeModel', () => {
+    test('success empty', async () => {
+      modelCardRevisionModel.find.mockResolvedValueOnce([])
+
+      const result = await removeModel({} as any, 'modelId')
+
+      expect(result).toMatchSnapshot()
+      expect(reviewMock.findReviews).toBeCalled()
+      expect(registryMock.listModelImages).toBeCalled()
+      expect(releaseMock.getModelReleases).toBeCalled()
+      expect(tokenMock.getTokensForModel).toBeCalled()
+      expect(webhookMock.getWebhooksByModel).toBeCalled()
+      expect(modelCardRevisionModel.find).toBeCalled()
+      expect(fileMock.getFilesByModel).toBeCalled()
+      expect(inferenceMock.getInferencesByModel).toBeCalled()
+      expect(accessRequestMock.getAccessRequestsByModel).toBeCalled()
+
+      expect(releaseMock.deleteReleases).toBeCalled()
+      expect(accessRequestMock.removeAccessRequests).toBeCalled()
+      expect(tokenMock.dropModelIdFromTokens).toBeCalled()
+      expect(fileMock.removeFiles).toBeCalled()
+      expect(inferenceMock.removeInferences).toBeCalled()
+      expect(modelMocks.delete).toBeCalled()
+    })
+
+    test('no model', async () => {
+      modelMocks.findOne.mockResolvedValueOnce(undefined)
+
+      await expect(() => removeModel({} as any, 'modelId')).rejects.toThrowError(/^The requested entry was not found./)
+    })
+
+    test('bad authorisation', async () => {
+      modelMocks.findOne.mockResolvedValueOnce({})
+      vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
+      await expect(() => removeModel({} as any, 'modelId')).rejects.toThrowError(/^You do not have permission/)
+    })
+
+    test('success entries', async () => {
+      const itemsFound = 3
+      const user = {} as any
+      const modelId = 'modelId'
+      const _id = '6776901b879d08e34b599d7e'
+      const semver = '1.2.3'
+      const accessRequestId = 'accessRequestId'
+      const fileId = 'fileId'
+      const modelCardRevisionMockDelete = vi.fn(() => Promise.resolve())
+      const webhookMockDelete = vi.fn(() => Promise.resolve())
+
+      reviewMock.findReviews.mockResolvedValueOnce(Array(itemsFound).fill({ _id }))
+      registryMock.listModelImages.mockResolvedValueOnce(
+        Array(itemsFound).fill({ tags: ['tag1', 'tag2'], repository: 'repository', name: 'name' }),
+      )
+      releaseMock.getModelReleases.mockResolvedValueOnce(Array(itemsFound).fill({ semver }))
+      tokenMock.getTokensForModel.mockResolvedValueOnce(Array(itemsFound).fill({}))
+      webhookMock.getWebhooksByModel.mockResolvedValueOnce(
+        Array.from({ length: itemsFound }, () => ({
+          delete: webhookMockDelete,
+        })),
+      )
+      modelCardRevisionModel.find.mockResolvedValueOnce(
+        Array.from({ length: itemsFound }, () => ({
+          delete: modelCardRevisionMockDelete,
+        })),
+      )
+      fileMock.getFilesByModel.mockResolvedValueOnce(Array(itemsFound).fill({ id: fileId }))
+      inferenceMock.getInferencesByModel.mockResolvedValueOnce(
+        Array(itemsFound).fill({ modelId, image: 'image', tag: 'tag' }),
+      )
+      accessRequestMock.getAccessRequestsByModel.mockResolvedValueOnce(Array(itemsFound).fill({ id: accessRequestId }))
+
+      const result = await removeModel(user, modelId)
+
+      expect(result).toMatchSnapshot()
+      expect(reviewMock.findReviews).toBeCalled()
+      expect(registryMock.listModelImages).toBeCalled()
+      expect(releaseMock.getModelReleases).toBeCalled()
+      expect(tokenMock.getTokensForModel).toBeCalled()
+      expect(webhookMock.getWebhooksByModel).toBeCalled()
+      expect(modelCardRevisionModel.find).toBeCalled()
+      expect(fileMock.getFilesByModel).toBeCalled()
+      expect(inferenceMock.getInferencesByModel).toBeCalled()
+      expect(accessRequestMock.getAccessRequestsByModel).toBeCalled()
+
+      expect(releaseMock.deleteReleases).toBeCalledWith(user, modelId, Array(itemsFound).fill(semver), true, undefined)
+      expect(modelCardRevisionMockDelete).toBeCalledTimes(itemsFound)
+      expect(accessRequestMock.removeAccessRequests).toBeCalledWith(
+        user,
+        Array(itemsFound).fill(accessRequestId),
+        undefined,
+      )
+      expect(reviewModelMocks.findByIdAndDelete).toBeCalledTimes(itemsFound)
+      expect(reviewModelMocks.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
+      expect(tokenMock.dropModelIdFromTokens).toBeCalledWith(user, modelId, Array(itemsFound).fill({}), undefined)
+      expect(webhookMockDelete).toBeCalledTimes(itemsFound)
+      expect(fileMock.removeFiles).toBeCalledWith(user, modelId, Array(itemsFound).fill(fileId), true, undefined)
+      expect(registryMock.softDeleteImage).toBeCalledTimes(itemsFound * 2)
+      expect(registryMock.softDeleteImage.mock.calls.at(0)).toEqual([
+        user,
+        { repository: 'repository', name: 'name', tag: 'tag1' },
+        true,
+        undefined,
+      ])
+      expect(inferenceMock.removeInferences).toBeCalledWith(
+        user,
+        Array(itemsFound).fill({ modelId, image: 'image', tag: 'tag' }),
+        undefined,
+      )
+      expect(modelMocks.delete).toBeCalled()
+    })
   })
 
   test('canUserActionModelById > allowed', async () => {

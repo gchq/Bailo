@@ -6,10 +6,10 @@ import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import getPeerConnectors from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
-import Model, { ModelInterface } from '../models/Model.js'
+import peers from '../connectors/peer/index.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
@@ -20,14 +20,22 @@ import {
   EntrySearchResultWithErrors,
   EntryUserPermissions,
 } from '../types/types.js'
+import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
+import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
+import { getFilesByModel, removeFiles } from './file.js'
+import { getInferencesByModel, removeInferences } from './inference.js'
+import { listModelImages, softDeleteImage } from './registry.js'
+import { deleteReleases, getModelReleases } from './release.js'
+import { findReviews } from './review.js'
 import { getSchemaById } from './schema.js'
+import { dropModelIdFromTokens, getTokensForModel } from './token.js'
+import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -75,7 +83,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ]
   }
 
-  const model = new Model({
+  const model = new ModelModel({
     ...modelParams,
     id: modelId,
     collaborators,
@@ -97,7 +105,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 }
 
 export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
   })
@@ -112,6 +120,115 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   }
 
   return model
+}
+
+export async function removeModel(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
+  const model = await ModelModel.findOne({
+    id: modelId,
+    ...(kind && { kind }),
+  })
+
+  if (!model) {
+    throw NotFound('The requested entry was not found.', { modelId })
+  }
+
+  const auth = await authorisation.model(user, model, ModelAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const [
+    allModelReviews,
+    allModelImages,
+    allModelReleases,
+    allModelTokens,
+    allModelWebhooks,
+    allModelCardRevisions,
+    allModelFiles,
+    allModelInferences,
+    allModelAccessRequests,
+  ] = await Promise.all([
+    findReviews(user, false, undefined, modelId),
+    listModelImages(user, modelId),
+    getModelReleases(user, modelId),
+    getTokensForModel(user, modelId),
+    getWebhooksByModel(user, modelId),
+    getModelCardRevisions(user, modelId),
+    getFilesByModel(user, modelId),
+    getInferencesByModel(user, modelId),
+    getAccessRequestsByModel(user, modelId),
+  ])
+
+  return await useTransaction([
+    // Initial concurrency has no overlapping Documents.
+    (session) =>
+      Promise.all([
+        // ModelCardRevision
+        Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
+        // Review
+        Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
+        // Token
+        dropModelIdFromTokens(user, modelId, allModelTokens, session),
+        // Webhook
+        Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
+        // Inference
+        removeInferences(
+          user,
+          allModelInferences.flatMap((inference) => ({
+            modelId: inference.modelId,
+            image: inference.image,
+            tag: inference.tag,
+          })),
+          session,
+        ),
+      ]),
+    // Only delete Releases after deleting Reviews as deleteReleases modifies Release, Review and Response Documents.
+    (session) =>
+      deleteReleases(
+        user,
+        modelId,
+        allModelReleases.flatMap((release) => release.semver),
+        true,
+        session,
+      ),
+    (session) =>
+      Promise.all([
+        // Only delete AccessRequests after deleting Releases as removeAccessRequests modifies AccessRequest, Review & Response Documents.
+        // Reviews are already deleted but Responses are only partially deleted and may overlap so cannot be concurrent.
+        removeAccessRequests(
+          user,
+          allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
+          session,
+        ),
+        // Only delete Files after deleting Releases as removeFiles modifies File, Scan & Release Documents.
+        removeFiles(
+          user,
+          modelId,
+          allModelFiles.flatMap((file) => file.id),
+          true,
+          session,
+        ),
+        // Only delete Images after deleting Releases as softDeleteImage modifies Releases.
+        Promise.all(
+          allModelImages.flatMap((modelImage) =>
+            modelImage.tags.map((tag) =>
+              softDeleteImage(
+                user,
+                {
+                  repository: modelImage.repository,
+                  name: modelImage.name,
+                  tag,
+                },
+                true,
+                session,
+              ),
+            ),
+          ),
+        ),
+      ]),
+    // Finally, delete the Model
+    (session) => model.delete(session),
+  ])
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -170,8 +287,7 @@ export async function searchModels(
   const promises: Promise<any>[] = [processLocalModels]
 
   if (opts.peers && opts.peers.length > 0) {
-    const connectors = await getPeerConnectors()
-    const remotePromise = connectors.searchEntries(user, opts)
+    const remotePromise = peers.searchEntries(user, opts)
 
     const processRemoteModels = remotePromise.then((remoteResponses) => {
       for (const response of remoteResponses.flat()) {
@@ -640,7 +756,7 @@ export async function validateMirroredModel(
   sourceModelId: string,
   logData: MirrorImportLogData,
 ) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
@@ -727,6 +843,6 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
 }
 
 export async function popularTagsForEntries() {
-  const tags = await Model.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
   return tags.map((tag) => tag._id) as string[]
 }

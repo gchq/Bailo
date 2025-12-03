@@ -2,7 +2,6 @@ import { Grid, Stack } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import { Fragment, useMemo } from 'react'
 import Loading from 'src/common/Loading'
-import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryRolesChipSet from 'src/entry/overview/EntryRolesChipSet'
 import MessageAlert from 'src/MessageAlert'
@@ -20,7 +19,6 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
         <Fragment key={collaborator.entity}>
           <Grid size={{ xs: 6 }}>
             <Stack direction='row' alignItems='center' spacing={1}>
-              <EntityIcon entryCollaborator={collaborator} />
               <EntityNameDisplay entryCollaborator={collaborator} />
             </Stack>
           </Grid>

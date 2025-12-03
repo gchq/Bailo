@@ -182,6 +182,20 @@ class Client:
 
         return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
 
+    def delete_model(
+        self,
+        model_id: str,
+    ):
+        """
+        Delete a specific model and all associated artefacts.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """
+        return self.agent.delete(
+            f"{self.url}/v2/model/{model_id}",
+        ).json()
+
     def get_model_card(
         self,
         model_id: str,
@@ -377,7 +391,7 @@ class Client:
         model_id: str,
         file_id: str,
     ):
-        """Download a specific file by it's id.
+        """Download a specific file by its id.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID

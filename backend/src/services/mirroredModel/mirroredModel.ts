@@ -8,6 +8,7 @@ import { Pack } from 'tar-stream'
 import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
+import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { BadReq, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
@@ -21,26 +22,10 @@ import { DocumentsExporter } from './exporters/documents.js'
 import { FileExporter } from './exporters/file.js'
 import { ImageExporter } from './exporters/image.js'
 import { BaseImporter } from './importers/base.js'
-import { DocumentsImporter, DocumentsMirrorMetadata, MongoDocumentMirrorInformation } from './importers/documents.js'
-import { FileImporter, FileMirrorInformation, FileMirrorMetadata } from './importers/file.js'
-import { ImageImporter, ImageMirrorInformation, ImageMirrorMetadata } from './importers/image.js'
+import { DocumentsImporter, MongoDocumentMirrorInformation } from './importers/documents.js'
+import { FileImporter, FileMirrorInformation } from './importers/file.js'
+import { ImageImporter, ImageMirrorInformation } from './importers/image.js'
 import { addEntryToTarGzUpload, extractTarGzStream } from './tarball.js'
-
-export const MirrorKind = {
-  Documents: 'documents',
-  File: 'file',
-  Image: 'image',
-} as const
-
-export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T extends keyof typeof MirrorKind
-  ? (typeof MirrorKind)[T]
-  : (typeof MirrorKind)[keyof typeof MirrorKind]
-
-export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
-export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
-
-export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
-export type MirrorImportLogData = Record<string, unknown> & { importId: string }
 
 const exportQueue: PQueue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
 

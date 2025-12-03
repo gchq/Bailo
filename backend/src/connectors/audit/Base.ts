@@ -11,8 +11,8 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
 import { EntrySearchResult } from '../../types/types.js'
 
 const AuditKind = {
@@ -28,6 +28,7 @@ export const AuditInfo = {
   CreateModel: { typeId: 'CreateModel', description: 'Model Created', auditKind: AuditKind.Create },
   ViewModel: { typeId: 'ViewModel', description: 'Model Viewed', auditKind: AuditKind.View },
   UpdateModel: { typeId: 'UpdateModel', description: 'Model Updated', auditKind: AuditKind.Update },
+  DeleteModel: { typeId: 'DeleteModel', description: 'Model Deleted', auditKind: AuditKind.Delete },
   SearchModels: { typeId: 'SearchModels', description: 'Model Searched', auditKind: AuditKind.Search },
 
   CreateModelCard: { typeId: 'CreateModelCard', description: 'Model Card Created', auditKind: AuditKind.Create },
@@ -104,9 +105,19 @@ export const AuditInfo = {
     description: 'Schema Migration Plan Created',
     auditKind: AuditKind.Create,
   },
+  UpdateSchemaMigration: {
+    typeId: 'UpdateSchemaMigration',
+    description: 'Schema Migration Plan Updated',
+    auditKind: AuditKind.Update,
+  },
   ViewSchemaMigrations: {
     typeId: 'ViewSchemaMigrations',
     description: 'Schemas Migration Plans viewed',
+    auditKind: AuditKind.View,
+  },
+  ViewSchemaMigration: {
+    typeId: 'ViewSchemaMigration',
+    description: 'Schema Migration Plan viewed',
     auditKind: AuditKind.View,
   },
 
@@ -164,6 +175,7 @@ export abstract class BaseAuditConnector {
   abstract onCreateModel(req: Request, model: ModelDoc)
   abstract onViewModel(req: Request, model: ModelDoc)
   abstract onUpdateModel(req: Request, model: ModelDoc)
+  abstract onDeleteModel(req: Request, modelId: string)
   abstract onSearchModel(req: Request, models: EntrySearchResult[])
 
   abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
@@ -208,7 +220,9 @@ export abstract class BaseAuditConnector {
   abstract onUpdateSchema(req: Request, schema: SchemaDoc)
 
   abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
+  abstract onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
   abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
+  abstract onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
 
   abstract onCreateInference(req: Request, inference: InferenceDoc)
   abstract onUpdateInference(req: Request, inference: InferenceDoc)

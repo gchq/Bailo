@@ -1,14 +1,9 @@
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Button from '@mui/material/Button'
-import Grid2 from '@mui/material/Grid2'
+import { Button, Box, Divider, Grid, Stack, Typography } from '@mui/material'
 import imageLoader from '../src/imageLoader'
 import Image from 'next/image'
 import localFont from '@next/font/local'
 import Link from '../src/Link'
 import { createRef } from 'react'
-import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import Slideshow from '../src/Slideshow'
 import React from 'react'
@@ -80,8 +75,8 @@ export default function Home() {
         }}
       />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
-        <Grid2 container alignItems='center' spacing={4}>
-          <Grid2 size={{ lg: 6 }}>
+        <Grid container alignItems='center' spacing={4}>
+          <Grid size={{ lg: 6 }}>
             <Box sx={{ px: 10, py: 4, textAlign: 'center', height: '100%' }}>
               <Stack
                 spacing={4}
@@ -106,13 +101,13 @@ export default function Home() {
                 </Typography>
               </Stack>
             </Box>
-          </Grid2>
-          <Grid2 size={{ lg: 6 }} sx={{ width: '100%' }}>
+          </Grid>
+          <Grid size={{ lg: 6 }} sx={{ width: '100%' }}>
             <Box sx={{ px: 3 }}>
               <Slideshow />
             </Box>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Box>
     </>
   )

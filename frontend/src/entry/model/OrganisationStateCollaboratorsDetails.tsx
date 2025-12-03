@@ -23,7 +23,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
 
-  const { mutateModel } = useGetModel(entry.id, entry.kind)
+  const { mutateModel } = useGetModel(entry.id)
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -40,6 +40,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   }, [entry])
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
+    setEntryTagUpdateErrorMessage('')
     const response = await patchModel(entry.id, { tags: newTags })
     if (!response.ok) {
       setEntryTagUpdateErrorMessage(await getErrorMessage(response))
@@ -59,7 +60,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   return (
     <Box>
       <Stack spacing={2} sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}>
-        <Typography color='primary' variant='h6'>
+        <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} Details
         </Typography>
         <Stack spacing={1}>

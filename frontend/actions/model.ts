@@ -50,8 +50,8 @@ export function useListModels(
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
-  viewAllPrivate?: boolean,
   titleOnly?: boolean,
+  adminAccess?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -64,8 +64,8 @@ export function useListModels(
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
-    ...(viewAllPrivate && { viewAllPrivate }),
     ...(titleOnly && { titleOnly }),
+    ...(adminAccess && { adminAccess }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -86,7 +86,7 @@ export function useListModels(
 
 export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
-    kind,
+    ...(kind && { kind }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<
@@ -200,6 +200,13 @@ export async function patchModel(
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(delta),
+  })
+}
+
+export async function deleteModel(id: string) {
+  return fetch(`/api/v2/model/${id}`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
   })
 }
 

@@ -489,7 +489,47 @@ describe('services > registry', () => {
       await softDeleteImage({} as any, source)
 
       expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
-      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith({}, 'sourceRepository', source)
+      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith(
+        {},
+        'sourceRepository',
+        source,
+        undefined,
+      )
+    })
+
+    test('softDeleteImage > success bypass mirrored model check', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        settings: { mirror: { sourceModelId: 'sourceModelId' } },
+      } as any)
+      const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
+      registryClientMocks.getImageTagManifest.mockResolvedValue({
+        body: mockBody,
+        headers: { 'docker-content-digest': 'digest' },
+      })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['newTag'])
+      const source = { name: 'sourceName', repository: 'sourceRepository', tag: 'sourceTag' }
+
+      await softDeleteImage({} as any, source, true)
+
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
+      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith(
+        {},
+        'sourceRepository',
+        source,
+        undefined,
+      )
+    })
+
+    test('softDeleteImage > fail on mirrored model', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        settings: { mirror: { sourceModelId: 'sourceModelId' } },
+      } as any)
+
+      const promise = softDeleteImage({} as any, {} as any)
+
+      await expect(promise).rejects.toThrowError(/^Cannot remove image from a mirrored model./)
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
+      expect(releaseMocks.findAndDeleteImageFromReleases).not.toHaveBeenCalled()
     })
   })
 })

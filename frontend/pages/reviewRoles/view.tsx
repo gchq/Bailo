@@ -297,7 +297,7 @@ export default function ReviewRoles() {
     <>
       <Title text='View Review Roles' />
       <Stack mx={2} mb={1} direction='row' divider={<Divider flexItem orientation='vertical' />} spacing={2}>
-        <Typography component='h1' color='primary' variant='h6' noWrap>
+        <Typography component='h1' color='primary' variant='h6' noWrap data-test='ReviewRolesTitle'>
           Review Roles
         </Typography>
         <Button variant='contained' href='/reviewRoles/new' color='primary'>

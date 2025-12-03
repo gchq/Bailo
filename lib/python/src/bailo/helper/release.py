@@ -245,7 +245,7 @@ class Release:
             ]
 
         logger.info(
-            "Downloading %d of %%d files for version %s of %s...",
+            "Downloading %d of %d files for version %s of %s...",
             len(file_names),
             len(orig_file_names),
             str(self.version),
@@ -349,10 +349,10 @@ class Release:
 
         :return: JSON Response object
         """
-        self.client.delete_release(self.model_id, str(self.version))
+        res = self.client.delete_release(self.model_id, str(self.version))
         logger.info("Release %s of %s successfully deleted.", str(self.version), self.model_id)
 
-        return True
+        return res
 
     @property
     def version(self):

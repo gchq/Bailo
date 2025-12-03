@@ -66,7 +66,7 @@ export default function ChipSelector({
 
   const allOptions = options.map((option) => (
     <ChipItem
-      key={option}
+      key={option.toString()}
       chip={option}
       size={size}
       activeChip={selectedChips.includes(option)}

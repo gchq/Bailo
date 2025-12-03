@@ -4,6 +4,12 @@ import z, { ZodSchema, ZodTypeDef } from 'zod'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
+import {
+  DocumentsMirrorMetadata,
+  MongoDocumentMirrorInformation,
+} from '../services/mirroredModel/importers/documents.js'
+import { FileMirrorInformation, FileMirrorMetadata } from '../services/mirroredModel/importers/file.js'
+import { ImageMirrorInformation, ImageMirrorMetadata } from '../services/mirroredModel/importers/image.js'
 import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
 import { BailoError } from './error.js'
 
@@ -214,3 +220,19 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   peers: coerceArray(z.array(z.string()).optional()),
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
+
+export const MirrorKind = {
+  Documents: 'documents',
+  File: 'file',
+  Image: 'image',
+} as const
+
+export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T extends keyof typeof MirrorKind
+  ? (typeof MirrorKind)[T]
+  : (typeof MirrorKind)[keyof typeof MirrorKind]
+
+export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
+export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
+
+export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
+export type MirrorImportLogData = Record<string, unknown> & { importId: string }

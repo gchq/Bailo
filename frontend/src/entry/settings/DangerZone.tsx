@@ -1,6 +1,11 @@
-import { Button, Stack, Typography } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material'
+import { deleteModel } from 'actions/model'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { EntryInterface } from 'types/types'
+import useNotification from 'src/hooks/useNotification'
+import MessageAlert from 'src/MessageAlert'
+import { EntryInterface, EntryKindLabel } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
 type DangerZoneProps = {
@@ -9,11 +14,31 @@ type DangerZoneProps = {
 
 export default function DangerZone({ entry }: DangerZoneProps) {
   const [loading, setLoading] = useState(false)
+  const sendNotification = useNotification()
+  const [errorMessage, setErrorMessage] = useState('')
+  const router = useRouter()
 
-  const handleDeleteEntry = () => {
+  const [openConfirm, setOpenConfirm] = useState(false)
+  const [confirmInput, setConfirmInput] = useState('')
+
+  const handleDeleteEntry = async () => {
     setLoading(true)
 
-    // TODO - Delete entry API request and setLoading(false) on success/fail
+    const response = await deleteModel(entry.id)
+
+    if (!response.ok) {
+      setErrorMessage(await getErrorMessage(response))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: `${toTitleCase(EntryKindLabel[entry.kind])} deleted`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+      router.push('/')
+    }
+
+    setLoading(false)
+    setOpenConfirm(!response.ok)
   }
 
   return (
@@ -21,10 +46,49 @@ export default function DangerZone({ entry }: DangerZoneProps) {
       <Typography variant='h6' component='h2'>
         Danger Zone!
       </Typography>
-      {/* TODO - Remove disabled prop when reenabling delete functionality */}
-      <Button fullWidth variant='contained' disabled onClick={handleDeleteEntry} loading={loading}>
-        {`Delete ${toTitleCase(entry.kind)}`}
+      <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
+        {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
       </Button>
+      <Dialog
+        onKeyUp={(e) => {
+          if (e.code === 'Enter' && confirmInput.trim() === entry.name) {
+            handleDeleteEntry()
+          }
+        }}
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+      >
+        <DialogTitle>{`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            To confirm deletion, type <strong>{entry.name}</strong> below. This action cannot be undone.
+          </Typography>
+          <TextField
+            fullWidth
+            variant='outlined'
+            value={confirmInput}
+            onChange={(e) => setConfirmInput(e.target.value)}
+            placeholder={entry.name}
+            autoFocus
+            sx={{ mt: 2 }}
+          />
+          {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} disabled={loading}>
+            Cancel
+          </Button>
+          <Button
+            color='error'
+            variant='contained'
+            onClick={handleDeleteEntry}
+            loading={loading}
+            disabled={confirmInput.trim() !== entry.name}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   )
 }

@@ -1,22 +1,30 @@
 import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
-import Link from 'next/link'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { formatDateString } from 'utils/dateUtils'
 
 export default function SchemaMigrationList() {
+  const theme = useTheme()
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
-
   const SchemaMigrationList = memoize(({ data, index }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} justifyContent='space-between'>
-        <Typography fontWeight='bold' color='primary' variant='h6'>
-          {data[index].name}
-        </Typography>
+        <Link
+          href={`/schemas/migrations/${data[index].id}`}
+          noLinkStyle
+          aria-label={`go to the ${data[index].name} migration plan`}
+        >
+          <Typography fontWeight='bold' color='primary' variant='h6' component='h2'>
+            {`${data[index].name}`}
+            <em style={{ color: theme.palette.secondary.main }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
+          </Typography>
+        </Link>
         <Typography>
           Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data[index].createdAt)}</span>
         </Typography>

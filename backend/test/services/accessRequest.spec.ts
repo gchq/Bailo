@@ -4,10 +4,12 @@ import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
+  findAccessRequests,
   getAccessRequestsByModel,
   getCurrentUserPermissionsByAccessRequest,
   getModelAccessRequestsForUser,
   removeAccessRequest,
+  removeAccessRequests,
 } from '../../src/services/accessRequest.js'
 import { AccessRequestUserPermissions } from '../../src/types/types.js'
 
@@ -18,14 +20,43 @@ const modelMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
+const modelModelMocks = vi.hoisted(() => {
+  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Model.js', () => ({ default: modelModelMocks }))
+
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
+const mockAuthentication = vi.hoisted(() => ({
+  hasRole: vi.fn(),
+  getEntities: vi.fn(() => ['user:testUser']),
+}))
+vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
+
 const accessRequestModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
+  obj.aggregate = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
@@ -72,19 +103,20 @@ const reviewModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
 
-const mockReviewService = vi.hoisted(() => {
-  return {
-    createAccessRequestReviews: vi.fn(),
-    removeAccessRequestReviews: vi.fn(),
-  }
-})
+const mockReviewService = vi.hoisted(() => ({
+  createAccessRequestReviews: vi.fn(),
+  removeAccessRequestReviews: vi.fn(),
+}))
 vi.mock('../../src/services/review.js', () => mockReviewService)
 
-const mockWebhookService = vi.hoisted(() => {
-  return {
-    sendWebhooks: vi.fn(),
-  }
-})
+const mockResponseService = vi.hoisted(() => ({
+  removeResponsesByParentIds: vi.fn(),
+}))
+vi.mock('../../src/services/response.js', () => mockResponseService)
+
+const mockWebhookService = vi.hoisted(() => ({
+  sendWebhooks: vi.fn(),
+}))
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 const accessRequest = {
@@ -135,6 +167,69 @@ describe('services > accessRequest', () => {
     expect(accessRequests).toMatchSnapshot()
   })
 
+  test('findAccessRequests > no filters', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+        model: {
+          id: 'modelId',
+        },
+      },
+    ])
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
+
+    const accessRequests = await findAccessRequests({} as any, [], '', true, false)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequests > all filters', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+        model: {
+          id: 'modelId',
+        },
+      },
+    ])
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
+
+    const accessRequests = await findAccessRequests({} as any, ['modelId'], 'schemaId', false, false)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequests > admin access without auth', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    await expect(() => findAccessRequests({} as any, [], '', true, true)).rejects.toThrowError(
+      /^You do not have the required role./,
+    )
+  })
+
+  test('findAccessRequests > admin access with auth', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(true)
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+      },
+    ])
+
+    const accessRequests = await findAccessRequests({} as any, [], '', true, true)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
   test('removeAccessRequest > success', async () => {
     reviewModelMocks.find.mockResolvedValue([])
     responseModelMocks.find.mockResolvedValue([])
@@ -155,6 +250,36 @@ describe('services > accessRequest', () => {
     })
 
     await expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
+      /^You do not have permission to delete this access request./,
+    )
+  })
+
+  test('removeAccessRequests > success', async () => {
+    reviewModelMocks.find.mockResolvedValue([])
+    responseModelMocks.find.mockResolvedValue([])
+
+    expect(await removeAccessRequests({} as any, ['test', 'test2'])).toStrictEqual({
+      accessRequestIds: ['test', 'test2'],
+    })
+    expect(reviewModelMocks.find).toHaveBeenCalledTimes(2)
+    // Once in removeAccessRequests and twice in getAccessRequestById
+    expect(modelMocks.getModelById).toHaveBeenCalledTimes(3)
+  })
+
+  test('removeAccessRequests > no permission', async () => {
+    const mockAccessRequest = { _id: 'release' }
+
+    modelMocks.getModelById.mockResolvedValue(undefined)
+    accessRequestModelMocks.findOne.mockResolvedValue(mockAccessRequest)
+
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({ success: true, id: '' })
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
+      success: false,
+      info: 'You do not have permission to delete this access request.',
+      id: '',
+    })
+
+    await expect(() => removeAccessRequests({} as any, ['test', 'test2'])).rejects.toThrowError(
       /^You do not have permission to delete this access request./,
     )
   })

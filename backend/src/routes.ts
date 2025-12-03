@@ -17,10 +17,12 @@ import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
+import { getAccessRequests } from './routes/v2/model/accessRequest/getAccessRequests.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
+import { deleteModel } from './routes/v2/model/deleteModel.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
@@ -74,11 +76,13 @@ import { postReviewRole } from './routes/v2/review/postReviewRole.js'
 import { putReviewRole } from './routes/v2/review/putReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
+import { getSchemaMigration } from './routes/v2/schema/getSchemaMigration.js'
 import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigrations.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
+import { putSchemaMigration } from './routes/v2/schema/putSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
@@ -113,6 +117,7 @@ server.get('/api/v2/models/search', ...getModelsSearch)
 
 server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
+server.delete('/api/v2/model/:modelId', ...deleteModel)
 
 server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 server.post('/api/v2/model/import/s3', ...postRequestImportFromS3)
@@ -138,6 +143,7 @@ server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseRevie
 
 server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
 server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
+server.get('/api/v2/access-requests/search', getAccessRequests)
 server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
 server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
@@ -198,7 +204,9 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/schema-migrations', ...getSchemaMigrations)
+server.get('/api/v2/schema-migration/:schemaMigrationId', ...getSchemaMigration)
 server.post('/api/v2/schema-migration', ...postSchemaMigration)
+server.put('/api/v2/schema-migration/:schemaMigrationId', ...putSchemaMigration)
 
 server.get('/api/v2/reviews', ...getReviews)
 server.head('/api/v2/reviews', ...getReviews)

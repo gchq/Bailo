@@ -34,6 +34,23 @@ global.fetch = vi.fn()
 // workaround TS being difficult
 const fetchMock: Mock = global.fetch as Mock
 
+class AbortControllerMock {
+  signal: { aborted: boolean; onabort: ((...args: any[]) => void) | null }
+  constructor() {
+    this.signal = {
+      aborted: false,
+      onabort: null,
+    }
+  }
+  abort() {
+    this.signal.aborted = true
+    if (typeof this.signal.onabort === 'function') {
+      this.signal.onabort()
+    }
+  }
+}
+global.AbortController = AbortControllerMock as any
+
 describe('clients > registry', () => {
   beforeEach(() => {
     // globals (e.g. `fetch`) persist changes between tests so always reset to the default mock
@@ -204,6 +221,18 @@ describe('clients > registry', () => {
     await expect(response).rejects.toThrowError('Unrecognised response stream when getting image layer blob.')
   })
 
+  test('getRegistryLayerStream > returnRawBody error with missing body triggers then fails json() callback', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      body: undefined,
+      json: vi.fn(() => Promise.reject()),
+      headers: new Headers({ 'content-type': 'application/json' }),
+    })
+    const promise = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
+
+    await expect(promise).rejects.toThrowError('Unrecognised response returned by the registry.')
+  })
+
   test('listModelRepos > only returns model repos', async () => {
     const modelId = 'modelId'
     fetchMock.mockReturnValueOnce({
@@ -277,6 +306,37 @@ describe('clients > registry', () => {
     const response = listModelRepos('token', 'modelId')
 
     await expect(response).rejects.toThrowError('Unrecognised response body when listing model repositories.')
+  })
+
+  test('listModelRepos > paginated link sets paginateParameter', async () => {
+    const modelId = 'modelId'
+    const linkHeader = '</v2/_catalog?n=100&last=modelId>; rel="next"'
+    fetchMock
+      .mockReturnValueOnce({
+        ok: true,
+        json: vi.fn(() => ({ repositories: [`${modelId}/repo`] })),
+        headers: new Headers({ 'content-type': 'application/json', link: linkHeader }),
+      })
+      .mockReturnValueOnce({
+        ok: true,
+        json: vi.fn(() => ({ repositories: [`${modelId}/repo`, 'wrong/repo'] })),
+        headers: new Headers({ 'content-type': 'application/json' }),
+      })
+    const response = await listModelRepos('token', modelId)
+
+    expect(response).toStrictEqual([`${modelId}/repo`, `${modelId}/repo`])
+  })
+
+  test('listModelRepos > non-JSON body error', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(() => {
+        throw new Error('error')
+      }),
+      headers: new Headers({ 'content-type': 'text/plain' }),
+    })
+    const response = listModelRepos('token', 'modelId')
+    await expect(response).rejects.toThrowError('Unable to read non-JSON response body.')
   })
 
   test('listImageTags > success', async () => {

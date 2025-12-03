@@ -40,7 +40,11 @@ function isSettingsCategory(
         value === SettingsCategory.MIRRORED_MODELS
       )
     case EntryKind.DATA_CARD:
-      return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.DANGER
+      )
     case EntryKind.MIRRORED_MODEL:
       return (
         value === SettingsCategory.DETAILS ||
@@ -136,14 +140,14 @@ export default function Settings({ entry }: SettingsProps) {
                 Mirrored Models
               </SimpleListItemButton>
             )}
-            <SimpleListItemButton
-              selected={selectedCategory === SettingsCategory.DANGER}
-              onClick={() => handleListItemClick(SettingsCategory.DANGER)}
-            >
-              Danger Zone
-            </SimpleListItemButton>
           </>
         )}
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.DANGER}
+          onClick={() => handleListItemClick(SettingsCategory.DANGER)}
+        >
+          Danger Zone
+        </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}

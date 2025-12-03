@@ -11,8 +11,8 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
 import { EntrySearchResult } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -24,6 +24,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateModel(_req: Request, _model: ModelDoc) {}
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
+  onDeleteModel(_req: Request, _modelId: string) {}
   onSearchModel(_req: Request, _models: EntrySearchResult[]) {}
   onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
@@ -78,5 +79,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
   onCreateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
+  onUpdateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
   onViewSchemaMigrations(_req: Request, _schemaMigrations: SchemaMigrationInterface[]) {}
+  onViewSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
 }

@@ -4,6 +4,7 @@ const audit = {
   onCreateModel: vi.fn(),
   onViewModel: vi.fn(),
   onUpdateModel: vi.fn(),
+  onDeleteModel: vi.fn(),
   onSearchModel: vi.fn(),
 
   onCreateModelCard: vi.fn(),
@@ -39,6 +40,8 @@ const audit = {
 
   onViewSchemaMigrations: vi.fn(),
   onCreateSchemaMigration: vi.fn(),
+  onUpdateSchemaMigration: vi.fn(),
+  onViewSchemaMigration: vi.fn(),
 
   onCreateInference: vi.fn(),
   onViewInference: vi.fn(),

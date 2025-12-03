@@ -142,6 +142,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
             emptyListText='No files found'
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
+              { value: 'size', title: 'Size', iconKind: 'size' },
               { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
               { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
             ]}
