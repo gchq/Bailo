@@ -1,4 +1,5 @@
-import { Box, Button, Container, Divider, Stack, Typography, useTheme } from '@mui/material'
+import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
