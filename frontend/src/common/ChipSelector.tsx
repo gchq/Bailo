@@ -8,13 +8,13 @@ import { CSSProperties, ReactElement, useState } from 'react'
 type PartialChipSelectorProps =
   | {
       multiple: true
-      options: [string, boolean][] | string[]
+      options: { key: string; value: boolean }[] | string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
-      options: [string, boolean][] | string[]
+      options: { key: string; value: boolean }[] | string[]
       selectedChips: string
       onChange: (value: string) => void
     }
@@ -80,7 +80,7 @@ export default function ChipSelector({
             style={style}
           />
         ))
-      : (options as [string, boolean][]).map(([key, value]) => (
+      : (options as { key: string; value: boolean }[]).map(({ key, value }) => (
           <ChipItem
             key={key.toString()}
             chip={key}

@@ -196,11 +196,11 @@ export default function Marketplace() {
     [roleOptions],
   )
 
-  const reachablePeerList: [string, boolean][] = useMemo(() => {
+  const reachablePeerList: { key: string; value: boolean }[] = useMemo(() => {
     if (!peers) return []
     return Array.from(peers.entries())
       .filter(([, value]) => isEnabled(value))
-      .map(([key, value]) => [key, isReachable(value)])
+      .map(([key, value]) => ({ key, value: isReachable(value) }))
   }, [peers])
 
   const organisationList = useMemo(() => {
