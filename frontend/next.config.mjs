@@ -12,8 +12,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [remarkFrontmatter, remarkGfm],
-    rehypePlugins: [rehypeHighlight],
+    remarkPlugins: ['remark-frontmatter', 'remark-gfm'],
+    rehypePlugins: ['rehype-highlight'],
   },
 })
 

@@ -1,4 +1,4 @@
-import { Box, Button, darken, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
@@ -149,7 +149,7 @@ export default function PageWithTabs({
             <Stack direction='row' alignItems='center'>
               <Typography
                 variant='caption'
-                sx={{ color: darken(theme.palette.primary.main, 0.4), textOverflow: 'ellipsis', overflow: 'hidden' }}
+                sx={{ color: theme.palette.primary.main, textOverflow: 'ellipsis', overflow: 'hidden' }}
               >
                 {subheading}
               </Typography>

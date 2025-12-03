@@ -25,6 +25,7 @@
     "@mui/material-nextjs": "7.3.5",
     "@mui/x-date-pickers": "8.19.0",
     "@next/mdx": "^16.0.6",
+    "@next/swc-wasm-nodejs": "16.0.6",
     "@rjsf/core": "6.1.2",
     "@rjsf/mui": "6.1.2",
     "@rjsf/utils": "6.1.2",
