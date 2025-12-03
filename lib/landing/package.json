@@ -24,8 +24,8 @@
     "@emotion/styled": "11.14.1",
     "@mdx-js/loader": "^2.1.5",
     "@mdx-js/react": "^2.1.5",
-    "@mui/icons-material": "6.4.8",
-    "@mui/material": "6.4.8",
+    "@mui/icons-material": "7.3.5",
+    "@mui/material": "7.3.5",
     "@next/mdx": "^14.2.4",
     "dedent-js": "^1.0.1",
     "gray-matter": "^4.0.3",
@@ -40,11 +40,11 @@
     "swiper": "^8.4.5"
   },
   "devDependencies": {
-    "@types/node": "24.9.2",
+    "@types/node": "24.10.1",
     "@types/react": "18.3.3",
     "@types/styled-components": "^5.1.36",
-    "eslint": "9.36.0",
-    "eslint-config-next": "15.5.4",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.0.6",
     "typescript": "5.9.3"
   }
 }

@@ -2,18 +2,22 @@
 
 exports[`services > model > removeModel > success empty 1`] = `
 [
+  [
+    [],
+    [],
+    undefined,
+    [],
+    undefined,
+  ],
   {
     "modelId": "modelId",
     "semvers": [],
   },
-  [],
-  undefined,
-  [],
-  undefined,
-  [],
-  undefined,
-  [],
-  undefined,
+  [
+    undefined,
+    undefined,
+    [],
+  ],
   {
     "_id": {
       "toString": [Function],
@@ -56,6 +60,25 @@ exports[`services > model > removeModel > success empty 1`] = `
 
 exports[`services > model > removeModel > success entries 1`] = `
 [
+  [
+    [
+      undefined,
+      undefined,
+      undefined,
+    ],
+    [
+      undefined,
+      undefined,
+      undefined,
+    ],
+    undefined,
+    [
+      undefined,
+      undefined,
+      undefined,
+    ],
+    undefined,
+  ],
   {
     "modelId": "modelId",
     "semvers": [
@@ -67,30 +90,15 @@ exports[`services > model > removeModel > success entries 1`] = `
   [
     undefined,
     undefined,
-    undefined,
+    [
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ],
   ],
-  undefined,
-  [
-    undefined,
-    undefined,
-    undefined,
-  ],
-  undefined,
-  [
-    undefined,
-    undefined,
-    undefined,
-  ],
-  undefined,
-  [
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ],
-  undefined,
   {
     "_id": {
       "toString": [Function],

@@ -50,7 +50,7 @@ export function useListModels(
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
-  viewAllPrivate?: boolean,
+  adminAccess?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -63,7 +63,7 @@ export function useListModels(
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
-    ...(viewAllPrivate && { viewAllPrivate }),
+    ...(adminAccess && { adminAccess }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {

@@ -137,17 +137,52 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
-  const allModelReviews = await findReviews(user, false, undefined, modelId)
-  const allModelImages = await listModelImages(user, modelId)
-  const allModelReleases = await getModelReleases(user, modelId)
-  const allModelTokens = await getTokensForModel(user, modelId)
-  const allModelWebhooks = await getWebhooksByModel(user, modelId)
-  const allModelCardRevisions = await getModelCardRevisions(user, modelId)
-  const allModelFiles = await getFilesByModel(user, modelId)
-  const allModelInferences = await getInferencesByModel(user, modelId)
-  const allModelAccessRequests = await getAccessRequestsByModel(user, modelId)
+  const [
+    allModelReviews,
+    allModelImages,
+    allModelReleases,
+    allModelTokens,
+    allModelWebhooks,
+    allModelCardRevisions,
+    allModelFiles,
+    allModelInferences,
+    allModelAccessRequests,
+  ] = await Promise.all([
+    findReviews(user, false, undefined, modelId),
+    listModelImages(user, modelId),
+    getModelReleases(user, modelId),
+    getTokensForModel(user, modelId),
+    getWebhooksByModel(user, modelId),
+    getModelCardRevisions(user, modelId),
+    getFilesByModel(user, modelId),
+    getInferencesByModel(user, modelId),
+    getAccessRequestsByModel(user, modelId),
+  ])
 
   return await useTransaction([
+    // Initial concurrency has no overlapping Documents.
+    (session) =>
+      Promise.all([
+        // ModelCardRevision
+        Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
+        // Review
+        Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
+        // Token
+        dropModelIdFromTokens(user, modelId, allModelTokens, session),
+        // Webhook
+        Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
+        // Inference
+        removeInferences(
+          user,
+          allModelInferences.flatMap((inference) => ({
+            modelId: inference.modelId,
+            image: inference.image,
+            tag: inference.tag,
+          })),
+          session,
+        ),
+      ]),
+    // Only delete Releases after deleting Reviews as deleteReleases modifies Release, Review and Response Documents.
     (session) =>
       deleteReleases(
         user,
@@ -156,51 +191,42 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
         true,
         session,
       ),
-    (session) => Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
     (session) =>
-      removeAccessRequests(
-        user,
-        allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
-        session,
-      ),
-    (session) => Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
-    (session) => dropModelIdFromTokens(user, modelId, allModelTokens, session),
-    (session) => Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
-    (session) =>
-      removeFiles(
-        user,
-        modelId,
-        allModelFiles.flatMap((file) => file.id),
-        true,
-        session,
-      ),
-    (session) =>
-      Promise.all(
-        allModelImages.flatMap((modelImage) =>
-          modelImage.tags.map((tag) =>
-            softDeleteImage(
-              user,
-              {
-                repository: modelImage.repository,
-                name: modelImage.name,
-                tag,
-              },
-              true,
-              session,
+      Promise.all([
+        // Only delete AccessRequests after deleting Releases as removeAccessRequests modifies AccessRequest, Review & Response Documents.
+        // Reviews are already deleted but Responses are only partially deleted and may overlap so cannot be concurrent.
+        removeAccessRequests(
+          user,
+          allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
+          session,
+        ),
+        // Only delete Files after deleting Releases as removeFiles modifies File, Scan & Release Documents.
+        removeFiles(
+          user,
+          modelId,
+          allModelFiles.flatMap((file) => file.id),
+          true,
+          session,
+        ),
+        // Only delete Images after deleting Releases as softDeleteImage modifies Releases.
+        Promise.all(
+          allModelImages.flatMap((modelImage) =>
+            modelImage.tags.map((tag) =>
+              softDeleteImage(
+                user,
+                {
+                  repository: modelImage.repository,
+                  name: modelImage.name,
+                  tag,
+                },
+                true,
+                session,
+              ),
             ),
           ),
         ),
-      ),
-    (session) =>
-      removeInferences(
-        user,
-        allModelInferences.flatMap((inference) => ({
-          modelId: inference.modelId,
-          image: inference.image,
-          tag: inference.tag,
-        })),
-        session,
-      ),
+      ]),
+    // Finally, delete the Model
     (session) => model.delete(session),
   ])
 }

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import z from 'zod'
 
-import { coerceArray, parse } from '../../src/utils/validate.js'
+import { coerceArray, parse, strictCoerceBoolean } from '../../src/utils/validate.js'
 
 describe('utils > validate', () => {
   test('parse', () => {
@@ -25,5 +25,17 @@ describe('utils > validate', () => {
     expect(() => parse({ a: undefined } as any, schema)).toThrow()
     expect(() => parse({ a: 2 } as any, schema)).toThrow()
     expect(() => parse({ a: [2] } as any, schema)).toThrow()
+  })
+
+  test('strictCoerceBoolean', () => {
+    const schema = z.object({
+      a: strictCoerceBoolean(z.boolean()),
+    })
+
+    expect(parse({ a: 'true' } as any, schema)).toStrictEqual({ a: true })
+    expect(parse({ a: 'false' } as any, schema)).toStrictEqual({ a: false })
+    expect(() => parse({ a: '' } as any, schema)).toThrow()
+    expect(() => parse({ a: '0' } as any, schema)).toThrow()
+    expect(() => parse({ a: 'TRUE' } as any, schema)).toThrow()
   })
 })
