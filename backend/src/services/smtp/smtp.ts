@@ -1,4 +1,3 @@
-import nodemailer, { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer/index.js'
 
 import authentication from '../../connectors/authentication/index.js'
@@ -10,8 +9,9 @@ import config from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import log from '../log.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
+import { generateTransporter, sanitiseEmail } from './smtpUtils.js'
 
-let transporter: undefined | Transporter = undefined
+const transporter = await generateTransporter(config.smtp.transporter)
 
 async function dispatchEmail(entity: string, emailContent: EmailContent) {
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
@@ -175,21 +175,12 @@ export async function notifyReviewResponseForAccess(
 }
 
 async function sendEmail(email: Mail.Options) {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: config.smtp.connection.host,
-      port: config.smtp.connection.port,
-      secure: config.smtp.connection.secure,
-      auth: config.smtp.connection.auth,
-      tls: config.smtp.connection.tls,
-    })
-  }
-
   try {
-    const info = await transporter.sendMail({
+    const sanisisedEmail = sanitiseEmail({
       from: config.smtp.from,
       ...email,
     })
+    const info = await transporter.sendMail(sanisisedEmail)
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (error) {
     const content = { to: email.to, subject: email.subject, text: email.text }

@@ -71,6 +71,7 @@ describe('services > smtp > smtp', () => {
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
       enabled: false,
+      transporter: 'smtp',
       connection: {
         host: 'localhost',
         port: 1025,
@@ -91,6 +92,7 @@ describe('services > smtp > smtp', () => {
   test('that an Access Request Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
       enabled: false,
+      transporter: 'smtp',
       connection: {
         host: 'localhost',
         port: 1025,
@@ -111,6 +113,7 @@ describe('services > smtp > smtp', () => {
   test('that an email is not sent after a response for a release review if disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
       enabled: false,
+      transporter: 'smtp',
       connection: {
         host: 'localhost',
         port: 1025,
@@ -130,6 +133,7 @@ describe('services > smtp > smtp', () => {
   test('that an email is not sent after a response for a an access request review if disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
       enabled: false,
+      transporter: 'smtp',
       connection: {
         host: 'localhost',
         port: 1025,

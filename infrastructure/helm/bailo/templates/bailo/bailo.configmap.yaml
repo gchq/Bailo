@@ -104,6 +104,7 @@ data:
       smtp: {
         // Enable / disable all email sending
         enabled: true,
+        transporter: '{{ .Values.config.smtp.transporter }}',
 
         // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
         // https://nodemailer.com/smtp/#1-single-connection
@@ -254,6 +255,11 @@ data:
         enabled: {{ .Values.instrumentation.enabled }},
         endpoint: '{{ .Values.instrumentation.endpoint }}',
         debug: {{ .Values.instrumentation.debug }},
+      },
+
+      ses: {
+        endpoint: '{{ .Values.aws.ses.endpoint }}',
+        region: '{{ .Values.aws.ses.region }}',
       },
 
       s3: {
