@@ -1,9 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
 import isDocker from 'is-docker'
-import rehypeHighlight from 'rehype-highlight'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkGfm from 'remark-gfm'
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
