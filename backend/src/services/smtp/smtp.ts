@@ -176,11 +176,11 @@ export async function notifyReviewResponseForAccess(
 
 async function sendEmail(email: Mail.Options) {
   try {
-    const sanisisedEmail = sanitiseEmail({
+    const sanitisedEmail = sanitiseEmail({
       from: config.smtp.from,
       ...email,
     })
-    const info = await transporter.sendMail(sanisisedEmail)
+    const info = await transporter.sendMail(sanitisedEmail)
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (error) {
     const content = { to: email.to, subject: email.subject, text: email.text }
