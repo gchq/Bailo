@@ -5,16 +5,18 @@ import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import { CSSProperties, ReactElement, useState } from 'react'
 
+type disableableOptionsType = { key: string; value: boolean }[]
+
 type PartialChipSelectorProps =
   | {
       multiple: true
-      options: { key: string; value: boolean }[] | string[]
+      options: disableableOptionsType | string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
-      options: { key: string; value: boolean }[] | string[]
+      options: disableableOptionsType | string[]
       selectedChips: string
       onChange: (value: string) => void
     }
@@ -80,7 +82,7 @@ export default function ChipSelector({
             style={style}
           />
         ))
-      : (options as { key: string; value: boolean }[]).map(({ key, value }) => (
+      : (options as disableableOptionsType).map(({ key, value }) => (
           <ChipItem
             key={key.toString()}
             chip={key}
