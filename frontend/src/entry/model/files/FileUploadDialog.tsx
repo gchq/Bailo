@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, styled, Typography } from '@mui/material'
+import styled from '@emotion/styled'
+import { Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
