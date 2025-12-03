@@ -1,8 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../../src/models/AccessRequest.js'
-import Release from '../../../src/models/Release.js'
-import Review from '../../../src/models/Review.js'
 import {
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
@@ -73,18 +70,18 @@ const responseService = vi.hoisted(() => ({
 vi.mock('../../../src/services/response.js', async () => responseService)
 
 describe('services > smtp > smtp', () => {
-  const review = new Review({
+  const review = {
     role: 'owner',
     responses: [{ decision: 'approve' }],
-  })
-  const release = new Release({
+  } as any
+  const release = {
     modelId: 'testmodel-123',
     semver: '1.2.3',
     createdBy: 'user:user',
-  })
-  const access = new AccessRequest({
+  } as any
+  const access = {
     metadata: { overview: { entities: ['user:user'] } },
-  })
+  } as any
 
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
@@ -207,7 +204,7 @@ describe('services > smtp > smtp', () => {
     }
     authenticationMock.getUserInformationList.mockReturnValueOnce(users)
 
-    await requestReviewForRelease('group:group1', new Review({ role: 'owner' }), new Release())
+    await requestReviewForRelease('group:group1', { role: 'owner' } as any, {} as any)
 
     expect(transporterMock.sendMail.mock.calls.length).toBe(20)
   })

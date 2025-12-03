@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import ReviewRoleModel from '../../src/models/ReviewRole.js'
 import { getAllEntryRoles } from '../../src/services/roles.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testAccessRequest, testReviewRoleNoSystemRole } from '../testUtils/testModels.js'
@@ -66,10 +65,10 @@ describe('services > review', () => {
       card: { schemaId: 'test' },
       collaborators: [{ entity: 'user:user', roles: 'reviewer' }],
     })
-    const reviewRoleInterface = new ReviewRoleModel({
+    const reviewRoleInterface = {
       ...testReviewRoleNoSystemRole,
       _id: 'test',
-    })
+    } as any
     accessRequestMock.getAccessRequestsByModel.mockResolvedValue([testAccessRequest])
     mockReviewService.findReviewRoles.mockResolvedValueOnce([reviewRoleInterface])
     const roles = await getAllEntryRoles({} as any, '234')
