@@ -35,6 +35,28 @@ const mockSchemaMigration = vi.hoisted(() => {
 })
 vi.mock('../../src/models/SchemaMigration.js', () => ({ default: mockSchemaMigration }))
 
+const mockModelCardRevision = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/ModelCardRevision.js', () => ({ default: mockModelCardRevision }))
+
 const mockMongoUtils = vi.hoisted(() => {
   return {
     isMongoServerError: vi.fn(),
@@ -176,9 +198,11 @@ describe('services > schemaMigration', () => {
     modelMocks.findOne.mockResolvedValueOnce(testModelForMigration)
     mockSchemaMigration.findOne.mockResolvedValueOnce(testSchemaMigration)
     schemaMocks.findOne.mockResolvedValueOnce(testModelSchema)
+    mockModelCardRevision.save.mockResolvedValueOnce(testModelForMigration)
+    modelMocks.save.mockResolvedValueOnce(testModelForMigration)
     await runModelSchemaMigration({} as UserInterface, 'my-model-123', testSchemaMigration.id)
-    expect(testModelForMigration.save).toBeCalledTimes(2)
-    expect(testModelForMigration.set).toBeCalledTimes(3)
+    expect(testModelForMigration.save).toBeCalledTimes(1)
+    expect(testModelForMigration.set).toBeCalledTimes(4)
   })
 
   test('update migration > suceess', async () => {
