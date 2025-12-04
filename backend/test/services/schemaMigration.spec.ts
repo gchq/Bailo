@@ -9,53 +9,15 @@ import {
   updateSchemaMigrationPlan,
 } from '../../src/services/schemaMigration.js'
 import { SchemaMigrationKind } from '../../src/types/enums.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema, testSchemaMigration } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
-const mockSchemaMigration = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/SchemaMigration.js', () => ({ default: mockSchemaMigration }))
-
-const mockModelCardRevision = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/ModelCardRevision.js', () => ({ default: mockModelCardRevision }))
+const SchemaMigrationModelMock = getTypedModelMock('SchemaMigrationModel')
+const ModelModelMock = getTypedModelMock('ModelModel')
+const SchemaModelMock = getTypedModelMock('SchemaModel')
+const ModelCardRevisionMock = getTypedModelMock('ModelCardRevisionModel')
 
 const mockMongoUtils = vi.hoisted(() => {
   return {
@@ -64,121 +26,91 @@ const mockMongoUtils = vi.hoisted(() => {
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 
-const modelMocks = vi.hoisted(() => {
-  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
-
-const schemaMocks = vi.hoisted(() => {
-  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Schema.js', () => ({ default: schemaMocks }))
-
 describe('services > schemaMigration', () => {
-  const testUser = { dn: 'user' } as UserInterface
+  const testUser = { dn: 'user' } as any
 
   test('that all schemas migrations can be retrieved', async () => {
-    mockSchemaMigration.find.mockResolvedValueOnce([testSchemaMigration])
+    SchemaMigrationModelMock.find.mockResolvedValueOnce([testSchemaMigration])
     const result = await searchSchemaMigrations()
     expect(result).toEqual([testSchemaMigration])
   })
 
   test('searchSchemaMigrationById > success', async () => {
     const schemaMigrationId = 'test-id'
-    mockSchemaMigration.findOne.mockResolvedValueOnce(testSchemaMigration)
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
     const res = await searchSchemaMigrationById(schemaMigrationId)
     expect(res).toBe(testSchemaMigration)
   })
 
   test('searchSchemaMigrationById > not found', async () => {
     const schemaMigrationId = 'test-id'
-    mockSchemaMigration.findOne.mockResolvedValueOnce(null)
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(null)
     await expect(() => searchSchemaMigrationById(schemaMigrationId)).rejects.toThrowError(
       'Cannot find specified schema migration plan.',
     )
   })
 
   test('a schema migration plan can be created', async () => {
-    mockSchemaMigration.save.mockResolvedValueOnce(testSchemaMigration)
+    SchemaMigrationModelMock.save.mockResolvedValueOnce(testSchemaMigration)
     const result = await createSchemaMigrationPlan(testUser, testSchemaMigration)
-    expect(mockSchemaMigration.save).toBeCalledTimes(1)
+    expect(SchemaMigrationModelMock.save).toBeCalledTimes(1)
     expect(result).toBe(testSchemaMigration)
   })
 
   test('cannot run a schema migration plan when there is no model', async () => {
-    modelMocks.findOne.mockResolvedValueOnce(undefined)
+    ModelModelMock.findOne.mockResolvedValueOnce(undefined)
     await expect(() =>
-      runModelSchemaMigration({} as UserInterface, 'my-model-123', 'my-migration-plan-123'),
+      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
     ).rejects.toThrowError(/^Model cannot be found/)
   })
 
   test('cannot run a schema migration plan when there is no valid model card', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({
+    ModelModelMock.findOne.mockResolvedValueOnce({
       _id: '1241',
       id: 'test-model',
-      toObject: vi.fn(() => ({ _id: 'test' })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+        }
+      }),
     })
     await expect(() =>
-      runModelSchemaMigration({} as UserInterface, 'my-model-123', 'my-migration-plan-123'),
+      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
     ).rejects.toThrowError(/^Model cannot be migrated as it does not have a valid model card./)
   })
 
   test('cannot run a schema migration plan when there is no schema migration plan available', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({
+    ModelModelMock.findOne.mockResolvedValueOnce({
       _id: '1241',
       id: 'test-model',
-      toObject: vi.fn(() => ({ _id: 'test', card: { testProperty: 'test' } })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          card: { testProperty: 'test' },
+        }
+      }),
     })
-    mockSchemaMigration.findOne.mockResolvedValueOnce(undefined)
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(undefined)
     await expect(() =>
-      runModelSchemaMigration({} as UserInterface, 'my-model-123', 'my-migration-plan-123'),
+      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
     ).rejects.toThrowError(/^Cannot find specified schema migration plan./)
   })
 
   test('cannot run schema migration plan where source schema does not exist', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({
+    ModelModelMock.findOne.mockResolvedValueOnce({
       _id: '1241',
       id: 'test-model',
-      toObject: vi.fn(() => ({ _id: 'test', card: { testProperty: 'test', schemaId: 'invalid-schema-id' } })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          card: { testProperty: 'test', schemaId: 'invalid-schema-id' },
+        }
+      }),
     })
-    mockSchemaMigration.findOne.mockResolvedValueOnce(testSchemaMigration)
-    schemaMocks.findOne.mockResolvedValueOnce(undefined)
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
+    SchemaModelMock.findOne.mockResolvedValueOnce(undefined)
     await expect(() =>
-      runModelSchemaMigration({} as UserInterface, 'my-model-123', 'my-migration-plan-123'),
+      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
     ).rejects.toThrowError(/^The schema for this model does not match the migration plan's source schema./)
   })
 
@@ -188,18 +120,20 @@ describe('services > schemaMigration', () => {
       _id: '1241',
       id: 'test-model',
       card: sourceCard,
-      toObject: vi.fn(() => ({
-        _id: 'test',
-        card: sourceCard,
-      })),
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          card: sourceCard,
+        }
+      }),
       set: vi.fn(),
       save: vi.fn(),
     }
-    modelMocks.findOne.mockResolvedValueOnce(testModelForMigration)
-    mockSchemaMigration.findOne.mockResolvedValueOnce(testSchemaMigration)
-    schemaMocks.findOne.mockResolvedValueOnce(testModelSchema)
-    mockModelCardRevision.save.mockResolvedValueOnce(testModelForMigration)
-    modelMocks.save.mockResolvedValueOnce(testModelForMigration)
+    ModelModelMock.findOne.mockResolvedValueOnce(testModelForMigration)
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
+    SchemaModelMock.findOne.mockResolvedValueOnce(testModelSchema)
+    ModelCardRevisionMock.save.mockResolvedValueOnce(testModelForMigration)
+    ModelModelMock.save.mockResolvedValueOnce(testModelForMigration)
     await runModelSchemaMigration({} as UserInterface, 'my-model-123', testSchemaMigration.id)
     expect(testModelForMigration.save).toBeCalledTimes(1)
     expect(testModelForMigration.set).toBeCalledTimes(4)
@@ -220,11 +154,11 @@ describe('services > schemaMigration', () => {
       ],
       draft: true,
     })
-    expect(mockSchemaMigration.save).toBeCalled()
+    expect(SchemaMigrationModelMock.save).toBeCalled()
   })
 
   test('update migration > not found', async () => {
-    mockSchemaMigration.findOne.mockResolvedValueOnce(null)
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(null)
 
     await expect(() =>
       updateSchemaMigrationPlan(testUser, '1241', {

@@ -8,7 +8,9 @@ vi.mock('../../../src/connectors/audit/index.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    findReviews: vi.fn(() => [testReleaseReview]),
+    findReviews: vi.fn(function () {
+      return [testReleaseReview]
+    }),
   }
 })
 vi.mock('../../../src/services/review.js', () => mockReviewService)
