@@ -1,8 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../src/models/AccessRequest.js'
-import Model from '../../src/models/Model.js'
-import Release from '../../src/models/Release.js'
 import {
   addDefaultReviewRoles,
   createAccessRequestReviews,
@@ -17,7 +14,14 @@ import {
 } from '../../src/services/review.js'
 import { RoleKind } from '../../src/types/types.js'
 import { NotFound } from '../../src/utils/error.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
+
+const ReviewModelMock = getTypedModelMock('ReviewModel')
+const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
+const SchemaModelMock = getTypedModelMock('SchemaModel')
+const ModelModelMock = getTypedModelMock('ModelModel')
+const ResponseModelMock = getTypedModelMock('ResponseModel')
 
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
   default: {
@@ -31,154 +35,6 @@ vi.mock('../../src/connectors/authorisation/index.js', async () => ({
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
-}))
-
-const reviewModelMock = vi.hoisted(() => {
-  const obj: any = { kind: 'access', accessRequestId: 'Hello', role: 'msro' }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.find = vi.fn(() => [obj])
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-vi.mock('../../src/models/Review.js', async () => ({
-  ...((await vi.importActual('../../src/models/Review.js')) as object),
-  default: reviewModelMock,
-}))
-
-const reviewRoleModelMock = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => [obj])
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-vi.mock('../../src/models/ReviewRole.js', async () => ({
-  ...((await vi.importActual('../../src/models/ReviewRole.js')) as object),
-  default: reviewRoleModelMock,
-}))
-
-const schemaModelMock = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => [obj])
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-vi.mock('../../src/models/Schema.js', async () => ({
-  ...((await vi.importActual('../../src/models/Schema.js')) as object),
-  default: schemaModelMock,
-}))
-
-const modelModelMock = vi.hoisted(() => {
-  const obj: any = { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => [obj])
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-const responseModelMock = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-vi.mock('../../src/models/Model.js', async () => ({
-  ...((await vi.importActual('../../src/models/Model.js')) as object),
-  default: modelModelMock,
 }))
 
 const smtpMock = vi.hoisted(() => ({
@@ -206,11 +62,6 @@ const arrayUtilMock = vi.hoisted(() => ({
   asyncFilter: vi.fn(),
 }))
 vi.mock('../../src/utils/array.js', async () => arrayUtilMock)
-
-vi.mock('../../src/models/Response.js', async () => ({
-  ...((await vi.importActual('../../src/models/Response.js')) as object),
-  default: responseModelMock,
-}))
 
 const configMock = vi.hoisted(() => ({
   defaultReviewRoles: [
@@ -247,73 +98,79 @@ describe('services > review', () => {
   test('findReviews > all reviews for user', async () => {
     await findReviews(user, true, false)
 
-    expect(reviewModelMock.aggregate.mock.calls).toMatchSnapshot()
+    expect(ReviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
   test('findReviews > all open reviews for user', async () => {
     const mockResponses = [{ _id: 'response' }]
-    responseModelMock.find.mockResolvedValueOnce(mockResponses)
+    ResponseModelMock.find.mockResolvedValueOnce(mockResponses)
     await findReviews(user, true, true)
 
-    expect(reviewModelMock.aggregate.mock.calls).toMatchSnapshot()
+    expect(ReviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
   test('findReviews > active reviews for a specific model', async () => {
     await findReviews(user, false, false, 'modelId')
 
-    expect(reviewModelMock.aggregate.mock.calls).toMatchSnapshot()
+    expect(ReviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
   test('findReviewsForAccessRequests > success', async () => {
-    await findReviewsForAccessRequests([reviewModelMock.accessRequestId])
+    await findReviewsForAccessRequests(['accessRequestId'])
 
-    expect(reviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
-    schemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
-    reviewRoleModelMock.find.mockResolvedValueOnce([])
-    const result: Promise<void> = createReleaseReviews(new Model(), new Release())
+    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
+    ReviewRoleModelMock.find.mockResolvedValueOnce([])
+    const result: Promise<void> = createReleaseReviews(
+      { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] } as any,
+      {} as any,
+    )
 
     await expect(result).resolves.not.toThrowError()
     expect(smtpMock.requestReviewForRelease).not.toBeCalled()
-    expect(reviewModelMock.save).not.toBeCalled()
+    expect(ReviewModelMock.save).not.toBeCalled()
   })
 
   test('createReleaseReviews > successful', async () => {
-    schemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
-    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
+    ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
     await createReleaseReviews(
-      new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr', 'reviewer'] }] }),
-      new Release(),
+      { collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr', 'reviewer'] }], card: {} } as any,
+      {} as any,
     )
 
-    expect(reviewModelMock.save).toBeCalled()
+    expect(ReviewModelMock.save).toBeCalled()
     expect(smtpMock.requestReviewForRelease).toBeCalled()
   })
 
   test('createAccessRequestReviews > successful', async () => {
-    schemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
-    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
+    ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
 
     await createAccessRequestReviews(
-      new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
-      new AccessRequest(),
+      { collaborators: [{ entity: 'user:user', roles: ['reviewer', 'owner'] }] } as any,
+      {} as any,
     )
 
-    expect(reviewModelMock.save).toBeCalled()
+    expect(ReviewModelMock.save).toBeCalled()
     expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
   })
 
   test('removeAccessRequestReviews > successful', async () => {
-    await removeAccessRequestReviews(reviewModelMock.accessRequestId)
+    ReviewModelMock.find.mockResolvedValueOnce([{ delete: ReviewModelMock.delete }])
 
-    expect(reviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.delete).toBeCalled()
+    await removeAccessRequestReviews('accessRequestId')
+
+    expect(ReviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewModelMock.delete).toBeCalled()
   })
 
   test('removeAccessRequestReviews > could not delete failure', async () => {
-    reviewModelMock.delete.mockImplementationOnce(() => {
+    ReviewModelMock.find.mockResolvedValueOnce([{ delete: ReviewModelMock.delete }])
+    ReviewModelMock.delete.mockImplementationOnce(() => {
       throw Error('Error deleting object')
     })
 
@@ -323,25 +180,25 @@ describe('services > review', () => {
   })
 
   test('getReviewRoles > returns array of review roles', async () => {
-    reviewRoleModelMock.find.mockImplementation(() => ({
+    ReviewRoleModelMock.find.mockImplementation(() => ({
       lean: vi.fn(),
     }))
     await findReviewRoles()
 
-    expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('getReviewRoles > returns array of review roles when given a single schema Id', async () => {
-    reviewRoleModelMock.find.mockImplementationOnce(() => ({
+    ReviewRoleModelMock.find.mockImplementationOnce(() => ({
       lean: vi.fn(),
     }))
-    schemaModelMock.find.mockResolvedValue([testModelSchema])
-    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+    SchemaModelMock.find.mockResolvedValue([testModelSchema])
+    ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
     await findReviewRoles('test123')
 
-    expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('createReviewRole > successful', async () => {
@@ -351,26 +208,26 @@ describe('services > review', () => {
       kind: RoleKind.REVIEW,
     })
 
-    expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('addDefaultReviewRoles > successfully added default review roles', async () => {
-    reviewRoleModelMock.findOne.mockResolvedValue(undefined)
+    ReviewRoleModelMock.findOne.mockResolvedValue(undefined)
     await addDefaultReviewRoles()
-    expect(reviewRoleModelMock.save).toBeCalled()
+    expect(ReviewRoleModelMock.save).toBeCalled()
   })
 
   test('removeReviewRole > successful', async () => {
-    reviewRoleModelMock.findOne.mockResolvedValue({ ...testReviewRole, delete: vi.fn() })
-    schemaModelMock.find.mockResolvedValue([{ ...testModelSchema, save: vi.fn() }])
-    modelModelMock.find.mockResolvedValue([
+    ReviewRoleModelMock.findOne.mockResolvedValue({ ...testReviewRole, delete: vi.fn() })
+    SchemaModelMock.find.mockResolvedValue([{ ...testModelSchema, save: vi.fn() }])
+    ModelModelMock.find.mockResolvedValue([
       { id: 'test-1234', collaborators: [{ entity: 'user:user', roles: ['reviewer'] }], save: vi.fn() },
     ])
     await removeReviewRole({} as any, 'reviewer')
 
-    expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(schemaModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(SchemaModelMock.match.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('updateReviewRole > successful', async () => {
@@ -383,13 +240,13 @@ describe('services > review', () => {
       defaultEntities: ['user:user2'],
     })
 
-    expect(reviewRoleModelMock.save).toBeCalled()
+    expect(ReviewRoleModelMock.save).toBeCalled()
   })
 
   test('updateReviewRole > failure', async () => {
     //make sure find works
     const shortName = 'badShortName'
-    reviewRoleModelMock.findOne.mockImplementation(() => {
+    ReviewRoleModelMock.findOne.mockImplementation(() => {
       throw NotFound(`The requested review role was not found`, { shortName })
     })
     const res = updateReviewRole(user, shortName, {

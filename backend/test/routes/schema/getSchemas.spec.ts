@@ -9,7 +9,9 @@ vi.mock('../../../src/connectors/audit/index.js')
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),
-    searchSchemas: vi.fn(() => [testDeploymentSchema, testModelSchema]),
+    searchSchemas: vi.fn(function () {
+      return [testDeploymentSchema, testModelSchema]
+    }),
   }
 })
 vi.mock('../../../src/services/schema.js', () => mockSchemaService)

@@ -2,6 +2,7 @@ import qs from 'qs'
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+vi.unmock('../../../../src/models/AccessRequest.js')
 import AccessRequestModel from '../../../../src/models/AccessRequest.js'
 import { GetAccessRequestsSchema } from '../../../../src/routes/v2/model/accessRequest/getAccessRequests.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'

@@ -18,7 +18,11 @@ const authMocks = vi.hoisted(() => ({
 vi.mock('../../src/connectors/authorisation/index.js', () => authMocks)
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ _id: 'test' })),
+  getModelById: vi.fn(function () {
+    return {
+      _id: 'test',
+    }
+  }),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -28,7 +32,9 @@ const releaseMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(() => 'token'),
+  getAccessToken: vi.fn(function () {
+    return 'token'
+  }),
   softDeletePrefix: 'soft_deleted/',
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
@@ -36,7 +42,9 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
-  listImageTags: vi.fn(() => [] as string[]),
+  listImageTags: vi.fn(function () {
+    return [] as string[]
+  }),
   mountBlob: vi.fn(),
   putManifest: vi.fn(),
 }))

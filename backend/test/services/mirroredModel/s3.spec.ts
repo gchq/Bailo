@@ -17,7 +17,9 @@ const configMock = vi.hoisted(
           },
         },
       },
+
       s3: { buckets: { uploads: 'test' } },
+
       modelMirror: {
         export: {
           maxSize: 100,
@@ -26,11 +28,13 @@ const configMock = vi.hoisted(
           },
         },
       },
+
       registry: {
         connection: {
           internal: 'https://localhost:5000',
         },
       },
+
       connectors: {
         audit: {
           kind: 'silly',
@@ -54,9 +58,15 @@ vi.mock('../../../src/services/log.js', async () => ({
 }))
 
 const s3Mocks = vi.hoisted(() => ({
-  putObjectStream: vi.fn(() => Promise.resolve({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => Promise.resolve({ Body: new PassThrough() })),
-  objectExists: vi.fn(() => Promise.resolve(true)),
+  putObjectStream: vi.fn(function () {
+    return Promise.resolve({ fileSize: 100 })
+  }),
+  getObjectStream: vi.fn(function () {
+    return Promise.resolve({ Body: new PassThrough() })
+  }),
+  objectExists: vi.fn(function () {
+    return Promise.resolve(true)
+  }),
 }))
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 

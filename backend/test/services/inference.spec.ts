@@ -10,6 +10,9 @@ import {
   removeInferences,
   updateInference,
 } from '../../src/services/inference.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
+
+const InferenceModelMock = getTypedModelMock('InferenceModel')
 
 const configMock = vi.hoisted(() => ({
   inference: {
@@ -54,37 +57,13 @@ const inferenceServiceMocks = vi.hoisted(() => ({
 
 vi.mock('../../src/clients/inferencing.js', () => inferenceServiceMocks)
 
-const inferenceModelMocks = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.updateMany = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.filter = vi.fn(() => obj)
-
-  const model: any = vi.fn((params) => ({ ...obj, ...params }))
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Inference.js', () => ({ default: inferenceModelMocks }))
-
 describe('services > inference', () => {
   test('createInference > simple', async () => {
     const mockUser: any = { dn: 'test' }
     await createInference(mockUser, 'test', inference)
 
-    expect(inferenceModelMocks.save).toBeCalled()
-    expect(inferenceModelMocks).toBeCalled()
+    expect(InferenceModelMock.save).toBeCalled()
+    expect(InferenceModelMock).toBeCalled()
   })
 
   test('createInference > non-existent image', async () => {
@@ -108,7 +87,7 @@ describe('services > inference', () => {
     mongoError.keyValue = {
       mockKey: 'mockValue',
     }
-    inferenceModelMocks.save.mockRejectedValueOnce(mongoError)
+    InferenceModelMock.save.mockRejectedValueOnce(mongoError)
     await expect(() => createInference({} as any, 'test', inference)).rejects.toThrowError(
       /^A service with this image already exists./,
     )
@@ -123,11 +102,11 @@ describe('services > inference', () => {
         processorType: 'cpu',
       },
     })
-    expect(inferenceModelMocks.findOneAndUpdate).toBeCalled()
+    expect(InferenceModelMock.findOneAndUpdate).toBeCalled()
   })
 
   test('updateInference > inference not found', async () => {
-    vi.mocked(inferenceModelMocks.findOneAndUpdate).mockResolvedValueOnce()
+    vi.mocked(InferenceModelMock.findOneAndUpdate).mockResolvedValueOnce()
     await expect(() =>
       updateInference({} as any, 'test', 'non-existent', 'image', {
         description: 'New description',
@@ -157,7 +136,7 @@ describe('services > inference', () => {
 
   test('removeInference > success', async () => {
     await removeInference({} as any, 'model', 'image', 'tag')
-    expect(inferenceModelMocks.delete).toBeCalled()
+    expect(InferenceModelMock.delete).toBeCalled()
   })
 
   test('removeInferences > success', async () => {
@@ -168,13 +147,13 @@ describe('services > inference', () => {
     ])
 
     expect(result).toMatchSnapshot()
-    expect(inferenceModelMocks.delete).toBeCalledTimes(3)
+    expect(InferenceModelMock.delete).toBeCalledTimes(3)
     expect(inferenceServiceMocks.deleteInferenceService).toBeCalledTimes(3)
     expect(modelMocks.getModelById).toBeCalledTimes(2)
   })
 
   test('removeInferences > inferencing service does not exist', async () => {
-    vi.mocked(inferenceModelMocks.findOne).mockResolvedValueOnce()
+    vi.mocked(InferenceModelMock.findOne).mockResolvedValueOnce()
 
     await expect(removeInferences({} as any, [{ modelId: 'model', image: 'image', tag: 'tag' }])).rejects.toThrowError(
       'The requested inferencing service was not found.',
@@ -190,11 +169,11 @@ describe('services > inference', () => {
 
   test('getInferenceByImage > good', async () => {
     await getInferenceByImage({} as any, 'test', 'nginx', 'latest')
-    expect(inferenceModelMocks.findOne).toBeCalled()
+    expect(InferenceModelMock.findOne).toBeCalled()
   })
 
   test('getInferenceByImage > no permission', async () => {
-    inferenceModelMocks.findOne.mockResolvedValue({ image: 'nginx', tag: 'latest' })
+    InferenceModelMock.findOne.mockResolvedValue({ image: 'nginx', tag: 'latest' })
 
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'You do not have permission to view this inference.',
@@ -206,14 +185,14 @@ describe('services > inference', () => {
     )
   })
   test('getInferenceByImage > no inference', async () => {
-    inferenceModelMocks.findOne.mockResolvedValueOnce(undefined)
+    InferenceModelMock.findOne.mockResolvedValueOnce(undefined)
     await expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
       /^The requested inferencing service was not found./,
     )
   })
 
   test('getInferenceByModel > good', async () => {
-    inferenceModelMocks.find.mockResolvedValue([
+    InferenceModelMock.find.mockResolvedValue([
       { image: 'nginx', tag: 'latest' },
       { image: 'yolov4', tag: 'latest' },
     ])

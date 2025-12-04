@@ -21,15 +21,23 @@ vi.mock('../../src/utils/config.js', () => ({
 }))
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
+  default: vi.fn(function () {
+    return {
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(),
+    }
+  }),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
 const formDataMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({
-    append: vi.fn(),
-    getHeaders: vi.fn(() => {}),
-  })),
+  default: vi.fn(function () {
+    return {
+      append: vi.fn(),
+      getHeaders: vi.fn(function () {}),
+    }
+  }),
 }))
 vi.mock('form-data', async () => formDataMock)
 
@@ -44,7 +52,9 @@ describe('clients > modelScan', () => {
     fetchMock.default.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
-      json: vi.fn(() => expectedResponse),
+      json: vi.fn(function () {
+        return expectedResponse
+      }),
     })
     const response = await getModelScanInfo()
 
@@ -56,7 +66,9 @@ describe('clients > modelScan', () => {
   test('getModelScanInfo > bad response', async () => {
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
-      text: vi.fn(() => 'Unrecognised response'),
+      text: vi.fn(function () {
+        return 'Unrecognised response'
+      }),
       json: vi.fn(),
     })
 
@@ -100,7 +112,9 @@ describe('clients > modelScan', () => {
     fetchMock.default.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
-      json: vi.fn(() => expectedResponse),
+      json: vi.fn(function () {
+        return expectedResponse
+      }),
     })
     // force lastModified to be 0
     const date = new Date(1970, 0, 1, 0)
@@ -118,7 +132,9 @@ describe('clients > modelScan', () => {
   test('scanStream > bad response', async () => {
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
-      text: vi.fn(() => 'Unrecognised response'),
+      text: vi.fn(function () {
+        return 'Unrecognised response'
+      }),
       json: vi.fn(),
     })
 

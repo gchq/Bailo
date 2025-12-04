@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { UserInterface } from '../../src/models/User.js'
 import {
   createToken,
   dropModelIdFromTokens,
@@ -9,42 +8,14 @@ import {
   getTokensForModel,
   removeToken,
 } from '../../src/services/token.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
-const mockToken = vi.hoisted(() => {
-  const mockedMethods = {
-    save: vi.fn(),
-    delete: vi.fn(),
-    deleteOne: vi.fn(),
-    find: vi.fn(() => ({ sort: vi.fn(() => ['schema-1', 'schema-2']) })),
-    findOne: vi.fn(),
-  }
-
-  const Token: any = vi.fn(() => ({
-    save: mockedMethods.save,
-  }))
-  Token.find = mockedMethods.find
-  Token.findOne = mockedMethods.findOne
-  Token.delete = mockedMethods.delete
-  Token.deleteOne = mockedMethods.deleteOne
-
-  return {
-    ...mockedMethods,
-    Token,
-  }
-})
-
-vi.mock('../../src/models/Token.js', async () => {
-  const actual = await vi.importActual('../../src/models/Token.js')
-  return {
-    ...actual,
-    default: mockToken.Token,
-  }
-})
+const TokenModelMock = getTypedModelMock('TokenModel')
 
 describe('services > token', () => {
-  const testUser = { dn: 'user' } as UserInterface
+  const testUser = { dn: 'user' } as any
 
   test('test that a token cannot create another token', async () => {
     const func = () => createToken({ ...testUser, token: { user: testUser.dn } as any }, {} as any)
@@ -54,7 +25,7 @@ describe('services > token', () => {
   test('findUserTokens > success', async () => {
     await findUserTokens(testUser)
 
-    expect(mockToken.find).toHaveBeenCalledWith({ user: testUser.dn })
+    expect(TokenModelMock.find).toHaveBeenCalledWith({ user: testUser.dn })
   })
 
   test('getTokensForModel > success', async () => {
@@ -62,7 +33,7 @@ describe('services > token', () => {
 
     await getTokensForModel(testUser, modelId)
 
-    expect(mockToken.find).toHaveBeenCalledWith({ user: testUser.dn, modelIds: modelId })
+    expect(TokenModelMock.find).toHaveBeenCalledWith({ user: testUser.dn, modelIds: modelId })
   })
 
   test('dropModelIdFromTokens > success', async () => {
@@ -89,7 +60,7 @@ describe('services > token', () => {
 
   test('removeToken > success', async () => {
     const mockDelete = vi.fn()
-    mockToken.findOne.mockResolvedValueOnce({ user: testUser.dn, delete: mockDelete })
+    TokenModelMock.findOne.mockResolvedValueOnce({ user: testUser.dn, delete: mockDelete })
 
     const result = await removeToken(testUser, 'accessKey')
 
@@ -98,7 +69,7 @@ describe('services > token', () => {
   })
 
   test('removeToken > bad auth', async () => {
-    mockToken.findOne.mockResolvedValueOnce({})
+    TokenModelMock.findOne.mockResolvedValueOnce({})
 
     await expect(() => removeToken(testUser, 'accessKey')).rejects.toThrowError(
       /^Only the token owner can remove the token./,
@@ -106,12 +77,12 @@ describe('services > token', () => {
   })
 
   test('findTokenByAccessKey > success', async () => {
-    mockToken.findOne.mockResolvedValueOnce({})
+    TokenModelMock.findOne.mockResolvedValueOnce({})
 
     const result = await findTokenByAccessKey('accessKey')
 
     expect(result).toEqual({})
-    expect(mockToken.findOne).toBeCalledWith({ accessKey: 'accessKey' })
+    expect(TokenModelMock.findOne).toBeCalledWith({ accessKey: 'accessKey' })
   })
 
   test('findTokenByAccessKey > success plus includeSecretKey', async () => {
@@ -119,7 +90,7 @@ describe('services > token', () => {
     const mockSelect = vi.fn().mockReturnValue({
       then: (resolve: (val: any) => any) => resolve(resolvedToken),
     })
-    mockToken.findOne.mockReturnValueOnce({
+    TokenModelMock.findOne.mockReturnValueOnce({
       select: mockSelect,
     })
 

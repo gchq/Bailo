@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+vi.unmock('../../../../src/models/ModelCardRevision.js')
 import ModelCardRevisionModel from '../../../../src/models/ModelCardRevision.js'
 import { putModelCardSchema } from '../../../../src/routes/v2/model/modelcard/putModelCard.js'
 import { createFixture, testPut } from '../../../testUtils/routes.js'

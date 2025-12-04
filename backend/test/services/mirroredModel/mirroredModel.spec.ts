@@ -44,51 +44,93 @@ vi.mock('../../../src/utils/config.js', () => ({ default: configMock }))
 const logMock = vi.hoisted(() => ({ info: vi.fn(), debug: vi.fn(), error: vi.fn() }))
 vi.mock('../../../src/services/log.js', () => ({ default: logMock }))
 
-const shortIdMock = vi.hoisted(() => vi.fn(() => 'shortId123'))
+const shortIdMock = vi.hoisted(() =>
+  vi.fn(function () {
+    return 'shortId123'
+  }),
+)
 vi.mock('../../../src/utils/id.js', () => ({ shortId: shortIdMock }))
 
-const getHttpsAgentMock = vi.hoisted(() => vi.fn(() => ({})))
+const getHttpsAgentMock = vi.hoisted(() =>
+  vi.fn(function () {
+    return {}
+  }),
+)
 vi.mock('../../../src/services/http.js', () => ({ getHttpsAgent: getHttpsAgentMock }))
 
 const getModelByIdMock = vi.hoisted(() =>
-  vi.fn(() => ({ id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } })),
+  vi.fn(function () {
+    return {
+      id: 'modelId',
+      settings: { mirror: { destinationModelId: 'dest123' } },
+    }
+  }),
 )
 vi.mock('../../../src/services/model.js', () => ({ getModelById: getModelByIdMock }))
 
-const fetchMock = vi.hoisted(() => vi.fn(() => ({ ok: true, body: Readable.from(['data']), text: vi.fn() }) as any))
+const fetchMock = vi.hoisted(() =>
+  vi.fn(function () {
+    return { ok: true, body: Readable.from(['data']), text: vi.fn() } as any
+  }),
+)
 vi.mock('node-fetch', () => ({ default: fetchMock }))
 
 const tarballMocks = vi.hoisted(() => ({
   addEntryToTarGzUpload: vi.fn(),
-  extractTarGzStream: vi.fn(() => ({ metadata: { mirroredModelId: 'dest123' } })),
+  extractTarGzStream: vi.fn(function () {
+    return {
+      metadata: { mirroredModelId: 'dest123' },
+    }
+  }),
 }))
 vi.mock('../../../src/services/mirroredModel/tarball.js', () => tarballMocks)
 
 const registryMocks = vi.hoisted(() => ({
-  splitDistributionPackageName: vi.fn(() => ({ path: 'img', tag: 'tag' })),
+  splitDistributionPackageName: vi.fn(function () {
+    return {
+      path: 'img',
+      tag: 'tag',
+    }
+  }),
   getImageManifest: vi.fn(),
   getImageBlob: vi.fn(),
 }))
 vi.mock('../../../src/services/registry.js', () => registryMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getReleasesForExport: vi.fn(() => Promise.resolve([{ id: 'rel1', semver: '1.0.0', images: [] }])),
+  getReleasesForExport: vi.fn(function () {
+    return Promise.resolve([{ id: 'rel1', semver: '1.0.0', images: [] }])
+  }),
 }))
 vi.mock('../../../src/services/release.js', () => releaseMocks)
 
 const DocumentsExporterMock = vi.hoisted(() => {
-  return vi.fn(() => {
+  return vi.fn(function () {
     const instance = {
-      init: vi.fn(() => Promise.resolve(instance)),
-      getModel: vi.fn(() => ({
-        id: 'modelId',
-        settings: { mirror: { destinationModelId: 'dest123' } },
-      })),
-      checkAuths: vi.fn(() => Promise.resolve()),
-      getReleases: vi.fn(() => [{ id: 'rel1', semver: '1.0.0', images: [] }]),
-      addData: vi.fn(() => Promise.resolve()),
-      finalise: vi.fn(() => Promise.resolve()),
-      getFiles: vi.fn(() => []),
+      init: vi.fn(function () {
+        return Promise.resolve(instance)
+      }),
+      getModel: vi.fn(function () {
+        return {
+          id: 'modelId',
+          settings: { mirror: { destinationModelId: 'dest123' } },
+        }
+      }),
+      checkAuths: vi.fn(function () {
+        return Promise.resolve()
+      }),
+      getReleases: vi.fn(function () {
+        return [{ id: 'rel1', semver: '1.0.0', images: [] }]
+      }),
+      addData: vi.fn(function () {
+        return Promise.resolve()
+      }),
+      finalise: vi.fn(function () {
+        return Promise.resolve()
+      }),
+      getFiles: vi.fn(function () {
+        return []
+      }),
     }
     return instance
   })
@@ -98,12 +140,18 @@ vi.mock('../../../src/services/mirroredModel/exporters/documents.js', () => ({
 }))
 
 const FileExporterMock = vi.hoisted(() => {
-  return vi.fn(() => {
+  return vi.fn(function () {
     const instance = {
-      init: vi.fn(() => Promise.resolve(instance)),
-      addData: vi.fn(() => Promise.resolve()),
-      finalise: vi.fn(() => Promise.resolve()),
-      getLogData: vi.fn(() => {}),
+      init: vi.fn(function () {
+        return Promise.resolve(instance)
+      }),
+      addData: vi.fn(function () {
+        return Promise.resolve()
+      }),
+      finalise: vi.fn(function () {
+        return Promise.resolve()
+      }),
+      getLogData: vi.fn(function () {}),
     }
     return instance
   })
@@ -111,11 +159,17 @@ const FileExporterMock = vi.hoisted(() => {
 vi.mock('../../../src/services/mirroredModel/exporters/file.js', () => ({ FileExporter: FileExporterMock }))
 
 const ImageExporterMock = vi.hoisted(() => {
-  return vi.fn(() => {
+  return vi.fn(function () {
     const instance = {
-      init: vi.fn(() => Promise.resolve(instance)),
-      addData: vi.fn(() => Promise.resolve()),
-      finalise: vi.fn(() => Promise.resolve()),
+      init: vi.fn(function () {
+        return Promise.resolve(instance)
+      }),
+      addData: vi.fn(function () {
+        return Promise.resolve()
+      }),
+      finalise: vi.fn(function () {
+        return Promise.resolve()
+      }),
     }
     return instance
   })
@@ -123,37 +177,57 @@ const ImageExporterMock = vi.hoisted(() => {
 vi.mock('../../../src/services/mirroredModel/exporters/image.js', () => ({ ImageExporter: ImageExporterMock }))
 
 const DocumentsImporterMock = vi.hoisted(() => ({
-  DocumentsImporter: vi.fn(() => ({ mocked: 'documents' })),
+  DocumentsImporter: vi.fn(function () {
+    return {
+      mocked: 'documents',
+    }
+  }),
   DocumentsMirrorMetadata: vi.fn(),
   MongoDocumentMirrorInformation: vi.fn(),
 }))
 vi.mock('../../../src/services/mirroredModel/importers/documents.js', () => DocumentsImporterMock)
 
 const FileImporterMock = vi.hoisted(() => ({
-  FileImporter: vi.fn(() => ({ mocked: 'file' })),
+  FileImporter: vi.fn(function () {
+    return {
+      mocked: 'file',
+    }
+  }),
   FileMirrorMetadata: vi.fn(),
   FileMirrorInformation: vi.fn(),
 }))
 vi.mock('../../../src/services/mirroredModel/importers/file.js', () => FileImporterMock)
 
 const ImageImporterMock = vi.hoisted(() => ({
-  ImageImporter: vi.fn(() => ({ mocked: 'file' })),
+  ImageImporter: vi.fn(function () {
+    return {
+      mocked: 'file',
+    }
+  }),
   ImageMirrorMetadata: vi.fn(),
   ImageMirrorInformation: vi.fn(),
 }))
 vi.mock('../../../src/services/mirroredModel/importers/image.js', () => ImageImporterMock)
 
 vi.mock('./importers/file.js', () => ({
-  FileImporter: vi.fn().mockImplementation(() => ({ mocked: 'file' })),
+  FileImporter: vi.fn().mockImplementation(function () {
+    return {
+      mocked: 'file',
+    }
+  }),
 }))
 
 vi.mock('./importers/image.js', () => ({
-  ImageImporter: vi.fn().mockImplementation(() => ({ mocked: 'image' })),
+  ImageImporter: vi.fn().mockImplementation(function () {
+    return {
+      mocked: 'image',
+    }
+  }),
 }))
 
 let pendingJobs: Promise<any>[] = []
 const exportQueueMock = vi.hoisted(() => {
-  const exportQueueAddMock = vi.fn((job: () => Promise<any>) => {
+  const exportQueueAddMock = vi.fn(function (job: () => Promise<any>) {
     const p = job()
     pendingJobs.push(p)
     return p
@@ -163,7 +237,11 @@ const exportQueueMock = vi.hoisted(() => {
     exportQueueAddMock,
   }
 })
-vi.mock('p-queue', () => ({ default: vi.fn(() => exportQueueMock) }))
+vi.mock('p-queue', () => ({
+  default: vi.fn(function () {
+    return exportQueueMock
+  }),
+}))
 
 describe('services > mirroredModel', () => {
   beforeEach(() => {
