@@ -32,9 +32,9 @@
     "next": "16.0.7",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "rehype-highlight": "^7.0.2",
+    "rehype-highlight": "^7.0.1",
     "remark-frontmatter": "^5.0.0",
-    "remark-gfm": "^3.0.1",
+    "remark-gfm": "4.0.0",
     "shelljs": "^0.10.0",
     "styled-components": "^6.1.19",
     "swiper": "^8.4.5"
