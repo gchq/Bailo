@@ -19,9 +19,12 @@ exports[`services > model > removeModel > success empty 1`] = `
     [],
   ],
   {
-    "aggregate": [MockFunction spy],
-    "append": [MockFunction spy],
-    "delete": [MockFunction spy] {
+    "_id": {
+      "toString": [Function],
+    },
+    "aggregate": [MockFunction],
+    "append": [MockFunction],
+    "delete": [MockFunction] {
       "calls": [
         [
           undefined,
@@ -34,43 +37,23 @@ exports[`services > model > removeModel > success empty 1`] = `
         },
       ],
     },
-    "find": [MockFunction spy],
-    "findByIdAndUpdate": [MockFunction spy],
-    "findOne": [MockFunction spy] {
-      "calls": [
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
-    "findOneAndUpdate": [MockFunction spy],
-    "lookup": [MockFunction spy],
-    "match": [MockFunction spy],
-    "save": [MockFunction spy],
-    "settings": {
-      "mirror": {
-        "sourceModelId": "",
-      },
-    },
-    "sort": [MockFunction spy],
-    "updateOne": [MockFunction spy],
+    "deleteMany": [MockFunction],
+    "deleteOne": [MockFunction],
+    "find": [MockFunction],
+    "findById": [MockFunction],
+    "findByIdAndDelete": [MockFunction],
+    "findOne": [MockFunction],
+    "findOneAndDelete": [MockFunction],
+    "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
+    "lookup": [MockFunction],
+    "match": [MockFunction],
+    "save": [MockFunction],
+    "sort": [MockFunction],
+    "toObject": [MockFunction],
+    "update": [MockFunction],
+    "updateMany": [MockFunction],
+    "updateOne": [MockFunction],
   },
 ]
 `;
@@ -84,102 +67,9 @@ exports[`services > model > removeModel > success entries 1`] = `
       undefined,
     ],
     [
-      {
-        "findByIdAndDelete": [MockFunction spy] {
-          "calls": [
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-          ],
-          "results": [
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-          ],
-        },
-      },
-      {
-        "findByIdAndDelete": [MockFunction spy] {
-          "calls": [
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-          ],
-          "results": [
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-          ],
-        },
-      },
-      {
-        "findByIdAndDelete": [MockFunction spy] {
-          "calls": [
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-            [
-              "6776901b879d08e34b599d7e",
-              undefined,
-            ],
-          ],
-          "results": [
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-            {
-              "type": "return",
-              "value": [Circular],
-            },
-          ],
-        },
-      },
+      undefined,
+      undefined,
+      undefined,
     ],
     undefined,
     [
@@ -210,9 +100,12 @@ exports[`services > model > removeModel > success entries 1`] = `
     ],
   ],
   {
-    "aggregate": [MockFunction spy],
-    "append": [MockFunction spy],
-    "delete": [MockFunction spy] {
+    "_id": {
+      "toString": [Function],
+    },
+    "aggregate": [MockFunction],
+    "append": [MockFunction],
+    "delete": [MockFunction] {
       "calls": [
         [
           undefined,
@@ -225,43 +118,23 @@ exports[`services > model > removeModel > success entries 1`] = `
         },
       ],
     },
-    "find": [MockFunction spy],
-    "findByIdAndUpdate": [MockFunction spy],
-    "findOne": [MockFunction spy] {
-      "calls": [
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-        [
-          {
-            "id": "modelId",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
-    "findOneAndUpdate": [MockFunction spy],
-    "lookup": [MockFunction spy],
-    "match": [MockFunction spy],
-    "save": [MockFunction spy],
-    "settings": {
-      "mirror": {
-        "sourceModelId": "",
-      },
-    },
-    "sort": [MockFunction spy],
-    "updateOne": [MockFunction spy],
+    "deleteMany": [MockFunction],
+    "deleteOne": [MockFunction],
+    "find": [MockFunction],
+    "findById": [MockFunction],
+    "findByIdAndDelete": [MockFunction],
+    "findOne": [MockFunction],
+    "findOneAndDelete": [MockFunction],
+    "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
+    "lookup": [MockFunction],
+    "match": [MockFunction],
+    "save": [MockFunction],
+    "sort": [MockFunction],
+    "toObject": [MockFunction],
+    "update": [MockFunction],
+    "updateMany": [MockFunction],
+    "updateOne": [MockFunction],
   },
 ]
 `;
