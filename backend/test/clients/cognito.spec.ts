@@ -29,13 +29,13 @@ const cognitoMock = vi.hoisted(() => {
 
   return {
     send,
-    ListUsersCommand: vi.fn(function ListUsersCommand() {
+    ListUsersCommand: vi.fn(function () {
       return {}
     }),
-    CognitoIdentityProviderClient: vi.fn(function CognitoIdentityProviderClient() {
+    CognitoIdentityProviderClient: vi.fn(function () {
       return { send }
     }),
-    ListUsersInGroupCommand: vi.fn(function ListUsersInGroupCommand() {
+    ListUsersInGroupCommand: vi.fn(function () {
       return {}
     }),
   }

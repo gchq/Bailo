@@ -104,7 +104,7 @@ vi.mock('../../src/utils/database.js', async () => ({
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
-  hasRole: vi.fn(function hasRole() {
+  hasRole: vi.fn(function () {
     return {}
   }),
 }))

@@ -7,10 +7,10 @@ const kmsMocks = vi.hoisted(() => {
 
   return {
     send,
-    DescribeKeyCommand: vi.fn(function DescribeKeyCommand() {
+    DescribeKeyCommand: vi.fn(function () {
       return {}
     }),
-    SignCommand: vi.fn(function SignCommand() {
+    SignCommand: vi.fn(function () {
       return {}
     }),
     KMSClient: vi.fn(function () {
