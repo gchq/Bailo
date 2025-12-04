@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { UserInterface } from '../../src/models/User.js'
 import {
   createSchemaMigrationPlan,
   runModelSchemaMigration,
@@ -16,6 +17,7 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const SchemaMigrationModelMock = getTypedModelMock('SchemaMigrationModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const SchemaModelMock = getTypedModelMock('SchemaModel')
+const ModelCardRevisionMock = getTypedModelMock('ModelCardRevisionModel')
 
 const mockMongoUtils = vi.hoisted(() => {
   return {
@@ -130,9 +132,11 @@ describe('services > schemaMigration', () => {
     ModelModelMock.findOne.mockResolvedValueOnce(testModelForMigration)
     SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
     SchemaModelMock.findOne.mockResolvedValueOnce(testModelSchema)
-    await runModelSchemaMigration({} as any, 'my-model-123', testSchemaMigration.id)
-    expect(testModelForMigration.save).toBeCalledTimes(2)
-    expect(testModelForMigration.set).toBeCalledTimes(3)
+    ModelCardRevisionMock.save.mockResolvedValueOnce(testModelForMigration)
+    ModelModelMock.save.mockResolvedValueOnce(testModelForMigration)
+    await runModelSchemaMigration({} as UserInterface, 'my-model-123', testSchemaMigration.id)
+    expect(testModelForMigration.save).toBeCalledTimes(1)
+    expect(testModelForMigration.set).toBeCalledTimes(4)
   })
 
   test('update migration > suceess', async () => {
