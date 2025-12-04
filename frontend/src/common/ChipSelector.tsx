@@ -9,12 +9,14 @@ type PartialChipSelectorProps =
   | {
       multiple: true
       options: string[]
+      unreachableOptions?: string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
       options: string[]
+      unreachableOptions?: string[]
       selectedChips: string
       onChange: (value: string) => void
     }
@@ -34,6 +36,7 @@ type ChipSelectorProps = {
 export default function ChipSelector({
   label,
   options,
+  unreachableOptions,
   onChange,
   selectedChips,
   multiple,
@@ -71,11 +74,14 @@ export default function ChipSelector({
       size={size}
       activeChip={selectedChips.includes(option)}
       handleChange={handleChange}
-      chipTooltipTitle={chipTooltipTitle}
+      chipTooltipTitle={
+        unreachableOptions && !unreachableOptions.includes(option) ? chipTooltipTitle : 'This is unreachable.'
+      }
       ariaLabel={ariaLabel}
       variant={variant}
       icon={icon}
       style={style}
+      disabled={unreachableOptions && unreachableOptions.includes(option)}
     />
   ))
 
@@ -127,6 +133,7 @@ type ChipItemProps = {
   variant?: 'filled' | 'outlined'
   icon?: ReactElement
   style?: CSSProperties
+  disabled?: boolean
 }
 
 function ChipItem({
@@ -139,21 +146,25 @@ function ChipItem({
   variant = 'filled',
   icon = <></>,
   style = {},
+  disabled = false,
 }: ChipItemProps) {
   return (
     <Tooltip title={chipTooltipTitle}>
-      <Chip
-        color={activeChip ? 'secondary' : 'default'}
-        size={size}
-        key={chip}
-        sx={{ mx: 0.5, mb: 1, ...style }}
-        label={chip}
-        data-test={`chipOption-${chip}`}
-        onClick={() => handleChange(chip)}
-        aria-label={ariaLabel}
-        variant={variant}
-        icon={icon}
-      />
+      <span>
+        <Chip
+          color={activeChip ? 'secondary' : 'default'}
+          size={size}
+          key={chip}
+          sx={{ mx: 0.5, mb: 1, ...style }}
+          label={chip}
+          data-test={`chipOption-${chip}`}
+          onClick={() => handleChange(chip)}
+          aria-label={ariaLabel}
+          variant={variant}
+          icon={icon}
+          disabled={disabled}
+        />
+      </span>
     </Tooltip>
   )
 }
