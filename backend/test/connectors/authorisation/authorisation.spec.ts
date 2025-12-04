@@ -36,6 +36,16 @@ const configMock = vi.hoisted(() => ({
   },
   smtp: {
     transporter: 'smtp',
+    connection: {
+      host: 'localhost',
+      port: 1025,
+      secure: false,
+      auth: undefined,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    },
+    from: '"Bailo 📝" <bailo@example.org>',
   },
   connectors: {
     authorisation: {
