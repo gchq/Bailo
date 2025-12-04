@@ -196,11 +196,11 @@ export default function Marketplace() {
     [roleOptions],
   )
 
-  const reachablePeerList: { key: string; value: boolean }[] = useMemo(() => {
+  const unreachablePeerList: string[] = useMemo(() => {
     if (!peers) return []
     return Array.from(peers.entries())
-      .filter(([, value]) => isEnabled(value))
-      .map(([key, value]) => ({ key, value: isReachable(value) }))
+      .filter(([, value]) => isEnabled(value) && !isReachable(value))
+      .map(([key]) => key)
   }, [peers])
 
   const organisationList = useMemo(() => {
@@ -395,12 +395,13 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
-                {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
+                {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
                   <Box>
                     <ChipSelector
                       label='External Repositories'
                       chipTooltipTitle={'Include external repostories'}
-                      options={reachablePeerList}
+                      options={Array.from(peers.keys())}
+                      unreachableOptions={unreachablePeerList}
                       expandThreshold={10}
                       multiple
                       selectedChips={selectedPeers}

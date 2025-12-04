@@ -5,18 +5,18 @@ import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import { CSSProperties, ReactElement, useState } from 'react'
 
-type disableableOptionsType = { key: string; value: boolean }[]
-
 type PartialChipSelectorProps =
   | {
       multiple: true
-      options: disableableOptionsType | string[]
+      options: string[]
+      unreachableOptions?: string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
-      options: disableableOptionsType | string[]
+      options: string[]
+      unreachableOptions?: string[]
       selectedChips: string
       onChange: (value: string) => void
     }
@@ -36,6 +36,7 @@ type ChipSelectorProps = {
 export default function ChipSelector({
   label,
   options,
+  unreachableOptions,
   onChange,
   selectedChips,
   multiple,
@@ -66,37 +67,23 @@ export default function ChipSelector({
     setExpanded(!expanded)
   }
 
-  const allOptions =
-    typeof options[0] === 'string'
-      ? options.map((option) => (
-          <ChipItem
-            key={option.toString()}
-            chip={option}
-            size={size}
-            activeChip={selectedChips.includes(option)}
-            handleChange={handleChange}
-            chipTooltipTitle={chipTooltipTitle}
-            ariaLabel={ariaLabel}
-            variant={variant}
-            icon={icon}
-            style={style}
-          />
-        ))
-      : (options as disableableOptionsType).map(({ key, value }) => (
-          <ChipItem
-            key={key.toString()}
-            chip={key}
-            size={size}
-            activeChip={selectedChips.includes(key)}
-            handleChange={handleChange}
-            chipTooltipTitle={value ? chipTooltipTitle : 'This is unreachable.'}
-            ariaLabel={ariaLabel}
-            variant={variant}
-            icon={icon}
-            style={style}
-            disabled={!value}
-          />
-        ))
+  const allOptions = options.map((option) => (
+    <ChipItem
+      key={option.toString()}
+      chip={option}
+      size={size}
+      activeChip={selectedChips.includes(option)}
+      handleChange={handleChange}
+      chipTooltipTitle={
+        unreachableOptions && !unreachableOptions.includes(option) ? chipTooltipTitle : 'This is unreachable.'
+      }
+      ariaLabel={ariaLabel}
+      variant={variant}
+      icon={icon}
+      style={style}
+      disabled={unreachableOptions && unreachableOptions.includes(option)}
+    />
+  ))
 
   if (accordion) {
     return (
