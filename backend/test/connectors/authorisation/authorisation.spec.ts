@@ -34,6 +34,9 @@ const configMock = vi.hoisted(() => ({
   log: {
     level: 'info',
   },
+  smtp: {
+    transporter: 'smtp',
+  },
   connectors: {
     authorisation: {
       kind: 'basic',
