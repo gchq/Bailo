@@ -30,10 +30,15 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
 
 const fileServiceMocks = vi.hoisted(() => ({
-  createFilePath: vi.fn(() => 'updated/file/path'),
+  // createFilePath: vi.fn(() => 'updated/file/path'),
   markFileAsCompleteAfterImport: vi.fn(),
 }))
 vi.mock('../../../../src/services/file.js', () => fileServiceMocks)
+
+const fileSplitServiceMocks = vi.hoisted(() => ({
+  createFilePath: vi.fn(() => 'updated/file/path'),
+}))
+vi.mock('../../../../src/services/fileSplit.js', () => fileSplitServiceMocks)
 
 const registryMocks = vi.hoisted(() => ({
   joinDistributionPackageName: vi.fn(() => 'repo/path:tag'),
