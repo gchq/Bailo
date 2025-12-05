@@ -93,6 +93,9 @@ aws:
   pvcMinioStorage: 20Gi
   pvcMongoName: "bailo-mongodb"
   pvcMongoStorage: 10Gi
+  ses:
+    endpoint: ""
+    region: ""
 
 # Pod resource
 resources:
@@ -282,6 +285,7 @@ config:
     user: "mailuser"
     pass: "mailpass"
     from: "bailo@example.com"
+    transporter: "smtp"
 
   app:
     protocol: "https"

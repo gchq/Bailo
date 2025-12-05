@@ -13,6 +13,8 @@ import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
 
+export type TransportOption = 'smtp' | 'aws'
+
 export interface Config {
   api: {
     host: string
@@ -62,6 +64,7 @@ export interface Config {
 
   smtp: {
     enabled: boolean
+    transporter: TransportOption
 
     connection: {
       host: string
@@ -77,6 +80,11 @@ export interface Config {
     }
 
     from: string
+  }
+
+  ses: {
+    endpoint: string
+    region: string
   }
 
   log: {

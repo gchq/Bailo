@@ -54,6 +54,7 @@ module.exports = {
 
   smtp: {
     enabled: true,
+    transporter: 'smtp',
 
     connection: {
       host: 'mailcrab',
@@ -66,6 +67,11 @@ module.exports = {
     },
 
     from: '"Bailo 📝" <bailo@example.org>',
+  },
+
+  ses: {
+    endpoint: 'ignored',
+    region: 'ignored',
   },
 
   avScanning: {
