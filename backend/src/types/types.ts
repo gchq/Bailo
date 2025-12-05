@@ -201,6 +201,7 @@ export interface EntrySearchOptions {
   allowTemplating: boolean
   schemaId: string
   adminAccess: boolean
+  titleOnly: boolean
 }
 
 export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
@@ -217,6 +218,7 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   schemaId: z.string().optional(),
   adminAccess: strictCoerceBoolean(z.boolean().optional()),
   peers: coerceArray(z.array(z.string()).optional()),
+  titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
 
 export const MirrorKind = {

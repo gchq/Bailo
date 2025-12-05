@@ -347,13 +347,6 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.search) {
-    if (opts.search.length > 0 && opts.search.length < 3) {
-      throw BadReq(`Search query too short - must be at least 3 characters`)
-    }
-    query.$text = { $search: opts.search }
-  }
-
   if (opts.schemaId) {
     query['card.schemaId'] = { $all: opts.schemaId }
   }
@@ -379,19 +372,36 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  let cursor = ModelModel
-    // Find only matching documents
-    .find(query)
-
-  if (!opts.search) {
-    // Sort by last updated
-    cursor = cursor.sort({ updatedAt: -1 })
-  } else {
-    // Sort by text search
-    cursor = cursor.sort({ score: { $meta: 'textScore' } })
+  const projection = {
+    settings: false,
+    card: false,
+    deleted: false,
+    _id: false,
+    __v: false,
+    deletedBy: false,
+    deletedAt: false,
   }
 
-  const results = await cursor
+  // Always do a partial match on the model name
+  let results = await ModelModel.find(
+    opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query,
+    projection,
+  ).sort({
+    updatedAt: -1,
+  })
+
+  //Include all full text matches
+  if (opts.search && !opts.titleOnly) {
+    let fullTextOnlyResults = await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+      score: { $meta: 'textScore' },
+    })
+    // Remove duplicate items
+    const mask = new Set(results.map((model) => model.id))
+
+    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model.id))
+    results = results.concat(fullTextOnlyResults)
+  }
+
   //Auth already checked, so just need to check if they require admin access
   if (opts.adminAccess) {
     return results
