@@ -1,9 +1,8 @@
-// eslint-disable-next-line simple-import-sort/imports
 import { Validator } from 'jsonschema'
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
-import authentication from '../connectors/authentication/index.js'
 import { Roles } from '../connectors/authentication/Base.js'
+import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
