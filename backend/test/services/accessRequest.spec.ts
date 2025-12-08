@@ -12,35 +12,18 @@ import {
   removeAccessRequests,
 } from '../../src/services/accessRequest.js'
 import { AccessRequestUserPermissions } from '../../src/types/types.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+
+const AccessRequestModelMock = getTypedModelMock('AccessRequestModel')
+const ResponseModelMock = getTypedModelMock('ResponseModel')
+const ReviewModelMock = getTypedModelMock('ReviewModel')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
-
-const modelModelMocks = vi.hoisted(() => {
-  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Model.js', () => ({ default: modelModelMocks }))
 
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
@@ -52,56 +35,6 @@ const mockAuthentication = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user:testUser']),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
-
-const accessRequestModelMocks = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/AccessRequest.js', () => ({ default: accessRequestModelMocks }))
-
-const responseModelMocks = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.find = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateMany = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Response.js', () => ({ default: responseModelMocks }))
-
-const reviewModelMocks = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.find = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.updateMany = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
 
 const mockReviewService = vi.hoisted(() => ({
   createAccessRequestReviews: vi.fn(),
@@ -134,8 +67,8 @@ describe('services > accessRequest', () => {
 
     await createAccessRequest({} as any, 'example-model', accessRequest)
 
-    expect(accessRequestModelMocks.save).toBeCalled()
-    expect(accessRequestModelMocks).toBeCalled()
+    expect(AccessRequestModelMock.save).toBeCalled()
+    expect(AccessRequestModelMock).toBeCalled()
     expect(mockReviewService.createAccessRequestReviews).toBeCalled()
     expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
@@ -157,7 +90,7 @@ describe('services > accessRequest', () => {
 
   test('getAccessRequestsByModel > good', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
-    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
+    AccessRequestModelMock.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
     vi.mocked(authorisation.accessRequests).mockResolvedValue([
       { info: 'You do not have permission', success: false, id: '' },
       { success: true, id: '' },
@@ -169,7 +102,7 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > no filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+    AccessRequestModelMock.aggregate.mockResolvedValueOnce([
       {
         accessRequests: [
           {
@@ -189,7 +122,7 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > all filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+    AccessRequestModelMock.aggregate.mockResolvedValueOnce([
       {
         accessRequests: [
           {
@@ -216,7 +149,7 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > admin access with auth', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(true)
-    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+    AccessRequestModelMock.aggregate.mockResolvedValueOnce([
       {
         accessRequests: [
           {
@@ -231,8 +164,8 @@ describe('services > accessRequest', () => {
   })
 
   test('removeAccessRequest > success', async () => {
-    reviewModelMocks.find.mockResolvedValue([])
-    responseModelMocks.find.mockResolvedValue([])
+    ReviewModelMock.find.mockResolvedValue([])
+    ResponseModelMock.find.mockResolvedValue([])
     expect(await removeAccessRequest({} as any, 'test')).toStrictEqual({ accessRequestId: 'test' })
   })
 
@@ -240,7 +173,7 @@ describe('services > accessRequest', () => {
     const mockAccessRequest = { _id: 'release' }
 
     modelMocks.getModelById.mockResolvedValue(undefined)
-    accessRequestModelMocks.findOne.mockResolvedValue(mockAccessRequest)
+    AccessRequestModelMock.findOne.mockResolvedValue(mockAccessRequest)
 
     vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({ success: true, id: '' })
     vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
@@ -255,13 +188,13 @@ describe('services > accessRequest', () => {
   })
 
   test('removeAccessRequests > success', async () => {
-    reviewModelMocks.find.mockResolvedValue([])
-    responseModelMocks.find.mockResolvedValue([])
+    ReviewModelMock.find.mockResolvedValue([])
+    ResponseModelMock.find.mockResolvedValue([])
 
     expect(await removeAccessRequests({} as any, ['test', 'test2'])).toStrictEqual({
       accessRequestIds: ['test', 'test2'],
     })
-    expect(reviewModelMocks.find).toHaveBeenCalledTimes(2)
+    expect(ReviewModelMock.find).toHaveBeenCalledTimes(2)
     // Once in removeAccessRequests and twice in getAccessRequestById
     expect(modelMocks.getModelById).toHaveBeenCalledTimes(3)
   })
@@ -270,7 +203,7 @@ describe('services > accessRequest', () => {
     const mockAccessRequest = { _id: 'release' }
 
     modelMocks.getModelById.mockResolvedValue(undefined)
-    accessRequestModelMocks.findOne.mockResolvedValue(mockAccessRequest)
+    AccessRequestModelMock.findOne.mockResolvedValue(mockAccessRequest)
 
     vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({ success: true, id: '' })
     vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
@@ -288,7 +221,7 @@ describe('services > accessRequest', () => {
     const user = { dn: 'testUser' } as UserInterface
     await getModelAccessRequestsForUser(user, 'test-model')
 
-    expect(accessRequestModelMocks.find.mock.calls).matchSnapshot()
+    expect(AccessRequestModelMock.find.mock.calls).matchSnapshot()
   })
 
   test('getCurrentUserPermissionsByAccessRequest > current user has all access request permissions', async () => {
@@ -299,7 +232,7 @@ describe('services > accessRequest', () => {
       deleteAccessRequest: { hasPermission: true },
     }
 
-    accessRequestModelMocks.findOne.mockResolvedValueOnce('mocked')
+    AccessRequestModelMock.findOne.mockResolvedValueOnce('mocked')
     modelMocks.getModelById.mockResolvedValueOnce('mocked')
     vi.mocked(authorisation.accessRequest)
       .mockResolvedValueOnce({ success: true, id: '' })
@@ -308,7 +241,7 @@ describe('services > accessRequest', () => {
 
     const permissions = await getCurrentUserPermissionsByAccessRequest(mockUser, mockAccessRequestId)
 
-    expect(accessRequestModelMocks.findOne).toBeCalled()
+    expect(AccessRequestModelMock.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
   })
 
@@ -320,7 +253,7 @@ describe('services > accessRequest', () => {
       deleteAccessRequest: { hasPermission: false, info: 'mocked' },
     }
 
-    accessRequestModelMocks.findOne.mockResolvedValueOnce('mocked')
+    AccessRequestModelMock.findOne.mockResolvedValueOnce('mocked')
     modelMocks.getModelById.mockResolvedValueOnce('mocked')
     vi.mocked(authorisation.accessRequest)
       .mockResolvedValueOnce({ success: true, id: '' })
@@ -329,7 +262,7 @@ describe('services > accessRequest', () => {
 
     const permissions = await getCurrentUserPermissionsByAccessRequest(mockUser, mockAccessRequestId)
 
-    expect(accessRequestModelMocks.findOne).toBeCalled()
+    expect(AccessRequestModelMock.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
   })
 })

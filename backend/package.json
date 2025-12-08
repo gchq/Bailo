@@ -22,6 +22,7 @@
     "@aws-sdk/client-cognito-identity-provider": "3.940.0",
     "@aws-sdk/client-kms": "3.940.0",
     "@aws-sdk/client-s3": "3.940.0",
+    "@aws-sdk/client-sesv2": "^3.943.0",
     "@aws-sdk/lib-storage": "3.940.0",
     "@huggingface/hub": "^2.7.1",
     "@opentelemetry/auto-instrumentations-node": "^0.67.2",
@@ -100,7 +101,7 @@
     "@types/tar-stream": "^3.1.4",
     "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.31.1",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.14",
     "eslint": "^9.39.1",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -109,7 +110,7 @@
     "supertest": "^7.1.4",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.5"
+    "vitest": "^4.0.14"
   },
   "overrides": {
     "mv": "npm:dry-uninstall"

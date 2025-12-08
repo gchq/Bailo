@@ -1,17 +1,44 @@
 import nodemailer, { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer/index.js'
 
+import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
-import config from '../../utils/config.js'
+import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
+import { sanitiseEmail } from '../../utils/smtp.js'
 import log from '../log.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
 
-let transporter: undefined | Transporter = undefined
+const transporter = await generateTransporter(config.smtp.transporter)
+
+/**
+ * Generates a Node Mailer Transporter.
+ * This dictates how the email is sent - e.g directly using SMTP or via a dedicated email service.
+ *
+ * @param transportOption {TransportOption} the option to use depending on the environment
+ * @returns the transporter to use
+ */
+export async function generateTransporter(transportOption: TransportOption): Promise<Transporter> {
+  if (transportOption === 'aws') {
+    // If deployed to AWS then use AWS SES as our transport medium
+    log.info('Generating transporter: Using AWS SES')
+    return createSesTransporter()
+  } else {
+    // In all other environments simply use Node Mailers Simple Mail Protocol
+    log.info('Generating transporter: Using SMTP')
+    return nodemailer.createTransport({
+      host: config.smtp.connection.host,
+      port: config.smtp.connection.port,
+      secure: config.smtp.connection.secure,
+      auth: config.smtp.connection.auth,
+      tls: config.smtp.connection.tls,
+    })
+  }
+}
 
 async function dispatchEmail(entity: string, emailContent: EmailContent) {
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
@@ -175,21 +202,12 @@ export async function notifyReviewResponseForAccess(
 }
 
 async function sendEmail(email: Mail.Options) {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: config.smtp.connection.host,
-      port: config.smtp.connection.port,
-      secure: config.smtp.connection.secure,
-      auth: config.smtp.connection.auth,
-      tls: config.smtp.connection.tls,
-    })
-  }
-
   try {
-    const info = await transporter.sendMail({
+    const sanitisedEmail = sanitiseEmail({
       from: config.smtp.from,
       ...email,
     })
+    const info = await transporter.sendMail(sanitisedEmail)
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (error) {
     const content = { to: email.to, subject: email.subject, text: email.text }
