@@ -1,4 +1,4 @@
-ipython==9.7.0
+ipython==9.8.0
 myst_parser==4.0.1
 nbsphinx==0.9.8
 sphinx==8.2.3
