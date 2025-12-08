@@ -2,7 +2,6 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { ModelCardRevisionDoc } from '../../src/models/ModelCardRevision.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -22,8 +21,13 @@ import {
   updateModelCard,
 } from '../../src/services/model.js'
 import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/types.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+
+const ModelModelMock = getTypedModelMock('ModelModel')
+const ModelCardRevisionModelMock = getTypedModelMock('ModelCardRevisionModel')
+const ReviewModelMock = getTypedModelMock('ReviewModel')
 
 const accessRequestMock = vi.hoisted(() => ({
   getAccessRequestsByModel: vi.fn(() => [] as any[]),
@@ -81,25 +85,6 @@ const validatorType = vi.hoisted(() => ({
 }))
 vi.mock('../../src/types/ValidatorResultError.js', async () => validatorType)
 
-const modelCardRevisionModel = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.findOne = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/ModelCardRevision.js', () => ({
-  default: modelCardRevisionModel,
-}))
-
 const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'model-id') }))
 vi.mock('../../src/utils/id.js', () => ({
   convertStringToId: idMocks.convertStringToId,
@@ -107,80 +92,21 @@ vi.mock('../../src/utils/id.js', () => ({
 
 const validator = vi.hoisted(() => ({ validate: vi.fn() }))
 vi.mock('jsonschema', () => ({
-  Validator: vi.fn(() => validator),
+  Validator: vi.fn(function () {
+    return validator
+  }),
 }))
-
-const modelMocks = vi.hoisted(() => {
-  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.delete = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Model.js', async () => {
-  const actual = await vi.importActual('../../src/models/Model.js')
-  return {
-    ...actual,
-    default: modelMocks,
-  }
-})
 
 vi.mock('../../src/utils/database.js', async () => ({
   isTransactionsEnabled: vi.fn(() => false),
 }))
 
-const reviewRoleModelMocks = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/ReviewRole.js', () => ({ default: reviewRoleModelMocks }))
-
-const reviewModelMocks = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.findByIdAndDelete = vi.fn(() => obj)
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
-
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
-  hasRole: vi.fn(() => ({})),
+  hasRole: vi.fn(function () {
+    return {}
+  }),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
@@ -190,15 +116,15 @@ describe('services > model', () => {
   test('createModel > simple', async () => {
     await createModel({} as any, {} as any)
 
-    expect(modelMocks.save).toBeCalled()
-    expect(modelMocks).toBeCalled()
+    expect(ModelModelMock.save).toBeCalled()
+    expect(ModelModelMock).toBeCalled()
   })
 
   test('createModel > bad authorisation', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
-    expect(modelMocks.save).not.toBeCalled()
+    expect(ModelModelMock.save).not.toBeCalled()
   })
 
   test('createModel > bad request is thrown when attempting to set both source and destinationModelId simultaneously', async () => {
@@ -211,7 +137,7 @@ describe('services > model', () => {
     await expect(() => createModel({} as any, {} as any)).rejects.toThrowError(
       /^You cannot select both settings simultaneously./,
     )
-    expect(modelMocks.save).not.toBeCalled()
+    expect(ModelModelMock.save).not.toBeCalled()
   })
 
   test('createModel > should throw an internal error if getUserInformation fails due to invalid user', async () => {
@@ -224,30 +150,30 @@ describe('services > model', () => {
   })
 
   test('getModelById > good', async () => {
-    modelMocks.findOne.mockResolvedValueOnce('mocked')
+    ModelModelMock.findOne.mockResolvedValueOnce('mocked')
 
     const model = await getModelById({} as any, {} as any)
 
-    expect(modelMocks.findOne).toBeCalled()
+    expect(ModelModelMock.findOne).toBeCalled()
     expect(model).toBe('mocked')
   })
 
   test('getModelById > bad authorisation', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({})
+    ModelModelMock.findOne.mockResolvedValueOnce({})
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
   })
 
   test('getModelById > no model', async () => {
-    modelMocks.findOne.mockResolvedValueOnce(undefined)
+    ModelModelMock.findOne.mockResolvedValueOnce(undefined)
 
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested entry was not found/)
   })
 
   describe('removeModel', () => {
     test('success empty', async () => {
-      modelCardRevisionModel.find.mockResolvedValueOnce([])
+      ModelCardRevisionModelMock.find.mockResolvedValueOnce([])
 
       const result = await removeModel({} as any, 'modelId')
 
@@ -257,7 +183,7 @@ describe('services > model', () => {
       expect(releaseMock.getModelReleases).toBeCalled()
       expect(tokenMock.getTokensForModel).toBeCalled()
       expect(webhookMock.getWebhooksByModel).toBeCalled()
-      expect(modelCardRevisionModel.find).toBeCalled()
+      expect(ModelCardRevisionModelMock.find).toBeCalled()
       expect(fileMock.getFilesByModel).toBeCalled()
       expect(inferenceMock.getInferencesByModel).toBeCalled()
       expect(accessRequestMock.getAccessRequestsByModel).toBeCalled()
@@ -267,17 +193,17 @@ describe('services > model', () => {
       expect(tokenMock.dropModelIdFromTokens).toBeCalled()
       expect(fileMock.removeFiles).toBeCalled()
       expect(inferenceMock.removeInferences).toBeCalled()
-      expect(modelMocks.delete).toBeCalled()
+      expect(ModelModelMock.delete).toBeCalled()
     })
 
     test('no model', async () => {
-      modelMocks.findOne.mockResolvedValueOnce(undefined)
+      ModelModelMock.findOne.mockResolvedValueOnce(undefined)
 
       await expect(() => removeModel({} as any, 'modelId')).rejects.toThrowError(/^The requested entry was not found./)
     })
 
     test('bad authorisation', async () => {
-      modelMocks.findOne.mockResolvedValueOnce({})
+      ModelModelMock.findOne.mockResolvedValueOnce({})
       vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
       await expect(() => removeModel({} as any, 'modelId')).rejects.toThrowError(/^You do not have permission/)
@@ -305,7 +231,7 @@ describe('services > model', () => {
           delete: webhookMockDelete,
         })),
       )
-      modelCardRevisionModel.find.mockResolvedValueOnce(
+      ModelCardRevisionModelMock.find.mockResolvedValueOnce(
         Array.from({ length: itemsFound }, () => ({
           delete: modelCardRevisionMockDelete,
         })),
@@ -324,7 +250,7 @@ describe('services > model', () => {
       expect(releaseMock.getModelReleases).toBeCalled()
       expect(tokenMock.getTokensForModel).toBeCalled()
       expect(webhookMock.getWebhooksByModel).toBeCalled()
-      expect(modelCardRevisionModel.find).toBeCalled()
+      expect(ModelCardRevisionModelMock.find).toBeCalled()
       expect(fileMock.getFilesByModel).toBeCalled()
       expect(inferenceMock.getInferencesByModel).toBeCalled()
       expect(accessRequestMock.getAccessRequestsByModel).toBeCalled()
@@ -336,8 +262,8 @@ describe('services > model', () => {
         Array(itemsFound).fill(accessRequestId),
         undefined,
       )
-      expect(reviewModelMocks.findByIdAndDelete).toBeCalledTimes(itemsFound)
-      expect(reviewModelMocks.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
+      expect(ReviewModelMock.findByIdAndDelete).toBeCalledTimes(itemsFound)
+      expect(ReviewModelMock.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
       expect(tokenMock.dropModelIdFromTokens).toBeCalledWith(user, modelId, Array(itemsFound).fill({}), undefined)
       expect(webhookMockDelete).toBeCalledTimes(itemsFound)
       expect(fileMock.removeFiles).toBeCalledWith(user, modelId, Array(itemsFound).fill(fileId), true, undefined)
@@ -353,12 +279,12 @@ describe('services > model', () => {
         Array(itemsFound).fill({ modelId, image: 'image', tag: 'tag' }),
         undefined,
       )
-      expect(modelMocks.delete).toBeCalled()
+      expect(ModelModelMock.delete).toBeCalled()
     })
   })
 
   test('canUserActionModelById > allowed', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({} as any)
+    ModelModelMock.findOne.mockResolvedValueOnce({} as any)
 
     expect(await canUserActionModelById({} as any, 'example', {} as any)).toStrictEqual({ success: true })
   })
@@ -369,7 +295,7 @@ describe('services > model', () => {
     // But then the action trigger should fail
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
-    modelMocks.findOne.mockResolvedValueOnce({} as any)
+    ModelModelMock.findOne.mockResolvedValueOnce({} as any)
 
     expect(await canUserActionModelById({} as any, 'example', {} as any)).toStrictEqual({
       success: false,
@@ -380,7 +306,7 @@ describe('services > model', () => {
 
   test('searchModels > no filters', async () => {
     const user: any = { dn: 'test' }
-    modelMocks.sort.mockResolvedValueOnce([])
+    ModelModelMock.sort.mockResolvedValueOnce([])
 
     const searchParams: EntrySearchOptionsParams = {
       kind: 'model',
@@ -397,7 +323,7 @@ describe('services > model', () => {
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
-    modelMocks.sort.mockResolvedValue([])
+    ModelModelMock.sort.mockResolvedValue([])
     const searchParams: EntrySearchOptionsParams = {
       kind: 'model',
       libraries: ['library'],
@@ -413,7 +339,7 @@ describe('services > model', () => {
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
-    modelMocks.sort.mockResolvedValueOnce([])
+    ModelModelMock.sort.mockResolvedValueOnce([])
 
     const searchParams: EntrySearchOptionsParams = {
       kind: 'model',
@@ -450,7 +376,7 @@ describe('services > model', () => {
   test('searchModels > admin access with auth', async () => {
     const user: any = { dn: 'admin' }
     const adminAccess = true
-    modelMocks.sort.mockResolvedValueOnce([])
+    ModelModelMock.sort.mockResolvedValueOnce([])
     authenticationMocks.hasRole.mockImplementation(() => true)
 
     const searchParams: EntrySearchOptionsParams = {
@@ -472,7 +398,7 @@ describe('services > model', () => {
     const mockModelId = '123'
     const mockVersion = 1
 
-    modelCardRevisionModel.findOne.mockResolvedValueOnce(undefined)
+    ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
       /^Version '.*' does not exist/,
@@ -485,7 +411,7 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
-    modelCardRevisionModel.findOne.mockResolvedValueOnce(mockModelCard)
+    ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(mockModelCard)
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
@@ -499,7 +425,7 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
-    modelCardRevisionModel.findOne.mockResolvedValueOnce(mockModelCard)
+    ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(mockModelCard)
 
     const result = await getModelCardRevision(mockUser, mockModelId, mockVersion)
 
@@ -507,6 +433,7 @@ describe('services > model', () => {
   })
 
   test('_setModelCard > should throw Forbidden if user does not have write permission', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: {} } })
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
     const mockSchemaId = 'abc'
@@ -524,10 +451,11 @@ describe('services > model', () => {
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
       /^You do not have permission to update this model card/,
     )
-    expect(modelCardRevisionModel.save).not.toBeCalled()
+    expect(ModelCardRevisionModelMock.save).not.toBeCalled()
   })
 
   test('_setModelCard > should throw BadReq if the user tries to alter a mirrored model card', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
     const mockSchemaId = 'abc'
@@ -545,10 +473,11 @@ describe('services > model', () => {
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
       /^Cannot alter a mirrored model./,
     )
-    expect(modelCardRevisionModel.save).not.toBeCalled()
+    expect(ModelCardRevisionModelMock.save).not.toBeCalled()
   })
 
   test('_setModelCard > should save and update model card if user has write permission', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: {} } })
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
     const mockSchemaId = 'abc'
@@ -558,7 +487,7 @@ describe('services > model', () => {
     const result = await _setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)
 
     expect(result).toBeDefined()
-    expect(modelCardRevisionModel.save).toBeCalled()
+    expect(ModelCardRevisionModelMock.save).toBeCalled()
   })
 
   test('updateModelCard > should throw a bad request when attempting to change mirrored model card', async () => {
@@ -606,6 +535,7 @@ describe('services > model', () => {
   })
 
   test('updateModel > should throw an internal error if getUserInformation fails due to invalid user', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
     authenticationMocks.getUserInformation.mockImplementation(() => {
       throw new Error('Unable to find user user:unknown_user')
     })
@@ -624,26 +554,26 @@ describe('services > model', () => {
     await expect(() => createModelCardFromSchema({} as any, '123', 'abc')).rejects.toThrowError(
       /^Cannot alter a mirrored model./,
     )
-    expect(modelMocks.save).not.toBeCalled()
+    expect(ModelModelMock.save).not.toBeCalled()
   })
 
   test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
     validator.validate.mockImplementationOnce(() => {
       throw Error('Unable to validate.')
     })
     validatorType.isValidatorResultError.mockReturnValueOnce(false)
 
-    const result = saveImportedModelCard({} as Omit<ModelCardRevisionDoc, '_id'>)
+    const result = saveImportedModelCard({} as any)
 
     await expect(result).rejects.toThrowError(/^Unable to validate./)
   })
 
   test('saveImportedModelCard > successfully saves model card', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
     await saveImportedModelCard({ modelId: 'id', version: 'version' } as any)
 
-    expect(modelCardRevisionModel.findOneAndUpdate).toBeCalledWith(
+    expect(ModelCardRevisionModelMock.findOneAndUpdate).toBeCalledWith(
       { modelId: 'id', version: 'version' },
       { modelId: 'id', version: 'version' },
       { upsert: true },
@@ -653,18 +583,18 @@ describe('services > model', () => {
   test('setLatestImportedModelCard > success', async () => {
     await setLatestImportedModelCard('abc')
 
-    expect(modelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
+    expect(ModelModelMock.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
   test('setLatestImportedModelCard > cannot find latest model card', async () => {
-    modelCardRevisionModel.findOne.mockResolvedValueOnce()
+    ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
     const result = setLatestImportedModelCard('abc')
 
     await expect(result).rejects.toThrowError(/^Cannot find latest model card./)
   })
 
   test('setLatestImportedModelCard > cannot update model', async () => {
-    modelMocks.findOneAndUpdate.mockResolvedValueOnce()
+    ModelModelMock.findOneAndUpdate.mockResolvedValueOnce(undefined)
     const result = setLatestImportedModelCard('abc')
 
     await expect(result).rejects.toThrowError(/^Unable to set latest model card of mirrored model./)
@@ -703,7 +633,7 @@ describe('services > model', () => {
     expect(result).toBe(false)
   })
 
-  test('crateModelCardFromTemplate > can create a model using a template', async () => {
+  test('createModelCardFromTemplate > can create a model using a template', async () => {
     const testModel = {
       name: 'test model',
       settings: {
@@ -726,11 +656,10 @@ describe('services > model', () => {
         },
       },
     }
-    modelMocks.findOne.mockResolvedValueOnce(testModel)
-    modelMocks.findOne.mockResolvedValueOnce(testTemplate)
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel).mockResolvedValue(testTemplate)
     await createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')
-    expect(modelCardRevisionModel.save).toBeCalled()
-    expect(modelMocks.updateOne).toBeCalled()
+    expect(ModelCardRevisionModelMock.save).toBeCalled()
+    expect(ModelModelMock.updateOne).toBeCalled()
   })
 
   test('createModelCardFromTemplate > requesting to use a template without a model card will throw an error', async () => {
@@ -740,7 +669,7 @@ describe('services > model', () => {
         mirror: {},
       },
     }
-    modelMocks.findOne.mockResolvedValue(testModel)
+    ModelModelMock.findOne.mockResolvedValue(testModel)
     await expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
       /^The template model is missing a model card/,
     )
@@ -778,7 +707,7 @@ describe('services > model', () => {
       exportMirroredModel: { hasPermission: true },
     }
 
-    modelMocks.findOne.mockResolvedValueOnce('mocked')
+    ModelModelMock.findOne.mockResolvedValueOnce('mocked')
     vi.mocked(authorisation.model)
       .mockResolvedValueOnce({ success: true, id: '' })
       .mockResolvedValueOnce({ success: true, id: '' })
@@ -794,7 +723,7 @@ describe('services > model', () => {
 
     const permissions = await getCurrentUserPermissionsByModel(mockUser, mockModelId)
 
-    expect(modelMocks.findOne).toBeCalled()
+    expect(ModelModelMock.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
   })
 
@@ -813,7 +742,7 @@ describe('services > model', () => {
       exportMirroredModel: { hasPermission: false, info: 'mocked' },
     }
 
-    modelMocks.findOne.mockResolvedValueOnce('mocked')
+    ModelModelMock.findOne.mockResolvedValueOnce('mocked')
     vi.mocked(authorisation.model)
       .mockResolvedValueOnce({ success: true, id: '' })
       .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
@@ -829,12 +758,12 @@ describe('services > model', () => {
 
     const permissions = await getCurrentUserPermissionsByModel(mockUser, mockModelId)
 
-    expect(modelMocks.findOne).toBeCalled()
+    expect(ModelModelMock.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
   })
 
   test('popularTagsForEntries > returns a list of tags', async () => {
-    modelMocks.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
+    ModelModelMock.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
     const tags = await popularTagsForEntries()
     expect(tags).toEqual(['test-tag'])
   })

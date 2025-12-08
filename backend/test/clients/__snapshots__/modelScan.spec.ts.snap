@@ -20,7 +20,7 @@ exports[`clients > modelScan > scanStream > success 1`] = `
     "undefined://undefined:undefined/scan/file",
     {
       "body": {
-        "append": [MockFunction spy] {
+        "append": [MockFunction] {
           "calls": [
             [
               "in_file",
@@ -38,7 +38,7 @@ exports[`clients > modelScan > scanStream > success 1`] = `
             },
           ],
         },
-        "getHeaders": [MockFunction spy] {
+        "getHeaders": [MockFunction] {
           "calls": [
             [],
           ],

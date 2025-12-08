@@ -22,7 +22,13 @@ vi.mock('../../src/utils/config.js', () => ({
 }))
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
+  default: vi.fn(function () {
+    return {
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(),
+    }
+  }),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
@@ -31,7 +37,11 @@ describe('clients > inferencing', () => {
     fetchMock.default.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
-      json: vi.fn(() => ({ message: 'ok' })),
+      json: vi.fn(function () {
+        return {
+          message: 'ok',
+        }
+      }),
     })
     const response = await createInferenceService({} as any)
 
@@ -43,7 +53,9 @@ describe('clients > inferencing', () => {
   test('createInferencing > bad response', async () => {
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
-      text: vi.fn(() => 'Unrecognised response'),
+      text: vi.fn(function () {
+        return 'Unrecognised response'
+      }),
       json: vi.fn(),
     })
     await expect(() => createInferenceService({} as any)).rejects.toThrowError(
@@ -69,7 +81,11 @@ describe('clients > inferencing', () => {
     fetchMock.default.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
-      json: vi.fn(() => ({ message: 'ok' })),
+      json: vi.fn(function () {
+        return {
+          message: 'ok',
+        }
+      }),
     })
     const response = await updateInferenceService({} as any)
 
@@ -81,7 +97,9 @@ describe('clients > inferencing', () => {
   test('updateInferencing > bad response', async () => {
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
-      text: vi.fn(() => 'Unrecognised response'),
+      text: vi.fn(function () {
+        return 'Unrecognised response'
+      }),
       json: vi.fn(),
     })
     await expect(() => updateInferenceService({} as any)).rejects.toThrowError(

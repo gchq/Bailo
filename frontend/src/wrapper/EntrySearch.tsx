@@ -50,7 +50,7 @@ export default function EntrySearch() {
     models: entries,
     isModelsLoading: isEntriesLoading,
     isModelsError: isEntriesError,
-  } = useListModels(undefined, [], '', [], [], [], [], debouncedFilter, false, '', false, true)
+  } = useListModels(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
 
   const modelList = useMemo(
     () =>

@@ -83,7 +83,6 @@ export default function Marketplace() {
     debouncedFilter.length >= 3 ? debouncedFilter : '',
     false,
     '',
-    false,
     titleOnly,
   )
 
@@ -103,7 +102,6 @@ export default function Marketplace() {
     debouncedFilter.length >= 3 ? debouncedFilter : '',
     false,
     '',
-    false,
     titleOnly,
   )
 
@@ -122,7 +120,6 @@ export default function Marketplace() {
     debouncedFilter.length >= 3 ? debouncedFilter : '',
     false,
     '',
-    false,
     titleOnly,
   )
 

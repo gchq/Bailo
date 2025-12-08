@@ -11,6 +11,6 @@ exports[`routes > inferencing > updateInference > 200 > ok 1`] = `
 exports[`routes > inferencing > updateInference > audit > expected call 1`] = `
 {
   "_id": "test",
-  "toObject": [MockFunction spy],
+  "toObject": [MockFunction],
 }
 `;
