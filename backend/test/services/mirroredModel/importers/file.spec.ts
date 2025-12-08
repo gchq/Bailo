@@ -5,6 +5,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
 import config from '../../../../src/utils/__mocks__/config.js'
+import { getTypedModelMock } from '../../../testUtils/setupMongooseModelMocks.js'
+
+const FileModelMock = getTypedModelMock('FileModel')
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -25,14 +28,6 @@ const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(),
 }))
 vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
-
-const fileModelMocks = vi.hoisted(() => ({
-  findOne: vi.fn(),
-}))
-vi.mock('../../../../src/models/File.js', () => ({
-  __esModule: true,
-  default: fileModelMocks,
-}))
 
 const fileServiceMocks = vi.hoisted(() => ({
   createFilePath: vi.fn(() => 'updated/file/path'),
@@ -77,7 +72,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   })
 
   test('processEntry > success upload new file to S3', async () => {
-    fileModelMocks.findOne.mockResolvedValue(null)
+    FileModelMock.findOne.mockResolvedValue(null)
 
     const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
@@ -92,7 +87,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   })
 
   test('processEntry > success skip already existing file', async () => {
-    fileModelMocks.findOne.mockResolvedValue({ id: 'existingId' })
+    FileModelMock.findOne.mockResolvedValue({ id: 'existingId' })
     const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()
@@ -107,7 +102,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   })
 
   test('processEntry > error on multiple files', async () => {
-    fileModelMocks.findOne.mockResolvedValue(null)
+    FileModelMock.findOne.mockResolvedValue(null)
     const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()

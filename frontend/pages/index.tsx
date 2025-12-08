@@ -1,5 +1,5 @@
 import { ExpandMore } from '@mui/icons-material'
-import SearchIcon from '@mui/icons-material/Search'
+import SubjectIcon from '@mui/icons-material/Subject'
 import {
   Accordion,
   AccordionDetails,
@@ -14,12 +14,12 @@ import {
   FormControlLabel,
   FormGroup,
   IconButton,
-  InputAdornment,
   InputLabel,
   Paper,
   Stack,
   Tab,
   Tabs,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
@@ -41,7 +41,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
-import { isReachable } from 'utils/peerUtils'
+import { isEnabled, isReachable } from 'utils/peerUtils'
 
 interface KeyAndLabel {
   key: string
@@ -60,6 +60,7 @@ export default function Marketplace() {
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [titleOnly, setTitleOnly] = useState(false)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -80,6 +81,9 @@ export default function Marketplace() {
     selectedStates,
     selectedPeers,
     debouncedFilter.length >= 3 ? debouncedFilter : '',
+    false,
+    '',
+    titleOnly,
   )
 
   const {
@@ -96,6 +100,9 @@ export default function Marketplace() {
     selectedStates,
     selectedPeers,
     debouncedFilter.length >= 3 ? debouncedFilter : '',
+    false,
+    '',
+    titleOnly,
   )
 
   const {
@@ -111,6 +118,9 @@ export default function Marketplace() {
     selectedStates,
     selectedPeers,
     debouncedFilter.length >= 3 ? debouncedFilter : '',
+    false,
+    '',
+    titleOnly,
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
@@ -126,6 +136,7 @@ export default function Marketplace() {
     organisations: organisationsFromQuery,
     states: statesFromQuery,
     tags: tagsFromQuery,
+    titleOnly: titleOnlyFromQuery,
   } = router.query
 
   useEffect(() => {
@@ -167,7 +178,16 @@ export default function Marketplace() {
       }
       setSelectedPeers([...peersAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, tagsFromQuery, organisationsFromQuery, statesFromQuery, peersFromQuery])
+    setTitleOnly(titleOnlyFromQuery === 'true')
+  }, [
+    filterFromQuery,
+    taskFromQuery,
+    tagsFromQuery,
+    organisationsFromQuery,
+    statesFromQuery,
+    peersFromQuery,
+    titleOnlyFromQuery,
+  ])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -196,10 +216,10 @@ export default function Marketplace() {
     [roleOptions],
   )
 
-  const reachablePeerList = useMemo(() => {
+  const unreachablePeerList: string[] = useMemo(() => {
     if (!peers) return []
     return Array.from(peers.entries())
-      .filter(([, value]) => isReachable(value))
+      .filter(([_key, value]) => isEnabled(value) && !isReachable(value))
       .map(([key]) => key)
   }, [peers])
 
@@ -255,6 +275,11 @@ export default function Marketplace() {
     e.preventDefault()
   }
 
+  const handleChangeTitleOnly = useCallback(() => {
+    setTitleOnly(!titleOnly)
+    updateQueryParams('titleOnly', (!titleOnly).toString())
+  }, [updateQueryParams, titleOnly])
+
   const handleResetFilters = () => {
     setSelectedOrganisations([])
     setSelectedTags([])
@@ -262,6 +287,7 @@ export default function Marketplace() {
     setSelectedRoles([])
     setSelectedPeers([])
     setFilter('')
+    setTitleOnly(false)
     router.replace('/', undefined, { shallow: true })
   }
 
@@ -341,19 +367,26 @@ export default function Marketplace() {
                 variant='filled'
                 onSubmit={onFilterSubmit}
               >
-                <InputLabel htmlFor='entry-filter-input'>Advanced Search</InputLabel>
+                <InputLabel htmlFor='entry-filter-input'>
+                  {titleOnly ? 'Search by title (partial)' : 'Search by full text (exact)'}
+                </InputLabel>
                 <FilledInput
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
                   id='entry-filter-input'
                   value={filter}
                   disableUnderline
+                  inputProps={{ spellCheck: 'false' }}
                   onChange={handleFilterChange}
                   endAdornment={
-                    <InputAdornment position='end'>
-                      <IconButton color='secondary' type='submit' sx={{ p: 2 }} aria-label='filter'>
-                        <SearchIcon />
+                    <Tooltip title='Full Text'>
+                      <IconButton
+                        aria-label='titleOnly'
+                        onClick={handleChangeTitleOnly}
+                        color={titleOnly ? 'primary' : 'secondary'}
+                      >
+                        <SubjectIcon />
                       </IconButton>
-                    </InputAdornment>
+                    </Tooltip>
                   }
                 />
                 {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
@@ -395,12 +428,13 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
-                {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
+                {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
                   <Box>
                     <ChipSelector
                       label='External Repositories'
                       chipTooltipTitle={'Include external repostories'}
-                      options={reachablePeerList}
+                      options={Array.from(peers.keys())}
+                      unreachableOptions={unreachablePeerList}
                       expandThreshold={10}
                       multiple
                       selectedChips={selectedPeers}
