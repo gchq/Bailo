@@ -10,55 +10,43 @@ import {
   updateResponseReaction,
 } from '../../src/services/response.js'
 import { ReviewKind } from '../../src/types/enums.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testAccessRequestReview, testReleaseReview } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
-  default: { getEntities: vi.fn(() => ['user:test']) },
+  default: {
+    getEntities: vi.fn(function () {
+      return ['user:test']
+    }),
+  },
 }))
 
-const responseModelMock = vi.hoisted(() => {
-  const obj: any = {}
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-vi.mock('../../src/models/Response.js', async () => ({
-  ...((await vi.importActual('../../src/models/Response.js')) as object),
-  default: responseModelMock,
-}))
+const ResponseModelMock = getTypedModelMock('ResponseModel')
 
 const smtpMock = vi.hoisted(() => ({
-  notifyReviewResponseForAccess: vi.fn(() => Promise.resolve()),
-  notifyReviewResponseForRelease: vi.fn(() => Promise.resolve()),
-  requestReviewForRelease: vi.fn(() => Promise.resolve()),
-  requestReviewForAccessRequest: vi.fn(() => Promise.resolve()),
+  notifyReviewResponseForAccess: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  notifyReviewResponseForRelease: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  requestReviewForRelease: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  requestReviewForAccessRequest: vi.fn(function () {
+    return Promise.resolve()
+  }),
 }))
 vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const reviewMock = vi.hoisted(() => ({
-  findReviewsForAccessRequests: vi.fn(() => [testReleaseReview]),
-  findReviewForResponse: vi.fn(() => testReleaseReview),
+  findReviewsForAccessRequests: vi.fn(function () {
+    return [testReleaseReview]
+  }),
+  findReviewForResponse: vi.fn(function () {
+    return testReleaseReview
+  }),
 }))
 vi.mock('../../src/services/review.js', async () => reviewMock)
 
@@ -102,12 +90,12 @@ describe('services > response', () => {
   test('findResponseById > success', async () => {
     const mockResponse = { _id: 'response' }
 
-    responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
+    ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await findResponseById('test')).toBe(mockResponse)
   })
   test('findResponseById > response not found', async () => {
-    responseModelMock.findOne.mockResolvedValueOnce(undefined)
+    ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
     await expect(findResponseById('test')).rejects.toThrowError('The requested response was not found.')
   })
@@ -115,12 +103,12 @@ describe('services > response', () => {
   test('getResponsesByParentIds > success', async () => {
     const mockResponses = [{ _id: 'response' }]
 
-    responseModelMock.find.mockResolvedValueOnce(mockResponses)
+    ResponseModelMock.find.mockResolvedValueOnce(mockResponses)
 
     expect(await getResponsesByParentIds(['test'])).toBe(mockResponses)
   })
   test('getResponsesByParentIds > response not found', async () => {
-    responseModelMock.find.mockResolvedValueOnce(undefined)
+    ResponseModelMock.find.mockResolvedValueOnce(undefined)
 
     await expect(getResponsesByParentIds(['test'])).rejects.toThrowError('The requested response was not found.')
   })
@@ -132,7 +120,7 @@ describe('services > response', () => {
     const mockResponse = { _id: 'response', entity: 'user:user', comment: 'test', save: vi.fn() }
     const mockUpdatedResponse = { ...mockResponse, comment: 'updated', commentEditedAt: date.toISOString() }
 
-    responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
+    ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
     entityUtilMock.toEntity.mockReturnValueOnce('user:user')
 
     const updatedResponse = await updateResponse({} as any, 'test', 'updated')
@@ -141,7 +129,7 @@ describe('services > response', () => {
     expect(mockResponse.save).toBeCalled()
   })
   test('updateResponse > response not found', async () => {
-    responseModelMock.findOne.mockResolvedValueOnce(undefined)
+    ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
     await expect(updateResponse({} as any, 'test', 'updated')).rejects.toThrowError(
       'The requested response was not found.',
@@ -150,7 +138,7 @@ describe('services > response', () => {
   test('updateResponse > invalid user', async () => {
     const mockResponse = { _id: 'response', entity: 'user:user', comment: 'test', save: vi.fn() }
 
-    responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
+    ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     await expect(updateResponse({} as any, 'test', 'updated')).rejects.toThrowError(
       'Only the original author can update a comment or review response.',
@@ -169,7 +157,7 @@ describe('services > response', () => {
       ],
     }
 
-    responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
+    ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await updateResponseReaction({ dn: 'user' } as any, 'test', ReactionKind.LIKE)).toEqual(mockUpdatedResponse)
     expect(mockResponse.save).toBeCalled()
@@ -195,7 +183,7 @@ describe('services > response', () => {
       ],
     }
 
-    responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
+    ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await updateResponseReaction({ dn: 'user' } as any, 'test', ReactionKind.LIKE)).toEqual(mockUpdatedResponse)
     expect(mockResponse.save).toBeCalled()
@@ -221,13 +209,13 @@ describe('services > response', () => {
       ],
     }
 
-    responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
+    ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await updateResponseReaction({ dn: 'user' } as any, 'test', ReactionKind.LIKE)).toEqual(mockUpdatedResponse)
     expect(mockResponse.save).toBeCalled()
   })
   test('updateResponseReaction > response not found', async () => {
-    responseModelMock.findOne.mockResolvedValueOnce(undefined)
+    ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
     await expect(updateResponseReaction({} as any, 'test', ReactionKind.LIKE)).rejects.toThrowError(
       'The requested response was not found.',
@@ -247,7 +235,7 @@ describe('services > response', () => {
       'semver',
     )
 
-    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
     expect(releaseServiceMock.getReleaseBySemver).toHaveBeenCalledOnce()
     expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
@@ -267,7 +255,7 @@ describe('services > response', () => {
       'accessRequestId',
     )
 
-    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(smtpMock.notifyReviewResponseForAccess).toHaveBeenCalledOnce()
     expect(accessRequestServiceMock.getAccessRequestById).toHaveBeenCalledOnce()
     expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
@@ -310,7 +298,7 @@ describe('services > response', () => {
     // Allow for completion of asynchronous content
     await new Promise((r) => setTimeout(r))
 
-    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(accessRequestServiceMock.getAccessRequestById).toHaveBeenCalledOnce()
     expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
     expect(logMock.warn).toHaveBeenCalledOnce()
@@ -332,7 +320,7 @@ describe('services > response', () => {
     // Allow for completion of asynchronous content
     await new Promise((r) => setTimeout(r))
 
-    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
     expect(releaseServiceMock.getReleaseBySemver).toHaveBeenCalledOnce()
     expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
@@ -377,12 +365,12 @@ describe('services > response', () => {
     )
 
     await expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
-    expect(responseModelMock.save).not.toBeCalled()
+    expect(ResponseModelMock.save).not.toBeCalled()
   })
 
   test('checkAccessRequestsApproved > approved access request exists', async () => {
     reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'msro' }, { role: 'random' }] as any)
-    responseModelMock.find.mockReturnValueOnce(['approved'])
+    ResponseModelMock.find.mockReturnValueOnce(['approved'])
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
 

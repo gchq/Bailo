@@ -1,6 +1,7 @@
 import { ModelAction, SchemaMigrationAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { ModelDoc } from '../models/Model.js'
+import ModelCardRevisionModel from '../models/ModelCardRevision.js'
 import SchemaMigration, { SchemaMigrationInterface } from '../models/SchemaMigration.js'
 import SchemaMigrationModel from '../models/SchemaMigration.js'
 import { UserInterface } from '../models/User.js'
@@ -103,14 +104,21 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
   }
 
   try {
-    await runMigrationPlan(modelDoc, migrationPlan)
+    const updatedModel = await runMigrationPlan(modelDoc, migrationPlan)
+    updatedModel.set('card.schemaId', migrationPlan.targetSchema)
+    updatedModel.set('card.version', updatedModel.card ? updatedModel.card.version + 1 : 1)
+    await updatedModel.save()
+    const newDocument = {
+      schemaId: migrationPlan.targetSchema,
+      version: updatedModel.card ? updatedModel.card.version : 1,
+      metadata: updatedModel.card?.metadata ? updatedModel.card?.metadata : {},
+    }
+    const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
+    await revision.save()
+    return modelDoc
   } catch (error) {
     throw BadReq('There was an error performing the migration', { error })
   }
-
-  modelDoc.set('card.schemaId', migrationPlan.targetSchema)
-  await modelDoc.save()
-  return modelDoc
 }
 
 async function runMigrationPlan(model: ModelDoc, migrationPlan: SchemaMigrationInterface) {
@@ -130,5 +138,5 @@ async function runMigrationPlan(model: ModelDoc, migrationPlan: SchemaMigrationI
         break
     }
   }
-  await model.save()
+  return model
 }

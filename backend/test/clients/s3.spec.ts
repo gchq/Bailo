@@ -12,25 +12,50 @@ import {
 } from '../../src/clients/s3.js'
 
 const s3Mocks = vi.hoisted(() => {
-  const send = vi.fn(() => 'response')
+  const send = vi.fn(function () {
+    return 'response'
+  })
 
   return {
     send,
-    GetObjectCommand: vi.fn(() => ({})),
-    HeadObjectCommand: vi.fn(() => ({})),
-    HeadBucketCommand: vi.fn(() => ({})),
-    CreateBucketCommand: vi.fn(() => ({})),
-    CreateMultipartUploadCommand: vi.fn(() => ({})),
-    CompleteMultipartUploadCommand: vi.fn(() => ({})),
-    UploadPartCommand: vi.fn(() => ({})),
-    S3Client: vi.fn(() => ({ send })),
+    GetObjectCommand: vi.fn(function () {
+      return {}
+    }),
+    HeadObjectCommand: vi.fn(function () {
+      return {}
+    }),
+    HeadBucketCommand: vi.fn(function () {
+      return {}
+    }),
+    CreateBucketCommand: vi.fn(function () {
+      return {}
+    }),
+    CreateMultipartUploadCommand: vi.fn(function () {
+      return {}
+    }),
+    CompleteMultipartUploadCommand: vi.fn(function () {
+      return {}
+    }),
+    UploadPartCommand: vi.fn(function () {
+      return {}
+    }),
+    S3Client: vi.fn(function () {
+      return {
+        send,
+      }
+    }),
   }
 })
 vi.mock('@aws-sdk/client-s3', () => s3Mocks)
 
 const s3UploadMocks = vi.hoisted(() => {
   return {
-    Upload: vi.fn(() => ({ on: vi.fn(), done: vi.fn() })),
+    Upload: vi.fn(function () {
+      return {
+        on: vi.fn(),
+        done: vi.fn(),
+      }
+    }),
   }
 })
 vi.mock('@aws-sdk/lib-storage', () => s3UploadMocks)

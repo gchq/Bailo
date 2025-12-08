@@ -1,8 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../../src/models/AccessRequest.js'
-import Release from '../../../src/models/Release.js'
-import Review from '../../../src/models/Review.js'
 import {
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
@@ -23,50 +20,68 @@ vi.mock('../../../src/services/log.js', async () => ({
 
 const transporterMock = vi.hoisted(() => {
   return {
-    sendMail: vi.fn(() => ({ messageId: 123 })),
+    sendMail: vi.fn(function () {
+      return {
+        messageId: 123,
+      }
+    }),
   }
 })
 const nodemailerMock = vi.hoisted(() => ({
-  createTransport: vi.fn(() => transporterMock),
+  createTransport: vi.fn(function () {
+    return transporterMock
+  }),
 }))
 vi.mock('nodemailer', async () => ({
   default: nodemailerMock,
 }))
 
 const authenticationMock = vi.hoisted(() => ({
-  getUserInformationList: vi.fn(() => [Promise.resolve({ email: 'email@email.com' })]),
-  getUserInformation: vi.fn(() => [Promise.resolve({ name: 'Joe Blogs' })]),
+  getUserInformationList: vi.fn(function () {
+    return [Promise.resolve({ email: 'email@email.com' })]
+  }),
+  getUserInformation: vi.fn(function () {
+    return [Promise.resolve({ name: 'Joe Blogs' })]
+  }),
 }))
 vi.mock('../../../src/connectors/authentication/index.js', async () => ({ default: authenticationMock }))
 
 const emailBuilderMock = vi.hoisted(() => ({
-  buildEmail: vi.fn(() => ({ subject: 'subject', text: 'text', html: 'html' })),
+  buildEmail: vi.fn(function () {
+    return {
+      subject: 'subject',
+      text: 'text',
+      html: 'html',
+    }
+  }),
 }))
 vi.mock('../../../src/services/smtp/emailBuilder.js', async () => emailBuilderMock)
 
 const responseService = vi.hoisted(() => ({
-  findResponseById: vi.fn(() => ({
-    user: 'user:user',
-    comment: 'This is a comment',
-    decision: 'approve',
-    kind: 'review',
-  })),
+  findResponseById: vi.fn(function () {
+    return {
+      user: 'user:user',
+      comment: 'This is a comment',
+      decision: 'approve',
+      kind: 'review',
+    }
+  }),
 }))
 vi.mock('../../../src/services/response.js', async () => responseService)
 
 describe('services > smtp > smtp', () => {
-  const review = new Review({
+  const review = {
     role: 'owner',
     responses: [{ decision: 'approve' }],
-  })
-  const release = new Release({
+  } as any
+  const release = {
     modelId: 'testmodel-123',
     semver: '1.2.3',
     createdBy: 'user:user',
-  })
-  const access = new AccessRequest({
+  } as any
+  const access = {
     metadata: { overview: { entities: ['user:user'] } },
-  })
+  } as any
 
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
@@ -193,7 +208,7 @@ describe('services > smtp > smtp', () => {
     }
     authenticationMock.getUserInformationList.mockReturnValueOnce(users)
 
-    await requestReviewForRelease('group:group1', new Review({ role: 'owner' }), new Release())
+    await requestReviewForRelease('group:group1', { role: 'owner' } as any, {} as any)
 
     expect(transporterMock.sendMail.mock.calls.length).toBe(20)
   })
