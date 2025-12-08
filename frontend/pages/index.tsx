@@ -199,7 +199,7 @@ export default function Marketplace() {
   const unreachablePeerList: string[] = useMemo(() => {
     if (!peers) return []
     return Array.from(peers.entries())
-      .filter(([, value]) => isEnabled(value) && !isReachable(value))
+      .filter(([_key, value]) => isEnabled(value) && !isReachable(value))
       .map(([key]) => key)
   }, [peers])
 
