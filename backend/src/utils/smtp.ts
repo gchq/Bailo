@@ -6,6 +6,7 @@ import Mail from 'nodemailer/lib/mailer/index.js'
  * @returns The sanitised email details
  */
 export function sanitiseEmail(email: Mail.Options): Mail.Options {
+  console.log(email.html)
   return {
     from: email.from,
     to: email.to,
