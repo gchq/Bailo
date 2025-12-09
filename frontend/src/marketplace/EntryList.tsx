@@ -25,11 +25,6 @@ interface EntryListProps {
   peers?: Map<string, PeerConfigStatus>
 }
 
-interface RowProps {
-  data: EntrySearchResult[]
-  index: number
-}
-
 type ListRef = {
   resetAfterIndex: (index: number, shouldForceUpdate?: boolean) => void
 }
@@ -72,7 +67,7 @@ export default function EntryList({
 
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
-  const Row = ({ data, index }: RowProps) => (
+  const Row = ({ data }) => (
     <EntryListRow
       selectedChips={selectedChips}
       onSelectedChipsChange={onSelectedChipsChange}
@@ -82,8 +77,7 @@ export default function EntryList({
       onSelectedStatesChange={onSelectedStatesChange}
       selectedPeers={selectedPeers}
       onSelectedPeersChange={onSelectedPeersChange}
-      data={data}
-      index={index}
+      entry={data}
       style={{ padding: theme.spacing(2.5) }}
       displayOrganisation={displayOrganisation}
       displayState={displayState}
