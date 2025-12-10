@@ -10,6 +10,8 @@ import { UserInformation } from '../connectors/authentication/Base.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 
+// Adding a test comment
+
 async function setupCognitoClient() {
   let dnName: string
   let userPoolId: string
