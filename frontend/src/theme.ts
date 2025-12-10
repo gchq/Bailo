@@ -67,13 +67,6 @@ export const lightTheme = createTheme({
         },
       },
     },
-    MuiAlert: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#effcff',
-        },
-      },
-    },
     MuiListItemButton: {
       styleOverrides: {
         root: {
