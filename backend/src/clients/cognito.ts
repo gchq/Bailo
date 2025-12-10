@@ -9,7 +9,6 @@ import {
 import { UserInformation } from '../connectors/authentication/Base.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
-// test comment 1
 
 async function setupCognitoClient() {
   let dnName: string
