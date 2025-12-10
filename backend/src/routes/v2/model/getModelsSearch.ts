@@ -21,7 +21,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/models/search',
   tags: ['model'],
-  description: 'Search through models',
+  description: 'Search models',
   schema: getModelsSearchSchema,
   responses: {
     200: {
@@ -40,6 +40,7 @@ registerPath({
                 schemaId: z.string().optional(),
                 adminAccess: z.boolean().optional(),
                 peerId: z.string().optional(),
+                titleOnly: z.boolean().optional(),
               }),
             ),
             errors: z
