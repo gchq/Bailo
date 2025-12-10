@@ -50,7 +50,7 @@ export default function EntrySearch() {
     models: entries,
     isModelsLoading: isEntriesLoading,
     isModelsError: isEntriesError,
-  } = useListModels(undefined, [], '', [], [], [], [], debouncedFilter)
+  } = useListModels(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
 
   const modelList = useMemo(
     () =>
@@ -108,7 +108,7 @@ export default function EntrySearch() {
           <SearchIcon />
           <StyledInputBase
             placeholder='Search'
-            inputProps={{ 'aria-label': 'search for a data card or model' }}
+            inputProps={{ 'aria-label': 'search for a data card or model', spellCheck: 'false' }}
             value={modelFilter}
             onChange={handleChange}
           />

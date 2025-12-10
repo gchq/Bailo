@@ -27,11 +27,20 @@ export function getEntryUrl(peer: RemoteFederationConfig, entry: EntrySearchResu
 }
 
 /**
+ *
+ * @param peer to check
+ * @returns true if enabled/readOnly
+ */
+export function isEnabled(peer: PeerConfigStatus): boolean {
+  return peer.config.state !== 'disabled'
+}
+
+/**
  * Given a peer's configuration status, is it reachable?
  *
  * @param peer to check
- * @returns true if enabled/readOnly and successfully pinged
+ * @returns true if successfully pinged
  */
 export function isReachable(peer: PeerConfigStatus): boolean {
-  return peer.config.state !== 'disabled' && !peer.status.error && peer.status.ping === 'pong'
+  return !peer.status.error && peer.status.ping === 'pong'
 }

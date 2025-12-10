@@ -106,14 +106,13 @@ export default function EntryList({
     <Box sx={{ py: 2 }}>
       <Paginate
         list={entries}
-        searchFilterProperty='name'
         sortingProperties={[
-          { value: 'name', title: 'Name', iconKind: 'text' },
           { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
           { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
         ]}
-        searchPlaceholderText='Search by name'
+        hideSearchInput
         defaultSortProperty='createdAt'
+        searchFilterProperty='createdAt'
       >
         {Row}
       </Paginate>
