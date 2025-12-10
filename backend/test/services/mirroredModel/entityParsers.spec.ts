@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 // import { parseFile, parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
-import { parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
+import { parseFile, parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
 
 const s3Mocks = vi.hoisted(() => ({
   objectExists: vi.fn(() => Promise.resolve(true)),
@@ -107,76 +107,76 @@ describe('services > parsers > modelParser', () => {
     ).toThrowError('Compressed file contains releases that have a model ID that does not match the source model Id.')
   })
 
-  // test('parseFile > success', () => {
-  //   const result = parseFile(
-  //     {
-  //       modelId: 'sourceModelId',
-  //       name: 'file.txt',
-  //       size: 123,
-  //       mime: 'text/plain',
-  //       path: 'foo/file.txt',
-  //       complete: true,
-  //       deleted: false,
-  //       updatedAt: 'timestamp',
-  //       createdAt: 'timestamp',
-  //       _id: 'mongoId',
-  //     },
-  //     'mirroredModelId',
-  //     'sourceModelId',
-  //     mockLogData,
-  //   )
+  test('parseFile > success', () => {
+    const result = parseFile(
+      {
+        modelId: 'sourceModelId',
+        name: 'file.txt',
+        size: 123,
+        mime: 'text/plain',
+        path: 'foo/file.txt',
+        complete: true,
+        deleted: false,
+        updatedAt: 'timestamp',
+        createdAt: 'timestamp',
+        _id: 'mongoId',
+      },
+      'mirroredModelId',
+      'sourceModelId',
+      mockLogData,
+    )
 
-  //   expect(result).toMatchSnapshot()
-  // })
+    expect(result).toMatchSnapshot()
+  })
 
-  // test('parseFile > data not a file', async () => {
-  //   await expect(() => parseFile({}, '', '', mockLogData)).rejects.toThrowError('Data cannot be converted into a file.')
-  // })
+  test('parseFile > data not a file', async () => {
+    await expect(() => parseFile({}, '', '', mockLogData)).rejects.toThrowError('Data cannot be converted into a file.')
+  })
 
-  // test('parseFile > file does not exist', async () => {
-  //   s3Mocks.objectExists.mockRejectedValueOnce('Error')
-  //   await expect(() =>
-  //     parseFile(
-  //       {
-  //         modelId: 'sourceModelId',
-  //         name: 'file.txt',
-  //         size: 123,
-  //         mime: 'text/plain',
-  //         path: 'foo/file.txt',
-  //         complete: true,
-  //         deleted: false,
-  //         updatedAt: 'timestamp',
-  //         createdAt: 'timestamp',
-  //         _id: 'mongoId',
-  //       },
-  //       'mirroredModelId',
-  //       'sourceModelId',
-  //       mockLogData,
-  //     ),
-  //   ).rejects.toThrowError('Error checking existence of file in storage.')
-  // })
+  test('parseFile > file does not exist', async () => {
+    s3Mocks.objectExists.mockRejectedValueOnce('Error')
+    await expect(() =>
+      parseFile(
+        {
+          modelId: 'sourceModelId',
+          name: 'file.txt',
+          size: 123,
+          mime: 'text/plain',
+          path: 'foo/file.txt',
+          complete: true,
+          deleted: false,
+          updatedAt: 'timestamp',
+          createdAt: 'timestamp',
+          _id: 'mongoId',
+        },
+        'mirroredModelId',
+        'sourceModelId',
+        mockLogData,
+      ),
+    ).rejects.toThrowError('Error checking existence of file in storage.')
+  })
 
-  // test('parseFile > bad sourceModelId', async () => {
-  //   await expect(() =>
-  //     parseFile(
-  //       {
-  //         modelId: 'sourceModelId',
-  //         name: 'file.txt',
-  //         size: 123,
-  //         mime: 'text/plain',
-  //         path: 'foo/file.txt',
-  //         complete: true,
-  //         deleted: false,
-  //         updatedAt: 'timestamp',
-  //         createdAt: 'timestamp',
-  //         _id: 'mongoId',
-  //       },
-  //       'mirroredModelId',
-  //       'badSourceModelId',
-  //       mockLogData,
-  //     ),
-  //   ).rejects.toThrowError(
-  //     'Compressed file contains files that have a model ID that does not match the source model Id.',
-  //   )
-  // })
+  test('parseFile > bad sourceModelId', async () => {
+    await expect(() =>
+      parseFile(
+        {
+          modelId: 'sourceModelId',
+          name: 'file.txt',
+          size: 123,
+          mime: 'text/plain',
+          path: 'foo/file.txt',
+          complete: true,
+          deleted: false,
+          updatedAt: 'timestamp',
+          createdAt: 'timestamp',
+          _id: 'mongoId',
+        },
+        'mirroredModelId',
+        'badSourceModelId',
+        mockLogData,
+      ),
+    ).rejects.toThrowError(
+      'Compressed file contains files that have a model ID that does not match the source model Id.',
+    )
+  })
 })

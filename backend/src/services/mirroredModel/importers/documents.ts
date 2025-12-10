@@ -19,7 +19,7 @@ import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from 
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseModelCard, parseRelease } from '../entityParsers.js'
-import { parseFile } from '../fileParser.js'
+import { parseFile } from '../entityParsers.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type DocumentsMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'Documents'> }

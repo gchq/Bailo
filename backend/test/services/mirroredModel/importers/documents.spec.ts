@@ -27,13 +27,14 @@ vi.mock('../../../../src/services/log.js', async () => ({
 const entityParsersMocks = vi.hoisted(() => ({
   parseModelCard: vi.fn(),
   parseRelease: vi.fn(),
+  parseFile: vi.fn(),
 }))
 vi.mock('../../../../src/services/mirroredModel/entityParsers.js', () => entityParsersMocks)
 
-const parseFileMocks = vi.hoisted(() => ({
-  parseFile: vi.fn(),
-}))
-vi.mock('../../../../src/services/mirroredModel/fileParser.js', () => parseFileMocks)
+// const parseFileMocks = vi.hoisted(() => ({
+//   parseFile: vi.fn(),
+// }))
+// vi.mock('../../../../src/services/mirroredModel/fileParser.js', () => parseFileMocks)
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
@@ -147,7 +148,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > success handle file entry', async () => {
-    parseFileMocks.parseFile.mockResolvedValue({ _id: 'file-id' })
+    entityParsersMocks.parseFile.mockResolvedValue({ _id: 'file-id' })
     fileMocks.saveImportedFile.mockResolvedValue(true)
 
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
@@ -160,7 +161,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(parseFileMocks.parseFile).toHaveBeenCalled()
+    expect(entityParsersMocks.parseFile).toHaveBeenCalled()
     expect(fileMocks.saveImportedFile).toHaveBeenCalled()
     expect(importer).toMatchSnapshot()
   })
