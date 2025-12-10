@@ -8,5 +8,5 @@ The logic for running project linting is:
 
 The individual config files that husky uses are:
 
-TypeScript: `backend/lint-staged.config.js` and `frontend/lint-staged.config.mjs`
-Python: `.pre-commit-config.yaml`
+- TypeScript: `backend/lint-staged.config.js` and `frontend/lint-staged.config.mjs`
+- Python: `.pre-commit-config.yaml`
