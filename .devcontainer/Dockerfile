@@ -1,36 +1,32 @@
-FROM node:24-bookworm
+FROM python:3.12-bookworm
 
 LABEL dev.containers.image.node.version="24" \
-      dev.containers.image.python.version="3.11"
+      dev.containers.image.python.version="3.12"
 
-# Install Python 3.11 and common tools
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        python3.11 \
-        python3.11-venv \
-        python3.11-dev \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel \
+# Install core tools and Node.js
+RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
+        ca-certificates \
         git \
         bash \
         build-essential \
         sudo \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g typescript \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Make python3.11 the default "python3"
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
- && update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+# Create a non-root 'user' user with passwordless sudo
+RUN useradd -ms /bin/bash user \
+    && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/user \
+    && chmod 0440 /etc/sudoers.d/user
 
-# Give node user passwordless sudo
-RUN echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/node \
-    && chmod 0440 /etc/sudoers.d/node
+# Ensure python3 points to 3.12
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.12 1 \
+ && update-alternatives --install /usr/bin/python python /usr/local/bin/python3.12 1
 
-# Install TypeScript globally
-RUN npm install -g typescript
+# Switch to 'user' user
+USER user
 
-# Switch to the existing `node` user
-USER node
-
+# Workdir for devcontainer
 WORKDIR /workspaces
