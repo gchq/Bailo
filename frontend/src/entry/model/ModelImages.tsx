@@ -57,13 +57,13 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
             <>
               <Box display='flex'>
                 <Box ml='auto'>
-                  <Restricted action='pushModelImage' fallback={<Button disabled>Push Image</Button>}>
+                  <Restricted action='pushModelImage' fallback={<Button disabled>Push image</Button>}>
                     <Button
                       variant='outlined'
                       onClick={() => setOpenUploadImageDialog(true)}
                       data-test='pushImageButton'
                     >
-                      Push Image
+                      Push image
                     </Button>
                   </Restricted>
                 </Box>
