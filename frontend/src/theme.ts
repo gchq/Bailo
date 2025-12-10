@@ -37,6 +37,21 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
     defaultProps: {
       disableElevation: true,
     },
+    styleOverrides: {
+      root: {
+        textTransform: 'none',
+      },
+    },
+  },
+  MuiTab: {
+    styleOverrides: {
+      root: {
+        textTransform: 'none',
+        '&:hover': {
+          backgroundColor: '#ececec',
+        },
+      },
+    },
   },
 }
 

@@ -431,7 +431,7 @@ export default function Marketplace() {
                 {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
                   <Box>
                     <ChipSelector
-                      label='External Repositories'
+                      label='External repositories'
                       chipTooltipTitle={'Include external repostories'}
                       options={Array.from(peers.keys())}
                       unreachableOptions={unreachablePeerList}
@@ -447,7 +447,8 @@ export default function Marketplace() {
                 )}
                 <Box>
                   <ChipSelector
-                    label='Popular Tags'
+                    label='Popular tags'
+                    subheading='(top 10)'
                     chipTooltipTitle={'Filter by frequently used tags'}
                     options={tags}
                     expandThreshold={10}
@@ -478,7 +479,7 @@ export default function Marketplace() {
                 )}
                 <Box>
                   <ChipSelector
-                    label='My Roles'
+                    label='My roles'
                     multiple
                     options={roleOptions.map((role) => role.label)}
                     onChange={handleSelectedRolesOnChange}
