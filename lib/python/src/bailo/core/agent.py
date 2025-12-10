@@ -9,6 +9,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 # isort: split
+# adding a comment to test pre commit hooks
 
 from bailo.core.exceptions import BailoException, ResponseException
 
