@@ -31,11 +31,6 @@ const entityParsersMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/mirroredModel/entityParsers.js', () => entityParsersMocks)
 
-// const parseFileMocks = vi.hoisted(() => ({
-//   parseFile: vi.fn(),
-// }))
-// vi.mock('../../../../src/services/mirroredModel/fileParser.js', () => parseFileMocks)
-
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
   saveImportedModelCard: vi.fn(),

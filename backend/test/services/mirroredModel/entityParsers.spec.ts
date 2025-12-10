@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-// import { parseFile, parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
 import { parseFile, parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
 
 const s3Mocks = vi.hoisted(() => ({
