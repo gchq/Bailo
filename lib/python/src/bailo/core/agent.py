@@ -10,8 +10,6 @@ from requests.auth import HTTPBasicAuth
 
 # isort: split
 
-# Adding another test comment
-
 from bailo.core.exceptions import BailoException, ResponseException
 
 logger = logging.getLogger(__name__)

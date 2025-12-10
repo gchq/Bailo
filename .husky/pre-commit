@@ -1,20 +1,27 @@
 #!/bin/sh
 
 # Run lint-staged for TypeScript frontend + backend
-echo "🔍 Running TypeScript/JavaScript lint-staged checks..."
+echo "Running TypeScript/JavaScript lint-staged checks..."
 npx lint-staged || exit 1
 
-# Check if Python is installed
+# Detect Python (python3 preferred, fallback to python)
+PYTHON_CMD=""
 if command -v python3 >/dev/null 2>&1; then
-  echo "Python detected: $(python3 --version)"
+  PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_CMD="python"
+fi
+
+if [ -n "$PYTHON_CMD" ]; then
+  echo "Python detected: $($PYTHON_CMD --version)"
 
   # Check if 'pre-commit' is installed in this Python environment
-  if python3 -m pre_commit --version >/dev/null 2>&1; then
-    echo "⚙️ Running Python pre-commit hooks..."
+  if $PYTHON_CMD -m pre_commit --version >/dev/null 2>&1; then
+    echo "Running Python pre-commit hooks..."
     pre-commit run --files $(git diff --cached --name-only)
   else
-    echo "pre-commit not installed in Python environment. Skipping Python linting."
-    echo "To enable, run: pip install pre-commit"
+    echo "'pre-commit' not installed in Python environment. Skipping Python linting."
+    echo "   To enable, run: pip install pre-commit"
   fi
 else
   echo "Python not found. Skipping Python linting."
