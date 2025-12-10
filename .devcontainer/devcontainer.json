@@ -26,7 +26,7 @@
     }
   },
   "postCreateCommand": "npm install",
-  "remoteUser": "node",
+  "remoteUser": "user",
 
   // Mount Docker socket from host
   "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
