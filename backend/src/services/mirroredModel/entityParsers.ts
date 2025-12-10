@@ -3,7 +3,7 @@ import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { MirrorImportLogData } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
-import { createFilePath, isFileInterfaceDoc } from '../fileSplit.js'
+import { createFilePath, isFileInterfaceDoc } from '../../utils/fileUtils.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
 

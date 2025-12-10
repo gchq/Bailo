@@ -18,7 +18,7 @@ import {
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
-import { isFileInterfaceDoc } from '../../src/services/fileSplit.js'
+import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
