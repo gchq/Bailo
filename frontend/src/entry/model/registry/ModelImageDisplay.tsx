@@ -1,7 +1,7 @@
 import { Card, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
+import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import MessageAlert from 'src/MessageAlert'
 import { ModelImage } from 'types/types'
@@ -13,16 +13,11 @@ type ModelImageDisplayProps = {
 export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const modelImageTags = useMemo(
-    () =>
-      uiConfig &&
-      modelImage.tags.map((imageTag) => (
-        <CodeLine
-          key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}
-          line={`${uiConfig.registry.host}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
-        />
-      )),
-    [modelImage, uiConfig],
+  const modelImageTag = ({ data }) => (
+    <CodeLine
+      key={`${modelImage.repository}-${modelImage.name}-${data.tag}`}
+      line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
+    />
   )
 
   if (isUiConfigError) {
@@ -42,7 +37,26 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
           <Typography component='h2' variant='h6' color='primary'>
             {modelImage.name}
           </Typography>
-          {modelImageTags}
+          {modelImage.tags.length >= 10 ? (
+            <Paginate
+              list={modelImage.tags.map((tag) => {
+                return { key: tag, ...{ tag } }
+              })}
+              sortingProperties={[{ value: 'tag', title: 'Tag', iconKind: 'text' }]}
+              searchFilterProperty={'tag'}
+              defaultSortProperty='tag'
+              emptyListText={`No image tags found for image ${modelImage.name}`}
+            >
+              {modelImageTag}
+            </Paginate>
+          ) : (
+            modelImage.tags.map((imageTag) => (
+              <CodeLine
+                key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}
+                line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
+              />
+            ))
+          )}
         </Stack>
       </Card>
     </>
