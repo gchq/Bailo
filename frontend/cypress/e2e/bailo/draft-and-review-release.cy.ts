@@ -93,7 +93,7 @@ describe('Draft and review a model release', () => {
   it('can download a release artefact', () => {
     cy.log('Navigating to the releases tab for a model')
     cy.visit(`/model/${modelUuidForRelease}?tab=releases  `)
-    cy.contains('Draft new Release')
+    cy.contains('Draft new release')
     // The following logic is to get around a known bug with Cypress and downloading files from anchor tags
     cy.log('Clicking the test file that is attached to a release')
     cy.get('[data-test="release-files-accordion-1.0.0"]').click()
