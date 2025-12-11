@@ -34,7 +34,7 @@ describe('Draft and review a model release', () => {
 
     cy.log('Navigating to releases tab to draft a new release')
     cy.get('[data-test=releasesTab]').click({ force: true })
-    cy.contains('Draft new Release')
+    cy.contains('Draft new release')
     cy.get('[data-test=draftNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
