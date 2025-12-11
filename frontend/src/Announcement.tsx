@@ -1,6 +1,6 @@
 import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { Box, Button, Grid, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 interface AnnoucementProps {
@@ -15,14 +15,12 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
 
   const announcementText = useMemo(() => {
     return message.length > 100 ? (
-      <Stack>
-        <Typography>
-          {showFullText ? message : `${message.slice(0, 100)}...`}
-          <Button variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
-            {showFullText ? 'Show less' : 'Show more'}
-          </Button>
-        </Typography>
-      </Stack>
+      <Typography sx={{ wordBreak: 'break-word' }}>
+        {showFullText ? message : `${message.slice(0, 100)}...`}
+        <Button variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
+          {showFullText ? 'Show less' : 'Show more'}
+        </Button>
+      </Typography>
     ) : (
       message
     )
@@ -32,45 +30,24 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
     <Box
       sx={{
         backgroundColor: theme.palette.info.light,
-        p: 1,
-        position: 'absolute',
-        bottom: 0,
-        mb: 4,
-        borderStyle: 'solid',
-        borderWidth: 2,
+        borderBottomStyle: 'solid',
+        borderWidth: 1,
         borderColor: theme.palette.primary.main,
-        borderRadius: 1,
-        left: 0,
-        right: 0,
-        maxWidth: 'md',
-        mx: 'auto',
+        p: 0.5,
       }}
     >
-      <Stack spacing={1} alignItems='center'>
-        <Grid container justifyContent='space-between' alignItems='center'>
-          <Grid size={{ xs: 1 }} />
-          <Grid size={{ xs: 10 }} sx={{ textAlign: 'center' }}>
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
-              sx={{ width: '100%' }}
-              justifyContent='center'
-              alignItems='center'
-            >
-              <CampaignIcon color='primary' />
-              <Typography color='primary' fontWeight='bold' sx={{ textAlign: 'center' }}>
-                Announcement
-              </Typography>
-              <CampaignIcon color='primary' />
-            </Stack>
-          </Grid>
-          <Grid size={{ xs: 1 }} sx={{ textAlign: 'right' }}>
-            <IconButton aria-label='close announcement pop-up' size='small' onClick={onClose}>
-              <Close color='primary' />
-            </IconButton>
-          </Grid>
-        </Grid>
-        {announcementText}
+      <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row' width='100%'>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='center' alignItems='center'>
+          <CampaignIcon color='primary' />
+          <Typography color='primary' fontWeight='bold' sx={{ textAlign: 'center' }}>
+            Announcement
+          </Typography>
+          <CampaignIcon color='primary' />
+          <Box sx={{ width: '100%' }}>{announcementText}</Box>
+        </Stack>
+        <IconButton aria-label='close announcement pop-up' size='small' onClick={onClose}>
+          <Close color='primary' />
+        </IconButton>
       </Stack>
     </Box>
   )

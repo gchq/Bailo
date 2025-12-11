@@ -1,5 +1,5 @@
 import { ExpandMore } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Tooltip } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
@@ -23,6 +23,7 @@ type PartialChipSelectorProps =
 
 type ChipSelectorProps = {
   label?: string
+  subheading?: string
   size?: 'small' | 'medium'
   expandThreshold?: number
   chipTooltipTitle?: string
@@ -35,6 +36,7 @@ type ChipSelectorProps = {
 
 export default function ChipSelector({
   label,
+  subheading,
   options,
   unreachableOptions,
   onChange,
@@ -89,7 +91,18 @@ export default function ChipSelector({
     return (
       <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
         <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-          <Typography component='h2' variant='h6'>{`${label}`}</Typography>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography component='h2' variant='h6'>
+              {`${label}`}
+            </Typography>
+            <Typography variant='caption'>{subheading ? subheading : ''}</Typography>
+          </Stack>
         </AccordionSummary>
         <AccordionDetails sx={{ p: 0 }}>
           <>

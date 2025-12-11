@@ -245,8 +245,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
         editAction='editRelease'
         deleteAction='deleteRelease'
-        editButtonText='Edit Release'
-        deleteButtonText='Delete Release'
+        editButtonText='Edit release'
+        deleteButtonText='Delete release'
         isEdit={isEdit}
         isLoading={isLoading}
         onEdit={handleEdit}
