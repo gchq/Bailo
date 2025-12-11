@@ -138,7 +138,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.5.0
+          node-version: 24.11.1
           cache: "npm"
 
       - name: Cache npm dependencies
@@ -172,7 +172,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.5.0
+          node-version: 24.11.1
           cache: "npm"
 
       # Setup BuildX
@@ -337,7 +337,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.5.0
+          node-version: 24.11.1
           cache: "npm"
 
       # Setup BuildX
