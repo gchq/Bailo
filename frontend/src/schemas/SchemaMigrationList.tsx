@@ -12,41 +12,37 @@ import { formatDateString } from 'utils/dateUtils'
 export default function SchemaMigrationList() {
   const theme = useTheme()
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
-  const SchemaMigrationList = memoize(({ data, index }) => (
+  const SchemaMigrationList = memoize(({ data }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} justifyContent='space-between'>
-        <Link
-          href={`/schemas/migrations/${data[index].id}`}
-          noLinkStyle
-          aria-label={`go to the ${data[index].name} migration plan`}
-        >
+        <Link href={`/schemas/migrations/${data.id}`} noLinkStyle aria-label={`go to the ${data.name} migration plan`}>
           <Typography fontWeight='bold' color='primary' variant='h6' component='h2'>
-            {`${data[index].name}`}
-            <em style={{ color: theme.palette.secondary.main }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
+            {`${data.name}`}
+            <em style={{ color: theme.palette.secondary.main }}>{` ${data.draft ? '(draft)' : ''}`}</em>
           </Typography>
         </Link>
         <Typography>
-          Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data[index].createdAt)}</span>
+          Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data.createdAt)}</span>
         </Typography>
       </Stack>
       <Stack direction='row' alignItems='center'>
         <Typography fontWeight='bold' color='primary'>
-          {data[index].id}
+          {data.id}
         </Typography>
         <CopyToClipboardButton
-          textToCopy={data[index].id}
+          textToCopy={data.id}
           notificationText='Copied migration ID to clipboard'
           ariaLabel='copy migration ID to clipboard'
         />
       </Stack>
       <Typography variant='caption'>
-        Plan for migrating <span style={{ fontWeight: 'bold' }}>{data[index].sourceSchema}</span> to{' '}
-        <span style={{ fontWeight: 'bold' }}>{data[index].targetSchema}</span>
+        Plan for migrating <span style={{ fontWeight: 'bold' }}>{data.sourceSchema}</span> to{' '}
+        <span style={{ fontWeight: 'bold' }}>{data.targetSchema}</span>
       </Typography>
-      {data[index].description && (
+      {data.description && (
         <>
           <Divider flexItem />
-          <Typography>{data[index].description}</Typography>
+          <Typography>{data.description}</Typography>
         </>
       )}
     </Stack>

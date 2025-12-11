@@ -21,16 +21,16 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
 
-  const AccessRequestListItem = memoize(({ data, index }) => (
+  const AccessRequestListItem = memoize(({ data }) => (
     <AccessRequestDisplay
-      accessRequest={data[index]}
-      key={data[index].metadata.overview.name}
+      accessRequest={data}
+      key={data.metadata.overview.name}
       hideReviewBanner={
         !hasRole(
           currentUserRoles,
           reviewRoles
             .filter((role) => {
-              const accessRequestSchema = schemas.find((schema) => schema.id === data[index].schemaId)
+              const accessRequestSchema = schemas.find((schema) => schema.id === data.schemaId)
               if (accessRequestSchema && accessRequestSchema.reviewRoles) {
                 return accessRequestSchema.reviewRoles.includes(role.shortName)
               } else {

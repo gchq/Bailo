@@ -17,8 +17,7 @@ interface EntryListRowProps {
   onSelectedStatesChange: (states: string[]) => void
   selectedPeers: string[]
   onSelectedPeersChange: (peers: string[]) => void
-  data: EntrySearchResult[]
-  index: number
+  entry: EntrySearchResult
   style: CSSProperties
   displayOrganisation?: boolean
   displayState?: boolean
@@ -35,8 +34,7 @@ export default function EntryListRow({
   onSelectedStatesChange,
   selectedPeers,
   onSelectedPeersChange,
-  data,
-  index,
+  entry,
   style,
   displayOrganisation = true,
   displayState = true,
@@ -44,7 +42,6 @@ export default function EntryListRow({
   peers,
 }: EntryListRowProps) {
   const theme = useTheme()
-  const entry = data[index]
 
   const entryKindForRedirect = useMemo(() => {
     return entry.kind === EntryKind.MODEL || entry.kind === EntryKind.MIRRORED_MODEL ? EntryKind.MODEL : entry.kind

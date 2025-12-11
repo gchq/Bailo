@@ -28,7 +28,7 @@ interface PaginateProps<T> {
   hideSearchInput?: boolean
   defaultSortProperty: keyof T
   defaultSortDirection?: SortingDirectionKeys
-  children: ({ data, index }: { data: T[]; index: number }) => ReactElement
+  children: ({ data }: { data: T }) => ReactElement
 }
 
 export const SortingDirection = {
@@ -228,7 +228,7 @@ export default function Paginate<T>({
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
         <div key={item['key']} style={{ width: '100%' }}>
-          {children({ data: sortedList, index })}
+          {children({ data: sortedList[index] })}
         </div>
       ))
     }

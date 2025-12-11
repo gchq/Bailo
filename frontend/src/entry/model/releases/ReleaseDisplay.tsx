@@ -94,11 +94,11 @@ export default function ReleaseDisplay({
     setExpanded(isExpanded ? panel : false)
   }
 
-  const FileRowItem = memoize(({ data, index }) => (
+  const FileRowItem = memoize(({ data }) => (
     <FileDisplay
       showMenuItems={{ rescanFile: scanners.length > 0 }}
-      key={data[index].name}
-      file={data[index]}
+      key={data.name}
+      file={data}
       modelId={model.id}
       mutator={mutateReleases}
       releases={releases}
