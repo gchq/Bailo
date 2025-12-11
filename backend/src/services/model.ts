@@ -19,8 +19,8 @@ import {
   EntrySearchOptionsParams,
   EntrySearchResultWithErrors,
   EntryUserPermissions,
+  MirrorImportLogData,
 } from '../types/types.js'
-import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'

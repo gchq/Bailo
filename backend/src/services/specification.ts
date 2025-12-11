@@ -7,8 +7,7 @@ import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
-import { FederationState } from '../types/types.js'
-import { MirrorKind } from '../types/types.js'
+import { FederationState, MirrorKind } from '../types/types.js'
 import config from '../utils/config.js'
 
 export const registry = new OpenAPIRegistry()
