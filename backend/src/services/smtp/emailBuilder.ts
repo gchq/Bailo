@@ -53,10 +53,8 @@ async function emailHtml(title, reviewMetadata, reviewActions) {
     wrapper(`
     <mj-section padding-bottom="5px" css-class='gradient-bg' padding-bottom="5px">
       <mj-column width="100%">
-        <mj-image
-          width="100px"
-          src="localhost:8080/logo-horizontal-light.png"
-        ></mj-image>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Bailo</span>
+        </mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">${title}</span>
         </mj-text>
       </mj-column>
