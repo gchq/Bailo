@@ -1,0 +1,41 @@
+{
+  "name": "Python 3.12 & Node.js 24",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.pylint",
+        "ms-python.isort",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ryanluker.vscode-coverage-gutters",
+        "tamasfe.even-better-toml",
+        "ms-azuretools.vscode-docker",
+        "mongodb.mongodb-vscode"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3.12"
+      }
+    }
+  },
+  "postCreateCommand": "npm install",
+  "remoteUser": "user",
+
+  // Mount Docker socket from host
+  "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
+
+  // Give permissions to use docker group
+  "runArgs": ["--group-add", "docker"],
+
+  // Install docker + docker compose inside container
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  }
+}
