@@ -107,7 +107,7 @@ Refer to [backend/docs/README.md](https://github.com/gchq/Bailo/blob/main/backen
 
 ### Install and add precommit
 
-If already working on Bailo you may be prompted to overwrite Husky. Follow the instructions given by Git CLI.
+If working on the Python package you will need to install the 'pre-commit' package. This will be ran from the root project level anytime you have staged committed changes.
 
 ```bash
 pip install pre-commit
