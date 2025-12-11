@@ -77,7 +77,7 @@ export default function ChipSelector({
       activeChip={selectedChips.includes(option)}
       handleChange={handleChange}
       chipTooltipTitle={
-        unreachableOptions && !unreachableOptions.includes(option) ? chipTooltipTitle : 'This is unreachable.'
+        unreachableOptions && unreachableOptions.includes(option) ? 'This is unreachable.' : chipTooltipTitle
       }
       ariaLabel={ariaLabel}
       variant={variant}
