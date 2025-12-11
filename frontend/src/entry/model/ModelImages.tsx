@@ -50,7 +50,6 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
 
   return (
     <>
-      {isModelImagesLoading && <Loading />}
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           {!readOnly && (
@@ -75,7 +74,7 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
               />
             </>
           )}
-          {modelImageList}
+          {isModelImagesLoading ? <Loading /> : modelImageList}
         </Stack>
       </Container>
     </>
