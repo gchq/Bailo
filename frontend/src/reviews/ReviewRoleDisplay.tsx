@@ -13,7 +13,11 @@ type ReviewRoleDisplayProps = {
 }
 
 export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
+  const {
+    entryRoles: modelRoles,
+    isEntryRolesLoading: isModelRolesLoading,
+    isEntryRolesError: isModelRolesError,
+  } = useGetModelRoles(review.model.id)
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
   if (isModelRolesError) {

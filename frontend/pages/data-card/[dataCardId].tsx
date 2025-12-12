@@ -14,10 +14,10 @@ export default function DataCard() {
   const router = useRouter()
   const { dataCardId }: { dataCardId?: string } = router.query
   const {
-    model: dataCard,
-    isModelLoading: isDataCardLoading,
-    isModelError: isDataCardError,
-    mutateModel,
+    entries: dataCard,
+    isEntryLoading: isDataCardLoading,
+    isEntryError: isDataCardError,
+    mutateEntries: mutateModel,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
 
   const { userPermissions } = useContext(UserPermissionsContext)

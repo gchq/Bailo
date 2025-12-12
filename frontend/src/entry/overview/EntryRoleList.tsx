@@ -12,7 +12,11 @@ type EntryRoleListProps = {
 }
 
 export default function EntryRoleList({ entry }: EntryRoleListProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(entry.id)
+  const {
+    entryRoles: modelRoles,
+    isEntryRolesLoading: isModelRolesLoading,
+    isEntryRolesError: isModelRolesError,
+  } = useGetModelRoles(entry.id)
   const rows = useMemo(
     () =>
       entry.collaborators.map((collaborator) => (

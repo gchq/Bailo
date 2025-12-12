@@ -23,7 +23,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
 
-  const { mutateModel } = useGetModel(entry.id)
+  const { mutateEntries: mutateModel } = useGetModel(entry.id)
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()

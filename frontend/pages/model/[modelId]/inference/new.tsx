@@ -29,7 +29,11 @@ export default function NewInference() {
 
   const [image, setImage] = useState<FlattenedModelImage | undefined>()
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(modelId, EntryKind.MODEL)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 

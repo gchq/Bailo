@@ -31,7 +31,11 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   const [isLoading, setIsLoading] = useState(false)
   const [isEdit, onIsEditChange] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(inference.modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(inference.modelId, EntryKind.MODEL)
   const { mutateInference } = useGetInference(inference.modelId, inference.image, inference.tag)
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 

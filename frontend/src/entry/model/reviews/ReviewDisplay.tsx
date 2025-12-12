@@ -23,7 +23,11 @@ export default function ReviewDisplay({
   showCurrentUserResponses = false,
   currentUserDn,
 }: ReviewDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const {
+    entryRoles: modelRoles,
+    isEntryRolesLoading: isModelRolesLoading,
+    isEntryRolesError: isModelRolesError,
+  } = useGetModelRoles(modelId)
   const dynamicRoles = useMemo(() => {
     const staticRoles = ['owner', 'contributor', 'consumer']
     return modelRoles.filter((role) => !staticRoles.includes(role.shortName))
