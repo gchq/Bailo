@@ -11,7 +11,6 @@ import {
   getFilesByIds,
   getFilesByModel,
   getTotalFileSize,
-  isFileInterfaceDoc,
   removeFile,
   removeFiles,
   rerunFileScan,
@@ -19,6 +18,7 @@ import {
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
+import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')

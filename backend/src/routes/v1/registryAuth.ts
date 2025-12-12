@@ -14,6 +14,7 @@ import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
 import config from '../../utils/config.js'
+import { getKid, getPublicKey } from '../../utils/registryUtils.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
@@ -38,53 +39,6 @@ export async function getAdminToken() {
 
 async function getPrivateKey() {
   return readFile(config.app.privateKey, { encoding: 'utf-8' })
-}
-
-async function getPublicKey() {
-  return readFile(config.app.publicKey, { encoding: 'utf-8' })
-}
-
-function getBit(buffer: Buffer, index: number) {
-  const byte = ~~(index / 8)
-  const bit = index % 8
-  const idByte = buffer[byte]
-  return Number((idByte & (2 ** (7 - bit))) !== 0)
-}
-
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-function formatKid(keyBuffer: Buffer) {
-  const bitLength = keyBuffer.length * 8
-
-  if (bitLength % 40 !== 0) {
-    throw new Error('Invalid bitLength provided, expected multiple of 40')
-  }
-
-  let output = ''
-  for (let i = 0; i < bitLength; i += 5) {
-    let idx = 0
-    for (let j = 0; j < 5; j += 1) {
-      idx <<= 1
-      idx += getBit(keyBuffer, i + j)
-    }
-    output += alphabet[idx]
-  }
-
-  const match = output.match(/.{1,4}/g)
-  if (match === null) {
-    throw new Error('KeyBuffer format failed, match did not find any sections.')
-  }
-
-  return match.join(':')
-}
-
-export async function getKid(cert?: X509Certificate) {
-  if (!cert) {
-    cert = new X509Certificate(await getPublicKey())
-  }
-  const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha256').update(der).digest().slice(0, 30)
-
-  return formatKid(hash)
 }
 
 async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {

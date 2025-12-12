@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'fs/promises'
 import r from 'jsrsasign'
 
-import { getKid } from '../routes/v1/registryAuth.js'
 import config from '../utils/config.js'
+import { getKid } from '../utils/registryUtils.js'
 
 async function script() {
   const pem = await readFile(config.app.publicKey, { encoding: 'utf-8' })
