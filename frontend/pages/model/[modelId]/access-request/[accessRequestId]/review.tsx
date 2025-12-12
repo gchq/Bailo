@@ -26,7 +26,11 @@ export default function AccessRequestReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isOpenAccessRequestDialogOpen, setIsOpenAccessRequestDialogOpen] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(modelId, EntryKind.MODEL)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({

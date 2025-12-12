@@ -1,6 +1,6 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
-import { EntrySearchResult, useGetModel, useListModels } from 'actions/model'
+import { EntrySearchResult, useGetModel, useListEntries } from 'actions/model'
 import { postFromTemplate } from 'actions/modelCard'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
@@ -21,16 +21,16 @@ export default function ModelTemplateSelect() {
   const [isButtonLoading, setIsButtonLoading] = useState(false)
 
   const {
-    model: entry,
-    isModelLoading: isEntryLoading,
-    isModelError: isEntryError,
-    mutateModel: mutateEntry,
+    entries: entry,
+    isEntryLoading: isEntryLoading,
+    isEntryError: isEntryError,
+    mutateEntries: mutateEntry,
   } = useGetModel(modelId, EntryKind.MODEL)
   const {
-    models: entries,
-    isModelsLoading: isEntriesLoading,
-    isModelsError: isEntriesError,
-  } = useListModels(EntryKind.MODEL, [], '', [], [], [], [], '', true)
+    entries: entries,
+    isEntriesLoading: isEntriesLoading,
+    isEntriesError: isEntriesError,
+  } = useListEntries(EntryKind.MODEL, [], '', [], [], [], [], '', true)
 
   const handleChange = (_event: SyntheticEvent, newValue: EntrySearchResult | null) => {
     setSelectedModel(newValue)

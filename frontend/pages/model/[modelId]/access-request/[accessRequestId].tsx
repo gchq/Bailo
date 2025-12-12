@@ -34,7 +34,11 @@ export default function AccessRequest() {
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(modelId, EntryKind.MODEL)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(
     accessRequest ? accessRequest.schemaId : undefined,

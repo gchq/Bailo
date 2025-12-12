@@ -12,7 +12,11 @@ import { EntryKind } from 'types/types'
 export default function InferenceApp() {
   const router = useRouter()
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(modelId, EntryKind.MODEL)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [isSpinningUp, setIsSpinningUp] = useState(true)

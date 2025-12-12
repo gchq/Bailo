@@ -42,7 +42,11 @@ export default function ReleaseReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(modelId, EntryKind.MODEL)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)

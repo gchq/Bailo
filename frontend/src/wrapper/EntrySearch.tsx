@@ -1,7 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, Chip, InputBase, List, ListItem, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { useListEntries } from 'actions/model'
 import { ChangeEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -47,10 +47,10 @@ export default function EntrySearch() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
   const {
-    models: entries,
-    isModelsLoading: isEntriesLoading,
-    isModelsError: isEntriesError,
-  } = useListModels(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
+    entries: entries,
+    isEntriesLoading: isEntriesLoading,
+    isEntriesError: isEntriesError,
+  } = useListEntries(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
 
   const modelList = useMemo(
     () =>

@@ -21,7 +21,11 @@ export default function NewAccessRequest() {
   const router = useRouter()
 
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(modelId, EntryKind.MODEL)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 

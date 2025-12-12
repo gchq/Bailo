@@ -505,7 +505,7 @@ export interface AccessRequestInterface {
   updatedAt: string
 }
 
-export interface ModelImage {
+export interface EntryImage {
   repository: string
   name: string
   tags: Array<string>

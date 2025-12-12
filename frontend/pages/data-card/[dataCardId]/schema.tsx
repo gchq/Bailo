@@ -12,9 +12,9 @@ export default function DataCardSchema() {
   const { dataCardId }: { dataCardId?: string } = router.query
 
   const {
-    model: dataCard,
-    isModelLoading: isDataCardLoading,
-    isModelError: isDataCardError,
+    entries: dataCard,
+    isEntryLoading: isDataCardLoading,
+    isEntryError: isDataCardError,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
 
   if (isDataCardError) {
