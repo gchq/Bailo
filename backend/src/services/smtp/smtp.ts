@@ -81,7 +81,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     true,
   )
 
-  await dispatchEmail(entity, emailContent)
+  await dispatchEmail(entity, await emailContent)
 }
 
 const requestingEntitiesText = (value: number) => {
@@ -120,7 +120,7 @@ export async function requestReviewForAccessRequest(
     true,
   )
 
-  await dispatchEmail(entity, emailContent)
+  await dispatchEmail(entity, await emailContent)
 }
 
 export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
@@ -158,7 +158,7 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-  await dispatchEmail(toEntity('user', release.createdBy), emailContent)
+  await dispatchEmail(toEntity('user', release.createdBy), await emailContent)
 }
 
 export async function notifyReviewResponseForAccess(
@@ -198,7 +198,7 @@ export async function notifyReviewResponseForAccess(
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-  await dispatchEmail(toEntity('user', accessRequest.createdBy), emailContent)
+  await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
 }
 
 async function sendEmail(email: Mail.Options) {
