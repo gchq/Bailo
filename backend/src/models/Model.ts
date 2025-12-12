@@ -44,6 +44,7 @@ export interface ModelCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  mirrored: boolean
 
   metadata: ModelMetadata
 }
@@ -64,6 +65,7 @@ export interface ModelInterface {
   kind: EntryKindKeys
   description: string
   card?: ModelCardInterface
+  mirroredCard?: ModelCardInterface
   organisation: string
   state: string
   tags: string[]
@@ -94,6 +96,15 @@ const ModelSchema = new Schema<ModelDoc>(
       schemaId: { type: String },
       version: { type: Number },
       createdBy: { type: String },
+      mirrored: { type: Boolean, default: false },
+
+      metadata: { type: Schema.Types.Mixed },
+    },
+    mirroredCard: {
+      schemaId: { type: String },
+      version: { type: Number },
+      createdBy: { type: String },
+      mirrored: { type: Boolean, default: true },
 
       metadata: { type: Schema.Types.Mixed },
     },
