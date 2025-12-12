@@ -28,7 +28,7 @@
     "@mui/material": "7.3.5",
     "@next/mdx": "^16.0.7",
     "dedent-js": "^1.0.1",
-    "next": "16.0.9",
+    "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "rehype-highlight": "^7.0.1",
