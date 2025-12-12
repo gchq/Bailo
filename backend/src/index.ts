@@ -1,4 +1,3 @@
-import './utils/signals.js'
 import './instrumentation.js'
 
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'

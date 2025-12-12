@@ -2,8 +2,7 @@ import { ModelAction, SchemaMigrationAction } from '../connectors/authorisation/
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { ModelDoc } from '../models/Model.js'
 import ModelCardRevisionModel from '../models/ModelCardRevision.js'
-import SchemaMigration, { SchemaMigrationInterface } from '../models/SchemaMigration.js'
-import SchemaMigrationModel from '../models/SchemaMigration.js'
+import SchemaMigrationModel, { SchemaMigrationInterface } from '../models/SchemaMigration.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaMigrationKind } from '../types/enums.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -19,7 +18,7 @@ export async function createSchemaMigrationPlan(
     throw BadReq('Could not create an ID for the schema migration due to missing name property')
   }
   const migrationId = convertStringToId(schemaMigration.name)
-  const schemaMigrationDoc = new SchemaMigration({ id: migrationId, ...schemaMigration })
+  const schemaMigrationDoc = new SchemaMigrationModel({ id: migrationId, ...schemaMigration })
 
   const auth = await authorisation.schemaMigration(user, schemaMigrationDoc, SchemaMigrationAction.Create)
   if (!auth.success) {
@@ -65,7 +64,7 @@ export async function updateSchemaMigrationPlan(
 }
 
 export async function searchSchemaMigrationById(schemaMigrationId: string) {
-  const schemaMigrationPlan = await SchemaMigration.findOne({ id: schemaMigrationId })
+  const schemaMigrationPlan = await SchemaMigrationModel.findOne({ id: schemaMigrationId })
   if (!schemaMigrationPlan) {
     throw NotFound('Cannot find specified schema migration plan.', { schemaMigrationId })
   }
@@ -73,7 +72,7 @@ export async function searchSchemaMigrationById(schemaMigrationId: string) {
 }
 
 export async function searchSchemaMigrations(sourceSchema?: string) {
-  return await SchemaMigration.find({ ...(sourceSchema && { sourceSchema }) })
+  return await SchemaMigrationModel.find({ ...(sourceSchema && { sourceSchema }) })
 }
 
 export async function runModelSchemaMigration(user: UserInterface, modelId: string, migrationPlanId: string) {

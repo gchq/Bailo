@@ -56,6 +56,7 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
+      'no-duplicate-imports': 'warn',
       'no-console': 'warn',
     },
   },

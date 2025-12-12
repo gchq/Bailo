@@ -4,7 +4,6 @@ import { createInferenceService, deleteInferenceService, updateInferenceService 
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import InferenceModel, { InferenceDoc, InferenceId, InferenceInterface } from '../models/Inference.js'
-import Inference from '../models/Inference.js'
 import { ModelDoc } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -19,7 +18,7 @@ export async function getInferenceByImage(user: UserInterface, modelId: string, 
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
-  const inference = await Inference.findOne({
+  const inference = await InferenceModel.findOne({
     modelId,
     image,
     tag,
@@ -79,7 +78,7 @@ export async function createInference(user: UserInterface, modelId: string, infe
 
   await createInferenceService(inferenceService)
 
-  const inference = new Inference({
+  const inference = new InferenceModel({
     modelId: modelId,
     createdBy: user.dn,
     ...inferenceParams,
@@ -128,7 +127,7 @@ export async function updateInference(
 
   await updateInferenceService(inferenceService)
 
-  const updatedInference = await Inference.findOneAndUpdate(
+  const updatedInference = await InferenceModel.findOneAndUpdate(
     { modelId: inference.modelId, image: inference.image, tag: inference.tag },
     inferenceParams,
     { new: true },
@@ -166,7 +165,7 @@ export async function removeInferences(
       }
     }
 
-    const inference = await Inference.findOne({ ...inferenceId })
+    const inference = await InferenceModel.findOne({ ...inferenceId })
     if (!inference) {
       throw NotFound('The requested inferencing service was not found.', { ...inferenceId })
     }

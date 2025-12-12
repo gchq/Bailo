@@ -6,8 +6,7 @@ import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
-import Release, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
-import ReleaseModel from '../models/Release.js'
+import ReleaseModel, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import Review, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -149,7 +148,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     releaseParams.modelCardVersion = model.card?.version
   }
 
-  const deletedRelease = await Release.findOne({
+  const deletedRelease = await ReleaseModel.findOne({
     modelId: releaseParams.modelId,
     semver: releaseParams.semver,
     deleted: true,
@@ -160,7 +159,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     )
   }
 
-  const release = new Release({
+  const release = new ReleaseModel({
     createdBy: user.dn,
     ...releaseParams,
   })
@@ -226,7 +225,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     })
   }
   const semverObj = semverStringToObject(semver)
-  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
+  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
@@ -235,7 +234,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   sendWebhooks(
     release.modelId,
     WebhookEvent.UpdateRelease,
-    `Release ${release.semver} has been updated for model ${release.modelId}`,
+    `ReleaseModel ${release.semver} has been updated for model ${release.modelId}`,
     { release },
   )
 
@@ -249,7 +248,7 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
   }
 
   const semverObj = semverStringToObject(semver)
-  const release = await Release.findOne({ modelId, semver: semverObj })
+  const release = await ReleaseModel.findOne({ modelId, semver: semverObj })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -278,7 +277,7 @@ export async function getModelReleases(
   querySemver?: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileWithScanResultsInterface[] }>> {
   const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
-  const results = await Release.aggregate()
+  const results = await ReleaseModel.aggregate()
     .match(query)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
@@ -325,7 +324,7 @@ export async function getModelReleases(
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
   const semverObjs = semvers.map((semver) => semverStringToObject(semver))
-  const releases = await Release.find({
+  const releases = await ReleaseModel.find({
     modelId,
     semver: semverObjs,
   })
@@ -377,7 +376,7 @@ export async function getReleaseBySemver(user: UserInterface, model: string | Mo
     model = await getModelById(user, model)
   }
   const semverObj = semverStringToObject(semver)
-  const release = await Release.findOne({
+  const release = await ReleaseModel.findOne({
     modelId: model.id,
     semver: semverObj,
   })
@@ -584,7 +583,7 @@ export async function removeFileFromReleases(user: UserInterface, model: ModelDo
     // Match documents where the element exists in the array
     fileIds: fileId,
   }
-  const releases = await Release.find(query)
+  const releases = await ReleaseModel.find(query)
 
   const responses = await authorisation.releases(user, model, releases, ReleaseAction.Update)
   const failures = responses.filter((response) => !response.success)
@@ -595,7 +594,7 @@ export async function removeFileFromReleases(user: UserInterface, model: ModelDo
     })
   }
 
-  const result = await Release.updateMany(query, {
+  const result = await ReleaseModel.updateMany(query, {
     $pull: { fileIds: fileId },
   })
 
@@ -617,7 +616,7 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 
 export async function getAllFileIds(modelId: string, semvers: string[]): Promise<string[]> {
   const semverObjs = semvers.map((semver) => semverStringToObject(semver))
-  const result = await Release.aggregate()
+  const result = await ReleaseModel.aggregate()
     .match({ modelId, semver: { $in: semverObjs } })
     .unwind({ path: '$fileIds' })
     .group({
@@ -633,7 +632,7 @@ export async function getAllFileIds(modelId: string, semvers: string[]): Promise
 }
 
 export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
-  const foundRelease = await Release.findOneAndUpdate(
+  const foundRelease = await ReleaseModel.findOneAndUpdate(
     { modelId: release.modelId, semver: semverStringToObject(release.semver) },
     release,
     {
