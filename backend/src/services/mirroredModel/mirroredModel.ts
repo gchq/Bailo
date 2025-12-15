@@ -167,7 +167,7 @@ export async function importModel(
 
   const importResult = await extractTarGzStream(responseBody, user, { importId })
   log.debug({ importId, importResult }, 'Completed extracting archive.')
-  
+
   const mirroredModel = await getModelByIdNoAuth(importResult.metadata.mirroredModelId)
 
   return {
