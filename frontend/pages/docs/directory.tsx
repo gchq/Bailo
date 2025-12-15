@@ -47,6 +47,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
   { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
   { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
+
+  { title: 'Accessiblility', slug: 'users/accessibility', header: true },
+  { title: 'Accessiblility Report', slug: 'users/accessibility/report' },
+
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
