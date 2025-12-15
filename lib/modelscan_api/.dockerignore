@@ -16,6 +16,7 @@ Dockerfile
 *env/
 *ENV/
 *env.bak/
+modelscanvenv/
 
 # Test files
 .pytest_cache/
