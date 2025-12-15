@@ -6,7 +6,6 @@ import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
-import AccessRequest from '../models/AccessRequest.js'
 import { ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -52,7 +51,7 @@ export async function createAccessRequest(
   }
 
   const accessRequestId = convertStringToId(accessRequestInfo.metadata.overview.name)
-  const accessRequest = new AccessRequest({
+  const accessRequest = new AccessRequestModel({
     id: accessRequestId,
     createdBy: user.dn,
     modelId,
@@ -132,14 +131,14 @@ export async function removeAccessRequest(
 
 export async function getAccessRequestsByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
-  const accessRequests = await AccessRequest.find({ modelId })
+  const accessRequests = await AccessRequestModel.find({ modelId })
 
   const auths = await authorisation.accessRequests(user, model, accessRequests, AccessRequestAction.View)
   return accessRequests.filter((_, i) => auths[i].success)
 }
 
 export async function getAccessRequestById(user: UserInterface, accessRequestId: string) {
-  const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
+  const accessRequest = await AccessRequestModel.findOne({ id: accessRequestId })
   if (!accessRequest) {
     throw NotFound('The requested access request was not found.', { accessRequestId })
   }
@@ -261,7 +260,7 @@ export async function updateAccessRequest(
 }
 
 export async function newAccessRequestComment(user: UserInterface, accessRequestId: string, message: string) {
-  const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
+  const accessRequest = await AccessRequestModel.findOne({ id: accessRequestId })
 
   if (!accessRequest) {
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
@@ -285,7 +284,7 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
 }
 
 export async function getModelAccessRequestsForUser(user: UserInterface, modelId: string) {
-  const accessRequests = await AccessRequest.find({
+  const accessRequests = await AccessRequestModel.find({
     modelId,
     'metadata.overview.entities': { $in: await authentication.getEntities(user) },
   })
