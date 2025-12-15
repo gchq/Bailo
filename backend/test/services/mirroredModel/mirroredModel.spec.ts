@@ -12,6 +12,9 @@ import {
 } from '../../../src/services/mirroredModel/mirroredModel.js'
 import { MirrorKind } from '../../../src/types/types.js'
 import { BadReq, InternalError } from '../../../src/utils/error.js'
+import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
+
+const ModelModelMock = getTypedModelMock('ModelModel')
 
 const configMock = vi.hoisted(() => ({
   ui: {
@@ -330,12 +333,23 @@ describe('services > mirroredModel', () => {
       await expect(importModel({} as any, 'url')).rejects.toThrow(/Unable to get the file/)
     })
 
+    test('missing mirrored model', async () => {
+      ModelModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      const promise = importModel({} as any, 'url')
+
+      await expect(promise).rejects.toThrowError(/^The requested Mirrored Model was not found./)
+      expect(fetchMock).toHaveBeenCalled()
+      expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
+      expect(ModelModelMock.findOne).toHaveBeenCalledWith({ id: 'dest123' })
+    })
+
     test('success with Readable', async () => {
       const res = await importModel({} as any, 'url')
 
       expect(fetchMock).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
-      expect(getModelByIdMock).toHaveBeenCalled()
+      expect(ModelModelMock.findOne).toHaveBeenCalledWith({ id: 'dest123' })
       expect(res).toHaveProperty('mirroredModel')
     })
 
@@ -356,7 +370,7 @@ describe('services > mirroredModel', () => {
       expect(fetchMock).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream.mock.calls.at(0)?.at(0)).toBeInstanceOf(Readable)
-      expect(getModelByIdMock).toHaveBeenCalled()
+      expect(ModelModelMock.findOne).toHaveBeenCalledWith({ id: 'dest123' })
       expect(res).toHaveProperty('mirroredModel')
     })
   })
