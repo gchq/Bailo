@@ -1,5 +1,7 @@
-import { Card, Stack, Typography } from '@mui/material'
+import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import { Accordion, AccordionDetails, AccordionSummary, Card, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
+import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
@@ -12,6 +14,11 @@ type ModelImageDisplayProps = {
 
 export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const [expanded, setExpanded] = useState(false)
+
+  function toggleExpand() {
+    setExpanded(!expanded)
+  }
 
   const modelImageTag = ({ data }) => (
     <CodeLine
@@ -38,17 +45,26 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
             {modelImage.name}
           </Typography>
           {modelImage.tags.length >= 10 ? (
-            <Paginate
-              list={modelImage.tags.map((tag) => {
-                return { key: tag, ...{ tag } }
-              })}
-              sortingProperties={[{ value: 'tag', title: 'Tag', iconKind: 'text' }]}
-              searchFilterProperty={'tag'}
-              defaultSortProperty='tag'
-              emptyListText={`No image tags found for image ${modelImage.name}`}
-            >
-              {modelImageTag}
-            </Paginate>
+            <Accordion expanded={expanded} onChange={toggleExpand}>
+              <AccordionSummary expandIcon={expanded ? <ExpandLess /> : <ExpandMore />} sx={{ px: 0 }}>
+                <Typography fontWeight='bold'>
+                  {expanded ? 'Hide' : 'Show'} {modelImage.tags.length} images
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Paginate
+                  list={modelImage.tags.map((tag) => {
+                    return { key: tag, ...{ tag } }
+                  })}
+                  sortingProperties={[{ value: 'tag', title: 'Tag', iconKind: 'text' }]}
+                  searchFilterProperty={'tag'}
+                  defaultSortProperty='tag'
+                  emptyListText={`No image tags found for image ${modelImage.name}`}
+                >
+                  {modelImageTag}
+                </Paginate>
+              </AccordionDetails>
+            </Accordion>
           ) : (
             modelImage.tags.map((imageTag) => (
               <CodeLine

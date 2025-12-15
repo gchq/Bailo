@@ -1,9 +1,9 @@
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetModelImages } from 'actions/model'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
-import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
 import ModelImageDisplay from 'src/entry/model/registry/ModelImageDisplay'
 import UploadModelImageDialog from 'src/entry/model/registry/UploadModelImageDialog'
@@ -20,8 +20,20 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
 
-  const modelImageListItem = ({ data }) => (
-    <ModelImageDisplay modelImage={data} key={`${data.repository}-${data.name}`} />
+  const modelImageList = useMemo(
+    () =>
+      isModelImagesLoading ? (
+        <Loading />
+      ) : modelImages.length ? (
+        modelImages.map((modelImage) => (
+          <ModelImageDisplay modelImage={modelImage} key={`${modelImage.repository}-${modelImage.name}`} />
+        ))
+      ) : (
+        <Box sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+          <EmptyBlob text={`No images found for model ${model.name}`} />
+        </Box>
+      ),
+    [isModelImagesLoading, modelImages, model.name],
   )
 
   if (isModelImagesError) {
@@ -40,20 +52,19 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
 
   return (
     <>
-      {isModelImagesLoading && <Loading />}
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           {!readOnly && (
             <>
               <Box display='flex'>
                 <Box ml='auto'>
-                  <Restricted action='pushModelImage' fallback={<Button disabled>Push Image</Button>}>
+                  <Restricted action='pushModelImage' fallback={<Button disabled>Push image</Button>}>
                     <Button
                       variant='outlined'
                       onClick={() => setOpenUploadImageDialog(true)}
                       data-test='pushImageButton'
                     >
-                      Push Image
+                      Push image
                     </Button>
                   </Restricted>
                 </Box>
@@ -65,18 +76,7 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
               />
             </>
           )}
-          <Paginate
-            list={modelImages.map((image) => {
-              return { key: `${image.repository}-${image.name}`, ...image }
-            })}
-            emptyListText={`No images found for model ${model.name}`}
-            searchFilterProperty='name'
-            sortingProperties={[{ value: 'name', title: 'Name', iconKind: 'text' }]}
-            defaultSortProperty='name'
-            searchPlaceholderText='Search by image name'
-          >
-            {modelImageListItem}
-          </Paginate>
+          {isModelImagesLoading ? <Loading /> : modelImageList}
         </Stack>
       </Container>
     </>
