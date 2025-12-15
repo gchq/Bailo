@@ -448,16 +448,23 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
-      - name: Start MLFlow
+      - name: Read MLFlow version from pyproject.toml
         if: matrix.job_name == 'integration_python'
-        run: mlflow server --port 5050 &
+        id: mlflow_version
+        run: |
+          version=$(grep -Po '(?<=mlflow-skinny\[mlserver\]==)[0-9]+\.[0-9]+\.[0-9]+' lib/python/pyproject.toml)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Start MLFlow via Docker
+        if: matrix.job_name == 'integration_python'
+        run: docker run -d --name mlflow_server -p 5050:5000 ghcr.io/mlflow/mlflow:v${{ steps.mlflow_version.outputs.version }} mlflow server --host 0.0.0.0 --port 5000
 
       - name: Wait for MLFlow
         if: matrix.job_name == 'integration_python'
         env:
           MLFLOW_URL: http://localhost:5050/ajax-api/2.0/mlflow/experiments/search?max_results=1
         run: |
-          for c in {1..5}; do test $(curl -s -o /dev/null -w "%{http_code}" ${MLFLOW_URL}) -eq 200 && break; done
+          for c in {1..10}; do test $(curl -s -o /dev/null -w "%{http_code}" ${MLFLOW_URL}) -eq 200 && break || sleep 3; done
 
       - name: Test with pytest
         if: matrix.job_name == 'integration_python'
