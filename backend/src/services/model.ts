@@ -119,6 +119,8 @@ export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys) 
   if (!model) {
     throw NotFound('The requested entry was not found.', { modelId })
   }
+
+  return model
 }
 
 export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
