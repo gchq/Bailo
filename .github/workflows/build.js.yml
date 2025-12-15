@@ -448,11 +448,11 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
-      - name: Read MLFlow version from pyproject.toml
+      - name: Get MLFlow version from installed package
         if: matrix.job_name == 'integration_python'
         id: mlflow_version
         run: |
-          version=$(grep -Po '(?<=mlflow-skinny\[mlserver\]==)[0-9]+\.[0-9]+\.[0-9]+' lib/python/pyproject.toml)
+          version=$(python -m pip show mlflow | awk '/Version:/ {print $2}')
           echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Start MLFlow via Docker
