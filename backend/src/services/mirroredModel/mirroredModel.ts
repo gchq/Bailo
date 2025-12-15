@@ -5,12 +5,12 @@ import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
-import { EntryKind, ModelInterface } from '../../models/Model.js'
+import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { BadReq, InternalError } from '../../utils/error.js'
+import { BadReq, InternalError, NotFound } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
@@ -168,7 +168,14 @@ export async function importModel(
   const importResult = await extractTarGzStream(responseBody, user, { importId })
   log.debug({ importId, importResult }, 'Completed extracting archive.')
 
-  const mirroredModel = await getModelById(user, importResult.metadata.mirroredModelId)
+  // similar to `getModelById` but without the auth check to allow getting a private model
+  const mirroredModel = await ModelModel.findOne({
+    id: importResult.metadata.mirroredModelId,
+  })
+
+  if (!mirroredModel) {
+    throw NotFound('The requested Mirrored Model was not found.', { modelId: importResult.metadata.mirroredModelId })
+  }
 
   return {
     mirroredModel,
