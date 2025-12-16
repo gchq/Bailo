@@ -1,6 +1,6 @@
 # Bailo Python Client Documentation
 
-The documentation for [a simple Python API Wrapper for Bailo](../../lib/python/README.md)
+The documentation for [Bailo Python Client](../../lib/python/README.md).
 
 <br />
 
@@ -27,7 +27,7 @@ The documentation for [a simple Python API Wrapper for Bailo](../../lib/python/R
 
 ## Documentation
 
-Documentation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
+Full Python client documentation: [Bailo Python Docs](https://gchq.github.io/Bailo/docs/python/index.html).
 
 ### Building locally
 
