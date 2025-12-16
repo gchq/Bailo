@@ -106,6 +106,8 @@ The following steps are only required for users who wish to extend or develop th
 
 ### Python Setup
 
+From within the `lib/python` directory:
+
 ```bash
 python3 -m venv libpythonvenv
 source libpythonvenv/bin/activate

@@ -1,6 +1,6 @@
 # Bailo Python Client Documentation
 
-The documentation for [Bailo Python Client](../../lib/python/README.md).
+[Bailo Python Client](../../lib/python/README.md) documentation. Full Python client documentation: [Bailo Python Docs](https://gchq.github.io/Bailo/docs/python/index.html).
 
 <br />
 
@@ -9,12 +9,13 @@ The documentation for [Bailo Python Client](../../lib/python/README.md).
     <summary>Table of Contents</summary>
     <ol>
         <li>
-            <a href="#documentation">Documentation</a>
+            <a href="#building-locally">Building Locally</a>
             <ul>
+                <li><a href="#docker">Docker</a></li>
                 <li>
-                    <a href="#building-locally">Building locally</a>
+                    <a href="#manual">Manual</a>
                     <ul>
-                        <li><a href="#prerequisites">Prerequisites</a></li>
+                        <li><a href="#python setup">Python Setup</a></li>
                         <li><a href="#building">Building</a></li>
                     </ul>
                 </li>
@@ -25,27 +26,28 @@ The documentation for [Bailo Python Client](../../lib/python/README.md).
 
 <br />
 
-## Documentation
+## Building Locally
 
-Full Python client documentation: [Bailo Python Docs](https://gchq.github.io/Bailo/docs/python/index.html).
+> **Requires:** Python 3.11 to 3.14, Docker or [Pandoc](https://pandoc.org/installing.html)
 
-### Building locally
+The following steps are only required for users who wish to extend or develop the documentation package locally.
 
-<!-- prettier-ignore-start -->
-> [!IMPORTANT]
-> Python 3.11 or higher is required
-<!-- prettier-ignore-end -->
+### Docker
 
-#### Prerequisites
+The docs are built and served as part of the `backend` docker image.
+
+### Manual
+
+#### Python Setup
 
 From within the `backend/docs` directory:
 
 ```bash
+python3 -m venv backenddocsvenv
+source backenddocsvenv/bin/activate
 pip install bailo -r requirements.txt
-apt install -y pandoc
 ```
 
 #### Building
 
-From the docs directory run either `make html` (Linux & Mac) or `make.bat` (Windows). This will build it in the backend
-directory by default.
+Run either `make html` (Linux & Mac) or `make.bat` (Windows). This will build the docs in the backend directory by default.
