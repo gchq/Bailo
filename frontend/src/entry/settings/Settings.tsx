@@ -116,7 +116,7 @@ export default function Settings({ entry }: SettingsProps) {
           selected={selectedCategory === SettingsCategory.PERMISSIONS}
           onClick={() => handleListItemClick(SettingsCategory.PERMISSIONS)}
         >
-          {`${toTitleCase(entry.kind)} Access`}
+          {`${toTitleCase(entry.kind)} access`}
         </SimpleListItemButton>
         {entry.kind === EntryKind.MODEL && (
           <>
@@ -124,7 +124,7 @@ export default function Settings({ entry }: SettingsProps) {
               selected={selectedCategory === SettingsCategory.ACCESS_REQUESTS}
               onClick={() => handleListItemClick(SettingsCategory.ACCESS_REQUESTS)}
             >
-              Access Requests
+              Access requests
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={selectedCategory === SettingsCategory.TEMPLATING}
@@ -137,7 +137,7 @@ export default function Settings({ entry }: SettingsProps) {
                 selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
                 onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}
               >
-                Mirrored Models
+                Mirrored models
               </SimpleListItemButton>
             )}
           </>
@@ -146,7 +146,7 @@ export default function Settings({ entry }: SettingsProps) {
           selected={selectedCategory === SettingsCategory.DANGER}
           onClick={() => handleListItemClick(SettingsCategory.DANGER)}
         >
-          Danger Zone
+          Danger zone
         </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>

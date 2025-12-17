@@ -257,12 +257,6 @@ export default function Paginate<T>({
           />
         )}
         {hideSearchInput && <div style={{ maxWidth: '200px', width: '100%' }}></div>}
-        <Pagination
-          count={pageCount}
-          page={page}
-          onChange={handlePageOnChange}
-          aria-label='top page pagination navigation'
-        />
         <Button
           onClick={handleMenuButtonClick}
           endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
