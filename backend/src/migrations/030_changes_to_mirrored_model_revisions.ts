@@ -12,7 +12,7 @@ export async function up() {
     model.set('mirroredCard', { ...model.card, mirrored: true }, { strict: false })
     model.set('card.metadata', {}, { strict: false })
     model.set('card.version', 1, { strict: false })
-    model.set('card.mirrored', false, { strict: false })
+    model.set('card.mirrored', true, { strict: false })
     await model.save()
   }
 }
