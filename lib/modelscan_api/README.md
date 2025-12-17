@@ -13,72 +13,67 @@ This directory provides all of the necessary functionality to interact with
 > model formats. ModelScan currently supports: H5, Pickle, and SavedModel formats. This protects you when using PyTorch,
 > TensorFlow, Keras, Sklearn, XGBoost, with more on the way.
 
-This API is used as a filescanner and is not published to PyPI. The built image is published to
+This API is used as a file scanner and is not published to PyPI. The built image is published to
 [GHCR bailo_modelscan](https://github.com/gchq/Bailo/pkgs/container/bailo_modelscan).
 
-## Docker
+## Quickstart
 
-Two Docker end-stages exist in [Dockerfile](./Dockerfile). These make deployment and running of the ModelScan REST API
-simpler. These Docker stages are used by the docker compose files in the root of the project, and can be built manually
-by using `--target dev` or `--target prod` respectively (targeting prod is optional and will be built by default)
+> **Requires:** Python 3.10 to 3.12, Docker
 
-Note that the Docker containers run on port `3311` rather than `8000`, so adjust URLs accordingly.
+### Build and Run via Docker
 
-## Setup
-
-<!-- prettier-ignore-start -->
-> [!IMPORTANT]
-> Python 3.10 to 3.12 is required
-<!-- prettier-ignore-end -->
-
-Create and activate a virtual environment
-
-```bash
-python3 -m venv modelscan-venv
-source modelscan-venv/bin/activate
-```
-
-Install the required pip packages
-
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-Optionally, create and populate a `.env` file to override and set any [Settings](./bailo_modelscan_api/config.py)
-variables, including sensitive properties as per
-[FastAPI's Reading a .env file docs](https://fastapi.tiangolo.com/advanced/settings/#reading-a-env-file).
-
-Build and run [Dockerfile](./Dockerfile).
+This is the fastest way to get ModelScan REST API running.
 
 ```bash
 docker build -t modelscan_rest_api:latest .
 docker run -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
 ```
 
-Connect via the local endpoint: `http://127.0.0.1:8000`
+> **Note:** API runs on **port 3311**, not 8000. Adjust requests accordingly.
 
-View the swagger docs: `http://127.0.0.1:8000/docs`
+### Connect to the API
 
-Alternatively, run:
+- Local endpoint: `http://localhost:3311`
+- API docs (Swagger): `http://localhost:3311/docs`
 
-```bash
-fastapi run bailo_modelscan_api/main.py
+## Optional Configuration
+
+You can override default settings by creating a `.env` file. This is useful for sensitive or environment-specific properties. Refer to [FastAPI's env file docs](https://fastapi.tiangolo.com/advanced/settings/#reading-a-env-file) for formatting.
+
+Example `.env`:
+
+```env
+API_KEY=yourapikey
 ```
 
 ## Development
 
-### Install dev packages
+The following steps are only required for users who wish to extend or develop the API locally.
 
-If already working on Bailo you may be prompted to overwrite Husky. Follow the instructions given by Git CLI.
+### Python setup
 
 ```bash
+python3 -m venv modelscanvenv
+source modelscanvenv/bin/activate
 pip install -r requirements-dev.txt
-pre-commit install
 ```
 
-### Tests
+### Developer Mode via Docker
+
+This mode mounts your source code for real-time changes.
+
+```bash
+docker build -t modelscan_rest_api:latest --target dev .
+docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
+```
+
+Alternatively, run locally without Docker:
+
+```bash
+fastapi dev --port 3311 bailo_modelscan_api/main.py
+```
+
+### Running Tests
 
 To run the unit tests:
 
@@ -92,26 +87,15 @@ To run the integration tests (does not require any externally running services):
 pytest -m integration
 ```
 
-Note that the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
+> **Note:** the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
 refer to [test_integration](./tests/test_integration/README.md) for details.
 
-### Running
+## Docker Build Stages
 
-To run in [dev mode](https://fastapi.tiangolo.com/fastapi-cli/#fastapi-dev):
+The [Dockerfile](./Dockerfile) has two build targets:
 
-Build and run [Dockerfile](./Dockerfile) using `--target dev` which mounts the `bailo_modelscan_api` directory as a
-volume, so allows for real-time changes with FastAPI running in dev mode.
-
-```bash
-docker build -t modelscan_rest_api:latest --target dev .
-docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
-```
-
-Alternatively, run:
-
-```bash
-fastapi dev bailo_modelscan_api/main.py
-```
+- `dev` - mounts source code for live changes
+- `prod` - optimised for deployment (default target)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
