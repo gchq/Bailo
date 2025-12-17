@@ -6,13 +6,15 @@ export async function up() {
   if ('modelId_1_version_1' in indexes) {
     await ModelCardRevisionModel.collection.dropIndex('modelId_1_version_1')
   }
-  await ModelCardRevisionModel.updateMany({}, { $set: { mirrored: false } })
+  await ModelCardRevisionModel.updateMany({ mirrored: { $exists: false } }, { $set: { mirrored: false } })
   const mirroredModels = await Model.find({ kind: EntryKind.MirroredModel })
   for (const model of mirroredModels) {
     model.set('mirroredCard', { ...model.card, mirrored: true }, { strict: false })
     model.set('card.metadata', {}, { strict: false })
     model.set('card.version', 1, { strict: false })
-    model.set('card.mirrored', true, { strict: false })
+    if (model.card?.mirrored === undefined) {
+      model.set('card.mirrored', true, { strict: false })
+    }
     await model.save()
   }
 }
