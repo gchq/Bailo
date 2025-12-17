@@ -48,8 +48,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
   { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
 
+  /// Accessibility
   { title: 'Accessiblility', slug: 'users/accessibility', header: true },
-  { title: 'Accessiblility Report', slug: 'users/accessibility/report' },
+  { title: 'Accessibility Statement', slug: 'users/accessibility/accessibility-statement' },
+  { title: 'Accessiblility Report', slug: 'users/accessibility/accessibility-report' },
 
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
@@ -78,10 +80,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
   { title: 'DataBase Scripts', slug: 'administration/migrations/scripts' },
-
-  /// Accessibility
-  { title: 'Accessibility', slug: 'accessibility', header: true },
-  { title: 'Accessibility Statement', slug: 'accessibility/accessibility-statement' },
 ]
 
 export interface DirectoryTree {
