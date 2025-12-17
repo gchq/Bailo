@@ -42,13 +42,18 @@ export async function putModelCard(modelId: string, metadata: unknown) {
   }
 }
 
-export function useGetEntryCard(entryId?: string, entryCardVersion?: number) {
+export function useGetEntryCard(entryId?: string, entryCardVersion?: number, mirrored?: boolean) {
   const { data, isLoading, error } = useSWR<
     {
       modelCard: EntryCardInterface
     },
     ErrorInfo
-  >(entryId && entryCardVersion ? `/api/v2/model/${entryId}/model-card/${entryCardVersion}` : null, fetcher)
+  >(
+    entryId && entryCardVersion
+      ? `/api/v2/model/${entryId}/model-card/${entryCardVersion}${mirrored ? '?mirrored=true' : ''}`
+      : null,
+    fetcher,
+  )
 
   return {
     entryCard: data ? data.modelCard : undefined,

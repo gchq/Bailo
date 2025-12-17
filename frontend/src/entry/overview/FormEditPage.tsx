@@ -99,7 +99,8 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
 
   useEffect(() => {
     if (!entry || !schema) return
-    const metadata = entry.card.metadata
+    const metadata =
+      entry.kind === EntryKind.MIRRORED_MODEL && entry.mirroredCard ? entry.mirroredCard.metadata : entry.card.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
     for (const step of steps) {
       step.steps = steps
@@ -164,12 +165,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   return (
     <>
       <Box sx={{ py: 1 }}>
-        {entry.kind === EntryKind.MIRRORED_MODEL && isEdit && (
-          <MessageAlert
-            message={`Mirrored from ${entry.settings.mirror?.sourceModelId}. Some parts of this information will be read-only.`}
-            severity='info'
-          />
-        )}
         <Stack
           direction={{ sm: 'column', md: 'row' }}
           justifyContent='space-between'
@@ -215,6 +210,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     setOldSchema(_.cloneDeep(splitSchema))
                   }}
                   data-test='editEntryCardButton'
+                  disabled={entry.kind === EntryKind.MIRRORED_MODEL}
                   startIcon={<EditIcon fontSize='small' />}
                 >
                   {`Edit ${EntryCardKindLabel[entry.kind]}`}

@@ -414,6 +414,7 @@ export async function getModelCard(
   user: UserInterface,
   modelId: string,
   version: number | GetModelCardVersionOptionsKeys,
+  mirrored: boolean = false,
 ) {
   if (version === GetModelCardVersionOptions.Latest) {
     const card = (await getModelById(user, modelId)).card
@@ -424,12 +425,12 @@ export async function getModelCard(
 
     return card
   } else {
-    return getModelCardRevision(user, modelId, version)
+    return getModelCardRevision(user, modelId, version, mirrored)
   }
 }
 
-export async function getModelCardRevision(user: UserInterface, modelId: string, version: number) {
-  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
+export async function getModelCardRevision(user: UserInterface, modelId: string, version: number, mirrored: boolean) {
+  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version, mirrored })
   const model = await getModelById(user, modelId)
 
   if (!modelCard) {
@@ -479,6 +480,8 @@ export async function _setModelCard(
   //
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
+
+  checkModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {

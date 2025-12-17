@@ -9,9 +9,14 @@ import { EntryKind } from 'types/types'
 
 export default function ModelCardVersion() {
   const router = useRouter()
-  const { modelId, modelCardVersion }: { modelId?: string; modelCardVersion?: number } = router.query
+  const { modelId, modelCardVersion, mirrored }: { modelId?: string; modelCardVersion?: number; mirrored?: string } =
+    router.query
 
-  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(modelId, modelCardVersion)
+  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(
+    modelId,
+    modelCardVersion,
+    mirrored === 'true' ? true : false,
+  )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entryCard?.schemaId || '')
 
   const error = MultipleErrorWrapper(`Unable to load history page`, {

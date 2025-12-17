@@ -13,7 +13,7 @@ export async function up() {
     model.set('card.metadata', {}, { strict: false })
     model.set('card.version', 1, { strict: false })
     model.set('card.mirrored', false, { strict: false })
-    model.save()
+    await model.save()
   }
 }
 

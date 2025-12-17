@@ -20,7 +20,7 @@ export default function EntryCardRevision({ entryCard, entryKind }: EntryCardRev
         hover
         onClick={() =>
           router.push(
-            `/${entryKind === EntryKind.MIRRORED_MODEL || entryKind === EntryKind.MODEL ? EntryKind.MODEL : entryKind}/${entryCard.modelId}/history/${entryCard.version}`,
+            `/${entryKind === EntryKind.MIRRORED_MODEL || entryKind === EntryKind.MODEL ? EntryKind.MODEL : entryKind}/${entryCard.modelId}/history/${entryCard.version}${entryCard.mirrored ? '?mirrored=true' : ''}`,
           )
         }
         sx={{ '&:hover': { cursor: 'pointer' } }}
