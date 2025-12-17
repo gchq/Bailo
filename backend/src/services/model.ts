@@ -429,7 +429,12 @@ export async function getModelCard(
   }
 }
 
-export async function getModelCardRevision(user: UserInterface, modelId: string, version: number, mirrored: boolean) {
+export async function getModelCardRevision(
+  user: UserInterface,
+  modelId: string,
+  version: number,
+  mirrored: boolean = false,
+) {
   const modelCard = await ModelCardRevisionModel.findOne({ modelId, version, mirrored })
   const model = await getModelById(user, modelId)
 

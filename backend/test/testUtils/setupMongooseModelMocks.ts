@@ -49,6 +49,7 @@ type ModelMock<TDoc extends { _id?: any }> = MockInstance & {
     findOne: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
     findOneAndDelete: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
     findOneAndUpdate: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
+    save: MockedFunction<() => Promise<TDoc & InstanceType<TDoc>>>
     countDocuments: MockedFunction<(filter?: any) => Promise<number>>
     reset(): void
   }
