@@ -46,7 +46,7 @@ export default function MarkdownDisplay({ children, id }: MarkdownDisplayProps) 
         },
         p: {
           component: (props: TypographyProps) => (
-            <Typography component='p' sx={{ wordWrap: 'break-word' }} {...props} />
+            <Typography component='p' sx={{ wordWrap: 'break-word', py: 1 }} {...props} />
           ),
         },
         blockquote: {

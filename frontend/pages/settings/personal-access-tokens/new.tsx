@@ -293,7 +293,7 @@ export default function NewToken() {
                   onClick={handleSubmit}
                   data-test='generatePersonalAccessTokenButton'
                 >
-                  Generate Token
+                  Generate token
                 </Button>
                 <MessageAlert message={isModelsError?.info.message || errorMessage} severity='error' />
               </Stack>

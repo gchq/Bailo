@@ -108,7 +108,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           pr: '24px', // keep right padding when drawer closed
         }}
       >
-        <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ width: '100%' }}>
+        <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' sx={{ width: '100%' }}>
           {!isSmOrLarger && (
             <Box>
               <IconButton onClick={handleNavMenuClicked}>
