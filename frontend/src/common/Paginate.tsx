@@ -251,7 +251,9 @@ export default function Paginate<T>({
         justifyContent='space-between'
         alignItems='center'
       >
-        {!hideSearchInput && (
+        {hideSearchInput ? (
+          <div style={{ maxWidth: '200px', width: '100%' }}></div>
+        ) : (
           <TextField
             size='small'
             value={searchFilter}
@@ -260,7 +262,6 @@ export default function Paginate<T>({
             sx={{ maxWidth: '200px' }}
           />
         )}
-        {hideSearchInput && <div style={{ maxWidth: '200px', width: '100%' }}></div>}
         <Button
           onClick={handleMenuButtonClick}
           endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
