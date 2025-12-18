@@ -96,7 +96,7 @@ const ModelSchema = new Schema<ModelDoc>(
       schemaId: { type: String },
       version: { type: Number },
       createdBy: { type: String },
-      mirrored: { type: Boolean, default: false },
+      mirrored: { type: Boolean },
 
       metadata: { type: Schema.Types.Mixed },
     },
@@ -104,7 +104,7 @@ const ModelSchema = new Schema<ModelDoc>(
       schemaId: { type: String },
       version: { type: Number },
       createdBy: { type: String },
-      mirrored: { type: Boolean, default: true },
+      mirrored: { type: Boolean },
 
       metadata: { type: Schema.Types.Mixed },
     },
