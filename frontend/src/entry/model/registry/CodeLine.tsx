@@ -22,7 +22,17 @@ export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
       >
         <Stack direction='row' spacing={2} alignItems='center'>
           {icon}
-          <Typography>{line}</Typography>
+          <Typography
+            sx={{
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
+              whitespace: 'pre-wrap',
+              flexGrow: 1,
+              minWidth: 0,
+            }}
+          >
+            {line}
+          </Typography>
         </Stack>
       </Box>
       <CopyToClipboardButton

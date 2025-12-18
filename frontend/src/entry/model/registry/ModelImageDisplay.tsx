@@ -39,7 +39,16 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
         }}
       >
         <Stack direction='column' spacing={1}>
-          <Typography component='h2' variant='h6' color='primary'>
+          <Typography
+            component='h2'
+            variant='h6'
+            color='primary'
+            sx={{
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              maxWidth: '100%',
+            }}
+          >
             {modelImage.name}
           </Typography>
           {modelImageTags}

@@ -170,7 +170,19 @@ export default function PageWithTabs({
         )}
         {additionalHeaderDisplay}
       </Stack>
-      <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
+      <Typography
+        sx={{
+          pl: 2,
+          pb: 1,
+          overflowWrap: 'anywhere',
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap',
+          flexGrow: 1,
+          minWidth: 0,
+        }}
+      >
+        {additionalInfo}
+      </Typography>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}
