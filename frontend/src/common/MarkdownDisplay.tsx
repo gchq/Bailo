@@ -72,24 +72,11 @@ export default function MarkdownDisplay({ children, id }: MarkdownDisplayProps) 
         },
         span: {
           component: (props: TypographyProps) => (
-            <Typography
-              component='span'
-              sx={{
-                wordWrap: 'break-word',
-              }}
-              {...props}
-            />
+            <Typography component='span' sx={{ wordWrap: 'break-word' }} {...props} />
           ),
         },
         a: {
-          component: (props: any) => (
-            <Link
-              sx={{
-                wordWrap: 'break-word',
-              }}
-              {...props}
-            />
-          ),
+          component: (props: any) => <Link sx={{ wordWrap: 'break-word' }} {...props} />,
         },
         li: {
           component: (props: any) => (
@@ -119,8 +106,17 @@ export default function MarkdownDisplay({ children, id }: MarkdownDisplayProps) 
   )
 
   return (
-    <ReactMarkdown options={options} id={id}>
-      {children}
-    </ReactMarkdown>
+    <Box
+      sx={{
+        overflowWrap: 'anywhere',
+        wordBreak: 'break-word',
+        whiteSpace: 'normal',
+      }}
+      id={id}
+    >
+      <ReactMarkdown options={options} id={id}>
+        {children}
+      </ReactMarkdown>
+    </Box>
   )
 }

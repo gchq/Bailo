@@ -40,20 +40,19 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
 
   return (
     <>
-      {isModelImagesLoading && <Loading />}
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           {!readOnly && (
             <>
               <Box display='flex'>
                 <Box ml='auto'>
-                  <Restricted action='pushModelImage' fallback={<Button disabled>Push Image</Button>}>
+                  <Restricted action='pushModelImage' fallback={<Button disabled>Push image</Button>}>
                     <Button
                       variant='outlined'
                       onClick={() => setOpenUploadImageDialog(true)}
                       data-test='pushImageButton'
                     >
-                      Push Image
+                      Push image
                     </Button>
                   </Restricted>
                 </Box>
@@ -65,18 +64,22 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
               />
             </>
           )}
-          <Paginate
-            list={modelImages.map((image) => {
-              return { key: `${image.repository}-${image.name}`, ...image }
-            })}
-            emptyListText={`No images found for model ${model.name}`}
-            searchFilterProperty='name'
-            sortingProperties={[{ value: 'name', title: 'Name', iconKind: 'text' }]}
-            defaultSortProperty='name'
-            searchPlaceholderText='Search by image name'
-          >
-            {modelImageListItem}
-          </Paginate>
+          {isModelImagesLoading ? (
+            <Loading />
+          ) : (
+            <Paginate
+              list={modelImages.map((image) => {
+                return { key: `${image.repository}-${image.name}`, ...image }
+              })}
+              emptyListText={`No images found for model ${model.name}`}
+              searchFilterProperty='name'
+              sortingProperties={[{ value: 'name', title: 'Name', iconKind: 'text' }]}
+              defaultSortProperty='name'
+              searchPlaceholderText='Search by image name'
+            >
+              {modelImageListItem}
+            </Paginate>
+          )}
         </Stack>
       </Container>
     </>

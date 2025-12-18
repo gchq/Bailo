@@ -3,7 +3,7 @@ import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { MirrorImportLogData } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
-import { createFilePath, isFileInterfaceDoc } from '../file.js'
+import { createFilePath, isFileInterfaceDoc } from '../../utils/fileUtils.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
 
@@ -70,7 +70,6 @@ export function parseRelease(
 
   return release
 }
-
 export async function parseFile(
   file: unknown,
   mirroredModelId: string,

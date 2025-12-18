@@ -3,7 +3,7 @@
 [![PyPI - Python Version][pypi-python-version-shield]][pypi-url] [![PyPI - Version][pypi-version-shield]][pypi-url]
 [![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
-A simple Python API Wrapper for Bailo
+A lightweight, Python API wrapper for Bailo, providing streamlined programmatic access to its core functionality - designed for Data Scientists, ML Engineers, and Developers who need to integrate Bailo capabilities directly into their workflows.
 
 <br />
 
@@ -12,13 +12,12 @@ A simple Python API Wrapper for Bailo
     <summary>Table of Contents</summary>
     <ol>
         <li>
-            <a href="#key-features">Key Features</a>
-        </li>
-        <li>
-            <a href="#installing">Installing</a>
-        </li>
-        <li>
-            <a href="#getting-started">Getting Started</a>
+            <a href="#quickstart">Quickstart</a>
+            <ul>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#basic-usage">Basic Usage</a></li>
+                <li><a href="#core-features">Core Features</a></li>
+            </ul>
         </li>
         <li>
             <a href="#documentation">Documentation</a>
@@ -29,9 +28,8 @@ A simple Python API Wrapper for Bailo
         <li>
             <a href="#development">Development</a>
             <ul>
-                <li><a href="#install-and-add-precommit">Install and add precommit</a></li>
-                <li><a href="#install-the-package-locally">Install the package locally</a></li>
-                <li><a href="#testing">Testing</a></li>
+                <li><a href="#python-setup">Python Setup</a></li>
+                <li><a href="#running-tests">Running Tests</a></li>
             </ul>
         </li>
     </ol>
@@ -39,42 +37,28 @@ A simple Python API Wrapper for Bailo
 
 <br />
 
-## Key Features
+## Quickstart
 
-- Uploading and downloading model binaries
-- Managing Models and Releases
-- Managing Datacards
-- Managing Schemas
-- Managing Access Requests
+> **Requires:** Python 3.9 to 3.13
 
-The Bailo Python client aims to programmatically cover Bailo's core functionality by interacting with the endpoints in
-the backend. The functionality covered is that which a Data Scientist, Software Engineer or other similarly technical
-role might be expected to utilise, meaning that it does _not_ have complete coverage of all endpoints, such as those
-relating to the discussion & approval of reviews & access requests. For these interactions, the web frontend is expected
-to be used.
-
-## Installing
-
-<!-- prettier-ignore-start -->
-> [!IMPORTANT]
-> Python 3.9 or higher is required
-<!-- prettier-ignore-end -->
+### Installation
 
 ```bash
 pip install bailo
 ```
 
-The Bailo Python client also (optionally) supports integration with [MLFlow](https://mlflow.org/) with the extra
-functionality included in `bailo`'s `mlflow` optional-dependency.
+Optional: enable integration with [MLFlow](https://mlflow.org/) for advanced model tracking:
 
 ```bash
 pip install bailo[mlflow]
 ```
 
-## Getting Started
+### Basic Usage
 
 ```python
 from bailo import Client, Model
+
+# Connect to Bailo server
 client = Client("http://localhost:8080")
 
 # Create a model
@@ -84,20 +68,33 @@ yolo = Model.create(
     description="You only look once!"
 )
 
+# Populate datacard using a predefined schema
 yolo.card_from_schema("minimal-general-v10")
 
 # Create a new release
-my_release = yolo.create_release(version="0.1.0",
-                                 notes="Beta")
+my_release = yolo.create_release(
+    version="0.1.0",
+    notes="Beta"
+)
 
-# Upload a file to the release
+# Upload a binary file to the release
 with open("yolo.onnx") as f:
     my_release.upload("yolo", f)
 ```
 
+### Core Features
+
+- Upload and download model binaries
+- Manage Models & Releases
+- Handle Datacards & Schemas
+- Manage Schemas
+- Process Access Requests
+
+> **Note:** Certain collaborative actions (approvals, review threads, etc.) are best handled via the Bailo web interface.
+
 ## Documentation
 
-Documentation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
+Full Python client documentation: [Bailo Python Docs](https://gchq.github.io/Bailo/docs/python/index.html).
 
 ### Building locally
 
@@ -105,43 +102,40 @@ Refer to [backend/docs/README.md](https://github.com/gchq/Bailo/blob/main/backen
 
 ## Development
 
-### Install and add precommit
+The following steps are only required for users who wish to extend or develop the Bailo Python client locally.
 
-If already working on Bailo you may be prompted to overwrite Husky. Follow the instructions given by Git CLI.
+### Python Setup
 
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-### Install the package locally
+From within the `lib/python` directory:
 
 ```bash
+python3 -m venv libpythonvenv
+source libpythonvenv/bin/activate
 pip install -e .[test]
 ```
 
-### Testing
+### Running Tests
 
-The package uses Pytest to test packages. Tests can be ran accordingly from within this directory. Tests are split into
-categories sections for automation purposes.
+To run the unit tests:
 
-In order to run integration tests make sure Bailo is running on `https://localhost:8080`:
+```bash
+pytest
+```
+
+To run the integration tests (requires Bailo running on `https://localhost:8080`):
 
 ```bash
 pytest -m integration
 ```
 
-To run the mlflow tests, make sure that Bailo is running as above and mlflow is running on port 5050 e.g.
-`mlflow server --host 127.0.0.1 --port 5050`:
+To run the mlflow integration tests (requires Bailo running on `https://localhost:8080` and mlflow running on `https://localhost:5050` e.g. via docker):
 
 ```bash
+docker run -p 5050:5000 \
+    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow | awk '/Version:/ {print $2}')" \
+    mlflow server --host 0.0.0.0 --port 5000
+
 pytest -m mlflow
-```
-
-Run all other tests:
-
-```bash
-pytest
 ```
 
 <!-- MARKDOWN LINKS & IMAGES -->

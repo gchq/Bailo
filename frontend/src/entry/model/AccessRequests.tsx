@@ -65,7 +65,7 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/model/${model.id}/access-request/schema`}>
             <Button variant='outlined' disabled={!model.card} data-test='requestAccessButton'>
-              Request Access
+              Request access
             </Button>
           </Link>
         </Box>

@@ -55,7 +55,7 @@ export default function Model() {
               disabledText: 'Select a schema to view this tab',
             },
             {
-              title: 'Access Requests',
+              title: 'Access requests',
               path: 'access',
               view: <AccessRequests model={model} currentUserRoles={currentUserRoles} />,
               datatest: 'accessRequestTab',
@@ -68,7 +68,7 @@ export default function Model() {
               view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
-              title: 'File Management',
+              title: 'File management',
               path: 'files',
               view: <ModelFileManagement model={model} />,
             },

@@ -53,7 +53,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           mt: 4,
         })
         onContentTopStylingChanged({
-          mt: isDocsPage ? 4 : 8,
+          mt: isDocsPage ? 2 : 4,
         })
       }
     }
@@ -132,16 +132,17 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             ) : (
               <>
                 {isCurrentUserLoading && <Loading />}
-                <MessageAlert message={errorMessage} severity='error' />
-                {children}
-                <Copyright sx={{ m: 2 }} />
+                {uiConfig && announcementBannerOpen && (
+                  <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
+                )}
+                <Box paddingTop={4}>
+                  <MessageAlert message={errorMessage} severity='error' />
+                  {children}
+                  <Copyright sx={{ m: 2 }} />
+                </Box>
               </>
             )}
           </Box>
-          {isUiConfigLoading && <Loading />}
-          {uiConfig && announcementBannerOpen && (
-            <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
-          )}
         </Box>
       </Box>
     </>

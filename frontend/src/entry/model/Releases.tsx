@@ -80,7 +80,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
                   disabled={!model.card}
                   data-test='draftNewReleaseButton'
                 >
-                  Draft new Release
+                  Draft new release
                 </Button>
               </Restricted>
             </Box>

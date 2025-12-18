@@ -21,37 +21,12 @@ import { UserInterface } from '../models/User.js'
 import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { createFilePath } from '../utils/fileUtils.js'
 import { longId } from '../utils/id.js'
 import { plural } from '../utils/string.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
-
-export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
-  if (typeof data !== 'object' || data === null) {
-    return false
-  }
-
-  if (
-    !('modelId' in data) ||
-    !('name' in data) ||
-    !('size' in data) ||
-    !('mime' in data) ||
-    !('path' in data) ||
-    !('complete' in data) ||
-    !('deleted' in data) ||
-    !('createdAt' in data) ||
-    !('updatedAt' in data) ||
-    !('_id' in data)
-  ) {
-    return false
-  }
-  return true
-}
-
-export const createFilePath = (modelId: string, fileId: string) => {
-  return `beta/model/${modelId}/files/${fileId}`
-}
 
 export async function uploadFile(
   user: UserInterface,

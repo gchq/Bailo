@@ -8,7 +8,7 @@ import {
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useEffectEvent, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -16,7 +16,7 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
-import { AccessRequestInterface, SplitSchemaNoRender } from 'types/types'
+import { AccessRequestInterface, SplitSchemaNoRender, StepNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
 
@@ -47,6 +47,20 @@ export default function EditableAccessRequestForm({
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   const router = useRouter()
+
+  const updateSplitSchema = useEffectEvent((schemaId: string, steps: StepNoRender[]) => {
+    setSplitSchema({ reference: schemaId, steps })
+  })
+
+  useEffect(() => {
+    if (isEdit === false && schema) {
+      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
+      for (const step of steps) {
+        step.steps = steps
+      }
+      updateSplitSchema(schema.id, steps)
+    }
+  }, [accessRequest.metadata, isEdit, schema])
 
   const handleDeleteConfirm = useCallback(async () => {
     setDeleteErrorMessage('')
