@@ -1,5 +1,6 @@
 import { ExpandMore } from '@mui/icons-material'
 import SubjectIcon from '@mui/icons-material/Subject'
+import TitleIcon from '@mui/icons-material/Title'
 import {
   Accordion,
   AccordionDetails,
@@ -368,7 +369,7 @@ export default function Marketplace() {
                 onSubmit={onFilterSubmit}
               >
                 <InputLabel htmlFor='entry-filter-input'>
-                  {titleOnly ? 'Search by title (partial)' : 'Search by full text (exact)'}
+                  {titleOnly ? 'Search by name' : 'Search by full text'}
                 </InputLabel>
                 <FilledInput
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
@@ -379,12 +380,8 @@ export default function Marketplace() {
                   onChange={handleFilterChange}
                   endAdornment={
                     <Tooltip title='Full Text'>
-                      <IconButton
-                        aria-label='titleOnly'
-                        onClick={handleChangeTitleOnly}
-                        color={titleOnly ? 'primary' : 'secondary'}
-                      >
-                        <SubjectIcon />
+                      <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
+                        {titleOnly ? <TitleIcon /> : <SubjectIcon />}
                       </IconButton>
                     </Tooltip>
                   }
@@ -464,7 +461,7 @@ export default function Marketplace() {
                   <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
                     <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
                       <Typography component='h2' variant='h6'>
-                        Mirrored Models
+                        Mirrored models
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ p: 1 }}>
