@@ -10,6 +10,7 @@ import {
   createModelCardFromTemplate,
   getCurrentUserPermissionsByModel,
   getModelById,
+  getModelByIdNoAuth,
   getModelCardRevision,
   isModelCardRevisionDoc,
   popularTagsForEntries,
@@ -149,13 +150,21 @@ describe('services > model', () => {
     ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
   })
 
-  test('getModelById > good', async () => {
+  test('getModelByIdNoAuth > good', async () => {
     ModelModelMock.findOne.mockResolvedValueOnce('mocked')
 
-    const model = await getModelById({} as any, {} as any)
+    const model = await getModelByIdNoAuth({} as any, {} as any)
 
     expect(ModelModelMock.findOne).toBeCalled()
     expect(model).toBe('mocked')
+  })
+
+  test('getModelByIdNoAuth > no model', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce(undefined)
+
+    await expect(() => getModelByIdNoAuth({} as any, {} as any)).rejects.toThrowError(
+      /^The requested entry was not found/,
+    )
   })
 
   test('getModelById > bad authorisation', async () => {
@@ -163,12 +172,6 @@ describe('services > model', () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
-  })
-
-  test('getModelById > no model', async () => {
-    ModelModelMock.findOne.mockResolvedValueOnce(undefined)
-
-    await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested entry was not found/)
   })
 
   describe('removeModel', () => {

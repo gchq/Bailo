@@ -15,7 +15,7 @@ import config from '../../../utils/config.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
 import log from '../../log.js'
-import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
+import { getModelByIdNoAuth, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
@@ -90,7 +90,7 @@ export class DocumentsImporter extends BaseImporter {
 
         // have to authorise per-release due to streaming, rather than do all releases at once
         if (!this.lazyMirroredModel) {
-          this.lazyMirroredModel = await getModelById(this.user, this.metadata.mirroredModelId)
+          this.lazyMirroredModel = await getModelByIdNoAuth(this.metadata.mirroredModelId)
         }
         const authResponse = await authorisation.releases(
           this.user,
