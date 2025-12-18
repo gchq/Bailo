@@ -1,5 +1,5 @@
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Card, Stack, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -21,10 +21,11 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
   }
 
   const modelImageTag = ({ data }) => (
-    <CodeLine
-      key={`${modelImage.repository}-${modelImage.name}-${data.tag}`}
-      line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
-    />
+    <Box key={`${modelImage.repository}-${modelImage.name}-${data.tag}`} sx={{ p: 1 }}>
+      <CodeLine
+        line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
+      />
+    </Box>
   )
 
   if (isUiConfigError) {
@@ -60,6 +61,8 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
                   searchFilterProperty={'tag'}
                   defaultSortProperty='tag'
                   emptyListText={`No image tags found for image ${modelImage.name}`}
+                  hideBorders
+                  hideDividers
                 >
                   {modelImageTag}
                 </Paginate>

@@ -28,6 +28,8 @@ interface PaginateProps<T> {
   hideSearchInput?: boolean
   defaultSortProperty: keyof T
   defaultSortDirection?: SortingDirectionKeys
+  hideBorders?: boolean
+  hideDividers?: boolean
   children: ({ data }: { data: T }) => ReactElement
 }
 
@@ -54,6 +56,8 @@ export default function Paginate<T>({
   hideSearchInput = false,
   defaultSortProperty,
   defaultSortDirection = SortingDirection.DESC,
+  hideBorders = false,
+  hideDividers = false,
   children,
 }: PaginateProps<T>) {
   const [page, setPage] = useState(1)
@@ -257,12 +261,6 @@ export default function Paginate<T>({
           />
         )}
         {hideSearchInput && <div style={{ maxWidth: '200px', width: '100%' }}></div>}
-        <Pagination
-          count={pageCount}
-          page={page}
-          onChange={handlePageOnChange}
-          aria-label='top page pagination navigation'
-        />
         <Button
           onClick={handleMenuButtonClick}
           endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
@@ -294,14 +292,14 @@ export default function Paginate<T>({
       <Box sx={{ px: 2, width: '100%' }}>
         <Stack
           sx={{
-            border: 'solid',
+            border: hideBorders ? 'none' : 'solid',
             borderWidth: '0.5px',
             width: '100%',
             margin: 'auto',
             borderColor: theme.palette.divider,
             borderRadius: 1,
           }}
-          divider={<Divider flexItem />}
+          divider={hideDividers ? <></> : <Divider flexItem />}
         >
           {listDisplay}
         </Stack>
