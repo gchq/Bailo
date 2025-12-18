@@ -50,7 +50,9 @@ API_KEY=yourapikey
 
 The following steps are only required for users who wish to extend or develop the API locally.
 
-### Python setup
+### Python Setup
+
+From within the `lib/modelscan_api` directory:
 
 ```bash
 python3 -m venv modelscanvenv
