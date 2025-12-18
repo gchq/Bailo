@@ -1,4 +1,5 @@
 import {
+  AccessibilityNew,
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
   Settings as SettingsIcon,
@@ -195,6 +196,16 @@ export default function SideNavigation({
             )}
           </StyledList>
           <StyledList>
+            <Divider aria-hidden='true' />
+            <NavMenuItem
+              href='/docs/users/accessibility/accessibility-statement'
+              selectedPage={page}
+              primaryText='Accessibility'
+              drawerOpen={drawerOpen}
+              menuPage='accessibility'
+              title='Accessibility'
+              icon={<AccessibilityNew />}
+            />
             <Divider aria-hidden='true' />
             <NavMenuItem
               href='/settings'
