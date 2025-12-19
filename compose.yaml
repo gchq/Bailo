@@ -46,30 +46,6 @@ services:
     volumes:
       - minioVolume:/bitnami/minio
 
-  clamd:
-    image: clamav/clamav:1.4.3_base
-    networks:
-      internal:
-    healthcheck:
-      test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  modelscan:
-    networks:
-      internal:
-    image: bailo_modelscan:${INSTANCE_NAME}
-    build:
-      context: ./lib/modelscan_api
-    volumes:
-      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
-    healthcheck:
-      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   nginx:
     image: nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
     networks:
@@ -126,12 +102,8 @@ services:
       - ./backend/certs:/usr/local/share/ca-certificates
       - ./backend/config:/app/config
     depends_on:
-      clamd:
-        condition: service_healthy
       registry:
         condition: service_started
-      modelscan:
-        condition: service_healthy
       minio:
         condition: service_started
       mongo:
