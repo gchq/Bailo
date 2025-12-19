@@ -26,10 +26,10 @@ module.exports = {
 
   s3: {
     credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
+      accessKeyId: 'rustfsadmin',
+      secretAccessKey: 'rustfsadmin',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://rustfs:9000',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,

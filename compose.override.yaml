@@ -39,12 +39,6 @@ services:
     build:
       target: dev
 
-  minio:
-    environment:
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/
-      MINIO_SERVER_URL: http://minio:9000
-      MINIO_SKIP_CLIENT: yes
-
 networks:
   debug:
     name: ${INSTANCE_NAME}_debug

@@ -388,11 +388,6 @@ jobs:
               uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
             },
 
-            minio: {
-              accessKey: 'minioadmin',
-              secretKey: 'minioadmin',
-            },
-
             smtp: {
               auth: {
                 user: 'mailuser',
