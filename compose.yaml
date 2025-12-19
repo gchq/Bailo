@@ -7,6 +7,43 @@ configs:
     content: abcdef1234567890
 
 services:
+  rustfs:
+    user: root
+    image: rustfs/rustfs:latest
+    security_opt:
+      - 'no-new-privileges:true'
+    ports:
+      - '9000:9000' # S3 API port
+      - '9001:9001' # Console port
+    environment:
+      - RUSTFS_VOLUMES=/data/rustfs0
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_EXTERNAL_ADDRESS=:9000
+      - RUSTFS_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_ACCESS_KEY=rustfsadmin
+      - RUSTFS_SECRET_KEY=rustfsadmin
+
+    volumes:
+      - rustfsVolume:/data/rustfs0
+    networks:
+      internal:
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'sh',
+          '-c',
+          'curl -f http://localhost:9000/health && curl -f http://localhost:9001/rustfs/console/health',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   mongo:
     image: mongodb/mongodb-community-server:8.2.2-ubi9
     networks:
@@ -35,16 +72,6 @@ services:
       start_period: 30s
     ports:
       - 27017:27017
-
-  minio:
-    image: bitnamilegacy/minio:2025.7.23
-    networks:
-      internal:
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - minioVolume:/bitnami/minio
 
   clamd:
     image: clamav/clamav:1.4.3_base
@@ -91,8 +118,8 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
       REGISTRY_HTTP_TLS_KEY: /certs/key.pem
 
-      REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
-      REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+      REGISTRY_STORAGE_S3_ACCESSKEY: rustfsadmin
+      REGISTRY_STORAGE_S3_SECRETKEY: rustfsadmin
 
       REGISTRY_AUTH: token
       REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
@@ -132,7 +159,7 @@ services:
         condition: service_started
       modelscan:
         condition: service_healthy
-      minio:
+      rustfs:
         condition: service_started
       mongo:
         condition: service_started
@@ -143,8 +170,8 @@ services:
       - NODE_CONFIG_ENV=${INSTANCE_NAME}_docker_compose
 
 volumes:
-  minioVolume:
-    name: ${INSTANCE_NAME}_minioVolume
+  rustfsVolume:
+    name: ${INSTANCE_NAME}_rustfsVolume
   mongoVolume:
     name: ${INSTANCE_NAME}_mongoVolume
 
