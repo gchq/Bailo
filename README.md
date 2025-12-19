@@ -86,7 +86,10 @@ more reliable for our cypress tests:
 
 ```bash
 # Build and run the productionised instance of Bailo.
-docker compose -f compose.yaml -f compose.prod.yaml --env-file prod.env up -d
+docker compose -f compose.yaml -f compose.prod.yaml --env-file  prod.env up --force-recreate --build  -d
+
+# Stop the service and destroy the volumes
+docker compose -f compose.yaml -f compose.prod.yaml down -v
 ```
 
 The above `docker compose` approaches are preferred, however we also provide a monolithic `Dockerfile.standalone`. To
