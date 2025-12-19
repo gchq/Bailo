@@ -384,20 +384,6 @@ jobs:
         run: |
           cat <<EOT >> backend/config/local.cjs
           module.exports = {
-            mongo: {
-              uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
-            },
-
-            smtp: {
-              auth: {
-                user: 'mailuser',
-                pass: 'mailpass',
-              },
-              tls: {
-                rejectUnauthorized: false,
-              },
-            },
-
             logging: {
               file: {
                 path: '/home/runner/work/Bailo/Bailo/logs/out.log',
