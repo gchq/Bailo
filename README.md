@@ -24,36 +24,6 @@
   </p>
 </div>
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#requirements">Requirements</a></li>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#service-ports">Service Ports</a></li>
-        <li><a href="#logical-project-flow-overview">Logical Project Flow (Overview)</a></li>
-        <li><a href="#known-issues">Known Issues</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#breaking-changes">Breaking Changes</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
-
-<br />
-
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
@@ -63,28 +33,20 @@
 Bailo helps you manage the lifecycle of machine learning to support scalability, impact, collaboration, compliance and
 sharing.
 
-### Built With
-
-- [Next.js](https://nextjs.org/)
-- [Node.js](https://nodejs.org/)
-- [MongoDB](https://www.mongodb.com/)
-
 <br />
 
 <!-- GETTING STARTED -->
 
 ## Getting Started
 
-### Requirements
+### Running Locally with Docker
+
+#### Requirements
 
 - Node v24
 - Docker / Docker Compose
 
-<br />
-
-### Installation
-
-#### Development
+#### Development Build
 
 To run in development mode (modified files on your host machine will be reloaded into the running application):
 
@@ -99,8 +61,6 @@ docker compose build --parallel
 # Then run the development instance of Bailo.
 docker compose up -d
 
-# or, to run a production instance:
-docker compose -f compose.yaml -f compose.prod.yaml --env-file prod.env up -d
 ```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript modules.
@@ -117,18 +77,19 @@ To stop the running services:
 docker compose down
 ```
 
-The above `docker compose` commands can, alternatively, be run with `-f docker-compose-prod.yml` to have a more static
-version of the application running which mimics a production environment. Volumes are not dynamically mounted, the build
-time is slower as the frontend is pre-compiled, and environment variables & users are more production ready. This build
-is also more reliable for our cypress tests:
+#### Production Build
+
+The above `docker compose` commands can, alternatively, be run with `-f compose.prod.yml` to have a more static version
+of the application running which mimics a production environment. Volumes are not dynamically mounted, the build time is
+slower as the frontend is pre-compiled, and environment variables & users are more production ready. This build is also
+more reliable for our cypress tests:
 
 ```bash
 # Build and run the productionised instance of Bailo.
-docker compose -f docker-compose-prod.yml build --parallel
-docker compose -f docker-compose-prod.yml up -d
+docker compose -f compose.yaml -f compose.prod.yaml --env-file  prod.env up --force-recreate --build  -d
 
-# Stop the productionised instance of Bailo.
-docker compose -f docker-compose-prod.yml down
+# Stop the service and destroy the volumes
+docker compose -f compose.yaml -f compose.prod.yaml down -v
 ```
 
 The above `docker compose` approaches are preferred, however we also provide a monolithic `Dockerfile.standalone`. To
@@ -139,31 +100,14 @@ docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
 docker run --name bailo -p 8080:8080 -d bailo:standalone
 ```
 
-#### Production
+### Kubernetes Deployment
 
-We recommend deployments utilise our
-[infrastructure/helm](https://github.com/gchq/Bailo/blob/main/infrastructure/helm/README.md) instructions to safely
-deploy Bailo.
+We recommend using our [helm charts](https://github.com/gchq/Bailo/blob/main/infrastructure/helm/README.md) to deploy
+Bailo to Kubernetes.
 
-<br />
+We expect the administrator to provide their own forms of authentication. By default all users authenticate as 'user'.
 
-### Service Ports
-
-| Service    | Host  | Notes                 |
-| ---------- | ----- | --------------------- |
-| Next UI    | 3000  | Stored in `frontend`  |
-| NodeJS App | 3001  | Stored in `backend`   |
-| Mongo      | 27017 | No credentials        |
-| Registry   | 5000  | HTTPS only, no UI     |
-| Minio UI   | 9001  | minioadmin:minioadmin |
-| Minio      | 9000  | minioadmin:minioadmin |
-| MailCrab   | 1080  | Fake email server     |
-
-\*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to
-something more secure.
-
-We expect the administrator to provide their own forms of authentication. By default all users authenticate using as
-'user'.
+### Testing a New Deployment
 
 You can test out your new deployment using the example models which can be found in `frontend/cypress/fixtures`
 [`minimal_binary.zip`](frontend/cypress/fixtures/minimal_binary.zip) and
@@ -174,9 +118,20 @@ You can test out your new deployment using the example models which can be found
 
 <br />
 
-### Logical Project Flow (Overview)
+## Logical Project Flow (Overview)
 
 ![bailo diagram](frontend/public/mm-diagram.png)
+
+### Components
+
+|                 |                                                                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NGINX           | [![nginx][NGINX]](https://nginx.org/)                                                                                                                                                        |
+| UI              | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![React][React]](https://react.dev/) [![Cypress][Cypress]](https://www.cypress.io/) |
+| API             | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](#)              |
+| Docker Registry | [![Docker][Docker]](https://www.docker.com/)                                                                                                                                                 |
+| Mongo           | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                |
+| S3              | [![MinIO][Minio]](https://www.min.io/)                                                                                                                                                       |
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
@@ -188,7 +143,7 @@ You can test out your new deployment using the example models which can be found
 
 <br />
 
-### Known Issues
+## Known Issues
 
 - _Issue: Sometimes Docker struggles when you add a new dependency._ <br /> Fix: Run `docker compose down --rmi all`
   followed by `docker compose up --build`.
@@ -210,18 +165,6 @@ You can test out your new deployment using the example models which can be found
 ## Usage
 
 See [our user documentation](https://gchq.github.io/Bailo/docs)
-
-<br />
-
-<!-- ROADMAP -->
-
-## Roadmap
-
-- [ ] Export/Import of Releases with Files.
-- [ ] Model LifeCycle State.
-- [x] Model Organisation.
-- [x] Improve Open Source Ways of Working.
-- [ ] Export/Import of Releases with Docker Images.
 
 <br />
 
@@ -266,3 +209,14 @@ more information.
 [code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
 [code-of-conduct-url]: https://github.com/gchq/Bailo/blob/main/CODE_OF_CONDUCT.md
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
+[Next.js]: https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white
+[React]: https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB
+[Express]: https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB
+[Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff
+[Mongo]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white
+[Minio]: https://img.shields.io/badge/MinIO-C72E49?logo=minio&logoColor=fff
+[NGINX]: https://img.shields.io/badge/nginx-009639?logo=nginx&logoColor=fff
+[Vitest]: https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=fff
+[Typescript]: https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff
+[Cypress]: https://img.shields.io/badge/Cypress-69D3A7?logo=cypress&logoColor=fff
+[MUI]: https://img.shields.io/badge/Material%20UI-007FFF?style=for-the-badge&logo=mui&logoColor=white
