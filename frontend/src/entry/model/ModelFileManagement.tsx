@@ -21,12 +21,12 @@ export default function Files({ model }: FilesProps) {
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const EntryListItem = ({ data, index }) => (
-    <Box key={data[index]._id} sx={{ width: '100%' }}>
+  const EntryListItem = ({ data }) => (
+    <Box key={data._id} sx={{ width: '100%' }}>
       <Stack spacing={1} p={2}>
         <FileDisplay
           showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
-          file={data[index]}
+          file={data}
           modelId={model.id}
           mutator={mutateEntryFiles}
           releases={releases}

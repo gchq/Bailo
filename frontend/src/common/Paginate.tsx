@@ -28,7 +28,9 @@ interface PaginateProps<T> {
   hideSearchInput?: boolean
   defaultSortProperty: keyof T
   defaultSortDirection?: SortingDirectionKeys
-  children: ({ data, index }: { data: T[]; index: number }) => ReactElement
+  hideBorders?: boolean
+  hideDividers?: boolean
+  children: ({ data }: { data: T }) => ReactElement
 }
 
 export const SortingDirection = {
@@ -54,6 +56,8 @@ export default function Paginate<T>({
   hideSearchInput = false,
   defaultSortProperty,
   defaultSortDirection = SortingDirection.DESC,
+  hideBorders = false,
+  hideDividers = false,
   children,
 }: PaginateProps<T>) {
   const [page, setPage] = useState(1)
@@ -228,7 +232,7 @@ export default function Paginate<T>({
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
         <div key={item['key']} style={{ width: '100%' }}>
-          {children({ data: sortedList, index })}
+          {children({ data: sortedList[index] })}
         </div>
       ))
     }
@@ -247,7 +251,9 @@ export default function Paginate<T>({
         justifyContent='space-between'
         alignItems='center'
       >
-        {!hideSearchInput && (
+        {hideSearchInput ? (
+          <div style={{ maxWidth: '200px', width: '100%' }}></div>
+        ) : (
           <TextField
             size='small'
             value={searchFilter}
@@ -256,7 +262,6 @@ export default function Paginate<T>({
             sx={{ maxWidth: '200px' }}
           />
         )}
-        {hideSearchInput && <div style={{ maxWidth: '200px', width: '100%' }}></div>}
         <Button
           onClick={handleMenuButtonClick}
           endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
@@ -288,14 +293,14 @@ export default function Paginate<T>({
       <Box sx={{ px: 2, width: '100%' }}>
         <Stack
           sx={{
-            border: 'solid',
+            border: hideBorders ? 'none' : 'solid',
             borderWidth: '0.5px',
             width: '100%',
             margin: 'auto',
             borderColor: theme.palette.divider,
             borderRadius: 1,
           }}
-          divider={<Divider flexItem />}
+          divider={hideDividers ? <></> : <Divider flexItem />}
         >
           {listDisplay}
         </Stack>

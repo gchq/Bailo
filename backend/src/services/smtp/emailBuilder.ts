@@ -17,16 +17,16 @@ export type actions = {
   url: string
 }
 
-export function buildEmail(
+export async function buildEmail(
   title: string,
   metadata: Info[],
   actions: actions[],
   actionRequired?: boolean,
-): EmailContent {
+): Promise<EmailContent> {
   return {
     subject: actionRequired ? `ACTION REQUIRED: ${title}` : title,
     text: emailText(title, metadata, actions),
-    html: emailHtml(title, metadata, actions),
+    html: await emailHtml(title, metadata, actions),
   }
 }
 
@@ -48,8 +48,8 @@ function textActions(actionsList: actions[]) {
   return `${actionsList.map((action) => `${action.name}: '${action.url}'\n`).join('')}`
 }
 
-function emailHtml(title, reviewMetadata, reviewActions) {
-  return mjml2html(
+async function emailHtml(title, reviewMetadata, reviewActions) {
+  const email = await mjml2html(
     wrapper(`
     <mj-section padding-bottom="5px" css-class='gradient-bg' padding-bottom="5px">
       <mj-column width="100%">
@@ -70,7 +70,8 @@ function emailHtml(title, reviewMetadata, reviewActions) {
       ${htmlActions(reviewActions)}
     </mj-section>
   `),
-  ).html
+  )
+  return email.html
 }
 
 function htmlMetadata(reviewMetadata: Info[]) {

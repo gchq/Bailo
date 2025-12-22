@@ -170,11 +170,11 @@ export default function ReleaseForm({
   )
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
-  const FileRowItem = memoize(({ data, index }) =>
-    isFileInterface(data[index]) && !isScannersLoading ? (
+  const FileRowItem = memoize(({ data }) =>
+    isFileInterface(data) && !isScannersLoading ? (
       <FileDisplay
-        key={data[index].name}
-        file={data[index]}
+        key={data.name}
+        file={data}
         modelId={model.id}
         showMenuItems={{ rescanFile: scanners.length > 0 }}
         mutator={mutateReleases}

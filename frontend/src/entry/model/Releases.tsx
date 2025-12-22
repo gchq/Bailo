@@ -26,11 +26,11 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
 
-  const ReleaseListItem = memoize(({ data, index }) => (
+  const ReleaseListItem = memoize(({ data }) => (
     <ReleaseDisplay
-      key={data[index].semver}
+      key={data.semver}
       model={model}
-      release={data[index]}
+      release={data}
       latestRelease={latestRelease}
       hideReviewBanner={
         !hasRole(
