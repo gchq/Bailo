@@ -1,6 +1,6 @@
 import { ModelAction, SchemaMigrationAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { ModelDoc } from '../models/Model.js'
+import ModelModel, { EntryKind, ModelDoc } from '../models/Model.js'
 import ModelCardRevisionModel from '../models/ModelCardRevision.js'
 import SchemaMigrationModel, { SchemaMigrationInterface } from '../models/SchemaMigration.js'
 import { UserInterface } from '../models/User.js'
@@ -87,6 +87,10 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (model.kind === EntryKind.MirroredModel) {
+    throw BadReq('Mirrored models cannot be migrated. Please migrate the source model first.', { modelId })
   }
 
   if (!model.card) {
