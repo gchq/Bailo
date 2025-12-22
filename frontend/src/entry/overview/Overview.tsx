@@ -16,17 +16,19 @@ type OverviewPageKeys = (typeof OverviewPage)[keyof typeof OverviewPage]
 
 type OverviewProps = {
   entry: EntryInterface
-  readOnly?: boolean
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
 
-export default function Overview({ entry, readOnly = false, mutateEntry }: OverviewProps) {
+export default function Overview({ entry, mutateEntry }: OverviewProps) {
   const page: OverviewPageKeys = useMemo(
-    () => (entry.card && entry.card.schemaId ? OverviewPage.FORM : OverviewPage.TEMPLATE),
-    [entry.card],
+    () =>
+      (entry.card || entry.mirroredCard) && (entry.card.schemaId || entry.mirroredCard?.schemaId)
+        ? OverviewPage.FORM
+        : OverviewPage.TEMPLATE,
+    [entry.card, entry.mirroredCard],
   )
 
-  return entry.kind === EntryKind.MIRRORED_MODEL && !entry.card ? (
+  return entry.kind === EntryKind.MIRRORED_MODEL && !entry.mirroredCard?.metadata ? (
     <>
       <MessageAlert
         severity='warning'
@@ -43,12 +45,12 @@ export default function Overview({ entry, readOnly = false, mutateEntry }: Overv
           <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
             {entry.kind === EntryKind.MIRRORED_MODEL && (
               <MessageAlert
-                message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`}
+                message={`Mirrored from ${entry.settings.mirror?.sourceModelId}. Some parts of this form will be read-only.`}
                 severity='info'
               />
             )}
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-            {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} mutateEntry={mutateEntry} />}
+            {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
           </Container>
         </Box>
       </Stack>

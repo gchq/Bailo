@@ -22,15 +22,14 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
   entry: EntryInterface
-  readOnly?: boolean
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
-export default function FormEditPage({ entry, readOnly = false, mutateEntry }: FormEditPageProps) {
+export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
@@ -99,7 +98,8 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
 
   useEffect(() => {
     if (!entry || !schema) return
-    const metadata = entry.card.metadata
+    const metadata =
+      entry.kind === EntryKind.MIRRORED_MODEL && entry.mirroredCard ? entry.mirroredCard.metadata : entry.card.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
     for (const step of steps) {
       step.steps = steps
@@ -182,7 +182,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
               />
             </Stack>
           </div>
-          {schemaMigrations.length > 0 && !readOnly && (
+          {schemaMigrations.length > 0 && (
             <Restricted
               action='editEntryCard'
               fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
@@ -197,25 +197,24 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           )}
           {!isEdit && (
             <Stack direction='row' spacing={1}>
-              {!readOnly && (
-                <Restricted
-                  action='editEntryCard'
-                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+              <Restricted
+                action='editEntryCard'
+                fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+              >
+                <Button
+                  variant='outlined'
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setIsEdit(!isEdit)
+                    setOldSchema(_.cloneDeep(splitSchema))
+                  }}
+                  data-test='editEntryCardButton'
+                  disabled={entry.kind === EntryKind.MIRRORED_MODEL}
+                  startIcon={<EditIcon fontSize='small' />}
                 >
-                  <Button
-                    variant='outlined'
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setIsEdit(!isEdit)
-                      setOldSchema(_.cloneDeep(splitSchema))
-                    }}
-                    data-test='editEntryCardButton'
-                    startIcon={<EditIcon fontSize='small' />}
-                  >
-                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                  </Button>
-                </Restricted>
-              )}
+                  {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                </Button>
+              </Restricted>
               <Button
                 endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
                 data-test='openEntryOverviewActions'
