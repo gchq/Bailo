@@ -115,7 +115,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+export async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
   if (access.name.startsWith(softDeletePrefix)) {
     const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
     log.warn({ userDn: user.dn, access }, info)
