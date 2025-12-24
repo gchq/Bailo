@@ -12,13 +12,36 @@ import {
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
-export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
+export function ArrayFieldTemplate({
+  title,
+  items,
+  canAdd,
+  registry,
+  onAddClick,
+  fieldPathId,
+}: ArrayFieldTemplateProps) {
+  if (registry.formContext.mirroredModel) {
+    const mirroredState = fieldPathId.$id
+      .replaceAll('root_', '')
+      .replaceAll('_', '.')
+      .split('.')
+      .filter((t) => t !== '')
+      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    if (mirroredState) {
+      const itemsToAdd = mirroredState.length - items.length
+      if (itemsToAdd > 0) {
+        for (let i = 0; i < itemsToAdd; i++) {
+          onAddClick()
+        }
+      }
+    }
+  }
   return (
     <Card sx={{ p: 2 }}>
       <Typography fontWeight='bold' variant='h5' component='h2'>
         {title}
       </Typography>
-      {canAdd && registry.formContext.editMode && (
+      {canAdd && registry.formContext.editMode && !registry.formContext.mirroredModel && (
         <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
           Add Item
         </Button>

@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
 import { Fragment, SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 
 interface MultipleDropdownProps {
   label?: string
@@ -48,6 +49,60 @@ export default function MultipleDropdown({
 
   if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
+  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
+    const mirroredState = id
+      .replaceAll('root_', '')
+      .replaceAll('_', '.')
+      .split('.')
+      .filter((t) => t !== '')
+      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+
+    return (
+      <>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
+        {mirroredState ? (
+          mirroredState.map((selectedValue) => (
+            <Typography
+              key={selectedValue}
+              sx={{
+                fontStyle: 'unset',
+                color: theme.palette.common.black,
+              }}
+            >
+              {selectedValue}
+            </Typography>
+          ))
+        ) : (
+          <Typography
+            sx={{
+              fontStyle: 'italic',
+              color: theme.palette.customTextInput.main,
+            }}
+          >
+            Unanswered
+          </Typography>
+        )}
+        <AdditionalInformation>
+          {value
+            ? value.map((selectedValue) => (
+                <Typography
+                  key={selectedValue}
+                  sx={{
+                    fontStyle: 'unset',
+                    color: theme.palette.common.black,
+                  }}
+                >
+                  {selectedValue}
+                </Typography>
+              ))
+            : undefined}
+        </AdditionalInformation>
+      </>
+    )
   }
 
   return (

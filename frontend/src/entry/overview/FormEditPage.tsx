@@ -83,7 +83,13 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   function onCancel() {
     if (schema) {
       mutateEntry()
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], entry.card.metadata)
+      const steps = getStepsFromSchema(
+        schema,
+        {},
+        ['properties.contacts'],
+        entry.card.metadata,
+        entry.mirroredCard?.metadata,
+      )
       for (const step of steps) {
         step.steps = steps
       }
@@ -98,9 +104,13 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
 
   useEffect(() => {
     if (!entry || !schema) return
-    const metadata =
-      entry.kind === EntryKind.MIRRORED_MODEL && entry.mirroredCard ? entry.mirroredCard.metadata : entry.card.metadata
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
+    const steps = getStepsFromSchema(
+      schema,
+      {},
+      ['properties.contacts'],
+      entry.card.metadata,
+      entry.mirroredCard?.metadata || {},
+    )
     for (const step of steps) {
       step.steps = steps
     }
@@ -209,7 +219,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     setOldSchema(_.cloneDeep(splitSchema))
                   }}
                   data-test='editEntryCardButton'
-                  disabled={entry.kind === EntryKind.MIRRORED_MODEL}
                   startIcon={<EditIcon fontSize='small' />}
                 >
                   {`Edit ${EntryCardKindLabel[entry.kind]}`}
@@ -266,7 +275,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          canEdit={isEdit}
+          mirroredModel={entry.kind === EntryKind.MIRRORED_MODEL}
+        />
         {isEdit && (
           <SaveAndCancelButtons
             onCancel={onCancel}

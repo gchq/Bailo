@@ -35,6 +35,7 @@ export function createStep({
   schema,
   uiSchema,
   state,
+  mirroredState,
   type,
   section,
   index,
@@ -44,6 +45,7 @@ export function createStep({
   schema: any
   uiSchema?: any
   state: unknown
+  mirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -54,6 +56,7 @@ export function createStep({
     schema,
     uiSchema,
     state,
+    mirroredState,
     type,
     index,
 
@@ -112,6 +115,7 @@ export function getStepsFromSchema(
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
   state: any = {},
+  mirroredState: any = {},
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -134,6 +138,7 @@ export function getStepsFromSchema(
       },
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
+      mirroredState: mirroredState ? mirroredState[prop] || {} : {},
       type: 'Form',
       index,
       schemaRef: schema.reference,

@@ -379,6 +379,7 @@ export interface StepNoRender {
   uiSchema?: UiSchema
 
   state: any
+  mirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>

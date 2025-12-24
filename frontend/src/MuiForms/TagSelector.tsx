@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -44,6 +45,52 @@ export default function TagSelector({ onChange, value, label, formContext, requi
 
   if (!formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
+  if (!formContext.editMode && formContext.mirroredModel) {
+    const mirroredState = id
+      .replaceAll('root_', '')
+      .replaceAll('_', '.')
+      .split('.')
+      .filter((t) => t !== '')
+      .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
+
+    return (
+      <>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
+        {mirroredState ? (
+          <>
+            <Typography>{mirroredState}</Typography>
+          </>
+        ) : (
+          <Typography
+            sx={{
+              fontStyle: value ? 'unset' : 'italic',
+              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+            }}
+            aria-label={`Label for ${label}`}
+          >
+            No tags
+          </Typography>
+        )}
+        <AdditionalInformation>
+          {value ? (
+            <Box sx={{ whitespace: 'pre-wrap' }}>
+              {value.map((tag) => (
+                <Chip
+                  label={tag}
+                  key={tag}
+                  sx={{ width: 'fit-content', m: 0.5 }}
+                  onDelete={() => handleChipOnDelete(tag)}
+                />
+              ))}
+            </Box>
+          ) : undefined}
+        </AdditionalInformation>
+      </>
+    )
   }
 
   return (
