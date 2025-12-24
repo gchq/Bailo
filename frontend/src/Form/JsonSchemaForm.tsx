@@ -21,12 +21,14 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  mirroredModel = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  mirroredModel?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const theme = useTheme()
@@ -99,6 +101,8 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
+            mirroredState: currentStep.mirroredState,
+            mirroredModel,
           }}
           templates={
             !canEdit

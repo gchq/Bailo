@@ -21,6 +21,8 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionDoc>(
     modelId: { type: String, required: true },
     schemaId: { type: String, required: true },
 
+    mirrored: { type: Boolean, required: true, default: false },
+
     version: { type: Number, required: true },
     metadata: { type: Schema.Types.Mixed },
 
@@ -36,7 +38,7 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionDoc>(
 // This is required to stop a race case that could occur when there are two 'updateModelCard'
 // requests that happen simultaneously.  Check out the function implementation in 'services'
 // to learn more.
-ModelCardRevisionSchema.index({ modelId: 1, version: 1 }, { unique: true })
+ModelCardRevisionSchema.index({ modelId: 1, version: 1, mirrored: 1 }, { unique: true })
 
 ModelCardRevisionSchema.plugin(softDeletionPlugin)
 

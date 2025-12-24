@@ -8,6 +8,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
@@ -37,6 +38,35 @@ export default function DateSelector({ onChange, value, label, registry, require
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
+    const mirroredState = id
+      .replaceAll('root_', '')
+      .replaceAll('_', '.')
+      .split('.')
+      .filter((t) => t !== '')
+      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    return (
+      <>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
+        {mirroredState ? (
+          <Typography>{mirroredState}</Typography>
+        ) : (
+          <Typography
+            sx={{
+              fontStyle: value ? 'unset' : 'italic',
+              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+            }}
+          >
+            {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
+          </Typography>
+        )}
+        <AdditionalInformation>{value ? <Typography>{value}</Typography> : undefined}</AdditionalInformation>
+      </>
+    )
+  }
+
   return (
     <Fragment key={label}>
       <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
@@ -53,14 +83,16 @@ export default function DateSelector({ onChange, value, label, registry, require
         />
       )}
       {!registry.formContext.editMode && (
-        <Typography
-          sx={{
-            fontStyle: value ? 'unset' : 'italic',
-            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-          }}
-        >
-          {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
-        </Typography>
+        <>
+          <Typography
+            sx={{
+              fontStyle: value ? 'unset' : 'italic',
+              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+            }}
+          >
+            {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
+          </Typography>
+        </>
       )}
     </Fragment>
   )
