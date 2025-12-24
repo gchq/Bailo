@@ -9,6 +9,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
@@ -39,12 +40,7 @@ export default function DateSelector({ onChange, value, label, registry, require
   }
 
   if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = id
-      .replaceAll('root_', '')
-      .replaceAll('_', '.')
-      .split('.')
-      .filter((t) => t !== '')
-      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    const mirroredState = getMirroredState(id, registry.formContext)
     return (
       <>
         <Typography fontWeight='bold' aria-label={`label for ${label}`}>

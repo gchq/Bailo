@@ -5,6 +5,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface RichTextInputProps {
   value: string
@@ -36,12 +37,7 @@ export default function RichTextInput({
   }
 
   if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = id
-      .replaceAll('root_', '')
-      .replaceAll('_', '.')
-      .split('.')
-      .filter((t) => t !== '')
-      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    const mirroredState = getMirroredState(id, registry.formContext)
 
     return (
       <>

@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntryKind } from 'types/types'
+import { getMirroredState } from 'utils/formUtils'
 
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
@@ -79,12 +80,7 @@ export default function DataCardSelector({
   }, 500)
 
   if (registry && !registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = id
-      .replaceAll('root_', '')
-      .replaceAll('_', '.')
-      .split('.')
-      .filter((t) => t !== '')
-      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    const mirroredState = getMirroredState(id, registry.formContext)
     return (
       <>
         <Typography fontWeight='bold' aria-label={`label for ${label}`}>

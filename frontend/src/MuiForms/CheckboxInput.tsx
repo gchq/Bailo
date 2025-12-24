@@ -4,6 +4,7 @@ import { Registry } from '@rjsf/utils'
 import { ChangeEvent, Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface CustomTextInputProps {
   label?: string
@@ -30,12 +31,7 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
   }
 
   if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = id
-      .replaceAll('root_', '')
-      .replaceAll('_', '.')
-      .split('.')
-      .filter((t) => t !== '')
-      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    const mirroredState = getMirroredState(id, registry.formContext)
     return (
       <>
         <Typography fontWeight='bold' aria-label={`label for ${label}`}>

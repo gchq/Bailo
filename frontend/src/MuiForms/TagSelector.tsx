@@ -4,6 +4,7 @@ import { Registry } from '@rjsf/utils'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -48,13 +49,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
   }
 
   if (!formContext.editMode && formContext.mirroredModel) {
-    const mirroredState = id
-      .replaceAll('root_', '')
-      .replaceAll('_', '.')
-      .split('.')
-      .filter((t) => t !== '')
-      .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
-
+    const mirroredState = getMirroredState(id, formContext)
     return (
       <>
         <Typography fontWeight='bold' aria-label={`label for ${label}`}>

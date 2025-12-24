@@ -8,6 +8,7 @@ import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, 
 import UserDisplay from 'src/common/UserDisplay'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntityObject } from 'types/types'
+import { getMirroredState } from 'utils/formUtils'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -80,12 +81,7 @@ export default function EntitySelector({
   }, 500)
 
   if (registry && !registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = id
-      .replaceAll('root_', '')
-      .replaceAll('_', '.')
-      .split('.')
-      .filter((t) => t !== '')
-      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    const mirroredState = getMirroredState(id, registry.formContext)
     return (
       <>
         <Typography fontWeight='bold' aria-label={`label for ${label}`}>
