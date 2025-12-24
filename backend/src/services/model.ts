@@ -776,7 +776,6 @@ export async function setLatestImportedModelCard(modelId: string) {
     updatedModel.card = newCard
   }
   await updatedModel.save()
-
   return updatedModel
 }
 
