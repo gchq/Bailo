@@ -10,6 +10,7 @@ import {
   RJSFSchema,
   TitleFieldProps,
 } from '@rjsf/utils'
+import Link from 'next/link'
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
@@ -52,13 +53,7 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function ObjectFieldTemplate({
-  title,
-  properties,
-  description,
-  registry,
-  fieldPathId,
-}: ObjectFieldTemplateProps) {
+export function ObjectFieldTemplate({ title, properties, description, fieldPathId }: ObjectFieldTemplateProps) {
   return (
     <Box sx={{ p: 2 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
@@ -68,9 +63,11 @@ export function ObjectFieldTemplate({
               {title}
             </Typography>
             <Tooltip title='Share'>
-              <IconButton onClick={() => registry.formContext.shareSection(fieldPathId.$id)}>
-                <Share fontSize='small' color='secondary' />
-              </IconButton>
+              <Link href={`#${fieldPathId.$id}`}>
+                <IconButton>
+                  <Share fontSize='small' color='secondary' />
+                </IconButton>
+              </Link>
             </Tooltip>
           </Stack>
           <Typography variant='caption'>{description}</Typography>

@@ -49,8 +49,8 @@ export default function JsonSchemaForm({
     if (router.query.page !== undefined && typeof router.query.page === 'string') {
       updatePageByRouterQuery(router.query.page)
     }
-    if (router.query.section !== undefined && typeof router.query.section === 'string') {
-      updatedSharedStateEvent(router.query.section as string)
+    if (router.asPath.split('#')[1]) {
+      updatedSharedStateEvent(router.asPath.split('#')[1] as string)
     }
   }, [router])
 
@@ -87,12 +87,6 @@ export default function JsonSchemaForm({
         Please make sure that all errors listed below have been resolved.
       </Typography>
     )
-  }
-
-  function handleShareSectionOnClick(id: string) {
-    router.replace({
-      query: { ...router.query, page: activeStep, section: id },
-    })
   }
 
   return (
@@ -139,7 +133,6 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
-            shareSection: handleShareSectionOnClick,
           }}
           templates={
             !canEdit
