@@ -57,7 +57,11 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
-  const { model, isModelLoading, isModelError } = useGetModel(release.modelId, EntryKind.MODEL)
+  const {
+    entries: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetModel(release.modelId, EntryKind.MODEL)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
 

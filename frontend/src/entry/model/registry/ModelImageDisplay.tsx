@@ -6,10 +6,10 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import MessageAlert from 'src/MessageAlert'
-import { ModelImage } from 'types/types'
+import { EntryImage } from 'types/types'
 
 type ModelImageDisplayProps = {
-  modelImage: ModelImage
+  modelImage: EntryImage
 }
 
 export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {

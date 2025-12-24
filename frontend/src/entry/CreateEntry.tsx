@@ -56,7 +56,11 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const {
+    entryRoles: modelRoles,
+    isEntryRolesLoading: isModelRolesLoading,
+    isEntryRolesError: isModelRolesError,
+  } = useGetModelRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
