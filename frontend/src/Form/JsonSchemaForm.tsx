@@ -3,7 +3,8 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { useRouter } from 'next/router'
+import { Dispatch, SetStateAction, useEffect, useEffectEvent, useRef, useState } from 'react'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -29,9 +30,39 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
+  const [sharedSection, setSharedSection] = useState('')
   const theme = useTheme()
+  const router = useRouter()
+  const ref = useRef<HTMLDivElement | null>(null)
 
   const currentStep = splitSchema.steps[activeStep]
+
+  const updatePageByRouterQuery = useEffectEvent((page: string) => {
+    setActiveStep(Number(page) || 0)
+  })
+
+  const updatedSharedStateEvent = useEffectEvent((id: string) => {
+    setSharedSection(id)
+  })
+
+  useEffect(() => {
+    if (router.query.page !== undefined && typeof router.query.page === 'string') {
+      updatePageByRouterQuery(router.query.page)
+    }
+    if (router.query.section !== undefined && typeof router.query.section === 'string') {
+      updatedSharedStateEvent(router.query.section as string)
+    }
+  }, [router])
+
+  useEffect(() => {
+    if (ref && sharedSection) {
+      const section = document.getElementById(sharedSection) as HTMLElement
+      if (!section) {
+        return
+      }
+      section.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [ref, sharedSection])
 
   if (!currentStep) {
     return null
@@ -45,6 +76,9 @@ export default function JsonSchemaForm({
 
   function handleListItemClick(index: number) {
     setActiveStep(index)
+    router.replace({
+      query: { ...router.query, page: index },
+    })
   }
 
   function ErrorListTemplate() {
@@ -53,6 +87,12 @@ export default function JsonSchemaForm({
         Please make sure that all errors listed below have been resolved.
       </Typography>
     )
+  }
+
+  function handleShareSectionOnClick(id: string) {
+    router.replace({
+      query: { ...router.query, page: activeStep, section: id },
+    })
   }
 
   return (
@@ -83,7 +123,7 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </Grid>
-      <Grid size={{ xs: 12, md: 10 }}>
+      <Grid size={{ xs: 12, md: 10 }} ref={ref}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
@@ -99,6 +139,7 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
+            shareSection: handleShareSectionOnClick,
           }}
           templates={
             !canEdit

@@ -1,3 +1,4 @@
+import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
@@ -51,14 +52,27 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function ObjectFieldTemplate({ title, properties, description }: ObjectFieldTemplateProps) {
+export function ObjectFieldTemplate({
+  title,
+  properties,
+  description,
+  registry,
+  fieldPathId,
+}: ObjectFieldTemplateProps) {
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
         <div>
-          <Typography fontWeight='bold' variant='h6' component='h3'>
-            {title}
-          </Typography>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography fontWeight='bold' variant='h6' component='h3'>
+              {title}
+            </Typography>
+            <Tooltip title='Share'>
+              <IconButton onClick={() => registry.formContext.shareSection(fieldPathId.$id)}>
+                <Share fontSize='small' color='secondary' />
+              </IconButton>
+            </Tooltip>
+          </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
         {properties.map((element) => (
