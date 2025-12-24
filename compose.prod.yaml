@@ -1,1 +1,57 @@
 name: bailo-prod
+
+services:
+  modelscan:
+    networks:
+      internal:
+    image: bailo_modelscan:${INSTANCE_NAME}
+    build:
+      context: ./lib/modelscan_api
+    volumes:
+      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
+    healthcheck:
+      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  clamd:
+    image: clamav/clamav:1.4.3_base
+    networks:
+      internal:
+    healthcheck:
+      test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mailcrab:
+    networks:
+      default:
+      internal:
+    ports:
+      - 1080:1080
+      - 1025:1025
+    image: marlonb/mailcrab:v1.6.2
+
+  webhook-tester:
+    networks:
+      default:
+      internal:
+    image: tarampampam/webhook-tester:2.2.5
+    command: serve --auto-create-sessions
+    ports:
+      - 8082:8080
+
+  backend:
+    depends_on:
+      clamd:
+        condition: service_healthy
+      registry:
+        condition: service_started
+      modelscan:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      mongo:
+        condition: service_started

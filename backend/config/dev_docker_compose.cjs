@@ -52,46 +52,12 @@ module.exports = {
     },
   },
 
-  smtp: {
-    enabled: true,
-    transporter: 'smtp',
-
-    connection: {
-      host: 'mailcrab',
-      port: 1025,
-      secure: false,
-      auth: undefined,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    },
-
-    from: '"Bailo 📝" <bailo@example.org>',
-  },
-
   ses: {
     endpoint: 'ignored',
     region: 'ignored',
   },
 
-  avScanning: {
-    clamdscan: {
-      host: 'clamd',
-    },
-
-    modelscan: {
-      host: 'modelscan',
-    },
-  },
-
-  connectors: {
-    fileScanners: {
-      kinds: ['clamAV', 'modelScan'],
-      retryDelayInMinutes: 60,
-      maxInitRetries: 5,
-      initRetryDelay: 5000,
-    },
-  },
+  connectors: {},
 
   federation: {
     id: 'localBailo',
