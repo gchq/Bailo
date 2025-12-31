@@ -54,6 +54,9 @@ export interface UiConfig {
       enabled: boolean
       disclaimer: string
     }
+    display: {
+      additionalInfoHeading: string
+    }
   }
   announcement: {
     enabled: boolean
