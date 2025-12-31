@@ -192,7 +192,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
               />
             </Stack>
           </div>
-          {schemaMigrations.length > 0 && (
+          {schemaMigrations.length > 0 && entry.kind !== EntryKind.MIRRORED_MODEL && (
             <Restricted
               action='editEntryCard'
               fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
