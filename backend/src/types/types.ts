@@ -134,6 +134,9 @@ export interface UiConfig {
       enabled: boolean
       disclaimer: string
     }
+    display: {
+      additionalInfoHeading: string
+    }
   }
 
   inference: {
