@@ -1,3 +1,4 @@
+import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
@@ -9,6 +10,7 @@ import {
   RJSFSchema,
   TitleFieldProps,
 } from '@rjsf/utils'
+import Link from 'next/link'
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
@@ -51,14 +53,29 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function ObjectFieldTemplate({ title, properties, description }: ObjectFieldTemplateProps) {
+export function ObjectFieldTemplate({
+  title,
+  properties,
+  description,
+  fieldPathId,
+  registry,
+}: ObjectFieldTemplateProps) {
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
         <div>
-          <Typography fontWeight='bold' variant='h6' component='h3'>
-            {title}
-          </Typography>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography fontWeight='bold' variant='h6' component='h3'>
+              {title}
+            </Typography>
+            <Tooltip title='Share'>
+              <Link href={`#${fieldPathId.$id}`} onClick={() => registry.formContext.onShare(fieldPathId.$id)}>
+                <IconButton>
+                  <Share fontSize='small' color='secondary' />
+                </IconButton>
+              </Link>
+            </Tooltip>
+          </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
         {properties.map((element) => (
