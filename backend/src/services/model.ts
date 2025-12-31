@@ -716,17 +716,16 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     throw error
   }
 
-  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
-    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
-    { ...modelCardRevision, mirrored: true },
-    {
-      upsert: true,
-    },
-  )
+  const foundModelCardRevision = await ModelCardRevisionModel.findOne({
+    modelId: modelCardRevision.modelId,
+    version: modelCardRevision.version,
+  })
 
   if (!foundModelCardRevision && modelCardRevision.version !== 1) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
     // Ignore model cards with a version number of 1 as these will always be blank.
+    const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
+    await newModelCardRevision.save()
     return modelCardRevision
   }
 }
@@ -740,6 +739,7 @@ export async function setLatestImportedModelCard(modelId: string) {
   const latestModelCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: true }, undefined, {
     sort: { version: -1 },
   })
+
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
   }
@@ -764,7 +764,7 @@ export async function setLatestImportedModelCard(modelId: string) {
     })
   }
 
-  updatedModel.mirroredCard = { ...latestNonMirroredCard, mirrored: true }
+  updatedModel.mirroredCard = { ...latestModelCard }
   if (updatedModel.card === undefined || updatedModel.card.metadata === undefined) {
     const newCard = new ModelCardRevisionModel({
       modelId: updatedModel.id,
@@ -778,7 +778,6 @@ export async function setLatestImportedModelCard(modelId: string) {
     updatedModel.card = newCard
   }
   await updatedModel.save()
-
   return updatedModel
 }
 

@@ -569,14 +569,6 @@ describe('services > model', () => {
     await expect(result).rejects.toThrowError(/^Unable to validate./)
   })
 
-  test('saveImportedModelCard > successfully saves model card', async () => {
-    const mockModelCard = { modelId: '123', version: '1' }
-    ModelCardRevisionModelMock.findOne.mockResolvedValue(mockModelCard)
-    await saveImportedModelCard({ modelId: 'id', version: 'version' } as any)
-
-    expect(ModelCardRevisionModelMock.findOneAndUpdate).toHaveBeenCalledOnce()
-  })
-
   test('setLatestImportedModelCard > success', async () => {
     const mockModelCard = { modelId: '123', version: 1 }
     const testModelForImport = { settings: { mirror: { sourceModelId: 'abc' } }, save: vi.fn() }

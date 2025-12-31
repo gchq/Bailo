@@ -15,7 +15,7 @@ export default function ModelCardVersion() {
   const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(
     modelId,
     modelCardVersion,
-    mirrored === 'true' ? true : false,
+    mirrored === 'true',
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entryCard?.schemaId || '')
 
