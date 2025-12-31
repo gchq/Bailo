@@ -145,7 +145,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     <ListItemIcon>
                       <LogoutIcon fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Sign Out</ListItemText>
+                    <ListItemText>Sign out</ListItemText>
                   </MenuItem>
                 </Link>
               </Menu>
@@ -206,7 +206,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                             <ListItemIcon>
                               <LogoutIcon fontSize='small' />
                             </ListItemIcon>
-                            <ListItemText>Sign Out</ListItemText>
+                            <ListItemText>Sign out</ListItemText>
                           </MenuItem>
                         </Link>
                       </MenuList>

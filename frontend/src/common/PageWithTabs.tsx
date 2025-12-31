@@ -29,6 +29,7 @@ interface PageWithTabsProps {
   titleToCopy?: string
   subheadingToCopy?: string
   additionalHeaderDisplay?: ReactElement
+  actionButtonIcon?: ReactElement
 }
 
 export default function PageWithTabs({
@@ -43,12 +44,14 @@ export default function PageWithTabs({
   titleToCopy = '',
   subheadingToCopy = '',
   additionalHeaderDisplay,
+  actionButtonIcon,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
 
   const [currentTab, setCurrentTab] = useState('')
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const [showFullText, setShowFullText] = useState(false)
   const theme = useTheme()
 
   const currentTabChanged = useEffectEvent((newTab: string) => {
@@ -101,6 +104,22 @@ export default function PageWithTabs({
       )),
     [currentTab, tabs],
   )
+
+  const announcementText = useMemo(() => {
+    if (!additionalInfo) {
+      return
+    }
+    return additionalInfo.length > 100 ? (
+      <Typography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+        {showFullText ? additionalInfo : `${additionalInfo.slice(0, 100)}...`}
+        <Button sx={{ ml: 1 }} variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
+          {showFullText ? 'Show less' : 'Show more'}
+        </Button>
+      </Typography>
+    ) : (
+      additionalInfo
+    )
+  }, [additionalInfo, showFullText])
 
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
@@ -164,25 +183,28 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
+          <Button
+            sx={{ minWidth: '154px' }}
+            variant='contained'
+            onClick={actionButtonOnClick}
+            startIcon={actionButtonIcon ? actionButtonIcon : <></>}
+          >
             {actionButtonTitle}
           </Button>
         )}
         {additionalHeaderDisplay}
       </Stack>
-      <Typography
+      <Box
         sx={{
           pl: 2,
           pb: 1,
-          overflowWrap: 'anywhere',
-          wordBreak: 'break-word',
-          whiteSpace: 'pre-wrap',
           flexGrow: 1,
           minWidth: 0,
+          maxWidth: '900px',
         }}
       >
-        {additionalInfo}
-      </Typography>
+        {announcementText}
+      </Box>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}
