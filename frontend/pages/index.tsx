@@ -1,4 +1,4 @@
-import { ExpandMore } from '@mui/icons-material'
+import { Add, ExpandMore, RestartAlt } from '@mui/icons-material'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
@@ -347,7 +347,7 @@ export default function Marketplace() {
       <Container maxWidth='xl'>
         <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
           <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '300px' } }}>
-            <Button component={Link} href='/entry/new' variant='contained'>
+            <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
@@ -488,7 +488,9 @@ export default function Marketplace() {
                 </Box>
               </Stack>
               <Box justifySelf='center' marginTop={1}>
-                <Button onClick={handleResetFilters}>Reset filters</Button>
+                <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
+                  Reset filters
+                </Button>
               </Box>
             </Container>
           </Stack>

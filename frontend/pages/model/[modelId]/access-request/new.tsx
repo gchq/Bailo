@@ -28,6 +28,7 @@ export default function NewAccessRequest() {
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
 
   const isLoading = useMemo(
     () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
@@ -54,6 +55,7 @@ export default function NewAccessRequest() {
   async function onSubmit() {
     setSubmissionErrorText('')
     setSubmitButtonLoading(true)
+    setFormValidationErrorState(false)
 
     if (!modelId || !schemaId) {
       setSubmissionErrorText(`Please wait until the page has finished loading before attempting to submit.`)
@@ -72,6 +74,7 @@ export default function NewAccessRequest() {
       if (!isValid) {
         setSubmissionErrorText('Please make sure that all sections have been completed.')
         setSubmitButtonLoading(false)
+        setFormValidationErrorState(true)
         return
       }
     }
@@ -123,7 +126,7 @@ export default function NewAccessRequest() {
                   splitSchema={splitSchema}
                   setSplitSchema={setSplitSchema}
                   canEdit
-                  displayLabelValidation
+                  displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList
                 />
                 <Stack alignItems='flex-end'>

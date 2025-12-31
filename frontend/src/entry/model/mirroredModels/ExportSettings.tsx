@@ -1,3 +1,4 @@
+import { Save } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
@@ -106,6 +107,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                       data-test='createAccessRequestButton'
                       loading={loading}
                       type='submit'
+                      startIcon={<Save />}
                     >
                       Save
                     </Button>

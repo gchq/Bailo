@@ -1,3 +1,4 @@
+import { Save } from '@mui/icons-material'
 import { Button, Stack, Typography } from '@mui/material'
 import { patchModel, useGetCurrentUserPermissionsForEntry, useGetModel, useGetModelRoles } from 'actions/model'
 import { useCallback, useState } from 'react'
@@ -75,7 +76,13 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         entryKind={entry.kind}
         entryRoles={entryRoles}
       />
-      <Button variant='contained' aria-label='Save access list' onClick={updateCollaborators} loading={loading}>
+      <Button
+        variant='contained'
+        aria-label='Save access list'
+        onClick={updateCollaborators}
+        loading={loading}
+        startIcon={<Save />}
+      >
         Save
       </Button>
       <MessageAlert message={errorMessage} severity='error' />

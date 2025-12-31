@@ -320,6 +320,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     type='submit'
                     data-test='createEntryButton'
                     loading={loading}
+                    startIcon={<FileUpload />}
                   >
                     {`Create ${EntryKindLabel[createEntryKind]}`}
                   </Button>

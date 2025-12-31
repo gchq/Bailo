@@ -1,4 +1,4 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
@@ -217,6 +217,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                 </Restricted>
               )}
               <Button
+                startIcon={<MenuIcon />}
                 endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
                 data-test='openEntryOverviewActions'
                 variant='contained'
@@ -225,10 +226,17 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                 More
               </Button>
               <Menu
-                slotProps={{ list: { dense: true } }}
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleActionButtonClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
               >
                 <MenuItem
                   onClick={() => {

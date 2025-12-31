@@ -1,3 +1,4 @@
+import { Create } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -64,7 +65,7 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/model/${model.id}/access-request/schema`}>
-            <Button variant='outlined' disabled={!model.card} data-test='requestAccessButton'>
+            <Button variant='outlined' disabled={!model.card} data-test='requestAccessButton' startIcon={<Create />}>
               Request access
             </Button>
           </Link>

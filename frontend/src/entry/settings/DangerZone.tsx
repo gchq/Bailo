@@ -1,3 +1,4 @@
+import { Close, Delete } from '@mui/icons-material'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material'
 import { deleteModel } from 'actions/model'
 import { useRouter } from 'next/router'
@@ -75,7 +76,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
           {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)} disabled={loading}>
+          <Button onClick={() => setOpenConfirm(false)} disabled={loading} startIcon={<Close />}>
             Cancel
           </Button>
           <Button
@@ -84,6 +85,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
             onClick={handleDeleteEntry}
             loading={loading}
             disabled={confirmInput.trim() !== entry.name}
+            startIcon={<Delete />}
           >
             Delete
           </Button>

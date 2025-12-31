@@ -48,6 +48,8 @@ describe('Check A11y violations', () => {
   })
 
   it('Check A11y violations, Settings Page', () => {
+    cy.get('[data-test=userMenuButton]').click()
+    cy.contains('Settings')
     cy.get('a[href="/settings"]').click()
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })

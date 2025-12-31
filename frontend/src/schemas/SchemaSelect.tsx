@@ -177,9 +177,17 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid container spacing={2} justifyContent='center'>
-                    {inactiveSchemaButtons}
-                  </Grid>
+                  <Stack spacing={2}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant='caption'>
+                        The use of inactive schemas is discouraged as they are deprecated. You may still use them if you
+                        have feel you have a valid use-case.
+                      </Typography>
+                    </Box>
+                    <Grid container spacing={2} justifyContent='center'>
+                      {inactiveSchemaButtons}
+                    </Grid>
+                  </Stack>
                 </AccordionDetails>
               </Accordion>
             </Stack>

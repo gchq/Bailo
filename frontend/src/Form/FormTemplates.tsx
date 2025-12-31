@@ -61,11 +61,13 @@ export function ObjectFieldTemplate({ title, properties, description }: ObjectFi
           </Typography>
           <Typography variant='caption'>{description}</Typography>
         </div>
-        {properties.map((element) => (
-          <div key={element.name} className='property-wrapper'>
-            {element.content}
-          </div>
-        ))}
+        <div style={{ marginLeft: 10 }}>
+          {properties.map((element) => (
+            <div key={element.name} className='property-wrapper'>
+              {element.content}
+            </div>
+          ))}
+        </div>
       </Stack>
     </Box>
   )
