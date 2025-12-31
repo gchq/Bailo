@@ -12,6 +12,7 @@ import {
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
+import useNotification from 'src/hooks/useNotification'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import { setStepState, widgets } from 'utils/formUtils'
@@ -34,6 +35,7 @@ export default function JsonSchemaForm({
   const theme = useTheme()
   const router = useRouter()
   const ref = useRef<HTMLDivElement | null>(null)
+  const sendNotification = useNotification()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -89,6 +91,17 @@ export default function JsonSchemaForm({
     )
   }
 
+  function onShareSectionOnClick(sectionId: string) {
+    navigator.clipboard.writeText(
+      `${window.location.origin + window.location.pathname}?page=${activeStep}#${sectionId}`,
+    )
+    sendNotification({
+      variant: 'success',
+      msg: `Link saved to clipboard`,
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+  }
+
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
       <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
@@ -133,6 +146,7 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
+            onShare: onShareSectionOnClick,
           }}
           templates={
             !canEdit

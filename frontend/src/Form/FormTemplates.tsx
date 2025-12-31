@@ -53,7 +53,13 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function ObjectFieldTemplate({ title, properties, description, fieldPathId }: ObjectFieldTemplateProps) {
+export function ObjectFieldTemplate({
+  title,
+  properties,
+  description,
+  fieldPathId,
+  registry,
+}: ObjectFieldTemplateProps) {
   return (
     <Box sx={{ p: 2 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
@@ -63,7 +69,7 @@ export function ObjectFieldTemplate({ title, properties, description, fieldPathI
               {title}
             </Typography>
             <Tooltip title='Share'>
-              <Link href={`#${fieldPathId.$id}`}>
+              <Link href={`#${fieldPathId.$id}`} onClick={() => registry.formContext.onShare(fieldPathId.$id)}>
                 <IconButton>
                   <Share fontSize='small' color='secondary' />
                 </IconButton>
