@@ -64,7 +64,7 @@ jobs:
       # Retrieve Bailo artifact
       - name: Download all the dists
         if: needs.build.outputs.files-changed-output == 'true'
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: python-package-distributions
           path: lib/python/dist/
