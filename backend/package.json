@@ -48,7 +48,7 @@
     "form-data": "^4.0.5",
     "grant": "^5.4.23",
     "jsonschema": "^1.5.0",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "jsrsasign": "^11.1.0",
     "lodash-es": "^4.17.21",
     "mjml": "5.0.0-alpha.8",
