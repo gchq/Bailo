@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.4",
+    "@asteasolutions/zod-to-openapi": "^8.4.0",
     "@aws-sdk/client-cognito-identity-provider": "3.962.0",
     "@aws-sdk/client-kms": "3.962.0",
     "@aws-sdk/client-s3": "3.962.0",
