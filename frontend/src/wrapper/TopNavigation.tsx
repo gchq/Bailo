@@ -119,9 +119,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 open={navbarMenuOpen}
                 onClose={() => setNavbarAnchorEl(null)}
                 sx={{ py: 0 }}
-                role='menu'
+                role='list'
               >
-                <Link href='/entry/new' color='inherit' underline='none' role='menuitem'>
+                <Link href='/entry/new' color='inherit' underline='none' role='listitem'>
                   <MenuItem>
                     <ListItemIcon>
                       <Add fontSize='small' />
@@ -134,7 +134,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 </span>
                 <Divider />
                 <Link href='/settings' color='inherit' underline='none'>
-                  <MenuItem data-test='settingsLink' role='menuitem'>
+                  <MenuItem data-test='settingsLink' role='listitem'>
                     <ListItemIcon>
                       <Settings fontSize='small' />
                     </ListItemIcon>
@@ -142,7 +142,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   </MenuItem>
                 </Link>
                 <Link href='/api/logout' color='inherit' underline='none'>
-                  <MenuItem data-test='logoutLink' role='menuitem'>
+                  <MenuItem data-test='logoutLink' role='listitem'>
                     <ListItemIcon>
                       <LogoutIcon fontSize='small' />
                     </ListItemIcon>
@@ -192,10 +192,10 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
                     </Button>
-                    <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose} role='menu'>
+                    <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose} role='list'>
                       <MenuList>
                         <Link href='/settings' color='inherit' underline='none'>
-                          <MenuItem data-test='settingsLink' role='menuitem'>
+                          <MenuItem data-test='settingsLink' role='listitem'>
                             <ListItemIcon>
                               <Settings fontSize='small' />
                             </ListItemIcon>
@@ -203,7 +203,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                           </MenuItem>
                         </Link>
                         <Link href='/api/logout' color='inherit' underline='none'>
-                          <MenuItem data-test='logoutLink' role='menuitem'>
+                          <MenuItem data-test='logoutLink' role='listitem'>
                             <ListItemIcon>
                               <LogoutIcon fontSize='small' />
                             </ListItemIcon>
