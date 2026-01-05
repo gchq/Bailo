@@ -50,7 +50,7 @@
     "jsonschema": "^1.5.0",
     "jsonwebtoken": "^9.0.3",
     "jsrsasign": "^11.1.0",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.22",
     "mjml": "5.0.0-alpha.8",
     "mongodb": "^6.20.0",
     "mongoose": "8.19.2",
