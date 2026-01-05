@@ -120,34 +120,28 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 sx={{ py: 0 }}
                 role='menuitem'
               >
-                <Link href='/entry/new' color='inherit' underline='none' role='menuitem'>
-                  <MenuItem>
-                    <ListItemIcon>
-                      <Add fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>Create</ListItemText>
-                  </MenuItem>
-                </Link>
+                <MenuItem component='a' href='/entry/new'>
+                  <ListItemIcon>
+                    <Add fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Create</ListItemText>
+                </MenuItem>
                 <span style={{ marginLeft: 2 }}>
                   <EntrySearch />
                 </span>
                 <Divider />
-                <Link href='/settings' color='inherit' underline='none'>
-                  <MenuItem data-test='settingsLink' role='menuitem'>
-                    <ListItemIcon>
-                      <Settings fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>Settings</ListItemText>
-                  </MenuItem>
-                </Link>
-                <Link href='/api/logout' color='inherit' underline='none'>
-                  <MenuItem data-test='logoutLink' role='menuitem'>
-                    <ListItemIcon>
-                      <LogoutIcon fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>Sign out</ListItemText>
-                  </MenuItem>
-                </Link>
+                <MenuItem component='a' href='/settings' data-test='settingsLink' role='menuitem'>
+                  <ListItemIcon>
+                    <Settings fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Settings</ListItemText>
+                </MenuItem>
+                <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Sign out</ListItemText>
+                </MenuItem>
               </Menu>
             </Box>
           )}
@@ -192,22 +186,18 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                       <UserDisplay dn={currentUser.dn} hidePopover />
                     </Button>
                     <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose} role='menu'>
-                      <Link href='/settings' color='inherit' underline='none'>
-                        <MenuItem data-test='settingsLink' role='menuitem'>
-                          <ListItemIcon>
-                            <Settings fontSize='small' />
-                          </ListItemIcon>
-                          <ListItemText>Settings</ListItemText>
-                        </MenuItem>
-                      </Link>
-                      <Link href='/api/logout' color='inherit' underline='none'>
-                        <MenuItem data-test='logoutLink' role='menuitem'>
-                          <ListItemIcon>
-                            <LogoutIcon fontSize='small' />
-                          </ListItemIcon>
-                          <ListItemText>Sign out</ListItemText>
-                        </MenuItem>
-                      </Link>
+                      <MenuItem component='a' data-test='settingsLink' role='menuitem' href='/settings'>
+                        <ListItemIcon>
+                          <Settings fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                      <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
+                        <ListItemIcon>
+                          <LogoutIcon fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Sign out</ListItemText>
+                      </MenuItem>
                     </Menu>
                   </>
                 ) : (
