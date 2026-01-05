@@ -49,6 +49,7 @@ describe('Check A11y violations', () => {
 
   it('Check A11y violations, Settings Page', () => {
     cy.visit('/settings')
+    cy.get('Settings').should('be.visible')
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 })
