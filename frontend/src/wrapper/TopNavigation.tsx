@@ -11,7 +11,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  MenuList,
   Stack,
   Toolbar,
   Typography,
@@ -119,9 +118,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 open={navbarMenuOpen}
                 onClose={() => setNavbarAnchorEl(null)}
                 sx={{ py: 0 }}
-                role='list'
+                role='menuitem'
               >
-                <Link href='/entry/new' color='inherit' underline='none' role='listitem'>
+                <Link href='/entry/new' color='inherit' underline='none' role='menuitem'>
                   <MenuItem>
                     <ListItemIcon>
                       <Add fontSize='small' />
@@ -134,7 +133,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 </span>
                 <Divider />
                 <Link href='/settings' color='inherit' underline='none'>
-                  <MenuItem data-test='settingsLink' role='listitem'>
+                  <MenuItem data-test='settingsLink' role='menuitem'>
                     <ListItemIcon>
                       <Settings fontSize='small' />
                     </ListItemIcon>
@@ -142,7 +141,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   </MenuItem>
                 </Link>
                 <Link href='/api/logout' color='inherit' underline='none'>
-                  <MenuItem data-test='logoutLink' role='listitem'>
+                  <MenuItem data-test='logoutLink' role='menuitem'>
                     <ListItemIcon>
                       <LogoutIcon fontSize='small' />
                     </ListItemIcon>
@@ -192,25 +191,23 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
                     </Button>
-                    <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose} role='list'>
-                      <MenuList>
-                        <Link href='/settings' color='inherit' underline='none'>
-                          <MenuItem data-test='settingsLink' role='listitem'>
-                            <ListItemIcon>
-                              <Settings fontSize='small' />
-                            </ListItemIcon>
-                            <ListItemText>Settings</ListItemText>
-                          </MenuItem>
-                        </Link>
-                        <Link href='/api/logout' color='inherit' underline='none'>
-                          <MenuItem data-test='logoutLink' role='listitem'>
-                            <ListItemIcon>
-                              <LogoutIcon fontSize='small' />
-                            </ListItemIcon>
-                            <ListItemText>Sign out</ListItemText>
-                          </MenuItem>
-                        </Link>
-                      </MenuList>
+                    <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose} role='menu'>
+                      <Link href='/settings' color='inherit' underline='none'>
+                        <MenuItem data-test='settingsLink' role='menuitem'>
+                          <ListItemIcon>
+                            <Settings fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Settings</ListItemText>
+                        </MenuItem>
+                      </Link>
+                      <Link href='/api/logout' color='inherit' underline='none'>
+                        <MenuItem data-test='logoutLink' role='menuitem'>
+                          <ListItemIcon>
+                            <LogoutIcon fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Sign out</ListItemText>
+                        </MenuItem>
+                      </Link>
                     </Menu>
                   </>
                 ) : (
