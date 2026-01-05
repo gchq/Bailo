@@ -9,7 +9,7 @@ import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 import audit from '../../connectors/audit/index.js'
 import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../models/Model.js'
+import { EntryKind, ModelDoc } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
@@ -115,7 +115,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+export async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
   if (access.name.startsWith(softDeletePrefix)) {
     const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
     log.warn({ userDn: user.dn, access }, info)
@@ -134,6 +134,11 @@ async function checkAccess(access: Access, user: UserInterface): Promise<AuthRes
     log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
     // bad model id?
     return { id: modelId, success: false, info: 'Bad modelId provided' }
+  }
+
+  //Check for disallowed entry types (Data-card and Mirrored Model, i.e. not model type)
+  if (model.kind !== EntryKind.Model) {
+    return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}` }
   }
 
   const auth = await authorisation.image(user, model, access)

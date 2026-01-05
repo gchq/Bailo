@@ -22,7 +22,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
@@ -182,7 +182,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
               />
             </Stack>
           </div>
-          {schemaMigrations.length > 0 && !readOnly && (
+          {schemaMigrations.length > 0 && entry.kind !== EntryKind.MIRRORED_MODEL && (
             <Restricted
               action='editEntryCard'
               fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
