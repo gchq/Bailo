@@ -6,14 +6,53 @@ from typing import Any
 NO_COLOR = "NO_COLOR" in os.environ
 
 
-def filter_none(json: dict[str, Any]) -> dict[str, Any]:
-    """Remove keys with None values from the given dictionary.
+def _is_empty_container(value: Any) -> bool:
+    """Check whether a value is an empty supported container.
 
-    :param json: The dictionary to filter
-    :return: Dictionary with removed None-valued keys
+    :param value: The value to check for container emptiness.
+    :return: True if the value is an empty dict or empty list, otherwise False.
     """
-    res = {k: v for k, v in json.items() if v is not None}
-    return res
+    return isinstance(value, (list, dict)) and not value
+
+
+def filter_none(value: Any) -> Any:
+    """Recursively remove None values and empty containers from data structures.
+
+    Traverses dictionaries and lists recursively, removing:
+    - Keys whose values are None
+    - Keys or items whose values become empty dicts or lists after cleaning
+
+    :param value: The value or data structure to clean.
+    :return: A cleaned version of the input with None values and empty
+             containers removed.
+    """
+
+    # If the value is a dictionary, recurse into each value
+    if isinstance(value, dict):
+        return {
+            key: filtered
+            for key, val in value.items()
+            # Recursively clean the value and assign the result to `filtered`
+            if (filtered := filter_none(val)) is not None
+            # Drop keys whose cleaned value is an empty dict or list
+            and not _is_empty_container(filtered)
+        }
+
+    # If the value is a list, recurse into each item
+    if isinstance(value, list):
+        return [
+            filtered
+            for item in value
+            # Recursively clean the value and assign the result to `filtered`
+            if (filtered := filter_none(item)) is not None
+            # Drop items that become empty dicts or lists
+            and not _is_empty_container(filtered)
+        ]
+
+    # Base case:
+    # - Return primitive values unchanged
+    # - Includes False, True, 0, strings, etc.
+    return value
 
 
 class NestedDict(dict):
