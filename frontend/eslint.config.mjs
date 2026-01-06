@@ -22,15 +22,9 @@ export default defineConfig([
   ...nextVitals,
   {
     plugins: {
-      '@typescript-eslint': typescriptEslint,
       prettier,
       'simple-import-sort': simpleImportSort,
     },
-
-    languageOptions: {
-      parser: tsParser,
-    },
-
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
