@@ -29,8 +29,8 @@ repos:
     rev: v3.20.0
     hooks:
       - id: pyupgrade
-        name: pyupgrade 3.9
-        args: ['--py39-plus']
+        name: pyupgrade 3.10
+        args: ['--py310-plus']
         exclude: backend/docs/
       - id: pyupgrade
         name: pyupgrade 3.11

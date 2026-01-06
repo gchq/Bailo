@@ -39,7 +39,7 @@ A lightweight, Python API wrapper for Bailo, providing streamlined programmatic 
 
 ## Quickstart
 
-> **Requires:** Python 3.9 to 3.13
+> **Requires:** Python 3.10 to 3.14
 
 ### Installation
 
