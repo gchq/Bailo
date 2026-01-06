@@ -1,39 +1,39 @@
 from __future__ import annotations
 
-from bailo.core.utils import _is_empty_container, filter_none
+from bailo.core.utils import filter_none
 
 
-def test_filter_none_empty_dict():
+def test_filter_none_should_keep_single_empty_dict():
     assert filter_none({}) == {}
 
 
-def test_filter_none_empty_array():
+def test_filter_none_should_keep_single_empty_array():
     assert filter_none([]) == []
 
 
-def test_filter_none_remove_empty_dict():
+def test_filter_none_should_remove_empty_dict():
     assert filter_none({"foo": "a", "bar": 1, "baz": [1, 2, 3], "bat": {}}) == {"foo": "a", "bar": 1, "baz": [1, 2, 3]}
 
 
-def test_filter_none_remove_nested_empty_dicts():
+def test_filter_none_should_remove_nested_empty_dicts():
     assert filter_none({"foo": {"bar": {"baz": {"bat": {}}}}}) == {}
 
 
-def test_filter_none_remove_nested_empty_arrays():
-    assert filter_none({"foo": {"bar": {"baz": {"bat": []}}}}) == {}
+def test_filter_none_should_not_remove_nested_empty_arrays():
+    assert filter_none({"foo": {"bar": {"baz": {"bat": []}}}}) == {"foo": {"bar": {"baz": {"bat": []}}}}
 
 
-def test_filter_none_remove_nested_None():
+def test_filter_none_should_remove_nested_none():
     assert filter_none({"foo": {"bar": {"baz": {"bat": None}}}}) == {}
 
 
-def test_filter_none_remove_nested_None():
+def test_filter_none_should_remove_nested_none():
     assert filter_none({"foo": {"bar": {"baz": {"bat": True, "qux": False}}}}) == {
         "foo": {"bar": {"baz": {"bat": True, "qux": False}}}
     }
 
 
-def test_filter_none_example_providing_none_values():
+def test_filter_none_should_keep_provided_values():
     """Should keep all provided values."""
     input = {
         "name": "Test Model 1",
@@ -53,8 +53,8 @@ def test_filter_none_example_providing_none_values():
     assert filter_none(input) == input
 
 
-def test_filter_none_example_providing_none_values():
-    """Should remove the various None values."""
+def test_filter_none_should_remove_none_values():
+    """Should keep all provided values and remove none values."""
     input = {
         "name": "Test Model 1",
         "kind": "model",
@@ -76,29 +76,36 @@ def test_filter_none_example_providing_none_values():
         "description": "Testing with an example you might see",
         "visibility": "public",
         "organisation": "big corp",
+        "tags": [],
     }
     assert filter_none(input) == output
 
 
-def test_is_empty_container_empty_dict():
-    assert _is_empty_container({}) is True
-
-
-def test_is_empty_container_empty_list():
-    assert _is_empty_container([]) is True
-
-
-def test_is_empty_container_non_empty_dict():
-    assert _is_empty_container({"a": 1}) is False
-
-
-def test_is_empty_container_non_empty_list():
-    assert _is_empty_container([None]) is False
-
-
-def test_is_empty_container_none():
-    assert _is_empty_container(None) is False
-
-
-def test_is_empty_container_false():
-    assert _is_empty_container(False) is False
+def test_filter_none_should_remove_none_values_and_keep_empty_arrays():
+    """Should remove the various none values but maintain nested empty arrays."""
+    input = {
+        "name": "Test Model 1",
+        "kind": "model",
+        "description": "Testing with an example you might see",
+        "settings": {
+            "mirror": {
+                "sourceModelId": None,
+            },
+        },
+        "something": {"somethingNested": []},
+        "visibility": "public",
+        "organisation": "big corp",
+        "state": None,
+        "tags": [],
+        "collaborators": None,
+    }
+    output = {
+        "name": "Test Model 1",
+        "kind": "model",
+        "description": "Testing with an example you might see",
+        "something": {"somethingNested": []},
+        "visibility": "public",
+        "organisation": "big corp",
+        "tags": [],
+    }
+    assert filter_none(input) == output

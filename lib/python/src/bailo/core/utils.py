@@ -6,53 +6,24 @@ from typing import Any
 NO_COLOR = "NO_COLOR" in os.environ
 
 
-def _is_empty_container(value: Any) -> bool:
-    """Check whether a value is an empty supported container.
+def filter_none(json: dict[str, Any]) -> dict[str, Any]:
+    """Recursively remove keys with None values or empty dicts from the given dictionary.
 
-    :param value: The value to check for container emptiness.
-    :return: True if the value is an empty dict or empty list, otherwise False.
-    """
-    return isinstance(value, (list, dict)) and not value
-
-
-def filter_none(value: Any) -> Any:
-    """Recursively remove None values and empty containers from data structures.
-
-    Traverses dictionaries and lists recursively, removing:
-    - Keys whose values are None
-    - Keys or items whose values become empty dicts or lists after cleaning
-
-    :param value: The value or data structure to clean.
-    :return: A cleaned version of the input with None values and empty
-             containers removed.
+    :param json: The dictionary to filter
+    :return: Dictionary with removed None-valued keys and empty sub-dicts
     """
 
-    # If the value is a dictionary, recurse into each value
-    if isinstance(value, dict):
-        return {
-            key: filtered
-            for key, val in value.items()
-            # Recursively clean the value and assign the result to `filtered`
-            if (filtered := filter_none(val)) is not None
-            # Drop keys whose cleaned value is an empty dict or list
-            and not _is_empty_container(filtered)
-        }
+    def _clean(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            cleaned = {k: _clean(v) for k, v in obj.items() if v is not None}
+            cleaned = {k: v for k, v in cleaned.items() if v != {}}
+            return cleaned
+        elif isinstance(obj, list):
+            return [_clean(item) for item in obj]
+        else:
+            return obj
 
-    # If the value is a list, recurse into each item
-    if isinstance(value, list):
-        return [
-            filtered
-            for item in value
-            # Recursively clean the value and assign the result to `filtered`
-            if (filtered := filter_none(item)) is not None
-            # Drop items that become empty dicts or lists
-            and not _is_empty_container(filtered)
-        ]
-
-    # Base case:
-    # - Return primitive values unchanged
-    # - Includes False, True, 0, strings, etc.
-    return value
+    return _clean(json)
 
 
 class NestedDict(dict):
