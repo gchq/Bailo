@@ -59,39 +59,23 @@ class Client:
         if sourceModelId is None and kind == EntryKind.MIRRORED_MODEL:
             raise ValueError("Mirrored Models must specify a `sourceModelId` argument.")
 
-        filtered_json = {}
-
-        if sourceModelId is not None:
-            filtered_json = filter_none(
-                {
-                    "name": name,
-                    "kind": kind,
-                    "description": description,
-                    "settings": {
-                        "mirror": {
-                            "sourceModelId": sourceModelId,
-                        },
+        filtered_json = filter_none(
+            {
+                "name": name,
+                "kind": kind,
+                "description": description,
+                "settings": {
+                    "mirror": {
+                        "sourceModelId": sourceModelId,
                     },
-                    "visibility": _visibility,
-                    "organisation": organisation,
-                    "state": state,
-                    "tags": tags,
-                    "collaborators": collaborators,
-                }
-            )
-        else:
-            filtered_json = filter_none(
-                {
-                    "name": name,
-                    "kind": kind,
-                    "description": description,
-                    "visibility": _visibility,
-                    "organisation": organisation,
-                    "state": state,
-                    "tags": tags,
-                    "collaborators": collaborators,
-                }
-            )
+                },
+                "visibility": _visibility,
+                "organisation": organisation,
+                "state": state,
+                "tags": tags,
+                "collaborators": collaborators,
+            }
+        )
 
         return self.agent.post(
             f"{self.url}/v2/models",
