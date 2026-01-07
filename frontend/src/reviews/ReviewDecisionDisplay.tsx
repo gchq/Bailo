@@ -39,7 +39,11 @@ export default function ReviewDecisionDisplay({
   const [comment, setComment] = useState(response.comment || '')
   const [errorMessage, setErrorMessage] = useState('')
 
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(modelId)
+  const {
+    entryRoles: modelRoles,
+    isEntryRolesLoading: isModelRolesLoading,
+    isEntryRolesError: isModelRolesError,
+  } = useGetEntryRoles(modelId)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )

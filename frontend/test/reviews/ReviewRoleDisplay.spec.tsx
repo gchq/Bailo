@@ -39,10 +39,10 @@ describe('ReviewRoleDisplay', () => {
 
   it('shows a message when an access request has no responses', async () => {
     vi.mocked(useGetEntryRoles).mockReturnValue({
-      modelRoles: [testManagerRole],
-      isModelRolesLoading: false,
-      isModelRolesError: undefined,
-      mutateModelRoles: vi.fn(),
+      entryRoles: [testManagerRole],
+      isEntryRolesLoading: false,
+      isEntryRolesError: undefined,
+      mutateEntryRoles: vi.fn(),
     })
     vi.mocked(useGetResponses).mockReturnValue({
       responses: [],
@@ -65,10 +65,10 @@ describe('ReviewRoleDisplay', () => {
 
   it('shows a message when an release has no responses', async () => {
     vi.mocked(useGetEntryRoles).mockReturnValue({
-      modelRoles: [testManagerRole],
-      isModelRolesLoading: false,
-      isModelRolesError: undefined,
-      mutateModelRoles: vi.fn(),
+      entryRoles: [testManagerRole],
+      isEntryRolesLoading: false,
+      isEntryRolesError: undefined,
+      mutateEntryRoles: vi.fn(),
     })
     vi.mocked(useGetResponses).mockReturnValue({
       responses: [],
@@ -91,10 +91,10 @@ describe('ReviewRoleDisplay', () => {
 
   it('does not show a message when an access request has responses', async () => {
     vi.mocked(useGetEntryRoles).mockReturnValue({
-      modelRoles: [testManagerRole],
-      isModelRolesLoading: false,
-      isModelRolesError: undefined,
-      mutateModelRoles: vi.fn(),
+      entryRoles: [testManagerRole],
+      isEntryRolesLoading: false,
+      isEntryRolesError: undefined,
+      mutateEntryRoles: vi.fn(),
     })
     vi.mocked(useGetResponses).mockReturnValue({
       responses: [testReviewResponse],
@@ -118,10 +118,10 @@ describe('ReviewRoleDisplay', () => {
 
   it('does not show a message when an release has responses', async () => {
     vi.mocked(useGetEntryRoles).mockReturnValue({
-      modelRoles: [testManagerRole],
-      isModelRolesLoading: false,
-      isModelRolesError: undefined,
-      mutateModelRoles: vi.fn(),
+      entryRoles: [testManagerRole],
+      isEntryRolesLoading: false,
+      isEntryRolesError: undefined,
+      mutateEntryRoles: vi.fn(),
     })
     vi.mocked(useGetResponses).mockReturnValue({
       responses: [testReviewResponse],

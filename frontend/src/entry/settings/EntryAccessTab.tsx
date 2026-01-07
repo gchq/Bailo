@@ -23,9 +23,9 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
 
   const { isEntryError: isEntryError, mutateEntry: mutateEntry } = useGetEntry(entry.id)
   const {
-    modelRoles: entryRoles,
-    isModelRolesLoading: isEntryRolesLoading,
-    isModelRolesError: isEntryRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(entry.id)
 
   const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)

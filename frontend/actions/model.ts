@@ -115,10 +115,10 @@ export function useGetEntryRoles(id?: string) {
   >(id ? `/api/v2/roles?modelId=${id}` : `/api/v2/roles`, fetcher)
 
   return {
-    mutateModelRoles: mutate,
-    modelRoles: data ? data.roles : emptyRolesList,
-    isModelRolesLoading: isLoading,
-    isModelRolesError: error,
+    mutateEntryRoles: mutate,
+    entryRoles: data ? data.roles : emptyRolesList,
+    isEntryRolesLoading: isLoading,
+    isEntryRolesError: error,
   }
 }
 
