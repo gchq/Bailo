@@ -1,6 +1,7 @@
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
+import PercentIcon from '@mui/icons-material/Percent'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
@@ -251,6 +252,17 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>View History</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setExportDialogOpen(true)
+                  }}
+                >
+                  <ListItemIcon>
+                    <PercentIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>View Percentage Complete</ListItemText>
                 </MenuItem>
               </Menu>
             </Stack>

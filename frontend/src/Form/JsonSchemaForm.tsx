@@ -1,4 +1,4 @@
-import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
+import { Grid, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
@@ -13,7 +13,7 @@ import {
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
-import { setStepState, widgets } from 'utils/formUtils'
+import { collateFormStats, displayPercentage, getFormStats, setStepState, widgets } from 'utils/formUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -32,6 +32,8 @@ export default function JsonSchemaForm({
   const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
+  const formStats = getFormStats(currentStep)
+  const collatedStats = collateFormStats(splitSchema.steps)
 
   if (!currentStep) {
     return null
@@ -56,69 +58,79 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
-        <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
-          <List sx={{ width: { xs: '100%' } }}>
-            {splitSchema.steps.map((step, index) => (
-              <ListItem
-                key={step.schema.title}
-                disablePadding
-                sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
-              >
-                <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                  <Typography
-                    sx={{
-                      wordBreak: 'break-word',
-                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
-                    }}
-                    width='100%'
-                  >
-                    {step.schema.title}
-                  </Typography>
-                  {displayLabelValidation && <ValidationErrorIcon step={step} />}
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Stepper>
+    <Stack direction='column'>
+      <div>
+        Percentage Complete: {displayPercentage(collatedStats.percentageComplete)} - Total Questions:{' '}
+        {collatedStats.totalQuestions} - Total Completed: {collatedStats.totalAnswers}
+      </div>
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+          <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
+            <List sx={{ width: { xs: '100%' } }}>
+              {splitSchema.steps.map((step, index) => (
+                <ListItem
+                  key={step.schema.title}
+                  disablePadding
+                  sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
+                >
+                  <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
+                    <Typography
+                      sx={{
+                        wordBreak: 'break-word',
+                        color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
+                      }}
+                      width='100%'
+                    >
+                      {step.schema.title}
+                    </Typography>
+                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Stepper>
+        </Grid>
+        <Grid size={{ xs: 12, md: 10 }}>
+          <div>
+            Percentage Complete: {displayPercentage(formStats.percentageComplete)} - Total Questions:{' '}
+            {formStats.totalQuestions} - Total Completed: {formStats.totalAnswers}
+          </div>
+          <Form
+            schema={currentStep.schema}
+            formData={currentStep.state}
+            onChange={onFormChange}
+            validator={validator}
+            widgets={widgets}
+            uiSchema={currentStep.uiSchema}
+            liveValidate
+            omitExtraData
+            disabled={!canEdit}
+            liveOmit
+            formContext={{
+              editMode: canEdit,
+              formSchema: currentStep.schema,
+              defaultCurrentUser: defaultCurrentUserInEntityList,
+            }}
+            templates={
+              !canEdit
+                ? {
+                    DescriptionFieldTemplate,
+                    ArrayFieldTemplate,
+                    ArrayFieldItemTemplate,
+                    ObjectFieldTemplate,
+                  }
+                : {
+                    ArrayFieldTemplate,
+                    ArrayFieldItemTemplate,
+                    ObjectFieldTemplate,
+                    ErrorListTemplate,
+                  }
+            }
+          >
+            <></>
+          </Form>
+        </Grid>
       </Grid>
-      <Grid size={{ xs: 12, md: 10 }}>
-        <Form
-          schema={currentStep.schema}
-          formData={currentStep.state}
-          onChange={onFormChange}
-          validator={validator}
-          widgets={widgets}
-          uiSchema={currentStep.uiSchema}
-          liveValidate
-          omitExtraData
-          disabled={!canEdit}
-          liveOmit
-          formContext={{
-            editMode: canEdit,
-            formSchema: currentStep.schema,
-            defaultCurrentUser: defaultCurrentUserInEntityList,
-          }}
-          templates={
-            !canEdit
-              ? {
-                  DescriptionFieldTemplate,
-                  ArrayFieldTemplate,
-                  ArrayFieldItemTemplate,
-                  ObjectFieldTemplate,
-                }
-              : {
-                  ArrayFieldTemplate,
-                  ArrayFieldItemTemplate,
-                  ObjectFieldTemplate,
-                  ErrorListTemplate,
-                }
-          }
-        >
-          <></>
-        </Form>
-      </Grid>
-    </Grid>
+    </Stack>
   )
 }

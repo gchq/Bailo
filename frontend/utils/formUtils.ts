@@ -189,3 +189,56 @@ export function validateForm(step: StepNoRender) {
 
   return sectionErrors.errors.length === 0
 }
+
+export interface FormStats {
+  totalQuestions: number
+  totalAnswers: number
+  percentageComplete: number
+}
+
+function countNestedObjects(state: any | undefined): number {
+  if (state === null || state === undefined || typeof state !== 'object') {
+    return -1
+  }
+
+  let total = 0
+
+  for (const section of Object.values(state)) {
+    if (section !== null && typeof section === 'object') {
+      total += Object.keys(section).length
+    }
+  }
+
+  return total
+}
+
+export function getFormStats(step: StepNoRender): FormStats {
+  const totalQuestions = countNestedObjects(step.uiSchema ?? {})
+  const totalAnswers = countNestedObjects(step.state ?? {})
+  const percentageComplete = (totalAnswers / totalQuestions) * 100
+  return {
+    totalQuestions,
+    totalAnswers,
+    percentageComplete,
+  }
+}
+
+export function collateFormStats(steps: StepNoRender[]): FormStats {
+  let totalQuestions = 0
+  let totalAnswers = 0
+  steps.forEach((step) => {
+    const stepStats = getFormStats(step)
+    totalQuestions += stepStats.totalQuestions
+    totalAnswers += stepStats.totalAnswers
+  })
+  const percentageComplete = (totalAnswers / totalQuestions) * 100
+  return {
+    totalQuestions,
+    totalAnswers,
+    percentageComplete,
+  }
+}
+
+export function displayPercentage(percentage: number): string {
+  return Number.isInteger(percentage) ? `${percentage}%` : `${percentage.toFixed(1)}%`
+}
