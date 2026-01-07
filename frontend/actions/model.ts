@@ -15,7 +15,7 @@ import {
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-const emptyModelList = []
+const emptyEntryList = []
 
 export interface EntrySearchResult {
   id: string
@@ -69,18 +69,18 @@ export function useListEntries(
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
-      models: EntrySearchResult[]
+      entries: EntrySearchResult[]
       errors: Record<string, BailoError>
     },
     ErrorInfo
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
-    mutateModels: mutate,
-    models: data ? data.models : emptyModelList,
-    errors: data ? data.errors : {},
-    isModelsLoading: isLoading,
-    isModelsError: error,
+    mutateEntries: mutate,
+    entries: data ? data.entries : emptyEntryList,
+    entryErrors: data ? data.errors : {},
+    isEntriesLoading: isLoading,
+    isEntriesError: error,
   }
 }
 
@@ -97,10 +97,10 @@ export function useGetEntry(id: string | undefined, kind?: EntryKindKeys) {
   >(id ? `/api/v2/model/${id}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
-    mutateModel: mutate,
-    model: data?.model,
-    isModelLoading: isLoading,
-    isModelError: error,
+    mutateEntry: mutate,
+    entry: data?.model,
+    isEntryLoading: isLoading,
+    isEntryError: error,
   }
 }
 

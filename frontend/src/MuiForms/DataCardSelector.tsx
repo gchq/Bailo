@@ -38,9 +38,9 @@ export default function DataCardSelector({
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 
   const {
-    models: dataCards,
-    isModelsLoading: isDataCardsLoading,
-    isModelsError: isDataCardsError,
+    entries: dataCards,
+    isEntriesLoading: isDataCardsLoading,
+    isEntriesError: isDataCardsError,
   } = useListEntries(EntryKind.DATA_CARD)
 
   const theme = useTheme()

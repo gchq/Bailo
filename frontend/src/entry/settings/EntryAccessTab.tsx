@@ -21,7 +21,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
 
-  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetEntry(entry.id)
+  const { isEntryError: isEntryError, mutateEntry: mutateEntry } = useGetEntry(entry.id)
   const {
     modelRoles: entryRoles,
     isModelRolesLoading: isEntryRolesLoading,

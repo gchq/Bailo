@@ -10,7 +10,11 @@ export default function ModelSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
 
-  const { model, isModelLoading, isModelError } = useGetEntry(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
 
   if (isModelError) {
     return <ErrorWrapper message={isModelError.info.message} />

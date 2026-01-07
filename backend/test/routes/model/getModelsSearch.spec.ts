@@ -9,7 +9,7 @@ vi.mock('../../../src/connectors/audit/index.js')
 
 vi.mock('../../../src/services/model.js', () => ({
   searchModels: vi.fn(() => {
-    return { models: [{ id: 'test', name: 'name', description: 'description', tags: ['tag'] }] }
+    return { entries: [{ id: 'test', name: 'name', description: 'description', tags: ['tag'] }] }
   }),
 }))
 

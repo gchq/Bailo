@@ -69,10 +69,10 @@ export default function Marketplace() {
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
   const {
-    models,
-    errors: modelsErrors,
-    isModelsError,
-    isModelsLoading,
+    entries: models,
+    entryErrors: modelsErrors,
+    isEntriesError: isModelsError,
+    isEntriesLoading: isModelsLoading,
   } = useListEntries(
     EntryKind.MODEL,
     selectedRoles,
@@ -88,10 +88,10 @@ export default function Marketplace() {
   )
 
   const {
-    models: dataCards,
-    errors: dataCardsErrors,
-    isModelsError: isDataCardsError,
-    isModelsLoading: isDataCardsLoading,
+    entries: dataCards,
+    entryErrors: dataCardsErrors,
+    isEntriesError: isDataCardsError,
+    isEntriesLoading: isDataCardsLoading,
   } = useListEntries(
     EntryKind.DATA_CARD,
     selectedRoles,
@@ -107,9 +107,9 @@ export default function Marketplace() {
   )
 
   const {
-    models: mirroredModels,
-    isModelsError: isMirroredModelsError,
-    isModelsLoading: isMirroredModelsLoading,
+    entries: mirroredModels,
+    isEntriesError: isMirroredModelsError,
+    isEntriesLoading: isMirroredModelsLoading,
   } = useListEntries(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,

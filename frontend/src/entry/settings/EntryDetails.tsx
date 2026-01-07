@@ -26,7 +26,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
-  const { mutateModel } = useGetEntry(entry.id, entry.kind)
+  const { mutateEntry: mutateModel } = useGetEntry(entry.id, entry.kind)
 
   const isFormValid = useMemo(() => name && description, [name, description])
 

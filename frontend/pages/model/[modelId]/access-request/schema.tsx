@@ -9,7 +9,11 @@ import { EntryKind, SchemaKind } from 'types/types'
 export default function AccessRequestSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetEntry(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isModelError,

@@ -46,9 +46,9 @@ export default function EntrySearch() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
   const {
-    models: entries,
-    isModelsLoading: isEntriesLoading,
-    isModelsError: isEntriesError,
+    entries: entries,
+    isEntriesLoading: isEntriesLoading,
+    isEntriesError: isEntriesError,
   } = useListEntries(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
 
   const modelList = useMemo(

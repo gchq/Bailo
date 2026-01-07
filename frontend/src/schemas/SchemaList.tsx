@@ -34,7 +34,11 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
-  const { models, isModelsLoading, isModelsError } = useListEntries(
+  const {
+    entries: models,
+    isEntriesLoading: isModelsLoading,
+    isEntriesError: isModelsError,
+  } = useListEntries(
     schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
     [],
     '',

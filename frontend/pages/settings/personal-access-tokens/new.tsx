@@ -29,7 +29,7 @@ import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
-  const { models, isModelsLoading, isModelsError } = useListEntries('model')
+  const { entries: models, isEntriesLoading: isModelsLoading, isEntriesError: isModelsError } = useListEntries('model')
   const { tokenActions, isTokenActionsLoading, isTokenActionsError } = useGetUserTokenList()
 
   const actionOptions = useMemo(() => tokenActions.map((tokenAction) => tokenAction.id), [tokenActions])

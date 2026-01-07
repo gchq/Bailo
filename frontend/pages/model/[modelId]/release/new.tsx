@@ -43,7 +43,11 @@ export default function NewRelease() {
   const router = useRouter()
 
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetEntry(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
 
   useEffect(() => {
     if (model && modelCardVersion !== model.card.version) {
