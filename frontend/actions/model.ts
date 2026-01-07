@@ -82,7 +82,7 @@ export function useListEntries(
   }
 }
 
-export function useGetEntry(id: string | undefined, kind?: EntryKindKeys) {
+export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
     ...(kind && { kind }),
   }
@@ -92,7 +92,7 @@ export function useGetEntry(id: string | undefined, kind?: EntryKindKeys) {
       entry: EntryInterface
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}?${qs.stringify(queryParams)}` : null, fetcher)
+  >(entryId ? `/api/v2/model/${entryId}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateEntry: mutate,
@@ -104,13 +104,13 @@ export function useGetEntry(id: string | undefined, kind?: EntryKindKeys) {
 
 const emptyRolesList = []
 
-export function useGetEntryRoles(id?: string) {
+export function useGetEntryRoles(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       roles: SystemRole[]
     },
     ErrorInfo
-  >(id ? `/api/v2/roles?modelId=${id}` : `/api/v2/roles`, fetcher)
+  >(entryId ? `/api/v2/roles?modelId=${entryId}` : `/api/v2/roles`, fetcher)
 
   return {
     mutateEntryRoles: mutate,
@@ -122,13 +122,13 @@ export function useGetEntryRoles(id?: string) {
 
 const emptyImageList = []
 
-export function useGetEntryImages(id?: string) {
+export function useGetEntryImages(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/images` : null, fetcher)
+  >(entryId ? `/api/v2/model/${entryId}/images` : null, fetcher)
 
   return {
     mutateEntryImages: mutate,
@@ -154,13 +154,13 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   }
 }
 
-export function useGetEntryFiles(id?: string) {
+export function useGetEntryFiles(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       files: Array<FileInterface>
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/files` : null, fetcher)
+  >(entryId ? `/api/v2/model/${entryId}/files` : null, fetcher)
 
   return {
     mutateEntryFiles: mutate,
@@ -186,7 +186,7 @@ export async function postEntry(form: EntryForm) {
 }
 
 export async function patchEntry(
-  id: string,
+  entryId: string,
   delta: Partial<
     Pick<
       EntryInterface,
@@ -194,22 +194,22 @@ export async function patchEntry(
     >
   >,
 ) {
-  return fetch(`/api/v2/model/${id}`, {
+  return fetch(`/api/v2/model/${entryId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(delta),
   })
 }
 
-export async function deleteEntry(id: string) {
-  return fetch(`/api/v2/model/${id}`, {
+export async function deleteEntry(entryId: string) {
+  return fetch(`/api/v2/model/${entryId}`, {
     method: 'delete',
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export async function postEntryExportToS3(id: string, modelExport: ModelExportRequest) {
-  return fetch(`/api/v2/model/${id}/export/s3`, {
+export async function postEntryExportToS3(entryId: string, modelExport: ModelExportRequest) {
+  return fetch(`/api/v2/model/${entryId}/export/s3`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(modelExport),
