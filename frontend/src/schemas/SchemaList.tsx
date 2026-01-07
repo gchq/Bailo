@@ -1,6 +1,6 @@
 import { Card, List, ListItemButton, ListItemText, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { useListEntries } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
 import { MouseEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
@@ -34,7 +34,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
-  const { models, isModelsLoading, isModelsError } = useListModels(
+  const { models, isModelsLoading, isModelsError } = useListEntries(
     schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
     [],
     '',

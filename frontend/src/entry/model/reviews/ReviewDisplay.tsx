@@ -1,7 +1,7 @@
 import { Done } from '@mui/icons-material'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -23,7 +23,7 @@ export default function ReviewDisplay({
   showCurrentUserResponses = false,
   currentUserDn,
 }: ReviewDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(modelId)
   const dynamicRoles = useMemo(() => {
     const staticRoles = ['owner', 'contributor', 'consumer']
     return modelRoles.filter((role) => !staticRoles.includes(role.shortName))

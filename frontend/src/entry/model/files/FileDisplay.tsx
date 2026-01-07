@@ -18,7 +18,7 @@ import {
 } from '@mui/material'
 import { patchFile } from 'actions/file'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
-import { deleteModelFile, useGetModelFiles } from 'actions/model'
+import { deleteEntryFile, useGetEntryFiles } from 'actions/model'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import {
@@ -109,7 +109,7 @@ export default function FileDisplay({
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
 
-  const { mutateEntryFiles } = useGetModelFiles(modelId)
+  const { mutateEntryFiles } = useGetEntryFiles(modelId)
   const router = useRouter()
 
   const [latestRelease, setLatestRelease] = useState('')
@@ -134,7 +134,7 @@ export default function FileDisplay({
 
   const handleDeleteConfirm = useCallback(async () => {
     if (isFileInterface(file)) {
-      const res = await deleteModelFile(modelId, file._id)
+      const res = await deleteEntryFile(modelId, file._id)
       if (!res.ok) {
         setDeleteErrorMessage(await getErrorMessage(res))
       } else {

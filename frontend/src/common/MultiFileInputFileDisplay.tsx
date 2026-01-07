@@ -1,7 +1,7 @@
 import { LocalOffer } from '@mui/icons-material'
 import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import { patchFile } from 'actions/file'
-import { useGetModelFiles } from 'actions/model'
+import { useGetEntryFiles } from 'actions/model'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -27,7 +27,7 @@ export default function MultiFileInputFileDisplay({
   const [newFileTags, setNewFileTags] = useState<string[]>([])
   const [fileTagCount, setFileTagCount] = useState(isFileInterface(file) ? file.tags.length : newFileTags.length)
 
-  const { mutateEntryFiles } = useGetModelFiles(isFileInterface(file) ? file.modelId : '')
+  const { mutateEntryFiles } = useGetEntryFiles(isFileInterface(file) ? file.modelId : '')
 
   const handleDelete = () => {
     onDelete(file)

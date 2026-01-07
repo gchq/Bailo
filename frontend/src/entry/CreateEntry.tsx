@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { postModel, useGetModelRoles } from 'actions/model'
+import { postEntry, useGetEntryRoles } from 'actions/model'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
@@ -56,7 +56,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
@@ -103,7 +103,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
         },
       },
     }
-    const response = await postModel(formData)
+    const response = await postEntry(formData)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))

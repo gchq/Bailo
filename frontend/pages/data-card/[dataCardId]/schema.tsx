@@ -1,4 +1,4 @@
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/model'
 import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
@@ -15,7 +15,7 @@ export default function DataCardSchema() {
     model: dataCard,
     isModelLoading: isDataCardLoading,
     isModelError: isDataCardError,
-  } = useGetModel(dataCardId, EntryKind.DATA_CARD)
+  } = useGetEntry(dataCardId, EntryKind.DATA_CARD)
 
   if (isDataCardError) {
     return <ErrorWrapper message={isDataCardError.info.message} />

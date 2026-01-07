@@ -1,4 +1,4 @@
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -18,7 +18,7 @@ export default function DataCard() {
     isModelLoading: isDataCardLoading,
     isModelError: isDataCardError,
     mutateModel,
-  } = useGetModel(dataCardId, EntryKind.DATA_CARD)
+  } = useGetEntry(dataCardId, EntryKind.DATA_CARD)
 
   const { userPermissions } = useContext(UserPermissionsContext)
 

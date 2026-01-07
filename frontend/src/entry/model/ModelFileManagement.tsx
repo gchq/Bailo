@@ -1,6 +1,6 @@
 import { Add } from '@mui/icons-material'
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
-import { useGetModelFiles } from 'actions/model'
+import { useGetEntryFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -16,7 +16,7 @@ type FilesProps = {
 }
 
 export default function Files({ model }: FilesProps) {
-  const { entryFiles, isEntryFilesLoading, isEntryFilesError, mutateEntryFiles } = useGetModelFiles(model.id)
+  const { entryFiles, isEntryFilesLoading, isEntryFilesError, mutateEntryFiles } = useGetEntryFiles(model.id)
   const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false)
   const [activeFileTag, setActiveFileTag] = useState('')
 

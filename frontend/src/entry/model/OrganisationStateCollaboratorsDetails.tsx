@@ -1,7 +1,7 @@
 import { LocalOffer } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { patchModel, useGetModel } from 'actions/model'
+import { patchEntry, useGetEntry } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -23,7 +23,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
 
-  const { mutateModel } = useGetModel(entry.id)
+  const { mutateModel } = useGetEntry(entry.id)
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -41,7 +41,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
     setEntryTagUpdateErrorMessage('')
-    const response = await patchModel(entry.id, { tags: newTags })
+    const response = await patchEntry(entry.id, { tags: newTags })
     if (!response.ok) {
       setEntryTagUpdateErrorMessage(await getErrorMessage(response))
     } else {

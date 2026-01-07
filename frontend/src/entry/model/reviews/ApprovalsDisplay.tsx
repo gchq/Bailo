@@ -1,6 +1,6 @@
 import { Done } from '@mui/icons-material'
 import { Stack, Tooltip, Typography } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { ReactElement, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -20,7 +20,7 @@ export default function ApprovalsDisplay({
   acceptedReviewResponses,
   showCurrentUserResponses = false,
 }: ApprovalsDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(modelId)
 
   const dynamicRoles = useMemo(() => modelRoles.filter((role) => !staticRoles.includes(role.shortName)), [modelRoles])
 

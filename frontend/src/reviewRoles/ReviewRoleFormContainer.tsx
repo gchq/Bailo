@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
@@ -60,7 +60,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   defaultEntitiesEntry = [],
   setDefaultEntities,
 }: ReviewRoleFormContainerProps<T>) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))

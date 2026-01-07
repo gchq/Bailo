@@ -3,7 +3,7 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import { Box, Button, Container, Link, Paper, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { CreateInferenceParams, postInference } from 'actions/inferencing'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/model'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -29,7 +29,7 @@ export default function NewInference() {
 
   const [image, setImage] = useState<FlattenedModelImage | undefined>()
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const { model, isModelLoading, isModelError } = useGetEntry(modelId, EntryKind.MODEL)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 

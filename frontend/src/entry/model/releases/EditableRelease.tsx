@@ -1,6 +1,6 @@
 import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/model'
 import {
   deleteRelease,
   putRelease,
@@ -57,7 +57,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
-  const { model, isModelLoading, isModelError } = useGetModel(release.modelId, EntryKind.MODEL)
+  const { model, isModelLoading, isModelError } = useGetEntry(release.modelId, EntryKind.MODEL)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
 

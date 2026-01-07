@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { ReviewRequestInterface } from 'types/types'
 
-import { useGetModelRoles } from '../../actions/model'
+import { useGetEntryRoles } from '../../actions/model'
 import { getRoleDisplayName } from '../../utils/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
@@ -13,7 +13,7 @@ type ReviewRoleDisplayProps = {
 }
 
 export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(review.model.id)
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
   if (isModelRolesError) {

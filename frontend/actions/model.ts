@@ -39,7 +39,7 @@ export interface ModelExportRequest {
 
 //This function is misleading, it gets a list of entries (models, data cards, etc.), not just models.
 //This is tech debt that is repeating throughout this file and other parts of the codebase.
-export function useListModels(
+export function useListEntries(
   kind?: EntryKindKeys,
   roles: string[] = [],
   task = '',
@@ -84,7 +84,7 @@ export function useListModels(
   }
 }
 
-export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
+export function useGetEntry(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
     ...(kind && { kind }),
   }
@@ -106,7 +106,7 @@ export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
 
 const emptyRolesList = []
 
-export function useGetModelRoles(id?: string) {
+export function useGetEntryRoles(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       roles: SystemRole[]
@@ -124,7 +124,7 @@ export function useGetModelRoles(id?: string) {
 
 const emptyImageList = []
 
-export function useGetModelImages(id?: string) {
+export function useGetEntryImages(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
@@ -156,7 +156,7 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   }
 }
 
-export function useGetModelFiles(id?: string) {
+export function useGetEntryFiles(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       files: Array<FileInterface>
@@ -172,14 +172,14 @@ export function useGetModelFiles(id?: string) {
   }
 }
 
-export function deleteModelFile(modelId: string, fileId: string) {
+export function deleteEntryFile(modelId: string, fileId: string) {
   return fetch(`/api/v2/model/${modelId}/file/${fileId}`, {
     method: `delete`,
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export async function postModel(form: EntryForm) {
+export async function postEntry(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -187,7 +187,7 @@ export async function postModel(form: EntryForm) {
   })
 }
 
-export async function patchModel(
+export async function patchEntry(
   id: string,
   delta: Partial<
     Pick<
@@ -203,14 +203,14 @@ export async function patchModel(
   })
 }
 
-export async function deleteModel(id: string) {
+export async function deleteEntry(id: string) {
   return fetch(`/api/v2/model/${id}`, {
     method: 'delete',
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export async function postModelExportToS3(id: string, modelExport: ModelExportRequest) {
+export async function postEntryExportToS3(id: string, modelExport: ModelExportRequest) {
   return fetch(`/api/v2/model/${id}/export/s3`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

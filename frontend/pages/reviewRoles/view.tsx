@@ -1,7 +1,7 @@
 import { Add, Create, Delete } from '@mui/icons-material'
 import Edit from '@mui/icons-material/Edit'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -23,7 +23,7 @@ import { plural } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
 

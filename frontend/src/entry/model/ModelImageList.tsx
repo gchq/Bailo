@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
-import { useGetModelImages } from 'actions/model'
+import { useGetEntryImages } from 'actions/model'
 import { SyntheticEvent, useEffect, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -36,7 +36,7 @@ export default function ModelImageList({
   multiple,
   id,
 }: ModelImageListProps) {
-  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
+  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetEntryImages(model.id)
 
   useEffect(() => {
     onRegistryError(!!isModelImagesError)

@@ -25,7 +25,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useGetPopularEntryTags, useListModels } from 'actions/model'
+import { useGetPopularEntryTags, useListEntries } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -73,7 +73,7 @@ export default function Marketplace() {
     errors: modelsErrors,
     isModelsError,
     isModelsLoading,
-  } = useListModels(
+  } = useListEntries(
     EntryKind.MODEL,
     selectedRoles,
     '',
@@ -92,7 +92,7 @@ export default function Marketplace() {
     errors: dataCardsErrors,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(
+  } = useListEntries(
     EntryKind.DATA_CARD,
     selectedRoles,
     '',
@@ -110,7 +110,7 @@ export default function Marketplace() {
     models: mirroredModels,
     isModelsError: isMirroredModelsError,
     isModelsLoading: isMirroredModelsLoading,
-  } = useListModels(
+  } = useListEntries(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,
     '',

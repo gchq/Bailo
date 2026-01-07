@@ -1,6 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/model'
 import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -25,7 +25,7 @@ export default function Release() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const { model, isModelLoading, isModelError } = useGetEntry(modelId, EntryKind.MODEL)
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,

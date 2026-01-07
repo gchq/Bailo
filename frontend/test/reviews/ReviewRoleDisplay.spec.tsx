@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { useGetResponses } from 'actions/response'
 import { useGetUiConfig } from 'actions/uiConfig'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
@@ -22,7 +22,7 @@ const mockRoleUtils = vi.hoisted(() => {
 vi.mock('utils/roles.ts', () => mockRoleUtils)
 
 vi.mock('actions/model', () => ({
-  useGetModelRoles: vi.fn(),
+  useGetEntryRoles: vi.fn(),
 }))
 
 vi.mock('actions/response', () => ({
@@ -38,7 +38,7 @@ describe('ReviewRoleDisplay', () => {
   const testMessageRelease = 'This release needs to be reviewed by the Manager.'
 
   it('shows a message when an access request has no responses', async () => {
-    vi.mocked(useGetModelRoles).mockReturnValue({
+    vi.mocked(useGetEntryRoles).mockReturnValue({
       modelRoles: [testManagerRole],
       isModelRolesLoading: false,
       isModelRolesError: undefined,
@@ -64,7 +64,7 @@ describe('ReviewRoleDisplay', () => {
   })
 
   it('shows a message when an release has no responses', async () => {
-    vi.mocked(useGetModelRoles).mockReturnValue({
+    vi.mocked(useGetEntryRoles).mockReturnValue({
       modelRoles: [testManagerRole],
       isModelRolesLoading: false,
       isModelRolesError: undefined,
@@ -90,7 +90,7 @@ describe('ReviewRoleDisplay', () => {
   })
 
   it('does not show a message when an access request has responses', async () => {
-    vi.mocked(useGetModelRoles).mockReturnValue({
+    vi.mocked(useGetEntryRoles).mockReturnValue({
       modelRoles: [testManagerRole],
       isModelRolesLoading: false,
       isModelRolesError: undefined,
@@ -117,7 +117,7 @@ describe('ReviewRoleDisplay', () => {
   })
 
   it('does not show a message when an release has responses', async () => {
-    vi.mocked(useGetModelRoles).mockReturnValue({
+    vi.mocked(useGetEntryRoles).mockReturnValue({
       modelRoles: [testManagerRole],
       isModelRolesLoading: false,
       isModelRolesError: undefined,

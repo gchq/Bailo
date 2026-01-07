@@ -1,5 +1,5 @@
 import { Grid, Stack } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { Fragment, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
@@ -12,7 +12,7 @@ type EntryRoleListProps = {
 }
 
 export default function EntryRoleList({ entry }: EntryRoleListProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(entry.id)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(entry.id)
   const rows = useMemo(
     () =>
       entry.collaborators.map((collaborator) => (

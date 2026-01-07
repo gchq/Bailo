@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
-import { useGetModelRoles } from '../../actions/model'
+import { useGetEntryRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
 import {
   AccessRequestInterface,
@@ -60,7 +60,7 @@ export default function ReviewWithComment({
   })
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(modelId)
 
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
     reviews.find((review) => review.role === router.query.role) || reviews[0],

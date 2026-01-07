@@ -4,7 +4,7 @@ import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/model'
 import { patchResponse } from 'actions/response'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
@@ -39,7 +39,7 @@ export default function ReviewDecisionDisplay({
   const [comment, setComment] = useState(response.comment || '')
   const [errorMessage, setErrorMessage] = useState('')
 
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetEntryRoles(modelId)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )

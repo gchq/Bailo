@@ -1,4 +1,4 @@
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -20,7 +20,7 @@ import { getCurrentUserRoles } from 'utils/roles'
 export default function Model() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError, mutateModel } = useGetEntry(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
