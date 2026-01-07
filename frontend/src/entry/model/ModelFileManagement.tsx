@@ -1,3 +1,4 @@
+import { Add } from '@mui/icons-material'
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
@@ -69,6 +70,7 @@ export default function Files({ model }: FilesProps) {
                     variant='outlined'
                     sx={{ float: 'right' }}
                     onClick={() => setIsFileUploadDialogOpen(true)}
+                    startIcon={<Add />}
                   >
                     Add new files
                   </Button>

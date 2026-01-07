@@ -1,3 +1,4 @@
+import { Create } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -79,6 +80,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
                   onClick={handleDraftNewRelease}
                   disabled={!model.card}
                   data-test='draftNewReleaseButton'
+                  startIcon={<Create />}
                 >
                   Draft new release
                 </Button>

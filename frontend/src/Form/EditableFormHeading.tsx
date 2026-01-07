@@ -1,3 +1,4 @@
+import { Close, Create, Delete, Save } from '@mui/icons-material'
 import { Button, Stack } from '@mui/material'
 import { ReactNode } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -46,7 +47,13 @@ export default function EditableFormHeading({
         {!isEdit && !readOnly && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
             <Restricted action={editAction} fallback={<Button disabled>{editButtonText}</Button>}>
-              <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
+              <Button
+                variant='outlined'
+                onClick={onEdit}
+                data-test='editFormButton'
+                disabled={isRegistryError}
+                startIcon={<Create />}
+              >
                 {editButtonText}
               </Button>
             </Restricted>
@@ -58,6 +65,7 @@ export default function EditableFormHeading({
                   onClick={onDelete}
                   data-test='deleteFormButton'
                   disabled={isRegistryError}
+                  startIcon={<Delete />}
                 >
                   {deleteButtonText}
                 </Button>
@@ -67,7 +75,7 @@ export default function EditableFormHeading({
         )}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton'>
+            <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton' startIcon={<Close />}>
               Cancel
             </Button>
             <Button
@@ -76,6 +84,7 @@ export default function EditableFormHeading({
               onClick={onSubmit}
               data-test='saveEditFormButton'
               disabled={isRegistryError || disableSaveButton}
+              startIcon={<Save />}
             >
               Save
             </Button>
