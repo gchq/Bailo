@@ -167,7 +167,7 @@ export default function EntitySelector({
             noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
             options={users || []}
-            renderTags={(value, getTagProps) =>
+            renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Box key={option.id} sx={{ maxWidth: '200px' }}>
                   <Chip
@@ -183,7 +183,7 @@ export default function EntitySelector({
                 {...params}
                 placeholder='Username or group name'
                 slotProps={{
-                  htmlInput: { 'aria-label': `input field for ${label}` },
+                  htmlInput: { ...params.inputProps, 'aria-label': `input field for ${label}` },
                 }}
                 error={rawErrors && rawErrors.length > 0}
                 id={id}
