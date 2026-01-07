@@ -50,7 +50,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       if (!section) {
         return
       }
-      section.scrollIntoView({ behavior: 'smooth' })
+      section.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [ref, pathname])
 
