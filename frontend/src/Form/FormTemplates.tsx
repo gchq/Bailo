@@ -21,7 +21,7 @@ export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick 
         {title}
       </Typography>
       {canAdd && registry.formContext.editMode && (
-        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
+        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />} sx={{ width: 'fit-content' }}>
           Add Item
         </Button>
       )}
@@ -78,11 +78,13 @@ export function ObjectFieldTemplate({
           </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
-        {properties.map((element) => (
-          <div key={element.name} className='property-wrapper'>
-            {element.content}
-          </div>
-        ))}
+        <div style={{ marginLeft: 10 }}>
+          {properties.map((element) => (
+            <div key={element.name} className='property-wrapper'>
+              {element.content}
+            </div>
+          ))}
+        </div>
       </Stack>
     </Box>
   )
@@ -146,8 +148,8 @@ export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
       {title}
     </Typography>
   ) : (
-    <Typography variant='h6' fontWeight='bold'>
-      {title}
+    <Typography variant='h6' fontWeight='bold' sx={{ pt: 2 }}>
+      test {title}
     </Typography>
   )
 }

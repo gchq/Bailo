@@ -1,4 +1,4 @@
-import { Lock, LockOpen } from '@mui/icons-material'
+import { Lock, LockOpen, Save } from '@mui/icons-material'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchModel, useGetModel } from 'actions/model'
 import { FormEvent, useMemo, useState } from 'react'
@@ -132,7 +132,13 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         <div>
           <Tooltip title={saveButtonTooltip}>
             <span>
-              <Button variant='contained' loading={isLoading} disabled={!isFormValid} type='submit'>
+              <Button
+                variant='contained'
+                loading={isLoading}
+                disabled={!isFormValid}
+                type='submit'
+                startIcon={<Save />}
+              >
                 Save
               </Button>
             </span>

@@ -1,3 +1,4 @@
+import { Save } from '@mui/icons-material'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
 import { useState } from 'react'
@@ -57,7 +58,13 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
       />
       <Divider />
       <div>
-        <Button variant='contained' aria-label='Save ungoverned access requests' onClick={handleSave} loading={loading}>
+        <Button
+          variant='contained'
+          aria-label='Save ungoverned access requests'
+          onClick={handleSave}
+          loading={loading}
+          startIcon={<Save />}
+        >
           Save
         </Button>
         <MessageAlert message={errorMessage} severity='error' />
