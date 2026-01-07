@@ -10,8 +10,8 @@ import {
   RJSFSchema,
   TitleFieldProps,
 } from '@rjsf/utils'
-import Link from 'next/link'
 import { ReactNode } from 'react'
+import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
