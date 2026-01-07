@@ -61,7 +61,7 @@ export function ObjectFieldTemplate({
   registry,
 }: ObjectFieldTemplateProps) {
   return (
-    <Box sx={{ p: 2 }} id={fieldPathId.$id}>
+    <Box sx={{ p: 2, scrollMarginTop: 100 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
         <div>
           <Stack direction='row' alignItems='center' spacing={1}>

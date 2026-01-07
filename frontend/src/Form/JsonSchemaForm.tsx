@@ -62,7 +62,7 @@ export default function JsonSchemaForm({
       if (!section) {
         return
       }
-      section.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      section.scrollIntoView({ behavior: 'smooth' })
     }
   }, [ref, sharedSection])
 
