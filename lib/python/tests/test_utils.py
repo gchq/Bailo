@@ -33,7 +33,7 @@ def test_filter_none_should_remove_nested_none():
     }
 
 
-def test_filter_none_should_keep_provided_values():
+def test_filter_none_should_keep_all_provided_values():
     """Should keep all provided values."""
     input = {
         "name": "Test Model 1",
