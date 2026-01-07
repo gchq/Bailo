@@ -57,9 +57,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
@@ -178,8 +178,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     return <ErrorWrapper message={isCurrentUserError.info.message} />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isEntryRolesError) {
+    return <ErrorWrapper message={isEntryRolesError.info.message} />
   }
 
   return (
@@ -263,14 +263,14 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       once a schema has been selected.
                     </Typography>
                     <Box sx={{ my: 1 }}>
-                      {isModelRolesLoading ? (
+                      {isEntryRolesLoading ? (
                         <Loading />
                       ) : (
                         <EntryAccessInput
                           value={collaborators}
                           onChange={handleCollaboratorsChange}
                           entryKind={createEntryKind}
-                          entryRoles={modelRoles}
+                          entryRoles={entryRoles}
                         />
                       )}
                     </Box>

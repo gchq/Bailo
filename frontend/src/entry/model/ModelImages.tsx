@@ -18,9 +18,9 @@ type AccessRequestsProps = {
 
 export default function ModelImages({ model, readOnly = false }: AccessRequestsProps) {
   const {
-    entryImages: modelImages,
-    isEntryImagesLoading: isModelImagesLoading,
-    isEntryImagesError: isModelImagesError,
+    entryImages: entryImages,
+    isEntryImagesLoading: isEntryImagesLoading,
+    isEntryImagesError: isEntryImagesError,
   } = useGetEntryImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
@@ -29,8 +29,8 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
     <ModelImageDisplay modelImage={data} key={`${data.repository}-${data.name}`} />
   )
 
-  if (isModelImagesError) {
-    if (isModelImagesError.status === 403) {
+  if (isEntryImagesError) {
+    if (isEntryImagesError.status === 403) {
       return (
         <Forbidden
           errorMessage='If you think this is in error please contact the model owners.'
@@ -39,7 +39,7 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
         />
       )
     } else {
-      return <MessageAlert message={isModelImagesError.info.message} severity='error' />
+      return <MessageAlert message={isEntryImagesError.info.message} severity='error' />
     }
   }
 
@@ -70,11 +70,11 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
               />
             </>
           )}
-          {isModelImagesLoading ? (
+          {isEntryImagesLoading ? (
             <Loading />
           ) : (
             <Paginate
-              list={modelImages.map((image) => {
+              list={entryImages.map((image) => {
                 return { key: `${image.repository}-${image.name}`, ...image }
               })}
               emptyListText={`No images found for model ${model.name}`}

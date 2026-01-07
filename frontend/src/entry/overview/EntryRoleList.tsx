@@ -13,9 +13,9 @@ type EntryRoleListProps = {
 
 export default function EntryRoleList({ entry }: EntryRoleListProps) {
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(entry.id)
   const rows = useMemo(
     () =>
@@ -27,19 +27,19 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
             </Stack>
           </Grid>
           <Grid size={{ xs: 6 }}>
-            <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={modelRoles} />
+            <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={entryRoles} />
           </Grid>
         </Fragment>
       )),
-    [entry.collaborators, modelRoles],
+    [entry.collaborators, entryRoles],
   )
 
-  if (isModelRolesLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   return (

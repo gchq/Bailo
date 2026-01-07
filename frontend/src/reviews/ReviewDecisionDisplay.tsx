@@ -40,9 +40,9 @@ export default function ReviewDecisionDisplay({
   const [errorMessage, setErrorMessage] = useState('')
 
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(modelId)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
@@ -90,11 +90,11 @@ export default function ReviewDecisionDisplay({
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
-  if (isUserInformationLoading || isModelRolesLoading) {
+  if (isUserInformationLoading || isEntryRolesLoading) {
     return <Loading />
   }
 
@@ -134,7 +134,7 @@ export default function ReviewDecisionDisplay({
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
               </Stack>
               {response.role && (
-                <Typography variant='caption'>as {getRoleDisplayName(response.role, modelRoles)}</Typography>
+                <Typography variant='caption'>as {getRoleDisplayName(response.role, entryRoles)}</Typography>
               )}
               <span>
                 {response.outdated && (

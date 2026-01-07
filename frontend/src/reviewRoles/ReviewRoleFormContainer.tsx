@@ -61,9 +61,9 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   setDefaultEntities,
 }: ReviewRoleFormContainerProps<T>) {
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -127,11 +127,11 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
     )
   }, [defaultEntitiesEntry, handleDefaultEntitiesChange])
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} />
   }
 
-  if (isModelRolesLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
@@ -180,7 +180,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {modelRoles.map((role) => (
+                  {entryRoles.map((role) => (
                     <MenuItem key={role.shortName} value={role.shortName}>
                       {role.name}
                     </MenuItem>

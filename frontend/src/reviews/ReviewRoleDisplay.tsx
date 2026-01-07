@@ -14,14 +14,14 @@ type ReviewRoleDisplayProps = {
 
 export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(review.model.id)
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   if (isResponsesError) {
@@ -32,7 +32,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
     return <></>
   }
 
-  if (isModelRolesLoading || isResponsesLoading) {
+  if (isEntryRolesLoading || isResponsesLoading) {
     return <Loading />
   }
 
@@ -41,7 +41,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
       <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
         <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
         <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }} component='p'>
-          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, modelRoles)}.`}
+          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, entryRoles)}.`}
         </Typography>
       </Stack>
     </>

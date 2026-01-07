@@ -21,12 +21,12 @@ export default function ApprovalsDisplay({
   showCurrentUserResponses = false,
 }: ApprovalsDisplayProps) {
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(modelId)
 
-  const dynamicRoles = useMemo(() => modelRoles.filter((role) => !staticRoles.includes(role.shortName)), [modelRoles])
+  const dynamicRoles = useMemo(() => entryRoles.filter((role) => !staticRoles.includes(role.shortName)), [entryRoles])
 
   const roleApprovals = useMemo(
     () =>
@@ -53,13 +53,13 @@ export default function ApprovalsDisplay({
     [acceptedReviewResponses, dynamicRoles, showCurrentUserResponses],
   )
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   return (
     <>
-      {isModelRolesLoading && <Loading />}
+      {isEntryRolesLoading && <Loading />}
       {roleApprovals}
     </>
   )

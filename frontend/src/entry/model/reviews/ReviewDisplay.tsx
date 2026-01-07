@@ -24,14 +24,14 @@ export default function ReviewDisplay({
   currentUserDn,
 }: ReviewDisplayProps) {
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(modelId)
   const dynamicRoles = useMemo(() => {
     const staticRoles = ['owner', 'contributor', 'consumer']
-    return modelRoles.filter((role) => !staticRoles.includes(role.shortName))
-  }, [modelRoles])
+    return entryRoles.filter((role) => !staticRoles.includes(role.shortName))
+  }, [entryRoles])
 
   const orderedReviewResponses = useMemo(
     () =>
@@ -43,12 +43,12 @@ export default function ReviewDisplay({
     [reviewResponses, currentUserDn, showCurrentUserResponses],
   )
 
-  if (isModelRolesLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   return (

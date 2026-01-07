@@ -35,9 +35,9 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
   const {
-    entries: models,
-    isEntriesLoading: isModelsLoading,
-    isEntriesError: isModelsError,
+    entries: entries,
+    isEntriesLoading: isEntriesLoading,
+    isEntriesError: isEntriesError,
   } = useListEntries(
     schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
     [],
@@ -69,12 +69,12 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       case SchemaKind.DATA_CARD:
       case SchemaKind.MODEL:
         return onObjectsToDeleteChange(
-          models.map((model) => {
+          entries.map((model) => {
             return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
           }),
         )
     }
-  }, [reviews, models, schemaKind])
+  }, [reviews, entries, schemaKind])
 
   const handleOpenMenu = useCallback(
     (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, schemaId: SchemaInterface['id']) => {
@@ -183,15 +183,15 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
   }
 
-  if (isModelsError) {
-    return <MessageAlert message={isModelsError.info.message} severity='error' />
+  if (isEntriesError) {
+    return <MessageAlert message={isEntriesError.info.message} severity='error' />
   }
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  if (isReviewsLoading || isModelsLoading || isSchemasLoading) {
+  if (isReviewsLoading || isEntriesLoading || isSchemasLoading) {
     return <Loading />
   }
 
@@ -209,7 +209,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
         onCancel={() => setIsConfirmationDialogOpen(false)}
         errorMessage={errorMessage}
-        dialogMessage={`${models.length > 0 ? `Deleting this schema will break these ${camelCaseToSentenceCase(schemaKind)}s` : `This schema isn't currently used by any ${camelCaseToSentenceCase(schemaKind)}s`}. Are you sure you want to do this?`}
+        dialogMessage={`${entries.length > 0 ? `Deleting this schema will break these ${camelCaseToSentenceCase(schemaKind)}s` : `This schema isn't currently used by any ${camelCaseToSentenceCase(schemaKind)}s`}. Are you sure you want to do this?`}
       >
         <List sx={{ maxHeight: '100%', overflow: 'auto' }}>{objectsToDeleteList}</List>
       </ConfirmationDialogue>

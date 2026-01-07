@@ -24,9 +24,9 @@ import { plural } from 'utils/stringUtils'
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
@@ -181,7 +181,7 @@ export default function ReviewRoles() {
                       System Role
                     </Typography>
                     <Typography>
-                      {formData.systemRole ? getRoleDisplayName(formData?.systemRole, modelRoles) : 'No system role'}
+                      {formData.systemRole ? getRoleDisplayName(formData?.systemRole, entryRoles) : 'No system role'}
                     </Typography>
                   </Box>
                   <Box>
@@ -257,7 +257,7 @@ export default function ReviewRoles() {
       selectedRole,
       isEdit,
       formData,
-      modelRoles,
+      entryRoles,
       displayReviewRoleDefaultEntities,
       handleOpenDeleteConfirmation,
       handleSubmit,
@@ -270,7 +270,7 @@ export default function ReviewRoles() {
     ],
   )
 
-  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading || isModelRolesLoading) {
+  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading || isEntryRolesLoading) {
     return <Loading />
   }
 
@@ -286,8 +286,8 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isSchemasError.info.message} />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isEntryRolesError) {
+    return <ErrorWrapper message={isEntryRolesError.info.message} />
   }
 
   if (!currentUser || !currentUser.isAdmin) {

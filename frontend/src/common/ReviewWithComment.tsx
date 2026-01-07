@@ -61,9 +61,9 @@ export default function ReviewWithComment({
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const {
-    entryRoles: modelRoles,
-    isEntryRolesLoading: isModelRolesLoading,
-    isEntryRolesError: isModelRolesError,
+    entryRoles: entryRoles,
+    isEntryRolesLoading: isEntryRolesLoading,
+    isEntryRolesError: isEntryRolesError,
   } = useGetEntryRoles(modelId)
 
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
@@ -122,8 +122,8 @@ export default function ReviewWithComment({
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   if (isResponsesError) {
@@ -132,12 +132,12 @@ export default function ReviewWithComment({
 
   return (
     <>
-      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading) && <Loading />}
+      {(isReviewsLoading || isEntryRolesLoading || isResponsesLoading) && <Loading />}
       <div data-test='reviewWithCommentContent'>
-        {modelRoles.length === 0 && (
+        {entryRoles.length === 0 && (
           <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
         )}
-        {modelRoles.length > 0 && (
+        {entryRoles.length > 0 && (
           <Stack spacing={2}>
             <Autocomplete
               sx={{ pt: 1 }}
@@ -153,7 +153,7 @@ export default function ReviewWithComment({
               }
               onChange={onChange}
               value={reviewRequest}
-              getOptionLabel={(option) => getRoleDisplayName(option.role, modelRoles)}
+              getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
               options={reviews}
               renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
             />

@@ -37,19 +37,19 @@ export default function ModelImageList({
   id,
 }: ModelImageListProps) {
   const {
-    entryImages: modelImages,
-    isEntryImagesLoading: isModelImagesLoading,
-    isEntryImagesError: isModelImagesError,
+    entryImages: entryImages,
+    isEntryImagesLoading: isEntryImagesLoading,
+    isEntryImagesError: isEntryImagesError,
   } = useGetEntryImages(model.id)
 
   useEffect(() => {
-    onRegistryError(!!isModelImagesError)
-  }, [isModelImagesError, onRegistryError])
+    onRegistryError(!!isEntryImagesError)
+  }, [isEntryImagesError, onRegistryError])
 
   const sortedImageList = useMemo(() => {
     const flattenedImageList: FlattenedModelImage[] = []
 
-    for (const modelImage of modelImages) {
+    for (const modelImage of entryImages) {
       for (const modelImageVersion of modelImage.tags) {
         flattenedImageList.push({
           repository: modelImage.repository,
@@ -60,10 +60,10 @@ export default function ModelImageList({
     }
 
     return flattenedImageList.sort(sortByNameAscending)
-  }, [modelImages])
+  }, [entryImages])
 
   const readOnlyImageList = useMemo(() => {
-    return isModelImagesLoading ? (
+    return isEntryImagesLoading ? (
       <Loading />
     ) : multiple ? (
       value.map((modelImage) => (
@@ -74,7 +74,7 @@ export default function ModelImageList({
     ) : (
       <Typography>{value ? `${value.name}:${value.tag}` : ''}</Typography>
     )
-  }, [isModelImagesLoading, value, multiple])
+  }, [isEntryImagesLoading, value, multiple])
 
   function handleChange(
     _event: SyntheticEvent<Element, Event>,
@@ -87,8 +87,8 @@ export default function ModelImageList({
     }
   }
 
-  if (isModelImagesError) {
-    return <MessageAlert message={isModelImagesError.info.message} severity='error' />
+  if (isEntryImagesError) {
+    return <MessageAlert message={isEntryImagesError.info.message} severity='error' />
   }
 
   if (readOnly) {
@@ -96,7 +96,7 @@ export default function ModelImageList({
   }
 
   const partialAutocompleteProps = {
-    loading: isModelImagesLoading,
+    loading: isEntryImagesLoading,
     onChange: handleChange,
     getOptionLabel: (option: FlattenedModelImage) => `${option.name}:${option.tag}`,
     groupBy: (option: FlattenedModelImage) => option.name,
