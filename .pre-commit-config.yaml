@@ -20,13 +20,13 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/PyCQA/isort
-    rev: 6.0.1
+    rev: 7.0.0
     hooks:
       - id: isort
         args: ['-a', 'from __future__ import annotations', '-l', '120']
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.20.0
+    rev: v3.21.2
     hooks:
       - id: pyupgrade
         name: pyupgrade 3.10
@@ -39,7 +39,7 @@ repos:
         files: backend/docs/
 
   - repo: https://github.com/hadialqattan/pycln
-    rev: v2.5.0
+    rev: v2.6.0
     hooks:
       - id: pycln
         args: [--config=lib/python/pyproject.toml]
@@ -63,7 +63,7 @@ repos:
       - id: rst-inline-touching-normal
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.1.0
+    rev: 25.12.0
     hooks:
       - id: black
         args: ['--config', 'lib/python/pyproject.toml']
