@@ -184,8 +184,7 @@ export interface EntrySearchResult {
 }
 
 export interface EntrySearchResultWithErrors {
-  // Todo: Update models to 'entries'
-  models: Array<EntrySearchResult>
+  entries: Array<EntrySearchResult>
   errors?: Record<string, BailoError>
 }
 
