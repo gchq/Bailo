@@ -91,14 +91,14 @@ export function useGetEntry(id: string | undefined, kind?: EntryKindKeys) {
 
   const { data, isLoading, error, mutate } = useSWR<
     {
-      model: EntryInterface
+      entry: EntryInterface
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateEntry: mutate,
-    entry: data?.model,
+    entry: data?.entry,
     isEntryLoading: isLoading,
     isEntryError: error,
   }

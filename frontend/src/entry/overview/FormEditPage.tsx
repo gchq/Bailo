@@ -28,7 +28,7 @@ import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
-  mutateEntry: KeyedMutator<{ model: EntryInterface }>
+  mutateEntry: KeyedMutator<{ entry: EntryInterface }>
 }
 export default function FormEditPage({ entry, readOnly = false, mutateEntry }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)

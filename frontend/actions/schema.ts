@@ -64,7 +64,7 @@ export function useGetUsageBySchema(kind: SchemaKindKeys, schemaId: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       accessRequests: AccessRequestInterface[]
-      models: EntrySearchResult[]
+      entries: EntrySearchResult[]
     },
     ErrorInfo
   >(
@@ -92,7 +92,7 @@ export function useGetUsageBySchema(kind: SchemaKindKeys, schemaId: string) {
     return {
       mutateData: mutate,
       data: data
-        ? data.models.map((entry) => ({
+        ? data.entries.map((entry) => ({
             id: entry.id,
             name: entry.name,
             description: entry.description,

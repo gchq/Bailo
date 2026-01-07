@@ -17,7 +17,7 @@ type OverviewPageKeys = (typeof OverviewPage)[keyof typeof OverviewPage]
 type OverviewProps = {
   entry: EntryInterface
   readOnly?: boolean
-  mutateEntry: KeyedMutator<{ model: EntryInterface }>
+  mutateEntry: KeyedMutator<{ entry: EntryInterface }>
 }
 
 export default function Overview({ entry, readOnly = false, mutateEntry }: OverviewProps) {

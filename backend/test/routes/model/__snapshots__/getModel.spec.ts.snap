@@ -2,7 +2,7 @@
 
 exports[`routes > model > getModel > 200 > ok 1`] = `
 {
-  "model": {
+  "entry": {
     "_id": "test",
   },
 }

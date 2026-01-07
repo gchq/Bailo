@@ -26,7 +26,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
-  const { mutateEntry: mutateModel } = useGetEntry(entry.id, entry.kind)
+  const { mutateEntry: mutateEntry } = useGetEntry(entry.id, entry.kind)
 
   const isFormValid = useMemo(() => name && description, [name, description])
 
@@ -59,7 +59,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      mutateModel()
+      mutateEntry()
     }
     setIsLoading(false)
   }
