@@ -19,7 +19,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetFileScannerInfo } from 'actions/fileScanning'
-import { useGetModelCardRevisions } from 'actions/modelCard'
+import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
 import { ChangeEvent, useCallback, useMemo } from 'react'
@@ -108,9 +108,11 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
-  const { modelCardRevisions, isModelCardRevisionsLoading, isModelCardRevisionsError } = useGetModelCardRevisions(
-    model.id,
-  )
+  const {
+    entryCardRevisions: modelCardRevisions,
+    isEntryCardRevisionsLoading: isModelCardRevisionsLoading,
+    isEntryCardRevisionsError: isModelCardRevisionsError,
+  } = useGetEntryCardRevisions(model.id)
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])

@@ -22,7 +22,7 @@ describe('routes > model > modelcard > getModelCardRevisions', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card-revisions`)
 
     expect(res.statusCode).toBe(200)
-    expect(res.body.modelCardRevisions[0].modelId).toBe(testModelCardRevision.modelId)
+    expect(res.body.entryCardRevisions[0].modelId).toBe(testModelCardRevision.modelId)
   })
 
   test('audit > expected call', async () => {
@@ -42,6 +42,6 @@ describe('routes > model > modelcard > getModelCardRevisions', () => {
 
     expect(mockModelService.getModelCardRevisions).toBeCalled()
     expect(res.statusCode).toBe(200)
-    expect(res.body.modelCardRevisions).toHaveLength(0)
+    expect(res.body.entryCardRevisions).toHaveLength(0)
   })
 })
