@@ -14,7 +14,7 @@ import {
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
-import { collateFormStats, getFormStats, setStepState, widgets } from 'utils/formUtils'
+import { getFormStats, getOverallCompletionStats, setStepState, widgets } from 'utils/formUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -34,7 +34,7 @@ export default function JsonSchemaForm({
 
   const currentStep = splitSchema.steps[activeStep]
   const formStats = useMemo(() => getFormStats(currentStep), [currentStep])
-  const collatedStats = useMemo(() => collateFormStats(splitSchema.steps), [splitSchema])
+  const collatedStats = useMemo(() => getOverallCompletionStats(splitSchema.steps), [splitSchema])
 
   if (!currentStep) {
     return null

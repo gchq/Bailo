@@ -34,6 +34,7 @@ type FormCompletionStatsProps = {
 }
 
 export function FormCompletionStats({ stats }: FormCompletionStatsProps) {
+  // console.log(`FormCompletionStats: ${JSON.stringify(stats)}`)
   return (
     <Box>
       <Box>

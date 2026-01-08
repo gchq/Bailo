@@ -204,15 +204,27 @@ export interface ModelFormStats extends FormStats {
 }
 
 function countNestedObjects(state: any | undefined): number {
-  if (state === null || state === undefined || typeof state !== 'object') {
+  if (state === null || state === undefined) {
     return -1
   }
 
   let total = 0
 
-  for (const section of Object.values(state)) {
-    if (section !== null && typeof section === 'object') {
-      total += Object.keys(section).length
+  for (const [sectionName, section] of Object.entries(state)) {
+    if (section !== null && section !== undefined && typeof section === 'object') {
+      // Ignore metrics as they are optional and may not be required
+      if (sectionName !== 'metrics') {
+        total += Object.keys(section).length
+      }
+    }
+
+    if (section !== null && section !== undefined && typeof section !== 'object') {
+      if (typeof section === 'string') {
+        total += 1
+      }
+      if (Array.isArray(section) && section.length > 0) {
+        total += 1
+      }
     }
   }
 
@@ -220,6 +232,8 @@ function countNestedObjects(state: any | undefined): number {
 }
 
 export function getFormStats(step?: StepNoRender): FormStats {
+  // console.log('getFormStats: ', step)
+  // console.log(`getFormStats: ${JSON.stringify(step)}`)
   if (!step) {
     return {
       totalQuestions: -1,
@@ -240,7 +254,7 @@ export function getFormStats(step?: StepNoRender): FormStats {
   }
 }
 
-export function collateFormStats(steps: StepNoRender[]): ModelFormStats {
+export function getOverallCompletionStats(steps: StepNoRender[]): ModelFormStats {
   let totalQuestions = 0
   let totalAnswers = 0
   let totalPages = 0
@@ -250,7 +264,10 @@ export function collateFormStats(steps: StepNoRender[]): ModelFormStats {
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
     totalPages += 1
-    if (totalQuestions === totalAnswers) {
+    // if (totalQuestions === totalAnswers) {
+    //   pagesCompleted += 1
+    // }
+    if (stepStats.formCompleted) {
       pagesCompleted += 1
     }
   })
