@@ -3,7 +3,8 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { FormCompletionStats, OverallCompletionStats } from 'src/Form/CompletionStats'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -13,7 +14,7 @@ import {
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
-import { collateFormStats, displayPercentage, getFormStats, setStepState, widgets } from 'utils/formUtils'
+import { collateFormStats, getFormStats, setStepState, widgets } from 'utils/formUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -32,8 +33,8 @@ export default function JsonSchemaForm({
   const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
-  const formStats = getFormStats(currentStep)
-  const collatedStats = collateFormStats(splitSchema.steps)
+  const formStats = useMemo(() => getFormStats(currentStep), [currentStep])
+  const collatedStats = useMemo(() => collateFormStats(splitSchema.steps), [splitSchema])
 
   if (!currentStep) {
     return null
@@ -59,10 +60,7 @@ export default function JsonSchemaForm({
 
   return (
     <Stack direction='column'>
-      <div>
-        Percentage Complete: {displayPercentage(collatedStats.percentageComplete)} - Total Questions:{' '}
-        {collatedStats.totalQuestions} - Total Completed: {collatedStats.totalAnswers}
-      </div>
+      <OverallCompletionStats stats={collatedStats} />
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
           <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
@@ -91,10 +89,7 @@ export default function JsonSchemaForm({
           </Stepper>
         </Grid>
         <Grid size={{ xs: 12, md: 10 }}>
-          <div>
-            Percentage Complete: {displayPercentage(formStats.percentageComplete)} - Total Questions:{' '}
-            {formStats.totalQuestions} - Total Completed: {formStats.totalAnswers}
-          </div>
+          <FormCompletionStats stats={formStats} />
           <Form
             schema={currentStep.schema}
             formData={currentStep.state}

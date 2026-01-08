@@ -193,7 +193,14 @@ export function validateForm(step: StepNoRender) {
 export interface FormStats {
   totalQuestions: number
   totalAnswers: number
-  percentageComplete: number
+  percentageQuestionsComplete: number
+  formCompleted: boolean
+}
+
+export interface ModelFormStats extends FormStats {
+  totalPages: number
+  pagesCompleted: number
+  percentagePagesComplete: number
 }
 
 function countNestedObjects(state: any | undefined): number {
@@ -212,30 +219,53 @@ function countNestedObjects(state: any | undefined): number {
   return total
 }
 
-export function getFormStats(step: StepNoRender): FormStats {
+export function getFormStats(step?: StepNoRender): FormStats {
+  if (!step) {
+    return {
+      totalQuestions: -1,
+      totalAnswers: -1,
+      percentageQuestionsComplete: -1,
+      formCompleted: false,
+    }
+  }
   const totalQuestions = countNestedObjects(step.uiSchema ?? {})
   const totalAnswers = countNestedObjects(step.state ?? {})
-  const percentageComplete = (totalAnswers / totalQuestions) * 100
+  const percentageQuestionsComplete = (totalAnswers / totalQuestions) * 100
+  const formCompleted = totalQuestions === totalAnswers
   return {
     totalQuestions,
     totalAnswers,
-    percentageComplete,
+    percentageQuestionsComplete,
+    formCompleted,
   }
 }
 
-export function collateFormStats(steps: StepNoRender[]): FormStats {
+export function collateFormStats(steps: StepNoRender[]): ModelFormStats {
   let totalQuestions = 0
   let totalAnswers = 0
+  let totalPages = 0
+  let pagesCompleted = 0
   steps.forEach((step) => {
     const stepStats = getFormStats(step)
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
+    totalPages += 1
+    if (totalQuestions === totalAnswers) {
+      pagesCompleted += 1
+    }
   })
-  const percentageComplete = (totalAnswers / totalQuestions) * 100
+  const percentageQuestionsComplete = (totalAnswers / totalQuestions) * 100
+  const formCompleted = totalQuestions === totalAnswers
+  const percentagePagesComplete = (pagesCompleted / totalPages) * 100
+
   return {
     totalQuestions,
     totalAnswers,
-    percentageComplete,
+    percentageQuestionsComplete,
+    percentagePagesComplete,
+    formCompleted,
+    totalPages,
+    pagesCompleted,
   }
 }
 
