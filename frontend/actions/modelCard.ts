@@ -28,11 +28,11 @@ export async function postFromTemplate(modelId: string, templateId: string) {
   })
 }
 
-export async function putModelCard(modelId: string, metadata: unknown) {
+export async function putEntryCard(entryId: string, metadata: unknown) {
   try {
     const response = await axios({
       method: 'put',
-      url: `/api/v2/model/${modelId}/model-cards`,
+      url: `/api/v2/model/${entryId}/model-cards`,
       headers: { 'Content-Type': 'application/json' },
       data: { metadata: metadata },
     })

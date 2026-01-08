@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
-import { useGetEntryImages } from 'actions/model'
+import { useGetModelImages } from 'actions/model'
 import { SyntheticEvent, useEffect, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -36,16 +36,16 @@ export default function ModelImageList({
   multiple,
   id,
 }: ModelImageListProps) {
-  const { entryImages, isEntryImagesLoading, isEntryImagesError } = useGetEntryImages(model.id)
+  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   useEffect(() => {
-    onRegistryError(!!isEntryImagesError)
-  }, [isEntryImagesError, onRegistryError])
+    onRegistryError(!!isModelImagesError)
+  }, [isModelImagesError, onRegistryError])
 
   const sortedImageList = useMemo(() => {
     const flattenedImageList: FlattenedModelImage[] = []
 
-    for (const modelImage of entryImages) {
+    for (const modelImage of modelImages) {
       for (const modelImageVersion of modelImage.tags) {
         flattenedImageList.push({
           repository: modelImage.repository,
@@ -56,10 +56,10 @@ export default function ModelImageList({
     }
 
     return flattenedImageList.sort(sortByNameAscending)
-  }, [entryImages])
+  }, [modelImages])
 
   const readOnlyImageList = useMemo(() => {
-    return isEntryImagesLoading ? (
+    return isModelImagesLoading ? (
       <Loading />
     ) : multiple ? (
       value.map((modelImage) => (
@@ -70,7 +70,7 @@ export default function ModelImageList({
     ) : (
       <Typography>{value ? `${value.name}:${value.tag}` : ''}</Typography>
     )
-  }, [isEntryImagesLoading, value, multiple])
+  }, [isModelImagesLoading, value, multiple])
 
   function handleChange(
     _event: SyntheticEvent<Element, Event>,
@@ -83,8 +83,8 @@ export default function ModelImageList({
     }
   }
 
-  if (isEntryImagesError) {
-    return <MessageAlert message={isEntryImagesError.info.message} severity='error' />
+  if (isModelImagesError) {
+    return <MessageAlert message={isModelImagesError.info.message} severity='error' />
   }
 
   if (readOnly) {
@@ -92,7 +92,7 @@ export default function ModelImageList({
   }
 
   const partialAutocompleteProps = {
-    loading: isEntryImagesLoading,
+    loading: isModelImagesLoading,
     onChange: handleChange,
     getOptionLabel: (option: FlattenedModelImage) => `${option.name}:${option.tag}`,
     groupBy: (option: FlattenedModelImage) => option.name,

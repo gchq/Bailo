@@ -1,6 +1,6 @@
 import { Add } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
-import { useGetEntryImages } from 'actions/model'
+import { useGetModelImages } from 'actions/model'
 import { useState } from 'react'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -17,7 +17,7 @@ type AccessRequestsProps = {
 }
 
 export default function ModelImages({ model, readOnly = false }: AccessRequestsProps) {
-  const { entryImages, isEntryImagesLoading, isEntryImagesError } = useGetEntryImages(model.id)
+  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
 
@@ -25,8 +25,8 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
     <ModelImageDisplay modelImage={data} key={`${data.repository}-${data.name}`} />
   )
 
-  if (isEntryImagesError) {
-    if (isEntryImagesError.status === 403) {
+  if (isModelImagesError) {
+    if (isModelImagesError.status === 403) {
       return (
         <Forbidden
           errorMessage='If you think this is in error please contact the model owners.'
@@ -35,7 +35,7 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
         />
       )
     } else {
-      return <MessageAlert message={isEntryImagesError.info.message} severity='error' />
+      return <MessageAlert message={isModelImagesError.info.message} severity='error' />
     }
   }
 
@@ -66,11 +66,11 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
               />
             </>
           )}
-          {isEntryImagesLoading ? (
+          {isModelImagesLoading ? (
             <Loading />
           ) : (
             <Paginate
-              list={entryImages.map((image) => {
+              list={modelImages.map((image) => {
                 return { key: `${image.repository}-${image.name}`, ...image }
               })}
               emptyListText={`No images found for model ${model.name}`}

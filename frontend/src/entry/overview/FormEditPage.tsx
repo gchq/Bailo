@@ -4,7 +4,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { putModelCard } from 'actions/modelCard'
+import { putEntryCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
@@ -70,7 +70,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
       if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
       } else {
-        const res = await putModelCard(entry.id, data)
+        const res = await putEntryCard(entry.id, data)
         if (res.status && res.status < 400) {
           setIsEdit(false)
         } else {

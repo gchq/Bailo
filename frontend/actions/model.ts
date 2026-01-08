@@ -122,19 +122,19 @@ export function useGetEntryRoles(entryId?: string) {
 
 const emptyImageList = []
 
-export function useGetEntryImages(entryId?: string) {
+export function useGetModelImages(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
     ErrorInfo
-  >(entryId ? `/api/v2/model/${entryId}/images` : null, fetcher)
+  >(modelId ? `/api/v2/model/${modelId}/images` : null, fetcher)
 
   return {
-    mutateEntryImages: mutate,
-    entryImages: data ? data.images : emptyImageList,
-    isEntryImagesLoading: isLoading,
-    isEntryImagesError: error,
+    mutateModelImages: mutate,
+    modelImages: data ? data.images : emptyImageList,
+    isModelImagesLoading: isLoading,
+    isModelImagesError: error,
   }
 }
 
