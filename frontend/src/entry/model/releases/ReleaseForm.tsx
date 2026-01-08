@@ -108,11 +108,9 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
-  const {
-    entryCardRevisions: modelCardRevisions,
-    isEntryCardRevisionsLoading: isModelCardRevisionsLoading,
-    isEntryCardRevisionsError: isModelCardRevisionsError,
-  } = useGetEntryCardRevisions(model.id)
+  const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
+    model.id,
+  )
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
@@ -140,7 +138,7 @@ export default function ReleaseForm({
   )
 
   const modelCardVersionList = useMemo(() => {
-    return modelCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
+    return entryCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
       <MenuItem key={revision.version} value={revision.version}>
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>{revision.version} -</Typography>
@@ -148,7 +146,7 @@ export default function ReleaseForm({
         </Stack>
       </MenuItem>
     ))
-  }, [modelCardRevisions])
+  }, [entryCardRevisions])
 
   const handleDeleteFile = (fileToDelete: File | FileInterface) => {
     if (formData.files) {
@@ -192,8 +190,8 @@ export default function ReleaseForm({
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
-  if (isModelCardRevisionsError) {
-    return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
+  if (isEntryCardRevisionsError) {
+    return <MessageAlert message={isEntryCardRevisionsError.info.message} severity='error' />
   }
 
   if (isScannersError) {
@@ -201,7 +199,7 @@ export default function ReleaseForm({
   }
 
   const error = MultipleErrorWrapper('Unable to load release form', {
-    isModelCardRevisionsError,
+    isModelCardRevisionsError: isEntryCardRevisionsError,
     isReleasesError,
   })
   if (error) return error
@@ -254,8 +252,8 @@ export default function ReleaseForm({
             </Typography>
           ) : (
             <>
-              {isModelCardRevisionsLoading && <Loading />}
-              {!isModelCardRevisionsLoading && (
+              {isEntryCardRevisionsLoading && <Loading />}
+              {!isEntryCardRevisionsLoading && (
                 <>
                   <Select
                     size='small'
