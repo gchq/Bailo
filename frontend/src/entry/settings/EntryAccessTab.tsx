@@ -21,12 +21,8 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
 
-  const { isEntryError: isEntryError, mutateEntry: mutateEntry } = useGetEntry(entry.id)
-  const {
-    entryRoles: entryRoles,
-    isEntryRolesLoading: isEntryRolesLoading,
-    isEntryRolesError: isEntryRolesError,
-  } = useGetEntryRoles(entry.id)
+  const { isEntryError, mutateEntry } = useGetEntry(entry.id)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
 
   const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
   const sendNotification = useNotification()

@@ -17,11 +17,7 @@ type AccessRequestsProps = {
 }
 
 export default function ModelImages({ model, readOnly = false }: AccessRequestsProps) {
-  const {
-    entryImages: entryImages,
-    isEntryImagesLoading: isEntryImagesLoading,
-    isEntryImagesError: isEntryImagesError,
-  } = useGetEntryImages(model.id)
+  const { entryImages, isEntryImagesLoading, isEntryImagesError } = useGetEntryImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
 

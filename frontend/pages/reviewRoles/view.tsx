@@ -23,11 +23,7 @@ import { plural } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
-  const {
-    entryRoles: entryRoles,
-    isEntryRolesLoading: isEntryRolesLoading,
-    isEntryRolesError: isEntryRolesError,
-  } = useGetEntryRoles()
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
 

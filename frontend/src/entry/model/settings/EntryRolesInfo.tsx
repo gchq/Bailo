@@ -29,11 +29,7 @@ interface Row {
 }
 
 export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
-  const {
-    entryRoles: entryRoles,
-    isEntryRolesLoading: isEntryRolesLoading,
-    isEntryRolesError: isEntryRolesError,
-  } = useGetEntryRoles(entry.id)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
 
   const getFilteredRoles = useCallback(
     (roleKind: string) =>

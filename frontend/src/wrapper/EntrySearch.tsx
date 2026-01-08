@@ -45,11 +45,19 @@ export default function EntrySearch() {
   const debouncedFilter = useDebounce(modelFilter, 250)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
-  const {
-    entries: entries,
-    isEntriesLoading: isEntriesLoading,
-    isEntriesError: isEntriesError,
-  } = useListEntries(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
+  const { entries, isEntriesLoading, isEntriesError } = useListEntries(
+    undefined,
+    [],
+    '',
+    [],
+    [],
+    [],
+    [],
+    debouncedFilter,
+    false,
+    '',
+    true,
+  )
 
   const modelList = useMemo(
     () =>

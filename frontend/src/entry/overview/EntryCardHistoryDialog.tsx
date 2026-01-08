@@ -28,11 +28,9 @@ type EntryCardHistoryDialogProps = {
 
 export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()
-  const {
-    entryCardRevisions: entryCardRevisions,
-    isEntryCardRevisionsLoading: isEntryCardRevisionsLoading,
-    isEntryCardRevisionsError: isEntryCardRevisionsError,
-  } = useGetEntryCardRevisions(entry.id)
+  const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
+    entry.id,
+  )
   const sortedEntryCardRevisions = useMemo(
     () =>
       entryCardRevisions

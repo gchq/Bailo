@@ -36,11 +36,7 @@ export default function ModelImageList({
   multiple,
   id,
 }: ModelImageListProps) {
-  const {
-    entryImages: entryImages,
-    isEntryImagesLoading: isEntryImagesLoading,
-    isEntryImagesError: isEntryImagesError,
-  } = useGetEntryImages(model.id)
+  const { entryImages, isEntryImagesLoading, isEntryImagesError } = useGetEntryImages(model.id)
 
   useEffect(() => {
     onRegistryError(!!isEntryImagesError)

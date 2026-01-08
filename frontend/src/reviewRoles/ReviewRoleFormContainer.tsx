@@ -60,11 +60,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   defaultEntitiesEntry = [],
   setDefaultEntities,
 }: ReviewRoleFormContainerProps<T>) {
-  const {
-    entryRoles: entryRoles,
-    isEntryRolesLoading: isEntryRolesLoading,
-    isEntryRolesError: isEntryRolesError,
-  } = useGetEntryRoles()
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))

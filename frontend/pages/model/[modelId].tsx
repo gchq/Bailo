@@ -19,13 +19,8 @@ import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
-  const { modelId }: { modelId?: string } = router.query
-  const {
-    entry: entry,
-    isEntryLoading: isEntryLoading,
-    isEntryError: isEntryError,
-    mutateEntry: mutateEntry,
-  } = useGetEntry(modelId)
+  const { entryId }: { entryId?: string } = router.query
+  const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetEntry(entryId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
@@ -96,11 +91,11 @@ export default function Model() {
   )
 
   function requestAccess() {
-    router.push(`/model/${modelId}/access-request/schema`)
+    router.push(`/model/${entryId}/access-request/schema`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
-    isModelError: isEntryError,
+    isEntryError,
     isCurrentUserError,
     isUiConfigError,
   })

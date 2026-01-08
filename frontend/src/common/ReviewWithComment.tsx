@@ -60,11 +60,7 @@ export default function ReviewWithComment({
   })
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
-  const {
-    entryRoles: entryRoles,
-    isEntryRolesLoading: isEntryRolesLoading,
-    isEntryRolesError: isEntryRolesError,
-  } = useGetEntryRoles(modelId)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
 
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
     reviews.find((review) => review.role === router.query.role) || reviews[0],

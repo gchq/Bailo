@@ -20,11 +20,7 @@ export default function ApprovalsDisplay({
   acceptedReviewResponses,
   showCurrentUserResponses = false,
 }: ApprovalsDisplayProps) {
-  const {
-    entryRoles: entryRoles,
-    isEntryRolesLoading: isEntryRolesLoading,
-    isEntryRolesError: isEntryRolesError,
-  } = useGetEntryRoles(modelId)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
 
   const dynamicRoles = useMemo(() => entryRoles.filter((role) => !staticRoles.includes(role.shortName)), [entryRoles])
 
