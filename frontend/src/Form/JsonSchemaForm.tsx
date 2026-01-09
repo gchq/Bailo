@@ -106,7 +106,7 @@ export default function JsonSchemaForm({
 
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider, height: 'fit-content' }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (

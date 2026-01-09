@@ -121,7 +121,8 @@ export default function Model() {
           additionalHeaderDisplay={
             model.kind === EntryKind.MIRRORED_MODEL ? (
               <MessageAlert
-                message={`Mirrored from ${model.settings.mirror?.sourceModelId}. Some sections will be read-only.`}
+                message={`This is a mirrored model, some sections will be read-only.`}
+                subHeading={`Source model ID: ${model.settings.mirror?.sourceModelId}`}
                 severity='info'
               />
             ) : (
