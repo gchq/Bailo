@@ -129,7 +129,7 @@ export class ImageImporter extends BaseImporter {
               },
               'Putting image blob.',
             )
-            await uploadLayerMonolithic(repositoryPushPullToken, res.location, layerDigest, stream, String(entry.size))
+            await uploadLayerMonolithic(repositoryPushPullToken, res.location!, layerDigest, stream, String(entry.size))
             await finished(stream)
           }
         } catch (err) {
