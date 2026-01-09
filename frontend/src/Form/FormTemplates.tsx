@@ -14,14 +14,37 @@ import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
-export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
+export function ArrayFieldTemplate({
+  title,
+  items,
+  canAdd,
+  registry,
+  onAddClick,
+  fieldPathId,
+}: ArrayFieldTemplateProps) {
+  if (registry.formContext.mirroredModel) {
+    const mirroredState = fieldPathId.$id
+      .replaceAll('root_', '')
+      .replaceAll('_', '.')
+      .split('.')
+      .filter((t) => t !== '')
+      .reduce((prev, cur) => prev && prev[cur], registry.formContext.mirroredState)
+    if (mirroredState) {
+      const itemsToAdd = mirroredState.length - items.length
+      if (itemsToAdd > 0) {
+        for (let i = 0; i < itemsToAdd; i++) {
+          onAddClick()
+        }
+      }
+    }
+  }
   return (
     <Card sx={{ p: 2 }}>
       <Typography fontWeight='bold' variant='h5' component='h2'>
         {title}
       </Typography>
-      {canAdd && registry.formContext.editMode && (
-        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />} sx={{ width: 'fit-content' }}>
+      {canAdd && registry.formContext.editMode && !registry.formContext.mirroredModel && (
+        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
           Add Item
         </Button>
       )}
@@ -78,13 +101,13 @@ export function ObjectFieldTemplate({
           </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
-        <div style={{ marginLeft: 10 }}>
+        <Stack style={{ marginLeft: 10 }} spacing={2}>
           {properties.map((element) => (
-            <div key={element.name} className='property-wrapper'>
+            <Box key={element.name} className='property-wrapper'>
               {element.content}
-            </div>
+            </Box>
           ))}
-        </div>
+        </Stack>
       </Stack>
     </Box>
   )

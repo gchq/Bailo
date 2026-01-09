@@ -1,4 +1,4 @@
-import { RegistryWidgetsType } from '@rjsf/utils'
+import { Registry, RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
@@ -35,6 +35,7 @@ export function createStep({
   schema,
   uiSchema,
   state,
+  mirroredState,
   type,
   section,
   index,
@@ -44,6 +45,7 @@ export function createStep({
   schema: any
   uiSchema?: any
   state: unknown
+  mirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -54,6 +56,7 @@ export function createStep({
     schema,
     uiSchema,
     state,
+    mirroredState,
     type,
     index,
 
@@ -112,6 +115,7 @@ export function getStepsFromSchema(
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
   state: any = {},
+  mirroredState: any = {},
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -134,6 +138,7 @@ export function getStepsFromSchema(
       },
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
+      mirroredState: mirroredState ? mirroredState[prop] || {} : {},
       type: 'Form',
       index,
       schemaRef: schema.reference,
@@ -188,4 +193,13 @@ export function validateForm(step: StepNoRender) {
   const sectionErrors = validator.validate(step.state, step.schema)
 
   return sectionErrors.errors.length === 0
+}
+
+export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
 }

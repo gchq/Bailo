@@ -7,7 +7,9 @@ import { EntrySearchResult, useListModels } from 'actions/model'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntryKind } from 'types/types'
+import { getMirroredState } from 'utils/formUtils'
 
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
@@ -76,6 +78,62 @@ export default function DataCardSelector({
   const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
     handleInputChange(event, value)
   }, 500)
+
+  if (registry && !registry.formContext.editMode && registry.formContext.mirroredModel) {
+    const mirroredState = getMirroredState(id, registry.formContext)
+    return (
+      <>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
+        {mirroredState ? (
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {mirroredState.map((currentDataCardId) => (
+                <Chip
+                  label={
+                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                    'Unable to find data card name'
+                  }
+                  key={currentDataCardId}
+                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                  sx={{ width: 'fit-content' }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        ) : (
+          <Typography
+            sx={{
+              fontStyle: 'italic',
+              color: theme.palette.customTextInput.main,
+            }}
+          >
+            Unanswered
+          </Typography>
+        )}
+        <AdditionalInformation>
+          {currentValue.length > 0 ? (
+            <Box sx={{ overflowX: 'auto', p: 1 }}>
+              <Stack spacing={1} direction='row'>
+                {currentValue.map((currentDataCardId) => (
+                  <Chip
+                    label={
+                      dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                      'Unable to find data card name'
+                    }
+                    key={currentDataCardId}
+                    onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                    sx={{ width: 'fit-content' }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          ) : undefined}
+        </AdditionalInformation>
+      </>
+    )
+  }
 
   if (isDataCardsError) {
     return <MessageAlert message={isDataCardsError.info.message} severity='error' />
@@ -167,21 +225,23 @@ export default function DataCardSelector({
               Unanswered
             </Typography>
           )}
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((currentDataCardId) => (
-                <Chip
-                  label={
-                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                    'Unable to find data card name'
-                  }
-                  key={currentDataCardId}
-                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                  sx={{ width: 'fit-content' }}
-                />
-              ))}
-            </Stack>
-          </Box>
+          {currentValue.length > 0 && (
+            <Box sx={{ overflowX: 'auto', p: 1 }}>
+              <Stack spacing={1} direction='row'>
+                {currentValue.map((currentDataCardId) => (
+                  <Chip
+                    label={
+                      dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                      'Unable to find data card name'
+                    }
+                    key={currentDataCardId}
+                    onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                    sx={{ width: 'fit-content' }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          )}
         </>
       )}
     </>

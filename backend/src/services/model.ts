@@ -426,6 +426,7 @@ export async function getModelCard(
   user: UserInterface,
   modelId: string,
   version: number | GetModelCardVersionOptionsKeys,
+  mirrored: boolean = false,
 ) {
   if (version === GetModelCardVersionOptions.Latest) {
     const card = (await getModelById(user, modelId)).card
@@ -436,12 +437,17 @@ export async function getModelCard(
 
     return card
   } else {
-    return getModelCardRevision(user, modelId, version)
+    return getModelCardRevision(user, modelId, version, mirrored)
   }
 }
 
-export async function getModelCardRevision(user: UserInterface, modelId: string, version: number) {
-  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
+export async function getModelCardRevision(
+  user: UserInterface,
+  modelId: string,
+  version: number,
+  mirrored: boolean = false,
+) {
+  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version, mirrored })
   const model = await getModelById(user, modelId)
 
   if (!modelCard) {
@@ -492,8 +498,6 @@ export async function _setModelCard(
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
 
-  checkModelRestriction(model)
-
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
@@ -506,6 +510,7 @@ export async function _setModelCard(
 
     version,
     metadata,
+    mirrored: false,
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
@@ -524,7 +529,6 @@ export async function updateModelCard(
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  checkModelRestriction(model)
 
   if (!model.card) {
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
@@ -722,17 +726,16 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     throw error
   }
 
-  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
-    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
-    modelCardRevision,
-    {
-      upsert: true,
-    },
-  )
+  const foundModelCardRevision = await ModelCardRevisionModel.findOne({
+    modelId: modelCardRevision.modelId,
+    version: modelCardRevision.version,
+  })
 
   if (!foundModelCardRevision && modelCardRevision.version !== 1) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
     // Ignore model cards with a version number of 1 as these will always be blank.
+    const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
+    await newModelCardRevision.save()
     return modelCardRevision
   }
 }
@@ -743,16 +746,27 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
  * Do not expose this functionality to users.
  */
 export async function setLatestImportedModelCard(modelId: string) {
-  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: true }, undefined, {
+    sort: { version: -1 },
+  })
+
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
   }
 
-  const updatedModel = await ModelModel.findOneAndUpdate(
-    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
-    { $set: { card: latestModelCard } },
-    { returnOriginal: false },
-  )
+  let latestNonMirroredCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: false }, undefined, {
+    sort: { version: -1 },
+  })
+
+  if (!latestNonMirroredCard) {
+    latestNonMirroredCard = latestModelCard
+  }
+
+  const updatedModel = await ModelModel.findOne({
+    id: modelId,
+    'settings.mirror.sourceModelId': { $exists: true, $ne: '' },
+  })
+
   if (!updatedModel) {
     throw InternalError('Unable to set latest model card of mirrored model.', {
       modelId,
@@ -760,6 +774,20 @@ export async function setLatestImportedModelCard(modelId: string) {
     })
   }
 
+  updatedModel.mirroredCard = { ...latestModelCard }
+  if (updatedModel.card === undefined || updatedModel.card.metadata === undefined) {
+    const newCard = new ModelCardRevisionModel({
+      modelId: updatedModel.id,
+      schemaId: latestModelCard.schemaId,
+      version: 1,
+      mirrored: false,
+      metadata: {},
+      createdBy: latestModelCard.createdBy,
+    })
+    newCard.save()
+    updatedModel.card = newCard
+  }
+  await updatedModel.save()
   return updatedModel
 }
 

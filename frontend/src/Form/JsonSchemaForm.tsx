@@ -23,12 +23,14 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  mirroredModel = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  mirroredModel?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const [sharedSection, setSharedSection] = useState('')
@@ -104,7 +106,7 @@ export default function JsonSchemaForm({
 
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider, height: 'fit-content' }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
@@ -149,6 +151,8 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
+            mirroredState: currentStep.mirroredState,
+            mirroredModel,
             onShare: onShareSectionOnClick,
           }}
           templates={

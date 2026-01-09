@@ -1,9 +1,11 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { FieldPathId, Registry } from '@rjsf/utils'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface RichTextInputProps {
   value: string
@@ -15,6 +17,7 @@ interface RichTextInputProps {
   readOnly?: boolean
   id: string
   rawErrors?: string[]
+  fieldPath?: FieldPathId
 }
 
 export default function RichTextInput({
@@ -31,6 +34,31 @@ export default function RichTextInput({
 
   if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
+  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
+    const mirroredState = getMirroredState(id, registry.formContext)
+
+    return (
+      <>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
+        {mirroredState ? (
+          <MarkdownDisplay>{mirroredState}</MarkdownDisplay>
+        ) : (
+          <Typography
+            sx={{
+              fontStyle: 'italic',
+              color: theme.palette.customTextInput.main,
+            }}
+          >
+            Unanswered
+          </Typography>
+        )}
+        <AdditionalInformation>{value ? <Typography>{value}</Typography> : undefined}</AdditionalInformation>
+      </>
+    )
   }
 
   if (!registry.formContext.editMode) {

@@ -4,7 +4,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { putModelCard } from 'actions/modelCard'
+import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
@@ -27,10 +27,9 @@ import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
   entry: EntryInterface
-  readOnly?: boolean
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
-export default function FormEditPage({ entry, readOnly = false, mutateEntry }: FormEditPageProps) {
+export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
@@ -50,6 +49,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const sendNotification = useNotification()
+  const { mutateModelCardRevisions } = useGetModelCardRevisions(entry.id)
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -73,6 +73,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
         const res = await putModelCard(entry.id, data)
         if (res.status && res.status < 400) {
           setIsEdit(false)
+          mutateModelCardRevisions()
         } else {
           setErrorMessage(res.data)
         }
@@ -84,7 +85,13 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   function onCancel() {
     if (schema) {
       mutateEntry()
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], entry.card.metadata)
+      const steps = getStepsFromSchema(
+        schema,
+        {},
+        ['properties.contacts'],
+        entry.card.metadata,
+        entry.mirroredCard?.metadata,
+      )
       for (const step of steps) {
         step.steps = steps
       }
@@ -99,8 +106,13 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
 
   useEffect(() => {
     if (!entry || !schema) return
-    const metadata = entry.card.metadata
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
+    const steps = getStepsFromSchema(
+      schema,
+      {},
+      ['properties.contacts'],
+      entry.card.metadata,
+      entry.mirroredCard?.metadata || {},
+    )
     for (const step of steps) {
       step.steps = steps
     }
@@ -172,8 +184,8 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           sx={{ pb: 2 }}
         >
           <div>
-            <Typography fontWeight='bold'>Schema</Typography>
-            <Stack direction='row' alignItems='center'>
+            <Stack direction='row' alignItems='center' spacing={1}>
+              <Typography fontWeight='bold'>Schema</Typography>
               <Typography>{schema?.name}</Typography>
               <CopyToClipboardButton
                 textToCopy={schema ? schema.name : ''}
@@ -197,25 +209,23 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           )}
           {!isEdit && (
             <Stack direction='row' spacing={1}>
-              {!readOnly && (
-                <Restricted
-                  action='editEntryCard'
-                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+              <Restricted
+                action='editEntryCard'
+                fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+              >
+                <Button
+                  variant='outlined'
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setIsEdit(!isEdit)
+                    setOldSchema(_.cloneDeep(splitSchema))
+                  }}
+                  data-test='editEntryCardButton'
+                  startIcon={<EditIcon fontSize='small' />}
                 >
-                  <Button
-                    variant='outlined'
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setIsEdit(!isEdit)
-                      setOldSchema(_.cloneDeep(splitSchema))
-                    }}
-                    data-test='editEntryCardButton'
-                    startIcon={<EditIcon fontSize='small' />}
-                  >
-                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                  </Button>
-                </Restricted>
-              )}
+                  {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                </Button>
+              </Restricted>
               <Button
                 startIcon={<MenuIcon />}
                 endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
@@ -275,7 +285,12 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          canEdit={isEdit}
+          mirroredModel={entry.kind === EntryKind.MIRRORED_MODEL}
+        />
         {isEdit && (
           <SaveAndCancelButtons
             onCancel={onCancel}

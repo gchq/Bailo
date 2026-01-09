@@ -6,7 +6,9 @@ import { Registry } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntityObject } from 'types/types'
+import { getMirroredState } from 'utils/formUtils'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -77,6 +79,46 @@ export default function EntitySelector({
   const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
     handleInputChange(event, value)
   }, 500)
+
+  if (registry && !registry.formContext.editMode && registry.formContext.mirroredModel) {
+    const mirroredState = getMirroredState(id, registry.formContext)
+    return (
+      <>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
+        {mirroredState ? (
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {mirroredState.map((entity) => (
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+              ))}
+            </Stack>
+          </Box>
+        ) : (
+          <Typography
+            sx={{
+              fontStyle: currentValue ? 'unset' : 'italic',
+              color: currentValue ? theme.palette.common.black : theme.palette.customTextInput.main,
+            }}
+          >
+            {currentValue ? currentValue : 'Unanswered'}
+          </Typography>
+        )}
+        <AdditionalInformation>
+          {currentValue ? (
+            <Box sx={{ overflowX: 'auto', p: 1 }}>
+              <Stack spacing={1} direction='row'>
+                {currentValue.map((entity) => (
+                  <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+                ))}
+              </Stack>
+            </Box>
+          ) : undefined}
+        </AdditionalInformation>
+      </>
+    )
+  }
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />

@@ -72,6 +72,7 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
 
 export const testModelCard: EntryCardInterface = {
   schemaId: modelCardSchemaId,
+  mirrored: false,
   metadata: {},
   version: 1,
   createdBy: testEntity,
@@ -248,6 +249,9 @@ export const testUiConfig: UiConfig = {
     export: {
       enabled: false,
       disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+    },
+    display: {
+      additionalInfoHeading: 'Additional information',
     },
   },
 

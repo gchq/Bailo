@@ -29,6 +29,7 @@ type PartialButtonMessageAlertProps =
 
 type MessageAlertProps = {
   message?: string
+  subHeading?: string
   id?: string
   code?: number
   status?: number
@@ -41,6 +42,7 @@ type MessageAlertProps = {
 
 export default function MessageAlert({
   message = '',
+  subHeading = '',
   id = '',
   code = -1,
   status = -1,
@@ -102,7 +104,12 @@ export default function MessageAlert({
         <Stack direction='row' spacing={1} alignItems='center'>
           {id && <Typography fontWeight={'bold'}>{id}</Typography>}
           {statusCode > 0 && <Typography fontWeight={'bold'}>{statusCode}</Typography>}
-          <Typography>{message}</Typography>
+          <Stack>
+            <Typography>{message}</Typography>
+            <Typography fontWeight='bold' variant='caption'>
+              {subHeading}
+            </Typography>
+          </Stack>
           {severity === 'error' && (
             <CopyToClipboardButton
               textToCopy={message}
