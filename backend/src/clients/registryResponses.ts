@@ -1,152 +1,138 @@
-import { arrayOfObjectsHasKeysOfType, hasKeys, hasKeysOfType } from '../utils/typeguards.js'
+import { z, ZodSchema } from 'zod'
 
-export type RegistryErrorResponse = {
-  errors: Array<ErrorInfo>
+import { InternalError } from '../utils/error.js'
+
+/**
+ * Important: while HTTP headers are case insensitive, TS always handles them as lower case
+ * so definitions must also be lower case.
+ */
+
+export const HeaderValue = z.string()
+// Common headers
+export const CommonRegistryHeaders = z
+  .object({
+    'docker-distribution-api-version': HeaderValue.optional(),
+    'content-type': HeaderValue.optional(),
+    'content-length': HeaderValue.optional(),
+    date: HeaderValue.optional(),
+  })
+  .passthrough()
+export type CommonRegistryHeaders = z.infer<typeof CommonRegistryHeaders>
+
+// Error response
+export const RegistryErrorDetail = z.object({
+  code: z.string(),
+  message: z.string(),
+  detail: z.unknown().optional(),
+})
+export const RegistryErrorResponse = z.object({
+  errors: z.array(RegistryErrorDetail),
+})
+export type RegistryErrorResponse = z.infer<typeof RegistryErrorResponse>
+
+export function parseRegistryResponse<T>(
+  schema: ZodSchema<T>,
+  body: unknown,
+): { ok: true; data: T } | { ok: false; error: RegistryErrorResponse } {
+  // expected successful response
+  const success = schema.safeParse(body)
+  if (success.success) {
+    return { ok: true, data: success.data }
+  }
+
+  // fallback on error
+  const error = RegistryErrorResponse.safeParse(body)
+  if (error.success) {
+    return { ok: false, error: error.data }
+  }
+
+  // error not in expected format
+  throw InternalError('Response did not match expected schema or RegistryErrorResponse', { schema, body })
 }
 
-export type ErrorInfo = { code: string; message: string; detail: string }
+// GET /v2/
+export const BaseApiCheckHeaders = CommonRegistryHeaders.extend({
+  'docker-distribution-api-version': z
+    .string()
+    .regex(/^registry\/2\.0$/)
+    .optional(),
+})
+export const BaseApiCheckResponse = z.record(z.never())
 
-type ListImageTagResponse = { tags: Array<string> }
+// GET /v2/<name>/tags/list
+export const TagsListResponse = z.object({
+  name: z.string(),
+  tags: z.array(z.string()).nullable(),
+})
+export const TagsListHeaders = CommonRegistryHeaders.extend({
+  link: HeaderValue.optional(), // pagination
+})
 
-type ListModelReposResponse = { repositories: Array<string> }
+// GET /v2/_catalog
+export const CatalogResponse = z.object({
+  repositories: z.array(z.string()),
+})
+export const CatalogHeaders = TagsListHeaders
 
-export type GetImageTagManifestResponse = {
-  schemaVersion: number
-  mediaType: string
-  config: { mediaType: string; size: number; digest: string }
-  layers: { mediaType: string; size: number; digest: string }[]
-}
+// GET /v2/<name>/blobs/<digest>
+export const BlobHeaders = CommonRegistryHeaders.extend({
+  'docker-content-digest': HeaderValue,
+  etag: HeaderValue.optional(),
+})
 
-type DoesLayerExistResponse = {
-  'accept-ranges': string
-  'content-length': string
-  'content-type': string
-  date: string
-  'docker-content-digest': string
-  'docker-distribution-api-version': string
-  etag: string
-}
+// POST/PATCH/PUT blob upload
+export const BlobUploadHeaders = CommonRegistryHeaders.extend({
+  location: HeaderValue.optional(),
+  range: HeaderValue.optional(),
+  'docker-upload-uuid': HeaderValue.optional(),
+})
 
-type PutManifestResponse = {
-  'content-length': string
-  date: string
-  'docker-content-digest': string
-  'docker-distribution-api-version': string
-  location: string
-}
+// DELETE /v2/<name>/manifests/<reference>
+export const DeleteManifestHeaders = CommonRegistryHeaders.extend({
+  'docker-content-digest': HeaderValue.optional(),
+})
 
-type UploadLayerMonolithicResponse = PutManifestResponse
-type MountBlobResponse = PutManifestResponse
+// GET /v2/<name>/manifests/<reference>
+export const ManifestMediaType = z.enum([
+  'application/vnd.docker.distribution.manifest.v2+json',
+  'application/vnd.oci.image.manifest.v1+json',
+])
+export const ManifestListMediaType = z.enum([
+  'application/vnd.docker.distribution.manifest.list.v2+json',
+  'application/vnd.oci.image.index.v1+json',
+])
 
-type InitialiseUploadResponse = {
-  'content-length': string
-  date: string
-  'docker-distribution-api-version': string
-  'docker-upload-uuid': string
-  location: string
-  range: string
-}
-
-type DeleteManifestResponse = {
-  'content-length': string
-  date: string
-  'docker-distribution-api-version': string
-}
-
-export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
-  return (
-    hasKeys(resp, ['errors']) &&
-    arrayOfObjectsHasKeysOfType(resp['errors'], {
-      code: 'string',
-      message: 'string',
-      detail: 'object',
-    }) &&
-    resp['errors'].every((e) => Array.isArray(e['detail']))
-  )
-}
-
-export function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
-  return (
-    hasKeysOfType(resp, { tags: 'object' }) &&
-    Array.isArray(resp['tags']) &&
-    resp['tags'].every((repo: unknown) => typeof repo === 'string')
-  )
-}
-
-export function isListModelReposResponse(resp: unknown): resp is ListModelReposResponse {
-  return (
-    hasKeysOfType(resp, { repositories: 'object' }) &&
-    Array.isArray(resp['repositories']) &&
-    resp['repositories'].every((repo: unknown) => typeof repo === 'string')
-  )
-}
-
-export function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
-  return (
-    hasKeysOfType(resp, {
-      schemaVersion: 'number',
-      mediaType: 'string',
-      config: 'object',
-      layers: 'object',
-    }) &&
-    hasKeysOfType(resp['config'], {
-      mediaType: 'string',
-      size: 'number',
-      digest: 'string',
-    }) &&
-    arrayOfObjectsHasKeysOfType(resp['layers'], {
-      mediaType: 'string',
-      size: 'number',
-      digest: 'string',
+export const Descriptor = z.object({
+  mediaType: z.string(),
+  size: z.number().int().nonnegative(),
+  digest: z.string(),
+  platform: z
+    .object({
+      architecture: z.string(),
+      os: z.string(),
+      osVersion: z.string().optional(),
+      osFeatures: z.array(z.string()).optional(),
+      variant: z.string().optional(),
     })
-  )
-}
+    .optional(),
+})
 
-export function isDoesLayerExistResponse(resp: unknown): resp is DoesLayerExistResponse {
-  return hasKeysOfType(resp, {
-    'accept-ranges': 'string',
-    'content-length': 'string',
-    'content-type': 'string',
-    date: 'string',
-    'docker-content-digest': 'string',
-    'docker-distribution-api-version': 'string',
-    etag: 'string',
-  })
-}
+export const ImageManifestV2 = z.object({
+  schemaVersion: z.literal(2),
+  mediaType: ManifestMediaType.optional(),
+  config: Descriptor,
+  layers: z.array(Descriptor),
+})
 
-export function isPutManifestResponse(resp: unknown): resp is PutManifestResponse {
-  return hasKeysOfType(resp, {
-    'content-length': 'string',
-    date: 'string',
-    'docker-content-digest': 'string',
-    'docker-distribution-api-version': 'string',
-    location: 'string',
-  })
-}
+export const ManifestListV2 = z.object({
+  schemaVersion: z.literal(2),
+  mediaType: ManifestListMediaType.optional(),
+  manifests: z.array(Descriptor),
+})
+// TODO: handle multi-platform images
+export const ManifestResponseBody = z.union([ImageManifestV2.passthrough(), ManifestListV2.passthrough()])
 
-export function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
-  return isPutManifestResponse(resp)
-}
-
-export function isMountBlobResponse(resp: unknown): resp is MountBlobResponse {
-  return isPutManifestResponse(resp)
-}
-
-export function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
-  return hasKeysOfType(resp, {
-    'content-length': 'string',
-    date: 'string',
-    'docker-distribution-api-version': 'string',
-    'docker-upload-uuid': 'string',
-    location: 'string',
-    range: 'string',
-  })
-}
-
-export function isDeleteManifestResponse(resp: unknown): resp is DeleteManifestResponse {
-  return hasKeysOfType(resp, {
-    'content-length': 'string',
-    date: 'string',
-    'docker-distribution-api-version': 'string',
-  })
-}
+export const ManifestHeaders = CommonRegistryHeaders.extend({
+  'docker-content-digest': HeaderValue,
+  etag: HeaderValue.optional(),
+})

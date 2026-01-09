@@ -208,7 +208,7 @@ export async function addCompressedRegistryImageComponents(
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
-  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body
+  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body!
   log.debug(
     {
       modelId,
