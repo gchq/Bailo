@@ -98,7 +98,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
             startIcon={<LocalOffer />}
             onClick={(event) => setAnchorEl(event.currentTarget)}
           >
-            {`Edit ${entry.kind} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
+            {`Edit ${entry.kind.replace('-', ' ')} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
           </Button>
         </Restricted>
         <EntryTagSelector
