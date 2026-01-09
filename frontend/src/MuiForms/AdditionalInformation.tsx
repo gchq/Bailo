@@ -1,5 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { SxProps, useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { ReactNode } from 'react'
 import Loading from 'src/common/Loading'
@@ -7,9 +7,10 @@ import MessageAlert from 'src/MessageAlert'
 
 interface AdditionalInformationProps {
   children: ReactNode
+  sx?: SxProps
 }
 
-export default function AdditionalInformation({ children }: AdditionalInformationProps) {
+export default function AdditionalInformation({ children, sx }: AdditionalInformationProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const theme = useTheme()
 
@@ -26,7 +27,19 @@ export default function AdditionalInformation({ children }: AdditionalInformatio
   }
 
   return (
-    <Box sx={{ borderStyle: 'solid', borderWidth: 1, borderRadius: 1, borderColor: theme.palette.divider, p: 1, m: 2 }}>
+    <Box
+      sx={{
+        borderStyle: 'solid',
+        borderWidth: 3,
+        borderRadius: 1,
+        borderColor: theme.palette.divider,
+        py: 1,
+        px: 2,
+        m: 2,
+        width: 'fit-content',
+        ...sx,
+      }}
+    >
       <Stack spacing={1}>
         <Typography variant='caption' fontWeight='bold'>
           {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}

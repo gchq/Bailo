@@ -101,13 +101,13 @@ export function ObjectFieldTemplate({
           </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
-        <div style={{ marginLeft: 10 }}>
+        <Stack style={{ marginLeft: 10 }} spacing={2}>
           {properties.map((element) => (
-            <div key={element.name} className='property-wrapper'>
+            <Box key={element.name} className='property-wrapper'>
               {element.content}
-            </div>
+            </Box>
           ))}
-        </div>
+        </Stack>
       </Stack>
     </Box>
   )

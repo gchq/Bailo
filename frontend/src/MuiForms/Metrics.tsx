@@ -96,7 +96,7 @@ export default function Metrics({ onChange, value, label, registry, required, id
       }
       return (
         <TableContainer component={Paper}>
-          <Table sx={{ maxWidth: 'sm' }} size='small'>
+          <Table sx={{ width: 'fit-content' }} size='small'>
             <TableHead>
               <TableRow>
                 <TableCell>Metric name</TableCell>
@@ -106,7 +106,7 @@ export default function Metrics({ onChange, value, label, registry, required, id
             <TableBody>
               {data.map((metric) => (
                 <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell component='th' scope='row'>
+                  <TableCell component='th' scope='row' sx={{ wordBreak: 'break-all', maxWidth: 'sm' }}>
                     {metric.name}
                   </TableCell>
                   <TableCell align='right'>{metric.value}</TableCell>
@@ -159,7 +159,9 @@ export default function Metrics({ onChange, value, label, registry, required, id
             Unanswered
           </Typography>
         )}
-        <AdditionalInformation>{value.length > 0 ? table(value) : undefined}</AdditionalInformation>
+        <AdditionalInformation sx={{ maxWidth: 'unset' }}>
+          {value.length > 0 ? table(value) : undefined}
+        </AdditionalInformation>
       </>
     )
   }
