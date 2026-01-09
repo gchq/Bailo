@@ -209,8 +209,8 @@ export async function registryRequest<TBody = unknown, THeaders = CommonRegistry
     }
 
     // pagination
-    if (pagination?.enabled) {
-      url = parseNextLink(res.headers.get('link'))
+    if (pagination?.enabled && res.headers.get('link')) {
+      url = `${registry}/${parseNextLink(res.headers.get('link'))}`
     } else {
       url = undefined
     }
