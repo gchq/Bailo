@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchEntry } from 'actions/model'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'
@@ -47,7 +47,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         },
       },
     }
-    const response = await patchModel(model.id, updatedSettings)
+    const response = await patchEntry(model.id, updatedSettings)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))

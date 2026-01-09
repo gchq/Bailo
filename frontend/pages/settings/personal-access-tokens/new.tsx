@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult, useListModels } from 'actions/model'
+import { EntrySearchResult, useListEntries } from 'actions/model'
 import { postUserToken, useGetUserTokenList } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -24,12 +24,16 @@ import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import { TokenActionKind, TokenInterface, TokenScope } from 'types/types'
+import { EntryKind, TokenActionKind, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
-  const { models, isModelsLoading, isModelsError } = useListModels('model')
+  const {
+    entries: models,
+    isEntriesLoading: isModelsLoading,
+    isEntriesError: isModelsError,
+  } = useListEntries(EntryKind.MODEL)
   const { tokenActions, isTokenActionsLoading, isTokenActionsError } = useGetUserTokenList()
 
   const actionOptions = useMemo(() => tokenActions.map((tokenAction) => tokenAction.id), [tokenActions])

@@ -9,9 +9,9 @@ import { EntryKind } from 'types/types'
 
 export default function ModelCardVersion() {
   const router = useRouter()
-  const { modelId, modelCardVersion }: { modelId?: string; modelCardVersion?: number } = router.query
+  const { entryId, entryCardVersion }: { entryId?: string; entryCardVersion?: number } = router.query
 
-  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(modelId, modelCardVersion)
+  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(entryId, entryCardVersion)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entryCard?.schemaId || '')
 
   const error = MultipleErrorWrapper(`Unable to load history page`, {
@@ -24,8 +24,8 @@ export default function ModelCardVersion() {
     <>
       <Title text='Model Card Revision' />
       {(isEntryCardLoading || isSchemaLoading) && <Loading />}
-      {entryCard && schema && modelId && (
-        <EntryCardVersion entryCard={entryCard} schema={schema} entryId={modelId} entryKind={EntryKind.MODEL} />
+      {entryCard && schema && entryId && (
+        <EntryCardVersion entryCard={entryCard} schema={schema} entryId={entryId} entryKind={EntryKind.MODEL} />
       )}
     </>
   )
