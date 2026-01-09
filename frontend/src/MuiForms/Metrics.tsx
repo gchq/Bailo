@@ -80,29 +80,44 @@ export default function Metrics({ onChange, value, label, registry, required, id
   )
 
   const table = useCallback(
-    (data: MetricValue[]) => (
-      <TableContainer component={Paper}>
-        <Table sx={{ maxWidth: 'sm' }} size='small'>
-          <TableHead>
-            <TableRow>
-              <TableCell>Metric name</TableCell>
-              <TableCell align='right'>Value</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((metric) => (
-              <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell component='th' scope='row'>
-                  {metric.name}
-                </TableCell>
-                <TableCell align='right'>{metric.value}</TableCell>
+    (data: MetricValue[]) => {
+      if (!data || data.length === 0) {
+        return (
+          <Typography
+            sx={{
+              fontStyle: 'italic',
+              color: theme.palette.customTextInput.main,
+            }}
+            aria-label={`Label for ${label}`}
+          >
+            Unanswered
+          </Typography>
+        )
+      }
+      return (
+        <TableContainer component={Paper}>
+          <Table sx={{ maxWidth: 'sm' }} size='small'>
+            <TableHead>
+              <TableRow>
+                <TableCell>Metric name</TableCell>
+                <TableCell align='right'>Value</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    ),
-    [],
+            </TableHead>
+            <TableBody>
+              {data.map((metric) => (
+                <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell component='th' scope='row'>
+                    {metric.name}
+                  </TableCell>
+                  <TableCell align='right'>{metric.value}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )
+    },
+    [label, theme.palette.customTextInput.main],
   )
 
   const handleDeleteItem = useCallback(
@@ -144,7 +159,7 @@ export default function Metrics({ onChange, value, label, registry, required, id
             Unanswered
           </Typography>
         )}
-        <AdditionalInformation>{value ? table(value) : undefined}</AdditionalInformation>
+        <AdditionalInformation>{value.length > 0 ? table(value) : undefined}</AdditionalInformation>
       </>
     )
   }
