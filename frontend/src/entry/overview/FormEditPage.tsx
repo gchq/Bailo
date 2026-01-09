@@ -4,7 +4,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { putModelCard } from 'actions/modelCard'
+import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
@@ -49,6 +49,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const sendNotification = useNotification()
+  const { mutateModelCardRevisions } = useGetModelCardRevisions(entry.id)
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -72,6 +73,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         const res = await putModelCard(entry.id, data)
         if (res.status && res.status < 400) {
           setIsEdit(false)
+          mutateModelCardRevisions()
         } else {
           setErrorMessage(res.data)
         }
