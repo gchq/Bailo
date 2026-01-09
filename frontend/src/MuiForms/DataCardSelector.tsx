@@ -225,21 +225,23 @@ export default function DataCardSelector({
               Unanswered
             </Typography>
           )}
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((currentDataCardId) => (
-                <Chip
-                  label={
-                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                    'Unable to find data card name'
-                  }
-                  key={currentDataCardId}
-                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                  sx={{ width: 'fit-content' }}
-                />
-              ))}
-            </Stack>
-          </Box>
+          {currentValue.length > 0 && (
+            <Box sx={{ overflowX: 'auto', p: 1 }}>
+              <Stack spacing={1} direction='row'>
+                {currentValue.map((currentDataCardId) => (
+                  <Chip
+                    label={
+                      dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                      'Unable to find data card name'
+                    }
+                    key={currentDataCardId}
+                    onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                    sx={{ width: 'fit-content' }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          )}
         </>
       )}
     </>
