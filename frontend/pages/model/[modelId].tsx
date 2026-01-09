@@ -19,7 +19,7 @@ import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
-  const { entryId }: { entryId?: string } = router.query
+  const { modelId: entryId }: { modelId?: string } = router.query
   const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetEntry(entryId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
