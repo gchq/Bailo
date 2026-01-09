@@ -2,7 +2,6 @@ import {
   AccessibilityNew,
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
-  Settings as SettingsIcon,
   SupervisorAccount,
 } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
@@ -205,16 +204,6 @@ export default function SideNavigation({
               menuPage='accessibility'
               title='Accessibility'
               icon={<AccessibilityNew />}
-            />
-            <Divider aria-hidden='true' />
-            <NavMenuItem
-              href='/settings'
-              selectedPage={page}
-              primaryText='Settings'
-              drawerOpen={drawerOpen}
-              menuPage='settings'
-              title='User settings'
-              icon={<SettingsIcon />}
             />
             <Divider aria-hidden='true' />
             <ListItem disablePadding>

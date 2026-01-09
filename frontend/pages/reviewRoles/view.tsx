@@ -1,3 +1,4 @@
+import { Add, Create, Delete } from '@mui/icons-material'
 import Edit from '@mui/icons-material/Edit'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
@@ -192,6 +193,7 @@ export default function ReviewRoles() {
                         sx={{ width: 'max-content' }}
                         variant='outlined'
                         onClick={() => setIsEdit(true)}
+                        startIcon={<Create />}
                       >
                         Edit Role
                       </Button>
@@ -200,6 +202,7 @@ export default function ReviewRoles() {
                         sx={{ width: 'max-content' }}
                         variant='contained'
                         onClick={handleOpenDeleteConfirmation}
+                        startIcon={<Delete />}
                       >
                         Delete role
                       </Button>
@@ -300,8 +303,8 @@ export default function ReviewRoles() {
         <Typography component='h1' color='primary' variant='h6' noWrap data-test='ReviewRolesTitle'>
           Review Roles
         </Typography>
-        <Button variant='contained' href='/reviewRoles/new' color='primary'>
-          Create new Review Role
+        <Button variant='contained' href='/reviewRoles/new' color='primary' startIcon={<Add />}>
+          Create new review role
         </Button>
       </Stack>
       {reviewRoles ? (

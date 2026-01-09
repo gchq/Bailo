@@ -73,7 +73,6 @@ export default function DateSelector({ onChange, value, label, registry, require
           value={value ? dayjs(value) : undefined}
           aria-label={`date input field for ${label}`}
           onChange={handleChange}
-          label={label}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
         />

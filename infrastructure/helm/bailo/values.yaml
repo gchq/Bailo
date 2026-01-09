@@ -242,7 +242,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.2
+  image: marlonb/mailcrab:v1.6.4
 
 # Openshift specific configuration
 openshift:

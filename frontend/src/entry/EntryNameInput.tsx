@@ -28,7 +28,9 @@ export default function EntryNameInput({ value, kind, onChange, autoFocus = fals
         size='small'
         id={htmlId}
         onChange={handleChange}
-        data-test='entryNameInput'
+        slotProps={{
+          htmlInput: { 'data-test': 'entryNameInput' },
+        }}
       />
     </LabelledInput>
   )

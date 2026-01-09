@@ -3,7 +3,8 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { useRouter } from 'next/router'
+import { Dispatch, SetStateAction, useEffect, useEffectEvent, useRef, useState } from 'react'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -11,6 +12,7 @@ import {
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
+import useNotification from 'src/hooks/useNotification'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import { setStepState, widgets } from 'utils/formUtils'
@@ -31,9 +33,40 @@ export default function JsonSchemaForm({
   mirroredModel?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
+  const [sharedSection, setSharedSection] = useState('')
   const theme = useTheme()
+  const router = useRouter()
+  const ref = useRef<HTMLDivElement | null>(null)
+  const sendNotification = useNotification()
 
   const currentStep = splitSchema.steps[activeStep]
+
+  const updatePageByRouterQuery = useEffectEvent((page: string) => {
+    setActiveStep(Number(page) || 0)
+  })
+
+  const updatedSharedStateEvent = useEffectEvent((id: string) => {
+    setSharedSection(id)
+  })
+
+  useEffect(() => {
+    if (router.query.page !== undefined && typeof router.query.page === 'string') {
+      updatePageByRouterQuery(router.query.page)
+    }
+    if (router.asPath.split('#')[1]) {
+      updatedSharedStateEvent(router.asPath.split('#')[1] as string)
+    }
+  }, [router])
+
+  useEffect(() => {
+    if (ref && sharedSection) {
+      const section = document.getElementById(sharedSection) as HTMLElement
+      if (!section) {
+        return
+      }
+      section.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [ref, sharedSection])
 
   if (!currentStep) {
     return null
@@ -47,6 +80,9 @@ export default function JsonSchemaForm({
 
   function handleListItemClick(index: number) {
     setActiveStep(index)
+    router.replace({
+      query: { ...router.query, page: index },
+    })
   }
 
   function ErrorListTemplate() {
@@ -55,6 +91,17 @@ export default function JsonSchemaForm({
         Please make sure that all errors listed below have been resolved.
       </Typography>
     )
+  }
+
+  function onShareSectionOnClick(sectionId: string) {
+    navigator.clipboard.writeText(
+      `${window.location.origin + window.location.pathname}?page=${activeStep}#${sectionId}`,
+    )
+    sendNotification({
+      variant: 'success',
+      msg: `Link saved to clipboard`,
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
   }
 
   return (
@@ -72,7 +119,10 @@ export default function JsonSchemaForm({
                   <Typography
                     sx={{
                       wordBreak: 'break-word',
-                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
+                      color:
+                        !step.isComplete(step) && displayLabelValidation
+                          ? theme.palette.error.main
+                          : theme.palette.common.black,
                     }}
                     width='100%'
                   >
@@ -85,7 +135,7 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </Grid>
-      <Grid size={{ xs: 12, md: 10 }}>
+      <Grid size={{ xs: 12, md: 10 }} ref={ref}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
@@ -103,6 +153,7 @@ export default function JsonSchemaForm({
             defaultCurrentUser: defaultCurrentUserInEntityList,
             mirroredState: currentStep.mirroredState,
             mirroredModel,
+            onShare: onShareSectionOnClick,
           }}
           templates={
             !canEdit
