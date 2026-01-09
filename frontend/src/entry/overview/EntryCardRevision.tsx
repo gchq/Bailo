@@ -1,8 +1,8 @@
-import { TableBody, TableCell, TableRow } from '@mui/material'
+import { Stack, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntryCardRevisionInterface, EntryKindKeys } from 'types/types'
+import { EntryCardRevisionInterface, EntryKind, EntryKindKeys } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type EntryCardRevisionProps = {
@@ -18,10 +18,19 @@ export default function EntryCardRevision({ entryCard, entryKind }: EntryCardRev
     <TableBody>
       <TableRow
         hover
-        onClick={() => router.push(`/${entryKind}/${entryCard.modelId}/history/${entryCard.version}`)}
+        onClick={() =>
+          router.push(
+            `/${entryKind === EntryKind.MIRRORED_MODEL || entryKind === EntryKind.MODEL ? EntryKind.MODEL : entryKind}/${entryCard.modelId}/history/${entryCard.version}${entryCard.mirrored ? '?mirrored=true' : ''}`,
+          )
+        }
         sx={{ '&:hover': { cursor: 'pointer' } }}
       >
-        <TableCell sx={{ color: theme.palette.secondary.main }}>{entryCard.version}</TableCell>
+        <TableCell>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography sx={{ color: theme.palette.secondary.main }}>{entryCard.version}</Typography>
+            <Typography variant='caption'>{entryCard.mirrored && `(Mirrored)`}</Typography>
+          </Stack>
+        </TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>
           <UserDisplay dn={entryCard.createdBy} />
         </TableCell>

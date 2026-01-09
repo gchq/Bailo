@@ -37,9 +37,7 @@ export default function Model() {
             {
               title: 'Overview',
               path: 'overview',
-              view: (
-                <Overview entry={model} readOnly={!!model.settings.mirror?.sourceModelId} mutateEntry={mutateModel} />
-              ),
+              view: <Overview entry={model} mutateEntry={mutateModel} />,
             },
             {
               title: 'Releases',
