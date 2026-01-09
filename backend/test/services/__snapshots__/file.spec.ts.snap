@@ -269,6 +269,7 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
     "lookup": [MockFunction],
+    "markModified": [MockFunction],
     "match": [MockFunction],
     "mime": "text/plain",
     "modelId": "testModelId",

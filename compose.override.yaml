@@ -17,7 +17,7 @@ services:
     ports:
       - 1080:1080
       - 1025:1025
-    image: marlonb/mailcrab:v1.6.2
+    image: marlonb/mailcrab:v1.6.4
 
   backend:
     ports:

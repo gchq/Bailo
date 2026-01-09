@@ -49,6 +49,7 @@ describe('Check A11y violations', () => {
 
   it('Check A11y violations, Settings Page', () => {
     cy.visit('/settings')
+    cy.injectAxe()
     cy.contains('Name')
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
