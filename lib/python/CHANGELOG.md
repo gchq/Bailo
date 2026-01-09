@@ -2,7 +2,17 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.3.0 - DD/MM/2025
+## 3.4.0 - DD/MM/2026
+
+### Breaking Changes
+
+- Change minimum supported Python version to 3.10 (was 3.9).
+
+### Changes
+
+- Change maximum supported Python version to 3.14 (was 3.13).
+
+## 3.3.0 - 28/11/2025
 
 - Add `Client.delete_model` to core and `Entry.delete` helper (and inherited classes `Model`, `MirroredModel` and
   `Datacard`)

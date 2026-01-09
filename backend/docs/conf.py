@@ -9,7 +9,7 @@ from __future__ import annotations
 # -- Project information -----------------------------------------------------
 
 project = "Bailo Python Client Docs"
-copyright = "2025, GCHQ"
+copyright = "2026, GCHQ"
 author = "Various"
 
 # The full version, including alpha/beta/rc tags
