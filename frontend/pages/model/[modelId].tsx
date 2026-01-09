@@ -15,6 +15,8 @@ import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import MessageAlert from 'src/MessageAlert'
+import { EntryKind } from 'types/types'
 import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
@@ -116,6 +118,16 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           titleToCopy={model.name}
           subheadingToCopy={model.id}
+          additionalHeaderDisplay={
+            model.kind === EntryKind.MIRRORED_MODEL ? (
+              <MessageAlert
+                message={`Mirrored from ${model.settings.mirror?.sourceModelId}. Some sections will be read-only.`}
+                severity='info'
+              />
+            ) : (
+              <></>
+            )
+          }
         />
       )}
     </>
