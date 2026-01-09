@@ -28,7 +28,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            entryCardRevisions: z.array(modelCardInterfaceSchema),
+            modelCardRevisions: z.array(modelCardInterfaceSchema),
           }),
         },
       },
@@ -37,7 +37,7 @@ registerPath({
 })
 
 interface GetModelCardResponse {
-  entryCardRevisions: Array<ModelCardInterface>
+  modelCardRevisions: Array<ModelCardInterface>
 }
 
 export const getModelCardRevisions = [
@@ -47,10 +47,10 @@ export const getModelCardRevisions = [
       params: { modelId },
     } = parse(req, getModelCardRevisionsSchema)
 
-    const entryCardRevisions = await getModelCardRevisionsService(req.user, modelId)
+    const modelCardRevisions = await getModelCardRevisionsService(req.user, modelId)
 
-    await audit.onViewModelCardRevisions(req, modelId, entryCardRevisions)
+    await audit.onViewModelCardRevisions(req, modelId, modelCardRevisions)
 
-    res.json({ entryCardRevisions })
+    res.json({ modelCardRevisions })
   },
 ]

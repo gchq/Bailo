@@ -29,7 +29,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            entries: z.array(
+            models: z.array(
               z.object({
                 id: z.string().openapi({ example: 'yolo-abcdef' }),
                 name: z.string().openapi({ example: 'Yolo v4' }),
@@ -67,12 +67,12 @@ export const getModelsSearch = [
     const opts: { query: EntrySearchOptionsParams } = parse(req, getModelsSearchSchema)
 
     let results: EntrySearchResultWithErrors = {
-      entries: [],
+      models: [],
     }
 
     results = await searchModels(req.user, opts.query)
 
-    await audit.onSearchModel(req, results.entries)
+    await audit.onSearchModel(req, results.models)
 
     res.json(results)
   },

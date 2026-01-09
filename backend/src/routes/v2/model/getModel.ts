@@ -28,7 +28,7 @@ registerPath({
       description: 'Object with model information.',
       content: {
         'application/json': {
-          schema: z.object({ entry: modelInterfaceSchema }),
+          schema: z.object({ model: modelInterfaceSchema }),
         },
       },
     },
@@ -36,7 +36,7 @@ registerPath({
 })
 
 interface GetModelResponse {
-  entry: ModelInterface
+  model: ModelInterface
 }
 
 export const getModel = [
@@ -44,12 +44,12 @@ export const getModel = [
     req.audit = AuditInfo.ViewModel
     const { params, query } = parse(req, getModelSchema)
 
-    const entry = await getModelById(req.user, params.modelId, query.kind as EntryKindKeys | undefined)
+    const model = await getModelById(req.user, params.modelId, query.kind as EntryKindKeys | undefined)
 
-    await audit.onViewModel(req, entry)
+    await audit.onViewModel(req, model)
 
     res.json({
-      entry,
+      model,
     })
   },
 ]

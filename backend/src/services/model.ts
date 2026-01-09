@@ -249,7 +249,7 @@ export async function searchModels(
   opts: EntrySearchOptionsParams,
 ): Promise<EntrySearchResultWithErrors> {
   const results: EntrySearchResultWithErrors = {
-    entries: [],
+    models: [],
   }
 
   const localModelsPromise = searchLocalModels(user, opts)
@@ -266,7 +266,7 @@ export async function searchModels(
   })
 
   const processLocalModels = localModelsPromise.then((localModels) => {
-    results.entries.push(
+    results.models.push(
       ...localModels.map((model) => ({
         id: model.id,
         name: model.name,
@@ -291,8 +291,8 @@ export async function searchModels(
 
     const processRemoteModels = remotePromise.then((remoteResponses) => {
       for (const response of remoteResponses.flat()) {
-        if (response.entries) {
-          results.entries.push(...response.entries)
+        if (response.models) {
+          results.models.push(...response.models)
         }
         if (response.errors) {
           for (const [peerId, error] of Object.entries(response.errors)) {

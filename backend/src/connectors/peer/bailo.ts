@@ -25,8 +25,8 @@ export class BailoPeerConnector extends BasePeerConnector {
     const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
 
     return {
-      entries: results.entries.map((entry) => ({
-        ...entry,
+      models: results.models.map((model) => ({
+        ...model,
         peerId: this.getId(),
       })),
       errors: results.errors,

@@ -184,7 +184,7 @@ export interface EntrySearchResult {
 }
 
 export interface EntrySearchResultWithErrors {
-  entries: Array<EntrySearchResult>
+  models: Array<EntrySearchResult>
   errors?: Record<string, BailoError>
 }
 

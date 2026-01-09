@@ -75,22 +75,22 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     if (cacheResult) {
       log.debug(`Cache hit - returning cached result for ${cacheKey}`)
       return {
-        entries: cacheResult,
+        models: cacheResult,
       }
     }
     log.debug(`Cache miss - executing query for ${cacheKey}`)
 
     // No cache result - execute query, cache response if appropriate
-    const entries = new Array<EntrySearchResult>()
+    const models = new Array<EntrySearchResult>()
 
     if (opts.search && opts.search.length === 0) {
-      return Promise.resolve({ entries: [] })
+      return Promise.resolve({ models: [] })
     }
 
     // Only supports searching for models, not data cards etc.
     if (opts.kind && opts.kind != 'model') {
       return {
-        entries: [],
+        models: [],
         errors: {
           [this.getId()]: NotImplemented(`HuggingFace does not support ${opts.kind}`, {
             query: opts.search,
@@ -110,7 +110,7 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
       opts.task
     ) {
       return {
-        entries: [],
+        models: [],
         errors: {
           [this.getId()]: NotImplemented(`HuggingFace does not support all query parameters`, {
             searchOptions: opts,
@@ -123,7 +123,7 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     const minLength = 5
     if (opts.search && opts.search.length < minLength) {
       return {
-        entries: [],
+        models: [],
         errors: {
           [this.getId()]: BadReq('Query too short', { query: opts.search, minLength }),
         },
@@ -135,7 +135,7 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
       limit: 100,
       additionalFields: ['tags', 'cardData', 'createdAt', 'author'],
     })) {
-      entries.push({
+      models.push({
         id: model.id,
         name: model.name,
         description: model.task || '',
@@ -154,8 +154,8 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     // Store in cache if configured to
     if (cache) {
       log.debug(`Cache store - storing query for ${cacheKey}`)
-      cache.set(cacheKey, entries)
+      cache.set(cacheKey, models)
     }
-    return Promise.resolve({ entries })
+    return Promise.resolve({ models })
   }
 }

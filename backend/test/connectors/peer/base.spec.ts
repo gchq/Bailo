@@ -44,7 +44,7 @@ class DummyConnector extends BasePeerConnector {
 
   async searchEntries(_user, _opts) {
     return {
-      entries: [],
+      models: [],
     }
   }
 }

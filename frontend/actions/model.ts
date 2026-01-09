@@ -67,7 +67,7 @@ export function useListEntries(
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
-      entries: EntrySearchResult[]
+      models: EntrySearchResult[]
       errors: Record<string, BailoError>
     },
     ErrorInfo
@@ -75,7 +75,7 @@ export function useListEntries(
 
   return {
     mutateEntries: mutate,
-    entries: data ? data.entries : emptyEntryList,
+    entries: data ? data.models : emptyEntryList,
     entryErrors: data ? data.errors : {},
     isEntriesLoading: isLoading,
     isEntriesError: error,
@@ -89,14 +89,14 @@ export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
 
   const { data, isLoading, error, mutate } = useSWR<
     {
-      entry: EntryInterface
+      model: EntryInterface
     },
     ErrorInfo
   >(entryId ? `/api/v2/model/${entryId}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateEntry: mutate,
-    entry: data?.entry,
+    entry: data?.model,
     isEntryLoading: isLoading,
     isEntryError: error,
   }
