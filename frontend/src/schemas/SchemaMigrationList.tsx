@@ -1,3 +1,4 @@
+import { Create } from '@mui/icons-material'
 import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
@@ -60,8 +61,8 @@ export default function SchemaMigrationList() {
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/schemas/migrations/new`}>
-            <Button variant='outlined' data-test='createNewSchemaMigration'>
-              New Schema Migration Plan
+            <Button variant='outlined' data-test='createNewSchemaMigration' startIcon={<Create />}>
+              New schema migration plan
             </Button>
           </Link>
         </Box>

@@ -1,4 +1,4 @@
-import { PostAdd } from '@mui/icons-material'
+import { Add, PostAdd } from '@mui/icons-material'
 import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import Link from 'src/Link'
@@ -56,6 +56,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                 sx={{ width: '100%' }}
                 data-test='createSchemaFromScratchButton'
                 disabled={!!entry.settings.mirror?.sourceModelId}
+                startIcon={<Add />}
               >
                 Create
               </Button>
@@ -79,6 +80,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                   href={`/${entry.kind}/${entry.id}/template`}
                   LinkComponent={Link}
                   disabled={!!entry.settings.mirror?.sourceModelId}
+                  startIcon={<Add />}
                 >
                   Create
                 </Button>

@@ -1,3 +1,4 @@
+import { FileUpload } from '@mui/icons-material'
 import { Button, Card, Stack, Typography } from '@mui/material'
 
 interface EntryCardProps {
@@ -24,7 +25,7 @@ export default function EntryCard({ title, description, dataTest, handleClick }:
           </Typography>
           <Typography>{description}</Typography>
         </Stack>
-        <Button fullWidth variant='contained' onClick={handleClick} data-test={dataTest}>
+        <Button fullWidth variant='contained' onClick={handleClick} data-test={dataTest} startIcon={<FileUpload />}>
           Create
         </Button>
       </Stack>

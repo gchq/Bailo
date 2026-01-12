@@ -399,12 +399,7 @@ export default function FileDisplay({
                     <IconButton aria-label='toggle file options menu' onClick={handleFileMoreButtonClick}>
                       <MoreVert color='primary' />
                     </IconButton>
-                    <Menu
-                      slotProps={{ list: { dense: true } }}
-                      anchorEl={anchorElMore}
-                      open={openMore}
-                      onClose={handleFileMoreButtonClose}
-                    >
+                    <Menu anchorEl={anchorElMore} open={openMore} onClose={handleFileMoreButtonClose}>
                       {showMenuItems.associatedReleases && (
                         <MenuItem
                           onClick={() => {
