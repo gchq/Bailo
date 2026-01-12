@@ -24,16 +24,24 @@ import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import { EntryKind, TokenActionKind, TokenInterface, TokenScope } from 'types/types'
+import { TokenActionKind, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
-  const {
-    entries: models,
-    isEntriesLoading: isModelsLoading,
-    isEntriesError: isModelsError,
-  } = useListEntries(EntryKind.MODEL)
+  const { entries, isEntriesLoading, isEntriesError } = useListEntries(
+    undefined,
+    [],
+    '',
+    [],
+    [],
+    [],
+    [],
+    '',
+    false,
+    '',
+    true,
+  )
   const { tokenActions, isTokenActionsLoading, isTokenActionsError } = useGetUserTokenList()
 
   const actionOptions = useMemo(() => tokenActions.map((tokenAction) => tokenAction.id), [tokenActions])
@@ -44,8 +52,8 @@ export default function NewToken() {
 
   const theme = useTheme()
   const [description, setDescription] = useState('')
-  const [isAllModels, setIsAllModels] = useState(true)
-  const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
+  const [isAllEntries, setIsAllEntries] = useState(true)
+  const [selectedEntries, setSelectedEntries] = useState<EntrySearchResult[]>([])
   const [isAllActions, setIsAllActions] = useState(false)
   const [selectedActions, setSelectedActions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -53,15 +61,15 @@ export default function NewToken() {
   const [token, setToken] = useState<TokenInterface | undefined>()
 
   const isGenerateButtonDisabled = useMemo(
-    () => !description || !(isAllModels || selectedModels.length) || !selectedActions.length,
-    [description, isAllModels, selectedModels.length, selectedActions.length],
+    () => !description || !(isAllEntries || selectedEntries.length) || !selectedActions.length,
+    [description, isAllEntries, selectedEntries.length, selectedActions.length],
   )
 
-  const modelsAutocompletePlaceholder = useMemo(() => {
-    if (isAllModels) return 'All models selected'
-    if (selectedModels.length) return ''
-    return 'Select models'
-  }, [isAllModels, selectedModels.length])
+  const entriesAutocompletePlaceholder = useMemo(() => {
+    if (isAllEntries) return 'All entries selected'
+    if (selectedEntries.length) return ''
+    return 'Select entries'
+  }, [isAllEntries, selectedEntries.length])
 
   const [TokenReadAction, TokenWriteAction] = useMemo(
     () =>
@@ -124,13 +132,13 @@ export default function NewToken() {
     setDescription(event.target.value)
   }
 
-  const handleAllModelsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
-    setIsAllModels(checked)
-    setSelectedModels([])
+  const handleAllEntriesChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    setIsAllEntries(checked)
+    setSelectedEntries([])
   }
 
-  const handleSelectedModelsChange = (_event: SyntheticEvent<Element, Event>, value: EntrySearchResult[]) => {
-    setSelectedModels(value)
+  const handleSelectedEntriesChange = (_event: SyntheticEvent<Element, Event>, value: EntrySearchResult[]) => {
+    setSelectedEntries(value)
   }
 
   const handleAllActionsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
@@ -167,9 +175,9 @@ export default function NewToken() {
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    const scope = isAllModels ? TokenScope.All : TokenScope.Models
-    const modelIds = selectedModels.map((model) => model.id)
-    const response = await postUserToken(description, scope, modelIds, selectedActions)
+    const scope = isAllEntries ? TokenScope.All : TokenScope.Models
+    const entryIds = selectedEntries.map((entry) => entry.id)
+    const response = await postUserToken(description, scope, entryIds, selectedActions)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -219,7 +227,7 @@ export default function NewToken() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Models <span style={{ color: theme.palette.error.main }}>*</span>
+                  Entries <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <Stack direction='row' alignItems='start' justifyContent='center' spacing={2}>
                   <FormControl>
@@ -227,10 +235,10 @@ export default function NewToken() {
                       control={
                         <Checkbox
                           name='All'
-                          checked={isAllModels}
-                          disabled={isModelsLoading}
-                          onChange={handleAllModelsChange}
-                          data-test='allModelsCheckbox'
+                          checked={isAllEntries}
+                          disabled={isEntriesLoading}
+                          onChange={handleAllEntriesChange}
+                          data-test='allEntriesCheckbox'
                         />
                       }
                       label='All'
@@ -239,17 +247,17 @@ export default function NewToken() {
                   <Autocomplete
                     multiple
                     fullWidth
-                    value={selectedModels}
-                    loading={isModelsLoading}
-                    disabled={isAllModels}
+                    value={selectedEntries}
+                    loading={isEntriesLoading}
+                    disabled={isAllEntries}
                     limitTags={5}
-                    getLimitTagsText={(more) => `+${plural(more, 'model')}`}
-                    options={models}
+                    getLimitTagsText={(more) => `+${plural(more, 'entry')}`}
+                    options={entries}
                     getOptionLabel={(option) => option.name}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
-                    onChange={handleSelectedModelsChange}
+                    onChange={handleSelectedEntriesChange}
                     renderInput={(params) => (
-                      <TextField {...params} required size='small' placeholder={modelsAutocompletePlaceholder} />
+                      <TextField {...params} required size='small' placeholder={entriesAutocompletePlaceholder} />
                     )}
                     slotProps={{
                       chip: { size: 'small' },
@@ -299,7 +307,7 @@ export default function NewToken() {
                 >
                   Generate token
                 </Button>
-                <MessageAlert message={isModelsError?.info.message || errorMessage} severity='error' />
+                <MessageAlert message={isEntriesError?.info.message || errorMessage} severity='error' />
               </Stack>
             </Stack>
           </Stack>
