@@ -1,9 +1,7 @@
-import { ErrorInfo } from '../clients/registryResponses.js'
+import { type RegistryErrorResponseBody } from '../clients/registryResponses.js'
 import { BailoError } from './error.js'
 
-export interface RegistryError extends BailoError {
-  errors: Array<ErrorInfo>
-}
+export interface RegistryError extends BailoError, RegistryErrorResponseBody {}
 
 export function isRegistryError(err: unknown): err is RegistryError {
   if (typeof err !== 'object' || err === null) {
