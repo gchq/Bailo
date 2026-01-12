@@ -22,7 +22,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { EntryCardKindLabel, EntryInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
@@ -189,7 +189,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
             >
               <MessageAlert
                 severity='info'
-                message='There is a migration available for this model'
+                message={`There is a migration available for this ${EntryKindLabel[entry.kind]}`}
                 buttonText='Migrate'
                 buttonAction={() => setMigrationListDialogOpen(true)}
               />

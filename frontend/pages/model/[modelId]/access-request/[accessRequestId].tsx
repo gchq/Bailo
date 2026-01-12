@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'

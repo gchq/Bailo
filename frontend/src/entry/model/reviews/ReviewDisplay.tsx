@@ -1,7 +1,7 @@
 import { Done } from '@mui/icons-material'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
-import { useGetEntryRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'

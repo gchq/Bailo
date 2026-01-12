@@ -1,6 +1,6 @@
 import { Card, List, ListItemButton, ListItemText, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useListEntries } from 'actions/model'
+import { useListEntries } from 'actions/entry'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
 import { MouseEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'

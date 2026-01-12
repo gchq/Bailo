@@ -1,4 +1,4 @@
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'

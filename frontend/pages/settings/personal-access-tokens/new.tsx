@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult, useListEntries } from 'actions/model'
+import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { postUserToken, useGetUserTokenList } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'

@@ -1,7 +1,7 @@
 import { LocalOffer } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { patchEntry, useGetEntry } from 'actions/model'
+import { patchEntry, useGetEntry } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'

@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { postEntry, useGetEntryRoles } from 'actions/model'
+import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'

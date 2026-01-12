@@ -1,7 +1,7 @@
 import { Add, Create, Delete } from '@mui/icons-material'
 import Edit from '@mui/icons-material/Edit'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntryRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'

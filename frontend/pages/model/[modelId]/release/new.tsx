@@ -1,7 +1,7 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { useGetEntry } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
-import { useGetEntry } from 'actions/model'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'

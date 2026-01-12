@@ -1,7 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
 import { Button, Card, Container, Dialog, DialogContent, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'

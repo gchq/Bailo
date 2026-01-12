@@ -1,4 +1,4 @@
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'

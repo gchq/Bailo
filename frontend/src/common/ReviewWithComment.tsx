@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
-import { useGetEntryRoles } from '../../actions/model'
+import { useGetEntryRoles } from '../../actions/entry'
 import { useGetReviewRequestsForModel } from '../../actions/review'
 import {
   AccessRequestInterface,

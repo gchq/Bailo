@@ -1,7 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, Chip, InputBase, List, ListItem, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
-import { useListEntries } from 'actions/model'
+import { useListEntries } from 'actions/entry'
 import { ChangeEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'

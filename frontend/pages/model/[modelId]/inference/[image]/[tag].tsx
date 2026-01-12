@@ -1,6 +1,6 @@
 import { ArrowBack } from '@mui/icons-material'
 import { Button, Container, Link, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'

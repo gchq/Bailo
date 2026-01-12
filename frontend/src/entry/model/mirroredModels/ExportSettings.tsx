@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { patchEntry } from 'actions/model'
+import { patchEntry } from 'actions/entry'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'

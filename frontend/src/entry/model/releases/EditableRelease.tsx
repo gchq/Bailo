@@ -1,6 +1,6 @@
 import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
+import { useGetEntry } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
-import { useGetEntry } from 'actions/model'
 import {
   deleteRelease,
   putRelease,

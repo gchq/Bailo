@@ -154,7 +154,7 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   }
 }
 
-export function useGetEntryFiles(entryId?: string) {
+export function useGetModelFiles(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       files: Array<FileInterface>
@@ -163,10 +163,10 @@ export function useGetEntryFiles(entryId?: string) {
   >(entryId ? `/api/v2/model/${entryId}/files` : null, fetcher)
 
   return {
-    mutateEntryFiles: mutate,
-    entryFiles: data ? data.files : [],
-    isEntryFilesLoading: isLoading,
-    isEntryFilesError: error,
+    mutateModelFiles: mutate,
+    modelFiles: data ? data.files : [],
+    isModelFilesLoading: isLoading,
+    isModelFilesError: error,
   }
 }
 

@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { useGetEntryRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
 import { useGetUiConfig } from 'actions/uiConfig'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
@@ -21,7 +21,7 @@ const mockRoleUtils = vi.hoisted(() => {
 })
 vi.mock('utils/roles.ts', () => mockRoleUtils)
 
-vi.mock('actions/model', () => ({
+vi.mock('actions/entry', () => ({
   useGetEntryRoles: vi.fn(),
 }))
 

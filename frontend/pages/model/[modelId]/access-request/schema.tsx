@@ -1,4 +1,4 @@
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'

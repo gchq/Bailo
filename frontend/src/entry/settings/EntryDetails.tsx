@@ -1,6 +1,6 @@
 import { Lock, LockOpen, Save } from '@mui/icons-material'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
-import { patchEntry, useGetEntry } from 'actions/model'
+import { patchEntry, useGetEntry } from 'actions/entry'
 import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'

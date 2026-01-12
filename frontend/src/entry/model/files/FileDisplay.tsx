@@ -16,9 +16,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
-import { deleteEntryFile, useGetEntryFiles } from 'actions/model'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import {
@@ -109,7 +109,7 @@ export default function FileDisplay({
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
 
-  const { mutateEntryFiles } = useGetEntryFiles(modelId)
+  const { mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
   const [latestRelease, setLatestRelease] = useState('')
@@ -138,12 +138,12 @@ export default function FileDisplay({
       if (!res.ok) {
         setDeleteErrorMessage(await getErrorMessage(res))
       } else {
-        mutateEntryFiles()
+        mutateModelFiles()
         setDeleteFileOpen(false)
         router.push(`/model/${modelId}?tab=files`)
       }
     }
-  }, [file, modelId, router, mutateEntryFiles])
+  }, [file, modelId, router, mutateModelFiles])
 
   function handleFileMoreButtonClick(event: MouseEvent<HTMLButtonElement>) {
     setAnchorElMore(event.currentTarget)
@@ -321,7 +321,7 @@ export default function FileDisplay({
       return
     }
     const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
-    mutateEntryFiles()
+    mutateModelFiles()
     if (res.status !== 200) {
       setFileTagErrorMessage('You lack the required authorisation in order to add tags to a file.')
     }

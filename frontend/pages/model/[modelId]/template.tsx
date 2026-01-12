@@ -1,6 +1,6 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
-import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/model'
+import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { postFromTemplate } from 'actions/modelCard'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'

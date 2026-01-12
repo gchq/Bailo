@@ -1,6 +1,6 @@
 import { Close, Delete } from '@mui/icons-material'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material'
-import { deleteEntry } from 'actions/model'
+import { deleteEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'

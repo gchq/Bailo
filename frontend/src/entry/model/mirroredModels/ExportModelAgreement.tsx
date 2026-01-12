@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
-import { postEntryExportToS3 } from 'actions/model'
+import { postEntryExportToS3 } from 'actions/entry'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'

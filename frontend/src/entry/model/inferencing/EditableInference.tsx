@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
+import { useGetEntry } from 'actions/entry'
 import { putInference, UpdateInferenceParams, useGetInference } from 'actions/inferencing'
-import { useGetEntry } from 'actions/model'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'

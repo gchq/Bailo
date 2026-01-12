@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import dayjs from 'dayjs'

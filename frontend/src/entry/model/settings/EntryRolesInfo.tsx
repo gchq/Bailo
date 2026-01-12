@@ -1,7 +1,7 @@
 import { Done } from '@mui/icons-material'
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
-import { useGetEntryRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { ReactNode, useCallback, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'

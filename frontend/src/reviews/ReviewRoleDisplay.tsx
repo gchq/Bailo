@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { ReviewRequestInterface } from 'types/types'
 
-import { useGetEntryRoles } from '../../actions/model'
+import { useGetEntryRoles } from '../../actions/entry'
 import { getRoleDisplayName } from '../../utils/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'

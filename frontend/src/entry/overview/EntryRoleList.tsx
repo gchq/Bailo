@@ -1,5 +1,5 @@
 import { Grid, Stack } from '@mui/material'
-import { useGetEntryRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { Fragment, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
