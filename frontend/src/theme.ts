@@ -53,9 +53,36 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
       },
     },
   },
+  MuiMenu: {
+    defaultProps: {
+      anchorOrigin: {
+        vertical: 'bottom',
+        horizontal: 'left',
+      },
+      transformOrigin: {
+        vertical: 'top',
+        horizontal: 'left',
+      },
+      slotProps: {
+        list: {
+          dense: true,
+        },
+      },
+    },
+    styleOverrides: {
+      root: {
+        marginTop: 4,
+      },
+    },
+  },
 }
 
 export const lightTheme = createTheme({
+  typography: {
+    caption: {
+      fontSize: '0.9rem',
+    },
+  },
   components: {
     ...defaultComponentOverrides,
     MuiMenuItem: {

@@ -22,7 +22,9 @@ export default function EntryDescriptionInput({ value, onChange }: EntryDescript
         value={value}
         size='small'
         onChange={handleChange}
-        data-test='entryDescriptionInput'
+        slotProps={{
+          htmlInput: { 'data-test': 'entryDescriptionInput' },
+        }}
       />
     </LabelledInput>
   )

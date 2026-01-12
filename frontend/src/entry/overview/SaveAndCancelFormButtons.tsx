@@ -1,3 +1,4 @@
+import { Close, Save } from '@mui/icons-material'
 import Code from '@mui/icons-material/Code'
 import { Button, Divider, Stack } from '@mui/material'
 
@@ -34,10 +35,10 @@ export default function SaveAndCancelButtons({
       >
         Add JSON to form
       </Button>
-      <Button variant='outlined' onClick={onCancel} data-test={cancelDataTestId}>
+      <Button variant='outlined' onClick={onCancel} data-test={cancelDataTestId} startIcon={<Close />}>
         Cancel
       </Button>
-      <Button variant='contained' onClick={onSubmit} loading={loading} data-test={saveDataTestId}>
+      <Button variant='contained' onClick={onSubmit} loading={loading} data-test={saveDataTestId} startIcon={<Save />}>
         Save
       </Button>
     </Stack>

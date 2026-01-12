@@ -49,36 +49,49 @@ export default function ReviewDisplay({
 
   return (
     <>
-      {orderedReviewResponses.some((reviewResponse) => reviewResponse.decision === Decision.Approve) && (
-        <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
-          <Stack direction='row'>
-            <Done color='success' fontSize='small' />
-            <Typography variant='caption'>
-              {showCurrentUserResponses
-                ? 'You have approved this as a'
-                : `Approved by ${orderedReviewResponses
-                    .filter((reviewResponse) => reviewResponse.decision === Decision.Approve)
-                    .map((response) => dynamicRoles.find((role) => role.shortName === response.role)?.name)
-                    .join(', ')}`}
-            </Typography>
-          </Stack>
-        </Tooltip>
-      )}
-      {orderedReviewResponses.some((reviewResponse) => reviewResponse.decision === Decision.RequestChanges) && (
-        <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
-          <Stack direction='row'>
-            <HourglassEmpty color='warning' fontSize='small' />
-            <Typography variant='caption'>
-              {showCurrentUserResponses
-                ? 'You have requested changes'
-                : `Changes requested by ${orderedReviewResponses
-                    .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
-                    .map((response) => dynamicRoles.find((role) => role.shortName === response.role)?.name)
-                    .join(', ')}`}
-            </Typography>
-          </Stack>
-        </Tooltip>
-      )}
+      <Stack>
+        {orderedReviewResponses.some((reviewResponse) => reviewResponse.decision === Decision.Approve) && (
+          <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
+            <Stack>
+              {orderedReviewResponses
+                .filter((reviewResponse) => reviewResponse.decision === Decision.Approve)
+                .map((response) => {
+                  const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
+                  return (
+                    <Stack direction='row' key={roleName}>
+                      <Done color='success' fontSize='small' />
+                      <Typography variant='caption'>
+                        {' '}
+                        {showCurrentUserResponses ? `You have approved as a ${roleName}` : `Approved by  ${roleName}`}
+                      </Typography>
+                    </Stack>
+                  )
+                })}
+            </Stack>
+          </Tooltip>
+        )}
+        {orderedReviewResponses.some((reviewResponse) => reviewResponse.decision === Decision.RequestChanges) && (
+          <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
+            <Stack>
+              {orderedReviewResponses
+                .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
+                .map((response) => {
+                  const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
+                  return (
+                    <Stack direction='row' key={roleName}>
+                      <HourglassEmpty color='warning' fontSize='small' />
+                      <Typography variant='caption'>
+                        {showCurrentUserResponses
+                          ? `You have requested changes as a ${roleName}`
+                          : `Changes requested by  ${roleName}`}
+                      </Typography>
+                    </Stack>
+                  )
+                })}
+            </Stack>
+          </Tooltip>
+        )}
+      </Stack>
       {reviewResponses.length === 0 && <Typography variant='caption'>Awaiting review</Typography>}
     </>
   )

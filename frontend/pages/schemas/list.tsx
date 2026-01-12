@@ -1,3 +1,4 @@
+import { FileUpload } from '@mui/icons-material'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -58,6 +59,7 @@ function Schemas() {
         displayActionButton
         actionButtonTitle='Upload a new schema'
         actionButtonOnClick={() => router.push('/schemas/new')}
+        actionButtonIcon={<FileUpload />}
       />
     </>
   )
