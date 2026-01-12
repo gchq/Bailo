@@ -35,7 +35,7 @@ export default function AdditionalInformation({ children, sx }: AdditionalInform
         borderColor: theme.palette.divider,
         py: 1,
         px: 2,
-        m: 2,
+        my: 1,
         width: 'fit-content',
         ...sx,
       }}
