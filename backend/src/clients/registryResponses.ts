@@ -7,7 +7,7 @@ import { InternalError } from '../utils/error.js'
  * so definitions must also be lower case.
  */
 
-export const HeaderValue = z.string()
+const HeaderValue = z.string()
 // Common headers
 export const CommonRegistryHeaders = z
   .object({
@@ -20,20 +20,20 @@ export const CommonRegistryHeaders = z
 export type CommonRegistryHeaders = z.infer<typeof CommonRegistryHeaders>
 
 // Error response
-export const RegistryErrorDetail = z.object({
+const RegistryErrorDetail = z.object({
   code: z.string(),
   message: z.string(),
   detail: z.unknown().optional(),
 })
-export const RegistryErrorResponse = z.object({
+export const RegistryErrorResponseBody = z.object({
   errors: z.array(RegistryErrorDetail),
 })
-export type RegistryErrorResponse = z.infer<typeof RegistryErrorResponse>
+export type RegistryErrorResponseBody = z.infer<typeof RegistryErrorResponseBody>
 
 export function parseRegistryResponse<T>(
   schema: ZodSchema<T>,
   body: unknown,
-): { ok: true; data: T } | { ok: false; error: RegistryErrorResponse } {
+): { ok: true; data: T } | { ok: false; error: RegistryErrorResponseBody } {
   // expected successful response
   const success = schema.safeParse(body)
   if (success.success) {
@@ -41,7 +41,7 @@ export function parseRegistryResponse<T>(
   }
 
   // fallback on error
-  const error = RegistryErrorResponse.safeParse(body)
+  const error = RegistryErrorResponseBody.safeParse(body)
   if (error.success) {
     return { ok: false, error: error.data }
   }
@@ -51,44 +51,44 @@ export function parseRegistryResponse<T>(
 }
 
 // GET /v2/
-export const BaseApiCheckHeaders = CommonRegistryHeaders.extend({
+export const BaseApiCheckResponseHeaders = CommonRegistryHeaders.extend({
   'docker-distribution-api-version': z
     .string()
     .regex(/^registry\/2\.0$/)
     .optional(),
 })
-export const BaseApiCheckResponse = z.record(z.never())
+export const BaseApiCheckResponseBody = z.record(z.never())
 
 // GET /v2/<name>/tags/list
-export const TagsListResponse = z.object({
+export const TagsListResponseBody = z.object({
   name: z.string(),
   tags: z.array(z.string()).nullable(),
 })
-export const TagsListHeaders = CommonRegistryHeaders.extend({
+export const TagsListResponseHeaders = CommonRegistryHeaders.extend({
   link: HeaderValue.optional(), // pagination
 })
 
 // GET /v2/_catalog
-export const CatalogResponse = z.object({
+export const CatalogBodyResponse = z.object({
   repositories: z.array(z.string()),
 })
-export const CatalogHeaders = TagsListHeaders
+export const CatalogResponseHeaders = TagsListResponseHeaders
 
 // GET /v2/<name>/blobs/<digest>
-export const BlobHeaders = CommonRegistryHeaders.extend({
+export const BlobResponseHeaders = CommonRegistryHeaders.extend({
   'docker-content-digest': HeaderValue,
   etag: HeaderValue.optional(),
 })
 
 // POST/PATCH/PUT blob upload
-export const BlobUploadHeaders = CommonRegistryHeaders.extend({
+export const BlobUploadResponseHeaders = CommonRegistryHeaders.extend({
   location: HeaderValue.optional(),
   range: HeaderValue.optional(),
   'docker-upload-uuid': HeaderValue.optional(),
 })
 
 // DELETE /v2/<name>/manifests/<reference>
-export const DeleteManifestHeaders = CommonRegistryHeaders.extend({
+export const DeleteManifestResponseHeaders = CommonRegistryHeaders.extend({
   'docker-content-digest': HeaderValue.optional(),
 })
 
@@ -102,7 +102,7 @@ export const ManifestListMediaType = z.enum([
   'application/vnd.oci.image.index.v1+json',
 ])
 
-export const Descriptor = z.object({
+const Descriptor = z.object({
   mediaType: z.string(),
   size: z.number().int().nonnegative(),
   digest: z.string(),
@@ -129,10 +129,11 @@ export const ManifestListV2 = z.object({
   mediaType: ManifestListMediaType.optional(),
   manifests: z.array(Descriptor),
 })
+// TODO: handle OCI Image Spec https://github.com/opencontainers/image-spec/blob/main/manifest.md
 // TODO: handle multi-platform images
 export const ManifestResponseBody = z.union([ImageManifestV2.passthrough(), ManifestListV2.passthrough()])
 
-export const ManifestHeaders = CommonRegistryHeaders.extend({
+export const ManifestResponseHeaders = CommonRegistryHeaders.extend({
   'docker-content-digest': HeaderValue,
   etag: HeaderValue.optional(),
 })
