@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
-import { useGetModelImages } from 'actions/model'
+import { useGetModelImages } from 'actions/entry'
 import { SyntheticEvent, useEffect, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'

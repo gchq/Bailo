@@ -1,6 +1,6 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
-import { EntrySearchResult, useGetModel, useListModels } from 'actions/model'
+import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { postFromTemplate } from 'actions/modelCard'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
@@ -21,16 +21,16 @@ export default function ModelTemplateSelect() {
   const [isButtonLoading, setIsButtonLoading] = useState(false)
 
   const {
-    model: entry,
-    isModelLoading: isEntryLoading,
-    isModelError: isEntryError,
-    mutateModel: mutateEntry,
-  } = useGetModel(modelId, EntryKind.MODEL)
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+    mutateEntry: mutateModel,
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const {
-    models: entries,
-    isModelsLoading: isEntriesLoading,
-    isModelsError: isEntriesError,
-  } = useListModels(EntryKind.MODEL, [], '', [], [], [], [], '', true)
+    entries: models,
+    isEntriesLoading: isModelsLoading,
+    isEntriesError: isModelsError,
+  } = useListEntries(EntryKind.MODEL, [], '', [], [], [], [], '', true)
 
   const handleChange = (_event: SyntheticEvent, newValue: EntrySearchResult | null) => {
     setSelectedModel(newValue)
@@ -38,7 +38,7 @@ export default function ModelTemplateSelect() {
 
   const handleSubmit = async () => {
     setSubmissionErrorText('')
-    if (!entry) {
+    if (!model) {
       setSubmissionErrorText('Could not find model to create using template.')
       return
     }
@@ -47,36 +47,36 @@ export default function ModelTemplateSelect() {
       return
     }
     setIsButtonLoading(true)
-    const res = await postFromTemplate(entry.id, selectedModel.id)
+    const res = await postFromTemplate(model.id, selectedModel.id)
     if (!res.ok) {
       setSubmissionErrorText(await getErrorMessage(res))
       setIsButtonLoading(false)
       return
     }
 
-    await mutateEntry()
-    router.push(`/${entry.kind}/${entry.id}`)
+    await mutateModel()
+    router.push(`/${model.kind}/${model.id}`)
   }
 
-  if (isEntryError) {
-    return <ErrorWrapper message={isEntryError.info.message} />
+  if (isModelError) {
+    return <ErrorWrapper message={isModelError.info.message} />
   }
 
-  if (isEntriesError) {
-    return <ErrorWrapper message={isEntriesError.info.message} />
+  if (isModelsError) {
+    return <ErrorWrapper message={isModelsError.info.message} />
   }
 
   return (
     <>
       <Title text='Select a model template' />
-      {(isEntriesLoading || isEntryLoading) && <Loading />}
+      {(isModelsLoading || isModelLoading) && <Loading />}
       <Container maxWidth='md'>
         <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
-          {entry && (
+          {model && (
             <>
-              <Link href={`/${entry.kind}/${entry.id}`}>
+              <Link href={`/${model.kind}/${model.id}`}>
                 <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                  {`Back to ${EntryKindLabel[entry.kind]}`}
+                  {`Back to ${EntryKindLabel[model.kind]}`}
                 </Button>
               </Link>
               <Stack spacing={2} justifyContent='center' alignItems='center'>
@@ -88,7 +88,7 @@ export default function ModelTemplateSelect() {
                   Only models that have been configured to allow templating can be used as a template.
                 </Typography>
                 <Autocomplete
-                  options={entries}
+                  options={models}
                   fullWidth
                   getOptionLabel={(option: EntrySearchResult) => option.name}
                   value={selectedModel}

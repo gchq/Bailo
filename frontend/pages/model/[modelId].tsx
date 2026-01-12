@@ -1,4 +1,4 @@
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -19,26 +19,26 @@ import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
-  const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
+  const { modelId: entryId }: { modelId?: string } = router.query
+  const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetEntry(entryId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const { userPermissions } = useContext(UserPermissionsContext)
 
-  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
+  const currentUserRoles = useMemo(() => getCurrentUserRoles(entry, currentUser), [entry, currentUser])
 
   const settingsPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
 
   const tabs: PageTab[] = useMemo(
     () =>
-      model && uiConfig
+      entry && uiConfig
         ? [
             {
               title: 'Overview',
               path: 'overview',
               view: (
-                <Overview entry={model} readOnly={!!model.settings.mirror?.sourceModelId} mutateEntry={mutateModel} />
+                <Overview entry={entry} readOnly={!!entry.settings.mirror?.sourceModelId} mutateEntry={mutateEntry} />
               ),
             },
             {
@@ -46,36 +46,36 @@ export default function Model() {
               path: 'releases',
               view: (
                 <Releases
-                  model={model}
+                  model={entry}
                   currentUserRoles={currentUserRoles}
-                  readOnly={!!model.settings.mirror?.sourceModelId}
+                  readOnly={!!entry.settings.mirror?.sourceModelId}
                 />
               ),
-              disabled: !model.card,
+              disabled: !entry.card,
               disabledText: 'Select a schema to view this tab',
             },
             {
               title: 'Access requests',
               path: 'access',
-              view: <AccessRequests model={model} currentUserRoles={currentUserRoles} />,
+              view: <AccessRequests model={entry} currentUserRoles={currentUserRoles} />,
               datatest: 'accessRequestTab',
-              disabled: !model.card,
+              disabled: !entry.card,
               disabledText: 'Select a schema to view this tab',
             },
             {
               title: 'Registry',
               path: 'registry',
-              view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
+              view: <ModelImages model={entry} readOnly={!!entry.settings.mirror?.sourceModelId} />,
             },
             {
               title: 'File management',
               path: 'files',
-              view: <ModelFileManagement model={model} />,
+              view: <ModelFileManagement model={entry} />,
             },
             {
               title: 'Inferencing',
               path: 'inferencing',
-              view: <InferenceServices model={model} />,
+              view: <InferenceServices model={entry} />,
               hidden: !uiConfig.inference.enabled,
             },
             {
@@ -83,19 +83,19 @@ export default function Model() {
               path: 'settings',
               disabled: !settingsPermission.hasPermission,
               disabledText: settingsPermission.info,
-              view: <Settings entry={model} />,
+              view: <Settings entry={entry} />,
             },
           ]
         : [],
-    [model, uiConfig, currentUserRoles, settingsPermission.hasPermission, settingsPermission.info, mutateModel],
+    [entry, uiConfig, currentUserRoles, settingsPermission.hasPermission, settingsPermission.info, mutateEntry],
   )
 
   function requestAccess() {
-    router.push(`/model/${modelId}/access-request/schema`)
+    router.push(`/model/${entryId}/access-request/schema`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
-    isModelError,
+    isEntryError,
     isCurrentUserError,
     isUiConfigError,
   })
@@ -103,21 +103,21 @@ export default function Model() {
 
   return (
     <>
-      <Title text={model ? model.name : 'Loading...'} />
-      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
+      <Title text={entry ? entry.name : 'Loading...'} />
+      {!entry || isEntryLoading || isCurrentUserLoading || isUiConfigLoading ? (
         <Loading />
       ) : (
         <PageWithTabs
-          title={model.name}
-          subheading={`ID: ${model.id}`}
-          additionalInfo={model.description}
+          title={entry.name}
+          subheading={`ID: ${entry.id}`}
+          additionalInfo={entry.description}
           tabs={tabs}
-          displayActionButton={model.card !== undefined}
+          displayActionButton={entry.card !== undefined}
           actionButtonTitle='Request access'
           actionButtonOnClick={requestAccess}
-          requiredUrlParams={{ modelId: model.id }}
-          titleToCopy={model.name}
-          subheadingToCopy={model.id}
+          requiredUrlParams={{ modelId: entry.id }}
+          titleToCopy={entry.name}
+          subheadingToCopy={entry.id}
         />
       )}
     </>

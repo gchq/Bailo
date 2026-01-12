@@ -4,7 +4,7 @@ import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { patchResponse } from 'actions/response'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
@@ -39,7 +39,7 @@ export default function ReviewDecisionDisplay({
   const [comment, setComment] = useState(response.comment || '')
   const [errorMessage, setErrorMessage] = useState('')
 
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )
@@ -86,11 +86,11 @@ export default function ReviewDecisionDisplay({
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
-  if (isUserInformationLoading || isModelRolesLoading) {
+  if (isUserInformationLoading || isEntryRolesLoading) {
     return <Loading />
   }
 
@@ -130,7 +130,7 @@ export default function ReviewDecisionDisplay({
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
               </Stack>
               {response.role && (
-                <Typography variant='caption'>as {getRoleDisplayName(response.role, modelRoles)}</Typography>
+                <Typography variant='caption'>as {getRoleDisplayName(response.role, entryRoles)}</Typography>
               )}
               <span>
                 {response.outdated && (

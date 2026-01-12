@@ -11,14 +11,14 @@ interface FileUploadDialogProps {
   model: EntryInterface
   open: boolean
   onDialogClose: () => void
-  mutateEntryFiles: () => void
+  mutateModelFiles: () => void
 }
 
 const Input = styled('input')({
   display: 'none',
 })
 
-export default function FileUploadDialog({ open, onDialogClose, model, mutateEntryFiles }: FileUploadDialogProps) {
+export default function FileUploadDialog({ open, onDialogClose, model, mutateModelFiles }: FileUploadDialogProps) {
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
@@ -86,7 +86,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
           setFilesToBeUpload(
             filesToBeUploaded.filter((FileToBeUploaded) => FileToBeUploaded.file.name !== fileItem.file.name),
           )
-          mutateEntryFiles()
+          mutateModelFiles()
         } else {
           setCurrentFileUploadProgress(undefined)
         }
@@ -105,7 +105,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
       onDialogClose()
       setFilesToBeUpload([])
     }
-  }, [failedFileUploads, model.id, mutateEntryFiles, filesToBeUploaded, onDialogClose])
+  }, [failedFileUploads, model.id, mutateModelFiles, filesToBeUploaded, onDialogClose])
 
   const handleDeleteFileFromUploadList = useCallback(
     (fileName: string) => {

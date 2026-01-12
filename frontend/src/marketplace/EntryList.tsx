@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Paginate from 'src/common/Paginate'
