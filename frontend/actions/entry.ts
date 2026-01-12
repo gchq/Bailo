@@ -154,13 +154,13 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   }
 }
 
-export function useGetModelFiles(entryId?: string) {
+export function useGetModelFiles(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       files: Array<FileInterface>
     },
     ErrorInfo
-  >(entryId ? `/api/v2/model/${entryId}/files` : null, fetcher)
+  >(modelId ? `/api/v2/model/${modelId}/files` : null, fetcher)
 
   return {
     mutateModelFiles: mutate,
