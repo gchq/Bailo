@@ -1,6 +1,6 @@
 import { Save } from '@mui/icons-material'
 import { Button, Stack, Typography } from '@mui/material'
-import { patchModel, useGetCurrentUserPermissionsForEntry, useGetModel, useGetModelRoles } from 'actions/model'
+import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
 import { useCallback, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -21,12 +21,8 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
 
-  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id)
-  const {
-    modelRoles: entryRoles,
-    isModelRolesLoading: isEntryRolesLoading,
-    isModelRolesError: isEntryRolesError,
-  } = useGetModelRoles(entry.id)
+  const { isEntryError, mutateEntry } = useGetEntry(entry.id)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
 
   const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
   const sendNotification = useNotification()
@@ -38,7 +34,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
 
   async function updateCollaborators() {
     setLoading(true)
-    const res = await patchModel(entry.id, { collaborators })
+    const res = await patchEntry(entry.id, { collaborators })
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {

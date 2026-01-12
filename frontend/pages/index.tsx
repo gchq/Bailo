@@ -25,7 +25,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useGetPopularEntryTags, useListModels } from 'actions/model'
+import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -69,11 +69,11 @@ export default function Marketplace() {
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
   const {
-    models,
-    errors: modelsErrors,
-    isModelsError,
-    isModelsLoading,
-  } = useListModels(
+    entries: models,
+    entryErrors: modelsErrors,
+    isEntriesError: isModelsError,
+    isEntriesLoading: isModelsLoading,
+  } = useListEntries(
     EntryKind.MODEL,
     selectedRoles,
     '',
@@ -88,11 +88,11 @@ export default function Marketplace() {
   )
 
   const {
-    models: dataCards,
-    errors: dataCardsErrors,
-    isModelsError: isDataCardsError,
-    isModelsLoading: isDataCardsLoading,
-  } = useListModels(
+    entries: dataCards,
+    entryErrors: dataCardsErrors,
+    isEntriesError: isDataCardsError,
+    isEntriesLoading: isDataCardsLoading,
+  } = useListEntries(
     EntryKind.DATA_CARD,
     selectedRoles,
     '',
@@ -107,10 +107,10 @@ export default function Marketplace() {
   )
 
   const {
-    models: mirroredModels,
-    isModelsError: isMirroredModelsError,
-    isModelsLoading: isMirroredModelsLoading,
-  } = useListModels(
+    entries: mirroredModels,
+    isEntriesError: isMirroredModelsError,
+    isEntriesLoading: isMirroredModelsLoading,
+  } = useListEntries(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,
     '',

@@ -15,7 +15,7 @@ import {
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-const emptyModelList = []
+const emptyEntryList = []
 
 export interface EntrySearchResult {
   id: string
@@ -37,9 +37,7 @@ export interface ModelExportRequest {
   semvers?: ReleaseInterface['semver'][]
 }
 
-//This function is misleading, it gets a list of entries (models, data cards, etc.), not just models.
-//This is tech debt that is repeating throughout this file and other parts of the codebase.
-export function useListModels(
+export function useListEntries(
   kind?: EntryKindKeys,
   roles: string[] = [],
   task = '',
@@ -76,15 +74,15 @@ export function useListModels(
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
-    mutateModels: mutate,
-    models: data ? data.models : emptyModelList,
-    errors: data ? data.errors : {},
-    isModelsLoading: isLoading,
-    isModelsError: error,
+    mutateEntries: mutate,
+    entries: data ? data.models : emptyEntryList,
+    entryErrors: data ? data.errors : {},
+    isEntriesLoading: isLoading,
+    isEntriesError: error,
   }
 }
 
-export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
+export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
     ...(kind && { kind }),
   }
@@ -94,43 +92,43 @@ export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
       model: EntryInterface
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}?${qs.stringify(queryParams)}` : null, fetcher)
+  >(entryId ? `/api/v2/model/${entryId}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
-    mutateModel: mutate,
-    model: data?.model,
-    isModelLoading: isLoading,
-    isModelError: error,
+    mutateEntry: mutate,
+    entry: data?.model,
+    isEntryLoading: isLoading,
+    isEntryError: error,
   }
 }
 
 const emptyRolesList = []
 
-export function useGetModelRoles(id?: string) {
+export function useGetEntryRoles(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       roles: SystemRole[]
     },
     ErrorInfo
-  >(id ? `/api/v2/roles?modelId=${id}` : `/api/v2/roles`, fetcher)
+  >(entryId ? `/api/v2/roles?modelId=${entryId}` : `/api/v2/roles`, fetcher)
 
   return {
-    mutateModelRoles: mutate,
-    modelRoles: data ? data.roles : emptyRolesList,
-    isModelRolesLoading: isLoading,
-    isModelRolesError: error,
+    mutateEntryRoles: mutate,
+    entryRoles: data ? data.roles : emptyRolesList,
+    isEntryRolesLoading: isLoading,
+    isEntryRolesError: error,
   }
 }
 
 const emptyImageList = []
 
-export function useGetModelImages(id?: string) {
+export function useGetModelImages(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/images` : null, fetcher)
+  >(modelId ? `/api/v2/model/${modelId}/images` : null, fetcher)
 
   return {
     mutateModelImages: mutate,
@@ -156,30 +154,30 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   }
 }
 
-export function useGetModelFiles(id?: string) {
+export function useGetModelFiles(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       files: Array<FileInterface>
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/files` : null, fetcher)
+  >(modelId ? `/api/v2/model/${modelId}/files` : null, fetcher)
 
   return {
-    mutateEntryFiles: mutate,
-    entryFiles: data ? data.files : [],
-    isEntryFilesLoading: isLoading,
-    isEntryFilesError: error,
+    mutateModelFiles: mutate,
+    modelFiles: data ? data.files : [],
+    isModelFilesLoading: isLoading,
+    isModelFilesError: error,
   }
 }
 
-export function deleteModelFile(modelId: string, fileId: string) {
+export function deleteEntryFile(modelId: string, fileId: string) {
   return fetch(`/api/v2/model/${modelId}/file/${fileId}`, {
     method: `delete`,
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export async function postModel(form: EntryForm) {
+export async function postEntry(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -187,8 +185,8 @@ export async function postModel(form: EntryForm) {
   })
 }
 
-export async function patchModel(
-  id: string,
+export async function patchEntry(
+  entryId: string,
   delta: Partial<
     Pick<
       EntryInterface,
@@ -196,22 +194,22 @@ export async function patchModel(
     >
   >,
 ) {
-  return fetch(`/api/v2/model/${id}`, {
+  return fetch(`/api/v2/model/${entryId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(delta),
   })
 }
 
-export async function deleteModel(id: string) {
-  return fetch(`/api/v2/model/${id}`, {
+export async function deleteEntry(entryId: string) {
+  return fetch(`/api/v2/model/${entryId}`, {
     method: 'delete',
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export async function postModelExportToS3(id: string, modelExport: ModelExportRequest) {
-  return fetch(`/api/v2/model/${id}/export/s3`, {
+export async function postEntryExportToS3(entryId: string, modelExport: ModelExportRequest) {
+  return fetch(`/api/v2/model/${entryId}/export/s3`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(modelExport),

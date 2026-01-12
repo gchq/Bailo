@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
@@ -60,7 +60,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   defaultEntitiesEntry = [],
   setDefaultEntities,
 }: ReviewRoleFormContainerProps<T>) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))
@@ -123,11 +123,11 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
     )
   }, [defaultEntitiesEntry, handleDefaultEntitiesChange])
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} />
   }
 
-  if (isModelRolesLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
@@ -176,7 +176,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {modelRoles.map((role) => (
+                  {entryRoles.map((role) => (
                     <MenuItem key={role.shortName} value={role.shortName}>
                       {role.name}
                     </MenuItem>

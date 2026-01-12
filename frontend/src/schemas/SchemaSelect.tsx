@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { postFromSchema } from 'actions/modelCard'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -44,7 +44,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const { mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
+  const { mutateEntry } = useGetEntry(entry.id, entry.kind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
