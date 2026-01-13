@@ -731,6 +731,7 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
   const foundModelCardRevision = await ModelCardRevisionModel.findOne({
     modelId: modelCardRevision.modelId,
     version: modelCardRevision.version,
+    mirrored: true,
   })
 
   if (!foundModelCardRevision && modelCardRevision.version !== 1) {
@@ -786,7 +787,6 @@ export async function setLatestImportedModelCard(modelId: string) {
       metadata: {},
       createdBy: latestModelCard.createdBy,
     })
-    newCard.save()
     updatedModel.card = newCard
   }
   await updatedModel.save()
