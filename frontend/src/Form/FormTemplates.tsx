@@ -1,3 +1,4 @@
+import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
@@ -10,6 +11,7 @@ import {
   TitleFieldProps,
 } from '@rjsf/utils'
 import { ReactNode } from 'react'
+import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
@@ -19,7 +21,7 @@ export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick 
         {title}
       </Typography>
       {canAdd && registry.formContext.editMode && (
-        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
+        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />} sx={{ width: 'fit-content' }}>
           Add Item
         </Button>
       )}
@@ -51,21 +53,38 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function ObjectFieldTemplate({ title, properties, description }: ObjectFieldTemplateProps) {
+export function ObjectFieldTemplate({
+  title,
+  properties,
+  description,
+  fieldPathId,
+  registry,
+}: ObjectFieldTemplateProps) {
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2, scrollMarginTop: 100 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
         <div>
-          <Typography fontWeight='bold' variant='h6' component='h3'>
-            {title}
-          </Typography>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography fontWeight='bold' variant='h6' component='h3'>
+              {title}
+            </Typography>
+            <Tooltip title='Share'>
+              <Link href={`#${fieldPathId.$id}`} onClick={() => registry.formContext.onShare(fieldPathId.$id)}>
+                <IconButton>
+                  <Share fontSize='small' color='secondary' />
+                </IconButton>
+              </Link>
+            </Tooltip>
+          </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
-        {properties.map((element) => (
-          <div key={element.name} className='property-wrapper'>
-            {element.content}
-          </div>
-        ))}
+        <div style={{ marginLeft: 10 }}>
+          {properties.map((element) => (
+            <div key={element.name} className='property-wrapper'>
+              {element.content}
+            </div>
+          ))}
+        </div>
       </Stack>
     </Box>
   )
@@ -129,8 +148,8 @@ export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
       {title}
     </Typography>
   ) : (
-    <Typography variant='h6' fontWeight='bold'>
-      {title}
+    <Typography variant='h6' fontWeight='bold' sx={{ pt: 2 }}>
+      test {title}
     </Typography>
   )
 }

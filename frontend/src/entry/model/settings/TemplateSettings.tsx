@@ -1,5 +1,6 @@
+import { Save } from '@mui/icons-material'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchEntry } from 'actions/entry'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -25,7 +26,7 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
       },
     }
 
-    const response = await patchModel(model.id, updatedModelSettings)
+    const response = await patchEntry(model.id, updatedModelSettings)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -58,7 +59,13 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
       </div>
       <Divider />
       <div>
-        <Button variant='contained' aria-label='Save model template settings' onClick={handleSave} loading={loading}>
+        <Button
+          variant='contained'
+          aria-label='Save model template settings'
+          onClick={handleSave}
+          loading={loading}
+          startIcon={<Save />}
+        >
           Save
         </Button>
         <MessageAlert message={errorMessage} severity='error' />

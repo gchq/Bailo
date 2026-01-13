@@ -1,10 +1,10 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { putModelCard } from 'actions/modelCard'
+import { putEntryCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
@@ -22,7 +22,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { EntryCardKindLabel, EntryInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
@@ -69,7 +69,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
       } else {
-        const res = await putModelCard(entry.id, data)
+        const res = await putEntryCard(entry.id, data)
         if (res.status && res.status < 400) {
           setIsEdit(false)
         } else {
@@ -189,7 +189,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             >
               <MessageAlert
                 severity='info'
-                message='There is a migration available for this model'
+                message={`There is a migration available for this ${EntryKindLabel[entry.kind]}`}
                 buttonText='Migrate'
                 buttonAction={() => setMigrationListDialogOpen(true)}
               />
@@ -216,6 +216,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                 </Button>
               </Restricted>
               <Button
+                startIcon={<MenuIcon />}
                 endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
                 data-test='openEntryOverviewActions'
                 variant='contained'
@@ -224,10 +225,17 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                 More
               </Button>
               <Menu
-                slotProps={{ list: { dense: true } }}
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleActionButtonClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
               >
                 <MenuItem
                   onClick={() => {

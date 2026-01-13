@@ -5,16 +5,16 @@ import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
-import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
+import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { BadReq, InternalError, NotFound } from '../../utils/error.js'
+import { BadReq, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
-import { getModelById } from '../model.js'
+import { getModelById, getModelByIdNoAuth } from '../model.js'
 import { getImageBlob, getImageManifest, splitDistributionPackageName } from '../registry.js'
 import { getReleasesForExport } from '../release.js'
 import { BaseExporter } from './exporters/base.js'
@@ -168,14 +168,7 @@ export async function importModel(
   const importResult = await extractTarGzStream(responseBody, user, { importId })
   log.debug({ importId, importResult }, 'Completed extracting archive.')
 
-  // similar to `getModelById` but without the auth check to allow getting a private model
-  const mirroredModel = await ModelModel.findOne({
-    id: importResult.metadata.mirroredModelId,
-  })
-
-  if (!mirroredModel) {
-    throw NotFound('The requested Mirrored Model was not found.', { modelId: importResult.metadata.mirroredModelId })
-  }
+  const mirroredModel = await getModelByIdNoAuth(importResult.metadata.mirroredModelId)
 
   return {
     mirroredModel,
@@ -215,7 +208,7 @@ export async function addCompressedRegistryImageComponents(
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
-  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body
+  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body!
   log.debug(
     {
       modelId,

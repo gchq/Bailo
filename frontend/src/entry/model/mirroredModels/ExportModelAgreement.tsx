@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
-import { postModelExportToS3 } from 'actions/model'
+import { postEntryExportToS3 } from 'actions/entry'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'
@@ -20,7 +20,7 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
   const handleSubmit = async () => {
     setErrorMessage('')
     setLoading(true)
-    const response = await postModelExportToS3(modelId, { disclaimerAgreement: checked })
+    const response = await postEntryExportToS3(modelId, { disclaimerAgreement: checked })
 
     if (!response.ok) {
       setLoading(false)

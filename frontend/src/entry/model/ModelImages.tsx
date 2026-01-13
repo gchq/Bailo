@@ -1,5 +1,6 @@
+import { Add } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
-import { useGetModelImages } from 'actions/model'
+import { useGetModelImages } from 'actions/entry'
 import { useState } from 'react'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -51,6 +52,7 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
                       variant='outlined'
                       onClick={() => setOpenUploadImageDialog(true)}
                       data-test='pushImageButton'
+                      startIcon={<Add />}
                     >
                       Push image
                     </Button>

@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import dayjs from 'dayjs'
@@ -21,13 +21,18 @@ export default function NewAccessRequest() {
   const router = useRouter()
 
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
 
   const isLoading = useMemo(
     () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
@@ -54,6 +59,7 @@ export default function NewAccessRequest() {
   async function onSubmit() {
     setSubmissionErrorText('')
     setSubmitButtonLoading(true)
+    setFormValidationErrorState(false)
 
     if (!modelId || !schemaId) {
       setSubmissionErrorText(`Please wait until the page has finished loading before attempting to submit.`)
@@ -72,6 +78,7 @@ export default function NewAccessRequest() {
       if (!isValid) {
         setSubmissionErrorText('Please make sure that all sections have been completed.')
         setSubmitButtonLoading(false)
+        setFormValidationErrorState(true)
         return
       }
     }
@@ -123,7 +130,7 @@ export default function NewAccessRequest() {
                   splitSchema={splitSchema}
                   setSplitSchema={setSplitSchema}
                   canEdit
-                  displayLabelValidation
+                  displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList
                 />
                 <Stack alignItems='flex-end'>

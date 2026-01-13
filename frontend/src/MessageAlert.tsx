@@ -82,7 +82,7 @@ export default function MessageAlert({
 
   return (
     <Alert
-      severity={'info'}
+      severity={severity ? severity : 'info'}
       sx={{
         my: 2,
         maxHeight: slimView ? '70px' : 'none',

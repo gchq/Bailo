@@ -9,7 +9,6 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
-import { GetImageTagManifestResponse } from '../clients/registryResponses.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
@@ -123,10 +122,7 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * This does _not_ also update any mongo data, and does _not_ do any auth checks on the destination.
  */
 export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
-  let manifest: {
-    body: GetImageTagManifestResponse
-    headers: Record<string, string>
-  }
+  let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
     manifest = await getImageManifest(user, source)
   } catch (err) {
@@ -137,7 +133,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
     throw err
   }
 
-  const allLayers = [manifest.body.config, ...manifest.body.layers]
+  const allLayers = [manifest.body!.config, ...manifest.body!.layers]
   const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
     { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
@@ -167,7 +163,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
   }
 
   log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
-  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), manifest.body['mediaType'])
+  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), manifest.body!.mediaType!)
   log.trace({ source }, 'Deleting the original manifest.')
   await deleteManifest(multiRepositoryToken, source)
 
@@ -198,7 +194,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
     await deleteManifest(multiRepositoryToken, {
       repository: source.repository,
       name: source.name,
-      tag: manifest.headers['docker-content-digest'],
+      tag: manifest.headers['docker-content-digest'] as string,
     })
   }
 }

@@ -3,6 +3,7 @@
 exports[`services > smtp > smtp > that an email is sent after a response for a an access request review 1`] = `
 [
   {
+    "attachments": undefined,
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
@@ -15,6 +16,7 @@ exports[`services > smtp > smtp > that an email is sent after a response for a a
 exports[`services > smtp > smtp > that an email is sent after a response for a release review 1`] = `
 [
   {
+    "attachments": undefined,
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
@@ -27,6 +29,7 @@ exports[`services > smtp > smtp > that an email is sent after a response for a r
 exports[`services > smtp > smtp > that an email is sent for Access Request Reviews 1`] = `
 [
   {
+    "attachments": undefined,
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
@@ -39,6 +42,7 @@ exports[`services > smtp > smtp > that an email is sent for Access Request Revie
 exports[`services > smtp > smtp > that an email is sent for Release Reviews 1`] = `
 [
   {
+    "attachments": undefined,
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
@@ -52,6 +56,7 @@ exports[`services > smtp > smtp > that sendEmail is called for each member of a 
 [
   [
     {
+      "attachments": undefined,
       "from": ""Bailo 📝" <bailo@example.org>",
       "html": "html",
       "subject": "subject",
@@ -61,6 +66,7 @@ exports[`services > smtp > smtp > that sendEmail is called for each member of a 
   ],
   [
     {
+      "attachments": undefined,
       "from": ""Bailo 📝" <bailo@example.org>",
       "html": "html",
       "subject": "subject",

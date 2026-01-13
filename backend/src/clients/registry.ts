@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream'
 
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
+import { ZodSchema } from 'zod'
 
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
@@ -9,16 +10,20 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
-  isDeleteManifestResponse,
-  isDoesLayerExistResponse,
-  isGetImageTagManifestResponse,
-  isInitialiseUploadObjectResponse,
-  isListImageTagResponse,
-  isListModelReposResponse,
-  isMountBlobResponse,
-  isPutManifestResponse,
-  isRegistryErrorResponse,
-  isUploadLayerMonolithicResponse,
+  BaseApiCheckResponseBody,
+  BaseApiCheckResponseHeaders,
+  BlobResponseHeaders,
+  BlobUploadResponseHeaders,
+  CatalogBodyResponse,
+  CatalogResponseHeaders,
+  CommonRegistryHeaders,
+  DeleteManifestResponseHeaders,
+  ImageManifestV2,
+  ManifestMediaType,
+  ManifestResponseHeaders,
+  RegistryErrorResponseBody,
+  TagsListResponseBody,
+  TagsListResponseHeaders,
 } from './registryResponses.js'
 
 const registry = config.registry.connection.internal
@@ -27,41 +32,103 @@ const agent = getHttpsUndiciAgent({
   connect: { rejectUnauthorized: !config.registry.connection.insecure },
 })
 
-interface RegistryRequestResult<TBody = unknown> {
-  headers: Record<string, string>
+interface RegistryRequestResult<TBody, THeaders> {
+  headers: THeaders
   body?: TBody
-  stream?: ReadableStream | Readable
+  stream?: Readable
   abort: () => void
   status: number
   statusText: string
   url: string
 }
 
-async function registryRequest(
+interface PaginationOptions<TBody> {
+  enabled?: boolean
+  maxPages?: number
+  aggregate?: (acc: TBody, next: TBody) => TBody
+}
+
+interface RegistryRequestOptions<TBody, THeaders> {
+  bodySchema?: ZodSchema<TBody>
+  headersSchema?: ZodSchema<THeaders>
+  expectStream?: boolean
+  extraFetchOptions?: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>>
+  extraHeaders?: HeadersInit
+  pagination?: PaginationOptions<TBody>
+}
+
+function normaliseHeaders(headers: Headers): Record<string, string> {
+  return Object.fromEntries(headers.entries())
+}
+
+function isJsonContentType(contentType: string | null): boolean {
+  return Boolean(contentType && contentType.includes('json'))
+}
+
+function parseNextLink(linkHeader: string | null): string | undefined {
+  if (!linkHeader) {
+    return
+  }
+
+  const links = linkHeader.split(',')
+  for (const link of links) {
+    const match = link.match(/<([^>]+)>\s*;\s*rel="?next"?/i)
+    if (match) {
+      return match[1]
+    }
+  }
+}
+
+async function readBody(res: Response, expectStream: boolean): Promise<{ body?: unknown; stream?: Readable }> {
+  if (expectStream) {
+    if (!res.body) {
+      return {}
+    }
+    return {
+      stream: res.body instanceof ReadableStream ? Readable.fromWeb(res.body) : (res.body as any),
+    }
+  }
+
+  if (isJsonContentType(res.headers.get('content-type'))) {
+    return { body: await res.json() }
+  }
+
+  return { body: await res.text() }
+}
+
+async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders>(
   token: string,
   endpoint: string,
-  returnRawBody: boolean = false,
-  extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
-  extraHeaders: HeadersInit = {},
-  pagination?: { traverseLinks?: boolean; start?: string; linkFilter?: string },
-): Promise<RegistryRequestResult> {
+  {
+    bodySchema,
+    headersSchema = CommonRegistryHeaders as unknown as ZodSchema<THeaders>,
+    expectStream = false,
+    extraFetchOptions = {},
+    extraHeaders = {},
+    pagination,
+  }: RegistryRequestOptions<TBody, THeaders> = {},
+): Promise<RegistryRequestResult<TBody, THeaders>> {
   const controller = new AbortController()
 
-  const allRepositories: string[] = []
-  let paginateParameter = pagination?.start ? pagination.start : ''
-  const linkFilter = pagination?.linkFilter ? pagination.linkFilter : ''
-  let link: string | null
-  let contentType: string
-  let res: Response
-  let body: any
-  let stream: Readable | undefined
+  let res!: Response
+  let accumulatedBody: TBody | undefined
+  let headers!: THeaders
 
-  do {
-    const url = `${registry}/v2/${endpoint}${paginateParameter}`
+  let url: string | undefined = `${registry}/v2/${endpoint}`
+  let pageCount = 0
+  const maxPages = pagination?.maxPages ?? 100
+
+  while (url) {
+    if (pageCount++ >= maxPages) {
+      throw InternalError('Registry pagination limit exceeded.', {
+        maxPages,
+        endpoint,
+      })
+    }
+
     log.trace({ url, extraHeaders }, 'Making request to the registry.')
+
     try {
-      // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
-      // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
       res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -75,71 +142,83 @@ async function registryRequest(
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    link = res.headers.get('link') || ''
-    contentType = res.headers.get('content-type') || ''
+    // headers
+    const rawHeaders = normaliseHeaders(res.headers)
+    const parsedHeaders = headersSchema.safeParse(rawHeaders)
+    if (!parsedHeaders.success) {
+      controller.abort()
+      throw InternalError('Registry returned invalid headers.', {
+        issues: parsedHeaders.error.format(),
+      })
+    }
+    headers = parsedHeaders.data
+    log.trace({ headers }, 'Headers received from the registry.')
 
-    log.trace(Object.fromEntries(res.headers), 'Headers received from the registry.')
-
-    const linkQueryIndex = link.indexOf('?')
-    const linkEndIndex = link.lastIndexOf('>')
-    if (link && linkQueryIndex !== -1 && linkEndIndex > linkQueryIndex) {
-      paginateParameter = link.substring(linkQueryIndex, linkEndIndex)
+    const { body: rawBody, stream } = await readBody(res, expectStream)
+    const context = {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
     }
 
-    if (returnRawBody) {
-      stream = res.body as any
-    } else if (contentType.endsWith('json')) {
-      // e.g. 'application/json', 'application/vnd.docker.distribution.manifest.v2+json'
-      try {
-        body = await res.json()
-      } catch (err) {
-        throw InternalError('Unable to parse response body JSON.', { err })
-      }
-    } else {
-      try {
-        body = await res.text()
-      } catch (err) {
-        throw InternalError('Unable to read non-JSON response body.', { err })
-      }
-    }
-
+    // check response
     if (!res.ok) {
-      const context = {
-        url: res.url,
-        status: res.status,
-        statusText: res.statusText,
+      controller.abort()
+      if (rawBody && RegistryErrorResponseBody.safeParse(rawBody).success) {
+        throw RegistryError(RegistryErrorResponseBody.parse(rawBody), context)
       }
 
-      if (!body && contentType.includes('application/json')) {
-        // try to get the json if there's an error, even if we wanted the raw body
-        body = await res.json().catch(() => undefined)
-      }
+      throw InternalError('Unrecognised registry error response.', {
+        ...context,
+        body: rawBody,
+      })
+    }
 
-      if (isRegistryErrorResponse(body)) {
-        throw RegistryError(body, context)
-      } else {
-        throw InternalError('Unrecognised response returned by the registry.', {
-          ...context,
-          body: JSON.stringify(body),
+    // streamed response
+    if (expectStream) {
+      return {
+        headers,
+        stream,
+        abort: () => controller.abort(),
+        ...context,
+      }
+    }
+
+    // json response
+    let parsedBody: TBody | undefined
+    if (bodySchema) {
+      const parsed = bodySchema.safeParse(rawBody)
+      if (!parsed.success) {
+        controller.abort()
+        throw InternalError('Registry response body validation failed.', {
+          issues: parsed.error.format(),
         })
       }
+
+      parsedBody = parsed.data
+    } else {
+      parsedBody = rawBody as TBody
     }
 
-    if (body?.repositories) {
-      allRepositories.push(...body.repositories)
+    if (parsedBody !== undefined) {
+      if (accumulatedBody && pagination?.aggregate) {
+        accumulatedBody = pagination.aggregate(accumulatedBody, parsedBody)
+      } else {
+        accumulatedBody = parsedBody
+      }
     }
-  } while (pagination?.traverseLinks && link && link.includes(linkFilter))
 
-  if (allRepositories.length) {
-    body = {
-      repositories: allRepositories,
+    // pagination
+    if (pagination?.enabled && res.headers.get('link')) {
+      url = `${registry}/${parseNextLink(res.headers.get('link'))}`
+    } else {
+      url = undefined
     }
   }
 
   return {
-    headers: Object.fromEntries(res.headers),
-    body: returnRawBody ? undefined : body,
-    stream: returnRawBody ? (stream instanceof ReadableStream ? Readable.fromWeb(stream) : stream) : undefined,
+    headers,
+    body: accumulatedBody,
     abort: () => controller.abort(),
     status: res.status,
     statusText: res.statusText,
@@ -147,59 +226,65 @@ async function registryRequest(
   }
 }
 
-export async function listModelRepos(token: string, modelId: string) {
-  const { body } = await registryRequest(token, '_catalog', undefined, undefined, undefined, {
-    traverseLinks: true,
-    start: `?n=100&last=${modelId}`,
-    linkFilter: modelId,
+export async function getApiVersion(token: string) {
+  const result = await registryRequest(token, '', {
+    bodySchema: BaseApiCheckResponseBody,
+    headersSchema: BaseApiCheckResponseHeaders,
   })
-  if (!isListModelReposResponse(body)) {
-    throw InternalError('Unrecognised response body when listing model repositories.', { body, modelId })
-  }
 
-  const filteredRepos = body.repositories.filter((repo) => repo.startsWith(`${modelId}/`))
-  return filteredRepos
+  return result.headers['docker-distribution-api-version']
+}
+
+export async function listModelRepos(token: string, modelId: string): Promise<string[]> {
+  const result = await registryRequest(token, '_catalog?n=100', {
+    bodySchema: CatalogBodyResponse,
+    headersSchema: CatalogResponseHeaders,
+    pagination: {
+      enabled: true,
+      aggregate: (acc, next) => ({
+        repositories: [...acc.repositories, ...next.repositories],
+      }),
+    },
+  })
+
+  const repositories = result.body?.repositories ?? []
+  return repositories.filter((repo) => repo.startsWith(modelId))
 }
 
 export async function listImageTags(token: string, repoRef: RepoRefInterface) {
-  const repo = `${repoRef.repository}/${repoRef.name}`
-
-  let body: unknown
   try {
-    ;({ body } = await registryRequest(token, `${repo}/tags/list`, undefined, undefined, undefined, {
-      traverseLinks: true,
-    }))
+    const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/tags/list`, {
+      bodySchema: TagsListResponseBody,
+      headersSchema: TagsListResponseHeaders,
+      pagination: {
+        enabled: true,
+        aggregate: (acc, next) => ({
+          name: acc.name,
+          tags: [...(acc.tags || []), ...(next.tags || [])],
+        }),
+      },
+    })
+
+    return result.body?.tags || []
   } catch (error) {
     if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
       return []
     }
     throw error
   }
-
-  if (!isListImageTagResponse(body)) {
-    throw InternalError('Unrecognised response body when listing image tags.', { body, repoRef })
-  }
-  return body.tags
 }
 
 export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
-  // TODO: handle `Accept: 'application/vnd.docker.distribution.manifest.list.v2+json'` type for multi-platform images
-  const { body, headers } = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
-    undefined,
-    undefined,
-    {
-      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+  // TODO: handle multi-platform images
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+    bodySchema: ImageManifestV2,
+    headersSchema: ManifestResponseHeaders,
+    extraHeaders: {
+      Accept: ManifestMediaType.options.join(','),
     },
-  )
-  if (!isGetImageTagManifestResponse(body)) {
-    throw InternalError('Unrecognised response body when getting image tag manifest.', {
-      body,
-      imageRef,
-    })
-  }
-  return { body, headers }
+  })
+
+  return { body: result.body, headers: result.headers }
 }
 
 export async function getRegistryLayerStream(
@@ -207,42 +292,34 @@ export async function getRegistryLayerStream(
   repoRef: RepoRefInterface,
   layerDigest: string,
 ): Promise<{ stream: Readable; abort: () => void }> {
-  const { stream, abort } = await registryRequest(
-    token,
-    `${repoRef.repository}/${repoRef.name}/blobs/${layerDigest}`,
-    true,
-    undefined,
-    {
-      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+  const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${layerDigest}`, {
+    headersSchema: BlobResponseHeaders,
+    expectStream: true,
+    extraHeaders: {
+      Accept: ManifestMediaType.options.join(','),
     },
-  )
+  })
 
-  if (!stream || !(stream instanceof Readable)) {
-    abort()
+  if (!result.stream || !(result.stream instanceof Readable)) {
+    result.abort()
     throw InternalError('Unrecognised response stream when getting image layer blob.', {
-      stream,
+      stream: result.stream,
       repoRef,
       layerDigest,
     })
   }
 
-  return { stream, abort }
+  return { stream: result.stream, abort: result.abort }
 }
 
 export async function doesLayerExist(token: string, repoRef: RepoRefInterface, digest: string) {
   try {
-    const { headers } = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, true, {
-      method: 'HEAD',
+    await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
+      expectStream: true,
+      extraFetchOptions: {
+        method: 'HEAD',
+      },
     })
-
-    if (!isDoesLayerExistResponse(headers)) {
-      throw InternalError('Unrecognised response headers when heading image layer.', {
-        headers,
-        repoRef,
-        digest,
-      })
-    }
-
     return true
   } catch (error) {
     if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
@@ -255,40 +332,33 @@ export async function doesLayerExist(token: string, repoRef: RepoRefInterface, d
 }
 
 export async function initialiseUpload(token: string, repoRef: RepoRefInterface) {
-  const { headers } = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/uploads/`, true, {
-    method: 'POST',
+  const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/uploads/`, {
+    headersSchema: BlobUploadResponseHeaders,
+    expectStream: true,
+    extraFetchOptions: {
+      method: 'POST',
+    },
   })
 
-  if (!isInitialiseUploadObjectResponse(headers)) {
-    throw InternalError('Unrecognised response headers when posting initialise image upload.', {
-      headers,
-      repoRef,
-    })
-  }
-
-  return headers
+  return result.headers
 }
 
 export async function putManifest(token: string, imageRef: ImageRefInterface, manifest: BodyInit, contentType: string) {
-  const { headers } = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
-    true,
-    {
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+    headersSchema: ManifestResponseHeaders,
+    expectStream: true,
+    extraFetchOptions: {
       method: 'PUT',
       body: manifest,
     },
-    { 'Content-Type': contentType, name: `${imageRef.repository}/${imageRef.name}`, reference: imageRef.tag },
-  )
+    extraHeaders: {
+      'Content-Type': contentType,
+      name: `${imageRef.repository}/${imageRef.name}`,
+      reference: imageRef.tag,
+    },
+  })
 
-  if (!isPutManifestResponse(headers)) {
-    throw InternalError('Unrecognised response headers when putting image manifest.', {
-      headers,
-      imageRef,
-    })
-  }
-
-  return headers
+  return result.headers
 }
 
 export async function uploadLayerMonolithic(
@@ -298,34 +368,23 @@ export async function uploadLayerMonolithic(
   blob: Readable | ReadableStream,
   size: string,
 ) {
-  const { headers, abort } = await registryRequest(
-    token,
-    `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
-    true,
-    {
+  const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
+    headersSchema: BlobUploadResponseHeaders,
+    expectStream: true,
+    extraFetchOptions: {
       method: 'PUT',
       body: blob,
       duplex: 'half',
       window: null,
       redirect: 'error',
     },
-    {
+    extraHeaders: {
       'content-length': size,
       'content-type': 'application/octet-stream',
     },
-  )
+  })
 
-  if (!isUploadLayerMonolithicResponse(headers)) {
-    abort()
-    throw InternalError('Unrecognised response headers when putting image blob.', {
-      headers,
-      uploadURL,
-      digest,
-      size,
-    })
-  }
-
-  return headers
+  return result.headers
 }
 
 export async function mountBlob(
@@ -334,45 +393,30 @@ export async function mountBlob(
   destinationRepoRef: RepoRefInterface,
   blobDigest: string,
 ) {
-  const { headers } = await registryRequest(
+  const result = await registryRequest(
     token,
     `${destinationRepoRef.repository}/${destinationRepoRef.name}/blobs/uploads/?from=${sourceRepoRef.repository}/${sourceRepoRef.name}&mount=${blobDigest}`,
-    false,
     {
-      method: 'POST',
+      headersSchema: BlobUploadResponseHeaders,
+      extraFetchOptions: {
+        method: 'POST',
+      },
+      extraHeaders: { 'Content-Length': '0' },
     },
-    { 'Content-Length': '0' },
   )
 
-  if (!isMountBlobResponse(headers)) {
-    throw InternalError('Unrecognised response headers when mounting a blob.', {
-      headers,
-      sourceRepoRef,
-      destinationRepoRef,
-      blobDigest,
-    })
-  }
-
-  return headers
+  return result.headers
 }
 
 export async function deleteManifest(token: string, imageRef: ImageRefInterface) {
-  const { headers } = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
-    true,
-    {
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+    headersSchema: DeleteManifestResponseHeaders,
+    expectStream: true,
+    extraFetchOptions: {
       method: 'DELETE',
     },
-    { Accept: 'application/vnd.docker.distribution.manifest.v2+json' },
-  )
+    extraHeaders: { Accept: ManifestMediaType.options.join(',') },
+  })
 
-  if (!isDeleteManifestResponse(headers)) {
-    throw InternalError('Unrecognised response headers when deleting manifest.', {
-      headers,
-      imageRef,
-    })
-  }
-
-  return headers
+  return result.headers
 }
