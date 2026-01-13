@@ -10,38 +10,33 @@ import ModelReleaseImageList from '../../../../public/docs/Model-release-images.
 
 ## Pushing a Docker image
 
-Images can be pushed to the Docker registry attached to the hosted Bailo environment. These images can be assigned to
-specific models so that they can be attached to releases. The steps on doing this will be detailed below, but can also
-be found inside the UI on the registry of a model.
+Docker images can be pushed to the Bailo registry and associated with a specific model. These images can later be used
+in model releases.
 
 <Image alt='model registry tab with push image button circled' src={registryTab} />
 
-Clicking on the "Push Image" button will display a dialogue window that will make the process easier, but essentially
-the process is:
+The process is:
 
-- Create a token in the UI to make sure you have the correct Docker permissions (this will give you a secret key and an
-  access key that will be used to authentication)
-- Run the command `docker login <registryAddress> -u <accessKey>`
-  - It will ask for a password, this is the secretKey property from the token you created earlier
-- Run the command `docker tag <image> <registryAddress>/<modelId>/<imageName>:<tag>`
-- Run the command `docker push <registryAddress>/<modelId>/<imageName>:<tag>`
+- Create a token in the UI to obtain Docker credentials
+- Run `docker login <registryAddress> -u <accessKey>`
+  - When prompted for a password, use the `secretKey`
+- Tag the image: `docker tag <image> <registryAddress>/<modelId>/<imageName>:<tag>`
+- Push the image: `docker push <registryAddress>/<modelId>/<imageName>:<tag>`
 
-## Using a pushed Docker image as part of a model release
+## Using a image in a release
 
-Once you have pushed a Docker image to the registry it will be made available for use when drafting a model release. As
-the image has been assigned to the model using the steps in the previous page, all you need to do is select the image
-using the drop down on the release creating page like so:
+After pushing an image, it becomes selectable when drafting a release. Choose the image from the dropdown in the release
+creation form.
 
 <Image alt='image dropdown displaying model-assigned images for use in a release' src={selectingAnImage} />
 
 ## Accessing an image
 
-When an image is attached to a release, you will see them listed as part of the release display in the `Releases` tab on
-the model page like so:
+Images attached to a release are listed in the **Releases** tab.
 
 <Image alt='release in releases tab with attached docker images' src={ModelReleaseImageList} />
 
-These paths can be copied for use in the following command:
+You can pull an image using:
 
 `docker pull <imagePath>`
 
