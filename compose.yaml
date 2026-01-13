@@ -37,7 +37,7 @@ services:
       - 27017:27017
 
   minio:
-    image: bitnamilegacy/minio:2024.4.6
+    image: bitnamilegacy/minio:2025.7.23
     networks:
       internal:
     environment:

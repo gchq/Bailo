@@ -41,7 +41,6 @@ export default function QuestionViewer({ label, id, schema, registry, fieldPath 
 
   return (
     <Box key={componentLabel} sx={{ textAlign: 'left' }}>
-      <>here</>
       <Button
         sx={{ textTransform: 'none', textAlign: 'left' }}
         variant={registry.formContext.activePath === schemaPath ? 'outlined' : 'text'}

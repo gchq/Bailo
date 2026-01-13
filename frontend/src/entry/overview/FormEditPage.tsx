@@ -223,7 +223,9 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                   data-test='editEntryCardButton'
                   startIcon={<EditIcon fontSize='small' />}
                 >
-                  {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                  {entry.kind === EntryKind.MIRRORED_MODEL
+                    ? 'Add additional information'
+                    : `Edit ${EntryCardKindLabel[entry.kind]}`}
                 </Button>
               </Restricted>
               <Button
