@@ -1,6 +1,6 @@
 import Logger from 'bunyan'
 
-import { RegistryErrorResponse } from '../clients/registryResponses.js'
+import { RegistryErrorResponseBody } from '../clients/registryResponses.js'
 import { BailoError } from '../types/error.js'
 import { RegistryError } from '../types/RegistryError.js'
 
@@ -69,10 +69,11 @@ export function ConfigurationError(message: string, context?: BailoError['contex
   return GenericError(503, `BAILO configuration error: ${message}`, context, logger)
 }
 
-export function RegistryError(error: RegistryErrorResponse, context: BailoError['context']) {
+export function RegistryError(error: RegistryErrorResponseBody, context?: BailoError['context'], logger?: Logger) {
   const registryError = GenericError(500, `Error response received from registry.`, {
     errors: error.errors,
-    ...context,
+    context,
+    logger,
   }) as RegistryError
   registryError.name = 'Registry Error'
   registryError.errors = error.errors

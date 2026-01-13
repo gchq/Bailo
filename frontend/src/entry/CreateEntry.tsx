@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { postModel, useGetModelRoles } from 'actions/model'
+import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
@@ -56,7 +56,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
@@ -103,7 +103,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
         },
       },
     }
-    const response = await postModel(formData)
+    const response = await postEntry(formData)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -174,8 +174,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     return <ErrorWrapper message={isCurrentUserError.info.message} />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isEntryRolesError) {
+    return <ErrorWrapper message={isEntryRolesError.info.message} />
   }
 
   return (
@@ -259,14 +259,14 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       once a schema has been selected.
                     </Typography>
                     <Box sx={{ my: 1 }}>
-                      {isModelRolesLoading ? (
+                      {isEntryRolesLoading ? (
                         <Loading />
                       ) : (
                         <EntryAccessInput
                           value={collaborators}
                           onChange={handleCollaboratorsChange}
                           entryKind={createEntryKind}
-                          entryRoles={modelRoles}
+                          entryRoles={entryRoles}
                         />
                       )}
                     </Box>

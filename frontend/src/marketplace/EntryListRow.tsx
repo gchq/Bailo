@@ -1,7 +1,7 @@
 import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
 import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import { CSSProperties, useMemo } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'

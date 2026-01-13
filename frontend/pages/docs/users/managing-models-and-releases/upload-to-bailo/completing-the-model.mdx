@@ -3,17 +3,20 @@ import Box from '@mui/material/Box'
 import bailoModelAccess from 'public/docs/bailo_model_access.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-## **Completing the Model**
+# Completing the Model
 
-Once you have uploaded your model, go to the **_*Settings tab*_**.
+Once your model has been uploaded and documented, it must be configured for review.
 
-Select **_*Model Access*_** in the side menu.
-
-Here you can select, from the **_*select roles*_** drop down menu, the roles that you want to review your model for
-approval.
+1. Open the model and navigate to the **Settings** tab.
+2. Select **Model access** from the side menu.
+3. Use the **Add a user or group to the Model access list** dropdown to add any additional users and/or groups to the
+   model access.
+4. Use the **Select roles** dropdown to choose the roles responsible for reviewing and approving the model.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='selecting user model roles' src={bailoModelAccess} />
 </Box>
+
+The selected roles will be notified when the model or its releases require review.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

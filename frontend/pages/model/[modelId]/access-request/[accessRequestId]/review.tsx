@@ -1,7 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
 import { Button, Card, Container, Dialog, DialogContent, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -25,7 +25,11 @@ export default function AccessRequestReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isOpenAccessRequestDialogOpen, setIsOpenAccessRequestDialogOpen] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({

@@ -1,6 +1,6 @@
 import { Save } from '@mui/icons-material'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchEntry } from 'actions/entry'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -27,7 +27,7 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
       },
     }
 
-    const response = await patchModel(model.id, updatedModelSettings)
+    const response = await patchEntry(model.id, updatedModelSettings)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))

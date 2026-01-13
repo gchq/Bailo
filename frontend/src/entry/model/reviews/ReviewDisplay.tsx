@@ -1,7 +1,7 @@
 import { Done } from '@mui/icons-material'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -23,11 +23,11 @@ export default function ReviewDisplay({
   showCurrentUserResponses = false,
   currentUserDn,
 }: ReviewDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
   const dynamicRoles = useMemo(() => {
     const staticRoles = ['owner', 'contributor', 'consumer']
-    return modelRoles.filter((role) => !staticRoles.includes(role.shortName))
-  }, [modelRoles])
+    return entryRoles.filter((role) => !staticRoles.includes(role.shortName))
+  }, [entryRoles])
 
   const orderedReviewResponses = useMemo(
     () =>
@@ -39,12 +39,12 @@ export default function ReviewDisplay({
     [reviewResponses, currentUserDn, showCurrentUserResponses],
   )
 
-  if (isModelRolesLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   return (

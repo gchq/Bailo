@@ -4,7 +4,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
+import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
@@ -22,7 +22,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { EntryCardKindLabel, EntryInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
@@ -49,7 +49,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const sendNotification = useNotification()
-  const { mutateModelCardRevisions } = useGetModelCardRevisions(entry.id)
+  const { mutateEntryCardRevisions } = useGetEntryCardRevisions(entry.id)
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -70,10 +70,10 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
       } else {
-        const res = await putModelCard(entry.id, data)
+        const res = await putEntryCard(entry.id, data)
         if (res.status && res.status < 400) {
           setIsEdit(false)
-          mutateModelCardRevisions()
+          mutateEntryCardRevisions()
         } else {
           setErrorMessage(res.data)
         }
@@ -201,7 +201,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             >
               <MessageAlert
                 severity='info'
-                message='There is a migration available for this model'
+                message={`There is a migration available for this ${EntryKindLabel[entry.kind]}`}
                 buttonText='Migrate'
                 buttonAction={() => setMigrationListDialogOpen(true)}
               />

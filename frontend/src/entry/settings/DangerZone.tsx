@@ -1,6 +1,6 @@
 import { Close, Delete } from '@mui/icons-material'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material'
-import { deleteModel } from 'actions/model'
+import { deleteEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
@@ -25,7 +25,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
   const handleDeleteEntry = async () => {
     setLoading(true)
 
-    const response = await deleteModel(entry.id)
+    const response = await deleteEntry(entry.id)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))

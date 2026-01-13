@@ -1,6 +1,6 @@
 import { Add } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
-import { useGetModelImages } from 'actions/model'
+import { useGetModelImages } from 'actions/entry'
 import { useState } from 'react'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'

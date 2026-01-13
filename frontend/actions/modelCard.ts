@@ -4,7 +4,7 @@ import { EntryCardInterface, EntryCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
-const emptyModelCardRevisionsList = []
+const emptyEntryCardRevisionsList = []
 
 export async function postFromSchema(modelId: string, schemaId: string) {
   try {
@@ -28,11 +28,11 @@ export async function postFromTemplate(modelId: string, templateId: string) {
   })
 }
 
-export async function putModelCard(modelId: string, metadata: unknown) {
+export async function putEntryCard(entryId: string, metadata: unknown) {
   try {
     const response = await axios({
       method: 'put',
-      url: `/api/v2/model/${modelId}/model-cards`,
+      url: `/api/v2/model/${entryId}/model-cards`,
       headers: { 'Content-Type': 'application/json' },
       data: { metadata: metadata },
     })
@@ -62,18 +62,18 @@ export function useGetEntryCard(entryId?: string, entryCardVersion?: number, mir
   }
 }
 
-export function useGetModelCardRevisions(modelId: string) {
+export function useGetEntryCardRevisions(entryId: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       modelCardRevisions: EntryCardRevisionInterface[]
     },
     ErrorInfo
-  >(`/api/v2/model/${modelId}/model-card-revisions`, fetcher)
+  >(`/api/v2/model/${entryId}/model-card-revisions`, fetcher)
 
   return {
-    mutateModelCardRevisions: mutate,
-    modelCardRevisions: data ? data.modelCardRevisions : emptyModelCardRevisionsList,
-    isModelCardRevisionsLoading: isLoading,
-    isModelCardRevisionsError: error,
+    mutateEntryCardRevisions: mutate,
+    entryCardRevisions: data ? data.modelCardRevisions : emptyEntryCardRevisionsList,
+    isEntryCardRevisionsLoading: isLoading,
+    isEntryCardRevisionsError: error,
   }
 }

@@ -3,7 +3,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry } from '@rjsf/utils'
-import { EntrySearchResult, useListModels } from 'actions/model'
+import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
@@ -40,10 +40,10 @@ export default function DataCardSelector({
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 
   const {
-    models: dataCards,
-    isModelsLoading: isDataCardsLoading,
-    isModelsError: isDataCardsError,
-  } = useListModels(EntryKind.DATA_CARD)
+    entries: dataCards,
+    isEntriesLoading: isDataCardsLoading,
+    isEntriesError: isDataCardsError,
+  } = useListEntries(EntryKind.DATA_CARD)
 
   const theme = useTheme()
   const router = useRouter()

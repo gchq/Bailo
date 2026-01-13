@@ -4,14 +4,15 @@ import Image from 'next/legacy/image'
 
 import bailoSwaggerDocs from 'public/docs/bailo_swagger_docs.png'
 
-# Open API Docs
+# OpenAPI Documentation
 
-Bailo provides an Open API Specification for all Bailo endpoints viewable [here](/docs/api) on a running Bailo instance.
+Bailo provides an OpenAPI specification for all Bailo endpoints viewable [here](/api/v2/docs/) on a running Bailo
+instance.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='open api documentation page with example request parameters' src={bailoSwaggerDocs} />
 </Box>
 
-Full Documentation on using the UI can be found [here](https://swagger.io/tools/swagger-ui/).
+For guidance on using Swagger UI, see the [official documentation](https://swagger.io/tools/swagger-ui/).
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
