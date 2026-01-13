@@ -68,6 +68,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             <Link href='/docs'>
               <Button sx={{ color: 'white' }}>Documentation</Button>
             </Link>
+            <Link href='/accessibility/statement'>
+              <Button sx={{ color: 'white' }}>Accessibility</Button>
+            </Link>
             <Link href='https://github.com/gchq/bailo'>
               <Button sx={{ color: 'white' }}>Github</Button>
             </Link>
