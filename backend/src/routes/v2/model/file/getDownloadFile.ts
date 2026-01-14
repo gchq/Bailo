@@ -11,7 +11,7 @@ import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import log from '../../../../services/log.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
-import { registerPath } from '../../../../services/specification.js'
+import { PathConfig, registerPath } from '../../../../services/specification.js'
 import { HttpHeader } from '../../../../types/enums.js'
 import { BailoError } from '../../../../types/error.js'
 import { InternalError } from '../../../../utils/error.js'
@@ -72,15 +72,9 @@ const fileNameParam = z.object({ fileName: z.string() })
 const modelIdWithSemverAndFileName = modelIdParam.merge(semverParam).merge(fileNameParam)
 const modelIdWithFileId = modelIdParam.merge(fileIdParam)
 
-registerPath({
+const apiInfo: Omit<PathConfig, 'path' | 'schema'> = {
   method: 'get',
-  path: '/api/v2/model/{modelId}/release/{semver}/file/{fileName}/download',
   tags: ['file'],
-  description: 'Download a file by file name and release. Supports fetching parts via standard range headers.',
-  schema: z.object({
-    params: modelIdWithSemverAndFileName,
-    headers: rangeRequestHeader,
-  }),
   responses: {
     200: {
       description: 'The contents of the file, or the entire file if no range requested.',
@@ -93,29 +87,26 @@ registerPath({
       headers: rangedResponseHeaders,
     },
   },
+}
+
+registerPath({
+  ...apiInfo,
+  path: '/api/v2/model/{modelId}/release/{semver}/file/{fileName}/download',
+  description: 'Download a file by file name and release. Supports fetching parts via standard range headers.',
+  schema: z.object({
+    params: modelIdWithSemverAndFileName,
+    headers: rangeRequestHeader,
+  }),
 })
 
 registerPath({
-  method: 'get',
+  ...apiInfo,
   path: '/api/v2/model/{modelId}/file/{fileId}/download',
-  tags: ['file'],
   description: 'Download a file by file ID. Supports fetching parts via standard range headers.',
   schema: z.object({
     params: modelIdWithFileId,
     headers: rangeRequestHeader,
   }),
-  responses: {
-    200: {
-      description: 'The contents of the file.',
-      content: binaryContent,
-      headers: responseHeaders,
-    },
-    206: {
-      description: 'Range of bytes specified by the incoming header',
-      content: binaryContent,
-      headers: rangedResponseHeaders,
-    },
-  },
 })
 
 export const getDownloadFileSchema = z
