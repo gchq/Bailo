@@ -9,7 +9,7 @@ import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 import audit from '../../connectors/audit/index.js'
 import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
-import { EntryKind, ModelDoc } from '../../models/Model.js'
+import { EntryKind, EntryKindKeys, ModelDoc } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
@@ -136,8 +136,8 @@ export async function checkAccess(access: Access, user: UserInterface): Promise<
     return { id: modelId, success: false, info: 'Bad modelId provided' }
   }
 
-  //Check for disallowed entry types (Data-card and Mirrored Model, i.e. not model type)
-  if (model.kind !== EntryKind.Model) {
+  // Check for disallowed entry types (i.e. non model types)
+  if (!([EntryKind.Model, EntryKind.MirroredModel] as EntryKindKeys[]).includes(model.kind)) {
     return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}` }
   }
 

@@ -1,6 +1,6 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
-import { EntryVisibility, ModelDoc } from '../../models/Model.js'
+import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
@@ -397,7 +397,7 @@ export class BasicAuthorisationConnector {
           }
         })
 
-        // Don't allow anything beyond pushing, pulling and deleting actions.
+        // Don't allow anything beyond pushing, pulling, deleting and listing actions.
         if (
           !actions.every((action) =>
             ([ImageAction.Push, ImageAction.Pull, ImageAction.Delete, ImageAction.List] as ImageActionKeys[]).includes(
@@ -407,7 +407,19 @@ export class BasicAuthorisationConnector {
         ) {
           return {
             success: false,
-            info: 'You are not allowed to complete any actions beyond `push`, `pull` or `delete` on an image.',
+            info: 'You are not allowed to complete any actions beyond `push`, `pull`, `delete`, or `list` on an image associated with a model.',
+            id: access.name,
+          }
+        }
+
+        // Further restrict mirrored model actions.
+        if (
+          model.kind == EntryKind.MirroredModel &&
+          !actions.every((action) => ([ImageAction.Pull, ImageAction.List] as ImageActionKeys[]).includes(action))
+        ) {
+          return {
+            success: false,
+            info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
             id: access.name,
           }
         }
