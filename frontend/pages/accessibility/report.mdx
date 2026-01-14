@@ -1,7 +1,11 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import { Container, Card } from '@mui/material'
+import { Container, Card, Tab, Tabs } from '@mui/material'
 
 <Container>
+<Tabs value={1}>
+<Tab label="Statement" href="/accessibility/statement"/>
+<Tab label="Report" href="/accessibility/report" selected={true}/>
+</Tabs>
 <Card sx={{ width: '100%', px: 4, mt: 'auto' }}>
 
 # Bailo Accessibility Conformance Report WCAG Edition

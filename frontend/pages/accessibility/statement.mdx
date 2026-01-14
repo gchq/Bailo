@@ -1,7 +1,11 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import { Container, Card } from '@mui/material'
+import { Container, Card, Tab, Tabs } from '@mui/material'
 
 <Container>
+<Tabs value={0}>
+<Tab label="Statement" href="/accessibility/statement" selected={true}/>
+<Tab label="Report" href="/accessibility/report"/>
+</Tabs>
 <Card sx={{ width: '100%', px: 4, mt: 'auto' }}>
 
 # Accessibility Statement
