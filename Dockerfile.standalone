@@ -1,5 +1,19 @@
 # syntax=docker/dockerfile:1
 
+# For running a separate standalone instance of Bailo.
+# This is useful when testing cross-instance functionality, such as searching
+# for models in another instance.
+
+# Usage
+# Run your 1st instance of Bailo the usual way
+#       docker compose build --parallel
+#       docker compose up
+#       Access UI at localhost:8080
+# Then run your 2nd instance using this file with
+#       docker build . -t second-bailo -f Dockerfile.standalone
+#       docker run --rm -p 4318:8080 --name second-bailo second-bailo:latest
+#       Access UI at http://localhost:4318/
+
 FROM python:3.14-bookworm AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
