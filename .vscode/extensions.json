@@ -10,6 +10,7 @@
     "ms-python.flake8",
     "ms-python.black-formatter",
     "ryanluker.vscode-coverage-gutters",
-    "tamasfe.even-better-toml"
+    "tamasfe.even-better-toml",
+    "vitest.explorer"
   ]
 }

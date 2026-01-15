@@ -1,8 +1,9 @@
 import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
+import PercentIcon from '@mui/icons-material/Percent'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, Button, Checkbox, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -21,10 +22,12 @@ import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import { getDisplayFormStats, saveDisplayFormStats } from 'src/storage/userPreferences'
 import { KeyedMutator } from 'swr'
 import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
+
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
@@ -42,6 +45,11 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+
+  // For displaying the stats around model information completion
+  const [calculateStats, setCalculateStats] = useState<number>(0)
+
+  const [displayFormStats, setDisplayFormStats] = useState<boolean>(getDisplayFormStats())
 
   const open = Boolean(anchorEl)
 
@@ -78,6 +86,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
         }
       }
       setLoading(false)
+      setCalculateStats((v) => v + 1)
     }
   }
 
@@ -91,6 +100,12 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
       setSplitSchema({ reference: schema.id, steps })
       setIsEdit(false)
     }
+  }
+
+  function onToggleDisplayStats() {
+    const newValue = !displayFormStats
+    setDisplayFormStats(newValue)
+    saveDisplayFormStats(newValue)
   }
 
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
@@ -260,6 +275,19 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                   </ListItemIcon>
                   <ListItemText>View History</ListItemText>
                 </MenuItem>
+                <MenuItem onClick={onToggleDisplayStats} dense>
+                  <ListItemIcon>
+                    <PercentIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText primary='View Completion Stats' />
+                  <Checkbox
+                    edge='end'
+                    checked={displayFormStats}
+                    tabIndex={-1}
+                    disableRipple
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </MenuItem>
               </Menu>
             </Stack>
           )}
@@ -275,7 +303,13 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          calculateStats={calculateStats}
+          canEdit={isEdit}
+          displayStats={displayFormStats}
+        />
         {isEdit && (
           <SaveAndCancelButtons
             onCancel={onCancel}

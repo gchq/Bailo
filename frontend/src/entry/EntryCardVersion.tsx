@@ -39,7 +39,7 @@ export default function EntryCardVersion({ entryCard, schema, entryId, entryKind
         <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/${entryKind}/${entryId}`)}>
           {`Back to ${EntryKindLabel[entryKind]}`}
         </Button>
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
+        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} calculateStats={0} canEdit={false} />
       </Paper>
     </Container>
   )
