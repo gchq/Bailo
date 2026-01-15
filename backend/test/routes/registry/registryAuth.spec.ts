@@ -28,7 +28,7 @@ describe('registryAuth', () => {
     const name = 'badModelId/fakeImage'
     const modelId = name.split('/')[0]
     modelMocks.getModelById.mockRejectedValueOnce({})
-    const auth = await checkAccess({ name } as any, { dn: 'dn' } as any)
+    const auth = await checkAccess({ name, actions: ['push'] } as any, { dn: 'dn' } as any)
     expect(auth).toStrictEqual({ id: modelId, success: false, info: 'Bad modelId provided' })
   })
 
@@ -55,6 +55,17 @@ describe('registryAuth', () => {
     })
 
     const auth = await checkAccess({ name } as any, { dn: 'dn' } as any)
+    expect(auth).toStrictEqual({
+      id: modelId,
+      success: true,
+    })
+  })
+
+  test('checkAccess > success > allowed bad modelId', async () => {
+    const name = 'badModelId/fakeImage'
+    const modelId = name.split('/')[0]
+    modelMocks.getModelById.mockRejectedValueOnce({})
+    const auth = await checkAccess({ name, actions: ['pull'] } as any, { dn: 'dn' } as any)
     expect(auth).toStrictEqual({
       id: modelId,
       success: true,

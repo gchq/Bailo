@@ -97,6 +97,7 @@ export const DockerManifestMediaType = 'application/vnd.docker.distribution.mani
 export const OCIManifestMediaType = 'application/vnd.oci.image.manifest.v1+json'
 export const OCIEmptyMediaType = 'application/vnd.oci.empty.v1+json'
 export const ManifestMediaType = z.enum([DockerManifestMediaType, OCIManifestMediaType])
+export const AcceptManifestMediaTypeHeaderValue = ManifestMediaType.options.join(',')
 export const ManifestListMediaType = z.enum([
   'application/vnd.docker.distribution.manifest.list.v2+json',
   'application/vnd.oci.image.index.v1+json',
@@ -147,6 +148,7 @@ const OCIImageManifestV2 = z.discriminatedUnion('mediaType', [
 ])
 
 export const ImageManifestV2 = z.union([DockerImageManifestV2, OCIImageManifestV2])
+export type ImageManifestV2 = z.infer<typeof ImageManifestV2>
 
 const ManifestListDescriptor = BaseDescriptor.extend({
   platform: z

@@ -1,3 +1,4 @@
+import { AcceptManifestMediaTypeHeaderValue } from '../clients/registryResponses.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -40,7 +41,7 @@ async function script() {
           const repositoryDigest = await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => {

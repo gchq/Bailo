@@ -9,6 +9,7 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
+import { OCIEmptyMediaType } from '../clients/registryResponses.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
@@ -132,8 +133,11 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
     }
     throw err
   }
+  if (!manifest.body) {
+    throw InternalError('The registry returned a response but the body was missing.', { ...source, manifest })
+  }
 
-  const allLayers = [manifest.body!.config, ...manifest.body!.layers]
+  const allLayers = [manifest.body.config, ...manifest.body.layers]
   const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
     { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
@@ -163,7 +167,8 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
   }
 
   log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
-  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), manifest.body!.mediaType!)
+  const mediaType = manifest.body.mediaType == OCIEmptyMediaType ? manifest.body.artifactType : manifest.body.mediaType
+  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), mediaType)
   log.trace({ source }, 'Deleting the original manifest.')
   await deleteManifest(multiRepositoryToken, source)
 

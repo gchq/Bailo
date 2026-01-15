@@ -13,6 +13,7 @@
  */
 import prettyBytes from 'pretty-bytes'
 
+import { AcceptManifestMediaTypeHeaderValue } from '../clients/registryResponses.js'
 import FileModel from '../models/File.js'
 import ModelModel, { EntryKind } from '../models/Model.js'
 import ReleaseModel from '../models/Release.js'
@@ -213,7 +214,7 @@ async function script() {
           const manifest = (await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => res.json())) as { layers?: { size: number }[] }

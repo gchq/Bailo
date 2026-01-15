@@ -132,6 +132,11 @@ export async function checkAccess(access: Access, user: UserInterface): Promise<
     model = await getModelById(user, modelId)
   } catch (e) {
     log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
+    // From https://docs.docker.com/reference/api/registry/auth/#example
+    // > If the client only has a subset of the requested access it must not be considered an error as it is not the responsibility of the token server to indicate authorization errors as part of this workflow
+    if (access.actions.every((a) => a === 'pull')) {
+      return { id: modelId, success: true }
+    }
     // bad model id?
     return { id: modelId, success: false, info: 'Bad modelId provided' }
   }
@@ -208,8 +213,12 @@ export const getDockerRegistryAuth = [
     const accesses = scopes.map(generateAccess)
 
     for (const access of accesses) {
+      // Docker may ask pull on unrelated repos to optimise blob reuse
+      const isPush = access.actions.includes('push')
+
       const authResult = await checkAccess(access, user)
-      if (!admin && !authResult.success) {
+
+      if (!admin && !authResult.success && isPush) {
         throw Forbidden({ access }, authResult.info, rlog)
       }
     }

@@ -6,12 +6,12 @@ import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
+import { ImageManifestV2, OCIEmptyMediaType } from '../../../clients/registryResponses.js'
 import { UserInterface } from '../../../models/User.js'
 import { getAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
-import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
@@ -31,7 +31,7 @@ export class ImageImporter extends BaseImporter {
   protected readonly user: UserInterface
   protected readonly imageName: string
   protected readonly imageTag: string
-  protected manifestBody: unknown = null
+  protected manifestBody: ImageManifestV2 | null = null
 
   static readonly manifestRegex = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,
@@ -68,7 +68,7 @@ export class ImageImporter extends BaseImporter {
       if (ImageImporter.manifestRegex.test(entry.name)) {
         // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
         log.debug({ ...this.logData }, 'Extracting un-tarred manifest.')
-        this.manifestBody = await json(stream)
+        this.manifestBody = ImageManifestV2.parse(await json(stream))
       } else if (ImageImporter.blobRegex.test(entry.name)) {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
@@ -155,7 +155,7 @@ export class ImageImporter extends BaseImporter {
 
   async finishListener(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
-    if (hasKeysOfType<{ mediaType: 'string' }>(this.manifestBody, { mediaType: 'string' })) {
+    if (this.manifestBody) {
       const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
         {
           type: 'repository',
@@ -164,11 +164,13 @@ export class ImageImporter extends BaseImporter {
         },
       ])
 
+      const mediaType =
+        this.manifestBody.mediaType == OCIEmptyMediaType ? this.manifestBody.artifactType : this.manifestBody.mediaType
       await putManifest(
         repositoryPushPullToken,
         { repository: this.metadata.mirroredModelId, name: this.imageName, tag: this.imageTag },
         JSON.stringify(this.manifestBody),
-        this.manifestBody['mediaType'],
+        mediaType,
       )
       log.debug(
         {
