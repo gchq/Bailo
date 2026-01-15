@@ -11,7 +11,7 @@ import {
   SchemaMigrationAction,
 } from '../../../src/connectors/authorisation/actions.js'
 import { BasicAuthorisationConnector, partials } from '../../../src/connectors/authorisation/base.js'
-import { ModelDoc } from '../../../src/models/Model.js'
+import { EntryKind, ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
 import { SchemaDoc } from '../../../src/models/Schema.js'
 import { UserInterface } from '../../../src/models/User.js'
@@ -845,7 +845,26 @@ describe('connectors > authorisation > base', () => {
     expect(result).toStrictEqual({
       id: 'img1',
       success: false,
-      info: 'You are not allowed to complete any actions beyond `push`, `pull` or `delete` on an image.',
+      info: 'You are not allowed to complete any actions beyond `push`, `pull`, `delete`, or `list` on an image associated with a model.',
+    })
+  })
+
+  test('image > push action not allowed on mirrored model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+
+    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.MirroredModel } as any, {
+      type: 'repository',
+      name: 'img1',
+      actions: ['push'],
+    })
+
+    expect(result).toStrictEqual({
+      id: 'img1',
+      success: false,
+      info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
     })
   })
 
@@ -859,6 +878,24 @@ describe('connectors > authorisation > base', () => {
       id: 'role1',
       success: false,
       info: 'You cannot upload or modify a review role if you are not an admin.',
+    })
+  })
+
+  test('image > pull action allowed on mirrored model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+
+    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.MirroredModel } as any, {
+      type: 'repository',
+      name: 'img1',
+      actions: ['pull'],
+    })
+
+    expect(result).toStrictEqual({
+      id: 'img1',
+      success: true,
     })
   })
 

@@ -23,6 +23,7 @@ describe('registryAuth', () => {
       info: `Access name must not begin with soft delete prefix: ${softDeletePrefix}`,
     } as any)
   })
+
   test('checkAccess > failure > bad modelId', async () => {
     const name = 'badModelId/fakeImage'
     const modelId = name.split('/')[0]
@@ -30,19 +31,21 @@ describe('registryAuth', () => {
     const auth = await checkAccess({ name } as any, { dn: 'dn' } as any)
     expect(auth).toStrictEqual({ id: modelId, success: false, info: 'Bad modelId provided' })
   })
+
   test('checkAccess > failure > incorrect entry type', async () => {
     const name = 'modelId/fakeImage'
     const modelId = name.split('/')[0]
     modelMocks.getModelById.mockResolvedValueOnce({
-      kind: EntryKind.MirroredModel,
+      kind: EntryKind.DataCard,
     })
     const auth = await checkAccess({ name } as any, { dn: 'dn' } as any)
     expect(auth).toStrictEqual({
       id: modelId,
       success: false,
-      info: `No registry use allowed on ${EntryKind.MirroredModel}`,
+      info: `No registry use allowed on ${EntryKind.DataCard}`,
     })
   })
+
   test('checkAccess > success', async () => {
     const name = 'modelId/fakeImage'
     const modelId = name.split('/')[0]
