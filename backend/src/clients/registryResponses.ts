@@ -47,7 +47,7 @@ export function parseRegistryResponse<T>(
   }
 
   // error not in expected format
-  throw InternalError('Response did not match expected schema or RegistryErrorResponse', { schema, body })
+  throw InternalError('Response did not match expected schema or RegistryErrorResponse.', { schema, body })
 }
 
 // GET /v2/
@@ -93,19 +93,62 @@ export const DeleteManifestResponseHeaders = CommonRegistryHeaders.extend({
 })
 
 // GET /v2/<name>/manifests/<reference>
-export const ManifestMediaType = z.enum([
-  'application/vnd.docker.distribution.manifest.v2+json',
-  'application/vnd.oci.image.manifest.v1+json',
-])
+export const DockerManifestMediaType = 'application/vnd.docker.distribution.manifest.v2+json'
+export const OCIManifestMediaType = 'application/vnd.oci.image.manifest.v1+json'
+export const OCIEmptyMediaType = 'application/vnd.oci.empty.v1+json'
+export const ManifestMediaType = z.enum([DockerManifestMediaType, OCIManifestMediaType])
 export const ManifestListMediaType = z.enum([
   'application/vnd.docker.distribution.manifest.list.v2+json',
   'application/vnd.oci.image.index.v1+json',
 ])
 
-const Descriptor = z.object({
+const BaseDescriptor = z.object({
   mediaType: z.string(),
   size: z.number().int().nonnegative(),
   digest: z.string(),
+})
+const OCIAnnotations = z.record(z.string(), z.string())
+const OCIDescriptor = BaseDescriptor.extend({
+  urls: z.array(z.string()).optional(),
+  annotations: OCIAnnotations.optional(),
+  data: z.string().optional(),
+  artifactType: z.string().optional(),
+})
+
+const DockerImageManifestV2 = z.object({
+  schemaVersion: z.literal(2),
+  mediaType: z.literal(DockerManifestMediaType),
+  config: BaseDescriptor,
+  layers: z.array(
+    BaseDescriptor.extend({
+      urls: z.array(z.string()).optional(),
+    }),
+  ),
+})
+
+// helper for conditional setting
+const OCIImageBaseManifestV2 = z.object({
+  schemaVersion: z.literal(2),
+  mediaType: z.literal(OCIManifestMediaType).optional(),
+  artifactType: z.string().optional(),
+  config: OCIDescriptor,
+  layers: z.array(OCIDescriptor),
+  subject: OCIDescriptor.optional(),
+  annotations: OCIAnnotations.optional(),
+})
+const OCIImageManifestV2 = z.discriminatedUnion('mediaType', [
+  OCIImageBaseManifestV2.extend({
+    mediaType: z.literal(OCIManifestMediaType),
+  }),
+  OCIImageBaseManifestV2.extend({
+    mediaType: z.literal(OCIEmptyMediaType),
+    artifactType: z.string(),
+  }),
+])
+
+export const ImageManifestV2 = z.union([DockerImageManifestV2, OCIImageManifestV2])
+
+const ManifestListDescriptor = BaseDescriptor.extend({
   platform: z
     .object({
       architecture: z.string(),
@@ -117,21 +160,13 @@ const Descriptor = z.object({
     .optional(),
 })
 
-export const ImageManifestV2 = z.object({
-  schemaVersion: z.literal(2),
-  mediaType: ManifestMediaType.optional(),
-  config: Descriptor,
-  layers: z.array(Descriptor),
-})
-
 export const ManifestListV2 = z.object({
   schemaVersion: z.literal(2),
   mediaType: ManifestListMediaType.optional(),
-  manifests: z.array(Descriptor),
+  manifests: z.array(ManifestListDescriptor),
 })
-// TODO: handle OCI Image Spec https://github.com/opencontainers/image-spec/blob/main/manifest.md
 // TODO: handle multi-platform images
-export const ManifestResponseBody = z.union([ImageManifestV2.passthrough(), ManifestListV2.passthrough()])
+export const ManifestResponseBody = z.union([ImageManifestV2, ManifestListV2])
 
 export const ManifestResponseHeaders = CommonRegistryHeaders.extend({
   'docker-content-digest': HeaderValue,

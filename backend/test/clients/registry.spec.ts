@@ -15,6 +15,11 @@ import {
   putManifest,
   uploadLayerMonolithic,
 } from '../../src/clients/registry.js'
+import {
+  DockerManifestMediaType,
+  OCIEmptyMediaType,
+  OCIManifestMediaType,
+} from '../../src/clients/registryResponses.js'
 
 const mockHttpService = vi.hoisted(() => {
   return {
@@ -88,10 +93,10 @@ describe('clients > registry', () => {
     expect(fetchMock.mock.calls).toMatchSnapshot()
   })
 
-  test('getImageTagManifest > success', async () => {
+  test('getImageTagManifest > success Docker spec', async () => {
     const mockManifest = {
       schemaVersion: 2,
-      mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      mediaType: DockerManifestMediaType,
       config: {
         mediaType: 'application/vnd.docker.container.image.v1+json',
         size: 1,
@@ -106,6 +111,76 @@ describe('clients > registry', () => {
       ],
     }
 
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => mockManifest),
+      headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
+    })
+
+    const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual({
+      body: mockManifest,
+      headers: { 'content-type': 'application/json', 'docker-content-digest': 'digest' },
+    })
+  })
+
+  test.each([
+    {
+      schemaVersion: 2,
+      mediaType: OCIManifestMediaType,
+      config: {
+        mediaType: 'application/vnd.oci.image.config.v1+json',
+        size: 1,
+        digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.oci.image.layer.v1.tar',
+          size: 1,
+          digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        },
+      ],
+    },
+    {
+      schemaVersion: 2,
+      mediaType: OCIEmptyMediaType,
+      artifactType: OCIManifestMediaType,
+      config: {
+        mediaType: 'application/vnd.oci.image.config.v1+json',
+        size: 1,
+        digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        urls: ['https://github.com/gchq/Bailo', 'https://gchq.github.io/Bailo'],
+        annotations: {},
+        data: '{}',
+        artifactType: 'application/vnd.oci.image.config.v1+json',
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.oci.image.layer.v1.tar',
+          size: 1,
+          digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        },
+        {
+          mediaType: 'application/vnd.oci.empty.v1+json',
+          digest: 'sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a',
+          size: 2,
+          data: 'e30=',
+        },
+      ],
+      subject: {
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        size: 1,
+      },
+      annotations: {
+        'com.example.key1': 'value1',
+        'com.example.key2': 'value2',
+      },
+    },
+  ])('getImageTagManifest > success OCI spec', async (mockManifest) => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => mockManifest),
