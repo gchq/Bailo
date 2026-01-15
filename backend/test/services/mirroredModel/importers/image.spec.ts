@@ -188,7 +188,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    await importer.finishListener(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
       undefined,
@@ -209,7 +209,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    await importer.finishListener(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).not.toHaveBeenCalled()
     expect(reject).toHaveBeenCalledWith(

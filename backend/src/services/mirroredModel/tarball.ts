@@ -108,85 +108,123 @@ export async function extractTarGzStream(
   logData: MirrorImportLogData,
 ): Promise<MirrorInformation> {
   return new Promise((resolve, reject) => {
-    let metadata: MirrorMetadata
-    let importer: BaseImporter
+    let metadata: MirrorMetadata | undefined
+    let importer: BaseImporter | undefined
+    let settled = false
+
     const { ungzipStream, untarStream } = createUnTarGzStreams()
 
+    function settleOnce(err: unknown) {
+      if (settled) {
+        return
+      }
+      settled = true
+
+      tarGzStream.unpipe()
+      ungzipStream.destroy()
+      untarStream.destroy()
+
+      reject(err)
+    }
+
     // this error event is expected to always call `reject`
-    async function onErrorHandler(error: unknown) {
-      if (importer?.errorListener) {
-        await importer.errorListener(error, resolve, reject)
+    function fail(error: unknown) {
+      if (importer?.handleStreamError) {
+        importer.handleStreamError(error, resolve, reject)
+        settled = true
+        return
+      }
+
+      if (isBailoError(error)) {
+        settleOnce(error)
       } else {
-        if (isBailoError(error)) {
-          reject(error)
-        } else {
-          reject(InternalError('Error processing tarball during import.', { err: error, ...logData }))
-        }
+        settleOnce(
+          InternalError('Error processing tarball during import.', {
+            err: error,
+            ...logData,
+          }),
+        )
       }
     }
 
     ungzipStream.on('error', async (error) => {
-      log.error({ error, ...logData }, 'Error occurred in `zlib.Gunzip` stream. Aborting extraction.')
-      // Pass the error into the untarStream to trigger the error listener
-      untarStream.destroy(error)
+      log.error({ error, ...logData }, 'Gunzip stream failed.')
+      fail(error)
     })
 
     untarStream.on('error', async (error) => {
-      await onErrorHandler(error)
+      log.error({ error, ...logData }, 'Tar extraction failed.')
+      fail(error)
     })
 
-    untarStream.on('finish', async () => {
-      if (importer?.finishListener) {
-        await importer.finishListener(resolve, reject)
-      } else {
-        // if the importer isn't set then the extract hasn't finished
-        reject(InternalError('Tarball finished processing before expected.', { ...logData }))
-      }
-    })
-
-    untarStream.on('entry', async (entry, stream, next) => {
-      try {
-        log.debug(
-          {
-            entry,
+    untarStream.once('finish', () => {
+      if (!importer) {
+        fail(
+          InternalError('Tarball finished before importer initialisation.', {
             ...logData,
-          },
-          'Processing un-tarred entry.',
+          }),
         )
-
-        if (!metadata) {
-          if (entry.type !== 'file' || entry.name !== config.modelMirror.metadataFile) {
-            throw InternalError(`Expected '${config.modelMirror.metadataFile}' as first entry, found '${entry.name}'`, {
-              entry,
-              ...logData,
-            })
-          }
-          metadata = mirrorMetadataSchema.parse(await json(stream))
-          log.trace({ metadata, ...logData }, `Extracted metadata file '${config.modelMirror.metadataFile}'.`)
-
-          // Only check auth once we know what the model is
-          const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
-          const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
-          if (!auth.success) {
-            throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, ...logData })
-          }
-
-          importer = getImporter(metadata, user, logData)
-
-          // Drain and continue
-          next()
-          return
-        }
-
-        // Workaround `stream` sometimes being a reference rather than the stream itself
-        const passThrough = new PassThrough()
-        stream.pipe(passThrough)
-        await importer.processEntry(entry, passThrough)
-        next()
-      } catch (error) {
-        untarStream.destroy()
-        await onErrorHandler(error)
+        return
       }
+
+      try {
+        importer.handleStreamCompletion(resolve, reject)
+        settled = true
+      } catch (err) {
+        fail(err)
+      }
+    })
+
+    untarStream.on('entry', async (entry, entryStream, next) => {
+      // Async entry handling safely inside a sync stream callback, ensuring all async errors are caught and routed to `fail`
+      ;(async () => {
+        try {
+          log.debug({ entry, ...logData }, 'Processing un-tarred entry.')
+
+          if (!metadata) {
+            if (entry.type !== 'file' || entry.name !== config.modelMirror.metadataFile) {
+              throw InternalError(
+                `Expected '${config.modelMirror.metadataFile}' as first entry, found '${entry.name}'`,
+                {
+                  entry,
+                  ...logData,
+                },
+              )
+            }
+            metadata = mirrorMetadataSchema.parse(await json(entryStream))
+            log.trace({ metadata, ...logData }, `Extracted metadata file '${config.modelMirror.metadataFile}'.`)
+
+            // Only check auth once we know what the model is
+            const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
+            const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
+            if (!auth.success) {
+              throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, ...logData })
+            }
+
+            importer = getImporter(metadata, user, logData)
+
+            // Drain and continue
+            next()
+            return
+          }
+
+          // This should be unreachable but TS doesn't know that
+          if (!importer) {
+            throw InternalError('Importer not initialised.', { entry, ...logData })
+          }
+
+          // Workaround `stream` sometimes being a reference rather than the stream itself
+          const passThrough = new PassThrough()
+          entryStream.pipe(passThrough)
+
+          await importer.processEntry(entry, passThrough)
+          next()
+        } catch (error) {
+          // throw the error and drain the stream
+          entryStream.resume()
+          fail(error)
+        }
+      })().catch((err) => fail(err))
     })
 
     tarGzStream.pipe(ungzipStream).pipe(untarStream)
