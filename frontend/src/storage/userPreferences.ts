@@ -1,5 +1,5 @@
 /**
- * Uses the Local Storage browser API to store user preferences.
+ * Uses the Local Storage browser API to store provided user preferences.
  */
 
 export interface UserPreferences {
