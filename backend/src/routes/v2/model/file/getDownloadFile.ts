@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto'
-import stream from 'node:stream'
 
 import contentDisposition from 'content-disposition'
 import { Request, Response } from 'express'
@@ -14,7 +13,6 @@ import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { PathConfig, registerPath } from '../../../../services/specification.js'
 import { HttpHeader } from '../../../../types/enums.js'
 import { BailoError } from '../../../../types/error.js'
-import { InternalError } from '../../../../utils/error.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -144,10 +142,6 @@ export const getDownloadFile = [
 
     const stream = await downloadFile(req.user, fileId, fetchRange)
 
-    if (!stream.Body) {
-      throw InternalError('We were not able to retrieve the body of this file', { fileId })
-    }
-
     await audit.onViewFile(req, file)
 
     // Required to support utf-8 file names
@@ -156,10 +150,7 @@ export const getDownloadFile = [
 
     res.status(fetchRange ? 206 : 200)
 
-    // The AWS library doesn't seem to properly type 'Body' as being pipeable?
-    const fileStream = stream.Body as stream.Readable
-
-    fileStream.on('error', (err) => {
+    stream.on('error', (err) => {
       if (!res.headersSent) {
         const bailoError: BailoError = {
           code: 500,
@@ -178,10 +169,13 @@ export const getDownloadFile = [
       }
     })
 
-    fileStream.on('close', () => {
-      log.info('Client closed connection early', { fileId })
+    res.on('close', () => {
+      if (!stream.readableEnded) {
+        log.debug({ fileId }, 'Response has been closed before file stream has finished. Destroying file stream.')
+        stream.destroy()
+      }
     })
 
-    fileStream.pipe(res)
+    stream.pipe(res)
   },
 ]

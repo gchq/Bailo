@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream'
 
 import { ClientSession, Schema, Types } from 'mongoose'
+import prettyBytes from 'pretty-bytes'
 
 import {
   completeMultipartUpload,
@@ -220,7 +221,38 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
   }
 
-  return getObjectStream(file.path, undefined, range)
+  const stream = await getObjectStream(file.path, undefined, range)
+
+  let progress = 0
+  stream.on('data', function (chunk) {
+    // Advance your progress by chunk.length
+    progress += chunk.length
+    log.debug(
+      {
+        loaded: prettyBytes(progress),
+        loadedBytes: progress,
+        total: prettyBytes(file.size),
+        totalBytes: file.size,
+        fileId,
+      },
+      'Object download is in progress',
+    )
+  })
+
+  stream.on('close', () => {
+    log.debug(
+      {
+        loaded: prettyBytes(progress),
+        loadedBytes: progress,
+        total: prettyBytes(file.size),
+        totalBytes: file.size,
+        fileId,
+      },
+      'Object download stream closed',
+    )
+  })
+
+  return stream
 }
 
 export async function getFileById(
