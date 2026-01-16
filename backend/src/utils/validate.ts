@@ -23,7 +23,9 @@ export function parse<T extends ZodSchema>(req: Request, schema: T): z.infer<T> 
 
 export function coerceArray(object: z.ZodTypeAny) {
   return z.preprocess((val) => {
-    if (val === '' || val === undefined) return undefined
+    if (val === '' || val === undefined) {
+      return undefined
+    }
     return Array.isArray(val) ? val : [val]
   }, object)
 }
