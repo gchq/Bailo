@@ -91,15 +91,25 @@ export default function JsonSchemaForm({
     )
   }
 
-  function onShareSectionOnClick(sectionId: string) {
-    navigator.clipboard.writeText(
-      `${window.location.origin + window.location.pathname}?page=${activeStep}#${sectionId}`,
-    )
-    sendNotification({
-      variant: 'success',
-      msg: `Link saved to clipboard`,
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
+  async function onShareSectionOnClick(sectionId: string) {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin + window.location.pathname}?page=${activeStep}#${sectionId}`,
+      )
+      sendNotification({
+        variant: 'success',
+        msg: `Link saved to clipboard`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        sendNotification({
+          variant: 'error',
+          msg: error.message,
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+    }
   }
 
   return (

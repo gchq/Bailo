@@ -15,9 +15,15 @@ export default function CopyToClipboardButton({
 }: CopyToClipboardButtonProps) {
   const sendNotification = useNotification()
 
-  const copyTextToClipboard = () => {
-    navigator.clipboard.writeText(textToCopy)
-    sendNotification({ variant: 'success', msg: notificationText })
+  const copyTextToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(textToCopy)
+      sendNotification({ variant: 'success', msg: notificationText })
+    } catch (error) {
+      if (error instanceof Error) {
+        sendNotification({ variant: 'error', msg: error.message })
+      }
+    }
   }
 
   return (
