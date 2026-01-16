@@ -248,7 +248,9 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         totalBytes: file.size,
         fileId,
       },
-      'Object download stream closed',
+      progress === file.size
+        ? 'Object download stream closed with no data remaining'
+        : 'Object download stream closed with data remaining',
     )
   })
 
