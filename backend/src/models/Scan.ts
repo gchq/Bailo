@@ -9,8 +9,8 @@ export type ScanInterface = {
   toolName: string
   scannerVersion?: string
   state: ScanStateKeys
-  isInfected?: boolean
-  viruses?: string[]
+  isVulnerable?: boolean
+  vulnerabilities?: string[]
   lastRunAt: Date
 
   createdAt: Date

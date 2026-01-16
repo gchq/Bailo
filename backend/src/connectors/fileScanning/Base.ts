@@ -6,7 +6,7 @@ import log from '../../services/log.js'
 
 export type FileScanResult = Pick<
   ScanInterface,
-  'toolName' | 'scannerVersion' | 'state' | 'isInfected' | 'viruses' | 'lastRunAt'
+  'toolName' | 'scannerVersion' | 'state' | 'isVulnerable' | 'vulnerabilities' | 'lastRunAt'
 >
 
 export const ScanState = {
