@@ -81,7 +81,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _importResult: MirrorInformation,
   ) {}
   async onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
-  async onViewReviewRoles(_req: Request) {}
+  async onViewReviewRoles(_req: Request, _reviewRole: ReviewRoleInterface[]) {}
   async onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   async onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
   async onError(_req: Request, _error: BailoError) {}

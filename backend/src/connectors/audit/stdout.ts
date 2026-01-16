@@ -147,9 +147,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onCreateCommentResponse(req: Request, ResponseInterface: ResponseInterface) {
+  async onCreateCommentResponse(req: Request, response: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateResponse, req)
-    const event = this.generateEvent(req, { id: ResponseInterface['_id'] })
+    const event = this.generateEvent(req, { id: response['_id'] })
     req.log.info(event, req.audit.description)
   }
 
@@ -283,7 +283,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   async onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
+    this.checkEventType(AuditInfo.ViewSchemaMigration, req)
     const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
     req.log.info(event, req.audit.description)
   }

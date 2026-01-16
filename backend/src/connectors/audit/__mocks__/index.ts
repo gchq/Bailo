@@ -13,6 +13,7 @@ const audit = {
   onUpdateModelCard: vi.fn(),
 
   onCreateFile: vi.fn(),
+  onViewFile: vi.fn(),
   onViewFiles: vi.fn(),
   onUpdateFile: vi.fn(),
   onDeleteFile: vi.fn(),
@@ -23,7 +24,14 @@ const audit = {
   onUpdateRelease: vi.fn(),
   onDeleteRelease: vi.fn(),
 
+  onCreateCommentResponse: vi.fn(),
   onCreateReviewResponse: vi.fn(),
+  onViewResponses: vi.fn(),
+  onUpdateResponse: vi.fn(),
+
+  onCreateUserToken: vi.fn(),
+  onViewUserTokens: vi.fn(),
+  onDeleteUserToken: vi.fn(),
 
   onCreateAccessRequest: vi.fn(),
   onViewAccessRequest: vi.fn(),
@@ -55,10 +63,6 @@ const audit = {
 
   onCreateS3Export: vi.fn(),
   onCreateImport: vi.fn(),
-
-  onCreateCommentResponse: vi.fn(),
-  onViewResponses: vi.fn(),
-  onUpdateResponse: vi.fn(),
 
   onCreateReviewRole: vi.fn(),
   onViewReviewRoles: vi.fn(),
