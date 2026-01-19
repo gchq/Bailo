@@ -52,6 +52,21 @@ vi.mock('jsonwebtoken', async () => {
   }
 })
 
+const rlogMocks = vi.hoisted(() => {
+  const logger = {
+    trace: vi.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    child: vi.fn(() => logger),
+  }
+
+  return { logger }
+})
+vi.mock('../../../src/services/log.js', () => ({
+  default: rlogMocks.logger,
+}))
+
 function mockReqRes(query: any = {}) {
   const req = {
     query,
@@ -143,6 +158,7 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
+      expect(rlogMocks.logger.trace).toHaveBeenCalledWith('Successfully generated offline token')
     })
 
     test('success > basic push scope', async () => {
@@ -161,6 +177,7 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
+      expect(rlogMocks.logger.trace).toHaveBeenCalledWith('Successfully generated access token')
     })
 
     test('success > pull ignores unauthorised foreign scope (containerd cross-mount)', async () => {
@@ -172,6 +189,12 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
+      expect(rlogMocks.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          access: expect.objectContaining({ name: 'foreign/image' }),
+        }),
+        'Ignoring unauthorised scope',
+      )
     })
 
     test('success > push with extra unauthorised pull scope', async () => {
@@ -190,6 +213,12 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
+      expect(rlogMocks.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          access: expect.objectContaining({ name: 'foreign/image' }),
+        }),
+        'Ignoring unauthorised scope',
+      )
     })
 
     test('success > wildcard scope is ignored', async () => {
@@ -203,6 +232,12 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
+      expect(rlogMocks.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          access: expect.objectContaining({ name: 'model/image', actions: ['*'] }),
+        }),
+        'Ignoring unauthorised scope',
+      )
     })
 
     test('success > wildcard scope with admin is permitted', async () => {
@@ -217,6 +252,12 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
+      expect(rlogMocks.logger.debug).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          access: expect.objectContaining({ name: 'model/image', actions: ['*'] }),
+        }),
+        'Ignoring unauthorised scope',
+      )
     })
 
     test('reject > unauthorised push even if pull is allowed', async () => {
