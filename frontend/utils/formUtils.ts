@@ -201,9 +201,15 @@ function isMetricsKey(key: string): boolean {
 }
 
 function isAnswered(value: any): boolean {
-  if (value === null || value === undefined) return false
-  if (typeof value === 'string') return value.trim().length > 0
-  if (Array.isArray(value)) return value.length > 0
+  if (value === null || value === undefined) {
+    return false
+  }
+  if (typeof value === 'string') {
+    return value.trim().length > 0
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0
+  }
   return true
 }
 
@@ -216,8 +222,12 @@ function roundToOneDecimal(value: number): number {
 }
 
 function isPrimitiveSchema(schema: any): boolean {
-  if (!schema || typeof schema !== 'object') return false
-  if ('$ref' in schema) return true
+  if (!schema || typeof schema !== 'object') {
+    return false
+  }
+  if ('$ref' in schema) {
+    return true
+  }
   return ['string', 'number', 'boolean'].includes(schema.type)
 }
 
@@ -225,7 +235,9 @@ function isPrimitiveSchema(schema: any): boolean {
  * Counts how many questions are defined in a schema.
  */
 function countQuestionsFromSchema(schema: any): number {
-  if (!schema || typeof schema !== 'object') return 0
+  if (!schema || typeof schema !== 'object') {
+    return 0
+  }
 
   if (isPrimitiveSchema(schema)) {
     return 1
@@ -233,14 +245,18 @@ function countQuestionsFromSchema(schema: any): number {
 
   // If array - Only count if needed
   if (schema.type === 'array' && schema.items) {
-    if (!isRequiredArray(schema)) return 0
+    if (!isRequiredArray(schema)) {
+      return 0
+    }
     return countQuestionsFromSchema(schema.items)
   }
 
   if (schema.type === 'object' && schema.properties) {
     let total = 0
     for (const [key, prop] of Object.entries(schema.properties)) {
-      if (isMetricsKey(key)) continue
+      if (isMetricsKey(key)) {
+        continue
+      }
       total += countQuestionsFromSchema(prop)
     }
     return total
@@ -253,7 +269,9 @@ function countQuestionsFromSchema(schema: any): number {
  * Counts how many questions defined in a schema have been answered.
  */
 function countAnswersFromSchemaAndState(schema: any, state: any): number {
-  if (!schema || typeof schema !== 'object') return 0
+  if (!schema || typeof schema !== 'object') {
+    return 0
+  }
 
   if (isPrimitiveSchema(schema)) {
     return isAnswered(state) ? 1 : 0
@@ -261,14 +279,18 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
 
   // If Array - Check first item
   if (schema.type === 'array' && schema.items) {
-    if (!Array.isArray(state) || state.length === 0) return 0
+    if (!Array.isArray(state) || state.length === 0) {
+      return 0
+    }
     return countAnswersFromSchemaAndState(schema.items, state[0])
   }
 
   if (schema.type === 'object' && schema.properties) {
     let total = 0
     for (const [key, prop] of Object.entries(schema.properties)) {
-      if (isMetricsKey(key)) continue
+      if (isMetricsKey(key)) {
+        continue
+      }
       total += countAnswersFromSchemaAndState(prop, state?.[key])
     }
     return total
@@ -323,7 +345,9 @@ export function getOverallCompletionStats(steps: StepNoRender[]): ModelFormStats
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
     totalPages += 1
-    if (stepStats.formCompleted) pagesCompleted += 1
+    if (stepStats.formCompleted) {
+      pagesCompleted += 1
+    }
   })
 
   return {
