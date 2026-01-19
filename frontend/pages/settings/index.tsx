@@ -24,7 +24,9 @@ export default function Settings() {
   const error = MultipleErrorWrapper(`Unable to load settings page`, {
     isCurrentUserError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>
