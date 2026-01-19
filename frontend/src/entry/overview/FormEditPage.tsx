@@ -299,14 +299,23 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
             </Stack>
           )}
           {isEdit && (
-            <SaveAndCancelButtons
-              onCancel={onCancel}
-              onSubmit={onSubmit}
-              openTextInputDialog={() => setJsonUploadDialogOpen(true)}
-              loading={loading}
-              cancelDataTestId='cancelEditEntryCardButton'
-              saveDataTestId='saveEntryCardButton'
-            />
+            <Stack direction='row' spacing={1}>
+              <FormGroup>
+                <FormControlLabel
+                  onClick={onToggleDisplayStats}
+                  control={<Switch checked={displayFormStats} />}
+                  label='Show Completion Stats'
+                />
+              </FormGroup>
+              <SaveAndCancelButtons
+                onCancel={onCancel}
+                onSubmit={onSubmit}
+                openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+                loading={loading}
+                cancelDataTestId='cancelEditEntryCardButton'
+                saveDataTestId='saveEntryCardButton'
+              />
+            </Stack>
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
