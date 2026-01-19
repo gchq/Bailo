@@ -48,48 +48,17 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!formContext.editMode && formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, formContext)
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
-        {mirroredState ? (
-          <>
-            <Typography>{mirroredState}</Typography>
-          </>
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: value ? 'unset' : 'italic',
-              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-            }}
-            aria-label={`Label for ${label}`}
-          >
-            No tags
-          </Typography>
-        )}
-        <AdditionalInformation>
-          {value ? (
-            <Box sx={{ whitespace: 'pre-wrap' }}>
-              {value.map((tag) => (
-                <Chip
-                  label={tag}
-                  key={tag}
-                  sx={{ width: 'fit-content', m: 0.5 }}
-                  onDelete={() => handleChipOnDelete(tag)}
-                />
-              ))}
-            </Box>
-          ) : undefined}
-        </AdditionalInformation>
-      </>
-    )
-  }
+  const mirroredState = getMirroredState(id, formContext)
 
   return (
-    <>
+    <AdditionalInformation
+      editMode={formContext.editMode}
+      mirroredState={mirroredState}
+      display={formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+    >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
           <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
@@ -151,6 +120,6 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Typography>
         </Stack>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

@@ -36,37 +36,17 @@ export default function RichTextInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, registry.formContext)
-
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
-        {mirroredState ? (
-          <MarkdownDisplay>{mirroredState}</MarkdownDisplay>
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: 'italic',
-              color: theme.palette.customTextInput.main,
-            }}
-          >
-            Unanswered
-          </Typography>
-        )}
-        <AdditionalInformation>{value ? <Typography>{value}</Typography> : undefined}</AdditionalInformation>
-      </>
-    )
-  }
+  const mirroredState = getMirroredState(id, registry.formContext)
 
   if (!registry.formContext.editMode) {
     return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
+      <AdditionalInformation
+        editMode={registry.formContext.editMode}
+        mirroredState={mirroredState}
+        display={registry.formContext.mirroredModel && value}
+        label={label}
+        id={id}
+      >
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
         ) : (
@@ -79,12 +59,18 @@ export default function RichTextInput({
             Unanswered
           </Typography>
         )}
-      </>
+      </AdditionalInformation>
     )
   }
 
   return (
-    <>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+    >
       <RichTextEditor
         value={value}
         onChange={onChange}
@@ -98,6 +84,6 @@ export default function RichTextInput({
         }
         key={label}
       />
-    </>
+    </AdditionalInformation>
   )
 }

@@ -39,56 +39,43 @@ export default function DateSelector({ onChange, value, label, registry, require
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, registry.formContext)
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
-        {mirroredState ? (
-          <Typography>{mirroredState}</Typography>
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: value ? 'unset' : 'italic',
-              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-            }}
-          >
-            {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
-          </Typography>
-        )}
-        <AdditionalInformation>{value ? <Typography>{value}</Typography> : undefined}</AdditionalInformation>
-      </>
-    )
-  }
+  const mirroredState = getMirroredState(id, registry.formContext)
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
-      {registry.formContext.editMode && (
-        <DatePicker
-          value={value ? dayjs(value) : undefined}
-          aria-label={`date input field for ${label}`}
-          onChange={handleChange}
-          format='DD-MM-YYYY'
-          sx={{ '.MuiInputBase-input': { p: '10px' } }}
-        />
-      )}
-      {!registry.formContext.editMode && (
-        <>
-          <Typography
-            sx={{
-              fontStyle: value ? 'unset' : 'italic',
-              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-            }}
-          >
-            {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
-          </Typography>
-        </>
-      )}
+      <AdditionalInformation
+        editMode={registry.formContext.editMode}
+        mirroredState={mirroredState}
+        display={registry.formContext.mirroredModel && value}
+        label={label}
+        id={id}
+        required={required}
+      >
+        <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
+          {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+        </Typography>
+        {registry.formContext.editMode && (
+          <DatePicker
+            value={value ? dayjs(value) : undefined}
+            aria-label={`date input field for ${label}`}
+            onChange={handleChange}
+            format='DD-MM-YYYY'
+            sx={{ '.MuiInputBase-input': { p: '10px' } }}
+          />
+        )}
+        {!registry.formContext.editMode && (
+          <>
+            <Typography
+              sx={{
+                fontStyle: value ? 'unset' : 'italic',
+                color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+              }}
+            >
+              {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
+            </Typography>
+          </>
+        )}
+      </AdditionalInformation>
     </Fragment>
   )
 }

@@ -79,62 +79,6 @@ export default function DataCardSelector({
     handleInputChange(event, value)
   }, 500)
 
-  if (registry && !registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, registry.formContext)
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
-        {mirroredState ? (
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {mirroredState.map((currentDataCardId) => (
-                <Chip
-                  label={
-                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                    'Unable to find data card name'
-                  }
-                  key={currentDataCardId}
-                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                  sx={{ width: 'fit-content' }}
-                />
-              ))}
-            </Stack>
-          </Box>
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: 'italic',
-              color: theme.palette.customTextInput.main,
-            }}
-          >
-            Unanswered
-          </Typography>
-        )}
-        <AdditionalInformation>
-          {currentValue.length > 0 ? (
-            <Box sx={{ overflowX: 'auto', p: 1 }}>
-              <Stack spacing={1} direction='row'>
-                {currentValue.map((currentDataCardId) => (
-                  <Chip
-                    label={
-                      dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                      'Unable to find data card name'
-                    }
-                    key={currentDataCardId}
-                    onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                    sx={{ width: 'fit-content' }}
-                  />
-                ))}
-              </Stack>
-            </Box>
-          ) : undefined}
-        </AdditionalInformation>
-      </>
-    )
-  }
-
   if (isDataCardsError) {
     return <MessageAlert message={isDataCardsError.info.message} severity='error' />
   }
@@ -143,8 +87,17 @@ export default function DataCardSelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && currentValue.length > 0}
+      label={label}
+      id={id}
+      required={required}
+    >
       {isDataCardsLoading && <Loading />}
       {registry.formContext && registry.formContext.editMode && (
         <>
@@ -244,6 +197,6 @@ export default function DataCardSelector({
           )}
         </>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

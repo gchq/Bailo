@@ -52,39 +52,64 @@ export default function MultipleDropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, registry.formContext)
+  const mirroredState = getMirroredState(id, registry.formContext)
 
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+  return (
+    <Fragment key={label}>
+      <AdditionalInformation
+        editMode={registry.formContext.editMode}
+        mirroredState={mirroredState}
+        display={registry.formContext.mirroredModel && value}
+        label={label}
+        id={id}
+        required={required}
+      >
+        <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
           {label}
+          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {mirroredState ? (
-          mirroredState.map((selectedValue) => (
-            <Typography
-              key={selectedValue}
-              sx={{
-                fontStyle: 'unset',
-                color: theme.palette.common.black,
-              }}
-            >
-              {selectedValue}
-            </Typography>
-          ))
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: 'italic',
-              color: theme.palette.customTextInput.main,
-            }}
-          >
-            Unanswered
-          </Typography>
+        {registry.formContext.editMode && (
+          <Autocomplete
+            multiple
+            size='small'
+            options={multipleDropdownOptions}
+            sx={(theme) => ({
+              input: {
+                color: theme.palette.common.white,
+                ...theme.applyStyles('light', {
+                  color: theme.palette.common.black,
+                }),
+              },
+              label: {
+                WebkitTextFillColor: theme.palette.common.white,
+                ...theme.applyStyles('light', {
+                  WebkitTextFillColor: theme.palette.common.black,
+                }),
+              },
+              '& .MuiInputBase-input.Mui-disabled': {
+                WebkitTextFillColor: disabledWebkitTextFillColor,
+              },
+            })}
+            onChange={handleChange}
+            value={value || []}
+            disabled={!registry.formContext.editMode}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label='Select an option below'
+                size='small'
+                id={id}
+                aria-label={`input field for ${label}`}
+                placeholder={value.length ? undefined : 'Unanswered'}
+                error={rawErrors && rawErrors.length > 0}
+              />
+            )}
+          />
         )}
-        <AdditionalInformation>
-          {value
-            ? value.map((selectedValue) => (
+        {!registry.formContext.editMode && (
+          <>
+            {value.length ? (
+              value.map((selectedValue) => (
                 <Typography
                   key={selectedValue}
                   sx={{
@@ -95,82 +120,19 @@ export default function MultipleDropdown({
                   {selectedValue}
                 </Typography>
               ))
-            : undefined}
-        </AdditionalInformation>
-      </>
-    )
-  }
-
-  return (
-    <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
-      {registry.formContext.editMode && (
-        <Autocomplete
-          multiple
-          size='small'
-          options={multipleDropdownOptions}
-          sx={(theme) => ({
-            input: {
-              color: theme.palette.common.white,
-              ...theme.applyStyles('light', {
-                color: theme.palette.common.black,
-              }),
-            },
-            label: {
-              WebkitTextFillColor: theme.palette.common.white,
-              ...theme.applyStyles('light', {
-                WebkitTextFillColor: theme.palette.common.black,
-              }),
-            },
-            '& .MuiInputBase-input.Mui-disabled': {
-              WebkitTextFillColor: disabledWebkitTextFillColor,
-            },
-          })}
-          onChange={handleChange}
-          value={value || []}
-          disabled={!registry.formContext.editMode}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label='Select an option below'
-              size='small'
-              id={id}
-              aria-label={`input field for ${label}`}
-              placeholder={value.length ? undefined : 'Unanswered'}
-              error={rawErrors && rawErrors.length > 0}
-            />
-          )}
-        />
-      )}
-      {!registry.formContext.editMode && (
-        <>
-          {value.length ? (
-            value.map((selectedValue) => (
+            ) : (
               <Typography
-                key={selectedValue}
                 sx={{
-                  fontStyle: 'unset',
-                  color: theme.palette.common.black,
+                  fontStyle: 'italic',
+                  color: theme.palette.customTextInput.main,
                 }}
               >
-                {selectedValue}
+                Unanswered
               </Typography>
-            ))
-          ) : (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
+      </AdditionalInformation>
     </Fragment>
   )
 }

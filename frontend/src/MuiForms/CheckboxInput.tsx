@@ -30,49 +30,41 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, registry.formContext)
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
-        {mirroredState ? (
-          <>
-            <Typography>{mirroredState}</Typography>
-          </>
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: value ? 'unset' : 'italic',
-              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-            }}
-            aria-label={`Label for ${label}`}
-          >
-            Unanswered
-          </Typography>
-        )}
-        <AdditionalInformation>{value ? <Typography>{value}</Typography> : undefined}</AdditionalInformation>
-      </>
-    )
-  }
+  const mirroredState = getMirroredState(id, registry.formContext)
 
   if (!registry.formContext.editMode && value == undefined) {
     return (
-      <Typography
-        sx={{
-          fontStyle: value ? 'unset' : 'italic',
-          color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-        }}
-        aria-label={`Label for ${label}`}
+      <AdditionalInformation
+        editMode={registry.formContext.editMode}
+        mirroredState={mirroredState}
+        display={registry.formContext.mirroredModel && value}
+        label={label}
+        id={id}
+        required={required}
       >
-        Unanswered
-      </Typography>
+        <Typography
+          sx={{
+            fontStyle: value ? 'unset' : 'italic',
+            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+          }}
+          aria-label={`Label for ${label}`}
+        >
+          Unanswered
+        </Typography>
+      </AdditionalInformation>
     )
   }
 
   return (
-    <Fragment key={label}>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      key={id}
+    >
       <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`} component='label' htmlFor={id}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -88,6 +80,6 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
           <Typography>{value ? 'Yes' : 'No'}</Typography>
         </>
       )}
-    </Fragment>
+    </AdditionalInformation>
   )
 }

@@ -139,35 +139,17 @@ export default function Metrics({ onChange, value, label, registry, required, id
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!registry.formContext.editMode && registry.formContext.mirroredModel) {
-    const mirroredState = getMirroredState(id, registry.formContext)
-    return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
-        {mirroredState ? (
-          table(mirroredState)
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: value ? 'unset' : 'italic',
-              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-            }}
-            aria-label={`Label for ${label}`}
-          >
-            Unanswered
-          </Typography>
-        )}
-        <AdditionalInformation sx={{ maxWidth: 'unset' }}>
-          {value.length > 0 ? table(value) : undefined}
-        </AdditionalInformation>
-      </>
-    )
-  }
+  const mirroredState = getMirroredState(id, registry.formContext)
 
   return (
-    <>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      required={required}
+      id={id}
+    >
       {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
           <Typography fontWeight='bold' aria-label={`label for ${label}`}>
@@ -180,15 +162,7 @@ export default function Metrics({ onChange, value, label, registry, required, id
           </Button>
         </Stack>
       )}
-      {registry.formContext && !registry.formContext.editMode && (
-        <>
-          <Typography fontWeight='bold'>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
-          {table(value)}
-        </>
-      )}
-    </>
+      {registry.formContext && !registry.formContext.editMode && <>{table(value)}</>}
+    </AdditionalInformation>
   )
 }
