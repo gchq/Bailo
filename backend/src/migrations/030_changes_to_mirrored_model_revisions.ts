@@ -24,7 +24,7 @@ export async function up() {
     model.set('card.metadata', {}, { strict: false })
     model.set('card.version', 1, { strict: false })
     if (model.card?.mirrored === undefined) {
-      model.set('card.mirrored', true, { strict: false })
+      model.set('card.mirrored', false, { strict: false })
     }
     await model.save()
   }
