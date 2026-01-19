@@ -97,7 +97,9 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   })
 
   useEffect(() => {
-    if (!entry || !schema) return
+    if (!entry || !schema) {
+      return
+    }
     const metadata =
       entry.kind === EntryKind.MIRRORED_MODEL && entry.mirroredCard ? entry.mirroredCard.metadata : entry.card.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)

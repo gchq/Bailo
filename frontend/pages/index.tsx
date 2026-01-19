@@ -141,7 +141,9 @@ export default function Marketplace() {
   } = router.query
 
   useEffect(() => {
-    if (filterFromQuery) setFilter(filterFromQuery as string)
+    if (filterFromQuery) {
+      setFilter(filterFromQuery as string)
+    }
     if (tagsFromQuery) {
       let tagsAsArray: string[] = []
       if (typeof tagsFromQuery === 'string') {
@@ -218,7 +220,9 @@ export default function Marketplace() {
   )
 
   const unreachablePeerList: string[] = useMemo(() => {
-    if (!peers) return []
+    if (!peers) {
+      return []
+    }
     return Array.from(peers.entries())
       .filter(([_key, value]) => isEnabled(value) && !isReachable(value))
       .map(([key]) => key)

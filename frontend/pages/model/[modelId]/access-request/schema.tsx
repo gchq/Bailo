@@ -19,7 +19,9 @@ export default function AccessRequestSchema() {
     isModelError,
   })
 
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>
