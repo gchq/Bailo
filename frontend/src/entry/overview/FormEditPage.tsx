@@ -1,9 +1,20 @@
 import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
-import PercentIcon from '@mui/icons-material/Percent'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import { Box, Button, Checkbox, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  FormGroup,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Switch,
+  Typography,
+} from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -212,6 +223,13 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           )}
           {!isEdit && (
             <Stack direction='row' spacing={1}>
+              <FormGroup>
+                <FormControlLabel
+                  onClick={onToggleDisplayStats}
+                  control={<Switch checked={displayFormStats} />}
+                  label='Show Completion Stats'
+                />
+              </FormGroup>
               {!readOnly && (
                 <Restricted
                   action='editEntryCard'
@@ -274,19 +292,6 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>View History</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={onToggleDisplayStats} dense>
-                  <ListItemIcon>
-                    <PercentIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText primary='View Completion Stats' />
-                  <Checkbox
-                    edge='end'
-                    checked={displayFormStats}
-                    tabIndex={-1}
-                    disableRipple
-                    onClick={(e) => e.stopPropagation()}
-                  />
                 </MenuItem>
               </Menu>
             </Stack>
