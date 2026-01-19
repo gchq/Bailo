@@ -108,6 +108,12 @@ export default function JsonSchemaForm({
           msg: error.message,
           anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
         })
+      } else {
+        sendNotification({
+          variant: 'error',
+          msg: 'Failed to save link to clipboard',
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
       }
     }
   }

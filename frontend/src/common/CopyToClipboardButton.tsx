@@ -22,6 +22,8 @@ export default function CopyToClipboardButton({
     } catch (error) {
       if (error instanceof Error) {
         sendNotification({ variant: 'error', msg: error.message })
+      } else {
+        sendNotification({ variant: 'error', msg: 'Failed to copy to clipboard' })
       }
     }
   }
