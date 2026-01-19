@@ -40,7 +40,9 @@ export default function NewAccessRequest() {
   )
 
   useEffect(() => {
-    if (!model || !schema || !currentUser) return
+    if (!model || !schema || !currentUser) {
+      return
+    }
 
     const defaultState = {
       overview: {
@@ -107,7 +109,9 @@ export default function NewAccessRequest() {
     isSchemaError,
     isCurrentUserError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

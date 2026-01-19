@@ -18,7 +18,9 @@ export default function ModelCardVersion() {
     isEntryCardError,
     isSchemaError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

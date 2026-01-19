@@ -443,9 +443,12 @@ describe('services > release', () => {
       ReleaseModelMock.findOne.mockResolvedValue(mockRelease)
 
       vi.mocked(authorisation.release).mockImplementation(async (_user, _model, action, _release) => {
-        if (action === ReleaseAction.View) return { success: true, id: '' }
-        if (action === ReleaseAction.Delete)
+        if (action === ReleaseAction.View) {
+          return { success: true, id: '' }
+        }
+        if (action === ReleaseAction.Delete) {
           return { success: false, info: 'You do not have permission to delete this release.', id: '' }
+        }
 
         return { success: false, info: 'Unknown action.', id: '' }
       })

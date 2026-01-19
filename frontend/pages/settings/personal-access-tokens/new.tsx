@@ -66,8 +66,12 @@ export default function NewToken() {
   )
 
   const entriesAutocompletePlaceholder = useMemo(() => {
-    if (isAllEntries) return 'All entries selected'
-    if (selectedEntries.length) return ''
+    if (isAllEntries) {
+      return 'All entries selected'
+    }
+    if (selectedEntries.length) {
+      return ''
+    }
     return 'Select entries'
   }, [isAllEntries, selectedEntries.length])
 

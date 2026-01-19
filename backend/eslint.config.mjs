@@ -58,6 +58,7 @@ const eslintConfig = [
       'simple-import-sort/exports': 'warn',
       'no-duplicate-imports': 'warn',
       'no-console': 'warn',
+      curly: ['error', 'all'],
     },
   },
 ]
