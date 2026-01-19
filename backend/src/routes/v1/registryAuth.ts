@@ -131,14 +131,8 @@ export async function checkAccess(access: Access, user: UserInterface): Promise<
   try {
     model = await getModelById(user, modelId)
   } catch (e) {
-    log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
-    // From https://docs.docker.com/reference/api/registry/auth/#example
-    // > If the client only has a subset of the requested access it must not be considered an error as it is not the responsibility of the token server to indicate authorization errors as part of this workflow
-    if (access.actions.every((a) => a === 'pull')) {
-      return { id: modelId, success: true }
-    }
-    // bad model id?
-    return { id: modelId, success: false, info: 'Bad modelId provided' }
+    log.warn({ userDn: user.dn, access, e }, 'ModelId not found')
+    return { id: modelId, success: false, info: 'ModelId not found' }
   }
 
   // Check for disallowed entry types (i.e. non model types)
@@ -210,20 +204,54 @@ export const getDockerRegistryAuth = [
       throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
-    const accesses = scopes.map(generateAccess)
+    const requestedAccesses = scopes.map(generateAccess)
+    const grantedAccesses: Access[] = []
 
-    for (const access of accesses) {
-      // Docker may ask pull on unrelated repos to optimise blob reuse
-      const isPush = access.actions.includes('push')
+    for (const access of requestedAccesses) {
+      const auth = await checkAccess(access, user)
 
-      const authResult = await checkAccess(access, user)
+      const requestedActions = new Set(access.actions)
+      const authorisedActions = new Set<Action>()
 
-      if (!admin && !authResult.success && isPush) {
-        throw Forbidden({ access }, authResult.info, rlog)
+      if (auth.success) {
+        for (const action of access.actions) {
+          // Never auto-grant wildcard (except admins)
+          if (action === '*' && !admin) {
+            continue
+          }
+          authorisedActions.add(action)
+        }
       }
+
+      const hasWrite = [...requestedActions].some((a) => a === 'push' || a === 'delete')
+      const hasAuthorisedWrite = [...authorisedActions].some((a) => a === 'push' || a === 'delete')
+
+      // Unauthorised write always fails
+      if (hasWrite && !hasAuthorisedWrite && !admin) {
+        throw Forbidden({ access }, 'Unauthorised write requested', rlog)
+      }
+
+      // Ignore unauthorised read-only scopes (containerd cross-mount)
+      if (authorisedActions.size === 0) {
+        rlog.debug({ access }, 'Ignoring unauthorised scope')
+        continue
+      }
+
+      grantedAccesses.push({
+        ...access,
+        actions: [...authorisedActions],
+      })
     }
 
-    const accessToken = await getAccessToken(user, accesses)
+    // Enforce non-empty write authorisation
+    if (
+      requestedAccesses.some((a) => a.actions.includes('push')) &&
+      !grantedAccesses.some((a) => a.actions.includes('push'))
+    ) {
+      throw Forbidden({}, 'No authorised push scopes', req.log)
+    }
+
+    const accessToken = await getAccessToken(user, grantedAccesses)
     rlog.trace('Successfully generated access token')
 
     res.json({ token: accessToken })
