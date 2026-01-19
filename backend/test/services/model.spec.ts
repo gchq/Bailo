@@ -444,9 +444,12 @@ describe('services > model', () => {
     const mockMetadata = { key: 'value' }
 
     vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelAction.View) return { success: true, id: '' }
-      if (action === ModelAction.Write)
+      if (action === ModelAction.View) {
+        return { success: true, id: '' }
+      }
+      if (action === ModelAction.Write) {
         return { success: false, info: 'You do not have permission to update this model card', id: '' }
+      }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })
@@ -466,9 +469,15 @@ describe('services > model', () => {
     const mockMetadata = { key: 'value' }
 
     vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelAction.View) return { success: true, id: '' }
-      if (action === ModelAction.Write) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
-      if (action === ModelAction.Update) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      if (action === ModelAction.View) {
+        return { success: true, id: '' }
+      }
+      if (action === ModelAction.Write) {
+        return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      }
+      if (action === ModelAction.Update) {
+        return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })

@@ -46,6 +46,7 @@ export default defineConfig([
       'simple-import-sort/exports': 'error',
       'no-duplicate-imports': 'warn',
       'no-console': 'warn',
+      curly: ['error', 'all'],
     },
   },
   {

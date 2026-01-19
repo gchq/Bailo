@@ -78,7 +78,9 @@ export default function MessageAlert({
 
   const displayButton = buttonText && buttonAction
 
-  if (!message) return null
+  if (!message) {
+    return null
+  }
 
   return (
     <Alert

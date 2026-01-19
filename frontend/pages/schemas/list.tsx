@@ -14,7 +14,9 @@ import SchemaTab from 'src/schemas/SchemaTab'
 export default function SchemasPage() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  if (isCurrentUserLoading) return <Loading />
+  if (isCurrentUserLoading) {
+    return <Loading />
+  }
 
   if (!currentUser || !currentUser.isAdmin) {
     return (
@@ -29,7 +31,9 @@ export default function SchemasPage() {
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isCurrentUserError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

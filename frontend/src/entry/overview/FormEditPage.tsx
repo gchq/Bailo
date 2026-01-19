@@ -98,7 +98,9 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   })
 
   useEffect(() => {
-    if (!entry || !schema) return
+    if (!entry || !schema) {
+      return
+    }
     const metadata = entry.card.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
     for (const step of steps) {
