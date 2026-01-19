@@ -1,6 +1,14 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import { Container, Card, Tab, Tabs } from '@mui/material'
 
-## Accessibility Statement
+<Container>
+<Tabs value={0}>
+<Tab label="Statement" href="/accessibility/statement" selected={true}/>
+<Tab label="Report" href="/accessibility/report"/>
+</Tabs>
+<Card sx={{ width: '100%', px: 4, mt: 'auto' }}>
+
+# Accessibility Statement
 
 This accessibility statement applies to **Bailo** stored at https://github.com/gchq/Bailo. This app is run by the Bailo
 team as part of **GCHQ**. We want as many people as possible to be able to use this app. That means we've built the app
@@ -16,8 +24,7 @@ needs.
 ### How accessible this app is
 
 The app is fully compliant with the **Web Content Accessibility Guidelines version 2.2 AA standard**. For detailed
-information on compliance please read the full
-[**accessibility test report**](/docs/users/accessibility/accessibility-report).
+information on compliance please read the full [**accessibility test report**](/accessibility/report).
 
 ### Reporting accessibility problems with this app
 
@@ -53,9 +60,9 @@ This app was last tested on **02/12/2025**. This test was carried out by the **B
 pages within the application. We tested a random selection of content to check that the app displays it in an accessible
 way.
 
-You can read the full [**accessibility test report**](/docs/users/accessibility/accessibility-report). This report is
-called an 'Accessibility Conformance Report'. It is created by filling in a 'Voluntary Product Accessibility Template ®'
-(VPAT). The VPAT tests if the app complies with WCAG 2.2 criteria.
+You can read the full [**accessibility test report**](/accessibility/report). This report is called an 'Accessibility
+Conformance Report'. It is created by filling in a 'Voluntary Product Accessibility Template ®' (VPAT). The VPAT tests
+if the app complies with WCAG 2.2 criteria.
 
 #### Testing methods used
 
@@ -75,6 +82,7 @@ that are highlighted within 4 weeks of being identified. Bailo is accountable fo
 ### Preparation of this accessibility statement
 
 This statement was created on this app was last tested on **2nd December 2025**. The test was carried out by the Bailo
-team. You can read the full [**accessibility test report**](/docs/users/accessibility/accessibility-report).
+team. You can read the full [**accessibility test report**](/accessibility/report).
 
-export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+</Card>
+</Container>
