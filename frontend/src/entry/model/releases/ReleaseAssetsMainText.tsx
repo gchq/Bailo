@@ -30,16 +30,6 @@ export default function ReleaseAssetsMainText({
     }
   }
 
-  const semverTitle = (
-    <>
-      <Stack direction='row' alignItems='center' spacing={1} width='100%'>
-        <Typography component='h2' variant='h6' color='primary' noWrap>
-          {release.semver}
-        </Typography>
-      </Stack>
-    </>
-  )
-
   return (
     <>
       <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' alignItems='center' spacing={2}>
@@ -50,12 +40,13 @@ export default function ReleaseAssetsMainText({
           spacing={1}
           sx={{ minWidth: 0 }}
         >
-          {includeLinks && (
-            <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
-              {semverTitle}
-            </Link>
-          )}
-          {!includeLinks && <>{semverTitle}</>}
+          <Link inert={!includeLinks} noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
+            <Stack direction='row' alignItems='center' spacing={1} width='100%'>
+              <Typography component='h2' variant='h6' color='primary' noWrap>
+                {release.semver}
+              </Typography>
+            </Stack>
+          </Link>
           {!hideCopySemver && (
             <CopyToClipboardButton
               textToCopy={release.semver}
