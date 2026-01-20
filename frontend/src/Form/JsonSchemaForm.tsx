@@ -12,7 +12,7 @@ import {
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
-import useNotification from 'src/hooks/useNotification'
+import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import { setStepState, widgets } from 'utils/formUtils'
@@ -35,7 +35,8 @@ export default function JsonSchemaForm({
   const theme = useTheme()
   const router = useRouter()
   const ref = useRef<HTMLDivElement | null>(null)
-  const sendNotification = useNotification()
+
+  const copyToClipboard = useCopyToClipboard()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -91,31 +92,13 @@ export default function JsonSchemaForm({
     )
   }
 
-  async function onShareSectionOnClick(sectionId: string) {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin + window.location.pathname}?page=${activeStep}#${sectionId}`,
-      )
-      sendNotification({
-        variant: 'success',
-        msg: `Link saved to clipboard`,
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-    } catch (error) {
-      if (error instanceof Error) {
-        sendNotification({
-          variant: 'error',
-          msg: error.message,
-          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-        })
-      } else {
-        sendNotification({
-          variant: 'error',
-          msg: 'Failed to save link to clipboard',
-          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-        })
-      }
-    }
+  function onShareSectionOnClick(sectionId: string) {
+    const link = `${window.location.origin}${window.location.pathname}?page=${activeStep}#${sectionId}`
+
+    copyToClipboard(link, 'Link saved to clipboard', 'Failed to save link to clipboard', {
+      horizontal: 'center',
+      vertical: 'bottom',
+    })
   }
 
   return (
