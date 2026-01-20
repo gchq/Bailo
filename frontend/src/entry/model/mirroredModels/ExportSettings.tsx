@@ -33,9 +33,6 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(destinationModelId === undefined || destinationModelId === '')
 
-  // TODO - Add the ability to filter releases needed for export (This functionality is not available on the backend)
-  // const [selectedReleases, setSelectedReleases] = useState<ReleaseInterface[]>([])
-
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     setLoading(true)
     event.preventDefault()
@@ -92,15 +89,6 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                         size='small'
                       />
                     </LabelledInput>
-                    {/*TODO - Add the ability to filter releases needed for export (This functionality is not available on the backend)
-              <ReleaseSelector
-                model={model}
-                selectedReleases={selectedReleases}
-                onUpdateSelectedReleases={handleUpdateSelectedReleases}
-                isReadOnly={isReadOnly}
-                requiredRolesText={requiredRolesText}
-              />
-               */}
                     <Button
                       sx={{ width: 'fit-content' }}
                       variant='contained'
