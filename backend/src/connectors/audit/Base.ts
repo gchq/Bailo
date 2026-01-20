@@ -171,86 +171,85 @@ export const AuditInfo = {
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
 export abstract class BaseAuditConnector {
-  abstract onCreateModel(req: Request, model: ModelDoc)
-  abstract onViewModel(req: Request, model: ModelDoc)
-  abstract onUpdateModel(req: Request, model: ModelDoc)
-  abstract onDeleteModel(req: Request, modelId: string)
-  abstract onSearchModel(req: Request, models: EntrySearchResult[])
+  abstract onCreateModel(req: Request, model: ModelDoc): Promise<void>
+  abstract onViewModel(req: Request, model: ModelDoc): Promise<void>
+  abstract onSearchModel(req: Request, models: EntrySearchResult[]): Promise<void>
+  abstract onUpdateModel(req: Request, model: ModelDoc): Promise<void>
+  abstract onDeleteModel(req: Request, modelId: string): Promise<void>
 
-  abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
-  abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
-  abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
-  abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
+  abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface): Promise<void>
+  abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface): Promise<void>
+  abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[]): Promise<void>
+  abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface): Promise<void>
 
-  abstract onCreateFile(req: Request, file: FileInterface)
-  abstract onViewFile(req: Request, file: FileInterface)
-  abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
-  abstract onDeleteFile(req: Request, modelId: string, fileId: string)
-  abstract onUpdateFile(req: Request, modelId: string, fileId: string)
+  abstract onCreateFile(req: Request, file: FileInterface): Promise<void>
+  abstract onViewFile(req: Request, file: FileInterface): Promise<void>
+  abstract onViewFiles(req: Request, modelId: string, files: FileInterface[]): Promise<void>
+  abstract onUpdateFile(req: Request, modelId: string, fileId: string): Promise<void>
+  abstract onDeleteFile(req: Request, modelId: string, fileId: string): Promise<void>
 
-  abstract onCreateRelease(req: Request, release: ReleaseDoc)
-  abstract onViewRelease(req: Request, release: ReleaseDoc)
-  abstract onUpdateRelease(req: Request, release: ReleaseDoc)
-  abstract onDeleteRelease(req: Request, modelId: string, semver: string)
-  abstract onViewReleases(req: Request, releases: ReleaseDoc[])
+  abstract onCreateRelease(req: Request, release: ReleaseDoc): Promise<void>
+  abstract onViewRelease(req: Request, release: ReleaseDoc): Promise<void>
+  abstract onViewReleases(req: Request, releases: ReleaseDoc[]): Promise<void>
+  abstract onUpdateRelease(req: Request, release: ReleaseDoc): Promise<void>
+  abstract onDeleteRelease(req: Request, modelId: string, semver: string): Promise<void>
 
-  abstract onCreateCommentResponse(req: Request, response: ResponseInterface)
-  abstract onCreateReviewResponse(req: Request, response: ResponseInterface)
+  abstract onCreateCommentResponse(req: Request, response: ResponseInterface): Promise<void>
+  abstract onCreateReviewResponse(req: Request, response: ResponseInterface): Promise<void>
+  abstract onViewResponses(req: Request, responseInterfaces: ResponseInterface[]): Promise<void>
+  abstract onUpdateResponse(req: Request, responseId: string): Promise<void>
 
-  abstract onViewResponses(req: Request, responseInterfaces: ResponseInterface[])
-  abstract onUpdateResponse(req: Request, responseId: string)
+  abstract onCreateUserToken(req: Request, token: TokenDoc): Promise<void>
+  abstract onViewUserTokens(req: Request, tokens: TokenDoc[]): Promise<void>
+  abstract onDeleteUserToken(req: Request, accessKey: string): Promise<void>
 
-  abstract onCreateUserToken(req: Request, token: TokenDoc)
-  abstract onViewUserTokens(req: Request, tokens: TokenDoc[])
-  abstract onDeleteUserToken(req: Request, accessKey: string)
+  abstract onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
+  abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
+  abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]): Promise<void>
+  abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
+  abstract onDeleteAccessRequest(req: Request, accessRequestId: string): Promise<void>
 
-  abstract onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
-  abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc)
-  abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
-  abstract onDeleteAccessRequest(req: Request, accessRequestId: string)
-  abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
+  abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]): Promise<void>
 
-  abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
+  abstract onCreateSchema(req: Request, schema: SchemaInterface): Promise<void>
+  abstract onViewSchema(req: Request, schema: SchemaInterface): Promise<void>
+  abstract onSearchSchemas(req: Request, schemas: SchemaInterface[]): Promise<void>
+  abstract onUpdateSchema(req: Request, schema: SchemaDoc): Promise<void>
+  abstract onDeleteSchema(req: Request, schemaId: string): Promise<void>
 
-  abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
-  abstract onCreateSchema(req: Request, schema: SchemaInterface)
-  abstract onViewSchema(req: Request, schema: SchemaInterface)
-  abstract onDeleteSchema(req: Request, schemaId: string)
-  abstract onUpdateSchema(req: Request, schema: SchemaDoc)
+  abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
+  abstract onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
+  abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]): Promise<void>
+  abstract onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
 
-  abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
-  abstract onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
-  abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
-  abstract onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
-
-  abstract onCreateInference(req: Request, inference: InferenceDoc)
-  abstract onUpdateInference(req: Request, inference: InferenceDoc)
-  abstract onViewInference(req: Request, inference: InferenceDoc)
-  abstract onViewInferences(req: Request, inference: InferenceDoc[])
-  abstract onDeleteInference(req: Request, inference: InferenceDoc)
+  abstract onCreateInference(req: Request, inference: InferenceDoc): Promise<void>
+  abstract onViewInference(req: Request, inference: InferenceDoc): Promise<void>
+  abstract onViewInferences(req: Request, inference: InferenceDoc[]): Promise<void>
+  abstract onUpdateInference(req: Request, inference: InferenceDoc): Promise<void>
+  abstract onDeleteInference(req: Request, inference: InferenceDoc): Promise<void>
 
   abstract onViewModelImages(
     req: Request,
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
-  )
-  abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface)
+  ): Promise<void>
+  abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 
-  abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
+  abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[]): Promise<void>
   abstract onCreateImport(
     req: Request,
     mirroredModel: ModelInterface,
     sourceModelId: string,
     exporter: string,
     importResult: Omit<MirrorInformation, 'metadata'>,
-  )
+  ): Promise<void>
 
-  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
-  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
-  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
-  abstract onDeleteReviewRole(req: Request, reviewRoleId: string)
+  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
+  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
+  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
+  abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
 
-  abstract onError(req: Request, error: BailoError)
+  abstract onError(req: Request, error: BailoError): Promise<void>
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
     if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
