@@ -3,32 +3,37 @@ import { postEntryExportToS3 } from 'actions/entry'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'
+import ReleaseSelector from 'src/entry/model/mirroredModels/ReleaseSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import { EntryInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ExportModelAgreementProps = {
-  modelId: string
+  model: EntryInterface
 }
 
-export default function ExportModelAgreement({ modelId }: ExportModelAgreementProps) {
+export default function ExportModelAgreement({ model }: ExportModelAgreementProps) {
   const [checked, setChecked] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [selectedReleases, setSelectedReleases] = useState<ReleaseInterface[]>([])
+
   const sendNotification = useNotification()
 
   const handleSubmit = async () => {
     setErrorMessage('')
     setLoading(true)
-    const response = await postEntryExportToS3(modelId, { disclaimerAgreement: checked })
+
+    const response = await postEntryExportToS3(model.id, {
+      disclaimerAgreement: checked,
+      semvers: selectedReleases.map((release) => release.semver),
+    })
+    setLoading(false)
 
     if (!response.ok) {
-      setLoading(false)
-
-      const error = await getErrorMessage(response)
-      return setErrorMessage(error)
+      return setErrorMessage(await getErrorMessage(response))
     } else {
-      setLoading(false)
       sendNotification({
         variant: 'success',
         msg: 'Successfully started export upload.',
@@ -37,8 +42,12 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
     }
   }
 
-  const handleChecked = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChecked = (event: ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
+  }
+
+  const handleUpdateSelectedReleases = (releases: ReleaseInterface[]) => {
+    setSelectedReleases(releases)
   }
 
   return (
@@ -52,6 +61,13 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
           <FormControlLabel
             control={<Checkbox checked={checked} onChange={handleChecked} />}
             label='I agree to the terms and conditions of this model export agreement'
+          />
+          <ReleaseSelector
+            model={model}
+            selectedReleases={selectedReleases}
+            onUpdateSelectedReleases={handleUpdateSelectedReleases}
+            isReadOnly={!checked}
+            requiredRolesText=''
           />
           <Restricted action='exportMirroredModel' fallback={<Button disabled>Submit</Button>}>
             <Button variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>

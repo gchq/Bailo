@@ -115,7 +115,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                   </Stack>
                 </AccordionDetails>
               </Accordion>
-              <ExportModelAgreement modelId={model.id} />
+              <ExportModelAgreement model={model} />
             </Stack>
           </Box>
         </Card>
