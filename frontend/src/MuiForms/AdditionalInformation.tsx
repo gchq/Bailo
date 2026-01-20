@@ -10,6 +10,7 @@ interface AdditionalInformationProps {
   editMode?: boolean
   display?: boolean
   required?: boolean
+  mirroredModel?: boolean
   mirroredState?: any
   label: string | undefined
   id: string
@@ -22,6 +23,7 @@ export default function AdditionalInformation({
   editMode = false,
   display = false,
   required = false,
+  mirroredModel = false,
   id,
   label = '',
   mirroredState,
@@ -39,6 +41,26 @@ export default function AdditionalInformation({
 
   if (isUiConfigLoading) {
     return <Loading />
+  }
+
+  if (!mirroredModel) {
+    return (
+      <>
+        {!editMode && (
+          <Typography
+            fontWeight='bold'
+            id={`${id}-label`}
+            aria-label={`Label for ${label}`}
+            component='label'
+            htmlFor={id}
+          >
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
+        )}
+        {mirroredState ? <Box>{mirroredState}</Box> : children}
+      </>
+    )
   }
 
   if (!display && !editMode) {

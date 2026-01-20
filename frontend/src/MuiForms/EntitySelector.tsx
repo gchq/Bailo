@@ -108,6 +108,7 @@ export default function EntitySelector({
         display={registry.formContext.mirroredModel && currentValue}
         label={label}
         id={id}
+        mirroredModel={registry.formContext.mirroredModel}
         required={required}
       >
         {currentUser && registry.formContext && registry.formContext.editMode && (

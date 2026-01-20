@@ -97,6 +97,7 @@ export default function DataCardSelector({
       label={label}
       id={id}
       required={required}
+      mirroredModel={registry.formContext.mirroredModel}
     >
       {isDataCardsLoading && <Loading />}
       {registry.formContext && registry.formContext.editMode && (
@@ -164,10 +165,6 @@ export default function DataCardSelector({
       )}
       {registry.formContext && !registry.formContext.editMode && (
         <>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           {currentValue.length === 0 && (
             <Typography
               sx={{

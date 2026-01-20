@@ -63,6 +63,7 @@ export default function MultipleDropdown({
         label={label}
         id={id}
         required={required}
+        mirroredModel={registry.formContext.mirroredModel}
       >
         <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
           {label}

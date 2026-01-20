@@ -149,6 +149,7 @@ export default function Metrics({ onChange, value, label, registry, required, id
       label={label}
       required={required}
       id={id}
+      mirroredModel={registry.formContext.mirroredModel}
     >
       {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>

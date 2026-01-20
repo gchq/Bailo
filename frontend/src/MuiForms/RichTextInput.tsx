@@ -46,6 +46,7 @@ export default function RichTextInput({
         display={registry.formContext.mirroredModel && value}
         label={label}
         id={id}
+        mirroredModel={registry.formContext.mirroredModel}
       >
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
@@ -70,6 +71,7 @@ export default function RichTextInput({
       display={registry.formContext.mirroredModel && value}
       label={label}
       id={id}
+      mirroredModel={registry.formContext.mirroredModel}
     >
       <RichTextEditor
         value={value}

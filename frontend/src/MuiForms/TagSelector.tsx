@@ -58,6 +58,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       label={label}
       id={id}
       required={required}
+      mirroredModel={formContext.mirroredModel}
     >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>

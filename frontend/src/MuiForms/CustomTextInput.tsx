@@ -50,7 +50,7 @@ export default function CustomTextInput({
   const mirroredState = getMirroredState(id, registry.formContext)
 
   return (
-    <Fragment >
+    <Fragment>
       <AdditionalInformation
         editMode={registry.formContext.editMode}
         mirroredState={mirroredState}
@@ -58,6 +58,7 @@ export default function CustomTextInput({
         label={label}
         id={id}
         required={required}
+        mirroredModel={registry.formContext.mirroredModel}
       >
         <TextField
           size='small'
