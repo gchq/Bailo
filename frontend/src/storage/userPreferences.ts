@@ -33,7 +33,7 @@ export const getUserPreferences = (): UserPreferences => {
  * Get the boolean to dictate if stats should be displayed.
  * @returns The boolean for displaying form stats.
  */
-export const getDisplayFormStats = () => {
+export const getDisplayFormStats = (): boolean => {
   const preferences: UserPreferences = getUserPreferences()
   return preferences?.displayFormStats ?? false
 }

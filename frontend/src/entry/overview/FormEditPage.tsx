@@ -58,9 +58,8 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
   // For displaying the stats around model information completion
-  const [calculateStats, setCalculateStats] = useState<number>(0)
-
-  const [displayFormStats, setDisplayFormStats] = useState<boolean>(getDisplayFormStats())
+  const [calculateStats, setCalculateStats] = useState(0)
+  const [displayFormStats, setDisplayFormStats] = useState(getDisplayFormStats())
 
   const open = Boolean(anchorEl)
 

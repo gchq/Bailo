@@ -21,7 +21,7 @@ import { getFormStats, getOverallCompletionStats, setStepState, widgets } from '
 export default function JsonSchemaForm({
   splitSchema,
   setSplitSchema,
-  calculateStats,
+  calculateStats = 0,
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
@@ -29,7 +29,7 @@ export default function JsonSchemaForm({
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
-  calculateStats: number // a number to be incremented in order to re-run stats
+  calculateStats?: number // a number to be incremented in order to re-run stats
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean

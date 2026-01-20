@@ -168,7 +168,7 @@ export default function EditableAccessRequestForm({
           errorMessage={errorMessage}
           readOnly={readOnly}
         />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} calculateStats={0} canEdit={isEdit} />
+        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         <ConfirmationDialogue
           open={open}
           title='Delete Access Request'

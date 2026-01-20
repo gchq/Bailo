@@ -133,7 +133,6 @@ export default function NewAccessRequest() {
                 <JsonSchemaForm
                   splitSchema={splitSchema}
                   setSplitSchema={setSplitSchema}
-                  calculateStats={0}
                   canEdit
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList

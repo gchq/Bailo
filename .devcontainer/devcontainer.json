@@ -18,8 +18,7 @@
         "ryanluker.vscode-coverage-gutters",
         "tamasfe.even-better-toml",
         "ms-azuretools.vscode-docker",
-        "mongodb.mongodb-vscode",
-        "vitest.explorer"
+        "mongodb.mongodb-vscode"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/bin/python3.12"

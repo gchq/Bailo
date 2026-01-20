@@ -231,9 +231,6 @@ function isPrimitiveSchema(schema: any): boolean {
   return ['string', 'number', 'boolean'].includes(schema.type)
 }
 
-/**
- * Counts how many questions are defined in a schema.
- */
 function countQuestionsFromSchema(schema: any): number {
   if (!schema || typeof schema !== 'object') {
     return 0
@@ -265,9 +262,6 @@ function countQuestionsFromSchema(schema: any): number {
   return 0
 }
 
-/**
- * Counts how many questions defined in a schema have been answered.
- */
 function countAnswersFromSchemaAndState(schema: any, state: any): number {
   if (!schema || typeof schema !== 'object') {
     return 0
