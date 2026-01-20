@@ -52,9 +52,6 @@ export default function DateSelector({ onChange, value, label, registry, require
         required={required}
         mirroredModel={registry.formContext.mirroredModel}
       >
-        <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-          {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
         {registry.formContext.editMode && (
           <DatePicker
             value={value ? dayjs(value) : undefined}

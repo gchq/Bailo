@@ -15,6 +15,7 @@ interface AdditionalInformationProps {
   label: string | undefined
   id: string
   sx?: SxProps
+  description?: string
 }
 
 export default function AdditionalInformation({
@@ -27,6 +28,7 @@ export default function AdditionalInformation({
   id,
   label = '',
   mirroredState,
+  description = undefined,
 }: AdditionalInformationProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const theme = useTheme()
@@ -46,19 +48,20 @@ export default function AdditionalInformation({
   if (!mirroredModel) {
     return (
       <>
-        {!editMode && (
-          <Typography
-            fontWeight='bold'
-            id={`${id}-label`}
-            aria-label={`Label for ${label}`}
-            component='label'
-            htmlFor={id}
-          >
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
-        )}
+        <Typography
+          fontWeight='bold'
+          id={`${id}-label`}
+          aria-label={`Label for ${label}`}
+          component='label'
+          htmlFor={id}
+        >
+          {label}
+          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+        </Typography>
         {mirroredState ? <Box>{mirroredState}</Box> : children}
+        <Typography variant='caption' color='textSecondary'>
+          {description}
+        </Typography>
       </>
     )
   }
@@ -88,6 +91,11 @@ export default function AdditionalInformation({
             Unanswered
           </Typography>
         )}
+        {description && (
+          <Typography variant='caption' color='textSecondary'>
+            {description}
+          </Typography>
+        )}
       </>
     )
   }
@@ -113,6 +121,11 @@ export default function AdditionalInformation({
               {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
             </Typography>
             {<>{children}</>}
+            {description && (
+              <Typography variant='caption' color='textSecondary'>
+                {description}
+              </Typography>
+            )}
           </Stack>
         </Box>
       )}
@@ -158,6 +171,7 @@ export default function AdditionalInformation({
               </Typography>
               {children}
             </Stack>
+            {description && <Typography variant='caption'>{description}</Typography>}
           </Box>
         </Stack>
       )}

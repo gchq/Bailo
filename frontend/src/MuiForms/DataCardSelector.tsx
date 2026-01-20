@@ -102,16 +102,6 @@ export default function DataCardSelector({
       {isDataCardsLoading && <Loading />}
       {registry.formContext && registry.formContext.editMode && (
         <>
-          <Typography
-            id={`${id}-label`}
-            fontWeight='bold'
-            aria-label={`label for ${label}`}
-            component='label'
-            htmlFor={id}
-          >
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Autocomplete<EntrySearchResult, true, true>
             multiple
             data-test='dataCardSelector'

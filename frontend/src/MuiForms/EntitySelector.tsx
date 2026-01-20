@@ -113,10 +113,6 @@ export default function EntitySelector({
       >
         {currentUser && registry.formContext && registry.formContext.editMode && (
           <>
-            <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-              {label}
-              {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-            </Typography>
             <Autocomplete<EntityObject, true, true>
               multiple
               data-test='entitySelector'
@@ -170,10 +166,6 @@ export default function EntitySelector({
         )}
         {registry.formContext && !registry.formContext.editMode && (
           <>
-            <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-              {label}
-              {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-            </Typography>
             {currentValue.length === 0 && (
               <Typography
                 sx={{

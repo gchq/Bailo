@@ -64,7 +64,6 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
       label={label}
       id={id}
       required={required}
-      key={id}
       mirroredModel={registry.formContext.mirroredModel}
     >
       <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`} component='label' htmlFor={id}>

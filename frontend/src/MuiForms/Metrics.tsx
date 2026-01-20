@@ -153,10 +153,6 @@ export default function Metrics({ onChange, value, label, registry, required, id
     >
       {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Stack spacing={2}>{metricItems}</Stack>
           <Button onClick={() => handleChange([...value, { name: '', value: 0 }])} aria-label='add metric button'>
             Add item

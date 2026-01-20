@@ -62,10 +62,6 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Stack
             direction={{ md: 'row', sm: 'column' }}
             spacing={2}

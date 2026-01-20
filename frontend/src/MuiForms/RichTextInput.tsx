@@ -45,6 +45,7 @@ export default function RichTextInput({
         mirroredState={mirroredState}
         display={registry.formContext.mirroredModel && value}
         label={label}
+        required={required}
         id={id}
         mirroredModel={registry.formContext.mirroredModel}
       >
@@ -72,18 +73,13 @@ export default function RichTextInput({
       label={label}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
+      description={registry.rootSchema.description}
     >
       <RichTextEditor
         value={value}
         onChange={onChange}
         textareaProps={{ disabled, id }}
         errors={rawErrors}
-        label={
-          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
-        }
         key={label}
       />
     </AdditionalInformation>
