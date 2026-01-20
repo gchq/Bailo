@@ -59,8 +59,8 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
         {
           ...scannerInfo,
           state: ScanState.Complete,
-          isInfected,
-          viruses,
+          isVulnerable: isInfected,
+          vulnerabilities: viruses,
           lastRunAt: new Date(),
         },
       ]

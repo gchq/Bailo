@@ -73,7 +73,7 @@ vi.mock('../../src/utils/id.js', () => idMock)
 
 const fileScanResult: FileScanResult = {
   state: 'complete',
-  isInfected: false,
+  isVulnerable: false,
   toolName: 'Test',
   lastRunAt: new Date(),
 }

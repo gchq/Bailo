@@ -55,14 +55,14 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
     }
 
     try {
-      const { isInfected: isVulnerable, viruses: vulnerabilities } = await this.av.scanStream(s3Stream)
-      log.debug({ file, result: { isVulnerable, vulnerabilities }, ...scannerInfo }, 'Scan complete.')
+      const { isInfected, viruses } = await this.av.scanStream(s3Stream)
+      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,
           state: ScanState.Complete,
-          isVulnerable,
-          vulnerabilities,
+          isVulnerable: isInfected,
+          vulnerabilities: viruses,
           lastRunAt: new Date(),
         },
       ]

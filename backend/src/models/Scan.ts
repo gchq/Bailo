@@ -47,8 +47,8 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
     state: { type: String, enum: Object.values(ScanState), required: true },
-    isInfected: { type: Boolean },
-    viruses: [{ type: String }],
+    isVulnerable: { type: Boolean },
+    vulnerabilities: [{ type: String }],
     lastRunAt: { type: Schema.Types.Date, required: true },
   },
   {

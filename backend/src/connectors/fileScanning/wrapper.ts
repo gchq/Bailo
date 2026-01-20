@@ -2,14 +2,14 @@ import { FileInterface } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseFileScanningConnector, FileScanningConnectorInfo } from './Base.js'
+import { BaseFileScanningConnector, BaseQueueFileScanningConnector, FileScanningConnectorInfo } from './Base.js'
 
 export class FileScanningWrapper extends BaseFileScanningConnector {
   toolName = this.constructor.name
   version = undefined
-  scanners: Set<BaseFileScanningConnector> = new Set<BaseFileScanningConnector>()
-
-  constructor(scanners: Set<BaseFileScanningConnector>) {
+  scanners: Set<BaseQueueFileScanningConnector> = new Set<BaseQueueFileScanningConnector>()
+  //Can these be changed to BaseQueueFileScanningConnector as theoretically it could cause infinite recursion (init() and scan())?
+  constructor(scanners: Set<BaseQueueFileScanningConnector>) {
     super()
     this.scanners = scanners
   }
