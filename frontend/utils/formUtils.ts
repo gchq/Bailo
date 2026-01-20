@@ -157,7 +157,9 @@ export function getStepsData(splitSchema: SplitSchemaNoRender, includeAll = fals
   const data: any = {}
 
   splitSchema.steps.forEach((step) => {
-    if (!includeAll && step.type !== 'Form') return
+    if (!includeAll && step.type !== 'Form') {
+      return
+    }
 
     data[step.section] = step.state
   })
@@ -172,8 +174,12 @@ export function setStepsData(
   data: any,
 ) {
   const newSteps = splitSchema.steps.map((step) => {
-    if (!data[step.section]) return { ...step }
-    if (step.type !== 'Form') return { ...step }
+    if (!data[step.section]) {
+      return { ...step }
+    }
+    if (step.type !== 'Form') {
+      return { ...step }
+    }
 
     return {
       ...step,

@@ -308,7 +308,9 @@ export async function searchModels(
         }
         if (response.errors) {
           for (const [peerId, error] of Object.entries(response.errors)) {
-            if (!results.errors) results.errors = {}
+            if (!results.errors) {
+              results.errors = {}
+            }
             results.errors[peerId] = error
             results.errors[peerId].message = error.message
           }

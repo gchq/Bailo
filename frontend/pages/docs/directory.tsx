@@ -107,7 +107,9 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
       let child = leaf.children?.find((node) => node.slug === currentId)
 
       if (!child) {
-        if (!leaf.children) leaf.children = []
+        if (!leaf.children) {
+          leaf.children = []
+        }
 
         leaf.children.push({
           slug: currentId,

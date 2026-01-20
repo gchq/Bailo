@@ -21,7 +21,9 @@ export default function Help() {
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <Container maxWidth='xl' sx={{ pb: 2 }}>

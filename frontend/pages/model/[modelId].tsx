@@ -99,7 +99,9 @@ export default function Model() {
     isCurrentUserError,
     isUiConfigError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

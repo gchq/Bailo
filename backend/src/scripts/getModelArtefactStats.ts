@@ -204,7 +204,9 @@ async function script() {
         dispatcher: agent,
       }).then((res) => res.json())) as { name: string; tags: string[] }
 
-      if (!tagsList.tags) return // no tags = skip
+      if (!tagsList.tags) {
+        return
+      } // no tags = skip
 
       // 5️⃣ Process each tag
       await Promise.all(
@@ -218,7 +220,9 @@ async function script() {
             dispatcher: agent,
           }).then((res) => res.json())) as { layers?: { size: number }[] }
 
-          if (!manifest.layers) return
+          if (!manifest.layers) {
+            return
+          }
 
           // Calculate total image size for this image (sum of layer sizes)
           const totalImageSize = manifest.layers.reduce((sum, layer) => sum + (layer.size || 0), 0)

@@ -105,7 +105,9 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   })
 
   useEffect(() => {
-    if (!entry || !schema) return
+    if (!entry || !schema) {
+      return
+    }
     const steps = getStepsFromSchema(
       schema,
       {},

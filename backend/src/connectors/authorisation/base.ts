@@ -46,7 +46,9 @@ export class BasicAuthorisationConnector {
     }
 
     const roles = await getModelSystemRoles(user, model)
-    if (roles.length === 0) return false
+    if (roles.length === 0) {
+      return false
+    }
 
     return true
   }
