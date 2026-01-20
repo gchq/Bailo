@@ -59,7 +59,7 @@ export default function AdditionalInformation({
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
         {mirroredState ? <Box>{mirroredState}</Box> : children}
-        <Typography variant='caption' color='textSecondary'>
+        <Typography variant='caption' color='textSecondary' fontWeight='bold'>
           {description}
         </Typography>
       </>
@@ -92,7 +92,7 @@ export default function AdditionalInformation({
           </Typography>
         )}
         {description && (
-          <Typography variant='caption' color='textSecondary'>
+          <Typography variant='caption' color='textSecondary' fontWeight='bold'>
             {description}
           </Typography>
         )}
@@ -122,7 +122,7 @@ export default function AdditionalInformation({
             </Typography>
             {<>{children}</>}
             {description && (
-              <Typography variant='caption' color='textSecondary'>
+              <Typography variant='caption' color='textSecondary' fontWeight='bold'>
                 {description}
               </Typography>
             )}
