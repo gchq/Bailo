@@ -24,7 +24,7 @@ export default function ReleaseDisplay({
   release,
   latestRelease,
   hideReviewBanner = false,
-  hideFileDownloads = false,
+  hideFileDownloads,
 }: ReleaseDisplayProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: model.id,
@@ -56,7 +56,12 @@ export default function ReleaseDisplay({
             <ReleaseAssetsMainText model={model} release={release} latestRelease={latestRelease} />
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
-              {!hideFileDownloads && <ReleaseAssetsAccordion model={model} release={release} mode='interactive' />}
+              <ReleaseAssetsAccordion
+                model={model}
+                release={release}
+                mode='interactive'
+                hideFileDownloads={hideFileDownloads}
+              />
               <ReleaseAssetsResponses model={model} release={release} />
             </Stack>
           </Stack>

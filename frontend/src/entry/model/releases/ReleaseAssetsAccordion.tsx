@@ -14,9 +14,15 @@ export interface ReleaseAssetsAccordionProps {
   model: EntryInterface
   release: ReleaseInterface
   mode: 'readonly' | 'interactive'
+  hideFileDownloads?: boolean
 }
 
-export default function ReleaseAssetsAccordion({ model, release, mode }: ReleaseAssetsAccordionProps) {
+export default function ReleaseAssetsAccordion({
+  model,
+  release,
+  mode,
+  hideFileDownloads = false,
+}: ReleaseAssetsAccordionProps) {
   const [expanded, setExpanded] = useState<'files' | 'images' | false>(false)
 
   const { scanners } = useGetFileScannerInfo()
@@ -38,7 +44,7 @@ export default function ReleaseAssetsAccordion({ model, release, mode }: Release
 
   return (
     <Stack spacing={1}>
-      {release.files.length > 0 && (
+      {!hideFileDownloads && release.files.length > 0 && (
         <Accordion expanded={expanded === 'files'} onChange={handleAccordionChange('files')}>
           <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
             <Typography fontWeight='bold'>
