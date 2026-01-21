@@ -703,3 +703,18 @@ export type PeerConfigStatus = {
   config: RemoteFederationConfig
   status: SystemStatus
 }
+
+// For completion stats on the model info page
+export interface FormStats {
+  totalQuestions: number
+  totalAnswers: number
+  percentageQuestionsComplete: number
+  formCompleted: boolean
+}
+
+// For completion stats on the model info page
+export interface ModelFormStats extends FormStats {
+  totalPages: number
+  pagesCompleted: number
+  percentagePagesComplete: number
+}
