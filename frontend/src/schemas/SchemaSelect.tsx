@@ -132,7 +132,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     isSchemasError,
     isCurrentUserError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

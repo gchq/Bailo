@@ -59,7 +59,9 @@ export default function PageWithTabs({
   })
 
   useEffect(() => {
-    if (!tabs.length) return
+    if (!tabs.length) {
+      return
+    }
     currentTabChanged(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
