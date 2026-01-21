@@ -126,7 +126,7 @@ export default function ReleaseSelector({
       <Typography fontWeight='bold'>Select Releases</Typography>
       <Tooltip title={requiredRolesText}>
         <Typography variant='caption' color='text.secondary'>
-          Select one or more releases to export.
+          Select any releases to include in the export.
         </Typography>
       </Tooltip>
       <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
