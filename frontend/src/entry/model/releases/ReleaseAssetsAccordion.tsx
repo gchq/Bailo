@@ -45,7 +45,11 @@ export default function ReleaseAssetsAccordion({
   return (
     <Stack spacing={1}>
       {!hideFileDownloads && release.files.length > 0 && (
-        <Accordion expanded={expanded === 'files'} onChange={handleAccordionChange('files')}>
+        <Accordion
+          expanded={expanded === 'files'}
+          onChange={handleAccordionChange('files')}
+          data-test={`release-files-accordion-${release.semver}`}
+        >
           <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
             <Typography fontWeight='bold'>
               {`${expanded === 'files' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}
