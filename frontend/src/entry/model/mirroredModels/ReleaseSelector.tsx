@@ -103,8 +103,8 @@ export default function ReleaseSelector({
               }
             />
           </ListItemButton>
-          <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
-          <Stack spacing={1}>
+          <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider variant='middle' />}</Box>
+          <Stack spacing={1} padding={2}>
             <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
             <ReleaseAssetsResponses model={model} release={release} includeResponses={false} />
           </Stack>
