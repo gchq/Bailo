@@ -150,7 +150,7 @@ export const getDownloadFile = [
 
     res.status(fetchRange ? 206 : 200)
 
-    stream.on('error', (err) => {
+    stream.once('error', (err) => {
       if (!res.headersSent) {
         const bailoError: BailoError = {
           code: 500,
@@ -169,7 +169,7 @@ export const getDownloadFile = [
       }
     })
 
-    res.on('close', () => {
+    res.once('close', () => {
       if (!stream.readableEnded) {
         log.debug({ fileId }, 'Response has been closed before file stream has finished. Destroying file stream.')
         stream.destroy()
