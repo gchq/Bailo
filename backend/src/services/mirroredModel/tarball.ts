@@ -110,6 +110,8 @@ export async function extractTarGzStream(
   return new Promise((resolve, reject) => {
     let metadata: MirrorMetadata | undefined
     let importer: BaseImporter | undefined
+    // `settled` is used to force the finalising events 'finish' and 'error' to only happen once across all relevant streams.
+    // This allows for safer synchronous handling of async events, as well as only triggering stream destruction once on any error.
     let settled = false
 
     const { ungzipStream, untarStream } = createUnTarGzStreams()
@@ -147,12 +149,12 @@ export async function extractTarGzStream(
       }
     }
 
-    ungzipStream.on('error', async (error) => {
+    ungzipStream.on('error', (error) => {
       log.error({ error, ...logData }, 'Gunzip stream failed.')
       fail(error)
     })
 
-    untarStream.on('error', async (error) => {
+    untarStream.on('error', (error) => {
       log.error({ error, ...logData }, 'Tar extraction failed.')
       fail(error)
     })
@@ -175,8 +177,9 @@ export async function extractTarGzStream(
       }
     })
 
-    untarStream.on('entry', async (entry, entryStream, next) => {
-      // Async entry handling safely inside a sync stream callback, ensuring all async errors are caught and routed to `fail`
+    untarStream.on('entry', (entry, entryStream, next) => {
+      // Async entry handling safely inside a sync stream callback, ensuring all async errors are caught and routed to `fail`.
+      // See https://github.com/gchq/Bailo/pull/3115/changes#r2713416899 for more details.
       ;(async () => {
         try {
           log.debug({ entry, ...logData }, 'Processing un-tarred entry.')
