@@ -26,14 +26,14 @@ const baseScannerMock = vi.hoisted(() => ({
     Error: 'error',
   },
 }))
-vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 
 const fileScanningMock = vi.hoisted(() => ({
   info: vi.fn(() => []),
   scan: vi.fn(() => new Promise(() => [ArtefactScanResult])),
   init: vi.fn(() => {}),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
+vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 describe('routes > accessRequest > postAccessRequest', () => {
   test('200 > ok', async () => {

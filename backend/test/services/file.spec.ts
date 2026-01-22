@@ -22,7 +22,7 @@ import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/connectors/fileScanning/index.js')
+vi.mock('../../src/connectors/artefactScanning/index.js')
 
 const FileModelMock = getTypedModelMock('FileModel')
 const ScanModelMock = getTypedModelMock('ScanModel')
@@ -82,7 +82,7 @@ const fileScanningMock = vi.hoisted(() => ({
   scannersInfo: vi.fn(() => []),
   startScanners: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
+vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
@@ -114,7 +114,7 @@ const baseScannerMock = vi.hoisted(() => ({
     Error: 'error',
   },
 }))
-vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 
 const clamscan = vi.hoisted(() => ({ on: vi.fn() }))
 vi.mock('clamscan', () => ({

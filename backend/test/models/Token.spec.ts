@@ -16,7 +16,7 @@ const baseScannerMock = vi.hoisted(() => ({
     Error: 'error',
   },
 }))
-vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 
 const sha256Mocks = vi.hoisted(() => ({
   digest: vi.fn(),

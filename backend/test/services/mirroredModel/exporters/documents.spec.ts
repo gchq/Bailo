@@ -36,7 +36,7 @@ vi.mock('../../../../src/services/log.js', () => logMocks)
 const scannersMocks = vi.hoisted(() => ({
   default: { info: vi.fn() },
 }))
-vi.mock('../../../../src/connectors/fileScanning/index.js', () => scannersMocks)
+vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
 
 const configMocks = vi.hoisted(() => ({
   default: { modelMirror: { export: { maxSize: 1000 } } },

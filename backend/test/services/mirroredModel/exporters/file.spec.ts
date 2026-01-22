@@ -31,7 +31,7 @@ const scannersMocks = vi.hoisted(() => ({
     info: vi.fn(),
   },
 }))
-vi.mock('../../../../src/connectors/fileScanning/index.js', () => scannersMocks)
+vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
 
 const configMocks = vi.hoisted(() => ({
   default: {
