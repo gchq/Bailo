@@ -14,13 +14,14 @@ import {
   ListItemIcon,
   ListItemText,
   Stack,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
 import { useCallback, useMemo, useState } from 'react'
+import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
+import MirrorInfo from 'src/common/MirrorInfo'
 import Paginate from 'src/common/Paginate'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
@@ -33,7 +34,6 @@ type ReleaseSelectorProps = {
   selectedReleases: ReleaseInterface[]
   onUpdateSelectedReleases: (values: ReleaseInterface[]) => void
   isReadOnly: boolean
-  requiredRolesText: string
 }
 
 export default function ReleaseSelector({
@@ -41,7 +41,6 @@ export default function ReleaseSelector({
   selectedReleases,
   onUpdateSelectedReleases,
   isReadOnly,
-  requiredRolesText,
 }: ReleaseSelectorProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [checkedReleases, setCheckedReleases] = useState<ReleaseInterface[]>([])
@@ -123,12 +122,10 @@ export default function ReleaseSelector({
 
   return (
     <Stack spacing={2} width='100%'>
-      <Typography fontWeight='bold'>Select Releases</Typography>
-      <Tooltip title={requiredRolesText}>
-        <Typography variant='caption' color='text.secondary'>
-          Select any releases to include in the export.
-        </Typography>
-      </Tooltip>
+      <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
+        <Typography fontWeight='bold'>Select Releases</Typography>
+        <HelpDialog title='Mirror Export Info' content={<MirrorInfo />} />
+      </Stack>
       <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
         Select releases
       </Button>

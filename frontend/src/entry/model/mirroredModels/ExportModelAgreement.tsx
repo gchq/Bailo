@@ -67,7 +67,6 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
             selectedReleases={selectedReleases}
             onUpdateSelectedReleases={handleUpdateSelectedReleases}
             isReadOnly={!checked}
-            requiredRolesText=''
           />
           <Restricted action='exportMirroredModel' fallback={<Button disabled>Submit</Button>}>
             <Button variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>
