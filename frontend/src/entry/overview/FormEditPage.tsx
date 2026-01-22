@@ -210,10 +210,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
             </Stack>
           </div>
           {schemaMigrations.length > 0 && entry.kind !== EntryKind.MIRRORED_MODEL && (
-            <Restricted
-              action='editEntryCard'
-              fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
-            >
+            <Restricted action='editEntryCard' fallback={<></>}>
               <MessageAlert
                 severity='info'
                 message={`There is a migration available for this ${EntryKindLabel[entry.kind]}`}
