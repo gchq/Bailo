@@ -20,7 +20,7 @@ export async function up() {
   }
 
   for (const model of mirroredModels) {
-    if (!model.mirroredCard) {
+    if (!model.mirroredCard || Object.keys(model.mirroredCard).length === 0) {
       model.set('mirroredCard', { ...model.card, mirrored: true }, { strict: false })
       model.set('card.metadata', {}, { strict: false })
       model.set('card.version', 1, { strict: false })
