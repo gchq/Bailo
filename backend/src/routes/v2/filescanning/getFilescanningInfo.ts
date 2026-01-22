@@ -8,6 +8,6 @@ interface GetFileScanningInfoResponse {
 
 export const getFilescanningInfo = [
   async (req: Request, res: Response<GetFileScanningInfoResponse>): Promise<void> => {
-    res.json({ scanners: scanners.info().scannerNames })
+    res.json({ scanners: scanners.scannersInfo().scannerNames })
   },
 ]

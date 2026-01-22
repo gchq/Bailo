@@ -26,11 +26,11 @@ with ModelScan via a
 
 ## Minimal Configuration
 
-| Name                                          | Description                                                                           | Value  |
-| --------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
-| `connectors.fileScanners.kinds`               | A list of the file scanner names to enable                                            | `[]`   |
-| `connectors.fileScanners.retryDelayInMinutes` | Number of minutes between scans on a given file                                       | `60`   |
-| `connectors.fileScanners.maxInitRetries`      | Number of times the microservice is attempted to be reached before failing at startup | `5`    |
-| `connectors.fileScanners.initRetryDelay`      | Delay between successive microservice pings in milliseconds                           | `5000` |
+| Name                                              | Description                                                                           | Value  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
+| `connectors.artefactScanners.kinds`               | A list of the file scanner names to enable                                            | `[]`   |
+| `connectors.artefactScanners.retryDelayInMinutes` | Number of minutes between scans on a given file                                       | `60`   |
+| `connectors.artefactScanners.maxInitRetries`      | Number of times the microservice is attempted to be reached before failing at startup | `5`    |
+| `connectors.artefactScanners.initRetryDelay`      | Delay between successive microservice pings in milliseconds                           | `5000` |
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

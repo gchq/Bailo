@@ -71,7 +71,7 @@ modelscan:
   enabled: true
 
 connectors:
-  fileScanners:
+  artefactScanners:
     kinds: ['clamAV', 'modelScan']
 
 openshift:
@@ -138,7 +138,7 @@ modelscan:
   enabled: true
 
 connectors:
-  fileScanners:
+  artefactScanners:
     kinds: ['clamAV', 'modelScan']
 
 ```
@@ -298,10 +298,10 @@ oauth:
 | `connectors.authentication.kind`  | Name of the connector to be used for authentication  | `silly`  |
 | `connectors.authorisation.kind`  | Name of the connector to be used for authorisation  | `basic`  |
 | `connectors.audit.kind`  | Name of the connector to be used for auditing  | `silly`  |
-| `connectors.fileScanners.kinds` | A list of the file scanner names to enable. See local.yaml example above  | `[]`  |
-| `connectors.fileScanners.retryDelayInMinutes` | Number of minutes between scans on a given file   | `60`  |
-| `connectors.fileScanners.maxInitRetries` | Number of times the microservice is attempted to be reached before failing at startup  | `5`    |
-| `connectors.fileScanners.initRetryDelay` | Delay between successive microservice pings in milliseconds    | `5000` |
+| `connectors.artefactScanners.kinds` | A list of the file scanner names to enable. See local.yaml example above  | `[]`  |
+| `connectors.artefactScanners.retryDelayInMinutes` | Number of minutes between scans on a given file   | `60`  |
+| `connectors.artefactScanners.maxInitRetries` | Number of times the microservice is attempted to be reached before failing at startup  | `5`    |
+| `connectors.artefactScanners.initRetryDelay` | Delay between successive microservice pings in milliseconds    | `5000` |
 | `instrumentation.enabled`  | Enable OpenTelemetry instrumentation | `false`  |
 | `instrumentation.debug`  | Enable instrumentation debugging  | `false`  |
 | `modelMirror.import.enabled`  | Enable creation of mirrored models  | `false`  |

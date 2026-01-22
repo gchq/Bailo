@@ -85,7 +85,7 @@ module.exports = {
   },
 
   connectors: {
-    fileScanners: {
+    artefactScanners: {
       kinds: ['clamAV', 'modelScan'],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,

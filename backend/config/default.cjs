@@ -275,7 +275,7 @@ module.exports = {
       kind: 'silly',
     },
 
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,

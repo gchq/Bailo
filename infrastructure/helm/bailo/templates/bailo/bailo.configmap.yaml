@@ -243,11 +243,11 @@ data:
           kind: '{{ .Values.connectors.audit.kind }}',
         },
 
-        fileScanners: {
-          kinds: {{ toJson .Values.connectors.fileScanners.kinds }},
-          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }},
-          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
-          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
+        artefactScanners: {
+          kinds: {{ toJson .Values.connectors.artefactScanners.kinds }},
+          retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }},
+          maxInitRetries: {{ .Values.connectors.artefactScanners.maxInitRetries }},
+          initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }},
         },
       },
 
