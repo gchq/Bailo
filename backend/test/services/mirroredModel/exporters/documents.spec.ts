@@ -34,7 +34,7 @@ const logMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/log.js', () => logMocks)
 
 const scannersMocks = vi.hoisted(() => ({
-  default: { info: vi.fn() },
+  default: { scannersInfo: vi.fn() },
 }))
 vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
 
@@ -90,7 +90,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     fileServiceMocks.getTotalFileSize.mockResolvedValue(500)
     modelServiceMocks.getModelCardRevisions.mockResolvedValue([{ version: 'v1', toJSON: () => ({}) }])
     releaseServiceMocks.getAllFileIds.mockResolvedValue(['fileId'])
-    scannersMocks.default.info.mockReturnValue(false)
+    scannersMocks.default.scannersInfo.mockReturnValue(false)
     authMocks.default.model.mockResolvedValue({ success: true })
   })
 
@@ -139,7 +139,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init throws BadReq if AV scan issues (missing scan)', async () => {
-    scannersMocks.default.info.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
     const badFile = { id: 'f', name: 'name', avScan: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
@@ -153,7 +153,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init throws BadReq if AV scan incomplete', async () => {
-    scannersMocks.default.info.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
     const incompleteFile = {
       id: 'f',
       name: 'name',
@@ -171,7 +171,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init throws BadReq if AV scan failed', async () => {
-    scannersMocks.default.info.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
     const infectedFile = { id: 'f', name: 'name', avScan: [{ state: ArtefactScanState.Complete, isVulnerable: true }] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([infectedFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)

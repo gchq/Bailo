@@ -28,7 +28,7 @@ vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const scannersMocks = vi.hoisted(() => ({
   default: {
-    info: vi.fn(),
+    scannersInfo: vi.fn(),
   },
 }))
 vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
@@ -81,7 +81,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     fileServiceMocks.downloadFile.mockResolvedValue({ Body: new Readable() })
     authMocks.default.model.mockResolvedValue({ success: true })
     authMocks.default.file.mockResolvedValue({ success: true })
-    scannersMocks.default.info.mockReturnValue(false)
+    scannersMocks.default.scannersInfo.mockReturnValue(false)
   })
 
   test('constructor sets file reference', () => {
@@ -134,7 +134,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init throws BadReq if AV scans missing', () => {
-    scannersMocks.default.info.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
     const badFile = { ...mockFile, avScan: [] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file is missing AV scan(s).\nMethod `FileExporter._init` failure.', {
@@ -147,7 +147,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init throws BadReq if AV scans incomplete', () => {
-    scannersMocks.default.info.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
     const badFile = { ...mockFile, avScan: [{ state: ArtefactScanState.InProgress, isVulnerable: false }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has incomplete AV scan(s).\nMethod `FileExporter._init` failure.', {
@@ -160,7 +160,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init throws BadReq if AV scans infected', () => {
-    scannersMocks.default.info.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
     const badFile = { ...mockFile, avScan: [{ state: ArtefactScanState.Complete, isVulnerable: true }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has failed AV scan(s).\nMethod `FileExporter._init` failure.', {
