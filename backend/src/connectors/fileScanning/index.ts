@@ -14,9 +14,7 @@ export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 const fileScanConnectors: Set<BaseQueueFileScanningConnector> = new Set<BaseQueueFileScanningConnector>()
 let scannerWrapper: undefined | FileScanningWrapper = undefined
 
-//TODO does this need to be exported?
-//TODO Does this name need to be changed?
-export async function addFileScanners(cache = true) {
+async function addFileScanners(cache = true): Promise<FileScanningWrapper> {
   if (scannerWrapper && cache) {
     return scannerWrapper
   }
@@ -46,7 +44,7 @@ export async function addFileScanners(cache = true) {
   }
 
   scannerWrapper = new FileScanningWrapper(fileScanConnectors)
-  await scannerWrapper.init()
+  await scannerWrapper.initialiseScanners()
   return scannerWrapper
 }
 

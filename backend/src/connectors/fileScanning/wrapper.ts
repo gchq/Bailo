@@ -2,19 +2,15 @@ import { FileInterface } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseFileScanningConnector, BaseQueueFileScanningConnector, FileScanningConnectorInfo } from './Base.js'
+import { BaseQueueFileScanningConnector, FileScanningConnectorInfo } from './Base.js'
 
-export class FileScanningWrapper extends BaseFileScanningConnector {
-  toolName = this.constructor.name
-  version = undefined
+export class FileScanningWrapper {
   scanners: Set<BaseQueueFileScanningConnector> = new Set<BaseQueueFileScanningConnector>()
-  //Can these be changed to BaseQueueFileScanningConnector as theoretically it could cause infinite recursion (init() and scan())?
   constructor(scanners: Set<BaseQueueFileScanningConnector>) {
-    super()
     this.scanners = scanners
   }
 
-  async init() {
+  async initialiseScanners() {
     for (const scanner of this.scanners) {
       log.info({ toolName: scanner.toolName }, `Scanner initialising...`)
       let attempt = 0
@@ -40,13 +36,13 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
       if (attempt > config.connectors.fileScanners.maxInitRetries) {
         throw ConfigurationError(
           `Could not initialise scanner after max attempts, make sure that it is setup and configured correctly.`,
-          { failedAttempts: attempt, toolName: this.toolName },
+          { failedAttempts: attempt, toolName: scanner.toolName },
         )
       }
     }
   }
 
-  info(): FileScanningConnectorInfo & { scannerNames: string[] } {
+  scannersInfo(): FileScanningConnectorInfo & { scannerNames: string[] } {
     const scannersInfo = Array.from(this.scanners).map((scanner) => {
       return scanner.info()
     })
@@ -55,7 +51,7 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
     return { toolName: this.constructor.name, scannerNames: scannerNames }
   }
 
-  async scan(file: FileInterface) {
+  async startScans(file: FileInterface) {
     const results = await Promise.all(
       Array.from(this.scanners).map((scanner) => {
         log.info(
