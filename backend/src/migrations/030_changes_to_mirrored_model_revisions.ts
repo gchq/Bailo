@@ -20,13 +20,15 @@ export async function up() {
   }
 
   for (const model of mirroredModels) {
-    model.set('mirroredCard', { ...model.card, mirrored: true }, { strict: false })
-    model.set('card.metadata', {}, { strict: false })
-    model.set('card.version', 1, { strict: false })
-    if (model.card?.mirrored === undefined) {
-      model.set('card.mirrored', false, { strict: false })
+    if (!model.mirroredCard || !model.mirroredCard.schemaId) {
+      model.set('mirroredCard', { ...model.card, mirrored: true }, { strict: false })
+      model.set('card.metadata', {}, { strict: false })
+      model.set('card.version', 1, { strict: false })
+      if (model.card?.mirrored === undefined) {
+        model.set('card.mirrored', false, { strict: false })
+      }
+      await model.save()
     }
-    await model.save()
   }
 }
 
