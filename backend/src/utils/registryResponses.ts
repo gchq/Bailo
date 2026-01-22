@@ -1,6 +1,6 @@
 import { z, ZodSchema } from 'zod'
 
-import { InternalError } from '../utils/error.js'
+import { InternalError } from './error.js'
 
 /**
  * Important: while HTTP headers are case insensitive, TS always handles them as lower case

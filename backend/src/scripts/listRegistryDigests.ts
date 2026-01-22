@@ -1,9 +1,9 @@
-import { AcceptManifestMediaTypeHeaderValue } from '../clients/registryResponses.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 async function script() {
   await connectToMongoose()

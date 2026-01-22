@@ -13,7 +13,6 @@
  */
 import prettyBytes from 'pretty-bytes'
 
-import { AcceptManifestMediaTypeHeaderValue } from '../clients/registryResponses.js'
 import FileModel from '../models/File.js'
 import ModelModel, { EntryKind } from '../models/Model.js'
 import ReleaseModel from '../models/Release.js'
@@ -23,6 +22,7 @@ import log from '../services/log.js'
 import { joinDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 function calculateAverages(values: number[]) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length

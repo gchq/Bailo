@@ -9,13 +9,13 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
-import { OCIEmptyMediaType } from '../clients/registryResponses.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { OCIEmptyMediaType } from '../utils/registryResponses.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
