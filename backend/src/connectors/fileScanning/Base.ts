@@ -1,13 +1,23 @@
 import PQueue from 'p-queue'
 
 import { FileInterface } from '../../models/File.js'
+import { ImageRefInterface } from '../../models/Release.js'
 import { ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
 
-export type FileScanResult = Pick<
+//TODO Remove file-specific mentions, but do I replace with artefact? or keep bare?
+
+export type ArtefactScanResult = Pick<
   ScanInterface,
   'toolName' | 'scannerVersion' | 'state' | 'isVulnerable' | 'vulnerabilities' | 'lastRunAt'
->
+> &
+  (
+    | { AdditionalFileScanInfo?: string; AdditionalImageScanInfo?: null }
+    | { AdditionalFileScanInfo?: null; AdditionalImageScanInfo?: string }
+  )
+
+//TODO this may need to change
+type ArtefactInterface = FileInterface | ImageRefInterface
 
 export const ScanState = {
   NotScanned: 'notScanned',
@@ -17,20 +27,20 @@ export const ScanState = {
 } as const
 export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
-export type FileScanningConnectorInfo = Pick<FileScanResult, 'toolName' | 'scannerVersion'>
+export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion'>
 
-export abstract class BaseFileScanningConnector {
+export abstract class ArtefactBaseScanningConnector {
   abstract readonly toolName: string
   abstract readonly version: string | undefined
 
   abstract init()
-  abstract scan(file: FileInterface): Promise<FileScanResult[]>
+  abstract scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]>
 
-  info(): FileScanningConnectorInfo {
+  info(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version }
   }
 
-  async scanError(message: string, context?: object): Promise<FileScanResult[]> {
+  async scanError(message: string, context?: object): Promise<ArtefactScanResult[]> {
     const scannerInfo = this.info()
     log.error({ ...context, ...scannerInfo }, message)
     return [
@@ -43,21 +53,21 @@ export abstract class BaseFileScanningConnector {
   }
 }
 
-export abstract class BaseQueueFileScanningConnector extends BaseFileScanningConnector {
+export abstract class BaseQueueArtefactScanningConnector extends ArtefactBaseScanningConnector {
   abstract readonly queue: PQueue
 
-  abstract _scan(file: FileInterface): Promise<FileScanResult[]>
+  abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]>
 
-  async scan(file: FileInterface): Promise<FileScanResult[]> {
-    log.debug({ file, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
+  async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]> {
+    log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResult = await this.queue
-      .add(() => this._scan(file))
+      .add(() => this._scan(artefact))
       .catch((error) => {
-        return this.scanError('Queued scan threw an error.', { error, file })
+        return this.scanError('Queued scan threw an error.', { error, artefact })
       })
     // return type of `queue.add()` is Promise<void | ...> so reject void responses
     if (scanResult === null || typeof scanResult !== 'object') {
-      return this.scanError('Queued scan failed to correctly return.', { file })
+      return this.scanError('Queued scan failed to correctly return.', { artefact })
     }
     return scanResult
   }

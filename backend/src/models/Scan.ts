@@ -23,9 +23,8 @@ export type ScanInterface = {
   | {
       artefactKind: typeof ArtefactKind.Image
       repositoryName: string
-      // use Digest as image Tags can be overwritten but digests are immutable
-      imageDigest: string
-      // TODO: ultimately use backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
+      layerDigest: string
+      packageList: string[]
     }
 )
 
@@ -42,7 +41,8 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     artefactKind: { type: String, enum: Object.values(ArtefactKind), required: true },
     fileId: { type: String },
     repositoryName: { type: String },
-    imageDigest: { type: String },
+    layerDigest: { type: String },
+    packageList: [{ type: String }],
 
     toolName: { type: String, required: true },
     scannerVersion: { type: String },

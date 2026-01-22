@@ -8,9 +8,9 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Base.js'
+import { ArtefactScanResult, BaseQueueArtefactScanningConnector, ScanState } from './Base.js'
 
-export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnector {
+export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.avScanning.modelscan.concurrency })
   toolName: string = 'ModelScan'
   version: string | undefined = undefined
@@ -25,7 +25,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
     return this
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult[]> {
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {

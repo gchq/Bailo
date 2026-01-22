@@ -12,7 +12,7 @@ import {
 } from '../clients/s3.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
+import { ArtefactScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
@@ -70,13 +70,15 @@ export async function uploadFile(
 async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
   if (scannersInfo && scannersInfo.scannerNames && file.size > 0) {
-    const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
+    const resultsInprogress: ArtefactScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.startScans(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
+    scanners
+      .startScans(file)
+      .then((resultsArray: ArtefactScanResult[]) => updateFileWithResults(file._id, resultsArray))
   }
 
   const avScan = await ScanModel.find({ fileId: file._id.toString() })
@@ -193,7 +195,7 @@ export async function finishUploadMultipartFile(
   return await scanFile(file)
 }
 
-async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
+async function updateFileWithResults(_id: Schema.Types.ObjectId, results: ArtefactScanResult[]) {
   for (const result of results) {
     const updateExistingResult = await ScanModel.updateOne(
       { fileId: _id.toString(), toolName: result.toolName },
@@ -375,7 +377,7 @@ export async function markFileAsCompleteAfterImport(path: string) {
 }
 
 async function fileScanDelay(file: FileInterface): Promise<number> {
-  const delay = config.connectors.fileScanners.retryDelayInMinutes
+  const delay = config.connectors.artefactScanners.retryDelayInMinutes
   if (delay === undefined) {
     return 0
   }

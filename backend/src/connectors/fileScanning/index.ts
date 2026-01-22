@@ -1,51 +1,51 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseQueueFileScanningConnector } from './Base.js'
+import { BaseQueueArtefactScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
 import { ModelScanFileScanningConnector } from './modelScan.js'
-import { FileScanningWrapper } from './wrapper.js'
+import { ArtefactScanningWrapper } from './wrapper.js'
 
-export const FileScanKind = {
+export const ArtefactScanKind = {
   ClamAv: 'clamAV',
   ModelScan: 'modelScan',
 } as const
-export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
+export type ArtefactScanKindKeys = (typeof ArtefactScanKind)[keyof typeof ArtefactScanKind]
 
-const fileScanConnectors: Set<BaseQueueFileScanningConnector> = new Set<BaseQueueFileScanningConnector>()
-let scannerWrapper: undefined | FileScanningWrapper = undefined
+const artefactScanConnectors: Set<BaseQueueArtefactScanningConnector> = new Set<BaseQueueArtefactScanningConnector>()
+let scannerWrapper: undefined | ArtefactScanningWrapper = undefined
 
-async function addFileScanners(cache = true): Promise<FileScanningWrapper> {
+async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrapper> {
   if (scannerWrapper && cache) {
     return scannerWrapper
   }
-  for (const fileScanner of config.connectors.fileScanners.kinds) {
-    switch (fileScanner) {
-      case FileScanKind.ClamAv:
+  for (const artefactScanner of config.connectors.artefactScanners.kinds) {
+    switch (artefactScanner) {
+      case ArtefactScanKind.ClamAv:
         try {
           const scanner = new ClamAvFileScanningConnector()
-          fileScanConnectors.add(scanner)
+          artefactScanConnectors.add(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise Clam AV', { error })
         }
         break
-      case FileScanKind.ModelScan:
+      case ArtefactScanKind.ModelScan:
         try {
           const scanner = new ModelScanFileScanningConnector()
-          fileScanConnectors.add(scanner)
+          artefactScanConnectors.add(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise ModelScan', { error })
         }
         break
       default:
-        throw ConfigurationError(`'${fileScanner}' is not a valid file scanning kind.`, {
-          validKinds: Object.values(FileScanKind),
+        throw ConfigurationError(`'${artefactScanner}' is not a valid file scanning kind.`, {
+          validKinds: Object.values(ArtefactScanKind),
         })
     }
   }
 
-  scannerWrapper = new FileScanningWrapper(fileScanConnectors)
+  scannerWrapper = new ArtefactScanningWrapper(artefactScanConnectors)
   await scannerWrapper.initialiseScanners()
   return scannerWrapper
 }
 
-export default await addFileScanners()
+export default await addArtefactScanners()

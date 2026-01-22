@@ -36,7 +36,7 @@ const config: PartialDeep<Config> = {
     authorisation: {
       kind: 'basic',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },

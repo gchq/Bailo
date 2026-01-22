@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { FileScanResult, ScanState } from '../../src/connectors/fileScanning/Base.js'
+import { ArtefactScanResult, ScanState } from '../../src/connectors/fileScanning/Base.js'
 import {
   downloadFile,
   finishUploadMultipartFile,
@@ -52,7 +52,7 @@ const configMock = vi.hoisted(
         },
       },
       connectors: {
-        fileScanners: {
+        artefactScanners: {
           kinds: ['clamAV'],
           retryDelayInMinutes: 5,
           maxInitRetries: 5,
@@ -71,7 +71,7 @@ const idMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/utils/id.js', () => idMock)
 
-const fileScanResult: FileScanResult = {
+const fileScanResult: ArtefactScanResult = {
   state: 'complete',
   isVulnerable: false,
   toolName: 'Test',
@@ -79,8 +79,8 @@ const fileScanResult: FileScanResult = {
 }
 
 const fileScanningMock = vi.hoisted(() => ({
-  info: vi.fn(() => []),
-  scan: vi.fn(() => new Promise(() => [fileScanResult])),
+  scannersInfo: vi.fn(() => []),
+  startScanners: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
 vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
@@ -150,7 +150,7 @@ describe('services > file', () => {
   test('uploadFile > virus scan initialised', async () => {
     vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ clamdscan: 'test' })
     vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
-      fileScanners: {
+      artefactScanners: {
         kinds: ['clamAV'],
       },
     })
