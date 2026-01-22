@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 
-import scanners from '../../../connectors/fileScanning/index.js'
+import scanners from '../../../connectors/artefactScanning/index.js'
 
 interface GetFileScanningInfoResponse {
   scanners: string[]

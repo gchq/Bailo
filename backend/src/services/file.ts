@@ -10,10 +10,10 @@ import {
   putObjectStream,
   startMultipartUpload,
 } from '../clients/s3.js'
+import { ArtefactScanResult, ArtefactScanState } from '../connectors/artefactScanning/Base.js'
+import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { ArtefactScanResult, ScanState } from '../connectors/fileScanning/Base.js'
-import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
@@ -72,7 +72,7 @@ async function scanFile(file: FileInterfaceDoc) {
   if (scannersInfo && scannersInfo.scannerNames && file.size > 0) {
     const resultsInprogress: ArtefactScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
-      state: ScanState.InProgress,
+      state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
@@ -422,7 +422,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   if (scannersInfo && scannersInfo.scannerNames) {
     const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
-      state: ScanState.InProgress,
+      state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)

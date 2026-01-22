@@ -2,8 +2,8 @@ import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../../../src/connectors/authorisation/actions.js'
-import { ScanState } from '../../../../src/connectors/fileScanning/Base.js'
 import { FileExporter } from '../../../../src/services/mirroredModel/exporters/file.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 
@@ -65,7 +65,7 @@ const mockFile = {
   id: 'fileId',
   name: 'test.txt',
   size: 500,
-  avScan: [{ state: ScanState.Complete, isInfected: false }],
+  avScan: [{ state: ArtefactScanState.Complete, isVulnerable: false }],
 } as any
 const mockLogData = { extra: 'info', exporterType: 'FileExporter', exportId: 'exportId' }
 
@@ -148,7 +148,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if AV scans incomplete', () => {
     scannersMocks.default.info.mockReturnValue(true)
-    const badFile = { ...mockFile, avScan: [{ state: ScanState.InProgress, isInfected: false }] }
+    const badFile = { ...mockFile, avScan: [{ state: ArtefactScanState.InProgress, isVulnerable: false }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has incomplete AV scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
@@ -161,7 +161,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if AV scans infected', () => {
     scannersMocks.default.info.mockReturnValue(true)
-    const badFile = { ...mockFile, avScan: [{ state: ScanState.Complete, isInfected: true }] }
+    const badFile = { ...mockFile, avScan: [{ state: ArtefactScanState.Complete, isVulnerable: true }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has failed AV scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,

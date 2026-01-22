@@ -19,13 +19,13 @@ export type ArtefactScanResult = Pick<
 //TODO this may need to change
 type ArtefactInterface = FileInterface | ImageRefInterface
 
-export const ScanState = {
+export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',
   Complete: 'complete',
   Error: 'error',
 } as const
-export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion'>
 
@@ -46,7 +46,7 @@ export abstract class ArtefactBaseScanningConnector {
     return [
       {
         ...scannerInfo,
-        state: ScanState.Error,
+        state: ArtefactScanState.Error,
         lastRunAt: new Date(),
       },
     ]

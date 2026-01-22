@@ -1,7 +1,7 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
-import { ScanState } from '../connectors/fileScanning/Base.js'
+import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
@@ -131,9 +131,9 @@ export const scanInterfaceSchema = z.object({
     .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
-  state: z.nativeEnum(ScanState).openapi({ example: 'complete' }),
-  isInfected: z.boolean().optional().openapi({ example: true }),
-  viruses: z.array(z.string().openapi({ example: 'Win.Test.EICAR_HDB-1' })).optional(),
+  state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
+  isVulnerable: z.boolean().optional().openapi({ example: true }),
+  vulnerabilities: z.array(z.string().openapi({ example: 'Win.Test.EICAR_HDB-1' })).optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
   _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
   id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),

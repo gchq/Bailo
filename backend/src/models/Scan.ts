@@ -1,6 +1,6 @@
 import { model, ObjectId, Schema } from 'mongoose'
 
-import { ScanState, ScanStateKeys } from '../connectors/fileScanning/Base.js'
+import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export type ScanInterface = {
@@ -8,7 +8,7 @@ export type ScanInterface = {
 
   toolName: string
   scannerVersion?: string
-  state: ScanStateKeys
+  state: ArtefactScanStateKeys
   isVulnerable?: boolean
   vulnerabilities?: string[]
   lastRunAt: Date
@@ -46,7 +46,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
 
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
-    state: { type: String, enum: Object.values(ScanState), required: true },
+    state: { type: String, enum: Object.values(ArtefactScanState), required: true },
     isVulnerable: { type: Boolean },
     vulnerabilities: [{ type: String }],
     lastRunAt: { type: Schema.Types.Date, required: true },

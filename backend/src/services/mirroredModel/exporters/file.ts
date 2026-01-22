@@ -1,9 +1,9 @@
 import { Readable } from 'node:stream'
 
+import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
+import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { ScanState } from '../../../connectors/fileScanning/Base.js'
-import scanners from '../../../connectors/fileScanning/index.js'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
@@ -34,12 +34,12 @@ export class FileExporter extends BaseExporter {
       })
     }
 
-    if (scanners.info()) {
+    if (scanners.scannersInfo()) {
       if (!this.file.avScan || this.file.avScan.length === 0) {
         throw BadReq('The file is missing AV scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
+      } else if (this.file.avScan.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
         throw BadReq('The file has incomplete AV scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.avScan.some((scanResult) => scanResult.isInfected)) {
+      } else if (this.file.avScan.some((scanResult) => scanResult.isVulnerable)) {
         throw BadReq('The file has failed AV scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }

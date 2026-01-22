@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanResult } from '../../../src/connectors/artefactScanning/Base.js'
 import { getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
-import { ArtefactScanResult } from '../../../src/connectors/fileScanning/Base.js'
 
 vi.mock('../../../src/services/model.js', () => ({
   default: {

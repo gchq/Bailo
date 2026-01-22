@@ -9,7 +9,7 @@ const bcryptMocks = vi.hoisted(() => ({
 vi.mock('bcryptjs', () => ({ default: bcryptMocks }))
 
 const baseScannerMock = vi.hoisted(() => ({
-  ScanState: {
+  ArtefactScanState: {
     NotScanned: 'notScanned',
     InProgress: 'inProgress',
     Complete: 'complete',

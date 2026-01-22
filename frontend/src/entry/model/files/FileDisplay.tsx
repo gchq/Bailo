@@ -160,7 +160,7 @@ export default function FileDisplay({
       return 0
     }
     return file.avScan.reduce((acc, scan) => {
-      return scan.viruses ? scan.viruses.length + acc : acc
+      return scan.vulnerabilities ? scan.vulnerabilities.length + acc : acc
     }, 0)
   }, [])
 
@@ -277,7 +277,7 @@ export default function FileDisplay({
           <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
             {file.avScan.map((scanResult) => (
               <Fragment key={scanResult.toolName}>
-                {scanResult.isInfected ? (
+                {scanResult.isVulnerable ? (
                   <Stack spacing={2}>
                     <Stack spacing={1} direction='row'>
                       <Error color='error' />
@@ -289,7 +289,10 @@ export default function FileDisplay({
                       <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
                     )}
                     <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                    <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
+                    <ul>
+                      {scanResult.vulnerabilities &&
+                        scanResult.vulnerabilities.map((vulnerability) => <li key={vulnerability}>{vulnerability}</li>)}
+                    </ul>
                   </Stack>
                 ) : (
                   <Stack spacing={2}>

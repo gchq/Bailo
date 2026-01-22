@@ -104,8 +104,8 @@ export interface ScanResultInterface {
   _id: string
   state: ScanStateKeys
   scannerVersion?: string
-  isInfected?: boolean
-  viruses?: Array<string>
+  isVulnerable?: boolean
+  vulnerabilities?: Array<string>
   toolName: string
   lastRunAt: string
 

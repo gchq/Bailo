@@ -1,7 +1,7 @@
 import prettyBytes from 'pretty-bytes'
 
-import { ScanState } from '../../../connectors/fileScanning/Base.js'
-import scanners from '../../../connectors/fileScanning/index.js'
+import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
+import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
@@ -61,7 +61,7 @@ export class DocumentsExporter extends BaseExporter {
         }
       }
 
-      if (scanners.info()) {
+      if (scanners.scannersInfo()) {
         const scanErrors: {
           missingScan: Array<{ name: string; id: string }>
           incompleteScan: Array<{ name: string; id: string }>
@@ -70,9 +70,9 @@ export class DocumentsExporter extends BaseExporter {
         for (const file of this.files) {
           if (!file.avScan || file.avScan.length === 0) {
             scanErrors.missingScan.push({ name: file.name, id: file.id })
-          } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
+          } else if (file.avScan.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
             scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-          } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
+          } else if (file.avScan.some((scanResult) => scanResult.isVulnerable)) {
             scanErrors.failedScan.push({ name: file.name, id: file.id })
           }
         }

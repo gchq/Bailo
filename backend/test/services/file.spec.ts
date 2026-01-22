@@ -2,9 +2,9 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { ArtefactScanResult, ScanState } from '../../src/connectors/fileScanning/Base.js'
 import {
   downloadFile,
   finishUploadMultipartFile,
@@ -107,7 +107,7 @@ const testFileId = '73859F8D26679D2E52597326'
 const testFileIdReversed = testFileId.split('').reverse().join('')
 
 const baseScannerMock = vi.hoisted(() => ({
-  ScanState: {
+  ArtefactScanState: {
     NotScanned: 'notScanned',
     InProgress: 'inProgress',
     Complete: 'complete',
@@ -563,7 +563,7 @@ describe('services > file', () => {
     ])
     ScanModelMock.find.mockResolvedValueOnce([
       {
-        state: ScanState.Complete,
+        state: ArtefactScanState.Complete,
         lastRunAt: new Date(createdAtTimeInMilliseconds),
       },
     ])
@@ -581,7 +581,7 @@ describe('services > file', () => {
     ])
     ScanModelMock.find.mockResolvedValueOnce([
       {
-        state: ScanState.Complete,
+        state: ArtefactScanState.Complete,
       },
     ])
     await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
@@ -597,7 +597,7 @@ describe('services > file', () => {
         _id: { toString: vi.fn(() => testFileId) },
       },
     ])
-    ScanModelMock.find.mockResolvedValueOnce([{ state: ScanState.Complete, lastRunAt: new Date() }])
+    ScanModelMock.find.mockResolvedValueOnce([{ state: ArtefactScanState.Complete, lastRunAt: new Date() }])
     await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
       /^Please wait 5 minutes before attempting a rescan file.txt/,
     )

@@ -8,7 +8,7 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, BaseQueueArtefactScanningConnector, ScanState } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, BaseQueueArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -60,7 +60,7 @@ export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnec
       return [
         {
           ...scannerInfo,
-          state: ScanState.Complete,
+          state: ArtefactScanState.Complete,
           isVulnerable: isInfected,
           vulnerabilities: viruses,
           lastRunAt: new Date(),
