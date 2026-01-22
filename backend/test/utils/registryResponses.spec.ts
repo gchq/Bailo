@@ -4,7 +4,7 @@ import {
   BaseApiCheckResponseBody,
   BaseApiCheckResponseHeaders,
   parseRegistryResponse,
-} from '../../src/clients/registryResponses.js'
+} from '../../src/utils/registryResponses.js'
 
 describe('clients > registryResponses', () => {
   test('parseRegistryResponse > success', () => {

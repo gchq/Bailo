@@ -115,7 +115,7 @@ function generateAccess(scope: any) {
   }
 }
 
-export async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+export async function checkAccess(access: Access, user: UserInterface, admin?: boolean): Promise<AuthResponse> {
   if (access.name.startsWith(softDeletePrefix)) {
     const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
     log.warn({ userDn: user.dn, access }, info)
@@ -126,21 +126,58 @@ export async function checkAccess(access: Access, user: UserInterface): Promise<
     }
   }
 
+  const hasWriteAccess = access.actions.some((action) => (['push', 'delete', '*'] as Action[]).includes(action))
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
     model = await getModelById(user, modelId)
   } catch (e) {
-    log.warn({ userDn: user.dn, access, e }, 'ModelId not found')
-    return { id: modelId, success: false, info: 'ModelId not found' }
+    log.warn({ userDn: user.dn, access, e }, 'ModelId not found.')
+    if (hasWriteAccess) {
+      return { id: modelId, success: false, info: 'ModelId not found for write operation.' }
+    }
+    return { id: modelId, success: false, info: 'ModelId not found for read operation.' }
+  }
+
+  // Enforce users are explicit on the actions they wish to perform but allow admins to use wildcard `*`
+  if (!admin && access.actions.some((action) => action === '*')) {
+    return { id: modelId, success: false, info: 'No use of `*` action without an admin token.' }
   }
 
   // Check for disallowed entry types (i.e. non model types)
   if (!([EntryKind.Model, EntryKind.MirroredModel] as EntryKindKeys[]).includes(model.kind)) {
-    return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}` }
+    return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}.` }
+  }
+
+  // Further restrict mirrored model actions
+  if (
+    model.kind == EntryKind.MirroredModel &&
+    !access.actions.every((action) => (['pull', 'list', '*'] as Action[]).includes(action))
+  ) {
+    return {
+      id: modelId,
+      success: false,
+      info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
+    }
   }
 
   const auth = await authorisation.image(user, model, access)
+
+  if (!auth.success) {
+    if (hasWriteAccess) {
+      return {
+        id: modelId,
+        success: false,
+        info: 'Unauthorised write requested.',
+      }
+    }
+    return {
+      id: modelId,
+      success: false,
+      info: 'Unauthorised read requested.',
+    }
+  }
+
   return auth
 }
 
@@ -208,38 +245,23 @@ export const getDockerRegistryAuth = [
     const grantedAccesses: Access[] = []
 
     for (const access of requestedAccesses) {
-      const auth = await checkAccess(access, user)
-
-      const requestedActions = new Set(access.actions)
-      const authorisedActions = new Set<Action>()
-
-      if (auth.success) {
-        for (const action of access.actions) {
-          // Never auto-grant wildcard (except admins)
-          if (action === '*' && !admin) {
-            continue
-          }
-          authorisedActions.add(action)
+      const authResult = await checkAccess(access, user, admin)
+      if (!authResult.success) {
+        // Ignore unauthorised read-only scopes (containerd cross-mount)
+        if (
+          authResult.info === 'Unauthorised read requested.' ||
+          authResult.info === 'ModelId not found for read operation.'
+        ) {
+          rlog.debug({ access }, 'Ignoring unauthorised scope.')
+          continue
         }
-      }
 
-      const hasWrite = [...requestedActions].some((a) => a === 'push' || a === 'delete')
-      const hasAuthorisedWrite = [...authorisedActions].some((a) => a === 'push' || a === 'delete')
-
-      // Unauthorised write always fails
-      if (hasWrite && !hasAuthorisedWrite && !admin) {
-        throw Forbidden({ access }, 'Unauthorised write requested', rlog)
-      }
-
-      // Ignore unauthorised read-only scopes (containerd cross-mount)
-      if (authorisedActions.size === 0) {
-        rlog.debug({ access }, 'Ignoring unauthorised scope')
-        continue
+        throw Forbidden({ access }, authResult.info, rlog)
       }
 
       grantedAccesses.push({
         ...access,
-        actions: [...authorisedActions],
+        actions: access.actions,
       })
     }
 
@@ -248,11 +270,16 @@ export const getDockerRegistryAuth = [
       requestedAccesses.some((a) => a.actions.includes('push')) &&
       !grantedAccesses.some((a) => a.actions.includes('push'))
     ) {
-      throw Forbidden({}, 'No authorised push scopes', req.log)
+      throw Forbidden({ requestedAccesses }, 'No authorised push scopes.', req.log)
+    }
+
+    // Enforce non-empty authorisation
+    if (grantedAccesses.length == 0) {
+      throw Forbidden({ requestedAccesses }, 'No authorised scopes.', req.log)
     }
 
     const accessToken = await getAccessToken(user, grantedAccesses)
-    rlog.trace('Successfully generated access token')
+    rlog.trace('Successfully generated access token.')
 
     res.json({ token: accessToken })
   },

@@ -107,7 +107,7 @@ describe('registryAuth', () => {
 
       const auth = await checkAccess({ name, actions: ['push'] } as any, user)
 
-      expect(auth).toStrictEqual({ id: modelId, success: false, info: 'ModelId not found' })
+      expect(auth).toStrictEqual({ id: modelId, success: false, info: 'ModelId not found for write operation.' })
     })
 
     test('failure > incorrect entry type', async () => {
@@ -117,16 +117,32 @@ describe('registryAuth', () => {
         kind: EntryKind.DataCard,
       })
 
-      const auth = await checkAccess({ name } as any, user)
+      const auth = await checkAccess({ name, actions: [] } as any, user)
 
       expect(auth).toStrictEqual({
         id: modelId,
         success: false,
-        info: `No registry use allowed on ${EntryKind.DataCard}`,
+        info: `No registry use allowed on ${EntryKind.DataCard}.`,
       })
     })
 
-    test('success', async () => {
+    test('failure > limited access for mirrored model entry type', async () => {
+      const name = 'modelId/fakeImage'
+      const modelId = name.split('/')[0]
+      modelMocks.getModelById.mockResolvedValueOnce({
+        kind: EntryKind.MirroredModel,
+      })
+
+      const auth = await checkAccess({ name, actions: ['push'] } as any, user)
+
+      expect(auth).toStrictEqual({
+        id: modelId,
+        success: false,
+        info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
+      })
+    })
+
+    test('success > basic push pull', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         kind: EntryKind.Model,
       })
@@ -137,6 +153,22 @@ describe('registryAuth', () => {
       } as any)
 
       const auth = await checkAccess({ name: 'model/image', actions: ['pull', 'push'] } as any, user)
+
+      expect(authorisation.image).toHaveBeenCalled()
+      expect(auth.success).toBe(true)
+    })
+
+    test('success > pull mirrored model', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        kind: EntryKind.MirroredModel,
+      })
+      vi.mocked(authorisation.image).mockResolvedValueOnce({
+        id: 'model',
+        success: true,
+        actions: ['pull'],
+      } as any)
+
+      const auth = await checkAccess({ name: 'model/image', actions: ['pull'] } as any, user)
 
       expect(authorisation.image).toHaveBeenCalled()
       expect(auth.success).toBe(true)
@@ -177,13 +209,13 @@ describe('registryAuth', () => {
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
-      expect(rlogMocks.logger.trace).toHaveBeenCalledWith('Successfully generated access token')
+      expect(rlogMocks.logger.trace).toHaveBeenCalledWith('Successfully generated access token.')
     })
 
     test('success > pull ignores unauthorised foreign scope (containerd cross-mount)', async () => {
-      modelMocks.getModelById.mockRejectedValueOnce({})
+      modelMocks.getModelById.mockRejectedValueOnce({}).mockResolvedValueOnce({ kind: EntryKind.Model })
       const { req, res } = mockReqRes({
-        scope: 'repository:foreign/image:pull',
+        scope: ['repository:foreign/image:pull', 'repository:model/image:pull'],
       })
 
       await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
@@ -193,7 +225,7 @@ describe('registryAuth', () => {
         expect.objectContaining({
           access: expect.objectContaining({ name: 'foreign/image' }),
         }),
-        'Ignoring unauthorised scope',
+        'Ignoring unauthorised scope.',
       )
     })
 
@@ -217,26 +249,7 @@ describe('registryAuth', () => {
         expect.objectContaining({
           access: expect.objectContaining({ name: 'foreign/image' }),
         }),
-        'Ignoring unauthorised scope',
-      )
-    })
-
-    test('success > wildcard scope is ignored', async () => {
-      modelMocks.getModelById.mockResolvedValueOnce({
-        kind: EntryKind.Model,
-      })
-      const { req, res } = mockReqRes({
-        scope: 'repository:model/image:*',
-      })
-
-      await getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
-
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }))
-      expect(rlogMocks.logger.debug).toHaveBeenCalledWith(
-        expect.objectContaining({
-          access: expect.objectContaining({ name: 'model/image', actions: ['*'] }),
-        }),
-        'Ignoring unauthorised scope',
+        'Ignoring unauthorised scope.',
       )
     })
 
@@ -256,11 +269,11 @@ describe('registryAuth', () => {
         expect.objectContaining({
           access: expect.objectContaining({ name: 'model/image', actions: ['*'] }),
         }),
-        'Ignoring unauthorised scope',
+        'Ignoring unauthorised scope.',
       )
     })
 
-    test('reject > unauthorised push even if pull is allowed', async () => {
+    test('reject > unauthorised push', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         kind: EntryKind.Model,
       })
@@ -278,7 +291,7 @@ describe('registryAuth', () => {
       await expect(result).rejects.toThrowError(/^Unauthorised write requested/)
     })
 
-    test('reject > mixed pull & push denied as write unauthorised', async () => {
+    test('reject > mixed pull & push denied as push unauthorised', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         kind: EntryKind.Model,
       })
@@ -292,7 +305,31 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^Unauthorised write requested/)
+      await expect(result).rejects.toThrowError(/^Unauthorised write requested./)
+    })
+
+    test('reject > pull unauthorised', async () => {
+      modelMocks.getModelById.mockRejectedValueOnce({})
+      const { req, res } = mockReqRes({
+        scope: 'repository:model/image:pull',
+      })
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^No authorised scopes./)
+    })
+
+    test('reject > wildcard scope is disallowed', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        kind: EntryKind.Model,
+      })
+      const { req, res } = mockReqRes({
+        scope: 'repository:model/image:*',
+      })
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^No use of `\*` action without an admin token./)
     })
   })
 })

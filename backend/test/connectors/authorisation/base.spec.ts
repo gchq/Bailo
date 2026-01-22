@@ -794,7 +794,7 @@ describe('connectors > authorisation > base', () => {
     expect(result).toStrictEqual([
       {
         id: 'testModel',
-        info: 'You do not have permission to upload an image.',
+        info: 'You do not have permission to write to an image.',
         success: false,
       },
     ])
@@ -828,44 +828,6 @@ describe('connectors > authorisation > base', () => {
         success: false,
       },
     ])
-  })
-
-  test('image > wildcard action not allowed', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
-    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
-    ReviewRoleModelMock.find.mockResolvedValue([])
-
-    const result = await connector.image(user as any, model as any, {
-      type: 'repository',
-      name: 'img1',
-      actions: ['*'],
-    })
-
-    expect(result).toStrictEqual({
-      id: 'img1',
-      success: false,
-      info: 'You are not allowed to complete any actions beyond `push`, `pull`, `delete`, or `list` on an image associated with a model.',
-    })
-  })
-
-  test('image > push action not allowed on mirrored model', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
-    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
-    ReviewRoleModelMock.find.mockResolvedValue([])
-
-    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.MirroredModel } as any, {
-      type: 'repository',
-      name: 'img1',
-      actions: ['push'],
-    })
-
-    expect(result).toStrictEqual({
-      id: 'img1',
-      success: false,
-      info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
-    })
   })
 
   test('reviewRoles > create without admin role', async () => {

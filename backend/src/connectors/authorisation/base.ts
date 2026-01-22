@@ -1,6 +1,6 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
-import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
+import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
@@ -397,33 +397,6 @@ export class BasicAuthorisationConnector {
           }
         })
 
-        // Don't allow anything beyond pushing, pulling, deleting and listing actions.
-        if (
-          !actions.every((action) =>
-            ([ImageAction.Push, ImageAction.Pull, ImageAction.Delete, ImageAction.List] as ImageActionKeys[]).includes(
-              action,
-            ),
-          )
-        ) {
-          return {
-            success: false,
-            info: 'You are not allowed to complete any actions beyond `push`, `pull`, `delete`, or `list` on an image associated with a model.',
-            id: access.name,
-          }
-        }
-
-        // Further restrict mirrored model actions.
-        if (
-          model.kind == EntryKind.MirroredModel &&
-          !actions.every((action) => ([ImageAction.Pull, ImageAction.List] as ImageActionKeys[]).includes(action))
-        ) {
-          return {
-            success: false,
-            info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
-            id: access.name,
-          }
-        }
-
         // Is this a constrained user token.
         for (const action of actions) {
           const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
@@ -433,10 +406,15 @@ export class BasicAuthorisationConnector {
         }
 
         // If they are not listed on the model, don't let them upload or delete images.
-        if ((await missingRequiredRole(user, model, ['owner', 'contributor'])) && actions.includes(ImageAction.Push)) {
+        if (
+          (await missingRequiredRole(user, model, ['owner', 'contributor'])) &&
+          actions.some((action) =>
+            ([ImageAction.Push, ImageAction.Delete, ImageAction.Wildcard] as ImageActionKeys[]).includes(action),
+          )
+        ) {
           return {
             success: false,
-            info: 'You do not have permission to upload an image.',
+            info: 'You do not have permission to write to an image.',
             id: access.name,
           }
         }
@@ -444,7 +422,7 @@ export class BasicAuthorisationConnector {
         if (
           !hasAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'contributor', 'consumer'])) &&
-          actions.includes(ImageAction.Pull) &&
+          actions.some((action) => ([ImageAction.Pull, ImageAction.Wildcard] as ImageActionKeys[]).includes(action)) &&
           !model.settings.ungovernedAccess
         ) {
           return {
