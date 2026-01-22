@@ -105,7 +105,7 @@ export default function EntitySelector({
       <AdditionalInformation
         editMode={registry.formContext.editMode}
         mirroredState={mirroredState}
-        display={registry.formContext.mirroredModel && currentValue}
+        display={registry.formContext.mirroredModel && currentValue.length > 0}
         label={label}
         id={id}
         mirroredModel={registry.formContext.mirroredModel}

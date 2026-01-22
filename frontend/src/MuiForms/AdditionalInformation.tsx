@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import { SxProps, useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { ReactNode } from 'react'
@@ -12,6 +12,7 @@ interface AdditionalInformationProps {
   required?: boolean
   mirroredModel?: boolean
   mirroredState?: any
+  state?: any
   label: string | undefined
   id: string
   sx?: SxProps
@@ -101,14 +102,25 @@ export default function AdditionalInformation({
   }
 
   return (
-    <>
+    <Stack>
       {editMode && (
         <Box
           sx={{
             ...sx,
           }}
         >
-          <Stack spacing={1}>
+          <Box
+            sx={{
+              borderStyle: 'solid',
+              borderWidth: 1,
+              borderRadius: 1,
+              borderColor: theme.palette.divider,
+              py: 1,
+              px: 2,
+              my: 1,
+              width: 'auto',
+            }}
+          >
             <Typography
               fontWeight='bold'
               id={`${id}-label`}
@@ -119,19 +131,12 @@ export default function AdditionalInformation({
               {label}
               {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
             </Typography>
-            {mirroredState}
-            <Box
-              sx={{
-                borderStyle: 'solid',
-                borderWidth: 3,
-                borderRadius: 1,
-                borderColor: theme.palette.divider,
-                py: 1,
-                px: 2,
-                my: 1,
-                width: 'auto',
-              }}
-            >
+            <Divider sx={{ mt: 1 }} />
+            <Stack spacing={1} sx={{ mt: 1 }}>
+              <Typography variant='caption' fontWeight='bold'>
+                Original answer
+              </Typography>
+              <Box>{mirroredState}</Box>
               <Typography variant='caption' fontWeight='bold'>
                 {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
               </Typography>
@@ -141,8 +146,8 @@ export default function AdditionalInformation({
                   {description}
                 </Typography>
               )}
-            </Box>
-          </Stack>
+            </Stack>
+          </Box>
         </Box>
       )}
       {!editMode && (
@@ -171,7 +176,7 @@ export default function AdditionalInformation({
           <Box
             sx={{
               borderStyle: 'solid',
-              borderWidth: 3,
+              borderWidth: 1,
               borderRadius: 1,
               borderColor: theme.palette.divider,
               py: 1,
@@ -191,6 +196,6 @@ export default function AdditionalInformation({
           </Box>
         </Stack>
       )}
-    </>
+    </Stack>
   )
 }

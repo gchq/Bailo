@@ -5,7 +5,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState } from 'utils/formUtils'
+import { getMirroredState, getState } from 'utils/formUtils'
 
 interface RichTextInputProps {
   value: string
@@ -37,12 +37,14 @@ export default function RichTextInput({
   }
 
   const mirroredState = getMirroredState(id, registry.formContext)
+  const state = getState(id, registry.formContext)
 
   if (!registry.formContext.editMode) {
     return (
       <AdditionalInformation
         editMode={registry.formContext.editMode}
         mirroredState={mirroredState}
+        state={state}
         display={registry.formContext.mirroredModel && value}
         label={label}
         required={required}
@@ -69,6 +71,7 @@ export default function RichTextInput({
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={mirroredState}
+      state={state}
       display={registry.formContext.mirroredModel && value}
       label={label}
       id={id}
@@ -76,7 +79,7 @@ export default function RichTextInput({
       description={registry.rootSchema.description}
     >
       <RichTextEditor
-        value={value}
+        value={registry.formContext.mirroredModel ? state : value}
         onChange={onChange}
         textareaProps={{ disabled, id }}
         errors={rawErrors}

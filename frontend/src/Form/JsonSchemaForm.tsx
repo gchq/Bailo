@@ -104,6 +104,24 @@ export default function JsonSchemaForm({
     })
   }
 
+  const iterate = (source) => {
+    Object.keys(source).forEach((key) => {
+      if (typeof source[key] !== 'object') {
+        source[key] = undefined
+      }
+
+      if ((Array.isArray(source[key]) || typeof source[key] === 'object') && source[key] !== null) {
+        iterate(source[key])
+      }
+    })
+  }
+
+  const source = structuredClone(currentStep.mirroredState)
+  const target = structuredClone(currentStep.state)
+  iterate(source)
+
+  const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
+
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
       <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider, height: 'fit-content' }}>
@@ -138,7 +156,7 @@ export default function JsonSchemaForm({
       <Grid size={{ xs: 12, md: 10 }} ref={ref}>
         <Form
           schema={currentStep.schema}
-          formData={currentStep.state}
+          formData={updatedMirroredState}
           onChange={onFormChange}
           validator={validator}
           widgets={widgets}
@@ -152,6 +170,7 @@ export default function JsonSchemaForm({
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
             mirroredState: currentStep.mirroredState,
+            state: currentStep.state,
             mirroredModel,
             onShare: onShareSectionOnClick,
           }}

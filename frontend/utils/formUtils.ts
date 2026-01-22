@@ -146,7 +146,6 @@ export function getStepsFromSchema(
       section: prop,
       isComplete: validateForm,
     })
-
     steps.push(createdStep)
   })
 
@@ -208,4 +207,13 @@ export const getMirroredState = (id: string, formContext: Registry['formContext'
     .split('.')
     .filter((t) => t !== '')
     .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
+}
+
+export const getState = (id: string, formContext: Registry['formContext']) => {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.state)
 }

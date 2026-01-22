@@ -59,7 +59,7 @@ export default function MultipleDropdown({
       <AdditionalInformation
         editMode={registry.formContext.editMode}
         mirroredState={mirroredState}
-        display={registry.formContext.mirroredModel && value}
+        display={registry.formContext.mirroredModel && value.length > 0}
         label={label}
         id={id}
         required={required}
