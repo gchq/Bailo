@@ -65,7 +65,9 @@ export default function EntryList({
     }
   }, [entries, ref])
 
-  if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
+  if (entriesErrorMessage) {
+    return <MessageAlert message={entriesErrorMessage} severity='error' />
+  }
 
   const Row = ({ data }) => (
     <EntryListRow

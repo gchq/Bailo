@@ -9,7 +9,8 @@ import { EntryKind } from 'types/types'
 
 export default function ModelCardVersion() {
   const router = useRouter()
-  const { entryId, entryCardVersion }: { entryId?: string; entryCardVersion?: number } = router.query
+  const { modelId: entryId, modelCardVersion: entryCardVersion }: { modelId?: string; modelCardVersion?: number } =
+    router.query
 
   const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(entryId, entryCardVersion)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entryCard?.schemaId || '')
@@ -18,7 +19,9 @@ export default function ModelCardVersion() {
     isEntryCardError,
     isSchemaError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

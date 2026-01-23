@@ -2,7 +2,19 @@ import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  FormGroup,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Switch,
+  Typography,
+} from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -21,10 +33,12 @@ import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import { getDisplayFormStats, saveDisplayFormStats } from 'src/storage/userPreferences'
 import { KeyedMutator } from 'swr'
 import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
+
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
@@ -42,6 +56,10 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+
+  // For displaying the stats around model information completion
+  const [calculateStats, setCalculateStats] = useState(0)
+  const [displayFormStats, setDisplayFormStats] = useState(getDisplayFormStats())
 
   const open = Boolean(anchorEl)
 
@@ -78,6 +96,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
         }
       }
       setLoading(false)
+      setCalculateStats((v) => v + 1)
     }
   }
 
@@ -93,12 +112,20 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
     }
   }
 
+  function onToggleDisplayStats() {
+    const newValue = !displayFormStats
+    setDisplayFormStats(newValue)
+    saveDisplayFormStats(newValue)
+  }
+
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
     setSplitSchema(newSplitSchema)
   })
 
   useEffect(() => {
-    if (!entry || !schema) return
+    if (!entry || !schema) {
+      return
+    }
     const metadata = entry.card.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
     for (const step of steps) {
@@ -183,10 +210,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
             </Stack>
           </div>
           {schemaMigrations.length > 0 && entry.kind !== EntryKind.MIRRORED_MODEL && (
-            <Restricted
-              action='editEntryCard'
-              fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
-            >
+            <Restricted action='editEntryCard' fallback={<></>}>
               <MessageAlert
                 severity='info'
                 message={`There is a migration available for this ${EntryKindLabel[entry.kind]}`}
@@ -197,6 +221,13 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
           )}
           {!isEdit && (
             <Stack direction='row' spacing={1}>
+              <FormGroup>
+                <FormControlLabel
+                  onClick={onToggleDisplayStats}
+                  control={<Switch checked={displayFormStats} />}
+                  label='Show Completion Stats'
+                />
+              </FormGroup>
               {!readOnly && (
                 <Restricted
                   action='editEntryCard'
@@ -264,18 +295,33 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
             </Stack>
           )}
           {isEdit && (
-            <SaveAndCancelButtons
-              onCancel={onCancel}
-              onSubmit={onSubmit}
-              openTextInputDialog={() => setJsonUploadDialogOpen(true)}
-              loading={loading}
-              cancelDataTestId='cancelEditEntryCardButton'
-              saveDataTestId='saveEntryCardButton'
-            />
+            <Stack direction='row' spacing={1}>
+              <FormGroup>
+                <FormControlLabel
+                  onClick={onToggleDisplayStats}
+                  control={<Switch checked={displayFormStats} />}
+                  label='Show Completion Stats'
+                />
+              </FormGroup>
+              <SaveAndCancelButtons
+                onCancel={onCancel}
+                onSubmit={onSubmit}
+                openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+                loading={loading}
+                cancelDataTestId='cancelEditEntryCardButton'
+                saveDataTestId='saveEntryCardButton'
+              />
+            </Stack>
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          calculateStats={calculateStats}
+          canEdit={isEdit}
+          displayStats={displayFormStats}
+        />
         {isEdit && (
           <SaveAndCancelButtons
             onCancel={onCancel}

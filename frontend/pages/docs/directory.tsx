@@ -48,11 +48,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
   { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
 
-  /// Accessibility
-  { title: 'Accessiblility', slug: 'users/accessibility', header: true },
-  { title: 'Accessibility Statement', slug: 'users/accessibility/accessibility-statement' },
-  { title: 'Accessiblility Report', slug: 'users/accessibility/accessibility-report' },
-
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
@@ -112,7 +107,9 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
       let child = leaf.children?.find((node) => node.slug === currentId)
 
       if (!child) {
-        if (!leaf.children) leaf.children = []
+        if (!leaf.children) {
+          leaf.children = []
+        }
 
         leaf.children.push({
           slug: currentId,

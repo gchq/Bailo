@@ -113,7 +113,9 @@ export default function ReleaseDisplay({
     isCommentResponsesError,
     isReleasesError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

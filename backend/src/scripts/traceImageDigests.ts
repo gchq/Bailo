@@ -46,7 +46,9 @@ async function script() {
           tag,
         })
 
-        if (!manifest) continue
+        if (!manifest) {
+          continue
+        }
 
         const manifestDigest = headers['docker-content-digest']?.replace('sha256:', '') ?? ''
 
