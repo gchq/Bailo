@@ -96,96 +96,97 @@ export default function EntitySelector({
 
   const mirroredState = getMirroredState(id, registry.formContext)
 
+  if (isCurrentUserLoading) {
+    return <Loading />
+  }
+
   return (
-    <>
-      {isCurrentUserLoading && <Loading />}
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && currentValue.length > 0}
+      label={label}
+      id={id}
+      mirroredModel={registry.formContext.mirroredModel}
+      required={required}
+    >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={registry.formContext.mirroredModel && currentValue.length > 0}
-        label={label}
-        id={id}
-        mirroredModel={registry.formContext.mirroredModel}
-        required={required}
-      >
-        {currentUser && registry.formContext && registry.formContext.editMode && (
-          <>
-            <Autocomplete<EntityObject, true, true>
-              multiple
-              data-test='entitySelector'
-              loading={userListQuery.length > 3 && isUsersLoading}
-              open={open}
-              size='small'
-              onOpen={() => {
-                setOpen(true)
-              }}
-              onClose={() => {
-                setOpen(false)
-              }}
-              disableClearable
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              getOptionLabel={(option) => option.id}
-              value={selectedEntities || []}
-              filterOptions={(x) => x}
-              onChange={handleUserChange}
-              noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
-              onInputChange={debounceOnInputChange}
-              options={users || []}
-              renderValue={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Box key={option.id} sx={{ maxWidth: '200px' }}>
-                    <Chip
-                      {...getTagProps({ index })}
-                      sx={{ textOverflow: 'ellipsis' }}
-                      label={<UserDisplay dn={option.id} />}
-                    />
-                  </Box>
-                ))
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder='Username or group name'
-                  slotProps={{
-                    htmlInput: { ...params.inputProps, 'aria-label': `input field for ${label}` },
-                  }}
-                  error={rawErrors && rawErrors.length > 0}
-                  id={id}
-                  onKeyDown={(event: KeyboardEvent) => {
-                    if (event.key === 'Backspace') {
-                      event.stopPropagation()
-                    }
-                  }}
-                />
-              )}
-            />
-          </>
-        )}
-        {registry.formContext && !registry.formContext.editMode && (
-          <>
-            {currentValue.length === 0 && (
-              <Typography
-                sx={{
-                  fontStyle: 'italic',
-                  color: theme.palette.customTextInput.main,
+      {currentUser && registry.formContext && registry.formContext.editMode && (
+        <>
+          <Autocomplete<EntityObject, true, true>
+            multiple
+            data-test='entitySelector'
+            loading={userListQuery.length > 3 && isUsersLoading}
+            open={open}
+            size='small'
+            onOpen={() => {
+              setOpen(true)
+            }}
+            onClose={() => {
+              setOpen(false)
+            }}
+            disableClearable
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            getOptionLabel={(option) => option.id}
+            value={selectedEntities || []}
+            filterOptions={(x) => x}
+            onChange={handleUserChange}
+            noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+            onInputChange={debounceOnInputChange}
+            options={users || []}
+            renderValue={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Box key={option.id} sx={{ maxWidth: '200px' }}>
+                  <Chip
+                    {...getTagProps({ index })}
+                    sx={{ textOverflow: 'ellipsis' }}
+                    label={<UserDisplay dn={option.id} />}
+                  />
+                </Box>
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder='Username or group name'
+                slotProps={{
+                  htmlInput: { ...params.inputProps, 'aria-label': `input field for ${label}` },
                 }}
-              >
-                Unanswered
-              </Typography>
+                error={rawErrors && rawErrors.length > 0}
+                id={id}
+                onKeyDown={(event: KeyboardEvent) => {
+                  if (event.key === 'Backspace') {
+                    event.stopPropagation()
+                  }
+                }}
+              />
             )}
-            <Box sx={{ overflowX: 'auto', p: 1 }}>
-              <Stack spacing={1} direction='row'>
-                {currentValue.map((entity) => (
-                  <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-                ))}
-              </Stack>
-            </Box>
-          </>
-        )}
-      </AdditionalInformation>
-    </>
+          />
+        </>
+      )}
+      {registry.formContext && !registry.formContext.editMode && (
+        <>
+          {currentValue.length === 0 && (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((entity) => (
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+              ))}
+            </Stack>
+          </Box>
+        </>
+      )}
+    </AdditionalInformation>
   )
 }

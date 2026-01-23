@@ -1,21 +1,11 @@
-import {
-  Button,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Button, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import { Registry } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import MetricItem from 'src/MuiForms/MetricItem'
+import { getMirroredState, getState } from 'utils/formUtils'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -34,13 +24,13 @@ interface MetricsProps {
   onChange: (newValue: MetricValue[]) => void
   value: MetricValue[]
   label: string
+  id: string
   registry?: Registry
   required?: boolean
 }
 
-export default function Metrics({ onChange, value, label, registry, required }: MetricsProps) {
+export default function Metrics({ onChange, value, label, id, registry, required }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
-  const theme = useTheme()
 
   const onSetMetricsWithIds = useEffectEvent((newMetrics: MetricValueWithId[]) => {
     setMetricsWithIds(newMetrics)
@@ -106,14 +96,23 @@ export default function Metrics({ onChange, value, label, registry, required }: 
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+  const state = getState(id, registry.formContext)
+
   return (
-    <>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      state={state}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      required={required}
+      id={id}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={registry.rootSchema.description}
+    >
       {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Stack spacing={2}>{metricItems}</Stack>
           <Button onClick={() => handleChange([...value, { name: '', value: 0 }])} aria-label='add metric button'>
             Add item
@@ -122,10 +121,6 @@ export default function Metrics({ onChange, value, label, registry, required }: 
       )}
       {registry.formContext && !registry.formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <TableContainer component={Paper}>
             <Table sx={{ maxWidth: 'sm' }} size='small'>
               <TableHead>
@@ -139,6 +134,6 @@ export default function Metrics({ onChange, value, label, registry, required }: 
           </TableContainer>
         </>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

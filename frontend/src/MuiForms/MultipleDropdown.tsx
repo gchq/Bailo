@@ -1,7 +1,7 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { getMirroredState } from 'utils/formUtils'
@@ -55,81 +55,79 @@ export default function MultipleDropdown({
   const mirroredState = getMirroredState(id, registry.formContext)
 
   return (
-    <Fragment key={label}>
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={registry.formContext.mirroredModel && value.length > 0}
-        label={label}
-        id={id}
-        required={required}
-        mirroredModel={registry.formContext.mirroredModel}
-      >
-        {registry.formContext.editMode && (
-          <Autocomplete
-            multiple
-            size='small'
-            options={multipleDropdownOptions}
-            sx={(theme) => ({
-              input: {
-                color: theme.palette.common.white,
-                ...theme.applyStyles('light', {
-                  color: theme.palette.common.black,
-                }),
-              },
-              label: {
-                WebkitTextFillColor: theme.palette.common.white,
-                ...theme.applyStyles('light', {
-                  WebkitTextFillColor: theme.palette.common.black,
-                }),
-              },
-              '& .MuiInputBase-input.Mui-disabled': {
-                WebkitTextFillColor: disabledWebkitTextFillColor,
-              },
-            })}
-            onChange={handleChange}
-            value={value || []}
-            disabled={!registry.formContext.editMode}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label='Select an option below'
-                size='small'
-                id={id}
-                aria-label={`input field for ${label}`}
-                placeholder={value.length ? undefined : 'Unanswered'}
-                error={rawErrors && rawErrors.length > 0}
-              />
-            )}
-          />
-        )}
-        {!registry.formContext.editMode && (
-          <>
-            {value.length ? (
-              value.map((selectedValue) => (
-                <Typography
-                  key={selectedValue}
-                  sx={{
-                    fontStyle: 'unset',
-                    color: theme.palette.common.black,
-                  }}
-                >
-                  {selectedValue}
-                </Typography>
-              ))
-            ) : (
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value.length > 0}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+    >
+      {registry.formContext.editMode && (
+        <Autocomplete
+          multiple
+          size='small'
+          options={multipleDropdownOptions}
+          sx={(theme) => ({
+            input: {
+              color: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                color: theme.palette.common.black,
+              }),
+            },
+            label: {
+              WebkitTextFillColor: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                WebkitTextFillColor: theme.palette.common.black,
+              }),
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: disabledWebkitTextFillColor,
+            },
+          })}
+          onChange={handleChange}
+          value={value || []}
+          disabled={!registry.formContext.editMode}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label='Select an option below'
+              size='small'
+              id={id}
+              aria-label={`input field for ${label}`}
+              placeholder={value.length ? undefined : 'Unanswered'}
+              error={rawErrors && rawErrors.length > 0}
+            />
+          )}
+        />
+      )}
+      {!registry.formContext.editMode && (
+        <>
+          {value.length ? (
+            value.map((selectedValue) => (
               <Typography
+                key={selectedValue}
                 sx={{
-                  fontStyle: 'italic',
-                  color: theme.palette.customTextInput.main,
+                  fontStyle: 'unset',
+                  color: theme.palette.common.black,
                 }}
               >
-                Unanswered
+                {selectedValue}
               </Typography>
-            )}
-          </>
-        )}
-      </AdditionalInformation>
-    </Fragment>
+            ))
+          ) : (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+        </>
+      )}
+    </AdditionalInformation>
   )
 }

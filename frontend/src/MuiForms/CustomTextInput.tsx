@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry } from '@rjsf/utils'
-import { Fragment, useMemo } from 'react'
+import { useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { getMirroredState } from 'utils/formUtils'
@@ -50,61 +50,59 @@ export default function CustomTextInput({
   const mirroredState = getMirroredState(id, registry.formContext)
 
   return (
-    <Fragment>
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={registry.formContext.mirroredModel && value}
-        label={label}
-        id={id}
-        required={required}
-        mirroredModel={registry.formContext.mirroredModel}
-      >
-        <TextField
-          size='small'
-          error={rawErrors && rawErrors.length > 0}
-          sx={[
-            (theme) => ({
-              input: {
-                color: theme.palette.common.white,
-                ...theme.applyStyles('light', {
-                  color: theme.palette.common.black,
-                }),
-              },
-              label: {
-                WebkitTextFillColor: theme.palette.common.white,
-                ...theme.applyStyles('light', {
-                  WebkitTextFillColor: theme.palette.common.black,
-                }),
-              },
-              '& .MuiInputBase-input.Mui-disabled': {
-                WebkitTextFillColor: disabledWebkitTextFillColor,
-              },
-            }),
-            value
-              ? {
-                  fontStyle: 'unset',
-                }
-              : {
-                  fontStyle: 'italic',
-                },
-          ]}
-          onChange={handleChange}
-          variant={!registry.formContext.editMode ? 'standard' : 'outlined'}
-          required={registry.formContext.editMode}
-          value={value || (!registry.formContext.editMode ? 'Unanswered' : '')}
-          disabled={!registry.formContext.editMode}
-          slotProps={{
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+    >
+      <TextField
+        size='small'
+        error={rawErrors && rawErrors.length > 0}
+        sx={[
+          (theme) => ({
             input: {
-              ...InputProps,
-              ...(!registry.formContext.editMode && { disableUnderline: true }),
-              'data-test': id,
-              'aria-label': `text input field for ${label}`,
-              id: id,
+              color: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                color: theme.palette.common.black,
+              }),
             },
-          }}
-        />
-      </AdditionalInformation>
-    </Fragment>
+            label: {
+              WebkitTextFillColor: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                WebkitTextFillColor: theme.palette.common.black,
+              }),
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: disabledWebkitTextFillColor,
+            },
+          }),
+          value
+            ? {
+                fontStyle: 'unset',
+              }
+            : {
+                fontStyle: 'italic',
+              },
+        ]}
+        onChange={handleChange}
+        variant={!registry.formContext.editMode ? 'standard' : 'outlined'}
+        required={registry.formContext.editMode}
+        value={value || (!registry.formContext.editMode ? 'Unanswered' : '')}
+        disabled={!registry.formContext.editMode}
+        slotProps={{
+          input: {
+            ...InputProps,
+            ...(!registry.formContext.editMode && { disableUnderline: true }),
+            'data-test': id,
+            'aria-label': `text input field for ${label}`,
+            id: id,
+          },
+        }}
+      />
+    </AdditionalInformation>
   )
 }

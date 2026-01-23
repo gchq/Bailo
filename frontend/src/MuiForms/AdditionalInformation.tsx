@@ -136,7 +136,20 @@ export default function AdditionalInformation({
               <Typography variant='caption' fontWeight='bold'>
                 Original answer
               </Typography>
-              <Box>{mirroredState}</Box>
+              <Box>
+                {mirroredState ? (
+                  <Box>{mirroredState}</Box>
+                ) : (
+                  <Typography
+                    sx={{
+                      fontStyle: 'italic',
+                      color: theme.palette.customTextInput.main,
+                    }}
+                  >
+                    Unanswered
+                  </Typography>
+                )}
+              </Box>
               <Typography variant='caption' fontWeight='bold'>
                 {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
               </Typography>
