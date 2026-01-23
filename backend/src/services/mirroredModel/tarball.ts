@@ -179,7 +179,9 @@ export async function extractTarGzStream(
     }
 
     // Stream lifecycle errors (gzip corruption, tar parse errors, premature close)
-    finished(untarStream).catch(fail)
+    finished(untarStream).catch((err) => {
+      fail(err)
+    })
 
     // Successful completion of the tar stream
     untarStream.once('finish', () => {
@@ -260,6 +262,8 @@ export async function extractTarGzStream(
     })
 
     // Wire the stream chain using pipeline for correct teardown and automatic propagation of stream-level errors.
-    pipeline(tarGzStream, ungzipStream, untarStream)
+    pipeline(tarGzStream, ungzipStream, untarStream).catch((err) => {
+      fail(err)
+    })
   })
 }
