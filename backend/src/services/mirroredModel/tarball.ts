@@ -1,5 +1,6 @@
 import { PassThrough, Readable } from 'node:stream'
 import { json } from 'node:stream/consumers'
+import { finished, pipeline } from 'node:stream/promises'
 import zlib from 'node:zlib'
 
 import { extract, Pack, pack } from 'tar-stream'
@@ -102,6 +103,24 @@ export function createUnTarGzStreams() {
   return { ungzipStream, untarStream }
 }
 
+/**
+ * Extracts and processes a gzipped tar stream containing a mirrored model export.
+ *
+ * The stream is expected to contain:
+ *   1. A metadata JSON file as the first entry
+ *   2. One or more content entries handled by a dynamically selected importer
+ *
+ * Key design points:
+ * - Uses `pipeline()` for correct stream wiring and teardown
+ * - Uses `finished()` to capture lifecycle errors (gzip corruption, tar parse errors, premature close)
+ * - Uses a `settled` guard to guarantee resolve/reject happens exactly once
+ * - All async work inside stream callbacks is explicitly caught and routed to `fail`
+ *
+ * @param tarGzStream Readable stream containing a gzipped tar archive
+ * @param user Authenticated user performing the import
+ * @param logData Structured logging context
+ * @returns Mirror information produced by the importer
+ */
 export async function extractTarGzStream(
   tarGzStream: Readable,
   user: UserInterface,
@@ -110,29 +129,39 @@ export async function extractTarGzStream(
   return new Promise((resolve, reject) => {
     let metadata: MirrorMetadata | undefined
     let importer: BaseImporter | undefined
-    // `settled` is used to force the finalising events 'finish' and 'error' to only happen once across all relevant streams.
-    // This allows for safer synchronous handling of async events, as well as only triggering stream destruction once on any error.
+
+    // Guards finalisation so that resolve/reject and stream destruction occur exactly once across all async sources:
+    // pipeline/finished, untar 'finish', and async entry handlers
     let settled = false
 
     const { ungzipStream, untarStream } = createUnTarGzStreams()
 
+    // Finalise the operation once, tearing down all streams and rejecting
     function settleOnce(err: unknown) {
       if (settled) {
         return
       }
       settled = true
 
-      tarGzStream.unpipe()
+      tarGzStream.unpipe?.()
       ungzipStream.destroy()
       untarStream.destroy()
 
       reject(err)
     }
 
-    // this error event is expected to always call `reject`
+    // Centralised failure path for all synchronous and asynchronous errors.
     function fail(error: unknown) {
+      if (settled) {
+        return
+      }
+
       if (importer?.handleStreamError) {
-        importer.handleStreamError(error, resolve, reject)
+        try {
+          importer.handleStreamError(error, resolve, reject)
+        } catch (err) {
+          settleOnce(err)
+        }
         settled = true
         return
       }
@@ -149,17 +178,15 @@ export async function extractTarGzStream(
       }
     }
 
-    ungzipStream.on('error', (error) => {
-      log.error({ error, ...logData }, 'Gunzip stream failed.')
-      fail(error)
-    })
+    // Stream lifecycle errors (gzip corruption, tar parse errors, premature close)
+    finished(untarStream).catch(fail)
 
-    untarStream.on('error', (error) => {
-      log.error({ error, ...logData }, 'Tar extraction failed.')
-      fail(error)
-    })
-
+    // Successful completion of the tar stream
     untarStream.once('finish', () => {
+      if (settled) {
+        return
+      }
+
       if (!importer) {
         fail(
           InternalError('Tarball finished before importer initialisation.', {
@@ -177,13 +204,15 @@ export async function extractTarGzStream(
       }
     })
 
+    // Handle each tar entry.
     untarStream.on('entry', (entry, entryStream, next) => {
-      // Async entry handling safely inside a sync stream callback, ensuring all async errors are caught and routed to `fail`.
+      // This callback must remain synchronous, so all async work is wrapped in an IIFE and explicitly routed to `fail` on error.
       // See https://github.com/gchq/Bailo/pull/3115/changes#r2713416899 for more details.
       ;(async () => {
         try {
           log.debug({ entry, ...logData }, 'Processing un-tarred entry.')
 
+          // First entry must be the metadata file
           if (!metadata) {
             if (entry.type !== 'file' || entry.name !== config.modelMirror.metadataFile) {
               throw InternalError(
@@ -230,6 +259,7 @@ export async function extractTarGzStream(
       })().catch((err) => fail(err))
     })
 
-    tarGzStream.pipe(ungzipStream).pipe(untarStream)
+    // Wire the stream chain using pipeline for correct teardown and automatic propagation of stream-level errors.
+    pipeline(tarGzStream, ungzipStream, untarStream)
   })
 }
