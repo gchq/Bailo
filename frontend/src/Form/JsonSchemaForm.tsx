@@ -13,7 +13,7 @@ import {
 } from 'src/Form/FormTemplates'
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
-import useNotification from 'src/hooks/useNotification'
+import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import { getFormStats, getOverallCompletionStats, setStepState, widgets } from 'utils/formUtils'
@@ -40,7 +40,8 @@ export default function JsonSchemaForm({
   const theme = useTheme()
   const router = useRouter()
   const ref = useRef<HTMLDivElement | null>(null)
-  const sendNotification = useNotification()
+
+  const copyToClipboard = useCopyToClipboard()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -102,13 +103,11 @@ export default function JsonSchemaForm({
   }
 
   function onShareSectionOnClick(sectionId: string) {
-    navigator.clipboard.writeText(
-      `${window.location.origin + window.location.pathname}?page=${activeStep}#${sectionId}`,
-    )
-    sendNotification({
-      variant: 'success',
-      msg: `Link saved to clipboard`,
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    const link = `${window.location.origin}${window.location.pathname}?page=${activeStep}#${sectionId}`
+
+    copyToClipboard(link, 'Link saved to clipboard', 'Failed to save link to clipboard', {
+      horizontal: 'center',
+      vertical: 'bottom',
     })
   }
 
