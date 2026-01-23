@@ -55,9 +55,12 @@ export default function ReleaseAssetsResponses({
     return error
   }
 
+  if (isReviewsLoading || isCommentResponsesLoading || isReviewResponsesLoading) {
+    return <Loading />
+  }
+
   return (
     <>
-      {(isReviewsLoading || isCommentResponsesLoading || isReviewResponsesLoading) && <Loading />}
       <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
         {!release.minor && <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />}
         {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (

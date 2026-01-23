@@ -47,13 +47,16 @@ export default function ReleaseSelector({
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const selectedSemvers = useMemo(() => new Set(selectedReleases.map((r) => r.semver)), [selectedReleases])
+  const selectedSemvers = useMemo(
+    () => new Set(selectedReleases.map((selectedRelease) => selectedRelease.semver)),
+    [selectedReleases],
+  )
 
   const handleToggle = useCallback(
     (release: ReleaseInterface) => () => {
-      const exists = checkedReleases.find((r) => r.semver === release.semver)
+      const exists = checkedReleases.find((selectedRelease) => selectedRelease.semver === release.semver)
       if (exists) {
-        setCheckedReleases(checkedReleases.filter((r) => r.semver !== release.semver))
+        setCheckedReleases(checkedReleases.filter((selectedRelease) => selectedRelease.semver !== release.semver))
       } else {
         setCheckedReleases([...checkedReleases, release])
       }
@@ -67,7 +70,10 @@ export default function ReleaseSelector({
       return
     }
 
-    const merged = [...selectedReleases, ...checkedReleases.filter((r) => !selectedSemvers.has(r.semver))]
+    const merged = [
+      ...selectedReleases,
+      ...checkedReleases.filter((checkedRelease) => !selectedSemvers.has(checkedRelease.semver)),
+    ]
 
     onUpdateSelectedReleases(merged)
     setCheckedReleases([])
@@ -75,12 +81,12 @@ export default function ReleaseSelector({
   }
 
   const handleRemoveSelected = (semver: string) => {
-    onUpdateSelectedReleases(selectedReleases.filter((r) => r.semver !== semver))
+    onUpdateSelectedReleases(selectedReleases.filter((selectedRelease) => selectedRelease.semver !== semver))
   }
 
   const ReleaseRow = memoize(({ data: release }: { data: ReleaseInterface }) => {
     const isAlreadySelected = selectedSemvers.has(release.semver)
-    const isChecked = checkedReleases.some((r) => r.semver === release.semver)
+    const isChecked = checkedReleases.some((checkedRelease) => checkedRelease.semver === release.semver)
 
     return (
       <ListItem key={release.semver} disablePadding>

@@ -46,9 +46,12 @@ export default function ReleaseDisplay({
     return error
   }
 
+  if (isReviewsLoading || isReleasesLoading || isUiConfigLoading || isScannersLoading) {
+    return <Loading />
+  }
+
   return (
     <>
-      {(isReviewsLoading || isReleasesLoading || isUiConfigLoading || isScannersLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Box sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
