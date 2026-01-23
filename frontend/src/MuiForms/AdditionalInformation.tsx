@@ -185,28 +185,29 @@ export default function AdditionalInformation({
               Unanswered
             </Typography>
           )}
-          {mirroredState}
-          <Box
-            sx={{
-              borderStyle: 'solid',
-              borderWidth: 1,
-              borderRadius: 1,
-              borderColor: theme.palette.divider,
-              py: 1,
-              px: 2,
-              my: 1,
-              width: 'fit-content',
-              ...sx,
-            }}
-          >
-            <Stack spacing={1}>
-              <Typography variant='caption' fontWeight='bold'>
-                {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
-              </Typography>
-              {children}
-            </Stack>
-            {description && <Typography variant='caption'>{description}</Typography>}
-          </Box>
+          {mirroredState && (
+            <Box
+              sx={{
+                borderStyle: 'solid',
+                borderWidth: 1,
+                borderRadius: 1,
+                borderColor: theme.palette.divider,
+                py: 1,
+                px: 2,
+                my: 1,
+                width: 'fit-content',
+                ...sx,
+              }}
+            >
+              <Stack spacing={1}>
+                <Typography variant='caption' fontWeight='bold'>
+                  {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
+                </Typography>
+                {children}
+              </Stack>
+              {description && <Typography variant='caption'>{description}</Typography>}
+            </Box>
+          )}
         </Stack>
       )}
     </Stack>

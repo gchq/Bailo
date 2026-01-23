@@ -1,4 +1,16 @@
-import { Button, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
+import {
+  Button,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
@@ -31,6 +43,8 @@ interface MetricsProps {
 
 export default function Metrics({ onChange, value, label, id, registry, required }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
+
+  const theme = useTheme()
 
   const onSetMetricsWithIds = useEffectEvent((newMetrics: MetricValueWithId[]) => {
     setMetricsWithIds(newMetrics)
@@ -109,7 +123,6 @@ export default function Metrics({ onChange, value, label, id, registry, required
       required={required}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
-      description={registry.rootSchema.description}
     >
       {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
@@ -121,17 +134,29 @@ export default function Metrics({ onChange, value, label, id, registry, required
       )}
       {registry.formContext && !registry.formContext.editMode && (
         <>
-          <TableContainer component={Paper}>
-            <Table sx={{ maxWidth: 'sm' }} size='small'>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Metric name</TableCell>
-                  <TableCell align='right'>Value</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>{metricsTableRows}</TableBody>
-            </Table>
-          </TableContainer>
+          {value.length === 0 && (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+          {value.length > 0 && (
+            <TableContainer component={Paper}>
+              <Table sx={{ maxWidth: 'sm' }} size='small'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Metric name</TableCell>
+                    <TableCell align='right'>Value</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>{metricsTableRows}</TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </>
       )}
     </AdditionalInformation>
