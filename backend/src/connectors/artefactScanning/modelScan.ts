@@ -8,10 +8,11 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseQueueArtefactScanningConnector } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
 
 export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.avScanning.modelscan.concurrency })
+  artefactType: ArtefactType = 'file'
   toolName: string = 'ModelScan'
   version: string | undefined = undefined
 

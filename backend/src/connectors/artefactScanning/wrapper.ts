@@ -1,8 +1,14 @@
 import { FileInterface } from '../../models/File.js'
+import { ImageRefInterface } from '../../models/Release.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { ArtefactScanningConnectorInfo, BaseQueueArtefactScanningConnector } from './Base.js'
+import {
+  ArtefactInterface,
+  ArtefactScanningConnectorInfo,
+  ArtefactType,
+  BaseQueueArtefactScanningConnector,
+} from './Base.js'
 
 export class ArtefactScanningWrapper {
   scanners: Set<BaseQueueArtefactScanningConnector> = new Set<BaseQueueArtefactScanningConnector>()
@@ -51,17 +57,58 @@ export class ArtefactScanningWrapper {
     return { toolName: this.constructor.name, scannerNames: scannerNames }
   }
 
-  async startScans(file: FileInterface) {
-    const results = await Promise.all(
-      Array.from(this.scanners).map((scanner) => {
-        log.info(
-          { modelId: file.modelId, fileId: file._id.toString(), name: file.name, toolName: scanner.toolName },
-          'Scan started.',
-        )
-        return scanner.scan(file)
-      }),
-    )
+  isMatchingInterface(
+    artefact: ArtefactInterface,
+    scanner: BaseQueueArtefactScanningConnector,
+  ): { matching: boolean; artefactType: ArtefactType } {
+    let artefactType: ArtefactType | undefined = undefined
+    switch (true) {
+      case !!(artefact as ImageRefInterface).tag:
+        artefactType = 'image'
+        break
+      case !!(artefact as FileInterface)._id:
+        artefactType = 'file'
+    }
+    if (artefactType !== undefined) {
+      return { matching: artefactType === scanner.artefactType, artefactType }
+    } else {
+      throw TypeError(`Attempting to scan incorrect artefact type, make sure you are passing in a valid artefact`)
+    }
+  }
 
+  async startScans(artefact: ArtefactInterface) {
+    const results = await Promise.all(
+      Array.from(this.scanners)
+        .map((scanner) => {
+          const artefactMatch = this.isMatchingInterface(artefact, scanner)
+          if (artefactMatch.matching) {
+            if (artefactMatch.artefactType === 'file') {
+              log.info(
+                {
+                  modelId: (artefact as FileInterface).modelId,
+                  fileId: (artefact as FileInterface)._id.toString(),
+                  name: (artefact as FileInterface).name,
+                  toolName: scanner.toolName,
+                },
+                'Scan started.',
+              )
+            } else {
+              log.info(
+                {
+                  repository: (artefact as ImageRefInterface).repository,
+                  name: (artefact as ImageRefInterface).name,
+                  tag: (artefact as ImageRefInterface).tag,
+                  toolName: scanner.toolName,
+                },
+                'Scan started.',
+              )
+            }
+
+            return scanner.scan(artefact)
+          }
+        })
+        .filter((scanner) => scanner !== undefined),
+    )
     return results.flat()
   }
 }

@@ -8,7 +8,7 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseQueueArtefactScanningConnector } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -24,6 +24,7 @@ function safeParseVersion(versionStr: string): string {
 
 export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.avScanning.clamdscan.concurrency })
+  artefactType: ArtefactType = 'file'
   toolName = 'Clam AV'
   version: string | undefined = undefined
   av: NodeClam | undefined = undefined

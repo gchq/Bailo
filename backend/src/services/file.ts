@@ -195,7 +195,10 @@ export async function finishUploadMultipartFile(
   return await scanFile(file)
 }
 
-async function updateFileWithResults(_id: Schema.Types.ObjectId, results: ArtefactScanResult[]) {
+async function updateFileWithResults(_id: Schema.Types.ObjectId, results: ArtefactScanResult[] | undefined) {
+  if (results === undefined) {
+    throw InternalError(`No results provided`)
+  }
   for (const result of results) {
     const updateExistingResult = await ScanModel.updateOne(
       { fileId: _id.toString(), toolName: result.toolName },
@@ -426,7 +429,9 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.startScans(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
+    scanners.startScans(file).then((resultsArray) => {
+      updateFileWithResults(file._id, resultsArray)
+    })
   }
   return `Scan started for ${file.name}`
 }

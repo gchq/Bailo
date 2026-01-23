@@ -17,7 +17,7 @@ export type ArtefactScanResult = Pick<
   )
 
 //TODO this may need to change
-type ArtefactInterface = FileInterface | ImageRefInterface
+export type ArtefactInterface = FileInterface | ImageRefInterface
 
 export const ArtefactScanState = {
   NotScanned: 'notScanned',
@@ -28,6 +28,8 @@ export const ArtefactScanState = {
 export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion'>
+
+export type ArtefactType = 'file' | 'image'
 
 export abstract class ArtefactBaseScanningConnector {
   abstract readonly toolName: string
@@ -55,6 +57,7 @@ export abstract class ArtefactBaseScanningConnector {
 
 export abstract class BaseQueueArtefactScanningConnector extends ArtefactBaseScanningConnector {
   abstract readonly queue: PQueue
+  abstract artefactType: ArtefactType
 
   abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]>
 
