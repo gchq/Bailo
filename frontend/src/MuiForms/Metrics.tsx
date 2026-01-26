@@ -95,7 +95,10 @@ export default function Metrics({ onChange, value, label, id, registry, required
     ))
   }, [handleDeleteItem, handleMetricItemOnChange, metricsWithIds])
 
-  const metricsTableRows = useCallback((metrics) => {
+  const metricsTableRows = (metrics) => {
+    if (!metrics) {
+      return undefined
+    }
     return metrics.map((metric) => (
       <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
@@ -104,7 +107,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
         <TableCell align='right'>{metric.value}</TableCell>
       </TableRow>
     ))
-  }, [])
+  }
 
   if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
@@ -118,7 +121,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       editMode={registry.formContext.editMode}
       mirroredState={metricsTableRows(mirroredState)}
       state={state}
-      display={registry.formContext.mirroredModel && value}
+      display={registry.formContext.mirroredModel && value.length > 0}
       label={label}
       required={required}
       id={id}
@@ -134,7 +137,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       )}
       {registry.formContext && !registry.formContext.editMode && (
         <>
-          {value.length === 0 && (
+          {!registry.formContext.mirroredModel && value.length === 0 && (
             <Typography
               sx={{
                 fontStyle: 'italic',
