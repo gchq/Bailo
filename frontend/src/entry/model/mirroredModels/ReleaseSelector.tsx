@@ -101,8 +101,8 @@ export default function ReleaseSelector({
                   <ReleaseAssetsMainText
                     model={model}
                     release={release}
-                    hideCopySemver={true}
-                    hideDescription={true}
+                    hideCopySemver
+                    hideDescription
                     includeLinks={false}
                   />
                   {isAlreadySelected && (
