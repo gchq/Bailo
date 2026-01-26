@@ -95,8 +95,8 @@ export default function Metrics({ onChange, value, label, id, registry, required
     ))
   }, [handleDeleteItem, handleMetricItemOnChange, metricsWithIds])
 
-  const metricsTableRows = useMemo(() => {
-    return value.map((metric) => (
+  const metricsTableRows = useCallback((metrics) => {
+    return metrics.map((metric) => (
       <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
           {metric.name}
@@ -104,7 +104,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
         <TableCell align='right'>{metric.value}</TableCell>
       </TableRow>
     ))
-  }, [value])
+  }, [])
 
   if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
@@ -116,7 +116,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
   return (
     <AdditionalInformation
       editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
+      mirroredState={metricsTableRows(mirroredState)}
       state={state}
       display={registry.formContext.mirroredModel && value}
       label={label}
@@ -153,7 +153,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
                     <TableCell align='right'>Value</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>{metricsTableRows}</TableBody>
+                <TableBody>{metricsTableRows(value)}</TableBody>
               </Table>
             </TableContainer>
           )}

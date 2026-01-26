@@ -117,7 +117,6 @@ export default function AdditionalInformation({
               borderColor: theme.palette.divider,
               py: 1,
               px: 2,
-              my: 1,
               width: 'auto',
             }}
           >
@@ -164,48 +163,57 @@ export default function AdditionalInformation({
         </Box>
       )}
       {!editMode && (
-        <Stack>
-          <Typography
-            fontWeight='bold'
-            id={`${id}-label`}
-            aria-label={`Label for ${label}`}
-            component='label'
-            htmlFor={id}
-          >
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
-          {!mirroredState && (
+        <Stack
+          direction={{ md: 'row', sm: 'column' }}
+          spacing={2}
+          divider={<Divider flexItem orientation='vertical' />}
+        >
+          <Stack>
             <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
+              fontWeight='bold'
+              id={`${id}-label`}
+              aria-label={`Label for ${label}`}
+              component='label'
+              htmlFor={id}
             >
-              Unanswered
+              {label}
+              {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
             </Typography>
-          )}
-          {mirroredState && (
-            <Box
-              sx={{
-                borderStyle: 'solid',
-                borderWidth: 1,
-                borderRadius: 1,
-                borderColor: theme.palette.divider,
-                py: 1,
-                px: 2,
-                my: 1,
-                width: 'fit-content',
-                ...sx,
-              }}
-            >
-              <Stack spacing={1}>
-                <Typography variant='caption' fontWeight='bold'>
-                  {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
-                </Typography>
-                {children}
-              </Stack>
-              {description && <Typography variant='caption'>{description}</Typography>}
+            {!mirroredState ? (
+              <Typography
+                sx={{
+                  fontStyle: 'italic',
+                  color: theme.palette.customTextInput.main,
+                }}
+              >
+                Unanswered
+              </Typography>
+            ) : (
+              mirroredState
+            )}
+          </Stack>
+          {children && (
+            <Box>
+              <Box
+                sx={{
+                  borderStyle: 'solid',
+                  borderWidth: 1,
+                  borderRadius: 1,
+                  borderColor: theme.palette.divider,
+                  py: 1,
+                  px: 2,
+                  width: 'fit-content',
+                  ...sx,
+                }}
+              >
+                <Stack spacing={1}>
+                  <Typography variant='caption' fontWeight='bold'>
+                    {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
+                  </Typography>
+                  {children}
+                </Stack>
+                {description && <Typography variant='caption'>{description}</Typography>}
+              </Box>
             </Box>
           )}
         </Stack>
