@@ -423,7 +423,7 @@ export class BasicAuthorisationConnector {
         }
 
         // Enforce users are explicit on the actions they wish to perform but allow admins to use wildcard `*`
-        if (!admin && access.actions.some((action) => action === '*')) {
+        if (!admin && actions.some((action) => action === ImageAction.Wildcard)) {
           return {
             success: false,
             info: 'No use of `*` action without an admin token.',

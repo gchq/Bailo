@@ -126,17 +126,13 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
     }
   }
 
-  const hasWriteAccess = !isReadOnlyAccessRequestActions(access.actions)
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
     model = await getModelById(user, modelId)
   } catch (e) {
     log.warn({ userDn: user.dn, access, e }, 'ModelId not found.')
-    if (hasWriteAccess) {
-      return { id: modelId, success: false, info: 'ModelId not found for write operation.' }
-    }
-    return { id: modelId, success: false, info: 'ModelId not found for read operation.' }
+    return { id: modelId, success: false, info: 'ModelId not found.' }
   }
 
   // Check for disallowed entry types (i.e. non model types)
@@ -153,24 +149,7 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
     }
   }
 
-  const auth = await authorisation.image(user, model, access, admin)
-
-  if (!auth.success) {
-    if (hasWriteAccess) {
-      return {
-        id: modelId,
-        success: false,
-        info: 'Unauthorised write requested.',
-      }
-    }
-    return {
-      id: modelId,
-      success: false,
-      info: 'Unauthorised read requested.',
-    }
-  }
-
-  return auth
+  return await authorisation.image(user, model, access, admin)
 }
 
 function isReadOnlyAccessRequestActions(actions: Action[], includeWildCard: boolean = false) {
@@ -244,10 +223,7 @@ export const getDockerRegistryAuth = [
       const authResult = await checkAccess(access, user, admin)
       if (!authResult.success) {
         // Ignore unauthorised read-only scopes (containerd cross-mount)
-        if (
-          authResult.info === 'Unauthorised read requested.' ||
-          authResult.info === 'ModelId not found for read operation.'
-        ) {
+        if (isReadOnlyAccessRequestActions(access.actions)) {
           rlog.debug({ access }, 'Ignoring unauthorised scope.')
           continue
         }
@@ -271,7 +247,7 @@ export const getDockerRegistryAuth = [
 
     // Enforce non-empty authorisation
     if (grantedAccesses.length === 0) {
-      throw Forbidden({ requestedAccesses }, 'No authorised scopes.', rlog)
+      throw Forbidden({ requestedAccesses }, 'Requested image is not accessible - no authorised scopes.', rlog)
     }
 
     const accessToken = await getAccessToken(user, grantedAccesses)

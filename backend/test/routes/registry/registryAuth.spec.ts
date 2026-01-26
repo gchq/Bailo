@@ -100,14 +100,14 @@ describe('registryAuth', () => {
       } as any)
     })
 
-    test('failure > bad modelId', async () => {
+    test.each(['push', 'pull', 'delete', 'list', '*'])('failure > bad modelId $0', async (action) => {
       const name = 'badModelId/fakeImage'
       const modelId = name.split('/')[0]
       modelMocks.getModelById.mockRejectedValueOnce({})
 
-      const auth = await checkAccess({ name, actions: ['push'] } as any, user)
+      const auth = await checkAccess({ name, actions: [action] } as any, user)
 
-      expect(auth).toStrictEqual({ id: modelId, success: false, info: 'ModelId not found for write operation.' })
+      expect(auth).toStrictEqual({ id: modelId, success: false, info: 'ModelId not found.' })
     })
 
     test('failure > incorrect entry type', async () => {
@@ -126,14 +126,14 @@ describe('registryAuth', () => {
       })
     })
 
-    test('failure > limited access for mirrored model entry type', async () => {
+    test.each(['push', 'delete'])('failure > limited access for mirrored model entry type $0', async (action) => {
       const name = 'modelId/fakeImage'
       const modelId = name.split('/')[0]
       modelMocks.getModelById.mockResolvedValueOnce({
         kind: EntryKind.MirroredModel,
       })
 
-      const auth = await checkAccess({ name, actions: ['push'] } as any, user)
+      const auth = await checkAccess({ name, actions: [action] } as any, user)
 
       expect(auth).toStrictEqual({
         id: modelId,
@@ -273,6 +273,60 @@ describe('registryAuth', () => {
       )
     })
 
+    test('reject > no authorization header', async () => {
+      const { req, res } = mockReqRes({
+        scope: 'repository:model/image:push',
+      })
+      req.get = vi.fn(() => false)
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^No authorisation header found/)
+    })
+
+    test('reject > getUserFromAuthHeader err', async () => {
+      userMocks.getUserFromAuthHeader.mockResolvedValueOnce({ error: 'error' } as any)
+      const { req, res } = mockReqRes({
+        scope: 'repository:model/image:push',
+      })
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^error/)
+    })
+
+    test('reject > no user', async () => {
+      userMocks.getUserFromAuthHeader.mockResolvedValueOnce({ user: false } as any)
+      const { req, res } = mockReqRes({
+        scope: 'repository:model/image:push',
+      })
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^User authentication failed/)
+    })
+
+    test('reject > no user', async () => {
+      const { req, res } = mockReqRes({
+        scope: 'repository:model/image:push',
+      })
+      req.query.service = 'broken'
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^Received registry auth request from unexpected service/)
+    })
+
+    test('reject > no user', async () => {
+      const { req, res } = mockReqRes({
+        scope: 1,
+      })
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrowError(/^Scope is an unexpected value/)
+    })
+
     test('reject > unauthorised push', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         kind: EntryKind.Model,
@@ -288,7 +342,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^Unauthorised write requested/)
+      await expect(result).rejects.toThrowError(/^push denied/)
     })
 
     test('reject > mixed pull & push denied as push unauthorised', async () => {
@@ -305,7 +359,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^Unauthorised write requested./)
+      await expect(result).rejects.toThrowError(/^No authorised push scopes./)
     })
 
     test('reject > pull unauthorised', async () => {
@@ -316,20 +370,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^No authorised scopes./)
-    })
-
-    test('reject > wildcard scope is disallowed', async () => {
-      modelMocks.getModelById.mockResolvedValueOnce({
-        kind: EntryKind.Model,
-      })
-      const { req, res } = mockReqRes({
-        scope: 'repository:model/image:*',
-      })
-
-      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
-
-      await expect(result).rejects.toThrowError(/^No use of `\*` action without an admin token./)
+      await expect(result).rejects.toThrowError(/^Requested image is not accessible - no authorised scopes./)
     })
   })
 })
