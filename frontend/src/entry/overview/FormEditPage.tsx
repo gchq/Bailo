@@ -285,11 +285,12 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                     handleActionButtonClose()
                     setHistoryDialogOpen(true)
                   }}
+                  data-test='viewHistoryButton'
                 >
                   <ListItemIcon>
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText data-test='viewHistoryButton'>View History</ListItemText>
+                  <ListItemText>View History</ListItemText>
                 </MenuItem>
               </Menu>
             </Stack>
