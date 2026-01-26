@@ -289,7 +289,7 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
                   <ListItemIcon>
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText>View History</ListItemText>
+                  <ListItemText data-test='viewHistoryButton'>View History</ListItemText>
                 </MenuItem>
               </Menu>
             </Stack>
