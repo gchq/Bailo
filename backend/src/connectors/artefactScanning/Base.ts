@@ -9,12 +9,8 @@ import log from '../../services/log.js'
 
 export type ArtefactScanResult = Pick<
   ScanInterface,
-  'toolName' | 'scannerVersion' | 'state' | 'isVulnerable' | 'vulnerabilities' | 'lastRunAt'
-> &
-  (
-    | { AdditionalFileScanInfo?: string; AdditionalImageScanInfo?: null }
-    | { AdditionalFileScanInfo?: null; AdditionalImageScanInfo?: string }
-  )
+  'toolName' | 'scannerVersion' | 'state' | 'isVulnerable' | 'vulnerabilityTable' | 'lastRunAt'
+>
 
 //TODO this may need to change
 export type ArtefactInterface = FileInterface | ImageRefInterface

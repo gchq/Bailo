@@ -6,6 +6,7 @@ import PQueue from 'p-queue'
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
+import { ArtefactVulnerabilities } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
@@ -55,13 +56,42 @@ export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningCon
       const viruses: string[] = isInfected
         ? scanResults.issues.map((issue) => `${issue.severity}: ${issue.description}. ${issue.scanner}`)
         : []
+      const vulnerabilitiesTemp = {
+        LOW: [] as string[],
+        MEDIUM: [] as string[],
+        HIGH: [] as string[],
+        CRITICAL: [] as string[],
+      }
+      scanResults.issues.map((issue) =>
+        vulnerabilitiesTemp[issue.severity].push(`${issue.description}. (scanner: ${issue.scanner})`),
+      )
+      const vulnerabilityTable: ArtefactVulnerabilities = {
+        Unspecified: { amount: 0 },
+        Low: {
+          amount: scanResults.summary.total_issues_by_severity.LOW,
+          vulnerabilityDescriptions: vulnerabilitiesTemp.LOW,
+        },
+        Medium: {
+          amount: scanResults.summary.total_issues_by_severity.MEDIUM,
+          vulnerabilityDescriptions: vulnerabilitiesTemp.MEDIUM,
+        },
+        High: {
+          amount: scanResults.summary.total_issues_by_severity.HIGH,
+          vulnerabilityDescriptions: vulnerabilitiesTemp.HIGH,
+        },
+        Critical: {
+          amount: scanResults.summary.total_issues_by_severity.CRITICAL,
+          vulnerabilityDescriptions: vulnerabilitiesTemp.CRITICAL,
+        },
+      }
+
       log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
           isVulnerable: isInfected,
-          vulnerabilities: viruses,
+          vulnerabilityTable,
           lastRunAt: new Date(),
         },
       ]

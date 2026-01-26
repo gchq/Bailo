@@ -10,7 +10,7 @@ export type ScanInterface = {
   scannerVersion?: string
   state: ArtefactScanStateKeys
   isVulnerable?: boolean
-  vulnerabilities?: string[]
+  vulnerabilityTable?: ArtefactVulnerabilities
   lastRunAt: Date
 
   createdAt: Date
@@ -27,6 +27,19 @@ export type ScanInterface = {
       packageList: string[]
     }
 )
+
+export type ArtefactVulnerabilitiesDetails = {
+  amount: number
+  vulnerabilityDescriptions?: string[]
+}
+
+export type ArtefactVulnerabilities = {
+  Unspecified: ArtefactVulnerabilitiesDetails
+  Low: ArtefactVulnerabilitiesDetails
+  Medium: ArtefactVulnerabilitiesDetails
+  High: ArtefactVulnerabilitiesDetails
+  Critical: ArtefactVulnerabilitiesDetails
+}
 
 export const ArtefactKind = {
   File: 'file',
@@ -48,7 +61,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     scannerVersion: { type: String },
     state: { type: String, enum: Object.values(ArtefactScanState), required: true },
     isVulnerable: { type: Boolean },
-    vulnerabilities: [{ type: String }],
+    vulnerabilityTable: { type: Schema.Types.Mixed },
     lastRunAt: { type: Schema.Types.Date, required: true },
   },
   {
