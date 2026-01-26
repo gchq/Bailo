@@ -12,6 +12,7 @@ export interface ReleaseAssetsMainTextProps {
   release: ReleaseInterface
   latestRelease?: string
   hideCopySemver?: boolean
+  hideDescription?: boolean
   includeLinks?: boolean
 }
 
@@ -20,6 +21,7 @@ export default function ReleaseAssetsMainText({
   release,
   latestRelease,
   hideCopySemver = false,
+  hideDescription = false,
   includeLinks = true,
 }: ReleaseAssetsMainTextProps) {
   const router = useRouter()
@@ -74,7 +76,7 @@ export default function ReleaseAssetsMainText({
           {` ${formatDateString(release.createdAt)}`}
         </Typography>
       </Stack>
-      <MarkdownDisplay>{release.notes}</MarkdownDisplay>
+      {!hideDescription && <MarkdownDisplay>{release.notes}</MarkdownDisplay>}
     </>
   )
 }

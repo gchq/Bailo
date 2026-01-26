@@ -155,7 +155,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-          <Button onClick={handleAddFilesOnClick} disabled={checkedFiles.length === 0}>
+          <Button onClick={handleAddFilesOnClick} disabled={checkedFiles.length === 0} variant='contained'>
             Add files
           </Button>
         </DialogActions>

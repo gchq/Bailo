@@ -98,7 +98,13 @@ export default function ReleaseSelector({
             <ListItemText
               primary={
                 <Stack spacing={0.5}>
-                  <ReleaseAssetsMainText model={model} release={release} hideCopySemver={true} includeLinks={false} />
+                  <ReleaseAssetsMainText
+                    model={model}
+                    release={release}
+                    hideCopySemver={true}
+                    hideDescription={true}
+                    includeLinks={false}
+                  />
                   {isAlreadySelected && (
                     <Typography variant='caption' color='error'>
                       This release has already been selected
@@ -154,7 +160,7 @@ export default function ReleaseSelector({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-          <Button onClick={handleAddReleases} disabled={checkedReleases.length === 0}>
+          <Button onClick={handleAddReleases} disabled={checkedReleases.length === 0} variant='contained'>
             Add releases
           </Button>
         </DialogActions>
