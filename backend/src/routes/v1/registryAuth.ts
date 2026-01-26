@@ -126,7 +126,7 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
     }
   }
 
-  const hasWriteAccess = access.actions.some((action) => (['push', 'delete', '*'] as Action[]).includes(action))
+  const hasWriteAccess = !isReadOnlyAccessRequestActions(access.actions)
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -139,21 +139,13 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
     return { id: modelId, success: false, info: 'ModelId not found for read operation.' }
   }
 
-  // Enforce users are explicit on the actions they wish to perform but allow admins to use wildcard `*`
-  if (!admin && access.actions.some((action) => action === '*')) {
-    return { id: modelId, success: false, info: 'No use of `*` action without an admin token.' }
-  }
-
   // Check for disallowed entry types (i.e. non model types)
   if (!([EntryKind.Model, EntryKind.MirroredModel] as EntryKindKeys[]).includes(model.kind)) {
     return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}.` }
   }
 
   // Further restrict mirrored model actions
-  if (
-    model.kind == EntryKind.MirroredModel &&
-    !access.actions.every((action) => (['pull', 'list', '*'] as Action[]).includes(action))
-  ) {
+  if (model.kind == EntryKind.MirroredModel && !isReadOnlyAccessRequestActions(access.actions, true)) {
     return {
       id: modelId,
       success: false,
@@ -161,7 +153,7 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
     }
   }
 
-  const auth = await authorisation.image(user, model, access)
+  const auth = await authorisation.image(user, model, access, admin)
 
   if (!auth.success) {
     if (hasWriteAccess) {
@@ -179,6 +171,10 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
   }
 
   return auth
+}
+
+function isReadOnlyAccessRequestActions(actions: Action[], includeWildCard: boolean = false) {
+  return actions.some((action) => (['pull', 'list', ...(includeWildCard ? ['*'] : [])] as Action[]).includes(action))
 }
 
 export const getDockerRegistryAuth = [
@@ -270,12 +266,12 @@ export const getDockerRegistryAuth = [
       requestedAccesses.some((a) => a.actions.includes('push')) &&
       !grantedAccesses.some((a) => a.actions.includes('push'))
     ) {
-      throw Forbidden({ requestedAccesses }, 'No authorised push scopes.', req.log)
+      throw Forbidden({ requestedAccesses }, 'No authorised push scopes.', rlog)
     }
 
     // Enforce non-empty authorisation
-    if (grantedAccesses.length == 0) {
-      throw Forbidden({ requestedAccesses }, 'No authorised scopes.', req.log)
+    if (grantedAccesses.length === 0) {
+      throw Forbidden({ requestedAccesses }, 'No authorised scopes.', rlog)
     }
 
     const accessToken = await getAccessToken(user, grantedAccesses)
