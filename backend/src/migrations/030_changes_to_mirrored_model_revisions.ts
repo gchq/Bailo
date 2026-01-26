@@ -8,8 +8,14 @@ export async function up() {
   }
   const mirroredModels = await Model.find({ kind: EntryKind.MirroredModel })
   const mirroredModelIds: string[] = mirroredModels.map((model) => model.id)
-  await ModelCardRevisionModel.updateMany({ modelId: { $in: mirroredModelIds } }, { mirrored: true })
-  await ModelCardRevisionModel.updateMany({ modelId: { $nin: mirroredModelIds } }, { mirrored: false })
+  await ModelCardRevisionModel.updateMany(
+    { modelId: { $in: mirroredModelIds }, mirrored: { $exists: false } },
+    { mirrored: true },
+  )
+  await ModelCardRevisionModel.updateMany(
+    { modelId: { $nin: mirroredModelIds }, mirrored: { $exists: false } },
+    { mirrored: false },
+  )
 
   for (const model of mirroredModels) {
     if (!model.mirroredCard || !model.mirroredCard.schemaId) {
