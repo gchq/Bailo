@@ -72,7 +72,9 @@ export class DocumentsExporter extends BaseExporter {
             scanErrors.missingScan.push({ name: file.name, id: file.id })
           } else if (file.scanResult.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
             scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-          } else if (file.scanResult.some((scanResult) => scanResult.isVulnerable)) {
+          } else if (
+            file.scanResult.some((scanResult) => scanResult.vulnerabilities && scanResult.vulnerabilities?.length > 0)
+          ) {
             scanErrors.failedScan.push({ name: file.name, id: file.id })
           }
         }

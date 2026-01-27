@@ -13,7 +13,6 @@ vi.mock('../../../../src/services/accessRequest.js', async () => ({
 
 const ArtefactScanResult: ArtefactScanResult = {
   state: 'complete',
-  isVulnerable: false,
   lastRunAt: new Date(),
   toolName: 'Test',
 }

@@ -1,5 +1,6 @@
 import { PassThrough } from 'node:stream'
 
+import { SeverityLevel } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
@@ -72,7 +73,7 @@ const mockFile = {
   id: 'fileId',
   _id: { toString: () => 'fileId' },
   name: 'f',
-  scanResult: [{ state: ArtefactScanState.Complete, isVulnerable: false }],
+  scanResult: [{ state: ArtefactScanState.Complete }],
 } as any
 
 const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'DocumentsExporter' }
@@ -157,7 +158,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const incompleteFile = {
       id: 'f',
       name: 'name',
-      scanResult: [{ state: ArtefactScanState.InProgress, isVulnerable: false }],
+      scanResult: [{ state: ArtefactScanState.InProgress }],
     }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([incompleteFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
@@ -175,7 +176,12 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const infectedFile = {
       id: 'f',
       name: 'name',
-      scanResult: [{ state: ArtefactScanState.Complete, isVulnerable: true }],
+      scanResult: [
+        {
+          state: ArtefactScanState.Complete,
+          vulnerabilities: [{ severity: SeverityLevel.CRITICAL, vulnerabilityDescription: 'There is a virus aboard' }],
+        },
+      ],
     }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([infectedFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)

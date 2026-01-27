@@ -42,7 +42,9 @@ export class FileExporter extends BaseExporter {
           filename: this.file.name,
           fileId: this.file.id,
         })
-      } else if (this.file.scanResult.some((scanResult) => scanResult.isVulnerable)) {
+      } else if (
+        this.file.scanResult.some((scanResult) => scanResult.vulnerabilities && scanResult.vulnerabilities.length > 0)
+      ) {
         throw BadReq('The file has failed vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }

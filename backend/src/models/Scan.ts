@@ -9,7 +9,6 @@ export type ScanInterface = {
   toolName: string
   scannerVersion?: string
   state: ArtefactScanStateKeys
-  isVulnerable?: boolean
   vulnerabilities?: ArtefactVulnerability[]
   lastRunAt: Date
 
@@ -39,7 +38,7 @@ export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLeve
 
 export type ArtefactVulnerability = {
   severity: SeverityLevelKeys
-  vulnerabilityDescription?: string
+  vulnerabilityDescription: string
 }
 
 export const ArtefactKind = {
@@ -61,8 +60,12 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
     state: { type: String, enum: Object.values(ArtefactScanState), required: true },
-    isVulnerable: { type: Boolean },
-    vulnerabilities: { type: Schema.Types.Mixed },
+    vulnerabilities: [
+      {
+        severity: { type: String, enum: Object.values(SeverityLevel) },
+        vulnerabilityDescription: { type: String },
+      },
+    ],
     lastRunAt: { type: Schema.Types.Date, required: true },
   },
   {

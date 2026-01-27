@@ -73,7 +73,6 @@ vi.mock('../../src/utils/id.js', () => idMock)
 
 const fileScanResult: ArtefactScanResult = {
   state: 'complete',
-  isVulnerable: false,
   toolName: 'Test',
   lastRunAt: new Date(),
 }

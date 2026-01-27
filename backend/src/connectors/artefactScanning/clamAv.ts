@@ -57,8 +57,8 @@ export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnec
     }
 
     try {
-      const { isInfected, viruses } = await this.av.scanStream(s3Stream)
-      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
+      const { viruses } = await this.av.scanStream(s3Stream)
+      log.debug({ file, result: { viruses }, ...scannerInfo }, 'Scan complete.')
       const vulnerabilities: ArtefactVulnerability[] = viruses.map(
         (virus) =>
           ({
@@ -71,7 +71,6 @@ export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnec
         {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
-          isVulnerable: isInfected,
           vulnerabilities,
           lastRunAt: new Date(),
         },

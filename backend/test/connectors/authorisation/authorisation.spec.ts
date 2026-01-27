@@ -14,7 +14,6 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({}))
 const artefactScanResult: ArtefactScanResult = {
   state: 'complete',
   lastRunAt: new Date(),
-  isVulnerable: false,
   toolName: 'Test',
 }
 

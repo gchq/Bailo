@@ -70,7 +70,6 @@ export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningCon
         {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
-          isVulnerable: isInfected,
           vulnerabilities,
           lastRunAt: new Date(),
         },

@@ -4,7 +4,7 @@ import { AnyZodObject, z } from 'zod'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
-import { ArtefactKind } from '../models/Scan.js'
+import { ArtefactKind, SeverityLevel } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'
@@ -132,8 +132,9 @@ export const scanInterfaceSchema = z.object({
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
   state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
-  isVulnerable: z.boolean().optional().openapi({ example: true }),
-  vulnerabilities: z.array(z.string().openapi({ example: 'Win.Test.EICAR_HDB-1' })).optional(),
+  vulnerabilities: z
+    .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
+    .optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
   _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
   id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
