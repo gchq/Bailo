@@ -166,11 +166,11 @@ export default function FileDisplay({
 
   const updateChipDetails = useEffectEvent(() => {
     if (!isFileInterface(file) || file.scanResult === undefined) {
-      setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
+      setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
       return
     } else if (threatsFound(file as FileInterface)) {
       setChipDisplay({
-        label: `Virus scan failed: ${plural(threatsFound(file as FileInterface), 'threat')} found`,
+        label: `Scan failed: ${plural(threatsFound(file as FileInterface), 'threat')} found`,
         colour: 'error',
         icon: <Error />,
       })
@@ -180,10 +180,10 @@ export default function FileDisplay({
       file.scanResult !== undefined &&
       file.scanResult.some((scan) => scan.state === ScanState.Error)
     ) {
-      setChipDisplay({ label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> })
+      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'warning', icon: <Warning /> })
       return
     } else if (!threatsFound(file as FileInterface)) {
-      setChipDisplay({ label: 'Virus scan passed', colour: 'success', icon: <Done /> })
+      setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
     } else {
       setChipDisplay({
         label: 'There was a problem fetching the file scan results',
@@ -236,16 +236,16 @@ export default function FileDisplay({
     )
   }, [handleRerunFileScanOnClick, showMenuItems.rescanFile])
 
-  const avChip = useMemo(() => {
+  const scanResultChip = useMemo(() => {
     if (
       !isFileInterface(file) ||
       file.scanResult === undefined ||
       file.scanResult.every((scan) => scan.state === ScanState.NotScanned)
     ) {
-      return <Chip size='small' label='Virus scan results could not be found' />
+      return <Chip size='small' label='Scan results could not be found' />
     }
     if (file.scanResult.some((scan) => scan.state === ScanState.InProgress)) {
-      return <Chip size='small' label='Virus scan in progress' />
+      return <Chip size='small' label='Scan in progress' />
     }
     if (!chipDisplay) {
       return <Skeleton variant='text' sx={{ fontSize: '1rem', width: '150px' }} />
@@ -397,7 +397,7 @@ export default function FileDisplay({
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
               {scanners.length > 0 && (
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  {avChip}
+                  {scanResultChip}
                 </Stack>
               )}
               <Stack>

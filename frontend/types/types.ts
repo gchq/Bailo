@@ -89,7 +89,7 @@ export interface FileInterface {
 
   complete: boolean
 
-  // Older files may not have AV run against them
+  // Older files may not have scans run against them
   scanResult?: AvScanResult[]
 
   tags: string[]
