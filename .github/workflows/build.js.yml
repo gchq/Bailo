@@ -208,7 +208,7 @@ jobs:
           eval "$(minikube -p minikube docker-env)"
 
           # Load all Bailo images downloaded as artifacts
-          find /tmp -maxdepth 2 -type f -name 'bailo_*.tar' 2>/dev/null | while read -r image; do
+          for image in /tmp/bailo_*/*.tar; do
             echo "Loading image: $image"
             docker load -i "$image"
           done
