@@ -17,9 +17,12 @@ export class BailoPeerConnector extends BasePeerConnector {
   }
 
   async searchEntries(_user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
-    let query: URLSearchParams = new URLSearchParams()
+    const query: URLSearchParams = new URLSearchParams()
     if (opts.search) {
-      query = new URLSearchParams({ search: opts.search })
+      query.append('search', opts.search)
+    }
+    if (opts.kind) {
+      query.append('kind', opts.kind)
     }
 
     const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
