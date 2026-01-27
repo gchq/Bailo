@@ -2,9 +2,29 @@
 
 exports[`services > file > downloadFile > success 1`] = `
 {
-  "Body": {
-    "pipe": [MockFunction],
+  "on": [MockFunction] {
+    "calls": [
+      [
+        "data",
+        [Function],
+      ],
+      [
+        "close",
+        [Function],
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": undefined,
+      },
+      {
+        "type": "return",
+        "value": undefined,
+      },
+    ],
   },
+  "pipe": [MockFunction],
 }
 `;
 

@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream'
 import { isNativeError } from 'node:util/types'
 
 import NodeClam from 'clamscan'
@@ -48,11 +47,7 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
       })
     }
 
-    const getObjectStreamResponse = await getObjectStream(file.path)
-    const s3Stream = getObjectStreamResponse.Body as Readable | null
-    if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`, { file, ...scannerInfo })
-    }
+    const s3Stream = await getObjectStream(file.path)
 
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)

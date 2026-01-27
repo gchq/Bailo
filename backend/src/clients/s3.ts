@@ -143,7 +143,14 @@ export async function getObjectStream(
   try {
     const command = new GetObjectCommand(input)
     const response = await client.send(command)
-    return response
+
+    if (!response.Body) {
+      throw InternalError('Stream for object unavailable from the S3 service.', {
+        internal: { bucket, key, range },
+      })
+    }
+    // The AWS library doesn't seem to properly type 'Body' as being pipeable?
+    return response.Body as Readable
   } catch (error) {
     throw InternalError('Unable to retrieve the object from the S3 service.', {
       internal: { error, bucket, key, range },
