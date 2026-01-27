@@ -787,7 +787,6 @@ export async function setLatestImportedModelCard(modelId: string) {
       version: 1,
       mirrored: false,
       metadata: {},
-      createdBy: latestModelCard.createdBy,
     })
     updatedModel.card = newCard
   }
