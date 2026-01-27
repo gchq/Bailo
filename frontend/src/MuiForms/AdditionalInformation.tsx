@@ -56,7 +56,7 @@ export default function AdditionalInformation({
           component='label'
           htmlFor={id}
         >
-          s{label}
+          {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
         {children}
@@ -152,7 +152,7 @@ export default function AdditionalInformation({
               <Typography variant='caption' fontWeight='bold'>
                 {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
               </Typography>
-              {<>{children}</>}
+              {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
               {description && (
                 <Typography variant='caption' color='textSecondary' fontWeight='bold'>
                   {description}
