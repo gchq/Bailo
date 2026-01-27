@@ -172,14 +172,14 @@ export const getDownloadFile = [
           },
         }
         res.status(500).json(bailoError)
-        log.error(bailoError, { fileId })
+        log.error(bailoError)
       } else {
         res.destroy(err)
       }
     })
 
     fileStream.on('close', () => {
-      log.info('Client closed connection early', { fileId })
+      log.info({ fileId }, 'Client closed connection early')
     })
 
     fileStream.pipe(res)
