@@ -219,6 +219,7 @@ jobs:
           CERT_DIR="backend/certs"
           sudo chown -R runner:docker "$CERT_DIR"
           mkdir -p "$CERT_DIR"
+          openssl genrsa -out "$CERT_DIR/key.pem" 2048
           openssl req -new -x509 -key "$CERT_DIR/key.pem" -out "$CERT_DIR/cert.pem" -config "$CERT_DIR/san.cnf" -extensions 'v3_req' -days 360
           ./backend/src/scripts/generateJWKS.sh
 
