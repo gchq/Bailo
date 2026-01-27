@@ -242,7 +242,7 @@ export async function getFileById(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResult',
       },
     },
   ])
@@ -273,7 +273,7 @@ export async function getFilesByModel(user: UserInterface, modelId: string) {
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResult',
       },
     },
   ])
@@ -299,7 +299,7 @@ export async function getFilesByIds(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResult',
       },
     },
   ])
