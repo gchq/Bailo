@@ -56,7 +56,7 @@ export default function AdditionalInformation({
           component='label'
           htmlFor={id}
         >
-          {label}
+          s{label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
         {children}
@@ -163,11 +163,7 @@ export default function AdditionalInformation({
         </Box>
       )}
       {!editMode && (
-        <Stack
-          direction={{ md: 'row', sm: 'column' }}
-          spacing={2}
-          divider={<Divider flexItem orientation='vertical' />}
-        >
+        <Stack spacing={2} divider={<Divider flexItem orientation='vertical' />}>
           <Stack>
             <Typography
               fontWeight='bold'
@@ -203,6 +199,8 @@ export default function AdditionalInformation({
                   py: 1,
                   px: 2,
                   width: 'fit-content',
+                  ml: 4,
+                  mb: 2,
                   ...sx,
                 }}
               >
