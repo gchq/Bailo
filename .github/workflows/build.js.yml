@@ -138,7 +138,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.11.1
+          node-version: 24
           cache: "npm"
 
       - name: Cache npm dependencies
@@ -185,6 +185,9 @@ jobs:
           pattern: bailo_*
           path: /tmp
 
+      - name: List downloaded artifacts
+        run: ls -R /tmp/bailo_*
+
       - name: Start minikube
         uses: medyagh/setup-minikube@latest
         with:
@@ -198,12 +201,17 @@ jobs:
       - name: List Cluster
         run: kubectl get pods -A
 
-      - name: Load docker image to minikube
+      - name: Load docker images into minikube
         run: |
-          eval $(minikube -p minikube docker-env)
-          docker load -i /tmp/bailo_backend.tar
-          docker load -i /tmp/bailo_frontend.tar
-          docker load -i /tmp/bailo_modelscan.tar
+          set -euo pipefail
+
+          eval "$(minikube -p minikube docker-env)"
+
+          # Load all Bailo images downloaded as artifacts
+          for image in /tmp/bailo_*/**/*.tar; do
+            echo "Loading image: $image"
+            docker load -i "$image"
+          done
 
       - name: Create certs (without npm)
         run: |
@@ -321,7 +329,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.11.1
+          node-version: 24
           cache: "npm"
 
       # Setup BuildX
