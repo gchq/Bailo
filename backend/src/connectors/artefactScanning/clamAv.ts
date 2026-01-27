@@ -6,7 +6,7 @@ import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactVulnerabilities } from '../../models/Scan.js'
+import { ArtefactVulnerability, SeverityLevel } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
@@ -21,10 +21,6 @@ function safeParseVersion(versionStr: string): string {
   } catch {
     return versionStr
   }
-}
-
-function createVulnerabilityDescriptions(viruses: string[]): string[] {
-  return viruses.map((virusName) => `Virus Found: ${virusName}`)
 }
 
 export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnector {
@@ -63,19 +59,20 @@ export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnec
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)
       log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
-      const vulnerabilityTable: ArtefactVulnerabilities = {
-        Unspecified: { amount: 0 },
-        Low: { amount: 0 },
-        Medium: { amount: 0 },
-        High: { amount: 0 },
-        Critical: { amount: viruses.length, vulnerabilityDescriptions: createVulnerabilityDescriptions(viruses) },
-      }
+      const vulnerabilities: ArtefactVulnerability[] = viruses.map(
+        (virus) =>
+          ({
+            severity: SeverityLevel.CRITICAL,
+            vulnerabilityDescription: `Virus Found: ${virus}`,
+          }) as ArtefactVulnerability,
+      )
+
       return [
         {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
           isVulnerable: isInfected,
-          vulnerabilityTable: vulnerabilityTable,
+          vulnerabilities,
           lastRunAt: new Date(),
         },
       ]

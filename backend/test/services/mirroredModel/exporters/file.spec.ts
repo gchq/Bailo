@@ -65,7 +65,7 @@ const mockFile = {
   id: 'fileId',
   name: 'test.txt',
   size: 500,
-  avScan: [{ state: ArtefactScanState.Complete, isVulnerable: false }],
+  scanResult: [{ state: ArtefactScanState.Complete, isVulnerable: false }],
 } as any
 const mockLogData = { extra: 'info', exporterType: 'FileExporter', exportId: 'exportId' }
 
@@ -135,7 +135,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if AV scans missing', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, avScan: [] }
+    const badFile = { ...mockFile, scanResult: [] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file is missing AV scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
@@ -148,7 +148,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if AV scans incomplete', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, avScan: [{ state: ArtefactScanState.InProgress, isVulnerable: false }] }
+    const badFile = { ...mockFile, scanResult: [{ state: ArtefactScanState.InProgress, isVulnerable: false }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has incomplete AV scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
@@ -161,7 +161,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if AV scans infected', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, avScan: [{ state: ArtefactScanState.Complete, isVulnerable: true }] }
+    const badFile = { ...mockFile, scanResult: [{ state: ArtefactScanState.Complete, isVulnerable: true }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has failed AV scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,

@@ -156,16 +156,16 @@ export default function FileDisplay({
   const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
 
   const threatsFound = useCallback((file: FileInterface) => {
-    if (file.avScan === undefined) {
+    if (file.scanResult === undefined) {
       return 0
     }
-    return file.avScan.reduce((acc, scan) => {
+    return file.scanResult.reduce((acc, scan) => {
       return scan.vulnerabilities ? scan.vulnerabilities.length + acc : acc
     }, 0)
   }, [])
 
   const updateChipDetails = useEffectEvent(() => {
-    if (!isFileInterface(file) || file.avScan === undefined) {
+    if (!isFileInterface(file) || file.scanResult === undefined) {
       setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
       return
     } else if (threatsFound(file as FileInterface)) {
@@ -177,8 +177,8 @@ export default function FileDisplay({
       return
     } else if (
       isFileInterface(file) &&
-      file.avScan !== undefined &&
-      file.avScan.some((scan) => scan.state === ScanState.Error)
+      file.scanResult !== undefined &&
+      file.scanResult.some((scan) => scan.state === ScanState.Error)
     ) {
       setChipDisplay({ label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> })
       return
@@ -239,12 +239,12 @@ export default function FileDisplay({
   const avChip = useMemo(() => {
     if (
       !isFileInterface(file) ||
-      file.avScan === undefined ||
-      file.avScan.every((scan) => scan.state === ScanState.NotScanned)
+      file.scanResult === undefined ||
+      file.scanResult.every((scan) => scan.state === ScanState.NotScanned)
     ) {
       return <Chip size='small' label='Virus scan results could not be found' />
     }
-    if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
+    if (file.scanResult.some((scan) => scan.state === ScanState.InProgress)) {
       return <Chip size='small' label='Virus scan in progress' />
     }
     if (!chipDisplay) {
@@ -275,9 +275,9 @@ export default function FileDisplay({
           }}
         >
           <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
-            {file.avScan.map((scanResult) => (
+            {file.scanResult.map((scanResult) => (
               <Fragment key={scanResult.toolName}>
-                {scanResult.isVulnerable ? (
+                {scanResult.vulnerabilities && scanResult.vulnerabilities.length > 0 ? (
                   <Stack spacing={2}>
                     <Stack spacing={1} direction='row'>
                       <Error color='error' />
@@ -290,8 +290,12 @@ export default function FileDisplay({
                     )}
                     <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                     <ul>
-                      {scanResult.vulnerabilities &&
-                        scanResult.vulnerabilities.map((vulnerability) => <li key={vulnerability}>{vulnerability}</li>)}
+                      {scanResult.vulnerabilities.map((vulnerability) => (
+                        <li
+                          //this surely needs to change
+                          key={vulnerability.vulnerabilityDescription}
+                        >{`${(vulnerability.severity as string).toUpperCase()}: ${vulnerability.vulnerabilityDescription}`}</li>
+                      ))}
                     </ul>
                   </Stack>
                 ) : (

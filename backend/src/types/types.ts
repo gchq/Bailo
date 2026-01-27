@@ -74,7 +74,7 @@ export const FederationState = {
   DISABLED: 'disabled',
   READ_ONLY: 'readOnly',
   ENABLED: 'enabled',
-} as const
+}
 
 export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
 

@@ -429,7 +429,7 @@ describe('services > file', () => {
 
   test('getFilesByIds > success', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { example: 'file', avScan: [], _id: { toString: vi.fn(() => testFileId) } },
+      { example: 'file', scanResult: [], _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const user = { dn: 'testUser' } as any
@@ -446,12 +446,12 @@ describe('services > file', () => {
       {
         example: 'file',
         _id: '123',
-        avScan: [{ fileId: '123' }, { fileId: '123' }],
+        scanResult: [{ fileId: '123' }, { fileId: '123' }],
       },
       {
         example: 'file',
         _id: '321',
-        avScan: [{ fileId: '321' }],
+        scanResult: [{ fileId: '321' }],
       },
     ])
     vi.mocked(authorisation.files).mockResolvedValue([
@@ -501,7 +501,7 @@ describe('services > file', () => {
       },
     ])
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { example: 'file', avScan: [], _id: { toString: vi.fn(() => testFileId) } },
+      { example: 'file', scanResult: [], _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const user = { dn: 'testUser' } as any

@@ -81,10 +81,10 @@ async function scanFile(file: FileInterfaceDoc) {
       .then((resultsArray: ArtefactScanResult[]) => updateFileWithResults(file._id, resultsArray))
   }
 
-  const avScan = await ScanModel.find({ fileId: file._id.toString() })
+  const scanResults = await ScanModel.find({ fileId: file._id.toString() })
   const ret: FileWithScanResultsInterface = {
     ...file.toObject(),
-    avScan,
+    scanResults,
     id: file._id.toString(),
   }
 

@@ -90,7 +90,7 @@ export interface FileInterface {
   complete: boolean
 
   // Older files may not have AV run against them
-  avScan?: AvScanResult[]
+  scanResult?: AvScanResult[]
 
   tags: string[]
 
@@ -98,20 +98,29 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export type FileWithScanResultsInterface = FileInterface & { avScan: ScanResultInterface[]; id: string }
+export type FileWithScanResultsInterface = FileInterface & { scanResult: ScanResultInterface[]; id: string }
 
 export interface ScanResultInterface {
   _id: string
   state: ScanStateKeys
   scannerVersion?: string
   isVulnerable?: boolean
-  vulnerabilities?: Array<string>
+  vulnerabilities?: Array<{ severity: SeverityLevelKeys; vulnerabilityDescription: string }>
   toolName: string
   lastRunAt: string
 
   createdAt: Date
   updatedAt: Date
 }
+
+export const SeverityLevel = {
+  UNSPECIFIED: 'unspecified',
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+} as const
+export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
 export const ScanState = {
   NotScanned: 'notScanned',

@@ -72,7 +72,7 @@ const mockFile = {
   id: 'fileId',
   _id: { toString: () => 'fileId' },
   name: 'f',
-  avScan: [{ state: ArtefactScanState.Complete, isVulnerable: false }],
+  scanResult: [{ state: ArtefactScanState.Complete, isVulnerable: false }],
 } as any
 
 const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'DocumentsExporter' }
@@ -140,7 +140,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
 
   test('_init throws BadReq if AV scan issues (missing scan)', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { id: 'f', name: 'name', avScan: [] }
+    const badFile = { id: 'f', name: 'name', scanResult: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
@@ -157,7 +157,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const incompleteFile = {
       id: 'f',
       name: 'name',
-      avScan: [{ state: ArtefactScanState.InProgress, isVulnerable: false }],
+      scanResult: [{ state: ArtefactScanState.InProgress, isVulnerable: false }],
     }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([incompleteFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
@@ -172,7 +172,11 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
 
   test('_init throws BadReq if AV scan failed', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const infectedFile = { id: 'f', name: 'name', avScan: [{ state: ArtefactScanState.Complete, isVulnerable: true }] }
+    const infectedFile = {
+      id: 'f',
+      name: 'name',
+      scanResult: [{ state: ArtefactScanState.Complete, isVulnerable: true }],
+    }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([infectedFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
