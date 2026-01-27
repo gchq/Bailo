@@ -1,4 +1,4 @@
-import Logger from 'bunyan'
+import pino from 'pino'
 
 export interface BailoError extends Error {
   // Inherited from 'Error'
@@ -22,7 +22,7 @@ export interface BailoError extends Error {
   }
 
   // A custom logger may be provided, otherwise a default is used
-  logger?: Logger
+  logger?: pino.Logger
 }
 
 export function isBailoError(err: unknown): err is BailoError {
