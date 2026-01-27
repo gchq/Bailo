@@ -138,13 +138,13 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  test('_init throws BadReq if AV scan issues (missing scan)', async () => {
+  test('_init throws BadReq if scan issues (missing scan)', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
     const badFile = { id: 'f', name: 'name', scanResult: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
-      'The releases contain file(s) that do not have a clean AV scan.\nMethod `DocumentsExporter._init` failure.',
+      'The releases contain file(s) that do not have a clean scan.\nMethod `DocumentsExporter._init` failure.',
       { scanErrors: expect.any(Object) },
     )
 
@@ -152,7 +152,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  test('_init throws BadReq if AV scan incomplete', async () => {
+  test('_init throws BadReq if scan incomplete', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
     const incompleteFile = {
       id: 'f',
@@ -162,7 +162,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([incompleteFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
-      'The releases contain file(s) that do not have a clean AV scan.\nMethod `DocumentsExporter._init` failure.',
+      'The releases contain file(s) that do not have a clean scan.\nMethod `DocumentsExporter._init` failure.',
       { scanErrors: expect.any(Object) },
     )
 
@@ -170,7 +170,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  test('_init throws BadReq if AV scan failed', async () => {
+  test('_init throws BadReq if scan failed', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
     const infectedFile = {
       id: 'f',
@@ -180,7 +180,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([infectedFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
-      'The releases contain file(s) that do not have a clean AV scan.\nMethod `DocumentsExporter._init` failure.',
+      'The releases contain file(s) that do not have a clean scan.\nMethod `DocumentsExporter._init` failure.',
       { scanErrors: expect.any(Object) },
     )
 

@@ -35,12 +35,15 @@ export class FileExporter extends BaseExporter {
     }
 
     if (scanners.scannersInfo()) {
-      if (!this.file.scanResults || this.file.scanResults.length === 0) {
-        throw BadReq('The file is missing AV scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
-        throw BadReq('The file has incomplete AV scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.scanResults.some((scanResult) => scanResult.isVulnerable)) {
-        throw BadReq('The file has failed AV scan(s).', { filename: this.file.name, fileId: this.file.id })
+      if (!this.file.scanResult || this.file.scanResult.length === 0) {
+        throw BadReq('The file is missing vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
+      } else if (this.file.scanResult.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+        throw BadReq('The file has incomplete vulnerability scan(s).', {
+          filename: this.file.name,
+          fileId: this.file.id,
+        })
+      } else if (this.file.scanResult.some((scanResult) => scanResult.isVulnerable)) {
+        throw BadReq('The file has failed vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }
   }

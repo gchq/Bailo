@@ -11,7 +11,14 @@ exports[`services > file > downloadFile > success 1`] = `
 exports[`services > file > finishUploadMultipartFile > success 1`] = `
 {
   "_id": "mockFileId",
-  "avScan": {
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mock-id",
+  "mime": "mock/mime",
+  "modelId": "mockModelId",
+  "name": "mockFileName",
+  "path": "/mock/path",
+  "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "filter": [MockFunction],
@@ -37,13 +44,6 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
     "sort": [MockFunction],
     "unwind": [MockFunction],
   },
-  "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
-  "id": "mock-id",
-  "mime": "mock/mime",
-  "modelId": "mockModelId",
-  "name": "mockFileName",
-  "path": "/mock/path",
   "size": 100,
   "tags": [],
   "updatedAt": 2024-01-02T00:00:00.000Z,
@@ -56,8 +56,8 @@ exports[`services > file > getFilesByIds > success 1`] = `
     "_id": {
       "toString": [MockFunction],
     },
-    "avScan": [],
     "example": "file",
+    "scanResult": [],
   },
 ]
 `;
@@ -66,7 +66,8 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
 [
   {
     "_id": "123",
-    "avScan": [
+    "example": "file",
+    "scanResult": [
       {
         "fileId": "123",
       },
@@ -74,16 +75,15 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
         "fileId": "123",
       },
     ],
-    "example": "file",
   },
   {
     "_id": "321",
-    "avScan": [
+    "example": "file",
+    "scanResult": [
       {
         "fileId": "321",
       },
     ],
-    "example": "file",
   },
 ]
 `;
@@ -350,7 +350,14 @@ exports[`services > file > updateFile > success multiple params 1`] = `
 exports[`services > file > uploadFile > success 1`] = `
 {
   "_id": "mockFileId",
-  "avScan": {
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mock-id",
+  "mime": "text/plain",
+  "modelId": "testModelId",
+  "name": "testFile",
+  "path": "beta/model/testModelId/files/mock-long-id",
+  "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "filter": [MockFunction],
@@ -376,13 +383,6 @@ exports[`services > file > uploadFile > success 1`] = `
     "sort": [MockFunction],
     "unwind": [MockFunction],
   },
-  "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
-  "id": "mock-id",
-  "mime": "text/plain",
-  "modelId": "testModelId",
-  "name": "testFile",
-  "path": "beta/model/testModelId/files/mock-long-id",
   "size": 100,
   "tags": [],
   "updatedAt": 2024-01-02T00:00:00.000Z,
@@ -392,7 +392,14 @@ exports[`services > file > uploadFile > success 1`] = `
 exports[`services > file > uploadFile > virus scan initialised 1`] = `
 {
   "_id": "mockFileId",
-  "avScan": {
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mock-id",
+  "mime": "text/plain",
+  "modelId": "testModelId",
+  "name": "testFile",
+  "path": "beta/model/testModelId/files/mock-long-id",
+  "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "filter": [MockFunction],
@@ -418,13 +425,6 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
     "sort": [MockFunction],
     "unwind": [MockFunction],
   },
-  "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
-  "id": "mock-id",
-  "mime": "text/plain",
-  "modelId": "testModelId",
-  "name": "testFile",
-  "path": "beta/model/testModelId/files/mock-long-id",
   "size": 100,
   "tags": [],
   "updatedAt": 2024-01-02T00:00:00.000Z,

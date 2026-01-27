@@ -68,11 +68,11 @@ export class DocumentsExporter extends BaseExporter {
           failedScan: Array<{ name: string; id: string }>
         } = { missingScan: [], incompleteScan: [], failedScan: [] }
         for (const file of this.files) {
-          if (!file.scanResults || file.scanResults.length === 0) {
+          if (!file.scanResult || file.scanResult.length === 0) {
             scanErrors.missingScan.push({ name: file.name, id: file.id })
-          } else if (file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+          } else if (file.scanResult.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
             scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-          } else if (file.scanResults.some((scanResult) => scanResult.isVulnerable)) {
+          } else if (file.scanResult.some((scanResult) => scanResult.isVulnerable)) {
             scanErrors.failedScan.push({ name: file.name, id: file.id })
           }
         }
@@ -81,7 +81,7 @@ export class DocumentsExporter extends BaseExporter {
           scanErrors.incompleteScan.length > 0 ||
           scanErrors.failedScan.length > 0
         ) {
-          throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+          throw BadReq('The releases contain file(s) that do not have a clean scan.', { scanErrors })
         }
       }
     }
