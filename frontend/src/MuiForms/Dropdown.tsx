@@ -64,10 +64,6 @@ export default function Dropdown({
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
     >
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
       {registry.formContext.editMode && (
         <Autocomplete
           size='small'

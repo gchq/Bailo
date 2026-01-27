@@ -2,6 +2,7 @@ import { LocalOffer } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchEntry, useGetEntry } from 'actions/entry'
+import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -24,6 +25,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
 
   const { mutateEntry } = useGetEntry(entry.id)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -49,12 +51,16 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
     }
   }
 
-  if (isUiConfigLoading) {
+  if (isUiConfigLoading || isSchemaLoading) {
     return <Loading />
   }
 
   if (isUiConfigError) {
     return <ErrorWrapper message={isUiConfigError.info.message} />
+  }
+
+  if (isSchemaError) {
+    return <ErrorWrapper message={isSchemaError.info.message} />
   }
 
   return (
@@ -63,6 +69,12 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
         <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} Details
         </Typography>
+        <Stack direction='row' alignItems='center' spacing={1}>
+          <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
+            Schema
+          </Typography>
+          <Typography>{schema?.name}</Typography>
+        </Stack>
         <Stack spacing={1}>
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <Box>

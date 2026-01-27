@@ -13,7 +13,6 @@ import {
   MenuItem,
   Stack,
   Switch,
-  Typography,
 } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
@@ -21,7 +20,6 @@ import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
 import React, { useContext, useEffect, useEffectEvent, useState } from 'react'
-import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
@@ -188,6 +186,14 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     }
   }
 
+  function canBeMigrated(): boolean {
+    if (entry.kind === EntryKind.MIRRORED_MODEL) {
+      return entry.card.schemaId !== entry.mirroredCard?.schemaId
+    } else {
+      return true
+    }
+  }
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -210,27 +216,24 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           spacing={2}
           sx={{ pb: 2 }}
         >
-          <div>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Typography fontWeight='bold'>Schema</Typography>
-              <Typography>{schema?.name}</Typography>
-              <CopyToClipboardButton
-                textToCopy={schema ? schema.name : ''}
-                notificationText='Copied schema name to clipboard'
-                ariaLabel='copy schema name to clipboard'
-              />
-            </Stack>
-          </div>
-          {schemaMigrations.length > 0 && entry.kind !== EntryKind.MIRRORED_MODEL && (
-            <Restricted action='editEntryCard' fallback={<></>}>
-              <MessageAlert
-                severity='info'
-                message={`There is a migration available for this ${EntryKindLabel[entry.kind]}`}
-                buttonText='Migrate'
-                buttonAction={() => setMigrationListDialogOpen(true)}
-              />
-            </Restricted>
-          )}
+          <Box>
+            {schemaMigrations.length > 0 && canBeMigrated() && (
+              <Restricted action='editEntryCard' fallback={<></>}>
+                <Box sx={{ maxWidth: '700px' }}>
+                  <MessageAlert
+                    severity='info'
+                    message={
+                      entry.kind !== EntryKind.MIRRORED_MODEL
+                        ? `There is a migration available for this ${EntryKindLabel[entry.kind]}.`
+                        : `The schema ID for the source model does not match this mirrored model's schema ID. It is likely a migration is needed.`
+                    }
+                    buttonText='Migrate'
+                    buttonAction={() => setMigrationListDialogOpen(true)}
+                  />
+                </Box>
+              </Restricted>
+            )}
+          </Box>
           {!isEdit && (
             <Stack direction='row' spacing={1}>
               <FormGroup>
@@ -246,6 +249,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
               >
                 <Button
                   variant='outlined'
+                  sx={{ width: 'fit-content' }}
                   onClick={() => {
                     handleActionButtonClose()
                     setIsEdit(!isEdit)
