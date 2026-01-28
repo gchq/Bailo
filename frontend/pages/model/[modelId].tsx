@@ -15,6 +15,7 @@ import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import { EntryKind } from 'types/types'
 import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
@@ -37,9 +38,7 @@ export default function Model() {
             {
               title: 'Overview',
               path: 'overview',
-              view: (
-                <Overview entry={entry} readOnly={!!entry.settings.mirror?.sourceModelId} mutateEntry={mutateEntry} />
-              ),
+              view: <Overview entry={entry} mutateEntry={mutateEntry} />,
             },
             {
               title: 'Releases',
@@ -48,7 +47,7 @@ export default function Model() {
                 <Releases
                   model={entry}
                   currentUserRoles={currentUserRoles}
-                  readOnly={!!entry.settings.mirror?.sourceModelId}
+                  readOnly={entry.kind === EntryKind.MIRRORED_MODEL}
                 />
               ),
               disabled: !entry.card,
@@ -65,7 +64,7 @@ export default function Model() {
             {
               title: 'Registry',
               path: 'registry',
-              view: <ModelImages model={entry} readOnly={!!entry.settings.mirror?.sourceModelId} />,
+              view: <ModelImages model={entry} readOnly={entry.kind === EntryKind.MIRRORED_MODEL} />,
             },
             {
               title: 'File management',

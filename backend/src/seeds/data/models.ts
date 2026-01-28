@@ -40,6 +40,7 @@ export const model: ModelInterface = {
   card: {
     schemaId: 'minimal-general-v10-beta',
     version: 5,
+    mirrored: false,
     metadata: {
       overview: {
         modelSummary: `*Input*: Photo(s) or video(s)
