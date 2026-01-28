@@ -25,6 +25,7 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  mirroredModel = false,
   displayStats = false,
 }: {
   splitSchema: SplitSchemaNoRender
@@ -33,6 +34,7 @@ export default function JsonSchemaForm({
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  mirroredModel?: boolean
   displayStats?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
@@ -111,6 +113,24 @@ export default function JsonSchemaForm({
     })
   }
 
+  const iterate = (source) => {
+    Object.keys(source).forEach((key) => {
+      if (typeof source[key] !== 'object') {
+        source[key] = undefined
+      }
+
+      if ((Array.isArray(source[key]) || typeof source[key] === 'object') && source[key] !== null) {
+        iterate(source[key])
+      }
+    })
+  }
+
+  const source = structuredClone(currentStep.mirroredState)
+  const target = structuredClone(currentStep.state)
+  iterate(source)
+
+  const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
+
   return (
     <Stack>
       {displayStats && (
@@ -169,7 +189,7 @@ export default function JsonSchemaForm({
           )}
           <Form
             schema={currentStep.schema}
-            formData={currentStep.state}
+            formData={updatedMirroredState}
             onChange={onFormChange}
             validator={validator}
             widgets={widgets}
@@ -182,6 +202,9 @@ export default function JsonSchemaForm({
               editMode: canEdit,
               formSchema: currentStep.schema,
               defaultCurrentUser: defaultCurrentUserInEntityList,
+              mirroredState: currentStep.mirroredState,
+              state: currentStep.state,
+              mirroredModel,
               onShare: onShareSectionOnClick,
             }}
             templates={

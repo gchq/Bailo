@@ -1,9 +1,10 @@
-import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry } from '@rjsf/utils'
-import { Fragment, useMemo } from 'react'
+import { useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface CustomTextInputProps {
   label?: string
@@ -46,12 +47,18 @@ export default function CustomTextInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <Fragment key={label}>
-      <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+    >
       <TextField
         size='small'
         error={rawErrors && rawErrors.length > 0}
@@ -96,6 +103,6 @@ export default function CustomTextInput({
           },
         }}
       />
-    </Fragment>
+    </AdditionalInformation>
   )
 }

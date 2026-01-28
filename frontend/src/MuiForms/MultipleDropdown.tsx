@@ -1,8 +1,10 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState, getState } from 'utils/formUtils'
 
 interface MultipleDropdownProps {
   label?: string
@@ -50,16 +52,25 @@ export default function MultipleDropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+  const state = getState(id, registry.formContext)
+
   return (
-    <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value.length > 0 && value[0] !== null}
+      label={label}
+      state={state}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+    >
       {registry.formContext.editMode && (
         <Autocomplete
           multiple
           size='small'
+          getOptionLabel={(option) => option}
           options={multipleDropdownOptions}
           sx={(theme) => ({
             input: {
@@ -120,6 +131,6 @@ export default function MultipleDropdown({
           )}
         </>
       )}
-    </Fragment>
+    </AdditionalInformation>
   )
 }

@@ -54,6 +54,9 @@ export interface UiConfig {
       enabled: boolean
       disclaimer: string
     }
+    display: {
+      additionalInfoHeading: string
+    }
   }
   announcement: {
     enabled: boolean
@@ -379,6 +382,7 @@ export interface StepNoRender {
   uiSchema?: UiSchema
 
   state: any
+  mirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>

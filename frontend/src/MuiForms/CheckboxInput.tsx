@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
 import { ChangeEvent, Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface CustomTextInputProps {
   label?: string
@@ -28,22 +30,42 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   if (!registry.formContext.editMode && value == undefined) {
     return (
-      <Typography
-        sx={{
-          fontStyle: value ? 'unset' : 'italic',
-          color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-        }}
-        aria-label={`Label for ${label}`}
+      <AdditionalInformation
+        editMode={registry.formContext.editMode}
+        mirroredState={mirroredState}
+        display={registry.formContext.mirroredModel && value}
+        label={label}
+        id={id}
+        required={required}
+        mirroredModel={registry.formContext.mirroredModel}
       >
-        Unanswered
-      </Typography>
+        <Typography
+          sx={{
+            fontStyle: value ? 'unset' : 'italic',
+            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+          }}
+          aria-label={`Label for ${label}`}
+        >
+          Unanswered
+        </Typography>
+      </AdditionalInformation>
     )
   }
 
   return (
-    <Fragment key={label}>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+    >
       <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`} component='label' htmlFor={id}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -54,7 +76,11 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>
       )}
-      {!registry.formContext.editMode && <Typography>{value ? 'Yes' : 'No'}</Typography>}
-    </Fragment>
+      {!registry.formContext.editMode && (
+        <>
+          <Typography>{value ? 'Yes' : 'No'}</Typography>
+        </>
+      )}
+    </AdditionalInformation>
   )
 }

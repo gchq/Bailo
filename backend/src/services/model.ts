@@ -500,8 +500,6 @@ export async function _setModelCard(
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
 
-  checkModelRestriction(model)
-
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })

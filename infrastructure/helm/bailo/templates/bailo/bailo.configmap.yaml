@@ -212,6 +212,9 @@ data:
             enabled: {{ .Values.modelMirror.export.enabled }},
             disclaimer: '{{ .Values.modelMirror.export.disclaimer }}',
           },
+          display: {
+            additionalInfoHeading: '{{ .Values.modelMirror.display.additionalInfoHeading }}'
+          },
         },
 
         helpPopoverText: {

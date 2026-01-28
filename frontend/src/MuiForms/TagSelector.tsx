@@ -3,6 +3,8 @@ import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -46,14 +48,20 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, formContext)
+
   return (
-    <>
+    <AdditionalInformation
+      editMode={formContext.editMode}
+      mirroredState={mirroredState}
+      display={formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={formContext.mirroredModel}
+    >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Stack
             direction={{ md: 'row', sm: 'column' }}
             spacing={2}
@@ -109,6 +117,6 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Typography>
         </Stack>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

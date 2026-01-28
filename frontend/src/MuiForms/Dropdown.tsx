@@ -1,8 +1,10 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface DropdownProps {
   label?: string
@@ -50,12 +52,18 @@ export default function Dropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+    >
       {registry.formContext.editMode && (
         <Autocomplete
           size='small'
@@ -103,6 +111,6 @@ export default function Dropdown({
           {value ? value : 'Unanswered'}
         </Typography>
       )}
-    </Fragment>
+    </AdditionalInformation>
   )
 }
