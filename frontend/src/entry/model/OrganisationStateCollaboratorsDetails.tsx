@@ -1,5 +1,5 @@
 import { LocalOffer } from '@mui/icons-material'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchEntry, useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
@@ -65,17 +65,21 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
 
   return (
     <Box>
-      <Stack spacing={2} sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}>
+      <Stack
+        spacing={2}
+        divider={<Divider flexItem />}
+        sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}
+      >
         <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} Details
         </Typography>
-        <Stack direction='row' alignItems='center' spacing={1}>
-          <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
-            Schema
-          </Typography>
-          <Typography>{schema?.name}</Typography>
-        </Stack>
         <Stack spacing={1}>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
+              Schema:
+            </Typography>
+            <Typography>{schema?.name}</Typography>
+          </Stack>
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <Box>
               <Typography>
@@ -103,23 +107,25 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
           </Button>
           {collaboratorList}
         </Stack>
-        <Restricted action='editEntry' fallback={<></>}>
-          <Button
-            sx={{ width: 'fit-content' }}
-            size='small'
-            startIcon={<LocalOffer />}
-            onClick={(event) => setAnchorEl(event.currentTarget)}
-          >
-            {`Edit ${entry.kind.replace('-', ' ')} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
-          </Button>
-        </Restricted>
-        <EntryTagSelector
-          anchorEl={anchorEl}
-          setAnchorEl={setAnchorEl}
-          onChange={handleEntryTagOnChange}
-          tags={entry.tags}
-          errorText={entryTagUpdateErrorMessage}
-        />
+        <Box>
+          <Restricted action='editEntry' fallback={<></>}>
+            <Button
+              sx={{ width: 'fit-content' }}
+              size='small'
+              startIcon={<LocalOffer />}
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+            >
+              {`Edit ${entry.kind.replace('-', ' ')} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
+            </Button>
+          </Restricted>
+          <EntryTagSelector
+            anchorEl={anchorEl}
+            setAnchorEl={setAnchorEl}
+            onChange={handleEntryTagOnChange}
+            tags={entry.tags}
+            errorText={entryTagUpdateErrorMessage}
+          />
+        </Box>
       </Stack>
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
     </Box>

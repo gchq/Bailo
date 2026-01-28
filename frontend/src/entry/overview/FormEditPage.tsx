@@ -225,7 +225,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     message={
                       entry.kind !== EntryKind.MIRRORED_MODEL
                         ? `There is a migration available for this ${EntryKindLabel[entry.kind]}.`
-                        : `The schema ID for the source model does not match this mirrored model's schema ID. It is likely a migration is needed.`
+                        : `The schema ID for the source model does not match this mirrored model's schema ID. It is likely that a migration is needed.`
                     }
                     buttonText='Migrate'
                     buttonAction={() => setMigrationListDialogOpen(true)}
