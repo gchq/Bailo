@@ -153,7 +153,7 @@ export class ImageImporter extends BaseImporter {
     }
   }
 
-  async finishListener(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
+  async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
     if (this.manifestBody) {
       const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
