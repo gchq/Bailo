@@ -148,7 +148,7 @@ export class DocumentsImporter extends BaseImporter {
     }
   }
 
-  async finishListener(
+  async handleStreamCompletion(
     resolve: (reason?: MongoDocumentMirrorInformation) => void,
     _reject: (reason?: unknown) => void,
   ) {
