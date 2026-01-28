@@ -67,7 +67,7 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
                     return { key: tag, ...{ tag } }
                   })}
                   sortingProperties={[{ value: 'tag', title: 'Tag', iconKind: 'text' }]}
-                  searchFilterProperty={'tag'}
+                  searchFilterProperty='tag'
                   searchPlaceholderText='Search by tag'
                   defaultSortProperty='tag'
                   emptyListText={`No image tags found for image ${modelImage.name}`}

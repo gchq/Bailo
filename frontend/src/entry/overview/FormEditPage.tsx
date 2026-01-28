@@ -294,6 +294,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                       handleActionButtonClose()
                       setHistoryDialogOpen(true)
                     }}
+                    data-test='viewHistoryButton'
                   >
                     <ListItemIcon>
                       <HistoryIcon fontSize='small' />

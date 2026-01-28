@@ -11,7 +11,7 @@ import {
   SchemaMigrationAction,
 } from '../../../src/connectors/authorisation/actions.js'
 import { BasicAuthorisationConnector, partials } from '../../../src/connectors/authorisation/base.js'
-import { ModelDoc } from '../../../src/models/Model.js'
+import { EntryKind, ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
 import { SchemaDoc } from '../../../src/models/Schema.js'
 import { UserInterface } from '../../../src/models/User.js'
@@ -791,10 +791,11 @@ describe('connectors > authorisation > base', () => {
         },
       ],
     )
+
     expect(result).toStrictEqual([
       {
         id: 'testModel',
-        info: 'You do not have permission to upload an image.',
+        info: 'You do not have permission to write to an image.',
         success: false,
       },
     ])
@@ -821,6 +822,7 @@ describe('connectors > authorisation > base', () => {
         },
       ],
     )
+
     expect(result).toStrictEqual([
       {
         id: 'testModel',
@@ -830,22 +832,165 @@ describe('connectors > authorisation > base', () => {
     ])
   })
 
-  test('image > wildcard action not allowed', async () => {
+  test('image > invalid action', async () => {
+    const connector = new BasicAuthorisationConnector()
+    ReviewRoleModelMock.find.mockResolvedValue([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValue([])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+        settings: { ungovernedAccess: false },
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['delete', 'list', 'foo'] as any[],
+        },
+      ],
+    )
+
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'Unrecognised action included in the access request.',
+        success: false,
+      },
+    ])
+  })
+
+  test('image > handle map error', async () => {
+    const connector = new BasicAuthorisationConnector()
+    ReviewRoleModelMock.find.mockResolvedValue([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValue([])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+        settings: { ungovernedAccess: false },
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: {
+            map: vi.fn(() => {
+              throw Error('err')
+            }),
+          } as any,
+        },
+      ],
+    )
+
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'Error: err',
+        success: false,
+      },
+    ])
+  })
+
+  test('image > no wildcard without admin', async () => {
+    const connector = new BasicAuthorisationConnector()
+    ReviewRoleModelMock.find.mockResolvedValue([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValue([])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+        settings: { ungovernedAccess: false },
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['*'],
+        },
+      ],
+    )
+
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'No use of `*` action without an admin token.',
+        success: false,
+      },
+    ])
+  })
+
+  test('image > wildcard with admin', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
     mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
     ReviewRoleModelMock.find.mockResolvedValue([])
 
-    const result = await connector.image(user as any, model as any, {
+    const result = await connector.image(
+      user as any,
+      { id: 'testModel', kind: EntryKind.Model } as any,
+      {
+        type: 'repository',
+        name: 'img1',
+        actions: ['*'],
+      },
+      true,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'img1',
+      success: true,
+    })
+  })
+
+  test('image > constrained user token', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+    mockTokenService.validateTokenForModel.mockResolvedValueOnce({
+      success: false,
+      info: 'Token invalid',
+      id: 'testModel',
+    } as any)
+
+    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.Model } as any, {
       type: 'repository',
       name: 'img1',
-      actions: ['*'],
+      actions: ['pull'],
+    })
+
+    expect(result).toStrictEqual({
+      success: false,
+      info: 'Token invalid',
+      id: 'testModel',
+    })
+  })
+
+  test('image > pull action allowed on mirrored model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+
+    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.MirroredModel } as any, {
+      type: 'repository',
+      name: 'img1',
+      actions: ['pull'],
     })
 
     expect(result).toStrictEqual({
       id: 'img1',
-      success: false,
-      info: 'You are not allowed to complete any actions beyond `push`, `pull` or `delete` on an image.',
+      success: true,
     })
   })
 

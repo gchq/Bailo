@@ -1,8 +1,8 @@
 import Logger from 'bunyan'
 
-import { RegistryErrorResponseBody } from '../clients/registryResponses.js'
 import { BailoError } from '../types/error.js'
 import { RegistryError } from '../types/RegistryError.js'
+import { RegistryErrorResponseBody } from './registryResponses.js'
 
 export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: Logger) {
   const err = Error(message) as BailoError

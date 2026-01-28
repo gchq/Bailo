@@ -202,7 +202,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    await importer.finishListener(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
     expect(modelMocks.setLatestImportedModelCard).toHaveBeenCalledWith(mockMetadata.mirroredModelId)
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,
