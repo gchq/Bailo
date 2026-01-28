@@ -558,6 +558,8 @@ export default function Marketplace() {
                     onSelectedStatesChange={handleStatesOnChange}
                     selectedPeers={selectedPeers}
                     onSelectedPeersChange={handlePeersOnChange}
+                    displayPeers={federationEnabled}
+                    peers={peers}
                   />
                 </div>
               )}
