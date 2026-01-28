@@ -1,4 +1,4 @@
-import Logger from 'bunyan'
+import pino from 'pino'
 import { describe, expect, test, vi } from 'vitest'
 
 import { expressLogger } from '../../../src/routes/middleware/expressLogger.js'
@@ -23,6 +23,6 @@ describe('middleware > expressLogger', () => {
     })
 
     expect(req.reqId).not.equal('')
-    expect(req.log instanceof Logger).toBe(true)
+    expect(req.log instanceof pino).toBe(true)
   })
 })
