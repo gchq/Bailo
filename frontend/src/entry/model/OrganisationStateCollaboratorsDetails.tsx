@@ -25,7 +25,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
 
   const { mutateEntry } = useGetEntry(entry.id)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card ? entry.card.schemaId : '')
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -74,12 +74,14 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
           {toSentenceCase(entry.kind)} Details
         </Typography>
         <Stack spacing={1}>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
-              Schema:
-            </Typography>
-            <Typography>{schema?.name}</Typography>
-          </Stack>
+          {schema && (
+            <Stack direction='row' alignItems='center' spacing={1}>
+              <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
+                Schema:
+              </Typography>
+              <Typography>{schema.name}</Typography>
+            </Stack>
+          )}
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <Box>
               <Typography>
