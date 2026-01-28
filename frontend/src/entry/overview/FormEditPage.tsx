@@ -19,7 +19,7 @@ import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
-import React, { useContext, useEffect, useEffectEvent, useState } from 'react'
+import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
@@ -117,12 +117,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     }
   }
 
-  function onToggleDisplayStats() {
-    const newValue = !displayFormStats
-    setDisplayFormStats(newValue)
-    saveDisplayFormStats(newValue)
-  }
-
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
     setSplitSchema(newSplitSchema)
   })
@@ -186,12 +180,17 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     }
   }
 
-  function canBeMigrated(): boolean {
+  const canBeMigrated = (): boolean => {
     if (entry.kind === EntryKind.MIRRORED_MODEL) {
       return entry.card.schemaId !== entry.mirroredCard?.schemaId
     } else {
       return true
     }
+  }
+
+  const handleShowCompletionOnChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDisplayFormStats(event.target.checked)
+    saveDisplayFormStats(event.target.checked)
   }
 
   if (isSchemaError) {
@@ -209,17 +208,11 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   return (
     <>
       <Box sx={{ py: 1 }}>
-        <Stack
-          direction={{ sm: 'column', md: 'row' }}
-          justifyContent='space-between'
-          alignItems='center'
-          spacing={2}
-          sx={{ pb: 2 }}
-        >
+        <Stack spacing={2} sx={{ pb: 2 }}>
           <Box>
             {schemaMigrations.length > 0 && canBeMigrated() && (
               <Restricted action='editEntryCard' fallback={<></>}>
-                <Box sx={{ maxWidth: '700px' }}>
+                <Box sx={{ width: 'fit-content' }}>
                   <MessageAlert
                     severity='info'
                     message={
@@ -235,88 +228,88 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction='row' spacing={1}>
+            <Stack direction='row' justifyContent='space-between' spacing={1}>
               <FormGroup>
                 <FormControlLabel
-                  onClick={onToggleDisplayStats}
-                  control={<Switch checked={displayFormStats} />}
-                  label='Show Completion Stats'
+                  control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}
+                  label='Show completion'
                 />
               </FormGroup>
-              <Restricted
-                action='editEntryCard'
-                fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
-              >
+              <Stack direction='row' spacing={1}>
+                <Restricted
+                  action='editEntryCard'
+                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+                >
+                  <Button
+                    variant='outlined'
+                    sx={{ width: 'fit-content' }}
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setIsEdit(!isEdit)
+                      setOldSchema(_.cloneDeep(splitSchema))
+                    }}
+                    data-test='editEntryCardButton'
+                    startIcon={<EditIcon fontSize='small' />}
+                  >
+                    {entry.kind === EntryKind.MIRRORED_MODEL
+                      ? 'Add additional information'
+                      : `Edit ${EntryCardKindLabel[entry.kind]}`}
+                  </Button>
+                </Restricted>
                 <Button
-                  variant='outlined'
-                  sx={{ width: 'fit-content' }}
-                  onClick={() => {
-                    handleActionButtonClose()
-                    setIsEdit(!isEdit)
-                    setOldSchema(_.cloneDeep(splitSchema))
-                  }}
-                  data-test='editEntryCardButton'
-                  startIcon={<EditIcon fontSize='small' />}
+                  startIcon={<MenuIcon />}
+                  endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                  data-test='openEntryOverviewActions'
+                  variant='contained'
+                  onClick={handleActionButtonClick}
                 >
-                  {entry.kind === EntryKind.MIRRORED_MODEL
-                    ? 'Add additional information'
-                    : `Edit ${EntryCardKindLabel[entry.kind]}`}
+                  More
                 </Button>
-              </Restricted>
-              <Button
-                startIcon={<MenuIcon />}
-                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-                data-test='openEntryOverviewActions'
-                variant='contained'
-                onClick={handleActionButtonClick}
-              >
-                More
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleActionButtonClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-              >
-                <MenuItem
-                  onClick={() => {
-                    handleActionButtonClose()
-                    setExportDialogOpen(true)
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleActionButtonClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
                   }}
                 >
-                  <ListItemIcon>
-                    <PictureAsPdfIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Export as PDF</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleActionButtonClose()
-                    setHistoryDialogOpen(true)
-                  }}
-                >
-                  <ListItemIcon>
-                    <HistoryIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>View History</ListItemText>
-                </MenuItem>
-              </Menu>
+                  <MenuItem
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setExportDialogOpen(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <PictureAsPdfIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Export as PDF</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setHistoryDialogOpen(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <HistoryIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>View History</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </Stack>
             </Stack>
           )}
           {isEdit && (
-            <Stack direction='row' spacing={1}>
+            <Stack direction='row' spacing={1} justifyContent='space-between'>
               <FormGroup>
                 <FormControlLabel
-                  onClick={onToggleDisplayStats}
-                  control={<Switch checked={displayFormStats} />}
-                  label='Show Completion Stats'
+                  control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}
+                  label='Show completion'
                 />
               </FormGroup>
               <SaveAndCancelButtons
