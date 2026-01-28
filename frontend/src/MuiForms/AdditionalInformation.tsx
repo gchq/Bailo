@@ -163,7 +163,7 @@ export default function AdditionalInformation({
         </Box>
       )}
       {!editMode && (
-        <Stack spacing={2} divider={<Divider flexItem orientation='vertical' />}>
+        <Stack spacing={2}>
           <Stack>
             <Typography
               fontWeight='bold'
