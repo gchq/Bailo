@@ -94,7 +94,45 @@ exports[`clients > registry > getApiVersion > success 1`] = `
 ]
 `;
 
-exports[`clients > registry > getImageTagManifest > success 1`] = `
+exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success OCI spec 2`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",

@@ -22,6 +22,7 @@ import log from '../services/log.js'
 import { joinDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 function calculateAverages(values: number[]) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length
@@ -215,7 +216,7 @@ async function script() {
           const manifest = (await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => res.json())) as { layers?: { size: number }[] }
