@@ -1,4 +1,4 @@
-import { Delete, Done, Error, Info, LocalOffer, MoreVert, Refresh, Warning } from '@mui/icons-material'
+import { Delete, Done, Error, Info, LocalOffer, MoreVert, Pending, Refresh, Warning } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -182,6 +182,10 @@ export default function FileDisplay({
     ) {
       setChipDisplay({ label: 'One or more scanning tools failed', colour: 'warning', icon: <Warning /> })
       return
+    } else if (file.scanResult.some((scan) => scan.state === ScanState.InProgress)) {
+      setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
+    } else if (file.scanResult.some((scan) => scan.state === ScanState.NotScanned)) {
+      setChipDisplay({ label: 'Not scanned', colour: 'warning', icon: <Warning /> })
     } else if (!threatsFound(file as FileInterface)) {
       setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
     } else {
@@ -194,10 +198,8 @@ export default function FileDisplay({
   })
 
   useEffect(() => {
-    if (chipDisplay === undefined) {
-      updateChipDetails()
-    }
-  }, [chipDisplay, file])
+    updateChipDetails()
+  }, [file])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -237,16 +239,6 @@ export default function FileDisplay({
   }, [handleRerunFileScanOnClick, showMenuItems.rescanFile])
 
   const scanResultChip = useMemo(() => {
-    if (
-      !isFileInterface(file) ||
-      file.scanResult === undefined ||
-      file.scanResult.every((scan) => scan.state === ScanState.NotScanned)
-    ) {
-      return <Chip size='small' label='Scan results could not be found' />
-    }
-    if (file.scanResult.some((scan) => scan.state === ScanState.InProgress)) {
-      return <Chip size='small' label='Scan in progress' />
-    }
     if (!chipDisplay) {
       return <Skeleton variant='text' sx={{ fontSize: '1rem', width: '150px' }} />
     }
@@ -275,46 +267,47 @@ export default function FileDisplay({
           }}
         >
           <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
-            {file.scanResult.map((scanResult) => (
-              <Fragment key={scanResult.toolName}>
-                {scanResult.vulnerabilities && scanResult.vulnerabilities.length > 0 ? (
-                  <Stack spacing={2}>
-                    <Stack spacing={1} direction='row'>
-                      <Error color='error' />
-                      <Typography>
-                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
-                      </Typography>
+            {file.scanResult &&
+              file.scanResult.map((scanResult) => (
+                <Fragment key={scanResult.toolName}>
+                  {scanResult.vulnerabilities && scanResult.vulnerabilities.length > 0 ? (
+                    <Stack spacing={2}>
+                      <Stack spacing={1} direction='row'>
+                        <Error color='error' />
+                        <Typography>
+                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
+                        </Typography>
+                      </Stack>
+                      {scanResult.scannerVersion && (
+                        <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                      )}
+                      <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
+                      <ul>
+                        {scanResult.vulnerabilities.map((vulnerability) => (
+                          <li
+                            //this surely needs to change
+                            key={vulnerability.vulnerabilityDescription}
+                          >{`${(vulnerability.severity as string).toUpperCase()}: ${vulnerability.vulnerabilityDescription}`}</li>
+                        ))}
+                      </ul>
                     </Stack>
-                    {scanResult.scannerVersion && (
-                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
-                    )}
-                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                    <ul>
-                      {scanResult.vulnerabilities.map((vulnerability) => (
-                        <li
-                          //this surely needs to change
-                          key={vulnerability.vulnerabilityDescription}
-                        >{`${(vulnerability.severity as string).toUpperCase()}: ${vulnerability.vulnerabilityDescription}`}</li>
-                      ))}
-                    </ul>
-                  </Stack>
-                ) : (
-                  <Stack spacing={2}>
-                    <Stack spacing={1} direction='row'>
-                      {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
-                      <Typography>
-                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                        {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
-                      </Typography>
+                  ) : (
+                    <Stack spacing={2}>
+                      <Stack spacing={1} direction='row'>
+                        {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
+                        <Typography>
+                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
+                          {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
+                        </Typography>
+                      </Stack>
+                      {scanResult.scannerVersion && (
+                        <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                      )}
+                      <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                     </Stack>
-                    {scanResult.scannerVersion && (
-                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
-                    )}
-                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                  </Stack>
-                )}
-              </Fragment>
-            ))}
+                  )}
+                </Fragment>
+              ))}
           </Stack>
         </Popover>
       </>
