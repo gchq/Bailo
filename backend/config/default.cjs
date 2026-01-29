@@ -95,6 +95,7 @@ module.exports = {
 
   log: {
     level: 'debug',
+    onEventDelay: 500,
   },
 
   defaultReviewRoles: [

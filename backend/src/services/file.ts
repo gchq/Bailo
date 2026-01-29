@@ -223,16 +223,26 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
 
   const stream = await getObjectStream(file.path, undefined, range)
 
+  const totalBytes = file.size
+  const totalPretty = prettyBytes(totalBytes)
   let progress = 0
+  let lastLoggedAt = 0
   stream.on('data', function (chunk) {
     // Advance your progress by chunk.length
     progress += chunk.length
+
+    const now = Date.now()
+    if (now - lastLoggedAt < config.log.onEventDelay) {
+      return
+    }
+
+    lastLoggedAt = now
     log.debug(
       {
         loaded: prettyBytes(progress),
         loadedBytes: progress,
-        total: prettyBytes(file.size),
-        totalBytes: file.size,
+        total: totalPretty,
+        totalBytes,
         fileId,
       },
       'Object download is in progress',
