@@ -72,6 +72,7 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
 
 export const testModelCard: EntryCardInterface = {
   schemaId: modelCardSchemaId,
+  mirrored: false,
   metadata: {},
   version: 1,
   createdBy: testEntity,

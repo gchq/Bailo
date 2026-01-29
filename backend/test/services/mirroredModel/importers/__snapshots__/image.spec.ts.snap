@@ -31,7 +31,20 @@ ImageImporter {
     "importerType": "ImageImporter",
   },
   "manifestBody": {
-    "manifest": true,
+    "config": {
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "mediaType": "application/vnd.docker.container.image.v1+json",
+      "size": 1,
+    },
+    "layers": [
+      {
+        "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "size": 1,
+      },
+    ],
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "schemaVersion": 2,
   },
   "metadata": {
     "distributionPackageName": "domain/imageName:tag",

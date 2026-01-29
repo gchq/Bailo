@@ -76,4 +76,16 @@ describe('Create new model', () => {
     cy.get('[data-test=saveEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary')
   })
+
+  it('can view the model card history of an existing model', () => {
+    cy.log('Navigating to an existing model')
+    cy.visit(`/model/${modelUuid}`)
+    cy.log('Test that we can edit the model card')
+    cy.get('[data-test=openEntryOverviewActions]').click()
+    cy.contains('View History')
+    cy.get('[data-test=viewHistoryButton]').click()
+    cy.contains('Model Card History')
+    cy.visit(`/model/${modelUuid}/history/1`)
+    cy.contains('Back to model')
+  })
 })
