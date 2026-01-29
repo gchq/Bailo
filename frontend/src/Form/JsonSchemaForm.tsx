@@ -16,7 +16,13 @@ import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
-import { getFormStats, getOverallCompletionStats, setStepState, widgets } from 'utils/formUtils'
+import {
+  getFormStats,
+  getOverallCompletionStats,
+  setFormDataPropertiesToUndefined,
+  setStepState,
+  widgets,
+} from 'utils/formUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -113,21 +119,10 @@ export default function JsonSchemaForm({
     })
   }
 
-  const iterate = (source) => {
-    Object.keys(source).forEach((key) => {
-      if (typeof source[key] !== 'object') {
-        source[key] = undefined
-      }
-
-      if ((Array.isArray(source[key]) || typeof source[key] === 'object') && source[key] !== null) {
-        iterate(source[key])
-      }
-    })
-  }
-
   const source = structuredClone(currentStep.mirroredState)
   const target = structuredClone(currentStep.state)
-  iterate(source)
+
+  setFormDataPropertiesToUndefined(source)
 
   const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 

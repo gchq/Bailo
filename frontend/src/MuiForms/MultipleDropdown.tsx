@@ -52,6 +52,15 @@ export default function MultipleDropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  /**
+   * In some instances where we use mirroredCard data to structure the form, arrays might be initialised
+   * as [null]. If this is the case, we need to make sure it is removed from the state.
+   *
+   */
+  if (value.length === 1 && value[0] === null) {
+    onChange([])
+  }
+
   const mirroredState = getMirroredState(id, registry.formContext)
   const state = getState(id, registry.formContext)
 

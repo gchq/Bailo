@@ -198,7 +198,6 @@ export default function AdditionalInformation({
                   borderColor: theme.palette.divider,
                   py: 1,
                   px: 2,
-                  width: 'fit-content',
                   ml: 4,
                   mb: 2,
                   ...sx,

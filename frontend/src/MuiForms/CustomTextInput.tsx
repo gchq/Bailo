@@ -1,3 +1,4 @@
+import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry } from '@rjsf/utils'
@@ -59,50 +60,54 @@ export default function CustomTextInput({
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
     >
-      <TextField
-        size='small'
-        error={rawErrors && rawErrors.length > 0}
-        sx={[
-          (theme) => ({
-            input: {
-              color: theme.palette.common.white,
-              ...theme.applyStyles('light', {
-                color: theme.palette.common.black,
-              }),
-            },
-            label: {
-              WebkitTextFillColor: theme.palette.common.white,
-              ...theme.applyStyles('light', {
-                WebkitTextFillColor: theme.palette.common.black,
-              }),
-            },
-            '& .MuiInputBase-input.Mui-disabled': {
-              WebkitTextFillColor: disabledWebkitTextFillColor,
-            },
-          }),
-          value
-            ? {
-                fontStyle: 'unset',
-              }
-            : {
-                fontStyle: 'italic',
+      {registry.formContext.editMode && (
+        <TextField
+          size='small'
+          error={rawErrors && rawErrors.length > 0}
+          sx={[
+            (theme) => ({
+              input: {
+                color: theme.palette.common.white,
+                ...theme.applyStyles('light', {
+                  color: theme.palette.common.black,
+                }),
               },
-        ]}
-        onChange={handleChange}
-        variant={!registry.formContext.editMode ? 'standard' : 'outlined'}
-        required={registry.formContext.editMode}
-        value={value || (!registry.formContext.editMode ? 'Unanswered' : '')}
-        disabled={!registry.formContext.editMode}
-        slotProps={{
-          input: {
-            ...InputProps,
-            ...(!registry.formContext.editMode && { disableUnderline: true }),
-            'data-test': id,
-            'aria-label': `text input field for ${label}`,
-            id: id,
-          },
-        }}
-      />
+              width: '100%',
+              label: {
+                WebkitTextFillColor: theme.palette.common.white,
+                ...theme.applyStyles('light', {
+                  WebkitTextFillColor: theme.palette.common.black,
+                }),
+              },
+              '& .MuiInputBase-input.Mui-disabled': {
+                WebkitTextFillColor: disabledWebkitTextFillColor,
+              },
+            }),
+            value
+              ? {
+                  fontStyle: 'unset',
+                }
+              : {
+                  fontStyle: 'italic',
+                },
+          ]}
+          onChange={handleChange}
+          variant={!registry.formContext.editMode ? 'standard' : 'outlined'}
+          required={registry.formContext.editMode}
+          value={value || (!registry.formContext.editMode ? 'Unanswered' : '')}
+          disabled={!registry.formContext.editMode}
+          slotProps={{
+            input: {
+              ...InputProps,
+              ...(!registry.formContext.editMode && { disableUnderline: true }),
+              'data-test': id,
+              'aria-label': `text input field for ${label}`,
+              id: id,
+            },
+          }}
+        />
+      )}
+      {!registry.formContext.editMode && <Box>{value}</Box>}
     </AdditionalInformation>
   )
 }

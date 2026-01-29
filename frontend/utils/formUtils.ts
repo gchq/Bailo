@@ -376,3 +376,25 @@ export function getOverallCompletionStats(steps: StepNoRender[]): ModelFormStats
     pagesCompleted,
   }
 }
+
+/**
+ * Recursively iterate over an object to set all non array/object properties to undefined. This means that we retain the structure of the JSON with empty fields.
+ *
+ * @param source
+ */
+export const setFormDataPropertiesToUndefined = (source) => {
+  iterateAndResetProperties(source)
+  return source
+}
+
+const iterateAndResetProperties = (object: any) => {
+  Object.keys(object).forEach((key) => {
+    if (typeof object[key] !== 'object') {
+      object[key] = undefined
+    }
+
+    if ((Array.isArray(object[key]) || typeof object[key] === 'object') && object[key] !== null) {
+      setFormDataPropertiesToUndefined(object[key])
+    }
+  })
+}

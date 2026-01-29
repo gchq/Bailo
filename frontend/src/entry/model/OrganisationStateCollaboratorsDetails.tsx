@@ -11,7 +11,7 @@ import UserDisplay from 'src/common/UserDisplay'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import { EntryInterface } from 'types/types'
+import { EntryCardKindLabel, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -117,7 +117,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
               startIcon={<LocalOffer />}
               onClick={(event) => setAnchorEl(event.currentTarget)}
             >
-              {`Edit ${entry.kind.replace('-', ' ')} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
+              {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
             </Button>
           </Restricted>
           <EntryTagSelector
