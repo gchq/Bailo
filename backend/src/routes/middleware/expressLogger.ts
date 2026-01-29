@@ -31,7 +31,7 @@ const morganLog = promisify(
 
 export async function expressLogger(req: Request, res: Response, next: NextFunction) {
   req.log = log.child({
-    clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+    clientIp: req.header('x-forwarded-for') || req.socket.remoteAddress,
   })
 
   req.log.trace(
@@ -40,7 +40,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
       method: req.method,
       user: req.user,
       requestId: req.reqId,
-      ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
+      ...(req.header('user-agent') && { agent: req.header('user-agent') }),
       // trim each value in body to 128 characters maximum
       ...(req.body && {
         body: Object.fromEntries(

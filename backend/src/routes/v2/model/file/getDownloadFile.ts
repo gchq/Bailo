@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { pipeline } from 'node:stream'
 
 import contentDisposition from 'content-disposition'
 import { Request, Response } from 'express'
@@ -6,7 +7,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { FileWithScanResultsInterface } from '../../../../models/File.js'
+import { type FileWithScanResultsInterface } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import log from '../../../../services/log.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
@@ -132,7 +133,7 @@ export const getDownloadFile = [
     res.set(HttpHeader.CACHE_CONTROL, cacheControl)
 
     // 304 support
-    const clientEtag = req.headers[HttpHeader.IF_NONE_MATCH]
+    const clientEtag = req.header(HttpHeader.IF_NONE_MATCH)
     if (clientEtag === etag) {
       res.status(304).end()
       return
@@ -144,38 +145,54 @@ export const getDownloadFile = [
 
     await audit.onViewFile(req, file)
 
-    // Required to support utf-8 file names
-    res.set(HttpHeader.CONTENT_DISPOSITION, contentDisposition(file.name, { type: 'attachment' }))
-    res.set(HttpHeader.CONTENT_TYPE, file.mime)
+    // Do NOT set status or success headers yet
+    let headersCommitted = false
 
-    res.status(fetchRange ? 206 : 200)
-
-    stream.once('error', (err) => {
-      if (!res.headersSent) {
-        const bailoError: BailoError = {
-          code: 500,
-          name: 'File download error',
-          message: 'Error occurred whilst streaming file',
-          status: 500,
-          cause: err?.message || String(err),
-          context: {
-            fileId,
-          },
-        }
-        res.status(500).json(bailoError)
-        log.error(bailoError, { fileId })
-      } else {
-        res.destroy(err)
+    // Attach error handler early
+    stream.once('error', (err: unknown) => {
+      // Handle stream errors BEFORE headers are committed
+      const bailoError: BailoError = {
+        code: 500,
+        name: 'File download error',
+        message: 'Error occurred whilst streaming file',
+        status: 500,
+        cause: err instanceof Error ? err.message : String(err),
+        context: { fileId },
       }
+
+      if (!headersCommitted && !res.headersSent) {
+        res.status(500).json(bailoError)
+      } else {
+        res.destroy(err as Error)
+      }
+
+      log.error(bailoError, { fileId })
     })
 
+    // Commit headers only when first byte is about to flow
+    stream.once('readable', () => {
+      if (headersCommitted) {
+        return
+      }
+      headersCommitted = true
+
+      // Required to support utf-8 file names
+      res.set(HttpHeader.CONTENT_DISPOSITION, contentDisposition(file.name, { type: 'attachment' }))
+      res.set(HttpHeader.CONTENT_TYPE, file.mime)
+      res.status(fetchRange ? 206 : 200)
+    })
+
+    // Client disconnect cleanup
     res.once('close', () => {
-      if (!stream.readableEnded) {
+      if (!stream.readableEnded && !stream.destroyed) {
         log.debug({ fileId }, 'Response has been closed before file stream has finished. Destroying file stream.')
         stream.destroy()
       }
     })
 
-    stream.pipe(res)
+    // Finally, pipeline with no callback as handled by above error handler
+    pipeline(stream, res, () => {
+      /* NOOP */
+    })
   },
 ]
