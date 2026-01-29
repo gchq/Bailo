@@ -24,6 +24,18 @@ export class BailoPeerConnector extends BasePeerConnector {
     if (opts.kind) {
       query.append('kind', opts.kind)
     }
+    if (opts.organisations?.length) {
+      opts.organisations.forEach((organisation) => query.append('organisations', organisation))
+    }
+    if (opts.states?.length) {
+      opts.states.forEach((state) => query.append('states', state))
+    }
+    if (opts.libraries?.length) {
+      opts.libraries.forEach((library) => query.append('libraries', library))
+    }
+    if (opts.filters?.length) {
+      opts.filters.forEach((filter) => query.append('filters', filter))
+    }
 
     const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
 
