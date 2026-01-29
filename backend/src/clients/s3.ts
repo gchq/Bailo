@@ -35,6 +35,7 @@ async function getS3Client() {
     requestHandler: new NodeHttpHandler({
       httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
     }),
+    ...(config.s3.responseChecksumValidation && { responseChecksumValidation: config.s3.responseChecksumValidation }),
   })
 }
 
