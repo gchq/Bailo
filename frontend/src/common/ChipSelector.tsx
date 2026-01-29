@@ -108,7 +108,7 @@ export default function ChipSelector({
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
             {allOptions.length === 0 && (
-              <Typography color='text.secondary' textAlign={'center'}>
+              <Typography color='text.secondary' textAlign='center'>
                 No items available
               </Typography>
             )}
