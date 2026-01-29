@@ -207,7 +207,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
 
   return (
     <>
-      <Box sx={{ py: 1 }}>
+      <Box>
         <Stack spacing={2} sx={{ pb: 2 }}>
           <Box>
             {schemaMigrations.length > 0 && canBeMigrated() && (
@@ -215,6 +215,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                 <Box sx={{ width: 'fit-content' }}>
                   <MessageAlert
                     severity='info'
+                    style={{ my: 0 }}
                     message={
                       entry.kind !== EntryKind.MIRRORED_MODEL
                         ? `There is a migration available for this ${EntryKindLabel[entry.kind]}.`

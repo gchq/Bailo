@@ -1,6 +1,6 @@
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Button, Collapse, Typography } from '@mui/material'
+import { Button, Collapse, CSSProperties, Typography } from '@mui/material'
 import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import { useEffect, useRef, useState } from 'react'
@@ -36,6 +36,7 @@ type MessageAlertProps = {
   severity?: AlertProps['severity']
   'data-test'?: string
   slimView?: boolean
+  style?: CSSProperties
   disableScrollToView?: boolean
 } & PartialLinkMessageAlertProps &
   PartialButtonMessageAlertProps
@@ -49,6 +50,7 @@ export default function MessageAlert({
   severity,
   linkText,
   href,
+  style,
   buttonText,
   buttonAction,
   'data-test': dataTest,
@@ -91,6 +93,7 @@ export default function MessageAlert({
         my: 2,
         maxHeight: slimView ? '70px' : 'none',
         maxWidth: slimView ? '250px' : 'none',
+        ...style,
       }}
       ref={alertRef}
       data-test={dataTest}
