@@ -4,3 +4,4 @@ modelscan[tensorflow,h5py]==0.8.7
 pydantic_settings==2.12.0
 python-multipart==0.0.21
 uvicorn==0.40.0
+oras==0.2.38
