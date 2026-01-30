@@ -50,17 +50,80 @@ def test_post_model(requests_mock):
 
 
 @pytest.mark.parametrize(
-    ("libraries", "filters"),
-    [(None, []), (None, [])],
+    (
+        "task",
+        "libraries",
+        "filters",
+        "search",
+        "organisations",
+        "states",
+        "allow_templating",
+        "schema_id",
+        "admin_access",
+        "peers",
+        "title_only",
+    ),
+    [
+        ("image_classification", None, None, None, None, None, None, None, None, None, None),
+        (
+            None,
+            ["library"],
+            ["filter"],
+            "hello",
+            ["ExampleOrganisation"],
+            ["prod"],
+            True,
+            "schema-id",
+            True,
+            ["peer1"],
+            True,
+        ),
+    ],
 )
-def test_get_models(libraries, filters, requests_mock):
+def test_get_models(
+    task,
+    libraries,
+    filters,
+    search,
+    organisations,
+    states,
+    allow_templating,
+    schema_id,
+    admin_access,
+    peers,
+    title_only,
+    requests_mock,
+):
     requests_mock.get(
-        "https://example.com/api/v2/models/search?task=image_classification",
+        f"https://example.com/api/v2/models/search?{'&'.join(f'{k}={v}' for k, v in {
+            "libraries": "".join(libraries) if libraries is not None else None,
+            "organisations": "".join(organisations) if organisations is not None else None,
+            "states": "".join(states) if states is not None else None,
+            "filters": "".join(filters) if filters is not None else None,
+            "search": search,
+            "allowTemplating": allow_templating,
+            "schemaId": schema_id,
+            "adminAccess": admin_access,
+            "peers": "".join(peers) if peers is not None else None,
+            "titleOnly": title_only,
+        }.items() if v is not None)}",
         json={"success": True},
     )
 
     client = Client("https://example.com")
-    result = client.get_models(task="image_classification", libraries=libraries, filters=filters)
+    result = client.get_models(
+        task=task,
+        libraries=libraries,
+        filters=filters,
+        search=search,
+        organisations=organisations,
+        states=states,
+        allow_templating=allow_templating,
+        schema_id=schema_id,
+        admin_access=admin_access,
+        peers=peers,
+        title_only=title_only,
+    )
 
     assert result == {"success": True}
 
