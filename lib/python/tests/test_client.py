@@ -94,19 +94,24 @@ def test_get_models(
     title_only,
     requests_mock,
 ):
+    base_url = "https://example.com/api/v2/models/search"
+
+    params = {
+        "libraries": "".join(libraries) if libraries is not None else None,
+        "organisations": "".join(organisations) if organisations is not None else None,
+        "states": "".join(states) if states is not None else None,
+        "filters": "".join(filters) if filters is not None else None,
+        "search": search,
+        "allowTemplating": allow_templating,
+        "schemaId": schema_id,
+        "adminAccess": admin_access,
+        "peers": "".join(peers) if peers is not None else None,
+        "titleOnly": title_only,
+    }
+
+    query = "&".join(f"{k}={v}" for k, v in params.items() if v is not None)
     requests_mock.get(
-        f"https://example.com/api/v2/models/search?{'&'.join(f'{k}={v}' for k, v in {
-            "libraries": "".join(libraries) if libraries is not None else None,
-            "organisations": "".join(organisations) if organisations is not None else None,
-            "states": "".join(states) if states is not None else None,
-            "filters": "".join(filters) if filters is not None else None,
-            "search": search,
-            "allowTemplating": allow_templating,
-            "schemaId": schema_id,
-            "adminAccess": admin_access,
-            "peers": "".join(peers) if peers is not None else None,
-            "titleOnly": title_only,
-        }.items() if v is not None)}",
+        f"{base_url}?{query}",
         json={"success": True},
     )
 
