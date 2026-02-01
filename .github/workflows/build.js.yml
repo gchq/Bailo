@@ -412,7 +412,7 @@ jobs:
           --wait --wait-timeout 60
 
       # e2e with Cypress
-      - uses: cypress-io/github-action@v6
+      - uses: cypress-io/github-action@v7
         if: matrix.job_name == 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
