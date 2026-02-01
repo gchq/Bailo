@@ -24,8 +24,8 @@
     "@emotion/styled": "11.14.1",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@mui/icons-material": "7.3.6",
-    "@mui/material": "7.3.6",
+    "@mui/icons-material": "7.3.7",
+    "@mui/material": "7.3.7",
     "@next/mdx": "^16.1.1",
     "dedent-js": "^1.0.1",
     "next": "16.1.6",
@@ -35,7 +35,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "4.0.1",
     "shelljs": "^0.10.0",
-    "styled-components": "^6.1.19",
+    "styled-components": "^6.3.8",
     "swiper": "^8.4.5"
   },
   "devDependencies": {
