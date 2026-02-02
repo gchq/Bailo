@@ -3,6 +3,7 @@ import { SxProps, useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { ReactNode } from 'react'
 import Loading from 'src/common/Loading'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MessageAlert from 'src/MessageAlert'
 
 interface AdditionalInformationProps {
@@ -67,6 +68,19 @@ export default function AdditionalInformation({
     )
   }
 
+  const mirroredStateDisplay = () => {
+    switch (typeof mirroredState) {
+      case 'boolean':
+        return mirroredState ? 'Yes' : 'No'
+      case 'string':
+        return <MarkdownDisplay>{mirroredState}</MarkdownDisplay>
+      case 'number':
+        return mirroredState as number
+      default:
+        return mirroredState
+    }
+  }
+
   if (!display && !editMode) {
     return (
       <>
@@ -81,7 +95,7 @@ export default function AdditionalInformation({
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
         {mirroredState ? (
-          <Box>{mirroredState}</Box>
+          <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
         ) : (
           <Typography
             sx={{
@@ -137,7 +151,7 @@ export default function AdditionalInformation({
               </Typography>
               <Box>
                 {mirroredState ? (
-                  <Box>{mirroredState}</Box>
+                  <Box>{mirroredStateDisplay()}</Box>
                 ) : (
                   <Typography
                     sx={{
@@ -175,7 +189,7 @@ export default function AdditionalInformation({
               {label}
               {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
             </Typography>
-            {!mirroredState ? (
+            {mirroredState === undefined ? (
               <Typography
                 sx={{
                   fontStyle: 'italic',
@@ -185,7 +199,7 @@ export default function AdditionalInformation({
                 Unanswered
               </Typography>
             ) : (
-              mirroredState
+              <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
             )}
           </Stack>
           {children && (

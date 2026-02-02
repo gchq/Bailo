@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry } from '@rjsf/utils'
@@ -107,7 +107,20 @@ export default function CustomTextInput({
           }}
         />
       )}
-      {!registry.formContext.editMode && <Box>{value}</Box>}
+      {!registry.formContext.editMode && (
+        <Box sx={{ wordBreak: 'break-word' }}>
+          {value || (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+        </Box>
+      )}
     </AdditionalInformation>
   )
 }

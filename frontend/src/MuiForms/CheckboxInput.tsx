@@ -60,16 +60,12 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value}
+      display={registry.formContext.mirroredModel && value !== undefined}
       label={label}
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
     >
-      <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
       {registry.formContext.editMode && (
         <RadioGroup onChange={handleChange} value={value} aria-label={`radio input field for ${label}`} id={id}>
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />

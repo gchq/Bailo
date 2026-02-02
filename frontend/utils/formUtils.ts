@@ -390,7 +390,18 @@ export const setFormDataPropertiesToUndefined = (source) => {
 const iterateAndResetProperties = (object: any) => {
   Object.keys(object).forEach((key) => {
     if (typeof object[key] !== 'object') {
-      object[key] = undefined
+      switch (typeof object[key]) {
+        case 'number':
+          object[key] = undefined
+          break
+        case 'string':
+          object[key] = ''
+          break
+        default:
+          object[key] = undefined
+          break
+      }
+      object[key] = ''
     }
 
     if ((Array.isArray(object[key]) || typeof object[key] === 'object') && object[key] !== null) {

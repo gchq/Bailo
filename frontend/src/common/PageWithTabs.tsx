@@ -148,7 +148,7 @@ export default function PageWithTabs({
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
-        sx={{ pb: 2 }}
+        sx={{ pb: 2, px: 2 }}
         direction={{ xs: 'column', sm: 'row' }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
