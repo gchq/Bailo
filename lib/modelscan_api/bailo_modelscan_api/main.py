@@ -378,7 +378,7 @@ async def scan_image(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
-):
+) -> dict[str, Any]:
     """API endpoint to upload and scan image blobs using trivy.
 
     Blobs have to be compressed tarballs with an overlay file system

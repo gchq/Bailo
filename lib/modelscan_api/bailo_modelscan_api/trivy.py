@@ -71,7 +71,7 @@ def create_sbom(tempfile: str, blob_hash: str) -> None:
         logger.error("SBOM %s couldn't be found", blob_hash)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-            detail=f"There was a problem with creating the SBOM",
+            detail="There was a problem with creating the SBOM",
         )
 
 
@@ -107,7 +107,7 @@ def scan_sbom(blob_hash: str) -> Any:
         logger.error("SBOM %s couldn't be found", blob_hash)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-            detail=f"There was a problem with retrieving the SBOM",
+            detail="There was a problem with retrieving the SBOM",
         )
     return sbom
 
