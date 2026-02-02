@@ -10,9 +10,9 @@ from pickletools import genops
 from tempfile import NamedTemporaryFile
 from typing import Annotated, Any
 
-from .trivy import TrivyClient
 import modelscan
 import uvicorn
+from bailo_modelscan_api import trivy
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
@@ -68,8 +68,6 @@ class ApiInformation(BaseModel):
     scanners: dict[str, str]
 
 
-trivy_client = TrivyClient()
-
 @app.get(
     "/info",
     summary="Simple information endpoint",
@@ -85,7 +83,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
     return ApiInformation(
         apiName=settings.app_name,
         apiVersion=settings.app_version,
-        scanners={modelscan.__name__: modelscan.__version__, "trivy": trivy_client.__version__},
+        scanners={scanner.__name__: scanner.__version__ for scanner in (modelscan, trivy)},
     )
 
 
@@ -387,7 +385,7 @@ async def scan_image(
 
     """
     logger.info("Upload started")
-    res = trivy_client.scan_image_blob(in_file.file, background_tasks, in_file.filename, settings.block_size)
+    res = trivy.scan(in_file, background_tasks, settings.block_size)
     return res
 
 

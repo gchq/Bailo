@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
+from bailo_modelscan_api import trivy
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.main import app, get_settings
 
@@ -38,8 +39,7 @@ def test_info():
     assert response.json() == {
         "apiName": get_settings_override().app_name,
         "apiVersion": get_settings_override().app_version,
-        "scannerName": modelscan.__name__,
-        "modelscanVersion": modelscan.__version__,
+        "scanners": {scanner.__name__: scanner.__version__ for scanner in (modelscan, trivy)},
     }
 
 
