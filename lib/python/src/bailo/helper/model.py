@@ -38,7 +38,7 @@ class Model(Entry):
     :param organisation: Organisation responsible for the model, defaults to None
     :param state: Development readiness of the model, defaults to None
     :param tags: Tags to assign to the model, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+    :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -89,7 +89,7 @@ class Model(Entry):
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -172,7 +172,7 @@ class Model(Entry):
         :param client: A client object used to interact with Bailo
         :param task: Model task (e.g. image classification), defaults to None
         :param libraries: Model library (e.g. TensorFlow), defaults to None
-        :param filters: list of collaborator role filters. Special value `"mine"` restricts results to
+        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
             models where the current user is a collaborator. Otherwise, values are treated as collaborator
             roles, defaults to None
         :param search: Free-text search string. Always performs a partial, case-insensitive match against
@@ -250,7 +250,7 @@ class Model(Entry):
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: A model object
         """
         if not ML_FLOW:

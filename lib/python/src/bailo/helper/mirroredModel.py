@@ -26,7 +26,7 @@ class MirroredModel(Entry):
     :param organisation: Organisation responsible for the mirrored model, defaults to None
     :param state: Development readiness of the mirrored model, defaults to None
     :param tags: Tags to assign to the mirrored model, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
+    :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
     :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -80,7 +80,7 @@ class MirroredModel(Entry):
         :param organisation: Organisation responsible for the mirrored model, defaults to None
         :param state: Development readiness of the mirrored model, defaults to None
         :param tags: Tags to assign to the mirrored model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -169,7 +169,7 @@ class MirroredModel(Entry):
         :param client: A client object used to interact with Bailo
         :param task: Mirrored model task (e.g. image classification), defaults to None
         :param libraries: Mirrored model library (e.g. TensorFlow), defaults to None
-        :param filters: list of collaborator role filters. Special value `"mine"` restricts results to
+        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
             models where the current user is a collaborator. Otherwise, values are treated as collaborator
             roles, defaults to None
         :param search: Free-text search string. Always performs a partial, case-insensitive match against

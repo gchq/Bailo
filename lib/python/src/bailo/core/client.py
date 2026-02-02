@@ -46,7 +46,7 @@ class Client:
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -105,7 +105,7 @@ class Client:
 
         :param task: Entry task (e.g. image classification), defaults to None
         :param libraries: Entry library (e.g. TensorFlow), defaults to None
-        :param filters: list of collaborator role filters. Special value `"mine"` restricts results to
+        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
             models where the current user is a collaborator. Otherwise, values are treated as collaborator
             roles, defaults to None
         :param search: Free-text search string. Always performs a partial, case-insensitive match against
@@ -180,7 +180,7 @@ class Client:
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
@@ -541,7 +541,7 @@ class Client:
         :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
-        :param review_roles: list made up of the "shortName" property from a Review Role object
+        :param review_roles: List made up of the "shortName" property from a Review Role object
         :return: JSON response object
         """
         return self.agent.post(
