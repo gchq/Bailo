@@ -24,12 +24,12 @@ dynamic = ["version"]
 dependencies = [
     "requests==2.32.5",
     "semantic-version==2.10.0",
-    "tqdm==4.67.1"
+    "tqdm==4.67.2"
 ]
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny[mlserver]==3.8.1"
+    "mlflow-skinny[mlserver]==3.9.0"
 ]
 test = [
     "black==26.1.0",
