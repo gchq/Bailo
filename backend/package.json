@@ -33,7 +33,7 @@
     "@smithy/node-http-handler": "^4.0.4",
     "app-root-path": "^3.1.0",
     "bcryptjs": "^3.0.3",
-    "body-parser": "^2.2.1",
+    "body-parser": "^2.2.2",
     "bunyan": "^1.8.15",
     "chalk": "^5.6.2",
     "clamscan": "^2.4.0",
