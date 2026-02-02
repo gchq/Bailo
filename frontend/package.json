@@ -43,7 +43,7 @@
     "js-cookie": "^3.0.5",
     "jsonschema": "1.4.1",
     "lodash-es": "^4.17.23",
-    "markdown-to-jsx": "^9.5.0",
+    "markdown-to-jsx": "^9.6.1",
     "next": "16.1.6",
     "notistack": "^3.0.1",
     "pretty-bytes": "^7.1.0",
