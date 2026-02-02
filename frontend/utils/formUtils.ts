@@ -392,7 +392,7 @@ const iterateAndResetProperties = (object: any) => {
     if (typeof object[key] !== 'object') {
       switch (typeof object[key]) {
         case 'number':
-          object[key] = undefined
+          delete object[key]
           break
         case 'string':
           object[key] = undefined
@@ -401,7 +401,6 @@ const iterateAndResetProperties = (object: any) => {
           object[key] = undefined
           break
       }
-      object[key] = ''
     }
 
     if ((Array.isArray(object[key]) || typeof object[key] === 'object') && object[key] !== null) {
