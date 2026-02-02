@@ -79,13 +79,13 @@
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.6",
     "eslint-plugin-cypress": "^5.2.1",
-    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "jsdom": "^28.0.0",
     "next-router-mock": "^1.0.5",
-    "prettier": "^3.7.3",
+    "prettier": "^3.8.1",
     "vite-tsconfig-paths": "^6.0.5",
     "vitest": "^4.0.18"
   }
