@@ -44,7 +44,7 @@
     "dedent-js": "^1.0.1",
     "dev-null": "^0.1.1",
     "express": "5.2.1",
-    "express-session": "^1.18.2",
+    "express-session": "^1.19.0",
     "form-data": "^4.0.5",
     "grant": "^5.4.23",
     "jsonschema": "^1.5.0",
