@@ -395,7 +395,7 @@ const iterateAndResetProperties = (object: any) => {
           object[key] = undefined
           break
         case 'string':
-          object[key] = ''
+          object[key] = undefined
           break
         default:
           object[key] = undefined
