@@ -75,17 +75,26 @@ jobs:
         run: |
           set -euo pipefail
 
+          # debug logging
+          echo "Git context HEAD commit:"
+          git --no-pager log -1 --oneline
+
           git fetch origin main
 
           PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
+          echo "Previous main commit: $PREV_MAIN_COMMIT"
 
           OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/modelscan_api/bailo_modelscan_api/config.py" | grep 'app_version' | head -n1 | cut -d'"' -f2)
           NEW_VERSION=$(grep 'app_version' lib/modelscan_api/bailo_modelscan_api/config.py | head -n1 | cut -d'"' -f2)
+          echo "OLD_VERSION=$OLD_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION"
 
           if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "Result: app_version has changed"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
+            echo "Result: app_version has NOT changed"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
