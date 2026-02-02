@@ -101,7 +101,14 @@ export default function Metrics({ onChange, value, label, id, registry, required
     }
     return metrics.map((metric) => (
       <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-        <TableCell component='th' scope='row'>
+        <TableCell
+          component='th'
+          scope='row'
+          sx={{
+            wordBreak: 'break-word',
+            maxWidth: '500px',
+          }}
+        >
           {metric.name}
         </TableCell>
         <TableCell align='right'>{metric.value}</TableCell>
@@ -121,7 +128,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       editMode={registry.formContext.editMode}
       mirroredState={metricsTableRows(mirroredState)}
       state={state}
-      display={registry.formContext.mirroredModel && value.length > 0 && Object.keys(value[0]).length !== 0}
+      display={registry.formContext.mirroredModel && state !== undefined && state.length > 0}
       label={label}
       required={required}
       id={id}
@@ -149,7 +156,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
           )}
           {value.length > 0 && (
             <TableContainer component={Paper}>
-              <Table sx={{ maxWidth: 'sm' }} size='small'>
+              <Table sx={{ maxWidth: 'xs' }} size='small'>
                 <TableHead>
                   <TableRow>
                     <TableCell>Metric name</TableCell>
