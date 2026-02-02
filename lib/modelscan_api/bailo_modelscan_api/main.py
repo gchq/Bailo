@@ -65,7 +65,8 @@ class ApiInformation(BaseModel):
 
     apiName: str
     apiVersion: str
-    scanners: dict[str, str]
+    scannerName: str
+    modelscanVersion: str
 
 
 @app.get(
@@ -83,7 +84,8 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
     return ApiInformation(
         apiName=settings.app_name,
         apiVersion=settings.app_version,
-        scanners={scanner.__name__: scanner.__version__ for scanner in (modelscan, trivy)},
+        scannerName=modelscan.__name__,
+        modelscanVersion=modelscan.__version__,
     )
 
 

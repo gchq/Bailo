@@ -39,7 +39,8 @@ def test_info():
     assert response.json() == {
         "apiName": get_settings_override().app_name,
         "apiVersion": get_settings_override().app_version,
-        "scanners": {scanner.__name__: scanner.__version__ for scanner in (modelscan, trivy)},
+        "scannerName": modelscan.__name__,
+        "modelscanVersion": modelscan.__version__,
     }
 
 
