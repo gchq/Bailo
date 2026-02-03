@@ -11,7 +11,7 @@ describe('Form utils', () => {
     }
     const expectedResult = {
       parent: {
-        array: [{ question1: undefined }, { question2: undefined }],
+        array: [{ question1: undefined }],
         question3: undefined,
       },
     }
