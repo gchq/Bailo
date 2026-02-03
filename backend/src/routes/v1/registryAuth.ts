@@ -9,7 +9,7 @@ import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 import audit from '../../connectors/audit/index.js'
 import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
-import { EntryKind, ModelDoc } from '../../models/Model.js'
+import { EntryKind, EntryKindKeys, ModelDoc } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
@@ -115,7 +115,7 @@ function generateAccess(scope: any) {
   }
 }
 
-export async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+export async function checkAccess(access: Access, user: UserInterface, admin?: boolean): Promise<AuthResponse> {
   if (access.name.startsWith(softDeletePrefix)) {
     const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
     log.warn({ userDn: user.dn, access }, info)
@@ -131,18 +131,29 @@ export async function checkAccess(access: Access, user: UserInterface): Promise<
   try {
     model = await getModelById(user, modelId)
   } catch (e) {
-    log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
-    // bad model id?
-    return { id: modelId, success: false, info: 'Bad modelId provided' }
+    log.warn({ userDn: user.dn, access, e }, 'ModelId not found.')
+    return { id: modelId, success: false, info: 'ModelId not found.' }
   }
 
-  //Check for disallowed entry types (Data-card and Mirrored Model, i.e. not model type)
-  if (model.kind !== EntryKind.Model) {
-    return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}` }
+  // Check for disallowed entry types (i.e. non model types)
+  if (!([EntryKind.Model, EntryKind.MirroredModel] as EntryKindKeys[]).includes(model.kind)) {
+    return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}.` }
   }
 
-  const auth = await authorisation.image(user, model, access)
-  return auth
+  // Further restrict mirrored model actions
+  if (model.kind == EntryKind.MirroredModel && !isReadOnlyAccessRequestActions(access.actions, true)) {
+    return {
+      id: modelId,
+      success: false,
+      info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
+    }
+  }
+
+  return await authorisation.image(user, model, access, admin)
+}
+
+function isReadOnlyAccessRequestActions(actions: Action[], includeWildCard: boolean = false) {
+  return actions.some((action) => (['pull', 'list', ...(includeWildCard ? ['*'] : [])] as Action[]).includes(action))
 }
 
 export const getDockerRegistryAuth = [
@@ -205,17 +216,42 @@ export const getDockerRegistryAuth = [
       throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
-    const accesses = scopes.map(generateAccess)
+    const requestedAccesses = scopes.map(generateAccess)
+    const grantedAccesses: Access[] = []
 
-    for (const access of accesses) {
-      const authResult = await checkAccess(access, user)
-      if (!admin && !authResult.success) {
+    for (const access of requestedAccesses) {
+      const authResult = await checkAccess(access, user, admin)
+      if (!authResult.success) {
+        // Ignore unauthorised read-only scopes (containerd cross-mount)
+        if (isReadOnlyAccessRequestActions(access.actions)) {
+          rlog.debug({ access }, 'Ignoring unauthorised scope.')
+          continue
+        }
+
         throw Forbidden({ access }, authResult.info, rlog)
       }
+
+      grantedAccesses.push({
+        ...access,
+        actions: access.actions,
+      })
     }
 
-    const accessToken = await getAccessToken(user, accesses)
-    rlog.trace('Successfully generated access token')
+    // Enforce non-empty write authorisation
+    if (
+      requestedAccesses.some((a) => a.actions.includes('push')) &&
+      !grantedAccesses.some((a) => a.actions.includes('push'))
+    ) {
+      throw Forbidden({ requestedAccesses }, 'No authorised push scopes.', rlog)
+    }
+
+    // Enforce non-empty authorisation
+    if (grantedAccesses.length === 0) {
+      throw Forbidden({ requestedAccesses }, 'Requested image is not accessible - no authorised scopes.', rlog)
+    }
+
+    const accessToken = await getAccessToken(user, grantedAccesses)
+    rlog.trace('Successfully generated access token.')
 
     res.json({ token: accessToken })
   },

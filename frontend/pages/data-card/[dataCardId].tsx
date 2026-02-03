@@ -48,7 +48,9 @@ export default function DataCard() {
   const error = MultipleErrorWrapper(`Unable to load data card page`, {
     isDataCardError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

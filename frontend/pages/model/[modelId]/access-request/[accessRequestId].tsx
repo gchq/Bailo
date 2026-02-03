@@ -69,7 +69,9 @@ export default function AccessRequest() {
     isCurrentUserError,
     isReviewRolesError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

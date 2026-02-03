@@ -32,7 +32,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.finishListener(resolve, reject)
+    importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).toHaveBeenCalledWith({ metadata: mockMetadata })
     expect(reject).not.toHaveBeenCalled()
@@ -44,7 +44,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.errorListener(error, resolve, reject)
+    importer.handleStreamError(error, resolve, reject)
 
     expect(resolve).not.toHaveBeenCalled()
     expect(reject).toHaveBeenCalledTimes(1)
@@ -65,7 +65,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.errorListener(error, resolve, reject)
+    importer.handleStreamError(error, resolve, reject)
 
     expect(resolve).not.toHaveBeenCalled()
     expect(reject).toHaveBeenCalledTimes(1)

@@ -66,7 +66,9 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
 
     router.get('/api/logout', (req, res) => {
       req.session.destroy(function (err: unknown) {
-        if (err) throw err
+        if (err) {
+          throw err
+        }
         res.redirect('/')
       })
     })

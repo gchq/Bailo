@@ -202,7 +202,9 @@ export default function ReleaseForm({
     isModelCardRevisionsError: isEntryCardRevisionsError,
     isReleasesError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <Stack spacing={2}>
