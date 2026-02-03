@@ -232,7 +232,8 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     progress += chunk.length
 
     const now = Date.now()
-    if (now - lastLoggedAt < config.log.onEventDelay) {
+    // Only log every 0.5 seconds to avoid spamming logs excessively
+    if (now - lastLoggedAt < 500) {
       return
     }
 

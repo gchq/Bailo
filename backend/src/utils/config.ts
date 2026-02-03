@@ -91,7 +91,6 @@ export interface Config {
 
   log: {
     level: bunyan.LogLevel
-    onEventDelay: number
   }
 
   s3: {
