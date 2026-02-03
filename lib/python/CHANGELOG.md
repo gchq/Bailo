@@ -2,7 +2,7 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.5.0 - DD/MM/YYYY
+## 3.5.0 - 03/02/2026
 
 - Add additional params to `Client.get_models` and callers `Model.search` & `MirroredModel.search`
 
