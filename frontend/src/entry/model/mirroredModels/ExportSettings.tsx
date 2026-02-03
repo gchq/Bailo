@@ -76,7 +76,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
               >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
                   <Typography sx={{ width: '100%' }} color='primary' variant='h6' component='div'>
-                    Model Export Settings
+                    Model export settings
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>

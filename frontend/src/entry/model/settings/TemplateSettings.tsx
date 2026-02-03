@@ -43,7 +43,7 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
-        Manage Templating
+        Manage templating
       </Typography>
       <div>
         <FormControlLabel
