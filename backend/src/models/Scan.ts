@@ -9,7 +9,9 @@ export type ScanInterface = {
   toolName: string
   scannerVersion?: string
   state: ArtefactScanStateKeys
-  vulnerabilities?: ArtefactVulnerability[]
+  summary?: ScanSummary
+  additionalInfo?: ScanAdditionalInfo
+
   lastRunAt: Date
 
   createdAt: Date
@@ -27,19 +29,31 @@ export type ScanInterface = {
     }
 )
 
+export type ScanSummary = (ModelScanSummary | ClamAVSummary)[]
+
+export type ModelScanSummary = {
+  severity: SeverityLevelKeys
+  vulnerabilityDescription: string
+}
+
+export type ClamAVSummary = {
+  virus: string
+}
+
+export type ScanAdditionalInfo = ModelScanAdditionalInfo[]
+
+export type ModelScanAdditionalInfo = {
+  [x: string]: unknown
+}
+
 export const SeverityLevel = {
-  UNSPECIFIED: 'unspecified',
+  UNKNOWN: 'unknown',
   LOW: 'low',
   MEDIUM: 'medium',
   HIGH: 'high',
   CRITICAL: 'critical',
 } as const
 export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
-
-export type ArtefactVulnerability = {
-  severity: SeverityLevelKeys
-  vulnerabilityDescription: string
-}
 
 export const ArtefactKind = {
   File: 'file',
@@ -60,12 +74,13 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
     state: { type: String, enum: Object.values(ArtefactScanState), required: true },
-    vulnerabilities: [
+    summary: [
       {
-        severity: { type: String, enum: Object.values(SeverityLevel) },
-        vulnerabilityDescription: { type: String },
+        type: Schema.Types.Mixed,
+        required: true,
       },
     ],
+    additionalInfo: [{ type: Schema.Types.Mixed }],
     lastRunAt: { type: Schema.Types.Date, required: true },
   },
   {

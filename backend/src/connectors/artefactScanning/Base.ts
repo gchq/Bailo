@@ -9,7 +9,7 @@ import log from '../../services/log.js'
 
 export type ArtefactScanResult = Pick<
   ScanInterface,
-  'toolName' | 'scannerVersion' | 'state' | 'vulnerabilities' | 'lastRunAt'
+  'toolName' | 'scannerVersion' | 'state' | 'summary' | 'additionalInfo' | 'lastRunAt'
 >
 
 //TODO this may need to change

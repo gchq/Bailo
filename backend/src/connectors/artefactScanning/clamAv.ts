@@ -6,7 +6,7 @@ import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactVulnerability, SeverityLevel } from '../../models/Scan.js'
+import { ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
@@ -59,19 +59,18 @@ export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnec
     try {
       const { viruses } = await this.av.scanStream(s3Stream)
       log.debug({ file, result: { viruses }, ...scannerInfo }, 'Scan complete.')
-      const vulnerabilities: ArtefactVulnerability[] = viruses.map(
+      const summary: ClamAVSummary[] = viruses.map(
         (virus) =>
           ({
-            severity: SeverityLevel.CRITICAL,
-            vulnerabilityDescription: `Virus Found: ${virus}`,
-          }) as ArtefactVulnerability,
+            virus,
+          }) as ClamAVSummary,
       )
 
       return [
         {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
-          vulnerabilities,
+          summary,
           lastRunAt: new Date(),
         },
       ]
