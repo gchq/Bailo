@@ -388,6 +388,10 @@ export const setFormDataPropertiesToUndefined = (source) => {
 }
 
 const iterateAndResetProperties = (object: any) => {
+  // Each item in an array should be of the same type, so we only need the first item in order to render the input correctly on the form
+  if (Array.isArray(object)) {
+    object.splice(1)
+  }
   Object.keys(object).forEach((key) => {
     if (typeof object[key] !== 'object') {
       switch (typeof object[key]) {

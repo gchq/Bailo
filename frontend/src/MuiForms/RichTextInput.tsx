@@ -76,7 +76,6 @@ export default function RichTextInput({
       label={label}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
-      description={registry.rootSchema.description}
     >
       <RichTextEditor
         value={registry.formContext.mirroredModel ? state : value}
