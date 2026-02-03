@@ -42,6 +42,7 @@ export type ClamAVSummary = {
 
 export type ScanAdditionalInfo = ModelScanAdditionalInfo[]
 
+//TODO to be changed
 export type ModelScanAdditionalInfo = {
   [x: string]: unknown
 }
