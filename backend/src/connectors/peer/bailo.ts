@@ -1,9 +1,9 @@
 import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
+import { generateEscalationHeaders } from '../../services/escalation.js'
 import { isBailoError } from '../../types/error.js'
 import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
-import config from '../../utils/config.js'
 import { GenericError, InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
@@ -16,13 +16,13 @@ export class BailoPeerConnector extends BasePeerConnector {
     return Promise.resolve(true)
   }
 
-  async searchEntries(_user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
+  async searchEntries(user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
     let query: URLSearchParams = new URLSearchParams()
     if (opts.search) {
       query = new URLSearchParams({ search: opts.search })
     }
 
-    const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
+    const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`, user)
 
     return {
       models: results.models.map((model) => ({
@@ -58,15 +58,17 @@ export class BailoPeerConnector extends BasePeerConnector {
     })
   }
 
-  async request<T>(path: string) {
+  async request<T>(path: string, user: UserInterface = { dn: '' }) {
     let res: Response
     const requestUrl = this.config.baseUrl.concat(path)
+    const headers = generateEscalationHeaders(user.dn)
     try {
       res = await fetch(requestUrl, {
         agent: this.getHttpsAgent(),
-        headers: {
-          'x-bailo-id': config.federation.id,
-        },
+        headers,
+        // headers: {
+        //   'x-bailo-id': config.federation.id,
+        // },
       })
     } catch (err) {
       throw InternalError('Unable to communicate with peer.', {

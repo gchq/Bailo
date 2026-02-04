@@ -338,6 +338,7 @@ module.exports = {
   },
 
   escalation: {
+    isEnabled: false,
     allowed: [],
   },
 }

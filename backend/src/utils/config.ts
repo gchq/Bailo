@@ -207,6 +207,7 @@ export interface Config {
   }
 
   escalation: {
+    isEnabled: boolean
     // the list of users allowed to perform escalation
     allowed: EscalationDetails[]
   }

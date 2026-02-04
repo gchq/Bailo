@@ -8,6 +8,21 @@ const USER_HEADER = 'x-user'
 const BAILO_ID_HEADER = 'x-bailo-id'
 
 /**
+ * Generate headers to escalate the request in the receiving Bailo instance.
+ */
+export const generateEscalationHeaders = (requestingUserId: string): Headers => {
+  if (requestingUserId !== '' && config.escalation.isEnabled) {
+    return new Headers({
+      [USER_HEADER]: requestingUserId,
+      [BAILO_ID_HEADER]: config.federation.id,
+    })
+  }
+  return new Headers({
+    [BAILO_ID_HEADER]: config.federation.id,
+  })
+}
+
+/**
  * Checks if the provided user is in the allow list under an allowed bailo instance.
  * @param user The users id
  * @param instance The Bailo instance id
