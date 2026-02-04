@@ -1,6 +1,6 @@
 import { Box, Container, Stack } from '@mui/material'
 import { useMemo } from 'react'
-import EntryOverviewDetails from 'src/entry/model/EntryOverviewDetails'
+import EntryOverviewDetails from 'src/entry/EntryOverviewDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
