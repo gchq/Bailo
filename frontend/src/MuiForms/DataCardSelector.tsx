@@ -2,7 +2,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -23,6 +23,7 @@ interface DataCardSelectorProps {
   registry?: Registry
   rawErrors?: string[]
   InputProps?: any
+  schema: RJSFSchema
 }
 
 export default function DataCardSelector({
@@ -34,6 +35,7 @@ export default function DataCardSelector({
   registry,
   rawErrors,
   InputProps,
+  schema,
 }: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
@@ -98,6 +100,7 @@ export default function DataCardSelector({
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       {isDataCardsLoading && <Loading />}
       {registry.formContext && registry.formContext.editMode && (

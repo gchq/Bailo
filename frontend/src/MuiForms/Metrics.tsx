@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
@@ -39,9 +39,10 @@ interface MetricsProps {
   id: string
   registry?: Registry
   required?: boolean
+  schema: RJSFSchema
 }
 
-export default function Metrics({ onChange, value, label, id, registry, required }: MetricsProps) {
+export default function Metrics({ onChange, value, label, id, registry, required, schema }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
 
   const theme = useTheme()
@@ -133,6 +134,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       required={required}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>

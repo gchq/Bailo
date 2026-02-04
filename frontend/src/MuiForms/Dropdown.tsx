@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -18,6 +18,7 @@ interface DropdownProps {
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
   id: string
+  schema: RJSFSchema
 }
 
 export default function Dropdown({
@@ -29,6 +30,7 @@ export default function Dropdown({
   required,
   rawErrors,
   id,
+  schema,
 }: DropdownProps) {
   const theme = useTheme()
 
@@ -63,6 +65,7 @@ export default function Dropdown({
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       {registry.formContext.editMode && (
         <Autocomplete

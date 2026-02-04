@@ -1,6 +1,6 @@
 import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -13,9 +13,10 @@ interface TagSelectorProps {
   formContext?: Registry['formContext']
   required?: boolean
   id: string
+  schema: RJSFSchema
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required, id }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required, id, schema }: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
@@ -59,6 +60,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       id={id}
       required={required}
       mirroredModel={formContext.mirroredModel}
+      description={schema.description}
     >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>

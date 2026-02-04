@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -18,6 +18,7 @@ interface CustomTextInputProps {
   InputProps?: any
   id: string
   rawErrors?: string[]
+  schema: RJSFSchema
 }
 
 export default function CustomTextInput({
@@ -29,6 +30,7 @@ export default function CustomTextInput({
   required,
   rawErrors,
   InputProps,
+  schema,
 }: CustomTextInputProps) {
   const theme = useTheme()
 
@@ -59,6 +61,7 @@ export default function CustomTextInput({
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       {registry.formContext.editMode && (
         <TextField

@@ -2,7 +2,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -22,6 +22,7 @@ interface EntitySelectorProps {
   registry?: Registry
   rawErrors?: string[]
   id: string
+  schema: RJSFSchema
 }
 
 export default function EntitySelector({
@@ -32,6 +33,7 @@ export default function EntitySelector({
   registry,
   rawErrors,
   id,
+  schema,
 }: EntitySelectorProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
@@ -109,6 +111,7 @@ export default function EntitySelector({
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
       required={required}
+      description={schema.description}
     >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>

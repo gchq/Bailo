@@ -211,6 +211,7 @@ export default function JsonSchemaForm({
                     ObjectFieldTemplate,
                   }
                 : {
+                    DescriptionFieldTemplate,
                     ArrayFieldTemplate,
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,

@@ -1,6 +1,6 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { ChangeEvent, Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -17,9 +17,18 @@ interface CustomTextInputProps {
   InputProps?: any
   id: string
   rawErrors?: string[]
+  schema: RJSFSchema
 }
 
-export default function CheckboxInput({ onChange, value, label, registry, id, required }: CustomTextInputProps) {
+export default function CheckboxInput({
+  onChange,
+  value,
+  label,
+  registry,
+  id,
+  required,
+  schema,
+}: CustomTextInputProps) {
   const theme = useTheme()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -60,11 +69,12 @@ export default function CheckboxInput({ onChange, value, label, registry, id, re
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value !== undefined}
+      display={registry.formContext.mirroredModel && (value !== false || value)}
       label={label}
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       {registry.formContext.editMode && (
         <RadioGroup onChange={handleChange} value={value} aria-label={`radio input field for ${label}`} id={id}>

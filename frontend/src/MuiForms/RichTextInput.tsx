@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FieldPathId, Registry } from '@rjsf/utils'
+import { FieldPathId, Registry, RJSFSchema } from '@rjsf/utils'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
@@ -18,6 +18,7 @@ interface RichTextInputProps {
   id: string
   rawErrors?: string[]
   fieldPath?: FieldPathId
+  schema: RJSFSchema
 }
 
 export default function RichTextInput({
@@ -29,6 +30,7 @@ export default function RichTextInput({
   disabled,
   id,
   rawErrors,
+  schema,
 }: RichTextInputProps) {
   const theme = useTheme()
 
@@ -50,6 +52,7 @@ export default function RichTextInput({
         required={required}
         id={id}
         mirroredModel={registry.formContext.mirroredModel}
+        description={schema.description}
       >
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
@@ -76,6 +79,7 @@ export default function RichTextInput({
       label={label}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       <RichTextEditor
         value={registry.formContext.mirroredModel ? state : value}

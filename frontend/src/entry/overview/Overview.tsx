@@ -41,7 +41,7 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
         <OrganisationAndStateDetails entry={entry} />
       </Box>
       <Box width='100%'>
-        <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
+        <Container sx={{ m: 'auto' }} maxWidth='xl'>
           {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
           {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
         </Container>

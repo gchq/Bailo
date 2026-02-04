@@ -49,7 +49,7 @@ export default function AdditionalInformation({
 
   if (!mirroredModel) {
     return (
-      <>
+      <Stack spacing={1}>
         <Typography
           fontWeight='bold'
           id={`${id}-label`}
@@ -60,11 +60,13 @@ export default function AdditionalInformation({
           {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
+        {description && editMode && (
+          <Typography variant='caption' color='textSecondary' fontWeight='bold'>
+            {description}
+          </Typography>
+        )}
         {children}
-        <Typography variant='caption' color='textSecondary' fontWeight='bold'>
-          {description}
-        </Typography>
-      </>
+      </Stack>
     )
   }
 
@@ -94,7 +96,7 @@ export default function AdditionalInformation({
           {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {mirroredState ? (
+        {(typeof mirroredState === 'boolean' && mirroredState !== undefined) || mirroredState ? (
           <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
         ) : (
           <Typography
@@ -104,11 +106,6 @@ export default function AdditionalInformation({
             }}
           >
             Unanswered
-          </Typography>
-        )}
-        {description && (
-          <Typography variant='caption' color='textSecondary' fontWeight='bold'>
-            {description}
           </Typography>
         )}
       </>
@@ -134,16 +131,19 @@ export default function AdditionalInformation({
               width: 'auto',
             }}
           >
-            <Typography
-              fontWeight='bold'
-              id={`${id}-label`}
-              aria-label={`Label for ${label}`}
-              component='label'
-              htmlFor={id}
-            >
-              {label}
-              {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-            </Typography>
+            <Stack>
+              <Typography
+                fontWeight='bold'
+                id={`${id}-label`}
+                aria-label={`Label for ${label}`}
+                component='label'
+                htmlFor={id}
+              >
+                {label}
+                {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+              </Typography>
+              {description && <Typography variant='caption'>{description}</Typography>}
+            </Stack>
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
               <Typography variant='caption' fontWeight='bold'>
@@ -167,11 +167,6 @@ export default function AdditionalInformation({
                 {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
               </Typography>
               {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
-              {description && (
-                <Typography variant='caption' color='textSecondary' fontWeight='bold'>
-                  {description}
-                </Typography>
-              )}
             </Stack>
           </Box>
         </Box>
@@ -223,7 +218,6 @@ export default function AdditionalInformation({
                   </Typography>
                   {children}
                 </Stack>
-                {description && <Typography variant='caption'>{description}</Typography>}
               </Box>
             </Box>
           )}

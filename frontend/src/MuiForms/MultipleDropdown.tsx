@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -18,6 +18,7 @@ interface MultipleDropdownProps {
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
   id: string
+  schema: RJSFSchema
 }
 
 export default function MultipleDropdown({
@@ -29,6 +30,7 @@ export default function MultipleDropdown({
   required,
   rawErrors,
   id,
+  schema,
 }: MultipleDropdownProps) {
   const theme = useTheme()
 
@@ -74,6 +76,7 @@ export default function MultipleDropdown({
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
     >
       {registry.formContext.editMode && (
         <Autocomplete
