@@ -1,4 +1,4 @@
-import { ZodSchema } from 'zod'
+import type { ZodSchema } from 'zod'
 
 import { z } from '../lib/zod.js'
 import { InternalError } from './error.js'

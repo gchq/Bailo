@@ -1,5 +1,5 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
-import { AnyZodObject } from 'zod'
+import type { AnyZodObject } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import { z } from '../lib/zod.js'
