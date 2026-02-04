@@ -1,7 +1,8 @@
-import { extendZodWithOpenApi, OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
-import { AnyZodObject, z } from 'zod'
+import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
+import { AnyZodObject } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
+import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
@@ -9,10 +10,6 @@ import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'
 import config from '../utils/config.js'
-
-// Let Zod types have OpenAPI attributes
-// This is required for some scripts e.g. streamDockerRegistryToS3
-extendZodWithOpenApi(z)
 
 export const registry = new OpenAPIRegistry()
 
