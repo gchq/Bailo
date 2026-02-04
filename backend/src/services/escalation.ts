@@ -11,6 +11,7 @@ const BAILO_ID_HEADER = 'x-bailo-id'
  * Generate headers to escalate the request in the receiving Bailo instance.
  */
 export const generateEscalationHeaders = (requestingUserId: string): Headers => {
+  // If user is provided and escalation is enabled
   if (requestingUserId !== '' && config.escalation.isEnabled) {
     return new Headers({
       [USER_HEADER]: requestingUserId,
@@ -48,20 +49,23 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
 }
 
 /**
- * Check if escalation is required then escalate if authorised
+ * Checks if escalation is required, then escalate if authorised.
+ *
+ * If the user is provided as a header then assume escalation is required,
+ * if so then check if authorised to escalate.
  */
 export const escalateUserIfAuthorised = (req: Request): Request => {
   const headers = req.headers
   const requestingUser = headers[USER_HEADER]
   const bailoId = headers[BAILO_ID_HEADER]
 
-  // If the user and bailoId are provided then the request is to escalate to the original requesting user
   if (requestingUser && bailoId && typeof bailoId === 'string') {
     // Check the requesting proc user is authorised and part of an accepted Bailo instance
     const isAuthorised = isAuthorisedToEscalate(req.user.dn, bailoId)
     if (isAuthorised) {
       // Escalate from the system proc user to the original requesting user
       req.user = { dn: requestingUser }
+      log.info({}, `The system user ${req.user.dn} has been escalated to user ${requestingUser}.`)
     }
   }
   return req
