@@ -86,7 +86,7 @@ data:
         {{ end }}
       },
 
-      avScanning: {
+      artefactScanning: {
         clamdscan: {
           concurrency: {{ .Values.clamav.concurrency }},
           host: '{{ include "bailo.fullname" . }}-clamav',

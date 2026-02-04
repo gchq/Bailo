@@ -59,15 +59,15 @@ export abstract class BaseQueueArtefactScanningConnector extends ArtefactBaseSca
 
   async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]> {
     log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
-    const scanResult = await this.queue
+    const scanResults = await this.queue
       .add(() => this._scan(artefact))
       .catch((error) => {
         return this.scanError('Queued scan threw an error.', { error, artefact })
       })
     // return type of `queue.add()` is Promise<void | ...> so reject void responses
-    if (scanResult === null || typeof scanResult !== 'object') {
+    if (scanResults === null || typeof scanResults !== 'object') {
       return this.scanError('Queued scan failed to correctly return.', { artefact })
     }
-    return scanResult
+    return scanResults
   }
 }

@@ -68,13 +68,11 @@ export class DocumentsExporter extends BaseExporter {
           failedScan: Array<{ name: string; id: string }>
         } = { missingScan: [], incompleteScan: [], failedScan: [] }
         for (const file of this.files) {
-          if (!file.scanResult || file.scanResult.length === 0) {
+          if (!file.scanResults || file.scanResults.length === 0) {
             scanErrors.missingScan.push({ name: file.name, id: file.id })
-          } else if (file.scanResult.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+          } else if (file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
             scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-          } else if (
-            file.scanResult.some((scanResult) => scanResult.vulnerabilities && scanResult.vulnerabilities?.length > 0)
-          ) {
+          } else if (file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary?.length > 0)) {
             scanErrors.failedScan.push({ name: file.name, id: file.id })
           }
         }

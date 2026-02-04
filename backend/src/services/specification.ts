@@ -151,7 +151,7 @@ export const fileWithScanInterfaceSchema = z.object({
 
   complete: z.boolean().openapi({ example: true }),
 
-  scanResult: z.array(scanInterfaceSchema).optional(),
+  scanResults: z.array(scanInterfaceSchema).optional(),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),

@@ -12,7 +12,7 @@ import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
 
 export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.avScanning.modelscan.concurrency })
+  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.modelscan.concurrency })
   artefactType: ArtefactType = 'file'
   toolName: string = 'ModelScan'
   version: string | undefined = undefined

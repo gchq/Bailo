@@ -242,7 +242,7 @@ export async function getFileById(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'scanResult',
+        as: 'scanResults',
       },
     },
   ])
@@ -273,7 +273,7 @@ export async function getFilesByModel(user: UserInterface, modelId: string) {
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'scanResult',
+        as: 'scanResults',
       },
     },
   ])
@@ -299,7 +299,7 @@ export async function getFilesByIds(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'scanResult',
+        as: 'scanResults',
       },
     },
   ])
@@ -386,9 +386,9 @@ async function fileScanDelay(file: FileInterface): Promise<number> {
   }
   let minutesBeforeRetrying = 0
   const fileAvScans = await ScanModel.find({ fileId: file._id.toString() })
-  for (const scanResult of fileAvScans) {
+  for (const scanResults of fileAvScans) {
     const delayInMilliseconds = delay * 60000
-    const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
+    const scanTimeAtLimit = scanResults.lastRunAt.getTime() + delayInMilliseconds
     if (scanTimeAtLimit > new Date().getTime()) {
       minutesBeforeRetrying = scanTimeAtLimit - new Date().getTime()
       break

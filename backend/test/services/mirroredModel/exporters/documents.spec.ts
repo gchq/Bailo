@@ -73,7 +73,7 @@ const mockFile = {
   id: 'fileId',
   _id: { toString: () => 'fileId' },
   name: 'f',
-  scanResult: [{ state: ArtefactScanState.Complete }],
+  scanResults: [{ state: ArtefactScanState.Complete }],
 } as any
 
 const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'DocumentsExporter' }
@@ -141,7 +141,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
 
   test('_init throws BadReq if scan issues (missing scan)', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { id: 'f', name: 'name', scanResult: [] }
+    const badFile = { id: 'f', name: 'name', scanResults: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
@@ -158,7 +158,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const incompleteFile = {
       id: 'f',
       name: 'name',
-      scanResult: [{ state: ArtefactScanState.InProgress }],
+      scanResults: [{ state: ArtefactScanState.InProgress }],
     }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([incompleteFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
@@ -176,7 +176,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const infectedFile = {
       id: 'f',
       name: 'name',
-      scanResult: [
+      scanResults: [
         {
           state: ArtefactScanState.Complete,
           vulnerabilities: [{ severity: SeverityLevel.CRITICAL, vulnerabilityDescription: 'There is a virus aboard' }],

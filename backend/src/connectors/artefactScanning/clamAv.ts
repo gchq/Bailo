@@ -24,7 +24,7 @@ function safeParseVersion(versionStr: string): string {
 }
 
 export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.avScanning.clamdscan.concurrency })
+  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
   artefactType: ArtefactType = 'file'
   toolName = 'Clam AV'
   version: string | undefined = undefined
@@ -35,7 +35,7 @@ export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnec
   }
 
   async init() {
-    this.av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+    this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
     log.debug({ ...this.info() }, 'Initialised Clam AV scanner')

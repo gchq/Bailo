@@ -90,7 +90,7 @@ export interface FileInterface {
   complete: boolean
 
   // Older files may not have scans run against them
-  scanResult?: AvScanResult[]
+  scanResults?: AvScanResult[]
 
   tags: string[]
 
@@ -98,19 +98,22 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export type FileWithScanResultsInterface = FileInterface & { scanResult: ScanResultInterface[]; id: string }
+export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanResultInterface[]; id: string }
 
 export interface ScanResultInterface {
   _id: string
   state: ScanStateKeys
   scannerVersion?: string
-  vulnerabilities?: Array<{ severity: SeverityLevelKeys; vulnerabilityDescription: string }>
+  summary?: Array<ModelScanSummary | ClamAVScanSummary>
   toolName: string
   lastRunAt: string
 
   createdAt: Date
   updatedAt: Date
 }
+
+export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescription: string }
+export type ClamAVScanSummary = { virus: string }
 
 export const SeverityLevel = {
   UNSPECIFIED: 'unspecified',

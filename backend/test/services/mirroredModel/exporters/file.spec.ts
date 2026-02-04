@@ -65,7 +65,7 @@ const mockFile = {
   id: 'fileId',
   name: 'test.txt',
   size: 500,
-  scanResult: [{ state: ArtefactScanState.Complete }],
+  scanResults: [{ state: ArtefactScanState.Complete }],
 } as any
 const mockLogData = { extra: 'info', exporterType: 'FileExporter', exportId: 'exportId' }
 
@@ -135,7 +135,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if vulnerability scans missing', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, scanResult: [] }
+    const badFile = { ...mockFile, scanResults: [] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file is missing vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
@@ -148,7 +148,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if vulnerability scans incomplete', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, scanResult: [{ state: ArtefactScanState.InProgress }] }
+    const badFile = { ...mockFile, scanResults: [{ state: ArtefactScanState.InProgress }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has incomplete vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
@@ -161,7 +161,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if vulnerability scans infected', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, scanResult: [{ state: ArtefactScanState.Complete }] }
+    const badFile = { ...mockFile, scanResults: [{ state: ArtefactScanState.Complete }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has failed vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,

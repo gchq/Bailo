@@ -38,7 +38,7 @@ vi.mock('../../src/services/log.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
-      avScanning: {
+      artefactScanning: {
         clamdscan: {
           host: 'test',
           port: 8080,
@@ -147,7 +147,7 @@ describe('services > file', () => {
   })
 
   test('uploadFile > virus scan initialised', async () => {
-    vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ clamdscan: 'test' })
+    vi.spyOn(configMock, 'artefactScanning', 'get').mockReturnValue({ clamdscan: 'test' })
     vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
       artefactScanners: {
         kinds: ['clamAV'],
@@ -428,7 +428,7 @@ describe('services > file', () => {
 
   test('getFilesByIds > success', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { example: 'file', scanResult: [], _id: { toString: vi.fn(() => testFileId) } },
+      { example: 'file', scanResults: [], _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const user = { dn: 'testUser' } as any
@@ -445,12 +445,12 @@ describe('services > file', () => {
       {
         example: 'file',
         _id: '123',
-        scanResult: [{ fileId: '123' }, { fileId: '123' }],
+        scanResults: [{ fileId: '123' }, { fileId: '123' }],
       },
       {
         example: 'file',
         _id: '321',
-        scanResult: [{ fileId: '321' }],
+        scanResults: [{ fileId: '321' }],
       },
     ])
     vi.mocked(authorisation.files).mockResolvedValue([
@@ -500,7 +500,7 @@ describe('services > file', () => {
       },
     ])
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { example: 'file', scanResult: [], _id: { toString: vi.fn(() => testFileId) } },
+      { example: 'file', scanResults: [], _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const user = { dn: 'testUser' } as any

@@ -166,7 +166,7 @@ export interface Config {
     debug: boolean
   }
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       concurrency: number
       host: string

@@ -67,7 +67,7 @@ module.exports = {
     region: 'ignored',
   },
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       host: 'clamd',
     },

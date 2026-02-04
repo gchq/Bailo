@@ -41,7 +41,14 @@ import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { FileInterface, isFileInterface, ReleaseInterface, ScanState } from 'types/types'
+import {
+  ClamAVScanSummary,
+  FileInterface,
+  isFileInterface,
+  ModelScanSummary,
+  ReleaseInterface,
+  ScanState,
+} from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
@@ -156,16 +163,16 @@ export default function FileDisplay({
   const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
 
   const threatsFound = useCallback((file: FileInterface) => {
-    if (file.scanResult === undefined) {
+    if (file.scanResults === undefined) {
       return 0
     }
-    return file.scanResult.reduce((acc, scan) => {
-      return scan.vulnerabilities ? scan.vulnerabilities.length + acc : acc
+    return file.scanResults.reduce((acc, scan) => {
+      return scan.summary ? scan.summary.length + acc : acc
     }, 0)
   }, [])
 
   const updateChipDetails = useEffectEvent(() => {
-    if (!isFileInterface(file) || file.scanResult === undefined) {
+    if (!isFileInterface(file) || file.scanResults === undefined) {
       setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
       return
     } else if (threatsFound(file as FileInterface)) {
@@ -177,14 +184,14 @@ export default function FileDisplay({
       return
     } else if (
       isFileInterface(file) &&
-      file.scanResult !== undefined &&
-      file.scanResult.some((scan) => scan.state === ScanState.Error)
+      file.scanResults !== undefined &&
+      file.scanResults.some((scan) => scan.state === ScanState.Error)
     ) {
       setChipDisplay({ label: 'One or more scanning tools failed', colour: 'warning', icon: <Warning /> })
       return
-    } else if (file.scanResult.some((scan) => scan.state === ScanState.InProgress)) {
+    } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
       setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
-    } else if (file.scanResult.some((scan) => scan.state === ScanState.NotScanned)) {
+    } else if (file.scanResults.some((scan) => scan.state === ScanState.NotScanned)) {
       setChipDisplay({ label: 'Not scanned', colour: 'warning', icon: <Warning /> })
     } else if (!threatsFound(file as FileInterface)) {
       setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
@@ -267,10 +274,10 @@ export default function FileDisplay({
           }}
         >
           <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
-            {file.scanResult &&
-              file.scanResult.map((scanResult) => (
+            {file.scanResults &&
+              file.scanResults.map((scanResult) => (
                 <Fragment key={scanResult.toolName}>
-                  {scanResult.vulnerabilities && scanResult.vulnerabilities.length > 0 ? (
+                  {scanResult.summary && scanResult.summary.length > 0 ? (
                     <Stack spacing={2}>
                       <Stack spacing={1} direction='row'>
                         <Error color='error' />
@@ -283,12 +290,19 @@ export default function FileDisplay({
                       )}
                       <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                       <ul>
-                        {scanResult.vulnerabilities.map((vulnerability) => (
-                          <li
-                            //this surely needs to change
-                            key={vulnerability.vulnerabilityDescription}
-                          >{`${(vulnerability.severity as string).toUpperCase()}: ${vulnerability.vulnerabilityDescription}`}</li>
-                        ))}
+                        {scanResult.toolName === 'ModelScan'
+                          ? scanResult.summary.map((vulnerability) => (
+                              <li
+                                //this surely needs to change
+                                key={(vulnerability as ModelScanSummary).vulnerabilityDescription}
+                              >{`${((vulnerability as ModelScanSummary).severity as string).toUpperCase()}: ${(vulnerability as ModelScanSummary).vulnerabilityDescription}`}</li>
+                            ))
+                          : scanResult.summary.map((vulnerability) => (
+                              <li
+                                //this surely needs to change
+                                key={(vulnerability as ClamAVScanSummary).virus}
+                              >{`Virus found: ${(vulnerability as ClamAVScanSummary).virus}`}</li>
+                            ))}
                       </ul>
                     </Stack>
                   ) : (
