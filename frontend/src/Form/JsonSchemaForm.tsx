@@ -54,9 +54,13 @@ export default function JsonSchemaForm({
   const currentStep = splitSchema.steps[activeStep]
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formStats = useMemo(() => getFormStats(currentStep), [currentStep, calculateStats])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const collatedStats = useMemo(() => getOverallCompletionStats(splitSchema.steps), [splitSchema, calculateStats])
+  const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
+
+  const collatedStats = useMemo(
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [splitSchema, calculateStats, mirroredModel],
+  )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)

@@ -325,7 +325,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
  * If no step is provided, all numeric values are returned as -1 and the form
  * is marked as incomplete.
  */
-export function getFormStats(step?: StepNoRender): FormStats {
+export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): FormStats {
   if (!step) {
     return {
       totalQuestions: -1,
@@ -336,7 +336,7 @@ export function getFormStats(step?: StepNoRender): FormStats {
   }
 
   const totalQuestions = countQuestionsFromSchema(step.schema)
-  const totalAnswers = countAnswersFromSchemaAndState(step.schema, step.state)
+  const totalAnswers = countAnswersFromSchemaAndState(step.schema, mirroredModel ? step.mirroredState : step.state)
 
   // If more answers given than required answers then return 100% otherwise calulate percentage
   const percentageQuestionsComplete =
@@ -350,14 +350,14 @@ export function getFormStats(step?: StepNoRender): FormStats {
   }
 }
 
-export function getOverallCompletionStats(steps: StepNoRender[]): ModelFormStats {
+export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?: boolean): ModelFormStats {
   let totalQuestions = 0
   let totalAnswers = 0
   let totalPages = 0
   let pagesCompleted = 0
 
   steps.forEach((step) => {
-    const stepStats = getFormStats(step)
+    const stepStats = getFormStats(step, mirroredModel)
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
     totalPages += 1
