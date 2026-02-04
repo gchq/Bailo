@@ -13,7 +13,7 @@ interface TagSelectorProps {
   formContext?: Registry['formContext']
   required?: boolean
   id: string
-  schema: RJSFSchema
+  schema?: RJSFSchema
 }
 
 export default function TagSelector({ onChange, value, label, formContext, required, id, schema }: TagSelectorProps) {
@@ -60,7 +60,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       id={id}
       required={required}
       mirroredModel={formContext.mirroredModel}
-      description={schema.description}
+      description={schema ? schema.description : ''}
     >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
