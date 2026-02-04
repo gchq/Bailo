@@ -49,13 +49,12 @@ export interface UiConfig {
   modelMirror: {
     import: {
       enabled: boolean
+      additionalInfoHeading: string
+      originalAnswerHeading: string
     }
     export: {
       enabled: boolean
       disclaimer: string
-    }
-    display: {
-      additionalInfoHeading: string
     }
   }
   announcement: {

@@ -46,11 +46,11 @@ export async function exportModel(
   const model = await getModelById(user, modelId, EntryKind.Model)
 
   if (!model.card) {
-    throw BadReq('Cannot export a model that does have a valid model card.')
+    throw BadReq('Cannot export a model that does have a valid model card.', { modelId: model.id })
   }
 
   if (model.card.version === 1) {
-    throw BadReq('You must make changes to your model card before requesting an export.')
+    throw BadReq('You must make changes to your model card before requesting an export.', { modelId: model.id })
   }
 
   const mirroredModelId = model.settings.mirror.destinationModelId

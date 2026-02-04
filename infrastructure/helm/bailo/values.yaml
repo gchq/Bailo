@@ -318,6 +318,8 @@ instrumentation:
 modelMirror:
   import:
     enabled: false
+    additionalInfoHeading: 'Additional information'
+    originalAnswerHeading: 'Original answer'
   export:
     concurrency: 5
     enabled: false
@@ -329,8 +331,7 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
-  display:
-    additionalInfoHeading: 'Additional information'
+
 
 # Inferencing cluster reference
 inference:

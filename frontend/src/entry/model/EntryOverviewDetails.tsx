@@ -19,7 +19,7 @@ interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
 }
 
-export default function OrganisationStateCollaboratorsDetails({ entry }: OrganisationAndStateDetailsProps) {
+export default function EntryOverviewDetails({ entry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')

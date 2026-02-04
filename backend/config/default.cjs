@@ -233,13 +233,12 @@ module.exports = {
     modelMirror: {
       import: {
         enabled: false,
+        additionalInfoHeading: 'Additional information',
+        originalAnswerHeading: 'Original answer',
       },
       export: {
         enabled: false,
         disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
-      },
-      display: {
-        additionalInfoHeading: 'Additional information',
       },
     },
 

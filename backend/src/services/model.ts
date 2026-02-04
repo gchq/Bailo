@@ -7,7 +7,7 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKind, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
@@ -38,7 +38,7 @@ import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
-  if (model.settings.mirror.sourceModelId) {
+  if (model.kind === EntryKind.MirroredModel) {
     throw BadReq(`Cannot alter a mirrored model.`)
   }
 }

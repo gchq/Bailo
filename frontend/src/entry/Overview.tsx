@@ -1,6 +1,6 @@
 import { Box, Container, Stack } from '@mui/material'
 import { useMemo } from 'react'
-import OrganisationAndStateDetails from 'src/entry/model/OrganisationStateCollaboratorsDetails'
+import EntryOverviewDetails from 'src/entry/model/EntryOverviewDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
@@ -38,7 +38,7 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
   ) : (
     <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
       <Box sx={{ p: 2, minWidth: '300px' }}>
-        <OrganisationAndStateDetails entry={entry} />
+        <EntryOverviewDetails entry={entry} />
       </Box>
       <Box width='100%'>
         <Container sx={{ m: 'auto' }} maxWidth='xl'>

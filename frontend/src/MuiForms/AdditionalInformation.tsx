@@ -147,7 +147,7 @@ export default function AdditionalInformation({
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
               <Typography variant='caption' fontWeight='bold'>
-                Original answer
+                {uiConfig ? uiConfig.modelMirror.import.originalAnswerHeading : 'Original answer'}
               </Typography>
               <Box>
                 {mirroredState ? (
@@ -163,8 +163,8 @@ export default function AdditionalInformation({
                   </Typography>
                 )}
               </Box>
-              <Typography variant='caption' fontWeight='bold'>
-                {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
+              <Typography sx={{ pl: 4 }} variant='caption' fontWeight='bold'>
+                {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
               </Typography>
               {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
             </Stack>
@@ -214,7 +214,7 @@ export default function AdditionalInformation({
               >
                 <Stack spacing={1}>
                   <Typography variant='caption' fontWeight='bold'>
-                    {uiConfig ? uiConfig.modelMirror.display.additionalInfoHeading : 'Additional information'}
+                    {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
                   </Typography>
                   {children}
                 </Stack>
