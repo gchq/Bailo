@@ -236,3 +236,9 @@ export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInfor
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
+
+// The users within a specific Bailo instance allowed to escalate
+export interface EscalationDetails {
+  instanceId: string
+  userIds: string[]
+}
