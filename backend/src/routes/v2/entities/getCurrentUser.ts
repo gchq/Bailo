@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { Roles } from '../../../connectors/authentication/Base.js'
+import { Roles } from '../../../connectors/authentication/constants.js'
 import authentication from '../../../connectors/authentication/index.js'
 import { UserInterface } from '../../../models/User.js'
 import { registerPath, userInterfaceSchema } from '../../../services/specification.js'
