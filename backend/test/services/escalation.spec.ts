@@ -24,7 +24,7 @@ describe('escalation > isAuthorisedToEscalate', () => {
         },
       ],
     })
-    expect(isAuthorisedToEscalate('system-user-2', 'bailo-instance-1')).toBe(true)
+    expect(isAuthorisedToEscalate('system-user-2', 'bailo-instance-1')).toBe(false)
   })
   test('isAuthorisedToEscalate > should return false when the instance is not in the allowed list', () => {
     vi.spyOn(config, 'escalation', 'get').mockReturnValue({
@@ -35,13 +35,13 @@ describe('escalation > isAuthorisedToEscalate', () => {
         },
       ],
     })
-    expect(isAuthorisedToEscalate('system-user-2', 'bailo-instance-2')).toBe(true)
+    expect(isAuthorisedToEscalate('system-user-2', 'bailo-instance-2')).toBe(false)
   })
   test('isAuthorisedToEscalate > should return false when no instances are in the allowed list', () => {
     vi.spyOn(config, 'escalation', 'get').mockReturnValue({
       allowed: [],
     })
-    expect(isAuthorisedToEscalate('system-user-2', 'bailo-instance-2')).toBe(true)
+    expect(isAuthorisedToEscalate('system-user-2', 'bailo-instance-2')).toBe(false)
   })
 })
 
@@ -60,7 +60,7 @@ describe('escalation > escalateUserIfAuthorised', () => {
         'x-user': 'app-user-1',
         'x-bailo-id': 'bailo-instance-1',
       },
-      user: 'system-user-1',
+      user: { dn: 'system-user-1' },
     }
     const result = escalateUserIfAuthorised(req as any)
     expect(result.user).toEqual({
@@ -81,7 +81,7 @@ describe('escalation > escalateUserIfAuthorised', () => {
         'x-user': 'app-user-1',
         'x-bailo-id': 'bailo-instance-1',
       },
-      user: 'system-user-2',
+      user: { dn: 'system-user-2' },
     }
     const result = escalateUserIfAuthorised(req as any)
     expect(result.user).toEqual({
@@ -102,7 +102,7 @@ describe('escalation > escalateUserIfAuthorised', () => {
         'x-user': 'app-user-1',
         'x-bailo-id': 'bailo-instance-2',
       },
-      user: 'system-user-2',
+      user: { dn: 'system-user-2' },
     }
     const result = escalateUserIfAuthorised(req as any)
     expect(result.user).toEqual({
