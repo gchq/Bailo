@@ -151,7 +151,7 @@ export default function AdditionalInformation({
               </Typography>
               <Box>
                 {mirroredState ? (
-                  <Box>{mirroredStateDisplay()}</Box>
+                  <Box sx={{ color: theme.palette.customTextInput.main }}>{mirroredStateDisplay()}</Box>
                 ) : (
                   <Typography
                     sx={{

@@ -71,7 +71,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}
       >
         <Typography color='primary' variant='h6' component='h2'>
-          {toSentenceCase(entry.kind)} Details
+          {toSentenceCase(entry.kind)} details
         </Typography>
         <Stack spacing={1}>
           {schema && (
