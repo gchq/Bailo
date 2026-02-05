@@ -9,8 +9,8 @@ import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
-import DangerZone from 'src/entry/settings/DangerZone'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
+import EntryDeletion from 'src/entry/settings/EntryDeletion'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind } from 'types/types'
@@ -127,9 +127,8 @@ export default function Settings({ entry }: SettingsProps) {
           </SimpleListItemButton>
           {entry.kind === EntryKind.MODEL && (
             <>
-              {' '}
               <Divider sx={{ mb: 2, mt: 1 }} />
-              <Typography variant='caption'>Importing and requests</Typography>
+              <Typography variant='caption'>Sharing and requests</Typography>
               <SimpleListItemButton
                 selected={selectedCategory === SettingsCategory.ACCESS_REQUESTS}
                 onClick={() => handleListItemClick(SettingsCategory.ACCESS_REQUESTS)}
@@ -175,7 +174,7 @@ export default function Settings({ entry }: SettingsProps) {
           {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
           {selectedCategory === SettingsCategory.TEMPLATING && <TemplateSettings model={entry} />}
           {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
-          {selectedCategory === SettingsCategory.DANGER && <DangerZone entry={entry} />}
+          {selectedCategory === SettingsCategory.DANGER && <EntryDeletion entry={entry} />}
         </Container>
       </Stack>
     </Container>
