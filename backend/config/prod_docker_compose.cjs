@@ -5,7 +5,7 @@ module.exports = {
   },
 
   mongo: {
-    uri: 'mongodb://mongo:27017/bailo',
+    uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
   },
 
   app: {
@@ -19,10 +19,10 @@ module.exports = {
 
   s3: {
     credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
+      accessKeyId: 'rustfsadmin',
+      secretAccessKey: 'rustfsadmin',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://rustfs:9000',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
