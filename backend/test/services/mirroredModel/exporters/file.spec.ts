@@ -161,7 +161,10 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
   test('_init throws BadReq if vulnerability scans infected', () => {
     scannersMocks.default.scannersInfo.mockReturnValue(true)
-    const badFile = { ...mockFile, scanResults: [{ state: ArtefactScanState.Complete }] }
+    const badFile = {
+      ...mockFile,
+      scanResults: [{ state: ArtefactScanState.Complete, summary: [{ virus: 'Virus Found' }] }],
+    }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has failed vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,

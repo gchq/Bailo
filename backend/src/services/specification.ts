@@ -132,7 +132,7 @@ export const scanInterfaceSchema = z.object({
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
   state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
-  vulnerabilities: z
+  summary: z
     .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
     .optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),

@@ -179,7 +179,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
       scanResults: [
         {
           state: ArtefactScanState.Complete,
-          vulnerabilities: [{ severity: SeverityLevel.CRITICAL, vulnerabilityDescription: 'There is a virus aboard' }],
+          summary: [{ severity: SeverityLevel.CRITICAL, vulnerabilityDescription: 'There is a virus aboard' }],
         },
       ],
     }

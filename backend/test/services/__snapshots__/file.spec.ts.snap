@@ -57,7 +57,7 @@ exports[`services > file > getFilesByIds > success 1`] = `
       "toString": [MockFunction],
     },
     "example": "file",
-    "scanResult": [],
+    "scanResults": [],
   },
 ]
 `;
@@ -67,7 +67,7 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
   {
     "_id": "123",
     "example": "file",
-    "scanResult": [
+    "scanResults": [
       {
         "fileId": "123",
       },
@@ -79,7 +79,7 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
   {
     "_id": "321",
     "example": "file",
-    "scanResult": [
+    "scanResults": [
       {
         "fileId": "321",
       },
