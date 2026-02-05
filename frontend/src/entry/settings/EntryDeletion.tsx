@@ -1,0 +1,107 @@
+import { Close, Delete } from '@mui/icons-material'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { deleteEntry } from 'actions/entry'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import useNotification from 'src/hooks/useNotification'
+import MessageAlert from 'src/MessageAlert'
+import { EntryInterface, EntryKindLabel } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
+import { toTitleCase } from 'utils/stringUtils'
+
+type EntryDeletionProps = {
+  entry: EntryInterface
+}
+
+export default function EntryDeletion({ entry }: EntryDeletionProps) {
+  const [loading, setLoading] = useState(false)
+  const sendNotification = useNotification()
+  const [errorMessage, setErrorMessage] = useState('')
+  const router = useRouter()
+
+  const [openConfirm, setOpenConfirm] = useState(false)
+  const [confirmInput, setConfirmInput] = useState('')
+
+  const handleDeleteEntry = async () => {
+    setLoading(true)
+
+    const response = await deleteEntry(entry.id)
+
+    if (!response.ok) {
+      setErrorMessage(await getErrorMessage(response))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: `${toTitleCase(EntryKindLabel[entry.kind])} deleted`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+      router.push('/')
+    }
+
+    setLoading(false)
+    setOpenConfirm(!response.ok)
+  }
+
+  return (
+    <Stack spacing={2} sx={{ mt: 2 }}>
+      <Typography variant='h6' component='h2' color='primary'>
+        Deletion
+      </Typography>
+      <Divider />
+      <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
+        {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
+      </Button>
+      <Dialog
+        onKeyUp={(e) => {
+          if (e.code === 'Enter' && confirmInput.trim() === entry.name) {
+            handleDeleteEntry()
+          }
+        }}
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+      >
+        <DialogTitle>{`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            To confirm deletion, type <strong>{entry.name}</strong> below. This action cannot be undone.
+          </Typography>
+          <TextField
+            fullWidth
+            variant='outlined'
+            value={confirmInput}
+            onChange={(e) => setConfirmInput(e.target.value)}
+            placeholder={entry.name}
+            autoFocus
+            sx={{ mt: 2 }}
+          />
+          {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} disabled={loading} startIcon={<Close />}>
+            Cancel
+          </Button>
+          <Button
+            color='error'
+            variant='contained'
+            onClick={handleDeleteEntry}
+            loading={loading}
+            disabled={confirmInput.trim() !== entry.name}
+            startIcon={<Delete />}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
+  )
+}
