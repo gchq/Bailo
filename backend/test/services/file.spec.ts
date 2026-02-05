@@ -23,6 +23,7 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/fileScanning/index.js')
+vi.mock('pretty-bytes')
 
 const FileModelMock = getTypedModelMock('FileModel')
 const ScanModelMock = getTypedModelMock('ScanModel')
@@ -86,7 +87,7 @@ vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fi
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+  getObjectStream: vi.fn(() => ({ pipe: vi.fn(), on: vi.fn() })),
   completeMultipartUpload: vi.fn(),
   headObject: vi.fn(() => ({ ContentLength: 100 })),
   startMultipartUpload: vi.fn(() => ({ uploadId: 'uploadId' })),

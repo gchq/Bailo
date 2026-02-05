@@ -96,6 +96,9 @@ aws:
   ses:
     endpoint: ""
     region: ""
+  s3:
+    # Potentially requires setting to avoid OOM/memory leak as per https://github.com/aws/aws-sdk-js-v3/issues/7657
+    responseChecksumValidation: ""
 
 # Pod resource
 resources:
