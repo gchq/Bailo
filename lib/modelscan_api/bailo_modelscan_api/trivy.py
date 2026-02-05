@@ -31,11 +31,15 @@ def safe_extract(tar: tarfile.TarFile, path: str) -> None:
     :param tar: tarfile to extract
     :param path: the target to extract to
     """
+    base = Path(path).resolve()
+
     for member in tar.getmembers():
-        target = Path(path, member.name).resolve()
-        # Check for absolute paths
-        if not str(target).startswith(str(Path(path).resolve())):
+        # Create a PurePath where relative links `..` are resolved
+        member_path = (base / member.name).resolve()
+
+        if not member_path.is_relative_to(base):
             raise HTTPException(400, "Invalid tar contents")
+
     return tar.extractall(path)
 
 
@@ -47,12 +51,17 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="TRIVY_")
     BINARY: str = "/usr/local/bin/trivy"
-    CACHE_DIR: str = "/tmp/trivy"
+    TEMP_DIR: str = "/tmp"
+    CACHE_DIR: str = f"{TEMP_DIR}/trivy"
 
     DB_DIR: str = f"{CACHE_DIR}/db"
 
     # Default trivy database on Github.
     DB_IMAGE: str = "ghcr.io/aquasecurity/trivy-db:2"
+
+    CREATE_TIMEOUT_SECONDS: int = 900
+
+    SCAN_TIMEOUT_SECONDS: int = 60
 
 
 @lru_cache
@@ -72,7 +81,7 @@ def create_sbom(tempfile: str, blob_digest: str) -> None:
     :param tempfile: the target file to store unscanned sboms
     :param blob_digest: the digest of the blob to create an sbom
     """
-    cached_sbom = f"/tmp/{blob_digest}-master.json"
+    cached_sbom = f"{get_settings().TEMP_DIR}/{blob_digest}-master.json"
 
     args = (
         get_settings().BINARY,
@@ -90,13 +99,34 @@ def create_sbom(tempfile: str, blob_digest: str) -> None:
         tempfile,
         "--quiet",
     )
-    logger.info("Scanning sbom using Trivy")
-    p = subprocess.Popen(args, stderr=subprocess.PIPE)
-    p.wait()
-    _, error = p.communicate()
-    if p.returncode != 0:
-        logger.error(error)
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value, detail="Trivy failed creating sbom")
+    logger.info("Scanning SBOM (SHA256:%s) using Trivy", blob_digest)
+
+    try:
+        subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            timeout=get_settings().CREATE_TIMEOUT_SECONDS,
+            check=True,
+        )
+
+    except subprocess.TimeoutExpired as exception:
+        logger.error("Trivy timed out: %s", exception)
+        raise HTTPException(
+            status_code=HTTPStatus.REQUEST_TIMEOUT,
+            detail="Trivy scan timed out",
+        ) from exception
+
+    except subprocess.CalledProcessError as exception:
+        logger.error(
+            "Trivy failed (exit=%s): %s",
+            exception.returncode,
+            exception.stderr,
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Trivy failed creating sbom",
+        ) from exception
 
 
 def scan_sbom(blob_digest: str) -> Any:
@@ -104,8 +134,8 @@ def scan_sbom(blob_digest: str) -> Any:
 
     :param blob_digest: the digest of the blob contents
     """
-    cached_sbom = f"/tmp/{blob_digest}-master.json"
-    sbom_target = f"/tmp/{blob_digest}.json"
+    cached_sbom = f"{get_settings().TEMP_DIR}/{blob_digest}-master.json"
+    sbom_target = f"{get_settings().TEMP_DIR}/{blob_digest}.json"
     args = (
         get_settings().BINARY,
         "sbom",
@@ -125,22 +155,44 @@ def scan_sbom(blob_digest: str) -> Any:
         "--quiet",
     )
 
+    logger.info("Scanning SBOM (SHA256:%s) using Trivy", blob_digest)
+
     try:
-        logger.info("Scanning sbom using Trivy")
-        p = subprocess.Popen(args, stderr=subprocess.PIPE)
-        _, error = p.communicate()
-        p.wait()
-        if p.returncode != 0:
-            logger.error(error)
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value, detail="Trivy failed scanning sbom")
+        subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            timeout=get_settings().SCAN_TIMEOUT_SECONDS,
+            check=True,
+        )
         with open(sbom_target, encoding="utf-8") as f:
             sbom = json.load(f)
+
     except FileNotFoundError as exception:
-        logger.error("SBOM %s couldn't be found", blob_digest)
+        logger.error("SBOM (SHA256:%s) couldn't be found", blob_digest)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
             detail="There was a problem with retrieving the SBOM",
         ) from exception
+
+    except subprocess.TimeoutExpired as exception:
+        logger.error("Trivy timed out: %s", exception)
+        raise HTTPException(
+            status_code=HTTPStatus.REQUEST_TIMEOUT,
+            detail="Trivy scan timed out",
+        ) from exception
+
+    except subprocess.CalledProcessError as exception:
+        logger.error(
+            "Trivy failed (exit=%s): %s",
+            exception.returncode,
+            exception.stderr,
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Trivy failed during scanning",
+        ) from exception
+
     return sbom
 
 
@@ -178,7 +230,7 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
     """Scan an image blob from the registry
 
     :param upload_file: packed and compressed overlay filesystem to be scanned
-    :param background_tasks: background tasks to carry out after the respsonse is executed.
+    :param background_tasks: background tasks to carry out after the response is executed.
     :param block_size: chunk size for reading the file into memory
     """
     file = upload_file.file
@@ -198,7 +250,7 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
         )
 
     if not Path(
-        f"/tmp/{blob_digest}-master.json",
+        f"{get_settings().TEMP_DIR}/{blob_digest}-master.json",
     ).is_file():
         working_dir = mkdtemp()
         try:

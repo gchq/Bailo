@@ -5,6 +5,7 @@ import pathlib
 import tarfile
 from http import HTTPStatus
 from io import BytesIO
+from subprocess import CalledProcessError
 from typing import Any
 from unittest.mock import Mock, patch
 
@@ -49,10 +50,7 @@ def test_scan_wrong_digest(file_name: str, file_content: Any):
 
 @patch("subprocess.Popen")
 def test_unable_to_create_sbom(mock_run: Mock):
-    process_mock = Mock()
-    attrs = {"communicate.return_value": ("output", "error")}
-    process_mock.configure_mock(**attrs)
-    mock_run.return_value = process_mock
+    mock_run.side_effect = CalledProcessError(1, "trivy")
     with pytest.raises(HTTPException) as exception:
         trivy.create_sbom("tempfile", "deadbeef")
 
@@ -61,7 +59,7 @@ def test_unable_to_create_sbom(mock_run: Mock):
 
 
 @patch("builtins.open")
-def test_unable_to_scan_sbom(mock_open: Mock):
+def test_unable_to_find_sbom(mock_open: Mock):
     mock_open.side_effect = FileNotFoundError
     with pytest.raises(HTTPException) as exception:
         trivy.scan_sbom("deadbeef")
