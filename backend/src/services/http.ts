@@ -22,5 +22,7 @@ export function getHttpsAgent(opts?: ProxyAgentOptions) {
 }
 
 export function getHttpsUndiciAgent(opts?: Agent.Options) {
-  return new Agent({ ...opts })
+  // Workaround for @types/node being wrong for undici here and throwing:
+  // Type 'Agent' is not assignable to type 'Dispatcher'.
+  return new Agent({ ...opts }) as unknown as RequestInit['dispatcher']
 }
