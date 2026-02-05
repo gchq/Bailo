@@ -1,8 +1,9 @@
 import { ProxyAgentOptions } from 'proxy-agent'
 import { Optional } from 'utility-types'
-import z, { ZodSchema, ZodTypeDef } from 'zod'
+import type { ZodSchema, ZodTypeDef } from 'zod'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
+import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
 import {
   DocumentsMirrorMetadata,

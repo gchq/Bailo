@@ -2,7 +2,7 @@ import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
-import { Roles } from '../connectors/authentication/Base.js'
+import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
