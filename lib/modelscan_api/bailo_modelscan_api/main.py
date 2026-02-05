@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
@@ -41,6 +43,15 @@ class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
         super().__init__(status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE.value, detail=detail)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    trivy.download_database()
+    yield
+
+    logger.info("Cleaning up database")
+    shutil.rmtree(trivy.get_settings().DB_DIR)
+
+
 # Instantiate FastAPI app with various dependencies.
 app = FastAPI(
     title=get_settings().app_name,
@@ -48,6 +59,7 @@ app = FastAPI(
     description=get_settings().app_description,
     version=get_settings().app_version,
     dependencies=[Depends(get_settings)],
+    lifespan=lifespan,
 )
 # Limit the maximum filesize
 app.add_middleware(
@@ -248,7 +260,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
         },
     },
 )
-async def scan_file(
+def scan_file(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
@@ -376,7 +388,7 @@ async def scan_file(
         }
     },
 )
-async def scan_image(
+def scan_image(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],

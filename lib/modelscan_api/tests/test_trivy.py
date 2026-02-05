@@ -44,22 +44,23 @@ def test_scan_blob(mock_scan: Mock, file_name: str, file_content: Any, file_mime
 )
 def test_scan_wrong_digest(file_name: str, file_content: Any):
     with pytest.raises(HTTPException) as exception:
-        trivy.scan(upload_file=UploadFile(BytesIO(file_content), filename=file_name), background_tasks=[])
+        trivy.scan(UploadFile(BytesIO(file_content), filename=file_name), BackgroundTasks([]))
 
     assert exception.value.status_code == HTTPStatus.BAD_REQUEST.value
     assert exception.value.detail == f"Blob {file_name} has been modified"
 
 
-@patch("subprocess.run")
-@patch.object(pathlib.Path, "is_file")
-def test_unable_to_create_sbom(mock_run: Mock, mock_path: Mock):
-    mock_run.side_effect = FileNotFoundError
-    mock_path.return_value = True
+@patch("subprocess.Popen")
+def test_unable_to_create_sbom(mock_run: Mock):
+    process_mock = Mock()
+    attrs = {"communicate.return_value": ("output", "error")}
+    process_mock.configure_mock(**attrs)
+    mock_run.return_value = process_mock
     with pytest.raises(HTTPException) as exception:
         trivy.create_sbom("tempfile", "deadbeef")
 
     assert exception.value.status_code == HTTPStatus.INTERNAL_SERVER_ERROR.value
-    assert exception.value.detail == "There was a problem with creating the SBOM"
+    assert exception.value.detail == "Trivy failed creating sbom"
 
 
 @patch("builtins.open")
@@ -72,16 +73,18 @@ def test_unable_to_scan_sbom(mock_open: Mock):
     assert exception.value.detail == "There was a problem with retrieving the SBOM"
 
 
-@patch("tempfile.TemporaryDirectory")
 @patch("tarfile.is_tarfile")
-@patch.object(pathlib.Path, "is_file")
-def test_unable_to_extract_tar_file(mock_tempdir: Mock, mock_tarfile_istarfile: Mock, mock_path: Mock):
-    mock_path.return_value = False
-    mock_tempdir.return_value = "/tmp/file"
-    mock_tarfile_istarfile.side_effect = tarfile.ReadError
+@patch("tarfile.open")
+def test_unable_to_extract_tar_file(
+    mock_tarfile_istarfile: Mock,
+    mock_tarfile_open: Mock,
+):
+    mock_tarfile_istarfile.return_value = True
+    mock_tarfile_open.side_effect = tarfile.ReadError
 
-    with pytest.raises(HTTPException) as exception:
-        trivy.scan(UploadFile(BytesIO(EMPTY_CONTENTS), filename=EMPTY_DIGEST), BackgroundTasks([]))
+    with patch.object(pathlib.Path, "is_file") as mock_isfile:
+        mock_isfile.return_value = False
+        with pytest.raises(HTTPException) as exception:
+            trivy.scan(UploadFile(BytesIO(EMPTY_CONTENTS), filename=EMPTY_DIGEST), BackgroundTasks([]))
 
-    assert exception.value.status_code == HTTPStatus.INTERNAL_SERVER_ERROR.value
-    assert exception.value.detail == "There was a problem with retrieving the SBOM"
+    assert exception.value.detail.startswith("An error occurred while extracting image layer:")
