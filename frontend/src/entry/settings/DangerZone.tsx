@@ -1,5 +1,15 @@
 import { Close, Delete } from '@mui/icons-material'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { deleteEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -43,10 +53,11 @@ export default function DangerZone({ entry }: DangerZoneProps) {
   }
 
   return (
-    <Stack spacing={2}>
-      <Typography variant='h6' component='h2'>
-        Danger Zone!
+    <Stack spacing={2} sx={{ mt: 2 }}>
+      <Typography variant='h6' component='h2' color='primary'>
+        Danger zone!
       </Typography>
+      <Divider />
       <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
         {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
       </Button>
