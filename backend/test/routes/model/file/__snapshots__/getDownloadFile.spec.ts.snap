@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > files > getDownloadFile > GET modelId + fileId download > 200 > ok 1`] = `{}`;
+
+exports[`routes > files > getDownloadFile > GET modelId + fileId download > audit > expected call 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "fileId",
+        },
+      ],
+    },
+  },
+  "mime": "text/plain",
+  "name": "test-file.txt",
+  "size": 100,
+  "updatedAt": {
+    "getTime": [MockFunction] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": 123456789,
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`routes > files > getDownloadFile > GET modelId + fileId download > audit > expected call 2`] = `undefined`;
+
+exports[`routes > files > getDownloadFile > GET modelId + semver + fileName download > 200 > ok 1`] = `{}`;
+
+exports[`routes > files > getDownloadFile > GET modelId + semver + fileName download > audit > expected call 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "fileId",
+        },
+      ],
+    },
+  },
+  "mime": "text/plain",
+  "name": "test-file.txt",
+  "size": 100,
+  "updatedAt": {
+    "getTime": [MockFunction] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": 123456789,
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`routes > files > getDownloadFile > GET modelId + semver + fileName download > audit > expected call 2`] = `undefined`;

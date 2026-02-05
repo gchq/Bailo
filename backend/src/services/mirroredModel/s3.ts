@@ -72,7 +72,7 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Mirro
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    const stream = (await getObjectStream(object, bucket)).Body as Readable
+    const stream = await getObjectStream(object, bucket)
     log.debug(
       {
         bucket,
@@ -98,7 +98,7 @@ export async function getObjectFromExportS3Location(
 ) {
   const bucket = config.modelMirror.export.bucket
   try {
-    const stream = (await getObjectStream(object, bucket)).Body as Readable
+    const stream = await getObjectStream(object, bucket)
     log.debug(
       {
         bucket,

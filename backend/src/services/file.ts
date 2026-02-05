@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream'
 
 import { ClientSession, Schema, Types } from 'mongoose'
+import prettyBytes from 'pretty-bytes'
 
 import {
   completeMultipartUpload,
@@ -220,7 +221,51 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
   }
 
-  return getObjectStream(file.path, undefined, range)
+  const stream = await getObjectStream(file.path, undefined, range)
+
+  const totalBytes = file.size
+  const totalPretty = prettyBytes(totalBytes)
+  let progress = 0
+  let lastLoggedAt = 0
+  stream.on('data', function (chunk) {
+    // Advance your progress by chunk.length
+    progress += chunk.length
+
+    const now = Date.now()
+    // Only log every 0.5 seconds to avoid spamming logs excessively
+    if (now - lastLoggedAt < 500) {
+      return
+    }
+
+    lastLoggedAt = now
+    log.debug(
+      {
+        loaded: prettyBytes(progress),
+        loadedBytes: progress,
+        total: totalPretty,
+        totalBytes,
+        fileId,
+      },
+      'Object download is in progress',
+    )
+  })
+
+  stream.on('close', () => {
+    log.debug(
+      {
+        loaded: prettyBytes(progress),
+        loadedBytes: progress,
+        total: prettyBytes(file.size),
+        totalBytes: file.size,
+        fileId,
+      },
+      progress === file.size
+        ? 'Object download stream closed with no data remaining'
+        : 'Object download stream closed with data remaining',
+    )
+  })
+
+  return stream
 }
 
 export async function getFileById(

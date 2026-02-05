@@ -129,6 +129,7 @@ describe('clients > s3', () => {
   })
 
   test('getObjectStream > success', async () => {
+    s3Mocks.send.mockResolvedValueOnce({ Body: 'response' } as any)
     const bucket = 'test-bucket'
     const key = 'test-key'
     const range = { start: 0, end: 100 }

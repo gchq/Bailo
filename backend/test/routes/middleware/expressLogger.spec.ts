@@ -10,7 +10,7 @@ describe('middleware > expressLogger', () => {
     }))
 
     const req: any = {
-      headers: { 'x-request-id': '' },
+      header: vi.fn(() => ''),
       socket: { remoteAddress: '127.0.0.1' },
     }
 
