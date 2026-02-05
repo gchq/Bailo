@@ -69,7 +69,7 @@ export default function CheckboxInput({
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && (value !== false || value)}
+      display={registry.formContext.mirroredModel && value !== undefined}
       label={label}
       id={id}
       required={required}

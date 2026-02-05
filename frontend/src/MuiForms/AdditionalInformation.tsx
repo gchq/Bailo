@@ -150,7 +150,7 @@ export default function AdditionalInformation({
                 {uiConfig ? uiConfig.modelMirror.import.originalAnswerHeading : 'Original answer'}
               </Typography>
               <Box>
-                {mirroredState ? (
+                {mirroredState !== undefined ? (
                   <Box sx={{ color: theme.palette.customTextInput.main }}>{mirroredStateDisplay()}</Box>
                 ) : (
                   <Typography
