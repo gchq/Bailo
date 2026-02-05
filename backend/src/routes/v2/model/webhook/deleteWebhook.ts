@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { z } from '../../../../lib/zod.js'
 import { registerPath } from '../../../../services/specification.js'
 import { removeWebhook } from '../../../../services/webhook.js'
 import { parse } from '../../../../utils/validate.js'

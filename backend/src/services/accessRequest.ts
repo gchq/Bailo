@@ -1,7 +1,7 @@
 import { Validator } from 'jsonschema'
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
-import { Roles } from '../connectors/authentication/Base.js'
+import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
