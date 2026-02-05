@@ -11,7 +11,7 @@ import tarfile
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import mkdtemp
 from typing import Any
 
 import oras.client
@@ -200,25 +200,24 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
     if not Path(
         f"/tmp/{blob_digest}-master.json",
     ).is_file():
-        with TemporaryDirectory(delete=False) as working_dir:
-            dir_path = Path(working_dir)
-            try:
-                if tarfile.is_tarfile(file):
-                    with tarfile.open(fileobj=file, bufsize=block_size) as tarf:
-                        safe_extract(tarf, path=working_dir)
-            except tarfile.ReadError as exception:
-                logger.exception("Failed to extract blob %s", blob_digest)
-                raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                    detail=f"An error occurred while extracting image layer: {exception}",
-                ) from exception
-            create_sbom(working_dir, blob_digest)
+        working_dir = mkdtemp()
+        try:
+            if tarfile.is_tarfile(file):
+                with tarfile.open(fileobj=file, bufsize=block_size) as tarf:
+                    safe_extract(tarf, path=working_dir)
+        except tarfile.ReadError as exception:
+            logger.exception("Failed to extract blob %s", blob_digest)
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
+                detail=f"An error occurred while extracting image layer: {exception}",
+            ) from exception
+        create_sbom(working_dir, blob_digest)
         logger.info(
             "Cleaning up unpacked filesystem %s SHA256:%s",
             working_dir,
             blob_digest,
         )
-        background_tasks.add_task(shutil.rmtree, dir_path, ignore_errors=True)
+        background_tasks.add_task(shutil.rmtree, working_dir, ignore_errors=True)
     else:
         logger.info(
             "SBOM (SHA256:%s) is already cached. Skipping unpack.",

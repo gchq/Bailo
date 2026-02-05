@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import datetime
 import hashlib
 import pathlib
 import tarfile
-import tempfile
 from http import HTTPStatus
 from io import BytesIO
-from tempfile import TemporaryFile
-from typing import Any, BinaryIO
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
