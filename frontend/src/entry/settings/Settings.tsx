@@ -17,7 +17,7 @@ import { EntryInterface, EntryKind } from 'types/types'
 
 export const SettingsCategory = {
   DETAILS: 'details',
-  DANGER: 'danger',
+  DELETION: 'deletion',
   ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
   MIRRORED_MODELS: 'mirrored_models',
@@ -37,20 +37,20 @@ function isSettingsCategory(
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.ACCESS_REQUESTS ||
         value === SettingsCategory.TEMPLATING ||
-        value === SettingsCategory.DANGER ||
+        value === SettingsCategory.DELETION ||
         value === SettingsCategory.MIRRORED_MODELS
       )
     case EntryKind.DATA_CARD:
       return (
         value === SettingsCategory.DETAILS ||
         value === SettingsCategory.PERMISSIONS ||
-        value === SettingsCategory.DANGER
+        value === SettingsCategory.DELETION
       )
     case EntryKind.MIRRORED_MODEL:
       return (
         value === SettingsCategory.DETAILS ||
         value === SettingsCategory.PERMISSIONS ||
-        value === SettingsCategory.DANGER
+        value === SettingsCategory.DELETION
       )
     default:
       return false
@@ -161,9 +161,9 @@ export default function Settings({ entry }: SettingsProps) {
           <Divider sx={{ mb: 2, mt: 1 }} />
           <Typography variant='caption'>Other</Typography>
           <SimpleListItemButton
-            selected={selectedCategory === SettingsCategory.DANGER}
-            onClick={() => handleListItemClick(SettingsCategory.DANGER)}
-            icon={<Report color={selectedCategory === SettingsCategory.DANGER ? 'secondary' : 'inherit'} />}
+            selected={selectedCategory === SettingsCategory.DELETION}
+            onClick={() => handleListItemClick(SettingsCategory.DELETION)}
+            icon={<Report color={selectedCategory === SettingsCategory.DELETION ? 'secondary' : 'inherit'} />}
           >
             Deletion
           </SimpleListItemButton>
@@ -174,7 +174,7 @@ export default function Settings({ entry }: SettingsProps) {
           {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
           {selectedCategory === SettingsCategory.TEMPLATING && <TemplateSettings model={entry} />}
           {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
-          {selectedCategory === SettingsCategory.DANGER && <EntryDeletion entry={entry} />}
+          {selectedCategory === SettingsCategory.DELETION && <EntryDeletion entry={entry} />}
         </Container>
       </Stack>
     </Container>
