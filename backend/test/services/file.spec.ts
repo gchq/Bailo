@@ -23,6 +23,7 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/artefactScanning/index.js')
+vi.mock('pretty-bytes')
 
 const FileModelMock = getTypedModelMock('FileModel')
 const ScanModelMock = getTypedModelMock('ScanModel')
@@ -85,7 +86,7 @@ vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+  getObjectStream: vi.fn(() => ({ pipe: vi.fn(), on: vi.fn() })),
   completeMultipartUpload: vi.fn(),
   headObject: vi.fn(() => ({ ContentLength: 100 })),
   startMultipartUpload: vi.fn(() => ({ uploadId: 'uploadId' })),
@@ -350,9 +351,12 @@ describe('services > file', () => {
       { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
     ])
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
-      if (action === FileAction.View) return { success: true, id: '' }
-      if (action === FileAction.Delete)
+      if (action === FileAction.View) {
+        return { success: true, id: '' }
+      }
+      if (action === FileAction.Delete) {
         return { success: false, info: 'You do not have permission to delete a file from this model.', id: '' }
+      }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })
@@ -532,9 +536,12 @@ describe('services > file', () => {
     ])
 
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
-      if (action === FileAction.View) return { success: true, id: '' }
-      if (action === FileAction.Download)
+      if (action === FileAction.View) {
+        return { success: true, id: '' }
+      }
+      if (action === FileAction.Download) {
         return { success: false, info: 'You do not have permission to download this model.', id: '' }
+      }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })

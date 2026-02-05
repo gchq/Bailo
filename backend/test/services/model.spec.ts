@@ -444,9 +444,12 @@ describe('services > model', () => {
     const mockMetadata = { key: 'value' }
 
     vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelAction.View) return { success: true, id: '' }
-      if (action === ModelAction.Write)
+      if (action === ModelAction.View) {
+        return { success: true, id: '' }
+      }
+      if (action === ModelAction.Write) {
         return { success: false, info: 'You do not have permission to update this model card', id: '' }
+      }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })
@@ -466,9 +469,15 @@ describe('services > model', () => {
     const mockMetadata = { key: 'value' }
 
     vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelAction.View) return { success: true, id: '' }
-      if (action === ModelAction.Write) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
-      if (action === ModelAction.Update) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      if (action === ModelAction.View) {
+        return { success: true, id: '' }
+      }
+      if (action === ModelAction.Write) {
+        return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      }
+      if (action === ModelAction.Update) {
+        return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })
@@ -572,32 +581,25 @@ describe('services > model', () => {
     await expect(result).rejects.toThrowError(/^Unable to validate./)
   })
 
-  test('saveImportedModelCard > successfully saves model card', async () => {
-    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    await saveImportedModelCard({ modelId: 'id', version: 'version' } as any)
-
-    expect(ModelCardRevisionModelMock.findOneAndUpdate).toBeCalledWith(
-      { modelId: 'id', version: 'version' },
-      { modelId: 'id', version: 'version' },
-      { upsert: true },
-    )
-  })
-
   test('setLatestImportedModelCard > success', async () => {
+    const mockModelCard = { modelId: '123', version: 1 }
+    const testModelForImport = { settings: { mirror: { sourceModelId: 'abc' } }, save: vi.fn() }
+    ModelModelMock.findOne.mockResolvedValue(testModelForImport)
+    ModelCardRevisionModelMock.findOne.mockResolvedValue(mockModelCard)
     await setLatestImportedModelCard('abc')
 
-    expect(ModelModelMock.findOneAndUpdate).toHaveBeenCalledOnce()
+    expect(testModelForImport.save).toHaveBeenCalledOnce()
   })
 
   test('setLatestImportedModelCard > cannot find latest model card', async () => {
-    ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
+    ModelCardRevisionModelMock.findOne.mockResolvedValue(undefined)
     const result = setLatestImportedModelCard('abc')
 
     await expect(result).rejects.toThrowError(/^Cannot find latest model card./)
   })
 
   test('setLatestImportedModelCard > cannot update model', async () => {
-    ModelModelMock.findOneAndUpdate.mockResolvedValueOnce(undefined)
+    ModelModelMock.findOne.mockResolvedValueOnce(undefined)
     const result = setLatestImportedModelCard('abc')
 
     await expect(result).rejects.toThrowError(/^Unable to set latest model card of mirrored model./)

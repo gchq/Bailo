@@ -61,8 +61,8 @@ export default function InferenceApp() {
                 </Link>
               </Stack>
               {isSpinningUp && (
-                <Stack direction={'row'} spacing={3} alignItems='center' justifyContent='center'>
-                  <Typography fontWeight={'bold'} color={'primary'}>
+                <Stack direction='row' spacing={3} alignItems='center' justifyContent='center'>
+                  <Typography fontWeight='bold' color='primary'>
                     Spinning up {image}
                   </Typography>
                   <Loading />

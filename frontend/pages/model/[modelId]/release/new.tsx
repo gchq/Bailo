@@ -180,7 +180,9 @@ export default function NewRelease() {
   const error = MultipleErrorWrapper(`Unable to load release page`, {
     isModelError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

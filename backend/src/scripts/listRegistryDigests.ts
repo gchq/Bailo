@@ -3,6 +3,7 @@ import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 async function script() {
   await connectToMongoose()
@@ -40,7 +41,7 @@ async function script() {
           const repositoryDigest = await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => {

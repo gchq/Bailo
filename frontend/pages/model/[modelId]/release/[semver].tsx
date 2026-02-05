@@ -70,7 +70,9 @@ export default function Release() {
     isReviewRolesError,
   })
 
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   if (
     !release ||

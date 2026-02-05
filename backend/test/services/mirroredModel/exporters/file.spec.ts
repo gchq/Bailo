@@ -14,7 +14,7 @@ const tarballMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/mirroredModel/tarball.js', () => tarballMocks)
 
 const fileServiceMocks = vi.hoisted(() => ({
-  downloadFile: vi.fn(),
+  downloadFile: vi.fn(() => new Readable()),
 }))
 vi.mock('../../../../src/services/file.js', () => fileServiceMocks)
 
@@ -78,7 +78,6 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
       uploadPromise: Promise.resolve(),
     })
     tarballMocks.addEntryToTarGzUpload.mockResolvedValue(undefined)
-    fileServiceMocks.downloadFile.mockResolvedValue({ Body: new Readable() })
     authMocks.default.model.mockResolvedValue({ success: true })
     authMocks.default.file.mockResolvedValue({ success: true })
     scannersMocks.default.scannersInfo.mockReturnValue(false)

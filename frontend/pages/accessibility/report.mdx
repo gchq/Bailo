@@ -1,4 +1,12 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import { Container, Card, Tab, Tabs } from '@mui/material'
+
+<Container>
+<Tabs value={1}>
+<Tab label="Statement" href="../accessibility/statement"/>
+<Tab label="Report" href="../accessibility/report" selected={true}/>
+</Tabs>
+<Card sx={{ width: '100%', px: 4, mt: 'auto' }}>
 
 # Bailo Accessibility Conformance Report WCAG Edition
 
@@ -163,4 +171,5 @@ Notes: N/A
 | [3.3.6 Error Prevention (All)](http://www.w3.org/TR/WCAG20/#minimize-error-reversible-all) (Level AAA)                              | **Not Evaluated** |                          |
 | [3.3.9 Accessible Authentication (Enhanced)](https://www.w3.org/TR/WCAG22/#accessible-authentication-enhanced) (Level AAA 2.2 only) | **Not Evaluated** |                          |
 
-export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+</Card>
+</Container>

@@ -147,7 +147,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               Select files
             </Button>
           </label>
-          <Input multiple id='add-files-button' type='file' onInput={handleAddNewFiles} data-test='uploadFileButton' />
+          <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
           {filesToBeUploaded.length > 0 && <Typography fontWeight='bold'>Files to upload</Typography>}
           <Stack divider={<Divider />} spacing={1}>
             {fileListToUpload}

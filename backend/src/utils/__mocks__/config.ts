@@ -6,6 +6,7 @@ const config: PartialDeep<Config> = {
     protocol: '',
     host: '',
     port: 3000,
+    privateKey: 'privateKey',
   },
   federation: {
     state: 'disabled',

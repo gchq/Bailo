@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream'
-
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileAction } from '../../../connectors/authorisation/actions.js'
@@ -82,7 +80,7 @@ export class FileExporter extends BaseExporter {
       {
         type: 'stream',
         filename: this.file.id,
-        stream: (await downloadFile(this.user, this.file.id)).Body as Readable,
+        stream: await downloadFile(this.user, this.file.id),
         size: this.file.size,
       },
       this.logData,

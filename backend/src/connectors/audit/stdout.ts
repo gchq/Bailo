@@ -32,25 +32,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onViewModel(req: Request, model: ModelDoc) {
+  async onViewModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.ViewModel, req)
     const event = this.generateEvent(req, { name: model.name })
     req.log.info(event, req.audit.description)
   }
 
-  onDeleteModel(req: Request, modelId: string) {
-    this.checkEventType(AuditInfo.DeleteModel, req)
-    const event = this.generateEvent(req, { id: modelId })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateModel(req: Request, model: ModelDoc) {
-    this.checkEventType(AuditInfo.UpdateModel, req)
-    const event = this.generateEvent(req, { id: model.id })
-    req.log.info(event, req.audit.description)
-  }
-
-  onSearchModel(req: Request, models: EntrySearchResult[]) {
+  async onSearchModel(req: Request, models: EntrySearchResult[]) {
     this.checkEventType(AuditInfo.SearchModels, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
@@ -60,85 +48,85 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
+  async onUpdateModel(req: Request, model: ModelDoc) {
+    this.checkEventType(AuditInfo.UpdateModel, req)
+    const event = this.generateEvent(req, { id: model.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteModel(req: Request, modelId: string) {
+    this.checkEventType(AuditInfo.DeleteModel, req)
+    const event = this.generateEvent(req, { id: modelId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
     const event = this.generateEvent(req, { modelId: model.id, version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
-  onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+  async onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.ViewModelCard, req)
     const event = this.generateEvent(req, { modelId, version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
-  onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
-    this.checkEventType(AuditInfo.UpdateModelCard, req)
-    const event = this.generateEvent(req, { modelId, version: modelCard.version })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewModelCardRevisions(req: Request, _modelId, modelCards: ModelCardInterface[]) {
+  async onViewModelCardRevisions(req: Request, _modelId, modelCards: ModelCardInterface[]) {
     this.checkEventType(AuditInfo.ViewModelCardRevisions, req)
     const event = this.generateEvent(req, { url: req.originalUrl, results: modelCards.map((model) => model.version) })
     req.log.info(event, req.audit.description)
   }
 
-  onCreateFile(req: Request, file: FileInterfaceDoc) {
+  async onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+    this.checkEventType(AuditInfo.UpdateModelCard, req)
+    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.CreateFile, req)
     const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
-  onViewFile(req: Request, file: FileInterfaceDoc) {
+  async onViewFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.ViewFile, req)
     const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
-  onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
+  async onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
     this.checkEventType(AuditInfo.ViewFiles, req)
     const event = this.generateEvent(req, { modelId, results: files.map((file) => file._id.toString()) })
     req.log.info(event, req.audit.description)
   }
 
-  onDeleteFile(req: Request, modelId: string, fileId: string) {
-    this.checkEventType(AuditInfo.DeleteFile, req)
-    const event = this.generateEvent(req, { modelId, fileId })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateFile(req: Request, modelId: string, fileId: string) {
+  async onUpdateFile(req: Request, modelId: string, fileId: string) {
     this.checkEventType(AuditInfo.UpdateFile, req)
     const event = this.generateEvent(req, { modelId, fileId })
     req.log.info(event, req.audit.description)
   }
 
-  onCreateRelease(req: Request, release: ReleaseDoc) {
+  async onDeleteFile(req: Request, modelId: string, fileId: string) {
+    this.checkEventType(AuditInfo.DeleteFile, req)
+    const event = this.generateEvent(req, { modelId, fileId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.CreateRelease, req)
     const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
     req.log.info(event, req.audit.description)
   }
 
-  onViewRelease(req: Request, release: ReleaseDoc) {
+  async onViewRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.ViewRelease, req)
     const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
     req.log.info(event, req.audit.description)
   }
 
-  onUpdateRelease(req: Request, release: ReleaseDoc) {
-    this.checkEventType(AuditInfo.UpdateRelease, req)
-    const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
-    req.log.info(event, req.audit.description)
-  }
-
-  onDeleteRelease(req: Request, modelId: string, semver: string) {
-    this.checkEventType(AuditInfo.DeleteRelease, req)
-    const event = this.generateEvent(req, { modelId, semver })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewReleases(req: Request, releases: ReleaseDoc[]) {
+  async onViewReleases(req: Request, releases: ReleaseDoc[]) {
     this.checkEventType(AuditInfo.ViewReleases, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
@@ -147,13 +135,52 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateUserToken(req: Request, token: TokenDoc) {
+  async onUpdateRelease(req: Request, release: ReleaseDoc) {
+    this.checkEventType(AuditInfo.UpdateRelease, req)
+    const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteRelease(req: Request, modelId: string, semver: string) {
+    this.checkEventType(AuditInfo.DeleteRelease, req)
+    const event = this.generateEvent(req, { modelId, semver })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateCommentResponse(req: Request, response: ResponseInterface) {
+    this.checkEventType(AuditInfo.CreateResponse, req)
+    const event = this.generateEvent(req, { id: response['_id'] })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateReviewResponse(req: Request, response: ResponseInterface) {
+    this.checkEventType(AuditInfo.CreateReviewResponse, req)
+    const event = this.generateEvent(req, {
+      reviewId: response.parentId,
+      ...(response.decision && { decision: response.decision }),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewResponses(req: Request, responseInterfaces: ResponseInterface[]) {
+    this.checkEventType(AuditInfo.ViewResponses, req)
+    const event = this.generateEvent(req, { responseInterfaces })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateResponse(req: Request, responseId: string) {
+    this.checkEventType(AuditInfo.UpdateResponse, req)
+    const event = this.generateEvent(req, { id: responseId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateUserToken(req: Request, token: TokenDoc) {
     this.checkEventType(AuditInfo.CreateUserToken, req)
     const event = this.generateEvent(req, { accessKey: token.accessKey, description: token.description })
     req.log.info(event, req.audit.description)
   }
 
-  onViewUserTokens(req: Request, tokens: TokenDoc[]) {
+  async onViewUserTokens(req: Request, tokens: TokenDoc[]) {
     this.checkEventType(AuditInfo.ViewUserTokens, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
@@ -162,37 +189,25 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onDeleteUserToken(req: Request, accessKey: string) {
+  async onDeleteUserToken(req: Request, accessKey: string) {
     this.checkEventType(AuditInfo.DeleteUserToken, req)
     const event = this.generateEvent(req, { accessKey })
     req.log.info(event, req.audit.description)
   }
 
-  onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
+  async onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.CreateAccessRequest, req)
     const event = this.generateEvent(req, { id: accessRequest.id })
     req.log.info(event, req.audit.description)
   }
 
-  onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
+  async onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.ViewAccessRequest, req)
     const event = this.generateEvent(req, { id: accessRequest.id })
     req.log.info(event, req.audit.description)
   }
 
-  onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
-    this.checkEventType(AuditInfo.UpdateAccessRequest, req)
-    const event = this.generateEvent(req, { id: accessRequest.id })
-    req.log.info(event, req.audit.description)
-  }
-
-  onDeleteAccessRequest(req: Request, accessRequestId: string) {
-    this.checkEventType(AuditInfo.DeleteAccessRequest, req)
-    const event = this.generateEvent(req, { accessRequestId })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
+  async onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
     this.checkEventType(AuditInfo.ViewAccessRequests, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
@@ -203,7 +218,19 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]) {
+  async onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
+    this.checkEventType(AuditInfo.UpdateAccessRequest, req)
+    const event = this.generateEvent(req, { id: accessRequest.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteAccessRequest(req: Request, accessRequestId: string) {
+    this.checkEventType(AuditInfo.DeleteAccessRequest, req)
+    const event = this.generateEvent(req, { accessRequestId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]) {
     this.checkEventType(AuditInfo.SearchReviews, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
@@ -216,34 +243,167 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateReviewResponse(req: Request, response: ResponseInterface) {
-    this.checkEventType(AuditInfo.CreateReviewResponse, req)
+  async onCreateSchema(req: Request, schema: SchemaInterface) {
+    this.checkEventType(AuditInfo.CreateSchema, req)
+    const event = this.generateEvent(req, { id: schema.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewSchema(req: Request, schema: SchemaInterface) {
+    this.checkEventType(AuditInfo.ViewSchema, req)
+    const event = this.generateEvent(req, { id: schema.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
+    this.checkEventType(AuditInfo.SearchSchemas, req)
     const event = this.generateEvent(req, {
-      reviewId: response.parentId,
-      ...(response.decision && { decision: response.decision }),
+      url: req.originalUrl,
+      results: schemas.map((schema) => ({ id: schema.id })),
     })
     req.log.info(event, req.audit.description)
   }
 
-  onViewResponses(req: Request, responseInterfaces: ResponseInterface[]) {
-    this.checkEventType(AuditInfo.ViewResponses, req)
-    const event = this.generateEvent(req, { responseInterfaces })
+  async onUpdateSchema(req: Request, schema: SchemaDoc) {
+    this.checkEventType(AuditInfo.UpdateSchema, req)
+    const event = this.generateEvent(req, { id: schema.id })
     req.log.info(event, req.audit.description)
   }
 
-  onCreateCommentResponse(req: Request, ResponseInterface: ResponseInterface) {
-    this.checkEventType(AuditInfo.CreateResponse, req)
-    const event = this.generateEvent(req, { id: ResponseInterface['_id'] })
+  async onDeleteSchema(req: Request, schemaId: string) {
+    this.checkEventType(AuditInfo.DeleteSchema, req)
+    const event = this.generateEvent(req, { id: schemaId })
     req.log.info(event, req.audit.description)
   }
 
-  onUpdateResponse(req: Request, responseId: string) {
-    this.checkEventType(AuditInfo.UpdateResponse, req)
-    const event = this.generateEvent(req, { id: responseId })
+  async onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.CreateSchemaMigration, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
     req.log.info(event, req.audit.description)
   }
 
-  onError(req: Request, error: BailoError) {
+  async onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.ViewSchemaMigration, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
+    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
+    const event = this.generateEvent(req, {
+      results: schemaMigrations.map((schemaMigration) => schemaMigration.name),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.UpdateSchemaMigration, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.CreateInference, req)
+    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.ViewInference, req)
+    const event = this.generateEvent(req, {
+      modelId: inference.modelId,
+      imageName: inference.image,
+      imageTag: inference.tag,
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewInferences(req: Request, inferences: InferenceDoc[]) {
+    this.checkEventType(AuditInfo.ViewInferences, req)
+    const event = this.generateEvent(req, {
+      results: inferences.map((inference) => ({
+        modelId: inference.modelId,
+        image: inference.image,
+        tag: inference.tag,
+      })),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.UpdateInference, req)
+    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.DeleteInference, req)
+    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewModelImages(
+    req: Request,
+    modelId: string,
+    images: { repository: string; name: string; tags: string[] }[],
+  ) {
+    this.checkEventType(AuditInfo.ViewModelImages, req)
+    const event = this.generateEvent(req, {
+      modelId,
+      images: images.map((image) => ({ repository: image.repository, name: image.name })),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.checkEventType(AuditInfo.DeleteImage, req)
+    const event = this.generateEvent(req, { modelId, image })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateS3Export(req: Request, modelId: string, semvers?: string[]) {
+    this.checkEventType(AuditInfo.CreateExport, req)
+    const event = this.generateEvent(req, { modelId: modelId, semvers })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateImport(
+    req: Request,
+    mirroredModel: ModelInterface,
+    sourceModelId: string,
+    exporter: string,
+    importResult: MirrorInformation,
+  ) {
+    this.checkEventType(AuditInfo.CreateImport, req)
+    const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.CreateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewReviewRoles(req: Request) {
+    this.checkEventType(AuditInfo.ViewReviewRoles, req)
+    const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.UpdateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteReviewRole(req: Request, reviewRoleId: string) {
+    this.checkEventType(AuditInfo.DeleteReviewRole, req)
+    const event = this.generateEvent(req, { reviewRoleId: reviewRoleId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onError(req: Request, error: BailoError) {
     if (!req.audit) {
       // No audit information has been attached to the request
       return
@@ -270,160 +430,5 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       resource: resourceInfo,
       ...(outcome && { outcome }),
     }
-  }
-
-  onCreateSchema(req: Request, schema: SchemaInterface) {
-    this.checkEventType(AuditInfo.CreateSchema, req)
-    const event = this.generateEvent(req, { id: schema.id })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewSchema(req: Request, schema: SchemaInterface) {
-    this.checkEventType(AuditInfo.ViewSchema, req)
-    const event = this.generateEvent(req, { id: schema.id })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateSchema(req: Request, schema: SchemaDoc) {
-    this.checkEventType(AuditInfo.UpdateSchema, req)
-    const event = this.generateEvent(req, { id: schema.id })
-    req.log.info(event, req.audit.description)
-  }
-
-  onDeleteSchema(req: Request, schemaId: string) {
-    this.checkEventType(AuditInfo.DeleteSchema, req)
-    const event = this.generateEvent(req, { id: schemaId })
-    req.log.info(event, req.audit.description)
-  }
-
-  onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
-    this.checkEventType(AuditInfo.SearchSchemas, req)
-    const event = this.generateEvent(req, {
-      url: req.originalUrl,
-      results: schemas.map((schema) => ({ id: schema.id })),
-    })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewModelImages(req: Request, modelId: string, images: { repository: string; name: string; tags: string[] }[]) {
-    this.checkEventType(AuditInfo.ViewModelImages, req)
-    const event = this.generateEvent(req, {
-      modelId,
-      images: images.map((image) => ({ repository: image.repository, name: image.name })),
-    })
-    req.log.info(event, req.audit.description)
-  }
-  onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
-    this.checkEventType(AuditInfo.DeleteImage, req)
-    const event = this.generateEvent(req, { modelId, image })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewInference(req: Request, inference: InferenceDoc) {
-    this.checkEventType(AuditInfo.ViewInference, req)
-    const event = this.generateEvent(req, {
-      modelId: inference.modelId,
-      imageName: inference.image,
-      imageTag: inference.tag,
-    })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewInferences(req: Request, inferences: InferenceDoc[]) {
-    this.checkEventType(AuditInfo.ViewInferences, req)
-    const event = this.generateEvent(req, {
-      results: inferences.map((inference) => ({
-        modelId: inference.modelId,
-        image: inference.image,
-        tag: inference.tag,
-      })),
-    })
-    req.log.info(event, req.audit.description)
-  }
-
-  onCreateInference(req: Request, inference: InferenceDoc) {
-    this.checkEventType(AuditInfo.CreateInference, req)
-    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateInference(req: Request, inference: InferenceDoc) {
-    this.checkEventType(AuditInfo.UpdateInference, req)
-    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
-    req.log.info(event, req.audit.description)
-  }
-
-  onDeleteInference(req: Request, inference: InferenceDoc) {
-    this.checkEventType(AuditInfo.DeleteInference, req)
-    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
-    req.log.info(event, req.audit.description)
-  }
-
-  onCreateS3Export(req: Request, modelId: string, semvers?: string[]) {
-    this.checkEventType(AuditInfo.CreateExport, req)
-    const event = this.generateEvent(req, { modelId: modelId, semvers })
-    req.log.info(event, req.audit.description)
-  }
-
-  onCreateImport(
-    req: Request,
-    mirroredModel: ModelInterface,
-    sourceModelId: string,
-    exporter: string,
-    importResult: MirrorInformation,
-  ) {
-    this.checkEventType(AuditInfo.CreateImport, req)
-    const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
-    req.log.info(event, req.audit.description)
-  }
-
-  onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
-    this.checkEventType(AuditInfo.CreateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewReviewRoles(req: Request) {
-    this.checkEventType(AuditInfo.ViewReviewRoles, req)
-    const event = this.generateEvent(req, {})
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
-    this.checkEventType(AuditInfo.UpdateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
-    req.log.info(event, req.audit.description)
-  }
-
-  onDeleteReviewRole(req: Request, reviewRoleId: string) {
-    this.checkEventType(AuditInfo.DeleteReviewRole, req)
-    const event = this.generateEvent(req, { reviewRoleId: reviewRoleId })
-    req.log.info(event, req.audit.description)
-  }
-
-  onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.checkEventType(AuditInfo.CreateSchemaMigration, req)
-    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.checkEventType(AuditInfo.UpdateSchemaMigration, req)
-    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
-    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
-    const event = this.generateEvent(req, {
-      results: schemaMigrations.map((schemaMigration) => schemaMigration.name),
-    })
-    req.log.info(event, req.audit.description)
-  }
-
-  onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
-    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
-    req.log.info(event, req.audit.description)
   }
 }
