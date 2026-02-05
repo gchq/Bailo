@@ -79,7 +79,7 @@ const fileScanResult: ArtefactScanResult = {
 
 const fileScanningMock = vi.hoisted(() => ({
   scannersInfo: vi.fn(() => []),
-  startScanners: vi.fn(() => new Promise(() => [fileScanResult])),
+  startScans: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 

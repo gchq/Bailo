@@ -17,35 +17,37 @@ export class ArtefactScanningWrapper {
   }
 
   async initialiseScanners() {
-    for (const scanner of this.scanners) {
-      log.info({ toolName: scanner.toolName }, `Scanner initialising...`)
-      let attempt = 0
-      while (attempt <= config.connectors.artefactScanners.maxInitRetries) {
-        ++attempt
-        try {
-          await new Promise<void>((resolve, reject) => {
-            setTimeout(async () => {
-              try {
-                await scanner.init()
-              } catch (error) {
-                return reject(error)
-              }
-              log.info({ toolName: scanner.toolName }, `Scanner initialised`)
-              return resolve()
-            }, config.connectors.artefactScanners.initRetryDelay)
-          })
-          break
-        } catch (error) {
-          log.warn({ attempt: attempt, toolName: scanner.toolName, error }, `Could not initialise scanner, retrying.`)
+    await Promise.all(
+      Array.from(this.scanners).map(async (scanner) => {
+        log.info({ toolName: scanner.toolName }, `Scanner initialising...`)
+        let attempt = 0
+        while (attempt <= config.connectors.artefactScanners.maxInitRetries) {
+          ++attempt
+          try {
+            await new Promise<void>((resolve, reject) => {
+              setTimeout(async () => {
+                try {
+                  await scanner.init()
+                } catch (error) {
+                  return reject(error)
+                }
+                log.info({ toolName: scanner.toolName }, `Scanner initialised`)
+                return resolve()
+              }, config.connectors.artefactScanners.initRetryDelay)
+            })
+            break
+          } catch (error) {
+            log.warn({ attempt: attempt, toolName: scanner.toolName, error }, `Could not initialise scanner, retrying.`)
+          }
         }
-      }
-      if (attempt > config.connectors.artefactScanners.maxInitRetries) {
-        throw ConfigurationError(
-          `Could not initialise scanner after max attempts, make sure that it is setup and configured correctly.`,
-          { failedAttempts: attempt, toolName: scanner.toolName },
-        )
-      }
-    }
+        if (attempt > config.connectors.artefactScanners.maxInitRetries) {
+          throw ConfigurationError(
+            `Could not initialise scanner after max attempts, make sure that it is setup and configured correctly.`,
+            { failedAttempts: attempt, toolName: scanner.toolName },
+          )
+        }
+      }),
+    )
   }
 
   scannersInfo(): ArtefactScanningConnectorInfo & { scannerNames: string[] } {

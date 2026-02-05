@@ -293,13 +293,11 @@ export default function FileDisplay({
                         {scanResult.toolName === 'ModelScan'
                           ? scanResult.summary.map((vulnerability) => (
                               <li
-                                //this surely needs to change
                                 key={(vulnerability as ModelScanSummary).vulnerabilityDescription}
                               >{`${((vulnerability as ModelScanSummary).severity as string).toUpperCase()}: ${(vulnerability as ModelScanSummary).vulnerabilityDescription}`}</li>
                             ))
                           : scanResult.summary.map((vulnerability) => (
                               <li
-                                //this surely needs to change
                                 key={(vulnerability as ClamAVScanSummary).virus}
                               >{`Virus found: ${(vulnerability as ClamAVScanSummary).virus}`}</li>
                             ))}
