@@ -45,7 +45,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
-        Danger Zone!
+        Danger zone!
       </Typography>
       <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
         {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}

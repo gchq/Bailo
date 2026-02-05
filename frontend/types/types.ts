@@ -49,6 +49,8 @@ export interface UiConfig {
   modelMirror: {
     import: {
       enabled: boolean
+      additionalInfoHeading: string
+      originalAnswerHeading: string
     }
     export: {
       enabled: boolean
@@ -379,6 +381,7 @@ export interface StepNoRender {
   uiSchema?: UiSchema
 
   state: any
+  mirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>

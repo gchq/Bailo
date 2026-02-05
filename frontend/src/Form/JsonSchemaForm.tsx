@@ -16,7 +16,13 @@ import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
-import { getFormStats, getOverallCompletionStats, setStepState, widgets } from 'utils/formUtils'
+import {
+  getFormStats,
+  getOverallCompletionStats,
+  setFormDataPropertiesToUndefined,
+  setStepState,
+  widgets,
+} from 'utils/formUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -25,6 +31,7 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  mirroredModel = false,
   displayStats = false,
 }: {
   splitSchema: SplitSchemaNoRender
@@ -33,6 +40,7 @@ export default function JsonSchemaForm({
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  mirroredModel?: boolean
   displayStats?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
@@ -46,9 +54,13 @@ export default function JsonSchemaForm({
   const currentStep = splitSchema.steps[activeStep]
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formStats = useMemo(() => getFormStats(currentStep), [currentStep, calculateStats])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const collatedStats = useMemo(() => getOverallCompletionStats(splitSchema.steps), [splitSchema, calculateStats])
+  const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
+
+  const collatedStats = useMemo(
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [splitSchema, calculateStats, mirroredModel],
+  )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
@@ -111,6 +123,13 @@ export default function JsonSchemaForm({
     })
   }
 
+  const source = structuredClone(currentStep.mirroredState)
+  const target = structuredClone(currentStep.state)
+
+  setFormDataPropertiesToUndefined(source)
+
+  const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
+
   return (
     <Stack>
       {displayStats && (
@@ -169,7 +188,7 @@ export default function JsonSchemaForm({
           )}
           <Form
             schema={currentStep.schema}
-            formData={currentStep.state}
+            formData={updatedMirroredState}
             onChange={onFormChange}
             validator={validator}
             widgets={widgets}
@@ -182,6 +201,9 @@ export default function JsonSchemaForm({
               editMode: canEdit,
               formSchema: currentStep.schema,
               defaultCurrentUser: defaultCurrentUserInEntityList,
+              mirroredState: currentStep.mirroredState,
+              state: currentStep.state,
+              mirroredModel,
               onShare: onShareSectionOnClick,
             }}
             templates={
@@ -193,6 +215,7 @@ export default function JsonSchemaForm({
                     ObjectFieldTemplate,
                   }
                 : {
+                    DescriptionFieldTemplate,
                     ArrayFieldTemplate,
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,

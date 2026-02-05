@@ -62,6 +62,14 @@ const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
     return {
       id: 'modelId',
+      card: {
+        schemaId: 'minimal-general-v10',
+        version: 2,
+        mirrored: false,
+        metadata: {
+          overview: 'test',
+        },
+      },
       settings: { mirror: { destinationModelId: 'dest123' } },
     }
   }),
@@ -116,6 +124,14 @@ const DocumentsExporterMock = vi.hoisted(() => {
       getModel: vi.fn(function () {
         return {
           id: 'modelId',
+          card: {
+            schemaId: 'minimal-general-v10',
+            version: 2,
+            mirrored: false,
+            metadata: {
+              overview: 'test',
+            },
+          },
           settings: { mirror: { destinationModelId: 'dest123' } },
         }
       }),

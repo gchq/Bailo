@@ -245,6 +245,8 @@ export const testUiConfig: UiConfig = {
   modelMirror: {
     import: {
       enabled: false,
+      additionalInfoHeading: 'Additional information',
+      originalAnswerHeading: 'Original answer',
     },
     export: {
       enabled: false,

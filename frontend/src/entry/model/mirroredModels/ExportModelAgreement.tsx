@@ -53,7 +53,7 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
   return (
     <>
       <Typography variant='h6' component='h1' color='primary'>
-        Request a Model Export
+        Request a model export
       </Typography>
       <Box component='form' onSubmit={handleSubmit}>
         <Stack spacing={2} alignItems='start' justifyContent='start'>

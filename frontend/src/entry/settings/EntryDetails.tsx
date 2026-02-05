@@ -97,7 +97,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
         <>
           <Typography variant='h6' component='h2'>
-            {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
+            {`${toTitleCase(EntryKindLabel[entry.kind])} details`}
           </Typography>
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />

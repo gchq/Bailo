@@ -1,4 +1,4 @@
-import { RegistryWidgetsType } from '@rjsf/utils'
+import { Registry, RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
@@ -35,6 +35,7 @@ export function createStep({
   schema,
   uiSchema,
   state,
+  mirroredState,
   type,
   section,
   index,
@@ -44,6 +45,7 @@ export function createStep({
   schema: any
   uiSchema?: any
   state: unknown
+  mirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -54,6 +56,7 @@ export function createStep({
     schema,
     uiSchema,
     state,
+    mirroredState,
     type,
     index,
 
@@ -112,6 +115,7 @@ export function getStepsFromSchema(
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
   state: any = {},
+  mirroredState: any = {},
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -134,6 +138,7 @@ export function getStepsFromSchema(
       },
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
+      mirroredState: mirroredState ? mirroredState[prop] || {} : {},
       type: 'Form',
       index,
       schemaRef: schema.reference,
@@ -141,7 +146,6 @@ export function getStepsFromSchema(
       section: prop,
       isComplete: validateForm,
     })
-
     steps.push(createdStep)
   })
 
@@ -194,6 +198,24 @@ export function validateForm(step: StepNoRender) {
   const sectionErrors = validator.validate(step.state, step.schema)
 
   return sectionErrors.errors.length === 0
+}
+
+export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
+}
+
+export const getState = (id: string, formContext: Registry['formContext']) => {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.state)
 }
 
 function isMetricsKey(key: string): boolean {
@@ -303,7 +325,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
  * If no step is provided, all numeric values are returned as -1 and the form
  * is marked as incomplete.
  */
-export function getFormStats(step?: StepNoRender): FormStats {
+export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): FormStats {
   if (!step) {
     return {
       totalQuestions: -1,
@@ -314,7 +336,7 @@ export function getFormStats(step?: StepNoRender): FormStats {
   }
 
   const totalQuestions = countQuestionsFromSchema(step.schema)
-  const totalAnswers = countAnswersFromSchemaAndState(step.schema, step.state)
+  const totalAnswers = countAnswersFromSchemaAndState(step.schema, mirroredModel ? step.mirroredState : step.state)
 
   // If more answers given than required answers then return 100% otherwise calulate percentage
   const percentageQuestionsComplete =
@@ -328,14 +350,14 @@ export function getFormStats(step?: StepNoRender): FormStats {
   }
 }
 
-export function getOverallCompletionStats(steps: StepNoRender[]): ModelFormStats {
+export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?: boolean): ModelFormStats {
   let totalQuestions = 0
   let totalAnswers = 0
   let totalPages = 0
   let pagesCompleted = 0
 
   steps.forEach((step) => {
-    const stepStats = getFormStats(step)
+    const stepStats = getFormStats(step, mirroredModel)
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
     totalPages += 1
@@ -353,4 +375,40 @@ export function getOverallCompletionStats(steps: StepNoRender[]): ModelFormStats
     totalPages,
     pagesCompleted,
   }
+}
+
+/**
+ * Recursively iterate over an object to set all non array/object properties to undefined. This means that we retain the structure of the JSON with empty fields.
+ *
+ * @param source
+ */
+export const setFormDataPropertiesToUndefined = (source) => {
+  iterateAndResetProperties(source)
+  return source
+}
+
+const iterateAndResetProperties = (object: any) => {
+  // Each item in an array should be of the same type, so we only need the first item in order to render the input correctly on the form
+  if (Array.isArray(object)) {
+    object.splice(1)
+  }
+  Object.keys(object).forEach((key) => {
+    if (typeof object[key] !== 'object') {
+      switch (typeof object[key]) {
+        case 'number':
+          object[key] = 0
+          break
+        case 'string':
+          object[key] = undefined
+          break
+        default:
+          object[key] = undefined
+          break
+      }
+    }
+
+    if ((Array.isArray(object[key]) || typeof object[key] === 'object') && object[key] !== null) {
+      setFormDataPropertiesToUndefined(object[key])
+    }
+  })
 }
