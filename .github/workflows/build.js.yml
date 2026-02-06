@@ -263,8 +263,12 @@ jobs:
           cat << EOT >> infrastructure/helm/bailo/local.yaml
           ---
           # Instance Settings
-          securityContext:
-            runAsUser: 1002
+          frontend:
+            podSecurityContext:
+              runAsUser: 1001
+          backend:
+            podSecurityContext:
+              runAsUser: 1001
           config:
             ui:
               banner:
