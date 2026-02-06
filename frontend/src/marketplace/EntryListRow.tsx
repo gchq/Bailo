@@ -105,13 +105,13 @@ export default function EntryListRow({
                 <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
               )}
               {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
+              {isExternal && <LaunchOutlined />}
             </Stack>
-            {isExternal && <LaunchOutlined />}
           </Stack>
           {displayPeers && isExternal && (
             <ChipSelector
               chipTooltipTitle={'Filter by external repository'}
-              options={peers ? Array.from(peers.keys()) : []}
+              options={peers && entry?.peerId && peers.has(entry.peerId) ? [entry.peerId] : []}
               expandThreshold={10}
               variant='outlined'
               multiple

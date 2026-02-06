@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream'
 
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
-import { ZodSchema } from 'zod'
+import type { ZodSchema } from 'zod'
 
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
@@ -10,6 +10,7 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
+  AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBody,
   BaseApiCheckResponseHeaders,
   BlobResponseHeaders,
@@ -19,12 +20,11 @@ import {
   CommonRegistryHeaders,
   DeleteManifestResponseHeaders,
   ImageManifestV2,
-  ManifestMediaType,
   ManifestResponseHeaders,
   RegistryErrorResponseBody,
   TagsListResponseBody,
   TagsListResponseHeaders,
-} from './registryResponses.js'
+} from '../utils/registryResponses.js'
 
 const registry = config.registry.connection.internal
 
@@ -280,7 +280,7 @@ export async function getImageTagManifest(token: string, imageRef: ImageRefInter
     bodySchema: ImageManifestV2,
     headersSchema: ManifestResponseHeaders,
     extraHeaders: {
-      Accept: ManifestMediaType.options.join(','),
+      Accept: AcceptManifestMediaTypeHeaderValue,
     },
   })
 
@@ -296,7 +296,7 @@ export async function getRegistryLayerStream(
     headersSchema: BlobResponseHeaders,
     expectStream: true,
     extraHeaders: {
-      Accept: ManifestMediaType.options.join(','),
+      Accept: AcceptManifestMediaTypeHeaderValue,
     },
   })
 
@@ -415,7 +415,7 @@ export async function deleteManifest(token: string, imageRef: ImageRefInterface)
     extraFetchOptions: {
       method: 'DELETE',
     },
-    extraHeaders: { Accept: ManifestMediaType.options.join(',') },
+    extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
   })
 
   return result.headers

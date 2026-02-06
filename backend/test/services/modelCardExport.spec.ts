@@ -26,6 +26,7 @@ describe('services > export', () => {
   const mockModelCardRevision: ModelCardRevisionInterface = {
     modelId: mockModelId,
     schemaId: mockSchemaId,
+    mirrored: false,
     version: 1,
     createdBy: 'Joe Bloggs',
     metadata: {},

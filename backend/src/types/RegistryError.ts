@@ -1,4 +1,4 @@
-import { type RegistryErrorResponseBody } from '../clients/registryResponses.js'
+import { type RegistryErrorResponseBody } from '../utils/registryResponses.js'
 import { BailoError } from './error.js'
 
 export interface RegistryError extends BailoError, RegistryErrorResponseBody {}

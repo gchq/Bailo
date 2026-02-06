@@ -2,7 +2,7 @@
 
 ARG PYTHONPATH=/venv/lib/python3.12/site-packages
 
-FROM python:3.12.11-slim-bookworm AS build
+FROM python:3.12.12-slim-bookworm AS build
 ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

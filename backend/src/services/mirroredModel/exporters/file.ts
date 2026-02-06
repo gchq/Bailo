@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream'
-
 import { FileAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
 import { ScanState } from '../../../connectors/fileScanning/Base.js'
@@ -79,7 +77,7 @@ export class FileExporter extends BaseExporter {
       {
         type: 'stream',
         filename: this.file.id,
-        stream: (await downloadFile(this.user, this.file.id)).Body as Readable,
+        stream: await downloadFile(this.user, this.file.id),
         size: this.file.size,
       },
       this.logData,
