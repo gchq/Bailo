@@ -116,7 +116,7 @@ export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescr
 export type ClamAVScanSummary = { virus: string }
 
 export const SeverityLevel = {
-  UNSPECIFIED: 'unspecified',
+  UNKNOWN: 'unknown',
   LOW: 'low',
   MEDIUM: 'medium',
   HIGH: 'high',

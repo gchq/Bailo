@@ -13,7 +13,7 @@ export async function up() {
   ])
 
   const modelScans = await ScanModel.find({
-    toolName: 'testScanner',
+    toolName: 'ModelScan',
   })
 
   for (const scan of modelScans) {

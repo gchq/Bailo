@@ -18,6 +18,7 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
   if (scannerWrapper && cache) {
     return scannerWrapper
   }
+  artefactScanConnectors.clear()
   for (const artefactScanner of config.connectors.artefactScanners.kinds) {
     switch (artefactScanner) {
       case ArtefactScanKind.ClamAv:

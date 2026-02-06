@@ -162,7 +162,7 @@ export default function FileDisplay({
 
   const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
 
-  const threatsFound = useCallback((file: FileInterface) => {
+  const findings = useCallback((file: FileInterface) => {
     if (file.scanResults === undefined) {
       return 0
     }
@@ -174,10 +174,10 @@ export default function FileDisplay({
   const updateChipDetails = useEffectEvent(() => {
     if (!isFileInterface(file) || file.scanResults === undefined) {
       setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
-      return
-    } else if (threatsFound(file as FileInterface)) {
+      return ``
+    } else if (findings(file as FileInterface)) {
       setChipDisplay({
-        label: `Scan failed: ${plural(threatsFound(file as FileInterface), 'threat')} found`,
+        label: `Scan failed: ${plural(findings(file as FileInterface), 'finding')}`,
         colour: 'error',
         icon: <Error />,
       })
@@ -193,7 +193,7 @@ export default function FileDisplay({
       setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
     } else if (file.scanResults.some((scan) => scan.state === ScanState.NotScanned)) {
       setChipDisplay({ label: 'Not scanned', colour: 'warning', icon: <Warning /> })
-    } else if (!threatsFound(file as FileInterface)) {
+    } else if (!findings(file as FileInterface)) {
       setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
     } else {
       setChipDisplay({
@@ -282,7 +282,7 @@ export default function FileDisplay({
                       <Stack spacing={1} direction='row'>
                         <Error color='error' />
                         <Typography>
-                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
+                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following:
                         </Typography>
                       </Stack>
                       {scanResult.scannerVersion && (
@@ -309,7 +309,7 @@ export default function FileDisplay({
                         {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
                         <Typography>
                           <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                          {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
+                          {scanResult.state === 'error' ? ' was not able to be run' : ' did not find anything'}
                         </Typography>
                       </Stack>
                       {scanResult.scannerVersion && (

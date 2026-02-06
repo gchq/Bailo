@@ -70,16 +70,18 @@ export async function uploadFile(
 
 async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
-  if (scannersInfo && scannersInfo.scannerNames && file.size > 0) {
+  if (scannersInfo && scannersInfo.scannerNames.length > 0 && file.size > 0) {
     const resultsInprogress: ArtefactScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners
-      .startScans(file)
-      .then((resultsArray: ArtefactScanResult[]) => updateFileWithResults(file._id, resultsArray))
+    scanners.startScans(file).then(
+      await ((resultsArray) => {
+        updateFileWithResults(file._id, resultsArray)
+      }),
+    )
   }
 
   const scanResults = await ScanModel.find({ fileId: file._id.toString() })
@@ -474,9 +476,11 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.startScans(file).then((resultsArray) => {
-      updateFileWithResults(file._id, resultsArray)
-    })
+    scanners.startScans(file).then(
+      await ((resultsArray) => {
+        updateFileWithResults(file._id, resultsArray)
+      }),
+    )
   }
   return `Scan started for ${file.name}`
 }
