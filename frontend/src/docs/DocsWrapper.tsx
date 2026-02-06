@@ -72,7 +72,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       return (
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
-            <ListItem dense sx={{ pl: paddingLeft }} id={path.replaceAll('/', '-')}>
+            <ListItem dense sx={{ pl: 1 + paddingLeft }} id={path.replaceAll('/', '-')}>
               <ListItemText
                 primary={doc.title}
                 slotProps={{
@@ -83,7 +83,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           ) : (
             <ListItem dense sx={{ pl: paddingLeft }} id={path.replaceAll('/', '-')}>
               <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                <ListItemButton dense selected={isSelected} sx={{ pl: 0 }}>
+                <ListItemButton dense selected={isSelected} sx={{ pl: 1 }}>
                   <ListItemText
                     primary={doc.title}
                     slotProps={{

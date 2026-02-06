@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
+import { Box, Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { postEntryExportToS3 } from 'actions/entry'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -20,6 +21,7 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
   const [selectedReleases, setSelectedReleases] = useState<ReleaseInterface[]>([])
 
   const sendNotification = useNotification()
+  const theme = useTheme()
 
   const handleSubmit = async () => {
     setErrorMessage('')
@@ -53,21 +55,27 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
   return (
     <>
       <Typography variant='h6' component='h1' color='primary'>
-        Request a Model Export
+        Request a model export
       </Typography>
       <Box component='form' onSubmit={handleSubmit}>
         <Stack spacing={2} alignItems='start' justifyContent='start'>
-          <ModelExportAgreementText />
-          <FormControlLabel
-            control={<Checkbox checked={checked} onChange={handleChecked} />}
-            label='I agree to the terms and conditions of this model export agreement'
-          />
-          <ReleaseSelector
-            model={model}
-            selectedReleases={selectedReleases}
-            onUpdateSelectedReleases={handleUpdateSelectedReleases}
-            isReadOnly={!checked}
-          />
+          <Stack
+            spacing={2}
+            sx={{ borderStyle: 'solid', borderWidth: 1, borderColor: theme.palette.divider, p: 2, maxWidth: '730px' }}
+          >
+            <ModelExportAgreementText />
+            <FormControlLabel
+              control={<Checkbox checked={checked} onChange={handleChecked} />}
+              label='I agree to the terms and conditions of this model export agreement'
+            />
+            <Divider />
+            <ReleaseSelector
+              model={model}
+              selectedReleases={selectedReleases}
+              onUpdateSelectedReleases={handleUpdateSelectedReleases}
+              isReadOnly={!checked}
+            />
+          </Stack>
           <Restricted action='exportMirroredModel' fallback={<Button disabled>Submit</Button>}>
             <Button variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>
               Submit

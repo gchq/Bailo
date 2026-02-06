@@ -135,7 +135,7 @@ export default function ReleaseSelector({
   return (
     <Stack spacing={2} width='100%'>
       <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-        <Typography fontWeight='bold'>Select Releases</Typography>
+        <Typography fontWeight='bold'>Releases to export</Typography>
         <HelpDialog title='Mirror Export Info' content={<MirrorInfo />} />
       </Stack>
       <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
