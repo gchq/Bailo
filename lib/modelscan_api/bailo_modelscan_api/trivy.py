@@ -24,7 +24,7 @@ __version__ = "0.68.2"
 
 
 def safe_extract(tar: tarfile.TarFile, path: str) -> None:
-    """tar.extractall is vulnerable to relitive path traversal.
+    """tar.extractall is vulnerable to relative path relative.
 
     See [here](https://docs.python.org/3/library/tarfile.html#tarfile-extraction-filter)
 
