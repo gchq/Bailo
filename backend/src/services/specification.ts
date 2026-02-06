@@ -1,7 +1,8 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
-import { AnyZodObject, z } from 'zod'
+import type { AnyZodObject } from 'zod'
 
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
+import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind, SeverityLevel } from '../models/Scan.js'

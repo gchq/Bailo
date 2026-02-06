@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream'
 
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
-import { ZodSchema } from 'zod'
+import type { ZodSchema } from 'zod'
 
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
