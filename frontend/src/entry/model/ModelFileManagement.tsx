@@ -53,8 +53,7 @@ export default function Files({ model }: FilesProps) {
         <Stack spacing={2} justifyContent='center' alignItems='center'>
           <Typography>
             Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
-            that are no longer needed, and also manually retrigger anti-virus scanning (if anti-virus scanning is
-            enabled).
+            that are no longer needed, and also manually retrigger file scanning (if file scanning is enabled).
           </Typography>
           <Stack
             width='100%'

@@ -1,11 +1,11 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import type { AnyZodObject } from 'zod'
 
-import { ScanState } from '../connectors/fileScanning/Base.js'
+import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
-import { ArtefactKind } from '../models/Scan.js'
+import { ArtefactKind, SeverityLevel } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'
@@ -132,9 +132,10 @@ export const scanInterfaceSchema = z.object({
     .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
-  state: z.nativeEnum(ScanState).openapi({ example: 'complete' }),
-  isInfected: z.boolean().optional().openapi({ example: true }),
-  viruses: z.array(z.string().openapi({ example: 'Win.Test.EICAR_HDB-1' })).optional(),
+  state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
+  summary: z
+    .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
+    .optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
   _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
   id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
@@ -151,7 +152,7 @@ export const fileWithScanInterfaceSchema = z.object({
 
   complete: z.boolean().openapi({ example: true }),
 
-  avScan: z.array(scanInterfaceSchema).optional(),
+  scanResults: z.array(scanInterfaceSchema).optional(),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),

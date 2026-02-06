@@ -6,10 +6,10 @@ import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
 
+import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
-import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
@@ -50,8 +50,8 @@ export interface Config {
       kind: AuditKindKeys
     }
 
-    fileScanners: {
-      kinds: FileScanKindKeys[]
+    artefactScanners: {
+      kinds: ArtefactScanKindKeys[]
       retryDelayInMinutes: number
       maxInitRetries: number
       initRetryDelay: number
@@ -169,7 +169,7 @@ export interface Config {
     debug: boolean
   }
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       concurrency: number
       host: string

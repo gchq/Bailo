@@ -5,7 +5,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { getModelScanInfo, scanStream } from '../../src/clients/modelScan.js'
 
 const configMock = vi.hoisted(() => ({
-  avScanning: {
+  artefactScanning: {
     modelscan: {
       enabled: true,
       connection: {

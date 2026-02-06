@@ -5,9 +5,10 @@ import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
+import { ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -21,8 +22,9 @@ function safeParseVersion(versionStr: string): string {
   }
 }
 
-export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.avScanning.clamdscan.concurrency })
+export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnector {
+  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
+  artefactType: ArtefactType = 'file'
   toolName = 'Clam AV'
   version: string | undefined = undefined
   av: NodeClam | undefined = undefined
@@ -32,14 +34,14 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
   }
 
   async init() {
-    this.av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+    this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
     log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
     return this
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult[]> {
     const scannerInfo = this.info()
     if (!this.av) {
       return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`, {
@@ -50,14 +52,20 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
     const s3Stream = await getObjectStream(file.path)
 
     try {
-      const { isInfected, viruses } = await this.av.scanStream(s3Stream)
-      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
+      const { viruses } = await this.av.scanStream(s3Stream)
+      log.debug({ file, result: { viruses }, ...scannerInfo }, 'Scan complete.')
+      const summary: ClamAVSummary[] = viruses.map(
+        (virus) =>
+          ({
+            virus,
+          }) as ClamAVSummary,
+      )
+
       return [
         {
           ...scannerInfo,
-          state: ScanState.Complete,
-          isInfected,
-          viruses,
+          state: ArtefactScanState.Complete,
+          summary,
           lastRunAt: new Date(),
         },
       ]

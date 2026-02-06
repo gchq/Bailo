@@ -30,7 +30,7 @@ const configMock = vi.hoisted(() => ({
     authorisation: {
       kind: 'basic',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },

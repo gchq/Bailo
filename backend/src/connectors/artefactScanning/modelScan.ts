@@ -5,12 +5,14 @@ import PQueue from 'p-queue'
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
+import { ModelScanAdditionalInfo, ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
 
-export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.avScanning.modelscan.concurrency })
+export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningConnector {
+  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.modelscan.concurrency })
+  artefactType: ArtefactType = 'file'
   toolName: string = 'ModelScan'
   version: string | undefined = undefined
 
@@ -24,7 +26,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
     return this
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult[]> {
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {
@@ -44,18 +46,23 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
         })
       }
 
-      const issues = scanResults.summary.total_issues
-      const isInfected = issues > 0
-      const viruses: string[] = isInfected
-        ? scanResults.issues.map((issue) => `${issue.severity}: ${issue.description}. ${issue.scanner}`)
-        : []
-      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
+      const summary: ModelScanSummary[] = scanResults.issues.map(
+        (issue) =>
+          ({
+            severity: issue.severity.toLowerCase() as SeverityLevelKeys,
+            vulnerabilityDescription: `${issue.description}. (scanner: ${issue.scanner})`,
+          }) as ModelScanSummary,
+      )
+
+      const additionalInfo: ModelScanAdditionalInfo[] = scanResults.issues.map((issue) => issue)
+
+      log.debug({ file, result: { summary, additionalInfo }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,
-          state: ScanState.Complete,
-          isInfected,
-          viruses,
+          state: ArtefactScanState.Complete,
+          summary,
+          additionalInfo,
           lastRunAt: new Date(),
         },
       ]

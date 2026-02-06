@@ -51,7 +51,7 @@ interface ModelScanResponse {
 }
 
 export async function getModelScanInfo() {
-  const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
+  const url = `${config.artefactScanning.modelscan.protocol}://${config.artefactScanning.modelscan.host}:${config.artefactScanning.modelscan.port}`
   let res: FetchResponse
 
   try {
@@ -70,7 +70,7 @@ export async function getModelScanInfo() {
 }
 
 export async function scanStream(stream: Readable, fileName: string) {
-  const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
+  const url = `${config.artefactScanning.modelscan.protocol}://${config.artefactScanning.modelscan.host}:${config.artefactScanning.modelscan.port}`
   let res: FetchResponse
 
   try {

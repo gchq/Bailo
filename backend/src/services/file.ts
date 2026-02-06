@@ -11,10 +11,10 @@ import {
   putObjectStream,
   startMultipartUpload,
 } from '../clients/s3.js'
+import { ArtefactScanResult, ArtefactScanState } from '../connectors/artefactScanning/Base.js'
+import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
-import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
@@ -69,21 +69,25 @@ export async function uploadFile(
 }
 
 async function scanFile(file: FileInterfaceDoc) {
-  const scannersInfo = scanners.info()
-  if (scannersInfo && scannersInfo.scannerNames && file.size > 0) {
-    const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
+  const scannersInfo = scanners.scannersInfo()
+  if (scannersInfo && scannersInfo.scannerNames.length > 0 && file.size > 0) {
+    const resultsInprogress: ArtefactScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
-      state: ScanState.InProgress,
+      state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
+    scanners.startScans(file).then(
+      await ((resultsArray) => {
+        updateFileWithResults(file._id, resultsArray)
+      }),
+    )
   }
 
-  const avScan = await ScanModel.find({ fileId: file._id.toString() })
+  const scanResults = await ScanModel.find({ fileId: file._id.toString() })
   const ret: FileWithScanResultsInterface = {
     ...file.toObject(),
-    avScan,
+    scanResults,
     id: file._id.toString(),
   }
 
@@ -194,7 +198,10 @@ export async function finishUploadMultipartFile(
   return await scanFile(file)
 }
 
-async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
+async function updateFileWithResults(_id: Schema.Types.ObjectId, results: ArtefactScanResult[] | undefined) {
+  if (results === undefined) {
+    throw InternalError(`No results provided`)
+  }
   for (const result of results) {
     const updateExistingResult = await ScanModel.updateOne(
       { fileId: _id.toString(), toolName: result.toolName },
@@ -282,7 +289,7 @@ export async function getFileById(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResults',
       },
     },
   ])
@@ -313,7 +320,7 @@ export async function getFilesByModel(user: UserInterface, modelId: string) {
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResults',
       },
     },
   ])
@@ -339,7 +346,7 @@ export async function getFilesByIds(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResults',
       },
     },
   ])
@@ -420,15 +427,15 @@ export async function markFileAsCompleteAfterImport(path: string) {
 }
 
 async function fileScanDelay(file: FileInterface): Promise<number> {
-  const delay = config.connectors.fileScanners.retryDelayInMinutes
+  const delay = config.connectors.artefactScanners.retryDelayInMinutes
   if (delay === undefined) {
     return 0
   }
   let minutesBeforeRetrying = 0
   const fileAvScans = await ScanModel.find({ fileId: file._id.toString() })
-  for (const scanResult of fileAvScans) {
+  for (const scanResults of fileAvScans) {
     const delayInMilliseconds = delay * 60000
-    const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
+    const scanTimeAtLimit = scanResults.lastRunAt.getTime() + delayInMilliseconds
     if (scanTimeAtLimit > new Date().getTime()) {
       minutesBeforeRetrying = scanTimeAtLimit - new Date().getTime()
       break
@@ -461,15 +468,19 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
-  const scannersInfo = await scanners.info()
+  const scannersInfo = scanners.scannersInfo()
   if (scannersInfo && scannersInfo.scannerNames) {
     const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
-      state: ScanState.InProgress,
+      state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
+    scanners.startScans(file).then(
+      await ((resultsArray) => {
+        updateFileWithResults(file._id, resultsArray)
+      }),
+    )
   }
   return `Scan started for ${file.name}`
 }

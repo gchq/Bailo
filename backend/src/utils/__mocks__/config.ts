@@ -37,7 +37,7 @@ const config: PartialDeep<Config> = {
     authorisation: {
       kind: 'basic',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },
@@ -98,7 +98,7 @@ const config: PartialDeep<Config> = {
       userIdAttribute: '',
     },
   },
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       host: '127.0.0.1',
       port: 8080,
