@@ -6,8 +6,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
-  Container,
   Divider,
   Stack,
   TextField,
@@ -65,49 +63,45 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
 
   return (
     <>
-      <Container maxWidth='md'>
-        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-          <Box component='form' onSubmit={handleSave}>
-            <Stack spacing={3} divider={<Divider flexItem />}>
-              <Accordion
-                expanded={isSettingsOpen}
-                onChange={() => setIsSettingsOpen(isSettingsOpen ? false : true)}
-                slotProps={{ heading: { component: 'h3' } }}
-              >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
-                  <Typography sx={{ width: '100%' }} color='primary' variant='h6' component='div'>
-                    Model Export Settings
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Stack spacing={2}>
-                    <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
-                      <TextField
-                        id='destination-model-id'
-                        value={destinationModelId}
-                        onChange={handleDestinationModelId}
-                        size='small'
-                      />
-                    </LabelledInput>
-                    <Button
-                      sx={{ width: 'fit-content' }}
-                      variant='contained'
-                      data-test='createAccessRequestButton'
-                      loading={loading}
-                      type='submit'
-                      startIcon={<Save />}
-                    >
-                      Save
-                    </Button>
-                    <MessageAlert message={errorMessage} severity='error' />
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
-              <ExportModelAgreement model={model} />
-            </Stack>
-          </Box>
-        </Card>
-      </Container>
+      <Box component='form' onSubmit={handleSave}>
+        <Stack spacing={2} divider={<Divider flexItem />}>
+          <Accordion
+            expanded={isSettingsOpen}
+            onChange={() => setIsSettingsOpen(!isSettingsOpen)}
+            slotProps={{ heading: { component: 'h3' } }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
+              <Typography sx={{ width: '100%' }} color='primary' variant='h6'>
+                Model export settings
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
+                  <TextField
+                    id='destination-model-id'
+                    value={destinationModelId}
+                    onChange={handleDestinationModelId}
+                    size='small'
+                  />
+                </LabelledInput>
+                <Button
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  data-test='createAccessRequestButton'
+                  loading={loading}
+                  type='submit'
+                  startIcon={<Save />}
+                >
+                  Save
+                </Button>
+                <MessageAlert message={errorMessage} severity='error' />
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+          <ExportModelAgreement model={model} />
+        </Stack>
+      </Box>
     </>
   )
 }
