@@ -67,7 +67,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         <Stack spacing={2} divider={<Divider flexItem />}>
           <Accordion
             expanded={isSettingsOpen}
-            onChange={() => setIsSettingsOpen(isSettingsOpen ? false : true)}
+            onChange={() => setIsSettingsOpen(!isSettingsOpen)}
             slotProps={{ heading: { component: 'h3' } }}
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>

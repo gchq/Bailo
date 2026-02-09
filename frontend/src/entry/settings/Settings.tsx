@@ -1,5 +1,4 @@
-import { FileCopy, ImportExport, Key, ManageAccounts, Report } from '@mui/icons-material'
-import SettingsIcon from '@mui/icons-material/Settings'
+import { Delete, Edit, FileCopy, ImportExport, Key, ManageAccounts } from '@mui/icons-material'
 import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
@@ -112,7 +111,7 @@ export default function Settings({ entry }: SettingsProps) {
           <SimpleListItemButton
             selected={selectedCategory === SettingsCategory.DETAILS}
             onClick={() => handleListItemClick(SettingsCategory.DETAILS)}
-            icon={<SettingsIcon color={selectedCategory === SettingsCategory.DETAILS ? 'secondary' : 'inherit'} />}
+            icon={<Edit color={selectedCategory === SettingsCategory.DETAILS ? 'secondary' : 'inherit'} />}
           >
             Details
           </SimpleListItemButton>
@@ -163,7 +162,7 @@ export default function Settings({ entry }: SettingsProps) {
           <SimpleListItemButton
             selected={selectedCategory === SettingsCategory.DELETION}
             onClick={() => handleListItemClick(SettingsCategory.DELETION)}
-            icon={<Report color={selectedCategory === SettingsCategory.DELETION ? 'secondary' : 'inherit'} />}
+            icon={<Delete color={selectedCategory === SettingsCategory.DELETION ? 'secondary' : 'inherit'} />}
           >
             Deletion
           </SimpleListItemButton>
