@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
@@ -12,6 +14,7 @@ from typing import Annotated, Any
 
 import modelscan
 import uvicorn
+from bailo_modelscan_api import trivy
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
@@ -40,6 +43,15 @@ class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
         super().__init__(status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE.value, detail=detail)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    trivy.download_database()
+    yield
+
+    logger.info("Cleaning up database")
+    shutil.rmtree(trivy.get_settings().DB_DIR)
+
+
 # Instantiate FastAPI app with various dependencies.
 app = FastAPI(
     title=get_settings().app_name,
@@ -47,6 +59,7 @@ app = FastAPI(
     description=get_settings().app_description,
     version=get_settings().app_version,
     dependencies=[Depends(get_settings)],
+    lifespan=lifespan,
 )
 # Limit the maximum filesize
 app.add_middleware(
@@ -247,7 +260,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
         },
     },
 )
-async def scan_file(
+def scan_file(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
@@ -327,6 +340,67 @@ async def scan_file(
         except UnboundLocalError:
             # file_path may not be defined.
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
+
+
+@app.post(
+    "/scan/image",
+    responses={
+        HTTPStatus.OK.value: {
+            "description": "trivy returned an sbom",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "Empty": {
+                            "value": {
+                                "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+                                "bomFormat": "CycloneDX",
+                                "specVersion": "1.6",
+                                "serialNumber": "urn:uuid:c950496a-eebc-4022-8ff3-812500eab6ab",
+                                "version": 1,
+                                "metadata": {
+                                    "timestamp": "1970-01-01T00:00:00+00:00",
+                                    "tools": {
+                                        "components": [
+                                            {
+                                                "type": "application",
+                                                "manufacturer": {"name": "Aqua Security Software Ltd."},
+                                                "group": "aquasecurity",
+                                                "name": "trivy",
+                                                "version": "0.68.2",
+                                            }
+                                        ]
+                                    },
+                                    "component": {
+                                        "bom-ref": "1641bd45-e2ea-4ca8-8dea-78f047e68aac",
+                                        "type": "application",
+                                        "name": "/tmp/tmp",
+                                        "properties": [{"name": "aquasecurity:trivy:SchemaVersion", "value": "2"}],
+                                    },
+                                },
+                                "components": [],
+                                "dependencies": [{"ref": "1641bd45-e2ea-4ca8-8dea-78f047e68aac", "dependsOn": []}],
+                                "vulnerabilities": [],
+                            }
+                        }
+                    }
+                }
+            },
+        }
+    },
+)
+def scan_image(
+    in_file: UploadFile,
+    background_tasks: BackgroundTasks,
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> dict[str, Any]:
+    """API endpoint to upload and scan image blobs using trivy.
+
+    Blobs have to be compressed tarballs with an overlay file system
+
+    """
+    logger.info("Upload started")
+    res = trivy.scan(in_file, background_tasks, settings.block_size)
+    return res
 
 
 def is_valid_pickle(file_path: Path, max_bytes: int = 2 * 1024 * 1024) -> bool:

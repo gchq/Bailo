@@ -22,7 +22,7 @@ class Entry:
     :param organisation: Organisation responsible for the entry, defaults to None
     :param state: Development readiness of the entry, defaults to None
     :param tags: Tags to assign to the entry, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the entry's collaborators (a.k.a. entry access) are, defaults to None
+    :param collaborators: List of CollaboratorEntry to define who the entry's collaborators (a.k.a. entry access) are, defaults to None
     """
 
     def __init__(

@@ -34,6 +34,13 @@ docker run -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
 ### Connect to the API
 
 - Local endpoint: `http://localhost:3311`
+
+Files can be uploaded easily using `curl`.
+
+```bash
+curl -X 'POST' 'http://localhost:3311/scan/file' -H 'Accept: application/json' -H 'Content-Type: multipart/form-data' -F 'in_file=@yolo.onnx'
+```
+
 - API docs (Swagger): `http://localhost:3311/docs`
 
 ## Optional Configuration
@@ -67,12 +74,6 @@ This mode mounts your source code for real-time changes.
 ```bash
 docker build -t modelscan_rest_api:latest --target dev .
 docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
-```
-
-Alternatively, run locally without Docker:
-
-```bash
-fastapi dev --port 3311 bailo_modelscan_api/main.py
 ```
 
 ### Running Tests

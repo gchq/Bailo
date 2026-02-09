@@ -36,9 +36,9 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
       />
     </>
   ) : (
-    <Box sx={{ my: 2 }}>
+    <Container maxWidth='xl'>
       <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ pt: 2 }}>
           <OrganisationAndStateDetails entry={entry} />
         </Box>
         <Box width='100%'>
@@ -54,6 +54,6 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
           </Container>
         </Box>
       </Stack>
-    </Box>
+    </Container>
   )
 }
