@@ -43,12 +43,6 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
         </Box>
         <Box width='100%'>
           <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
-            {entry.kind === EntryKind.MIRRORED_MODEL && (
-              <MessageAlert
-                message={`Mirrored from ${entry.settings.mirror?.sourceModelId}. Some parts of this form will be read-only.`}
-                severity='info'
-              />
-            )}
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
             {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
           </Container>
