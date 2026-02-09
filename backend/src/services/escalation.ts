@@ -45,6 +45,7 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
     log.warn({}, `The system user ${userId} is not in the allow list under instance ${instanceId}.`)
     return false
   }
+
   return true
 }
 

@@ -66,9 +66,6 @@ export class BailoPeerConnector extends BasePeerConnector {
       res = await fetch(requestUrl, {
         agent: this.getHttpsAgent(),
         headers,
-        // headers: {
-        //   'x-bailo-id': config.federation.id,
-        // },
       })
     } catch (err) {
       throw InternalError('Unable to communicate with peer.', {
