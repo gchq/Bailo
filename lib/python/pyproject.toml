@@ -24,7 +24,7 @@ dynamic = ["version"]
 dependencies = [
     "requests==2.32.5",
     "semantic-version==2.10.0",
-    "tqdm==4.67.2"
+    "tqdm==4.67.3"
 ]
 
 [project.optional-dependencies]
