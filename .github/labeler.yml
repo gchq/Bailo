@@ -7,7 +7,7 @@ docker:
           - "**/Dockerfile.*"
           - "**/.dockerignore"
 
-docker-compose:
+docker_compose:
   - changed-files:
       - any-glob-to-any-file:
           - "compose*.yaml"
