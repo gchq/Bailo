@@ -13,7 +13,6 @@ interface AdditionalInformationProps {
   required?: boolean
   mirroredModel?: boolean
   mirroredState?: any
-  state?: any
   label: string | undefined
   id: string
   sx?: SxProps

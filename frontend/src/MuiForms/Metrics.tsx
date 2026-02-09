@@ -128,7 +128,6 @@ export default function Metrics({ onChange, value, label, id, registry, required
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={metricsTableRows(mirroredState)}
-      state={state}
       display={registry.formContext.mirroredModel && state !== undefined && state.length > 0}
       label={label}
       required={required}

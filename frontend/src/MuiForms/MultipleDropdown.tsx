@@ -4,7 +4,7 @@ import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState, getState } from 'utils/formUtils'
+import { getMirroredState } from 'utils/formUtils'
 
 interface MultipleDropdownProps {
   label?: string
@@ -64,7 +64,6 @@ export default function MultipleDropdown({
   }
 
   const mirroredState = getMirroredState(id, registry.formContext)
-  const state = getState(id, registry.formContext)
 
   return (
     <AdditionalInformation
@@ -72,7 +71,6 @@ export default function MultipleDropdown({
       mirroredState={mirroredState}
       display={registry.formContext.mirroredModel && value.length > 0 && value[0] !== null}
       label={label}
-      state={state}
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
