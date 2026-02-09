@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import peers from '../../../connectors/peer/index.js'
+import { z } from '../../../lib/zod.js'
 import { peersConfigStatusSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 

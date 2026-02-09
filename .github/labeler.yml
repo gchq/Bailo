@@ -1,0 +1,102 @@
+# Directory & file based labels
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/Dockerfile"
+          - "**/Dockerfile.*"
+          - "**/.dockerignore"
+
+docker-compose:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "compose*.yaml"
+          - "compose*.yml"
+          - "docker-compose*.yaml"
+          - "docker-compose*.yml"
+
+github_actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "**/*.mdx"
+          - "**/*.rst"
+          - "**/docs/**"
+          - "README*"
+          - "CODE_OF_CONDUCT*"
+          - "CONTRIBUTING*"
+
+helm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "infrastructure/helm/**"
+          - "**/Chart.yaml"
+          - "**/values.yaml"
+          - "**/*.helmignore"
+
+javascript:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.js"
+          - "**/*.mjs"
+          - "**/*.cjs"
+          - "**/*.ts"
+          - "**/*.tsx"
+          - "**/*.jsx"
+          # all frontend files are JS
+          - "frontend/**"
+          # some backend files are not JS (docker, config, docs, certs etc.)
+          - "backend/**/*.ts"
+          - "backend/**/*.js"
+
+python:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.py"
+          - "**/pyproject.toml"
+          - "**/requirements*.txt"
+          - "lib/python/**"
+          - "lib/modelscan_api/**"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/test/**"
+          - "**/tests/**"
+          - "**/*.spec.ts"
+          - "**/*.spec.tsx"
+          - "**/*.spec.js"
+          - "**/*.spec.jsx"
+          - "**/*.test.ts"
+          - "**/*.test.tsx"
+          - "**/*.test.js"
+          - "**/*.test.jsx"
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "frontend/**"
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "backend/**"
+
+# Branch-name labels
+
+enhancement:
+  - branch-name:
+      - "^(feat|feature)(/|-)"
+
+bug:
+  - branch-name:
+      - "^(bug|bugfix|fix|hotfix)(/|-)"
+
+tech debt:
+  - branch-name:
+      - "^(tech|debt|tech-?debt|chore|refactor|maintenance|cleanup)(/|-)"
