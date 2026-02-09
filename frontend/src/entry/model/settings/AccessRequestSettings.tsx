@@ -42,10 +42,11 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
   }
 
   return (
-    <Stack spacing={2}>
-      <Typography variant='h6' component='h2'>
+    <Stack spacing={2} sx={{ mt: 2 }}>
+      <Typography variant='h6' component='h2' color='primary'>
         Manage access requests
       </Typography>
+      <Divider />
       <FormControlLabel
         label='Allow users to make ungoverned access requests'
         control={
@@ -56,7 +57,6 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
           />
         }
       />
-      <Divider />
       <div>
         <Button
           variant='contained'

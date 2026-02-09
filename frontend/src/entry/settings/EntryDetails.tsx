@@ -10,7 +10,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKindLabel, UpdateEntryForm } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryDetailsProps = {
   entry: EntryInterface
@@ -93,12 +93,13 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   }
 
   return (
-    <Box component='form' onSubmit={onSubmit}>
+    <Box component='form' onSubmit={onSubmit} sx={{ mt: 2 }}>
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
         <>
-          <Typography variant='h6' component='h2'>
-            {`${toTitleCase(EntryKindLabel[entry.kind])} details`}
+          <Typography variant='h6' component='h2' color='primary'>
+            {`${toSentenceCase(EntryKindLabel[entry.kind])} details`}
           </Typography>
+          <Divider />
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
@@ -128,7 +129,6 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
             />
           </RadioGroup>
         </>
-        <Divider />
         <div>
           <Tooltip title={saveButtonTooltip}>
             <span>
