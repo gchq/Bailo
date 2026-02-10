@@ -54,8 +54,8 @@ export default function JsonSchemaForm({
 
   const currentStep = splitSchema.steps[activeStep]
 
-  const source = structuredClone(currentStep.mirroredState)
-  const target = structuredClone(currentStep.state)
+  const source = structuredClone(currentStep ? currentStep.mirroredState : {})
+  const target = structuredClone(currentStep ? currentStep.state : {})
 
   setFormDataPropertiesToUndefined(source)
 
