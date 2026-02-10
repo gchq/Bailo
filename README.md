@@ -45,6 +45,7 @@ sharing.
 
 - Node v24
 - Docker / Docker Compose
+- ripgrep
 
 #### Development Build
 
