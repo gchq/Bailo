@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
+import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import {
@@ -53,6 +54,13 @@ export default function JsonSchemaForm({
 
   const currentStep = splitSchema.steps[activeStep]
 
+  const source = structuredClone(currentStep.mirroredState)
+  const target = structuredClone(currentStep.state)
+
+  setFormDataPropertiesToUndefined(source)
+
+  const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
 
@@ -93,11 +101,11 @@ export default function JsonSchemaForm({
     return null
   }
 
-  const onFormChange = (form: RJSFSchema) => {
+  const onFormChange = debounce((form: RJSFSchema) => {
     if (form.schema.title === currentStep.schema.title) {
       setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }
-  }
+  }, 100)
 
   function handleListItemClick(index: number) {
     setActiveStep(index)
@@ -122,13 +130,6 @@ export default function JsonSchemaForm({
       vertical: 'bottom',
     })
   }
-
-  const source = structuredClone(currentStep.mirroredState)
-  const target = structuredClone(currentStep.state)
-
-  setFormDataPropertiesToUndefined(source)
-
-  const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 
   return (
     <Stack>
