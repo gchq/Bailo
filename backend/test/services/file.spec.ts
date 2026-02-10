@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
@@ -79,7 +79,7 @@ const fileScanResult: ArtefactScanResult = {
 }
 
 const fileScanningMock = vi.hoisted(() => ({
-  scannersInfo: vi.fn(() => []),
+  scannersInfo: vi.fn(() => ({ scannerNames: ['test'] })),
   startScans: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
@@ -133,6 +133,9 @@ vi.mock('clamscan', () => ({
 }))
 
 describe('services > file', () => {
+  beforeEach(() => {
+    fileScanningMock.scannersInfo.mockReturnValue({ scannerNames: [] })
+  })
   test('uploadFile > success', async () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'

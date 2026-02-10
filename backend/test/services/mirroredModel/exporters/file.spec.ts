@@ -80,7 +80,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     tarballMocks.addEntryToTarGzUpload.mockResolvedValue(undefined)
     authMocks.default.model.mockResolvedValue({ success: true })
     authMocks.default.file.mockResolvedValue({ success: true })
-    scannersMocks.default.scannersInfo.mockReturnValue(false)
+    scannersMocks.default.scannersInfo.mockReturnValue({})
   })
 
   test('constructor sets file reference', () => {
