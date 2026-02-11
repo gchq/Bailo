@@ -7,7 +7,7 @@ docker:
           - "**/Dockerfile.*"
           - "**/.dockerignore"
 
-docker-compose:
+docker_compose:
   - changed-files:
       - any-glob-to-any-file:
           - "compose*.yaml"
@@ -90,13 +90,13 @@ backend:
 # Branch-name labels
 
 enhancement:
-  - branch-name:
+  - head-branch:
       - "^(feat|feature)(/|-)"
 
 bug:
-  - branch-name:
+  - head-branch:
       - "^(bug|bugfix|fix|hotfix)(/|-)"
 
 tech debt:
-  - branch-name:
+  - head-branch:
       - "^(tech|debt|tech-?debt|chore|refactor|maintenance|cleanup)(/|-)"
