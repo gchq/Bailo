@@ -103,19 +103,28 @@ else
   echo "$TMP_KEYWORDS_FILE"
 fi
 
-# Run ripgrep
-echo "Scanning repository for keywords..."
+echo "Scanning staged files for keywords..."
 
-if rg \
+# Get list of staged files (Added, Copied, Modified)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# If nothing is staged, skip
+if [ -z "$STAGED_FILES" ]; then
+  echo "No staged files to scan."
+  [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
+  exit 0
+fi
+
+# Run ripgrep only on staged files
+if echo "$STAGED_FILES" | xargs rg \
   -n \
   -F \
   -f "$TMP_KEYWORDS_FILE" \
   --glob '!:node_modules/**' \
-  --glob '!:.husky/**' \
-  ..
+  --glob '!:.husky/**'
 then
   echo ""
-  echo "ERROR: Keywords detected."
+  echo "ERROR: Keywords detected in staged files."
   [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
   exit 1
 fi
