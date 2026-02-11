@@ -16,7 +16,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
-import { ModelDoc } from '../models/Model.js'
+import { EntryKind, ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
@@ -38,7 +38,7 @@ export async function uploadFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if ((model.kind = EntryKind.MirroredModel)) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -363,7 +363,7 @@ export async function removeFiles(
   session?: ClientSession | undefined,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
+  if (model.kind === EntryKind.MirroredModel && !deleteMirroredModel) {
     throw BadReq('Cannot remove file from a mirrored model.')
   }
   const allFiles: FileWithScanResultsInterface[] = []
