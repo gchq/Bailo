@@ -41,13 +41,10 @@ else
   echo "Python not found. Skipping Python linting."
 fi
 
-# ---- Keyword Check ----
-
-
-
+# ---- Ripgrep Keyword Check ----
 
 # Load local Husky config
-HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/husky-config.conf"
+HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/husky-config.conf"
 
 if [ -f "$HUSKY_CONFIG_FILE" ]; then
   . "$HUSKY_CONFIG_FILE"
@@ -68,6 +65,7 @@ TMP_KEYWORDS_FILE=""
 if [ "$USE_S3" = "true" ]; then
   # --- S3 mode ---
 
+  # Validate KEYWORDS_S3_URI is set
   if [ -z "${KEYWORDS_S3_URI:-}" ]; then
     echo "ERROR: KEYWORDS_S3_URI is not set in husky-config.conf"
     exit 1
@@ -79,7 +77,7 @@ if [ "$USE_S3" = "true" ]; then
   echo "$KEYWORDS_S3_URI"
 
   if ! aws s3 cp "$KEYWORDS_S3_URI" "$TMP_KEYWORDS_FILE" --quiet; then
-    echo "ERROR: Failed to fetch keywords file from S3"
+    echo "ERROR: Failed to fetch keywords file from S3. Ensure you have pasted in your AWS login command."
     rm -f "$TMP_KEYWORDS_FILE"
     exit 1
   fi
@@ -113,6 +111,7 @@ if rg \
   -F \
   -f "$TMP_KEYWORDS_FILE" \
   --glob '!:node_modules/**' \
+  --glob '!:.husky/**' \
   ..
 then
   echo ""
@@ -127,75 +126,17 @@ fi
 echo "Pre-commit check passed."
 
 
-
-
-# ---
-
-# # Load local Husky config
-# HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/husky-config.conf"
-
-# if [ -f "$HUSKY_CONFIG_FILE" ]; then
-#   . "$HUSKY_CONFIG_FILE"
-# else
-#   echo "ERROR: $HUSKY_CONFIG_FILE not found."
-#   echo "Create it locally (it is gitignored)."
-#   exit 1
-# fi
-
-# # Validate required config - KEYWORDS_S3_URI is in husky-config.conf
-# if [ -z "$KEYWORDS_S3_URI" ]; then
-#   echo "ERROR: KEYWORDS_S3_URI is not set in husky-config.conf"
-#   exit 1
-# fi
-
-# # Fetch patterns file
-# TMP_KEYWORDS_FILE="$(mktemp)"
-
-# echo "Fetching keywords from S3..."
-# echo $KEYWORDS_S3_URI
-
-# if ! aws s3 cp "$KEYWORDS_S3_URI" "$TMP_KEYWORDS_FILE" --quiet; then
-#   echo "ERROR: Failed to fetch keywords file from S3"
-#   rm -f "$TMP_KEYWORDS_FILE"
-#   exit 1
-# fi
-
-# # Run ripgrep
-# echo "Scanning repository for keywords..."
-
-# if rg \
-#   -n \
-#   -F \
-#   -f "$TMP_KEYWORDS_FILE" \
-#   --glob '!:node_modules/**' \
-#   ..
-# then
-#   echo ""
-#   echo "ERROR: Keywords detected."
-#   rm -f "$TMP_KEYWORDS_FILE"
-#   exit 1
-# fi
-
-# # Cleanup
-# rm -f "$TMP_KEYWORDS_FILE"
-
-# echo "Pre-commit check passed."
-
 # ---- Optional: Trufflehog Check - if enabled ----
 
 # RUN_TRUFFLE_HOGGING="${RUN_TRUFFLE_HOGGING:-false}"
 
-# # Normalise value
-# case "$(printf '%s' "$RUN_TRUFFLE_HOGGING" | tr '[:upper:]' '[:lower:]')" in
-#   true|1|yes|on)
-#     RUN_TRUFFLE_HOGGING=true
-#     ;;
-#   *)
-#     RUN_TRUFFLE_HOGGING=false
-#     ;;
-# esac
+# # Validate RUN_TRUFFLE_HOGGING is set
+# if [ -z "${RUN_TRUFFLE_HOGGING:-}" ]; then
+#   echo "ERROR: RUN_TRUFFLE_HOGGING is not set in husky-config.conf (true|false)"
+#   exit 1
+# fi
 
-# # Check whether to run or not
+# # Check if we need to run
 # if [ "$RUN_TRUFFLE_HOGGING" != "true" ]; then
 #   echo "TruffleHog disabled (RUN_TRUFFLE=$RUN_TRUFFLE_HOGGING)"
 #   exit 0
@@ -218,7 +159,7 @@ echo "Pre-commit check passed."
 #   git show ":$file" > "$TMP_DIR/$file" 2>/dev/null || true
 # done
 
-# # Run TruffleHog
+# # Run Trufflehog
 # RESULT=$(trufflehog filesystem "$TMP_DIR" \
 #   --only-verified \
 #   --no-update \
