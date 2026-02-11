@@ -108,7 +108,7 @@ export default function SideNavigation({
   }
 
   return (
-    <Drawer sx={{ ...pageTopStyling }} variant='permanent' open={drawerOpen}>
+    <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
       {(isReviewsLoading || isResponsesLoading) && <Loading />}
       <Toolbar
         sx={(theme) => ({

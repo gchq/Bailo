@@ -120,7 +120,6 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
             overflow: 'auto',
-            height: '100%',
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),
@@ -136,10 +135,10 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
                 {uiConfig && announcementBannerOpen && (
                   <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
                 )}
-                <Box paddingTop={4}>
+                <Box paddingTop={4} height='100%' minHeight='100vh'>
                   <MessageAlert message={errorMessage} severity='error' />
                   {children}
-                  <Copyright sx={{ m: 2 }} />
+                  <Copyright sx={{ p: 2 }} />
                 </Box>
               </>
             )}
