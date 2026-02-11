@@ -147,11 +147,11 @@ fi
 
 # Check if we need to run
 if [ "$RUN_TRUFFLE_HOGGING" != "true" ]; then
-  echo "TruffleHog disabled (RUN_TRUFFLE=$RUN_TRUFFLE_HOGGING)"
+  echo "Trufflehog disabled (RUN_TRUFFLE=$RUN_TRUFFLE_HOGGING)"
   exit 0
 fi
 
-echo "Running TruffleHog..."
+echo "Running Trufflehog..."
 
 # Get staged files only
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
