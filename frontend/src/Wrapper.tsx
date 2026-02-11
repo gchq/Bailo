@@ -96,7 +96,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   return (
     <>
       <Banner />
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && uiConfig && (
           <>
@@ -138,7 +138,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
                 {uiConfig && announcementBannerOpen && (
                   <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
                 )}
-                <Box paddingTop={4} height='100%' minHeight='100vh'>
+                <Box paddingTop={4}>
                   <MessageAlert message={errorMessage} severity='error' />
                   {children}
                   <Copyright sx={{ p: 2 }} />

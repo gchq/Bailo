@@ -185,7 +185,13 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
                     </Button>
-                    <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose} role='menu'>
+                    <Menu
+                      disableScrollLock
+                      anchorEl={userMenuAnchorEl}
+                      open={actionOpen}
+                      onClose={handleMenuClose}
+                      role='menu'
+                    >
                       <MenuItem component='a' data-test='settingsLink' role='menuitem' href='/settings'>
                         <ListItemIcon>
                           <Settings fontSize='small' />
