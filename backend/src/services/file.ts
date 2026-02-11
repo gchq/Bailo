@@ -38,7 +38,7 @@ export async function uploadFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if ((model.kind = EntryKind.MirroredModel)) {
+  if (model.kind === EntryKind.MirroredModel) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -99,7 +99,7 @@ export async function startUploadMultipartFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings?.mirror?.sourceModelId) {
+  if (model.kind === EntryKind.MirroredModel) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 

@@ -35,7 +35,7 @@ const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({
     id: 'test_model_id',
     card: { version: 1 },
-    settings: { mirror: { sourceModelId: '' } },
+    kind: 'model',
   })),
   getModelCardRevision: vi.fn(),
 }))
@@ -196,7 +196,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValue({
       id: 'test_model_id',
       card: { version: 1 },
-      settings: { mirror: { sourceModelId: '' } },
+      kind: 'model',
     })
     ReleaseModelMock.findOne.mockResolvedValue(null)
 
@@ -242,7 +242,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: { version: 999 },
-      settings: { mirror: { sourceModelId: '' } },
+      kind: 'model',
     })
     ReleaseModelMock.findOne.mockResolvedValue(null)
 
@@ -256,7 +256,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: undefined as any,
-      settings: { mirror: { sourceModelId: '' } },
+      kind: 'model',
     })
 
     await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
@@ -270,7 +270,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: { version: 1 },
-      settings: { mirror: { sourceModelId: '123' } },
+      kind: 'mirrored-model',
     })
 
     await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
@@ -308,7 +308,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: { version: 1 },
-      settings: { mirror: { sourceModelId: '123' } },
+      kind: 'mirrored-model',
     })
 
     await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
@@ -336,7 +336,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: { version: 1 },
-      settings: { mirror: { sourceModelId: '123' } },
+      kind: 'mirrored-model',
     })
 
     await expect(() => newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')).rejects.toThrowError(
@@ -463,7 +463,7 @@ describe('services > release', () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         id: 'test_model_id',
         card: { version: 1 },
-        settings: { mirror: { sourceModelId: '123' } },
+        kind: 'mirrored-model',
       })
       ReviewModelMock.find.mockResolvedValue([])
 
@@ -478,7 +478,7 @@ describe('services > release', () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         id: 'test_model_id',
         card: { version: 1 },
-        settings: { mirror: { sourceModelId: '123' } },
+        kind: 'mirrored-model',
       })
 
       await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrowError(
@@ -524,7 +524,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > should throw a bad req when attempting to remove a file from a mirrored model', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', settings: { mirror: { sourceModelId: '123' } } }
+    const mockModel: any = { id: 'test', kind: 'mirrored-model' }
 
     await expect(() => removeFileFromReleases(mockUser, mockModel, '123')).rejects.toThrowError(
       /^Cannot remove a file from a mirrored model./,
