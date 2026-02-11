@@ -217,8 +217,13 @@ minio:
   persistence:
     enabled: false
 
-securityContext:
-  runAsUser: 1001
+frontend:
+  podSecurityContext:
+    runAsUser: 1001
+
+backend:
+  podSecurityContext:
+    runAsUser: 1001
 
 clamav:
   enabled: true
@@ -333,8 +338,10 @@ The following tables describe selected configuration options available in `value
 | `autoscaling.targetCPUUtilizationPercentage` | HPA configuration | `80` |
 | `autoscaling.targetMemoryUtilizationPercentage` | HPA configuration | `80` |
 | `podSecurityContext` | <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `{}` |
-| `securityContext.readOnlyRootFilesystem` | <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `false` |
-| `securityContext.runAsNonRoot` | Does not run as UID 0 (root) <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `true` |
+| `backend.podSecurityContext.readOnlyRootFilesystem` | <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `false` |
+| `backend.podSecurityContext.runAsNonRoot` | Does not run as UID 0 (root) <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `true` |
+| `frontend.podSecurityContext.readOnlyRootFilesystem` | <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `false` |
+| `frontend.podSecurityContext.runAsNonRoot` | Does not run as UID 0 (root) <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context> | `true` |
 | `resources.limits.cpu` | Default pod cpu limits <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#alpha-level> | `400m` |
 | `resources.limits.memory` | Default pod memory limits | `512Mi` |
 | `resources.requests.cpu` | Default pod cpu requests | `200m` |
