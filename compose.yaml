@@ -130,8 +130,6 @@ services:
         condition: service_healthy
       registry:
         condition: service_started
-      # modelscan:
-      #   condition: service_healthy
       artefactscan:
         condition: service_healthy
       minio:

@@ -1,32 +1,32 @@
-{{- if .Values.modelscan.enabled }}
+{{- if .Values.artefactscan.enabled }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "bailo.fullname" . }}-modelscan
+  name: {{ include "bailo.fullname" . }}-artefactscan
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: modelscan
+      name: artefactscan
   template:
     metadata:
       labels:
-        name: modelscan
+        name: artefactscan
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - name: {{ include "bailo.fullname" . }}-modelscan
+      - name: {{ include "bailo.fullname" . }}-artefactscan
         ports:
-          - name: modelscanport
-            containerPort: {{ .Values.modelscan.port }}
+          - name: artefactscanport
+            containerPort: {{ .Values.artefactscan.port }}
             protocol: TCP
-        image: "{{ .Values.image.modelscanRepository }}:{{ .Values.image.modelscanTag }}"
+        image: "{{ .Values.image.artefactscanRepository }}:{{ .Values.image.artefactscanTag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           requests:
@@ -43,6 +43,6 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
-        - name: modelscan-log
+        - name: artefactscan-log
           emptyDir: {}
 {{- end }}
