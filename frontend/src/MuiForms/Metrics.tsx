@@ -17,7 +17,7 @@ import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import MetricItem from 'src/MuiForms/MetricItem'
-import { getMirroredState, getState } from 'utils/formUtils'
+import { getMirroredState } from 'utils/formUtils'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -71,6 +71,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       const updatedMetricArray = _.cloneDeep(metricsWithIds)
       const index = metricsWithIds.findIndex((metric) => metric.id === updatedMetricItem.id)
       updatedMetricArray[index] = updatedMetricItem
+      setMetricsWithIds(updatedMetricArray)
       onChange(
         updatedMetricArray.map((metric) => ({
           name: metric.name,
@@ -122,13 +123,12 @@ export default function Metrics({ onChange, value, label, id, registry, required
   }
 
   const mirroredState = getMirroredState(id, registry.formContext)
-  const state = getState(id, registry.formContext)
 
   return (
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={metricsTableRows(mirroredState)}
-      display={registry.formContext.mirroredModel && state !== undefined && state.length > 0}
+      display={registry.formContext.mirroredModel && value !== undefined && value.length > 0}
       label={label}
       required={required}
       id={id}
