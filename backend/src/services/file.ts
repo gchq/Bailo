@@ -218,7 +218,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
 
   const auth = await authorisation.file(user, model, file, FileAction.Download)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
   }
 
   const stream = await getObjectStream(file.path, undefined, range)
@@ -245,6 +245,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         total: totalPretty,
         totalBytes,
         fileId,
+        modelId: model.id,
       },
       'Object download is in progress',
     )
@@ -258,6 +259,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         total: prettyBytes(file.size),
         totalBytes: file.size,
         fileId,
+        modelId: model.id,
       },
       progress === file.size
         ? 'Object download stream closed with no data remaining'
@@ -297,7 +299,7 @@ export async function getFileById(
   }
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
   }
 
   return file
