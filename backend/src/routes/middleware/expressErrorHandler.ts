@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express'
-import { isNativeError } from 'util/types'
 
 import audit from '../../connectors/audit/index.js'
 import log from '../../services/log.js'
@@ -51,7 +50,7 @@ export async function expressErrorHandler(
       },
     })
     return
-  } else if (isNativeError(err)) {
+  } else if (Error.isError(err)) {
     log.warn(
       { err: { name: err.name, stack: err.stack } },
       'Generic Javascript error found, returning generic error to user.',
