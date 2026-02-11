@@ -161,10 +161,12 @@ done
 
 # Run Trufflehog
 RESULT=$(trufflehog filesystem "$TMP_DIR" \
-  --only-verified \
   --no-update \
-  --skip-archives \
   --json)
+# RESULT=$(trufflehog filesystem "$TMP_DIR" \
+#   --only-verified \
+#   --no-update \
+#   --json)
 
 # Clean up
 rm -rf "$TMP_DIR"
