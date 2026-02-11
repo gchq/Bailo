@@ -10,7 +10,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessTabProps = {
   entry: EntryInterface
@@ -40,7 +40,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
     } else {
       sendNotification({
         variant: 'success',
-        msg: `${toTitleCase(entry.kind)} access list updated`,
+        msg: `${toSentenceCase(entry.kind)} access list updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()

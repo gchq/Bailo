@@ -207,6 +207,8 @@ data:
         modelMirror: {
           import: {
             enabled: {{ .Values.modelMirror.import.enabled }},
+            additionalInfoHeading: '{{ .Values.modelMirror.import.additionalInfoHeading }}',
+            originalAnswerHeading: '{{ .Values.modelMirror.import.originalAnswerHeading }}',
           },
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
