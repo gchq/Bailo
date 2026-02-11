@@ -172,10 +172,17 @@ RESULT=$(trufflehog filesystem "$TMP_DIR" \
 rm -rf "$TMP_DIR"
 
 # Check for findings
-if echo "$RESULT" | grep -q '"Verified":true'; then
-  echo "Verified secret detected. Commit blocked."
+# if echo "$RESULT" | grep -q '"Verified":true'; then
+#   echo "Verified secret detected. Commit blocked."
+#   echo
+#   echo "$RESULT" | jq -r '.DetectorName + " in " + .SourceMetadata.Data.File'
+#   exit 1
+# fi
+
+if [ "$VERIFIED_COUNT" -gt 0 ] || [ "$UNVERIFIED_COUNT" -gt 0 ]; then
+  echo "Secret detected. Commit blocked."
   echo
-  echo "$RESULT" | jq -r '.DetectorName + " in " + .SourceMetadata.Data.File'
+  echo "$RESULT" | jq -r '.DetectorName + " in " + .SourceMetadata.Data.File + " (verified=" + (.Verified|tostring) + ")"'
   exit 1
 fi
 
