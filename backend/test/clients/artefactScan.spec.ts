@@ -2,11 +2,11 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { getModelScanInfo, scanStream } from '../../src/clients/modelScan.js'
+import { getArtefactScanInfo, scanStream } from '../../src/clients/artefactScan.js'
 
 const configMock = vi.hoisted(() => ({
   avScanning: {
-    modelscan: {
+    artefactscan: {
       enabled: true,
       connection: {
         host: 'example.com',
@@ -41,13 +41,13 @@ const formDataMock = vi.hoisted(() => ({
 }))
 vi.mock('form-data', async () => formDataMock)
 
-describe('clients > modelScan', () => {
-  test('getModelScanInfo > success', async () => {
+describe('clients > artefactScan', () => {
+  test('getArtefactScanInfo > success', async () => {
     const expectedResponse = {
-      apiName: 'Bailo ModelScan API',
+      apiName: 'Bailo ArtefactScan API',
       apiVersion: '1.0.0',
-      scannerName: 'modelscan',
-      modelscanVersion: '0.8.1',
+      scannerName: 'artefactscan',
+      artefactscanVersion: '0.8.1',
     }
     fetchMock.default.mockReturnValueOnce({
       ok: true,
@@ -56,14 +56,14 @@ describe('clients > modelScan', () => {
         return expectedResponse
       }),
     })
-    const response = await getModelScanInfo()
+    const response = await getArtefactScanInfo()
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  test('getModelScanInfo > bad response', async () => {
+  test('getArtefactScanInfo > bad response', async () => {
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(function () {
@@ -72,15 +72,17 @@ describe('clients > modelScan', () => {
       json: vi.fn(),
     })
 
-    await expect(() => getModelScanInfo()).rejects.toThrowError(
-      /^Unrecognised response returned by the ModelScan service./,
+    await expect(() => getArtefactScanInfo()).rejects.toThrowError(
+      /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
 
-  test('getModelScanInfo > rejected', async () => {
+  test('getArtefactScanInfo > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    await expect(() => getModelScanInfo()).rejects.toThrowError(/^Unable to communicate with the ModelScan service./)
+    await expect(() => getArtefactScanInfo()).rejects.toThrowError(
+      /^Unable to communicate with the ArtefactScan service./,
+    )
   })
 
   test('scanStream > success', async () => {
@@ -95,7 +97,7 @@ describe('clients > modelScan', () => {
         },
         input_path: '/foo/bar/safe_model.h5',
         absolute_path: '/foo/bar',
-        modelscan_version: '0.8.1',
+        artefactscan_version: '0.8.1',
         timestamp: '2024-11-27T12:00:00.000000',
         scanned: {
           total_scanned: 1,
@@ -139,16 +141,16 @@ describe('clients > modelScan', () => {
     })
 
     await expect(() => scanStream({} as Readable, 'safe_model.h5')).rejects.toThrowError(
-      /^Unrecognised response returned by the ModelScan service./,
+      /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
 
   test('scanStream > rejected', async () => {
-    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ModelScan service.')
+    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
 
     // use a real Readable to make sure `.destroy()` is also called
     await expect(() => scanStream(Readable.from(''), 'safe_model.h5')).rejects.toThrowError(
-      /^Unable to communicate with the ModelScan service./,
+      /^Unable to communicate with the ArtefactScan service./,
     )
   })
 })

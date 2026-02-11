@@ -3,16 +3,16 @@ import { isNativeError } from 'node:util/types'
 
 import PQueue from 'p-queue'
 
-import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
+import { getArtefactScanInfo, scanStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
-export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.avScanning.modelscan.concurrency })
-  toolName: string = 'ModelScan'
+export class ArtefactScanFileScanningConnector extends BaseQueueFileScanningConnector {
+  queue: PQueue = new PQueue({ concurrency: config.avScanning.artefactscan.concurrency })
+  toolName: string = 'ArtefactScan'
   version: string | undefined = undefined
 
   constructor() {
@@ -20,8 +20,8 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
   }
 
   async init() {
-    const modelScanInfo = await getModelScanInfo()
-    this.version = modelScanInfo.modelscanVersion
+    const artefactScanInfo = await getArtefactScanInfo()
+    this.version = artefactScanInfo.artefactscanVersion
     return this
   }
 
@@ -29,7 +29,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ModelScan as it is not running.', { ...scannerInfo })
+      return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
     }
 
     const getObjectStreamResponse = await getObjectStream(file.path)

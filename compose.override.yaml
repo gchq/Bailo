@@ -33,7 +33,7 @@ services:
     build:
       target: dev
 
-  modelscan:
+  artefactscan:
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     build:

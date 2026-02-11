@@ -56,10 +56,10 @@ services:
       timeout: 10s
       retries: 5
 
-  modelscan:
+  artefactscan:
     networks:
       internal:
-    image: bailo_modelscan:${INSTANCE_NAME}
+    image: bailo_artefactscan:${INSTANCE_NAME}
     build:
       context: ./lib/modelscan_api
     volumes:
@@ -130,7 +130,9 @@ services:
         condition: service_healthy
       registry:
         condition: service_started
-      modelscan:
+      # modelscan:
+      #   condition: service_healthy
+      artefactscan:
         condition: service_healthy
       minio:
         condition: service_started

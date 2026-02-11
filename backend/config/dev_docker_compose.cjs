@@ -79,14 +79,14 @@ module.exports = {
       host: 'clamd',
     },
 
-    modelscan: {
-      host: 'modelscan',
+    artefactscan: {
+      host: 'artefactscan',
     },
   },
 
   connectors: {
     fileScanners: {
-      kinds: ['clamAV', 'modelScan'],
+      kinds: ['clamAV', 'artefactScan'],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
