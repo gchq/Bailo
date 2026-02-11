@@ -53,7 +53,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           mt: 4,
         })
         onContentTopStylingChanged({
-          mt: 4,
+          mt: isDocsPage ? 2 : 4,
         })
       }
     }
@@ -119,7 +119,10 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
-            overflow: 'auto',
+            ...(isDocsPage && {
+              height: '100vh',
+              overflow: 'hidden',
+            }),
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),
