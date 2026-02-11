@@ -53,7 +53,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           mt: 4,
         })
         onContentTopStylingChanged({
-          mt: isDocsPage ? 2 : 4,
+          mt: 4,
         })
       }
     }
@@ -98,11 +98,12 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
       <Banner />
       <Box sx={{ display: 'flex' }}>
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && (
+        {currentUser && uiConfig && (
           <>
             <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
               page={page}
+              bannerVisible={uiConfig.banner.enabled}
               currentUser={currentUser}
               drawerOpen={open}
               pageTopStyling={pageTopStyling}
@@ -118,15 +119,15 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
-            height: '100vh',
             overflow: 'auto',
+            height: '100%',
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),
           })}
         >
           <Toolbar />
-          <Box sx={contentTopStyling}>
+          <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
             {isDocsPage ? (
               children
             ) : (

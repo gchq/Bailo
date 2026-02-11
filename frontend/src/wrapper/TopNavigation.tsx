@@ -90,7 +90,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   return (
     <AppBar
       open={drawerOpen}
-      position='absolute'
+      position='fixed'
       data-test='appBar'
       sx={(theme) => ({
         ...pageTopStyling,
