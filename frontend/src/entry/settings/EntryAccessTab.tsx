@@ -1,5 +1,5 @@
 import { Save } from '@mui/icons-material'
-import { Button, Stack, Typography } from '@mui/material'
+import { Button, Divider, Stack, Typography } from '@mui/material'
 import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
 import { useCallback, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
@@ -10,7 +10,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessTabProps = {
   entry: EntryInterface
@@ -40,7 +40,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
     } else {
       sendNotification({
         variant: 'success',
-        msg: `${toTitleCase(entry.kind)} access list updated`,
+        msg: `${toSentenceCase(entry.kind)} access list updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()
@@ -58,14 +58,15 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ mt: 2 }}>
       {isEntryRolesLoading && <Loading />}
       <Stack spacing={1} direction='row' alignItems='center'>
-        <Typography variant='h6' component='h2'>
+        <Typography variant='h6' component='h2' color='primary'>
           {`Manage ${toSentenceCase(entry.kind)} access`}
         </Typography>
         <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
       </Stack>
+      <Divider />
       <EntryAccessInput
         value={entry.collaborators}
         onChange={handleCollaboratorsChange}
@@ -78,6 +79,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         onClick={updateCollaborators}
         loading={loading}
         startIcon={<Save />}
+        sx={{ maxWidth: 'fit-content' }}
       >
         Save
       </Button>

@@ -82,6 +82,7 @@
     "@types/bunyan": "^1.8.11",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^3.3.5",
+    "@types/content-disposition": "^0.5.9",
     "@types/express": "5.0.6",
     "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",

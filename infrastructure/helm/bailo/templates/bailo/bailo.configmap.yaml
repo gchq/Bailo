@@ -207,6 +207,8 @@ data:
         modelMirror: {
           import: {
             enabled: {{ .Values.modelMirror.import.enabled }},
+            additionalInfoHeading: '{{ .Values.modelMirror.import.additionalInfoHeading }}',
+            originalAnswerHeading: '{{ .Values.modelMirror.import.originalAnswerHeading }}',
           },
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
@@ -266,6 +268,7 @@ data:
         endpoint: '{{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}',
         region: '{{ .Values.minio.region }}',
         forcePathStyle: true,
+        responseChecksumValidation: '{{ .Values.aws.s3.responseChecksumValidation }}',
 
         // Names of buckets that Bailo uses
         buckets: {

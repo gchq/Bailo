@@ -1,6 +1,3 @@
-import { Readable } from 'node:stream'
-import { isNativeError } from 'node:util/types'
-
 import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
 
@@ -48,11 +45,7 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
       })
     }
 
-    const getObjectStreamResponse = await getObjectStream(file.path)
-    const s3Stream = getObjectStreamResponse.Body as Readable | null
-    if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`, { file, ...scannerInfo })
-    }
+    const s3Stream = await getObjectStream(file.path)
 
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)
@@ -68,7 +61,7 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
       ]
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
-        error: isNativeError(error) ? { name: error.name, stack: error.stack } : error,
+        error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
         file,
         ...scannerInfo,
       })

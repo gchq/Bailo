@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
+import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import {
@@ -16,7 +17,13 @@ import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
-import { getFormStats, getOverallCompletionStats, setStepState, widgets } from 'utils/formUtils'
+import {
+  getFormStats,
+  getOverallCompletionStats,
+  setFormDataPropertiesToUndefined,
+  setStepState,
+  widgets,
+} from 'utils/formUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -25,6 +32,7 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  mirroredModel = false,
   displayStats = false,
 }: {
   splitSchema: SplitSchemaNoRender
@@ -33,6 +41,7 @@ export default function JsonSchemaForm({
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  mirroredModel?: boolean
   displayStats?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
@@ -45,10 +54,21 @@ export default function JsonSchemaForm({
 
   const currentStep = splitSchema.steps[activeStep]
 
+  const source = structuredClone(currentStep ? currentStep.mirroredState : {})
+  const target = structuredClone(currentStep ? currentStep.state : {})
+
+  setFormDataPropertiesToUndefined(source)
+
+  const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formStats = useMemo(() => getFormStats(currentStep), [currentStep, calculateStats])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const collatedStats = useMemo(() => getOverallCompletionStats(splitSchema.steps), [splitSchema, calculateStats])
+  const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
+
+  const collatedStats = useMemo(
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [splitSchema, calculateStats, mirroredModel],
+  )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
@@ -81,11 +101,11 @@ export default function JsonSchemaForm({
     return null
   }
 
-  const onFormChange = (form: RJSFSchema) => {
+  const onFormChange = debounce((form: RJSFSchema) => {
     if (form.schema.title === currentStep.schema.title) {
       setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }
-  }
+  }, 100)
 
   function handleListItemClick(index: number) {
     setActiveStep(index)
@@ -169,7 +189,7 @@ export default function JsonSchemaForm({
           )}
           <Form
             schema={currentStep.schema}
-            formData={currentStep.state}
+            formData={updatedMirroredState}
             onChange={onFormChange}
             validator={validator}
             widgets={widgets}
@@ -182,6 +202,9 @@ export default function JsonSchemaForm({
               editMode: canEdit,
               formSchema: currentStep.schema,
               defaultCurrentUser: defaultCurrentUserInEntityList,
+              mirroredState: currentStep.mirroredState,
+              state: currentStep.state,
+              mirroredModel,
               onShare: onShareSectionOnClick,
             }}
             templates={
@@ -193,6 +216,7 @@ export default function JsonSchemaForm({
                     ObjectFieldTemplate,
                   }
                 : {
+                    DescriptionFieldTemplate,
                     ArrayFieldTemplate,
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,

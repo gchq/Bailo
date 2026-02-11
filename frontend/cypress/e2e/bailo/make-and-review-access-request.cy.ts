@@ -48,6 +48,8 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=entitySelector]').contains('Joe Bloggs')
     cy.get('#root_name-label').contains('What is the name of the access request?')
     cy.get('#root_name').type(accessRequestName)
+    // We use a debounce for form entry, so wait until it has rendered
+    cy.wait(500)
     cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
 
     cy.url().should('contain', `/model/${modelUuid}/access-request`)

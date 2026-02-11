@@ -1,6 +1,3 @@
-import { Readable } from 'node:stream'
-import { isNativeError } from 'node:util/types'
-
 import PQueue from 'p-queue'
 
 import { getArtefactScanInfo, scanStream } from '../../clients/artefactScan.js'
@@ -32,11 +29,7 @@ export class ArtefactScanFileScanningConnector extends BaseQueueFileScanningConn
       return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
     }
 
-    const getObjectStreamResponse = await getObjectStream(file.path)
-    const s3Stream = getObjectStreamResponse.Body as Readable | null
-    if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`, { file, ...scannerInfo })
-    }
+    const s3Stream = await getObjectStream(file.path)
 
     try {
       const scanResults = await scanStream(s3Stream, file.name)
@@ -66,7 +59,7 @@ export class ArtefactScanFileScanningConnector extends BaseQueueFileScanningConn
       ]
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
-        error: isNativeError(error) ? { name: error.name, stack: error.stack } : error,
+        error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
         file,
       })
     } finally {

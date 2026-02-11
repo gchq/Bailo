@@ -15,7 +15,7 @@ import { validateTokenForModel, validateTokenForUse } from '../../services/token
 import { isBailoError } from '../../types/error.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq } from '../../utils/error.js'
-import { Roles } from '../authentication/Base.js'
+import { Roles } from '../authentication/constants.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestAction,
