@@ -16,9 +16,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { rerunArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
-import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import {
@@ -209,13 +209,13 @@ export default function FileDisplay({
   }, [file])
 
   const sendNotification = useNotification()
-  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
+  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
 
   const openMore = Boolean(anchorElMore)
   const openScan = Boolean(anchorElScan)
 
   const handleRerunFileScanOnClick = useCallback(async () => {
-    const res = await rerunFileScan(modelId, (file as FileInterface)._id)
+    const res = await rerunArtefactScan(modelId, (file as FileInterface)._id)
     if (!res.ok) {
       sendNotification({
         variant: 'error',
