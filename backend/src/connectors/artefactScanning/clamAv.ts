@@ -8,7 +8,7 @@ import { FileInterfaceDoc } from '../../models/File.js'
 import { ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
+import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, ArtefactType } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -22,7 +22,7 @@ function safeParseVersion(versionStr: string): string {
   }
 }
 
-export class ClamAvFileScanningConnector extends BaseQueueArtefactScanningConnector {
+export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
   artefactType: ArtefactType = 'file'
   toolName = 'Clam AV'

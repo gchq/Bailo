@@ -13,11 +13,11 @@ import {
   getTotalFileSize,
   removeFile,
   removeFiles,
-  rerunFileScan,
   startUploadMultipartFile,
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
+import { rerunArtefactScan } from '../../src/services/scan.js'
 import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -561,7 +561,7 @@ describe('services > file', () => {
     expect(size).toBe(42)
   })
 
-  test('rerunFileScan > successfully reruns a file scan', async () => {
+  test('rerunArtefactScan > successfully reruns a file scan', async () => {
     const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
     FileModelMock.aggregate.mockResolvedValueOnce([
       {
@@ -576,11 +576,11 @@ describe('services > file', () => {
         lastRunAt: new Date(createdAtTimeInMilliseconds),
       },
     ])
-    const scanStatus = await rerunFileScan({} as any, 'model123', testFileId)
+    const scanStatus = await rerunArtefactScan({} as any, 'model123', testFileId)
     expect(scanStatus).toBe('Scan started for file.txt')
   })
 
-  test('rerunFileScan > throws bad request when attempting to upload an empty file', async () => {
+  test('rerunArtefactScan > throws bad request when attempting to upload an empty file', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
       {
         name: 'file.txt',
@@ -593,12 +593,12 @@ describe('services > file', () => {
         state: ArtefactScanState.Complete,
       },
     ])
-    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
-      /^Cannot run scan on an empty file/,
+    await expect(rerunArtefactScan({} as any, 'model123', testFileId)).rejects.toThrowError(
+      /^Cannot run scan on an empty artefact/,
     )
   })
 
-  test('rerunFileScan > does not rerun file scan before delay is over', async () => {
+  test('rerunArtefactScan > does not rerun file scan before delay is over', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
       {
         name: 'file.txt',
@@ -607,7 +607,7 @@ describe('services > file', () => {
       },
     ])
     ScanModelMock.find.mockResolvedValueOnce([{ state: ArtefactScanState.Complete, lastRunAt: new Date() }])
-    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
+    await expect(rerunArtefactScan({} as any, 'model123', testFileId)).rejects.toThrowError(
       /^Please wait 5 minutes before attempting a rescan file.txt/,
     )
   })

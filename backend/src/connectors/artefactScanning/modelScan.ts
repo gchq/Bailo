@@ -8,9 +8,9 @@ import { FileInterfaceDoc } from '../../models/File.js'
 import { ModelScanAdditionalInfo, ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, ArtefactType, BaseQueueArtefactScanningConnector } from './Base.js'
+import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, ArtefactType } from './Base.js'
 
-export class ModelScanFileScanningConnector extends BaseQueueArtefactScanningConnector {
+export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.artefactScanning.modelscan.concurrency })
   artefactType: ArtefactType = 'file'
   toolName: string = 'ModelScan'

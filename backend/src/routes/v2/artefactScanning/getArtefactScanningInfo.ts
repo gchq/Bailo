@@ -2,12 +2,12 @@ import { Request, Response } from 'express'
 
 import scanners from '../../../connectors/artefactScanning/index.js'
 
-interface GetFileScanningInfoResponse {
+interface GetArtefactScanningInfoResponse {
   scanners: string[]
 }
 
-export const getFilescanningInfo = [
-  async (req: Request, res: Response<GetFileScanningInfoResponse>): Promise<void> => {
+export const getArtefactScanningInfo = [
+  async (req: Request, res: Response<GetArtefactScanningInfoResponse>): Promise<void> => {
     res.json({ scanners: scanners.scannersInfo().scannerNames })
   },
 ]

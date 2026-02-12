@@ -31,29 +31,13 @@ export abstract class ArtefactBaseScanningConnector {
   abstract readonly toolName: string
   abstract readonly version: string | undefined
 
-  abstract init()
-  abstract scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]>
-
   info(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version }
   }
-
-  async scanError(message: string, context?: object): Promise<ArtefactScanResult[]> {
-    const scannerInfo = this.info()
-    log.error({ ...context, ...scannerInfo }, message)
-    return [
-      {
-        ...scannerInfo,
-        state: ArtefactScanState.Error,
-        lastRunAt: new Date(),
-      },
-    ]
-  }
-}
-
-export abstract class BaseQueueArtefactScanningConnector extends ArtefactBaseScanningConnector {
   abstract readonly queue: PQueue
   abstract artefactType: ArtefactType
+
+  abstract init()
 
   abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]>
 
@@ -69,5 +53,17 @@ export abstract class BaseQueueArtefactScanningConnector extends ArtefactBaseSca
       return this.scanError('Queued scan failed to correctly return.', { artefact })
     }
     return scanResults
+  }
+
+  async scanError(message: string, context?: object): Promise<ArtefactScanResult[]> {
+    const scannerInfo = this.info()
+    log.error({ ...context, ...scannerInfo }, message)
+    return [
+      {
+        ...scannerInfo,
+        state: ArtefactScanState.Error,
+        lastRunAt: new Date(),
+      },
+    ]
   }
 }

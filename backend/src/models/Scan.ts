@@ -22,6 +22,7 @@ export type ScanInterface = {
       fileId: string
     }
   | {
+      //TODO - Change this - if necessary - when implementing image scanning.
       artefactKind: typeof ArtefactKind.Image
       repositoryName: string
       layerDigest: string

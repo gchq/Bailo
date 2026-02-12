@@ -3,11 +3,11 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { rerunFileScan } from '../../../services/file.js'
+import { rerunArtefactScan } from '../../../services/scan.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const putFileScanSchema = z.object({
+export const putArtefactScanSchema = z.object({
   params: z.object({
     modelId: z.string(),
     fileId: z.string(),
@@ -18,16 +18,16 @@ export const putFileScanSchema = z.object({
 registerPath({
   method: 'put',
   path: '/api/v2/filescanning/model/{modelId}/file/{fileId}/scan',
-  tags: ['filescanning'],
-  description: 'Manually re-request a new antivirus scan for a file',
-  schema: putFileScanSchema,
+  tags: ['artefact-scanning'],
+  description: 'Manually re-request a new antivirus scan for an artefact',
+  schema: putArtefactScanSchema,
   responses: {
     200: {
       description: ``,
       content: {
         'application/json': {
           schema: z.object({
-            status: z.string().openapi({ example: 'File scan started' }),
+            status: z.string().openapi({ example: 'Artefact scan started' }),
           }),
         },
       },
@@ -35,20 +35,20 @@ registerPath({
   },
 })
 
-interface PutFileScanResponse {
+interface PutArtefactScanResponse {
   status: string
 }
 
-export const putFileScan = [
-  async (req: Request, res: Response<PutFileScanResponse>): Promise<void> => {
+export const putArtefactScan = [
+  async (req: Request, res: Response<PutArtefactScanResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateFile
     const {
-      params: { modelId, fileId },
-    } = parse(req, putFileScanSchema)
+      params: { modelId, fileId: artefactId },
+    } = parse(req, putArtefactScanSchema)
 
-    await rerunFileScan(req.user, modelId, fileId)
+    await rerunArtefactScan(req.user, modelId, artefactId)
 
-    await audit.onUpdateFile(req, modelId, fileId)
+    await audit.onUpdateFile(req, modelId, artefactId)
 
     res.json({
       status: 'Scan started',
