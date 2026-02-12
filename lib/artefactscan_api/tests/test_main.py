@@ -12,9 +12,9 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
-from bailo_modelscan_api import trivy
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.main import app, get_settings
+from bailo_artefactscan_api import trivy
+from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.main import app, get_settings
 
 client = TestClient(app)
 
@@ -39,12 +39,12 @@ def test_info():
     assert response.json() == {
         "apiName": get_settings_override().app_name,
         "apiVersion": get_settings_override().app_version,
-        "scannerName": modelscan.__name__,
-        "modelscanVersion": modelscan.__version__,
+        "scannerName": artefactscan.__name__,
+        "artefactscanVersion": artefactscan.__version__,
     }
 
 
-@patch("modelscan.modelscan.ModelScan.scan")
+@patch("artefactscan.artefactscan.ArtefactScan.scan")
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
     [
@@ -63,7 +63,7 @@ def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime
     mock_scan.assert_called_once()
 
 
-@patch("modelscan.modelscan.ModelScan.scan")
+@patch("artefactscan.artefactscan.ArtefactScan.scan")
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
     [("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE)],
@@ -79,8 +79,8 @@ def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any,
     mock_scan.assert_called_once()
 
 
-@patch("bailo_modelscan_api.main.is_valid_pickle")
-@patch("modelscan.modelscan.ModelScan.scan")
+@patch("bailo_artefactscan_api.main.is_valid_pickle")
+@patch("artefactscan.artefactscan.ArtefactScan.scan")
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
     [

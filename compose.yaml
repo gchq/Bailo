@@ -61,9 +61,9 @@ services:
       internal:
     image: bailo_artefactscan:${INSTANCE_NAME}
     build:
-      context: ./lib/modelscan_api
+      context: ./lib/artefactscan_api
     volumes:
-      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
+      - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
     healthcheck:
       test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
       interval: 30s

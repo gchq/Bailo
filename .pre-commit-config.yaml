@@ -2,7 +2,7 @@ ci:
   autoupdate_commit_msg: 'chore: update pre-commit hooks'
   autofix_commit_msg: 'style: pre-commit fixes'
 
-files: ^(backend/docs/|lib/python/|lib/modelscan_api/)
+files: ^(backend/docs/|lib/python/|lib/artefactscan_api/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

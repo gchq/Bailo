@@ -35,7 +35,7 @@ services:
 
   artefactscan:
     volumes:
-      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
+      - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
     build:
       target: dev
 

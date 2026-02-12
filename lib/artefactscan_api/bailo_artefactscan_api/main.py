@@ -1,4 +1,4 @@
-"""FastAPI app to provide a ModelScan REST API."""
+"""FastAPI app to provide a ArtefactScan REST API."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from typing import Annotated, Any
 
 import modelscan
 import uvicorn
-from bailo_modelscan_api import trivy
+from bailo_artefactscan_api import trivy
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 # isort: split
 
-from bailo_modelscan_api.config import Settings
+from bailo_artefactscan_api.config import Settings
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -78,7 +78,7 @@ class ApiInformation(BaseModel):
     apiName: str
     apiVersion: str
     scannerName: str
-    modelscanVersion: str
+    artefactscanVersion: str
 
 
 @app.get(
@@ -97,21 +97,21 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
         apiName=settings.app_name,
         apiVersion=settings.app_version,
         scannerName=modelscan.__name__,
-        modelscanVersion=modelscan.__version__,
+        artefactscanVersion=modelscan.__version__,
     )
 
 
 @app.post(
     "/scan/file",
     summary="Upload and scan a file",
-    description="Upload a file which is scanned by ModelScan and return the result of the scan",
+    description="Upload a file which is scanned by ArtefactScan and return the result of the scan",
     status_code=HTTPStatus.OK.value,
-    response_description="The result from ModelScan",
+    response_description="The result from ArtefactScan",
     response_model=dict[str, Any],
     # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
     responses={
         HTTPStatus.OK.value: {
-            "description": "modelscan returned results",
+            "description": "artefactscan returned results",
             "content": {
                 "application/json": {
                     "examples": {
@@ -127,7 +127,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/safe_model.pkl",
                                     "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
+                                    "artefactscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "scanned": {
                                         "total_scanned": 1,
@@ -154,7 +154,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     "total_issues": 1,
                                     "input_path": "/foo/bar/unsafe_model.h5",
                                     "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
+                                    "artefactscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "scanned": {
                                         "total_scanned": 1,
@@ -171,7 +171,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                         "operator": "Lambda",
                                         "module": "Keras",
                                         "source": "unsafe_model.h5",
-                                        "scanner": "modelscan.scanners.H5LambdaDetectScan",
+                                        "scanner": "artefactscan.scanners.H5LambdaDetectScan",
                                         "severity": "MEDIUM",
                                     }
                                 ],
@@ -185,7 +185,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                 "summary": {
                                     "input_path": "/foo/bar/empty.txt",
                                     "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
+                                    "artefactscan_version": "0.8.1",
                                     "scanned": {"total_scanned": 0},
                                     "skipped": {
                                         "skipped_files": [
@@ -220,7 +220,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/null.h5",
                                     "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
+                                    "artefactscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "scanned": {"total_scanned": 0},
                                     "skipped": {
@@ -265,24 +265,24 @@ def scan_file(
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, Any]:
-    """API endpoint to upload and scan a file using modelscan.
+    """API endpoint to upload and scan a file using artefactscan.
 
     :param in_file: uploaded file to be scanned
     :param background_tasks: FastAPI object to perform background tasks once the function has already returned.
     :raises HTTPException: failure to process the uploaded file in any way
-    :return: `modelscan.scan` results
+    :return: `artefactscan.scan` results
     """
     logger.info("Called the API endpoint to scan uploaded file %s", in_file.filename)
     try:
-        # Instantiate ModelScan
-        modelscan_model = ModelScan(settings=settings.modelscan_settings)
+        # Instantiate ArtefactScan
+        artefactscan_model = ArtefactScan(settings=settings.artefactscan_settings)
 
         file_suffix = Path(str(in_file.filename).strip()).suffix
         with NamedTemporaryFile("wb", suffix=file_suffix, delete=False) as out_file:
             file_path = Path(out_file.name)
             logger.debug("Writing file %s to disk as %s", in_file.filename, file_path)
             # Write the streamed in_file to disk.
-            # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
+            # This is a bit silly as artefactscan will ultimately load this back into memory, but artefactscan
             # doesn't currently support streaming directly from memory.
             try:
                 while content := in_file.file.read(settings.block_size):
@@ -295,15 +295,17 @@ def scan_file(
                 ) from exception
 
         if (
-            settings.modelscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["enabled"]
+            settings.artefactscan_settings["scanners"]["artefactscan.scanners.PickleUnsafeOpScan"]["enabled"]
             and file_path.suffix
-            in settings.modelscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["supported_extensions"]
+            in settings.artefactscan_settings["scanners"]["artefactscan.scanners.PickleUnsafeOpScan"][
+                "supported_extensions"
+            ]
             and not is_valid_pickle(file_path)
         ):
             # false positive e.g. "license.dat"
             new_file_path = file_path.with_suffix(".txt")
             logger.info(
-                "File %s is not a pickle but extension is in the ModelScan config `scanners.PickleUnsafeOpScan.supported_extensions` "
+                "File %s is not a pickle but extension is in the ArtefactScan config `scanners.PickleUnsafeOpScan.supported_extensions` "
                 "file extensions. Renaming from %s to %s",
                 in_file.filename,
                 file_path,
@@ -312,9 +314,9 @@ def scan_file(
             file_path = file_path.rename(new_file_path)
 
         # Scan the uploaded file.
-        logger.info("Initiating ModelScan scan of %s (%s)", file_path, in_file.filename)
-        result = modelscan_model.scan(file_path)
-        logger.info("ModelScan result for %s (%s): %s", file_path, in_file.filename, result)
+        logger.info("Initiating ArtefactScan scan of %s (%s)", file_path, in_file.filename)
+        result = artefactscan_model.scan(file_path)
+        logger.info("ArtefactScan result for %s (%s): %s", file_path, in_file.filename, result)
 
         # Finally, return the result.
         return result

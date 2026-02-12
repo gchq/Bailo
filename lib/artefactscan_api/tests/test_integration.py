@@ -1,4 +1,4 @@
-"""Integration tests for working with ModelScan."""
+"""Integration tests for working with ArtefactScan."""
 
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
+from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
 
 
 @lru_cache
@@ -54,7 +54,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                 "summary": {
                     "absolute_path": ANY,
                     "input_path": ANY,
-                    "modelscan_version": modelscan.__version__,
+                    "artefactscan_version": artefactscan.__version__,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
                         "skipped_files": [
@@ -92,7 +92,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     "total_issues": 0,
                     "input_path": ANY,
                     "absolute_path": ANY,
-                    "modelscan_version": modelscan.__version__,
+                    "artefactscan_version": artefactscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
@@ -131,7 +131,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     "total_issues": 0,
                     "input_path": ANY,
                     "absolute_path": ANY,
-                    "modelscan_version": modelscan.__version__,
+                    "artefactscan_version": artefactscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
@@ -158,7 +158,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     "total_issues": 1,
                     "input_path": ANY,
                     "absolute_path": ANY,
-                    "modelscan_version": modelscan.__version__,
+                    "artefactscan_version": artefactscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
@@ -171,7 +171,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                         "description": "Use of unsafe operator 'system' from module 'posix'",
                         "module": "posix",
                         "operator": "system",
-                        "scanner": "modelscan.scanners.PickleUnsafeOpScan",
+                        "scanner": "artefactscan.scanners.PickleUnsafeOpScan",
                         "severity": "CRITICAL",
                         "source": ANY,
                     },
@@ -189,7 +189,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                 "summary": {
                     "absolute_path": ANY,
                     "input_path": ANY,
-                    "modelscan_version": modelscan.__version__,
+                    "artefactscan_version": artefactscan.__version__,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
                         "skipped_files": [

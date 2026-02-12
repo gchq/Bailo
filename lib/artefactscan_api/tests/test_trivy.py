@@ -10,8 +10,8 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
-from bailo_modelscan_api import trivy
-from bailo_modelscan_api.main import app
+from bailo_artefactscan_api import trivy
+from bailo_artefactscan_api.main import app
 from fastapi import BackgroundTasks, HTTPException, UploadFile
 from fastapi.testclient import TestClient
 
@@ -22,7 +22,7 @@ EMPTY_DIGEST = hashlib.sha256(EMPTY_CONTENTS).hexdigest()
 TAR_MIME_TYPE = "application/x-tar"
 
 
-@patch("bailo_modelscan_api.trivy.scan")
+@patch("bailo_artefactscan_api.trivy.scan")
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
     [(EMPTY_DIGEST, EMPTY_CONTENTS, TAR_MIME_TYPE)],
