@@ -275,7 +275,7 @@ def scan_file(
     logger.info("Called the API endpoint to scan uploaded file %s", in_file.filename)
     try:
         # Instantiate ArtefactScan
-        artefactscan_model = ArtefactScan(settings=settings.artefactscan_settings)
+        artefactscan_model = ModelScan(settings=settings.artefactscan_settings)
 
         file_suffix = Path(str(in_file.filename).strip()).suffix
         with NamedTemporaryFile("wb", suffix=file_suffix, delete=False) as out_file:
