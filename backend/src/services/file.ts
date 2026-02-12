@@ -66,6 +66,12 @@ export async function uploadFile(
   return await scanArtefact(file)
 }
 
+export async function saveImportedFile(file: FileInterface) {
+  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
+    upsert: true,
+  })
+}
+
 export async function startUploadMultipartFile(
   user: UserInterface,
   modelId: string,

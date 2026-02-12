@@ -5,7 +5,7 @@ import PQueue from 'p-queue'
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ModelScanAdditionalInfo, ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
+import { ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, ArtefactType } from './Base.js'
@@ -54,15 +54,12 @@ export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnecto
           }) as ModelScanSummary,
       )
 
-      const additionalInfo: ModelScanAdditionalInfo[] = scanResults.issues.map((issue) => issue)
-
-      log.debug({ file, result: { summary, additionalInfo }, ...scannerInfo }, 'Scan complete.')
+      log.debug({ file, result: { summary }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
           summary,
-          additionalInfo,
           lastRunAt: new Date(),
         },
       ]
