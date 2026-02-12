@@ -1,22 +1,17 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-
 /** @type {import('../src/utils/config.js').Config} */
 module.exports = {
   api: {
-    // Publicly accessible host
     host: '',
 
-    // Port to listen on
     port: 3001,
   },
 
   app: {
-    // Publicly accessible route to service
     protocol: '',
     host: '',
     port: 3000,
 
-    // Typically generated from `npm run certs`
     privateKey: './certs/key.pem',
     publicKey: './certs/cert.pem',
     jwks: './certs/jwks.json',
@@ -26,40 +21,26 @@ module.exports = {
     defaultOpts: {
       rejectUnauthorized: true,
     },
-    // Default proxy to use for all requests
     proxy: '',
-    // Don't use a proxy for any address in this list
     noProxy: ['localhost', '127.0.0.1'],
   },
 
   mongo: {
-    // A mongo connection URI, can contain replica set information, etc.
-    // See: https://www.mongodb.com/docs/manual/reference/connection-string/
-
-    // This is usually embedded in a config map, so do not put usernames and
-    // passwords in the connection string.
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
-
-    // Authentication details
     user: undefined,
     pass: undefined,
-
-    // Whether to use transactions. Requires a replica set to be enabled
     transactions: false,
   },
 
   registry: {
-    // Registry connection information should be the internal connection to the registry.
     connection: {
       internal: 'https://localhost:5000',
       insecure: true,
     },
 
-    // Service and Issuer must match those set in the registry configuration
     service: 'RegistryAuth',
     issuer: 'RegistryIssuer',
 
-    // Allow self-signed certificates
     insecure: true,
   },
 
@@ -68,12 +49,9 @@ module.exports = {
   },
 
   smtp: {
-    // Enable / disable all email sending
     enabled: true,
     transporter: 'smtp',
 
-    // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
-    // https://nodemailer.com/smtp/#1-single-connection
     connection: {
       host: 'localhost',
       port: 1025,
@@ -84,7 +62,6 @@ module.exports = {
       },
     },
 
-    // Set the email address that Bailo should use, can be different from the SMTP server details.
     from: '"Bailo 📝" <bailo@example.org>',
   },
 
@@ -154,8 +131,6 @@ module.exports = {
     provider: 'cognito',
 
     grant: {
-      // Grant configuration options, provide any option from:
-      // https://www.npmjs.com/package/grant
       defaults: {
         origin: '',
         prefix: '/api/connect',
@@ -200,9 +175,7 @@ module.exports = {
     },
   },
 
-  // These settings are PUBLIC and shared with the UI
   ui: {
-    // Show a banner at the top of the screen on all pages
     banner: {
       enabled: true,
       text: 'DEVELOPMENT DEPLOYMENT',
@@ -210,14 +183,12 @@ module.exports = {
       textColor: 'black',
     },
 
-    // Contact details for the support team
     issues: {
       label: 'Bailo Support Team',
       supportHref: 'mailto:hello@example.com?subject=Bailo%20Support',
       contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
     },
 
-    // The publicly accessible location of the registry, including host and port
     registry: {
       host: 'localhost:8080',
     },
@@ -297,7 +268,6 @@ module.exports = {
 
     multipartChunkSize: 5 * 1024 * 1024,
 
-    // Names of buckets that Bailo uses
     buckets: {
       uploads: 'uploads',
       registry: 'registry',
