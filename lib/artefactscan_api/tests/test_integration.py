@@ -54,7 +54,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                 "summary": {
                     "absolute_path": ANY,
                     "input_path": ANY,
-                    "artefactscan_version": artefactscan.__version__,
+                    "artefactscan_version": modelscan.__version__,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
                         "skipped_files": [
@@ -92,7 +92,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     "total_issues": 0,
                     "input_path": ANY,
                     "absolute_path": ANY,
-                    "artefactscan_version": artefactscan.__version__,
+                    "artefactscan_version": modelscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
@@ -131,7 +131,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     "total_issues": 0,
                     "input_path": ANY,
                     "absolute_path": ANY,
-                    "artefactscan_version": artefactscan.__version__,
+                    "artefactscan_version": modelscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
@@ -158,7 +158,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     "total_issues": 1,
                     "input_path": ANY,
                     "absolute_path": ANY,
-                    "artefactscan_version": artefactscan.__version__,
+                    "artefactscan_version": modelscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
@@ -189,7 +189,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                 "summary": {
                     "absolute_path": ANY,
                     "input_path": ANY,
-                    "artefactscan_version": artefactscan.__version__,
+                    "artefactscan_version": modelscan.__version__,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
                         "skipped_files": [
