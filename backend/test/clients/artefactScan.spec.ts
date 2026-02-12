@@ -97,7 +97,7 @@ describe('clients > artefactScan', () => {
         },
         input_path: '/foo/bar/safe_model.h5',
         absolute_path: '/foo/bar',
-        artefactscan_version: '0.8.1',
+        modelscan_version: '0.8.1',
         timestamp: '2024-11-27T12:00:00.000000',
         scanned: {
           total_scanned: 1,

@@ -127,7 +127,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/safe_model.pkl",
                                     "absolute_path": "/foo/bar",
-                                    "artefactscan_version": "0.8.1",
+                                    "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "scanned": {
                                         "total_scanned": 1,
@@ -154,7 +154,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     "total_issues": 1,
                                     "input_path": "/foo/bar/unsafe_model.h5",
                                     "absolute_path": "/foo/bar",
-                                    "artefactscan_version": "0.8.1",
+                                    "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "scanned": {
                                         "total_scanned": 1,
@@ -185,7 +185,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                 "summary": {
                                     "input_path": "/foo/bar/empty.txt",
                                     "absolute_path": "/foo/bar",
-                                    "artefactscan_version": "0.8.1",
+                                    "modelscan_version": "0.8.1",
                                     "scanned": {"total_scanned": 0},
                                     "skipped": {
                                         "skipped_files": [
@@ -220,7 +220,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/null.h5",
                                     "absolute_path": "/foo/bar",
-                                    "artefactscan_version": "0.8.1",
+                                    "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "scanned": {"total_scanned": 0},
                                     "skipped": {
@@ -295,9 +295,9 @@ def scan_file(
                 ) from exception
 
         if (
-            settings.artefactscan_settings["scanners"]["artefactscan.scanners.PickleUnsafeOpScan"]["enabled"]
+            settings.artefactscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["enabled"]
             and file_path.suffix
-            in settings.artefactscan_settings["scanners"]["artefactscan.scanners.PickleUnsafeOpScan"][
+            in settings.artefactscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"][
                 "supported_extensions"
             ]
             and not is_valid_pickle(file_path)
@@ -305,7 +305,7 @@ def scan_file(
             # false positive e.g. "license.dat"
             new_file_path = file_path.with_suffix(".txt")
             logger.info(
-                "File %s is not a pickle but extension is in the ArtefactScan config `scanners.PickleUnsafeOpScan.supported_extensions` "
+                "File %s is not a pickle but extension is in the ModelScan config `scanners.PickleUnsafeOpScan.supported_extensions` "
                 "file extensions. Renaming from %s to %s",
                 in_file.filename,
                 file_path,

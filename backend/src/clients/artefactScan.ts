@@ -24,7 +24,7 @@ interface ArtefactScanResponse {
     }
     input_path: string
     absolute_path: string
-    artefactscan_version: string
+    modelscan_version: string
     timestamp: string
     scanned: {
       total_scanned: number
