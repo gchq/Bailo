@@ -1,4 +1,4 @@
-# artefactscan REST API
+# Artefactscan REST API
 
 ![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
 ![Python](https://img.shields.io/badge/version-3.0.0-orange.svg?style=for-the-badge)
@@ -22,7 +22,7 @@ This API is used as a file scanner and is not published to PyPI. The built image
 
 ### Build and Run via Docker
 
-This is the fastest way to get ModelScan REST API running.
+This is the fastest way to get ArtefactScan REST API running.
 
 ```bash
 docker build -t artefactscan_rest_api:latest .
@@ -90,7 +90,7 @@ To run the integration tests (does not require any externally running services):
 pytest -m integration
 ```
 
-> **Note:** the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
+> **Note:** the integration tests use safe but technically "malicious" file(s) to check ArtefactScan's performance. Please
 refer to [test_integration](./tests/test_integration/README.md) for details.
 
 ## Docker Build Stages

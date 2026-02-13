@@ -40,7 +40,7 @@ def test_info():
         "apiName": get_settings_override().app_name,
         "apiVersion": get_settings_override().app_version,
         "scannerName": modelscan.__name__,
-        "artefactscanVersion": modelscan.__version__,
+        "modelscanVersion": modelscan.__version__,
     }
 
 

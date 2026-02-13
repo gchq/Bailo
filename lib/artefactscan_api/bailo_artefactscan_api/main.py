@@ -78,7 +78,7 @@ class ApiInformation(BaseModel):
     apiName: str
     apiVersion: str
     scannerName: str
-    artefactscanVersion: str
+    modelscanVersion: str
 
 
 @app.get(
@@ -97,7 +97,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
         apiName=settings.app_name,
         apiVersion=settings.app_version,
         scannerName=modelscan.__name__,
-        artefactscanVersion=modelscan.__version__,
+        modelscanVersion=modelscan.__version__,
     )
 
 
@@ -171,7 +171,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                         "operator": "Lambda",
                                         "module": "Keras",
                                         "source": "unsafe_model.h5",
-                                        "scanner": "artefactscan.scanners.H5LambdaDetectScan",
+                                        "scanner": "modelscan.scanners.H5LambdaDetectScan",
                                         "severity": "MEDIUM",
                                     }
                                 ],
@@ -265,24 +265,24 @@ def scan_file(
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, Any]:
-    """API endpoint to upload and scan a file using artefactscan.
+    """API endpoint to upload and scan a file using modelscan.
 
     :param in_file: uploaded file to be scanned
     :param background_tasks: FastAPI object to perform background tasks once the function has already returned.
     :raises HTTPException: failure to process the uploaded file in any way
-    :return: `artefactscan.scan` results
+    :return: `modelscan.scan` results
     """
     logger.info("Called the API endpoint to scan uploaded file %s", in_file.filename)
     try:
-        # Instantiate ArtefactScan
-        artefactscan_model = ModelScan(settings=settings.artefactscan_settings)
+        # Instantiate ModelScan
+        modelscan_model = ModelScan(settings=settings.modelscan_settings)
 
         file_suffix = Path(str(in_file.filename).strip()).suffix
         with NamedTemporaryFile("wb", suffix=file_suffix, delete=False) as out_file:
             file_path = Path(out_file.name)
             logger.debug("Writing file %s to disk as %s", in_file.filename, file_path)
             # Write the streamed in_file to disk.
-            # This is a bit silly as artefactscan will ultimately load this back into memory, but artefactscan
+            # This is a bit silly as modelscan will ultimately load this back into memory, but artefactscan
             # doesn't currently support streaming directly from memory.
             try:
                 while content := in_file.file.read(settings.block_size):
@@ -295,11 +295,9 @@ def scan_file(
                 ) from exception
 
         if (
-            settings.artefactscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["enabled"]
+            settings.modelscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["enabled"]
             and file_path.suffix
-            in settings.artefactscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"][
-                "supported_extensions"
-            ]
+            in settings.modelscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["supported_extensions"]
             and not is_valid_pickle(file_path)
         ):
             # false positive e.g. "license.dat"
@@ -314,9 +312,9 @@ def scan_file(
             file_path = file_path.rename(new_file_path)
 
         # Scan the uploaded file.
-        logger.info("Initiating ArtefactScan scan of %s (%s)", file_path, in_file.filename)
-        result = artefactscan_model.scan(file_path)
-        logger.info("ArtefactScan result for %s (%s): %s", file_path, in_file.filename, result)
+        logger.info("Initiating ModelScan scan of %s (%s)", file_path, in_file.filename)
+        result = modelscan_model.scan(file_path)
+        logger.info("ModelScan result for %s (%s): %s", file_path, in_file.filename, result)
 
         # Finally, return the result.
         return result
