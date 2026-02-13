@@ -38,7 +38,7 @@ export async function uploadFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.kind === EntryKind.MirroredModel) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -99,7 +99,7 @@ export async function startUploadMultipartFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.kind === EntryKind.MirroredModel) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -363,7 +363,7 @@ export async function removeFiles(
   session?: ClientSession | undefined,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.kind === EntryKind.MirroredModel && !deleteMirroredModel) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot remove file from a mirrored model.')
   }
   const allFiles: FileWithScanResultsInterface[] = []
