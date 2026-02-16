@@ -111,7 +111,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
     # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
     responses={
         HTTPStatus.OK.value: {
-            "description": "artefactscan returned results",
+            "description": "modelscan returned results",
             "content": {
                 "application/json": {
                     "examples": {
@@ -282,7 +282,7 @@ def scan_file(
             file_path = Path(out_file.name)
             logger.debug("Writing file %s to disk as %s", in_file.filename, file_path)
             # Write the streamed in_file to disk.
-            # This is a bit silly as modelscan will ultimately load this back into memory, but artefactscan
+            # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
             # doesn't currently support streaming directly from memory.
             try:
                 while content := in_file.file.read(settings.block_size):
