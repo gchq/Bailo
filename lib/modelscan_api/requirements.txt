@@ -1,7 +1,7 @@
 content-size-limit-asgi==0.1.5
 fastapi[standard-no-fastapi-cloud-cli]==0.129.0
 modelscan[tensorflow,h5py]==0.8.7
-pydantic_settings==2.12.0
+pydantic_settings==2.13.0
 python-multipart==0.0.22
 uvicorn==0.40.0
 oras==0.2.38
