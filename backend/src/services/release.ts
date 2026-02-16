@@ -547,9 +547,9 @@ export async function deleteReleases(
       semver,
     })
 
-    release.delete(session)
-    removeReleaseReviews(modelId, semver, session)
-    removeResponsesByParentIds(
+    await release.delete(session)
+    await removeReleaseReviews(modelId, semver, session)
+    await removeResponsesByParentIds(
       [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
       session,
     )
