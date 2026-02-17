@@ -530,7 +530,7 @@ describe('services > registry', () => {
 
     test('softDeleteImage > fail on mirrored model', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
-        settings: { mirror: { sourceModelId: 'sourceModelId' } },
+        kind: 'mirrored-model',
       } as any)
 
       const promise = softDeleteImage({} as any, {} as any)

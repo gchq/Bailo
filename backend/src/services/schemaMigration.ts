@@ -93,7 +93,7 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
     throw BadReq('Model cannot be migrated as it does not have a valid model card.', { modelId })
   }
 
-  if (model.kind === EntryKind.MirroredModel) {
+  if (EntryKind.MirroredModel === model.kind) {
     if (model.card?.schemaId === model.mirroredCard?.schemaId) {
       throw BadReq(
         'This mirrored model cannot be migrated as the schema matches that of the source model. Please migrate the source model first.',
