@@ -123,11 +123,6 @@ if [ "$RUN_KEYWORD_CHECK" = "true" ]; then
 
   echo "Scanning staged files for keywords..."
 
-  # Get list of staged files (Added, Copied, Modified)
-  # STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
-  # STAGED_FILES_TMP="$(mktemp)"
-  # git diff --cached --name-only -z --diff-filter=ACM > "$STAGED_FILES_TMP"
-
   # If nothing is staged, skip (cheap pre-check)
   if [ -z "$STAGED_FILES" ]; then
     echo "No staged files to scan."
