@@ -178,7 +178,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     await release.save()
   } catch (error) {
     if (isMongoServerError(error) && error.code === 11000) {
-      throw BadReq(`A release with this semver already exists for this model.`, {
+      throw BadReq('A release with this semver already exists for this model.', {
         modelId: releaseParams.modelId,
         semver: releaseParams.semver,
       })

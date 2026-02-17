@@ -46,6 +46,11 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/registry.js', () => registryMocks)
 
+const mongoUtilsMocks = vi.hoisted(() => ({
+  isMongoServerError: vi.fn(() => false),
+}))
+vi.mock('../../src/utils/mongo.js', () => mongoUtilsMocks)
+
 const fileMocks = vi.hoisted(() => ({
   getFileById: vi.fn(),
   getFilesByIds: vi.fn(),
@@ -292,6 +297,33 @@ describe('services > release', () => {
     )
 
     expect(ReleaseModelMock.save).not.toBeCalled()
+  })
+
+  test('createRelease > save generic error', async () => {
+    ReleaseModelMock.findOne.mockResolvedValue(null)
+    ReleaseModelMock.save.mockRejectedValueOnce(new Error('err'))
+
+    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrowError('err')
+
+    expect(ReleaseModelMock.save).toBeCalled()
+    expect(ReleaseModelMock).toBeCalled()
+    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+  })
+
+  test('createRelease > save mongo server error', async () => {
+    ReleaseModelMock.findOne.mockResolvedValue(null)
+    const error = new Error('err')
+    error['code'] = 11000
+    ReleaseModelMock.save.mockRejectedValueOnce(error)
+    mongoUtilsMocks.isMongoServerError.mockReturnValueOnce(true)
+
+    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrowError(
+      /^A release with this semver already exists for this model./,
+    )
+
+    expect(ReleaseModelMock.save).toBeCalled()
+    expect(ReleaseModelMock).toBeCalled()
+    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
   })
 
   test('updateRelease > bad authorisation', async () => {
