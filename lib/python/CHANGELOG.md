@@ -2,6 +2,16 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.6.0 - 17/02/2026
+
+### Changes
+
+- `MirroredModel.update_model_card` helper method will patch additional information to the model card.
+
+### Breaking Changes
+
+- `MirroredModel.model_card` and `MirroredModel.model_card_version` implement 'card' and 'additional_information' keys
+
 ## 3.5.0 - 03/02/2026
 
 - Add additional params to `Client.get_models` and callers `Model.search` & `MirroredModel.search`

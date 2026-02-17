@@ -92,14 +92,14 @@ class Entry:
                 raise NotImplementedError(f"No default schema set for {self.kind=}")
 
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
-        self.__unpack_card(res["card"])
+        self._unpack_card(res["card"])
 
         logger.info("Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
     def card_from_template(self, template_id: str) -> None:
         """Create a card using a template."""
         res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
-        self.__unpack_card(res["card"])
+        self._unpack_card(res["card"])
 
         logger.info("Card for ID %s successfully created using template ID %s", self.id, template_id)
 
@@ -107,7 +107,7 @@ class Entry:
         """Get the latest card from Bailo."""
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
-            self.__unpack_card(res["model"]["card"])
+            self._unpack_card(res["model"]["card"])
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(
@@ -120,7 +120,7 @@ class Entry:
         :param version: Entry card version
         """
         res = self.client.get_model_card(model_id=self.id, version=version)
-        self.__unpack_card(res["modelCard"])
+        self._unpack_card(res["modelCard"])
 
         logger.info("Card version %s for ID %s successfully retrieved.", version, self.id)
 
@@ -142,7 +142,7 @@ class Entry:
             card = self._card
 
         res = self.client.put_model_card(model_id=self.id, metadata=card)
-        self.__unpack_card(res["card"])
+        self._unpack_card(res["card"])
 
         logger.info("Card for %s successfully updated on server.", self.id)
 
@@ -162,7 +162,7 @@ class Entry:
 
         logger.info("Attributes for ID %s successfully unpacked.", self.id)
 
-    def __unpack_card(self, res):
+    def _unpack_card(self, res):
         """Private method. Unpack card metadata, version, and schema ID from API response.
 
         :param res: Card-related dictionary from the API response.

@@ -216,15 +216,17 @@ class Client:
         self,
         model_id: str,
         version: str,
+        mirrored: bool = False,
     ):
         """Retrieve a specific model card, using the unique model ID and version.
 
         :param model_id: Unique model ID
         :param version: Model card version
+        :param mirrored: Whether to get the read only model card
         :return: JSON response object
         """
         return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/model-card/{version}",
+            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={mirrored: mirrored}
         ).json()
 
     def put_model_card(
