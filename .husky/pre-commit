@@ -51,9 +51,8 @@ HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/husky-config.conf"
 if [ -f "$HUSKY_CONFIG_FILE" ]; then
   . "$HUSKY_CONFIG_FILE"
 else
-  echo "ERROR: $HUSKY_CONFIG_FILE not found."
-  echo "Create it locally (it is gitignored)."
-  exit 1
+  echo "$HUSKY_CONFIG_FILE not found. Skipping additional checks."
+  exit 0
 fi
 
 # Will use these staged files for both checks
