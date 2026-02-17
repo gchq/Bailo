@@ -8,7 +8,9 @@ import { Request } from 'express'
 // import { EscalationDetails } from '../../types/types.js'
 import config from '../../utils/config.js'
 import log from '../log.js'
-import { BAILO_ID_HEADER, USER_HEADER } from './sendingEscalation.js'
+
+export const USER_HEADER = 'x-user'
+export const BAILO_ID_HEADER = 'x-bailo-id'
 
 /**
  * Checks if the provided user is in the allow list under an allowed bailo instance.
@@ -18,15 +20,31 @@ import { BAILO_ID_HEADER, USER_HEADER } from './sendingEscalation.js'
 export const isAuthorisedToEscalate = (userId: string, instanceId: string): boolean => {
   // const allowedInstances = config?.escalation?.allowed
 
-  // If the instanceId exists in the federation object then it is an allowed instance
-  if (!Object.hasOwn(config.federation, instanceId)) {
+  const peer = config.federation.peers.get(instanceId)
+  if (!peer) {
     log.warn(`${instanceId} is not a known Bailo instance, please update the config if it is missing.`)
     return false
   }
 
-  const allowedUsers = config.federation[instanceId].allowedProcUserIds ?? []
+  const allowedUsers = peer.allowedProcUserIds ?? []
+  const isAuthorised = allowedUsers.includes(userId)
 
-  const isAuthorised = allowedUsers.includes(userId) ?? false
+  if (!isAuthorised) {
+    log.warn({}, `The system user ${userId} is not in the allow list under instance ${instanceId}.`)
+    return false
+  }
+
+  return true
+
+  // // If the instanceId exists in the federation object then it is an allowed instance
+  // if (!Object.hasOwn(config.federation, instanceId)) {
+  //   log.warn(`${instanceId} is not a known Bailo instance, please update the config if it is missing.`)
+  //   return false
+  // }
+
+  // const allowedUsers = config.federation[instanceId].allowedProcUserIds ?? []
+
+  // const isAuthorised = allowedUsers.includes(userId) ?? false
 
   // Check there are allowed instances
   // if (!Array.isArray(allowedInstances) || allowedInstances.length === 0) {
@@ -38,12 +56,12 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
   // const instance = allowedInstances.find((entry: EscalationDetails) => entry.instanceId === instanceId)
   // const isAuthorised = instance?.userIds.includes(userId) ?? false
 
-  if (!isAuthorised) {
-    log.warn({}, `The system user ${userId} is not in the allow list under instance ${instanceId}.`)
-    return false
-  }
+  // if (!isAuthorised) {
+  //   log.warn({}, `The system user ${userId} is not in the allow list under instance ${instanceId}.`)
+  //   return false
+  // }
 
-  return true
+  // return true
 }
 
 /**

@@ -1,9 +1,10 @@
 import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
-import { generateEscalationHeaders } from '../../services/escalation/sendingEscalation.js'
+import { BAILO_ID_HEADER, USER_HEADER } from '../../services/escalation/receivingEscalation.js'
 import { isBailoError } from '../../types/error.js'
 import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
+import config from '../../utils/config.js'
 import { GenericError, InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
@@ -76,7 +77,17 @@ export class BailoPeerConnector extends BasePeerConnector {
   async request<T>(path: string, user: UserInterface = { dn: '' }) {
     let res: Response
     const requestUrl = this.config.baseUrl.concat(path)
-    const headers = generateEscalationHeaders(user.dn)
+
+    // const headers = generateEscalationHeaders(user.dn)
+
+    const headers = new Headers({
+      [BAILO_ID_HEADER]: config.federation.id,
+    })
+
+    if (user.dn !== '' && config.federation.isEscalationEnabled) {
+      headers.set(USER_HEADER, user.dn)
+    }
+
     try {
       res = await fetch(requestUrl, {
         agent: this.getHttpsAgent(),
