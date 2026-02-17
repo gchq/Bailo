@@ -30,13 +30,6 @@ autoscaling:
 podSecurityContext:
   {}
   # fsGroup: 2000
-securityContext:
-  # capabilities:
-  #   drop:
-  #     - ALL
-  readOnlyRootFilesystem: false
-  runAsNonRoot: true
-  # runAsUser: 1002380001
 
 # Networking
 # Ingress/route implementation. Also, see appPublicRoute below.
@@ -321,6 +314,8 @@ instrumentation:
 modelMirror:
   import:
     enabled: false
+    additionalInfoHeading: 'Additional information'
+    originalAnswerHeading: 'Original answer'
   export:
     concurrency: 5
     enabled: false
@@ -333,6 +328,7 @@ modelMirror:
         accessKey: ''
         secretKey: ''
 
+
 # Inferencing cluster reference
 inference:
   enabled: false
@@ -344,6 +340,22 @@ inference:
 
 backend:
   serviceAccount: ''
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  securityContext:
+    readOnlyRootFilesystem: false
+    # capabilities:
+    #   drop:
+    #     - ALL
+    # runAsUser: 1002380001
+
+frontend:
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  securityContext:
+    readOnlyRootFilesystem: false
 
 clamav:
   enabled: false

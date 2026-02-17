@@ -72,7 +72,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       return (
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
-            <ListItem dense sx={{ pl: paddingLeft }} id={path.replaceAll('/', '-')}>
+            <ListItem dense sx={{ pl: 1 + paddingLeft }} id={path.replaceAll('/', '-')}>
               <ListItemText
                 primary={doc.title}
                 slotProps={{
@@ -83,7 +83,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           ) : (
             <ListItem dense sx={{ pl: paddingLeft }} id={path.replaceAll('/', '-')}>
               <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                <ListItemButton dense selected={isSelected} sx={{ pl: 0 }}>
+                <ListItemButton dense selected={isSelected} sx={{ pl: 1 }}>
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
@@ -139,11 +139,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             overflow: 'auto',
             py: 2,
           })}
+          position={{ xs: 'relative', sm: 'fixed' }}
           height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
         >
           <StyledList>{createDocElement(directory)}</StyledList>
         </Box>
-        <Box flex={1} overflow='auto' sx={{ height: 'calc(100vh - 80px)' }}>
+        <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
           <Box display='flex' flexDirection='column'>
             <Container
               maxWidth='lg'

@@ -14,7 +14,7 @@ import {
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
-import { ModelDoc } from '../models/Model.js'
+import { EntryKind, ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
@@ -36,7 +36,7 @@ export async function uploadFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -81,7 +81,7 @@ export async function startUploadMultipartFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings?.mirror?.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -182,7 +182,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
 
   const auth = await authorisation.file(user, model, file, FileAction.Download)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
   }
 
   const stream = await getObjectStream(file.path, undefined, range)
@@ -209,6 +209,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         total: totalPretty,
         totalBytes,
         fileId,
+        modelId: model.id,
       },
       'Object download is in progress',
     )
@@ -222,6 +223,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         total: prettyBytes(file.size),
         totalBytes: file.size,
         fileId,
+        modelId: model.id,
       },
       progress === file.size
         ? 'Object download stream closed with no data remaining'
@@ -261,7 +263,7 @@ export async function getFileById(
   }
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
   }
 
   return file
@@ -325,7 +327,7 @@ export async function removeFiles(
   session?: ClientSession | undefined,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot remove file from a mirrored model.')
   }
   const allFiles: FileWithScanResultsInterface[] = []

@@ -94,7 +94,7 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ settings: { mirror: { sourceModelId: '' } } })),
+  getModelById: vi.fn(() => ({ kind: 'model' })),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -170,7 +170,7 @@ describe('services > file', () => {
   })
 
   test('uploadFile > no permission', async () => {
-    vi.mocked(authorisation.file).mockResolvedValue({
+    vi.mocked(authorisation.file).mockResolvedValueOnce({
       info: 'You do not have permission to upload a file to this model.',
       success: false,
       id: '',
@@ -188,7 +188,7 @@ describe('services > file', () => {
     const mime = 'text/plain'
     const stream = new Readable() as any
 
-    modelMocks.getModelById.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: '123' } } })
+    modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model' })
 
     await expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
       /^Cannot upload files to a mirrored model./,
@@ -197,7 +197,7 @@ describe('services > file', () => {
   })
 
   test('uploadFile > fileSize 0', async () => {
-    vi.mocked(s3Mocks.putObjectStream).mockResolvedValue({
+    vi.mocked(s3Mocks.putObjectStream).mockResolvedValueOnce({
       fileSize: 0,
     })
 
@@ -222,7 +222,7 @@ describe('services > file', () => {
   })
 
   test('startUploadMultipartFile > no permission', async () => {
-    vi.mocked(authorisation.file).mockResolvedValue({
+    vi.mocked(authorisation.file).mockResolvedValueOnce({
       info: 'You do not have permission to upload a file to this model.',
       success: false,
       id: '',
@@ -234,7 +234,7 @@ describe('services > file', () => {
   })
 
   test('startUploadMultipartFile > failed to get uploadId', async () => {
-    vi.mocked(s3Mocks.startMultipartUpload).mockResolvedValue({} as any)
+    vi.mocked(s3Mocks.startMultipartUpload).mockResolvedValueOnce({} as any)
 
     await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
       /^Failed to get uploadId from startMultipartUpload./,
@@ -242,7 +242,7 @@ describe('services > file', () => {
   })
 
   test('startUploadMultipartFile > should throw an error when attempting to upload a file to a mirrored model', async () => {
-    modelMocks.getModelById.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: '123' } } })
+    modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model' })
 
     await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
       /^Cannot upload files to a mirrored model./,
@@ -270,7 +270,7 @@ describe('services > file', () => {
   })
 
   test('finishUploadMultipartFile > no permission', async () => {
-    vi.mocked(authorisation.file).mockResolvedValue({
+    vi.mocked(authorisation.file).mockResolvedValueOnce({
       info: 'You do not have permission to upload a file to this model.',
       success: false,
       id: '',
@@ -282,7 +282,7 @@ describe('services > file', () => {
   })
 
   test('finishUploadMultipartFile > no file', async () => {
-    FileModelMock.findById.mockResolvedValue(undefined)
+    FileModelMock.findById.mockResolvedValueOnce(undefined)
 
     await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
       /^The requested file was not found./,
@@ -290,7 +290,7 @@ describe('services > file', () => {
   })
 
   test('finishUploadMultipartFile > no metadata ContentLength', async () => {
-    vi.mocked(s3Mocks.headObject).mockResolvedValue({} as any)
+    vi.mocked(s3Mocks.headObject).mockResolvedValueOnce({} as any)
 
     await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
       /^Could not determine uploaded file size./,
@@ -375,7 +375,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     modelMocks.getModelById.mockResolvedValueOnce({
-      settings: { mirror: { sourceModelId: 'sourceModelId' } },
+      kind: 'mirrored-model',
     } as any)
     vi.mocked(FileModelMock.aggregate)
       .mockResolvedValueOnce([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
@@ -392,7 +392,7 @@ describe('services > file', () => {
 
   test('removeFiles > throw on mirrored model', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
-      settings: { mirror: { sourceModelId: 'sourceModelId' } },
+      kind: 'mirrored-model',
     } as any)
 
     await expect(() => removeFiles({} as any, 'modelId', [testFileId])).rejects.toThrowError(
@@ -413,7 +413,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByModel > no permission', async () => {
-    vi.mocked(authorisation.files).mockResolvedValue([
+    vi.mocked(authorisation.files).mockResolvedValueOnce([
       {
         info: 'You do not have permission to get the files from this model.',
         success: false,
@@ -457,7 +457,7 @@ describe('services > file', () => {
         scanResults: [{ fileId: '321' }],
       },
     ])
-    vi.mocked(authorisation.files).mockResolvedValue([
+    vi.mocked(authorisation.files).mockResolvedValueOnce([
       { success: true, id: '123' },
       { success: true, id: '321' },
     ])
@@ -496,7 +496,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > no permission', async () => {
-    vi.mocked(authorisation.files).mockResolvedValue([
+    vi.mocked(authorisation.files).mockResolvedValueOnce([
       {
         info: 'You do not have permission to get the files from this model.',
         success: false,

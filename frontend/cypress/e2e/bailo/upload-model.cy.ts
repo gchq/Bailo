@@ -67,12 +67,14 @@ describe('Create new model', () => {
     cy.log('Test that we can edit the model card')
     cy.contains('Edit model card')
     cy.get('[data-test=editEntryCardButton]').click({ force: true })
-    cy.get('#root_modelSummary').type('This is a test summary', { force: true })
+    // Wait for debounce to finish rendering change
+    cy.get('#root_modelSummary').type('This is a test summary', { force: true }).wait(500)
     cy.get('[data-test=cancelEditEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary').should('not.exist')
     cy.get('[data-test=openEntryOverviewActions]').click()
     cy.get('[data-test=editEntryCardButton]').click({ force: true })
-    cy.get('#root_modelSummary').type('This is a test summary', { force: true })
+    // Wait for debounce to finish rendering change
+    cy.get('#root_modelSummary').type('This is a test summary', { force: true }).wait(500)
     cy.get('[data-test=saveEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary')
   })

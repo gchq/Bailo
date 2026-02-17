@@ -20,8 +20,8 @@ export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick 
       <Typography fontWeight='bold' variant='h5' component='h2'>
         {title}
       </Typography>
-      {canAdd && registry.formContext.editMode && (
-        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />} sx={{ width: 'fit-content' }}>
+      {canAdd && registry.formContext.editMode && !registry.formContext.mirroredModel && (
+        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
           Add Item
         </Button>
       )}
@@ -78,13 +78,13 @@ export function ObjectFieldTemplate({
           </Stack>
           <Typography variant='caption'>{description}</Typography>
         </div>
-        <div style={{ marginLeft: 10 }}>
+        <Stack style={{ marginLeft: 10 }} spacing={2}>
           {properties.map((element) => (
-            <div key={element.name} className='property-wrapper'>
+            <Box key={element.name} className='property-wrapper'>
               {element.content}
-            </div>
+            </Box>
           ))}
-        </div>
+        </Stack>
       </Stack>
     </Box>
   )
