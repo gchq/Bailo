@@ -336,9 +336,4 @@ module.exports = {
   inference: {
     authorisationToken: '',
   },
-
-  escalation: {
-    isEnabled: false,
-    allowed: [],
-  },
 }

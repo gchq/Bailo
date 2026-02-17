@@ -5,7 +5,7 @@
 
 import { Request } from 'express'
 
-import { EscalationDetails } from '../../types/types.js'
+// import { EscalationDetails } from '../../types/types.js'
 import config from '../../utils/config.js'
 import log from '../log.js'
 import { BAILO_ID_HEADER, USER_HEADER } from './sendingEscalation.js'
@@ -13,20 +13,30 @@ import { BAILO_ID_HEADER, USER_HEADER } from './sendingEscalation.js'
 /**
  * Checks if the provided user is in the allow list under an allowed bailo instance.
  * @param user The userId
- * @param instance The Bailo instanceId
+ * @param instance The Bailo federation instanceId
  */
 export const isAuthorisedToEscalate = (userId: string, instanceId: string): boolean => {
-  const allowedInstances = config?.escalation?.allowed
+  // const allowedInstances = config?.escalation?.allowed
 
-  // Check there are allowed instances
-  if (!Array.isArray(allowedInstances) || allowedInstances.length === 0) {
-    log.warn('There are no Bailo instances in the allow list.')
+  // If the instanceId exists in the federation object then it is an allowed instance
+  if (!Object.hasOwn(config.federation, instanceId)) {
+    log.warn(`${instanceId} is not a known Bailo instance, please update the config if it is missing.`)
     return false
   }
 
+  const allowedUsers = config.federation[instanceId].allowedProcUserIds ?? []
+
+  const isAuthorised = allowedUsers.includes(userId) ?? false
+
+  // Check there are allowed instances
+  // if (!Array.isArray(allowedInstances) || allowedInstances.length === 0) {
+  //   log.warn('There are no Bailo instances in the allow list.')
+  //   return false
+  // }
+
   // Check the given user is authorised under the specified bailo instance
-  const instance = allowedInstances.find((entry: EscalationDetails) => entry.instanceId === instanceId)
-  const isAuthorised = instance?.userIds.includes(userId) ?? false
+  // const instance = allowedInstances.find((entry: EscalationDetails) => entry.instanceId === instanceId)
+  // const isAuthorised = instance?.userIds.includes(userId) ?? false
 
   if (!isAuthorised) {
     log.warn({}, `The system user ${userId} is not in the allow list under instance ${instanceId}.`)

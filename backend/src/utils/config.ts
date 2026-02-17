@@ -12,7 +12,7 @@ import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
 import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
-import { EscalationDetails, FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
+import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
 
 export type TransportOption = 'smtp' | 'aws'
@@ -210,11 +210,11 @@ export interface Config {
     authorisationToken: string
   }
 
-  escalation: {
-    isEnabled: boolean
-    // the list of users allowed to perform escalation
-    allowed: EscalationDetails[]
-  }
+  // escalation: {
+  //   isEnabled: boolean
+  //   // the list of users allowed to perform escalation
+  //   allowed: EscalationDetails[]
+  // }
 }
 
 const config: Config = _config.util.toObject()
