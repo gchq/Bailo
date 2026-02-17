@@ -5,8 +5,9 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, ArtefactType } from './Base.js'
+import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -22,7 +23,7 @@ function safeParseVersion(versionStr: string): string {
 
 export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
-  artefactType: ArtefactType = 'file'
+  artefactType: ArtefactTypeKeys = ArtefactType.FILE
   toolName = 'Clam AV'
   version: string | undefined = undefined
   av: NodeClam | undefined = undefined
@@ -39,7 +40,7 @@ export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
     return this
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
     if (!this.av) {
       return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`, {
@@ -59,14 +60,12 @@ export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
           }) as ClamAVSummary,
       )
 
-      return [
-        {
-          ...scannerInfo,
-          state: ArtefactScanState.Complete,
-          summary,
-          lastRunAt: new Date(),
-        },
-      ]
+      return {
+        ...scannerInfo,
+        state: ArtefactScanState.Complete,
+        summary,
+        lastRunAt: new Date(),
+      }
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,

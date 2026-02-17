@@ -4,6 +4,7 @@ import { FileInterface } from '../../models/File.js'
 import { ImageRefInterface } from '../../models/Release.js'
 import { ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { ArtefactTypeKeys } from '../../types/types.js'
 
 //TODO Remove file-specific mentions, but do I replace with artefact? or keep bare?
 
@@ -25,13 +26,11 @@ export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof Arte
 
 export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion'>
 
-export type ArtefactType = 'file' | 'image'
-
 export abstract class ArtefactBaseScanningConnector {
   abstract readonly toolName: string
   abstract readonly version: string | undefined
   abstract readonly queue: PQueue
-  abstract artefactType: ArtefactType
+  abstract artefactType: ArtefactTypeKeys
 
   info(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version }
@@ -39,9 +38,9 @@ export abstract class ArtefactBaseScanningConnector {
 
   abstract init()
 
-  abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]>
+  abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
 
-  async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult[]> {
+  async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult> {
     log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResults = await this.queue
       .add(() => this._scan(artefact))
@@ -55,15 +54,13 @@ export abstract class ArtefactBaseScanningConnector {
     return scanResults
   }
 
-  async scanError(message: string, context?: object): Promise<ArtefactScanResult[]> {
+  async scanError(message: string, context?: object): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
     log.error({ ...context, ...scannerInfo }, message)
-    return [
-      {
-        ...scannerInfo,
-        state: ArtefactScanState.Error,
-        lastRunAt: new Date(),
-      },
-    ]
+    return {
+      ...scannerInfo,
+      state: ArtefactScanState.Error,
+      lastRunAt: new Date(),
+    }
   }
 }

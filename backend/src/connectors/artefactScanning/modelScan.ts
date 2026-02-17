@@ -5,12 +5,13 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, ArtefactType } from './Base.js'
+import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState } from './Base.js'
 
 export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.artefactScanning.modelscan.concurrency })
-  artefactType: ArtefactType = 'file'
+  artefactType: ArtefactTypeKeys = ArtefactType.FILE
   toolName: string = 'ModelScan'
   version: string | undefined = undefined
 
@@ -24,7 +25,7 @@ export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnecto
     return this
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {
@@ -53,14 +54,12 @@ export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnecto
       )
 
       log.debug({ file, result: { summary }, ...scannerInfo }, 'Scan complete.')
-      return [
-        {
-          ...scannerInfo,
-          state: ArtefactScanState.Complete,
-          summary,
-          lastRunAt: new Date(),
-        },
-      ]
+      return {
+        ...scannerInfo,
+        state: ArtefactScanState.Complete,
+        summary,
+        lastRunAt: new Date(),
+      }
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,

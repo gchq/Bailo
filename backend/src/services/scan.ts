@@ -24,11 +24,8 @@ export async function scanFile(file: FileInterfaceDoc) {
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.startScans(file).then(
-      await ((resultsArray) => {
-        updateFileWithResults(file._id, resultsArray)
-      }),
-    )
+    const resultsArray = await scanners.startScans(file)
+    await updateFileWithResults(file._id, resultsArray)
   }
 
   const scanResults = await ScanModel.find({ fileId: file._id.toString() })
@@ -112,11 +109,8 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
-    scanners.startScans(file).then(
-      await ((resultsArray) => {
-        updateFileWithResults(file._id, resultsArray)
-      }),
-    )
+    const resultsArray = await scanners.startScans(file)
+    await updateFileWithResults(file._id, resultsArray)
   }
   return `Scan started for ${file.name}`
 }
