@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack'
 import { useEffect, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Link from 'src/Link'
-//Testing commit - SHERLOCKSherlockSHERLOCK
+
 type PartialLinkMessageAlertProps =
   | {
       linkText: string
