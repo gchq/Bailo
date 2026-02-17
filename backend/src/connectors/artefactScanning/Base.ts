@@ -30,12 +30,12 @@ export type ArtefactType = 'file' | 'image'
 export abstract class ArtefactBaseScanningConnector {
   abstract readonly toolName: string
   abstract readonly version: string | undefined
+  abstract readonly queue: PQueue
+  abstract artefactType: ArtefactType
 
   info(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version }
   }
-  abstract readonly queue: PQueue
-  abstract artefactType: ArtefactType
 
   abstract init()
 
