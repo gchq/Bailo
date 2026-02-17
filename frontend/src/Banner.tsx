@@ -4,7 +4,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 
 export default function Banner() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-  //Testing commit - Sherlock
+  // Testing commit - Sherlock
   const style = {
     pt: 0.5,
     pb: 0.5,

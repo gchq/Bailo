@@ -153,7 +153,7 @@ fi
 RUN_TRUFFLE_HOGGING="${RUN_TRUFFLE_HOGGING:-false}"
 
 # Check if we need to run
-if [ "$RUN_TRUFFLE_HOGGING" != "true" ]; then
+if [ "$RUN_TRUFFLE_HOGGING" = "true" ]; then
 
   echo "Truffle Hog check enabled, running check..."
 
