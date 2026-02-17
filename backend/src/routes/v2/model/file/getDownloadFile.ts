@@ -157,7 +157,7 @@ export const getDownloadFile = [
         message: 'Error occurred whilst streaming file',
         status: 500,
         cause: err instanceof Error ? err.message : String(err),
-        context: { fileId },
+        context: { fileId, modelId: params.modelId },
       }
 
       if (!headersCommitted && !res.headersSent) {
@@ -185,7 +185,10 @@ export const getDownloadFile = [
     // Client disconnect cleanup
     res.once('close', () => {
       if (!stream.readableEnded && !stream.destroyed) {
-        log.debug({ fileId }, 'Response has been closed before file stream has finished. Destroying file stream.')
+        log.debug(
+          { fileId, modelId: params.modelId },
+          'Response has been closed before file stream has finished. Destroying file stream.',
+        )
         stream.destroy()
       }
     })
