@@ -187,7 +187,7 @@ export default function FileDisplay({
       file.scanResults !== undefined &&
       file.scanResults.some((scan) => scan.state === ScanState.Error)
     ) {
-      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'warning', icon: <Warning /> })
+      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Warning /> })
       return
     } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
       setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
@@ -198,7 +198,7 @@ export default function FileDisplay({
     } else {
       setChipDisplay({
         label: 'There was a problem fetching the file scan results',
-        colour: 'warning',
+        colour: 'error',
         icon: <Warning />,
       })
     }
@@ -261,6 +261,7 @@ export default function FileDisplay({
           />
         )}
         <Popover
+          hidden={file.scanResults && file.scanResults.some((res) => res.state === ScanState.InProgress)}
           open={openScan}
           anchorEl={anchorElScan}
           onClose={() => setAnchorElScan(null)}
