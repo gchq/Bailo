@@ -1,6 +1,6 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseQueueArtefactScanningConnector } from './Base.js'
+import { ArtefactBaseScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
 import { ModelScanFileScanningConnector } from './modelScan.js'
 import { ArtefactScanningWrapper } from './wrapper.js'
@@ -11,7 +11,7 @@ export const ArtefactScanKind = {
 } as const
 export type ArtefactScanKindKeys = (typeof ArtefactScanKind)[keyof typeof ArtefactScanKind]
 
-const artefactScanConnectors: Set<BaseQueueArtefactScanningConnector> = new Set<BaseQueueArtefactScanningConnector>()
+const artefactScanConnectors: Set<ArtefactBaseScanningConnector> = new Set<ArtefactBaseScanningConnector>()
 let scannerWrapper: undefined | ArtefactScanningWrapper = undefined
 
 async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrapper> {
