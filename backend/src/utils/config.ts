@@ -20,7 +20,7 @@ export type TransportOption = 'smtp' | 'aws'
 export interface Config {
   /** ### API
    *
-   * These are parameters for Express app.Listen. This is functionally the same as [http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen), and will bind connections to nginx at `/api/v2`.
+   * These are parameters for Express `app.Listen`. This is functionally the same as [http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen), and will bind connections to nginx at `/api/v2`.
    *
    * See [https://expressjs.com/en/api.html#app.listen](https://expressjs.com/en/api.html#app.listen) */
   api: {

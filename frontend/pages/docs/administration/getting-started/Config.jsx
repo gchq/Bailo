@@ -80,7 +80,6 @@ export default function Config() {
   if (isUiConfigLoading) {
     return <Loading />
   }
-  console.log(uiConfig)
 
   return (
     <>
