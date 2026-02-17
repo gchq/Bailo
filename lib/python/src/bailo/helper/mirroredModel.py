@@ -333,8 +333,8 @@ class MirroredModel(Entry):
         :return: Model card version.
         """
         return {
-            "card": self._mirrored_card_version,
-            "additional_information": self._card,
+            "card": self._card_version,
+            "additional_information": self._mirrored_card_version,
         }
 
     @property
