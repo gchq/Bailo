@@ -1,14 +1,10 @@
 import { FileInterface } from '../../models/File.js'
 import { ImageRefInterface } from '../../models/Release.js'
 import log from '../../services/log.js'
+import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ConfigurationError } from '../../utils/error.js'
-import {
-  ArtefactBaseScanningConnector,
-  ArtefactInterface,
-  ArtefactScanningConnectorInfo,
-  ArtefactType,
-} from './Base.js'
+import { ConfigurationError, InternalError } from '../../utils/error.js'
+import { ArtefactBaseScanningConnector, ArtefactInterface, ArtefactScanningConnectorInfo } from './Base.js'
 
 export class ArtefactScanningWrapper {
   scanners: Set<ArtefactBaseScanningConnector> = new Set<ArtefactBaseScanningConnector>()
@@ -62,14 +58,14 @@ export class ArtefactScanningWrapper {
   isMatchingInterface(
     artefact: ArtefactInterface,
     scanner: ArtefactBaseScanningConnector,
-  ): { matching: boolean; artefactType: ArtefactType } {
-    let artefactType: ArtefactType | undefined = undefined
+  ): { matching: boolean; artefactType: ArtefactTypeKeys } {
+    let artefactType: ArtefactTypeKeys | undefined = undefined
     switch (true) {
       case !!(artefact as ImageRefInterface).tag:
-        artefactType = 'image'
+        artefactType = ArtefactType.IMAGE
         break
       case !!(artefact as FileInterface)._id:
-        artefactType = 'file'
+        artefactType = ArtefactType.FILE
     }
     if (artefactType !== undefined) {
       return { matching: artefactType === scanner.artefactType, artefactType }
@@ -84,26 +80,31 @@ export class ArtefactScanningWrapper {
         .map((scanner) => {
           const artefactMatch = this.isMatchingInterface(artefact, scanner)
           if (artefactMatch.matching) {
-            if (artefactMatch.artefactType === 'file') {
-              log.info(
-                {
-                  modelId: (artefact as FileInterface).modelId,
-                  fileId: (artefact as FileInterface)._id.toString(),
-                  name: (artefact as FileInterface).name,
-                  toolName: scanner.toolName,
-                },
-                'Scan started.',
-              )
-            } else {
-              log.info(
-                {
-                  repository: (artefact as ImageRefInterface).repository,
-                  name: (artefact as ImageRefInterface).name,
-                  tag: (artefact as ImageRefInterface).tag,
-                  toolName: scanner.toolName,
-                },
-                'Scan started.',
-              )
+            switch (artefactMatch.artefactType) {
+              case ArtefactType.FILE:
+                log.info(
+                  {
+                    modelId: (artefact as FileInterface).modelId,
+                    fileId: (artefact as FileInterface)._id.toString(),
+                    name: (artefact as FileInterface).name,
+                    toolName: scanner.toolName,
+                  },
+                  'Scan started.',
+                )
+                break
+              case ArtefactType.IMAGE:
+                log.info(
+                  {
+                    repository: (artefact as ImageRefInterface).repository,
+                    name: (artefact as ImageRefInterface).name,
+                    tag: (artefact as ImageRefInterface).tag,
+                    toolName: scanner.toolName,
+                  },
+                  'Scan started.',
+                )
+                break
+              default:
+                throw InternalError('Incompatible artefact type')
             }
 
             return scanner.scan(artefact)

@@ -25,7 +25,7 @@ import { longId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
-import { scanArtefact } from './scan.js'
+import { scanFile } from './scan.js'
 
 export async function uploadFile(
   user: UserInterface,
@@ -63,7 +63,7 @@ export async function uploadFile(
 
   await file.save()
 
-  return await scanArtefact(file)
+  return await scanFile(file)
 }
 
 export async function saveImportedFile(file: FileInterface) {
@@ -173,7 +173,7 @@ export async function finishUploadMultipartFile(
 
   file.save()
 
-  return await scanArtefact(file)
+  return await scanFile(file)
 }
 
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {
