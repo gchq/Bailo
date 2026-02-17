@@ -65,6 +65,15 @@ function buildTree() {
   return documentation
 }
 
-const markdownConfig = buildTree()
+let cached: DocumentationNode[] | undefined
 
+function buildTreeCached() {
+  if (cached) {
+    return cached
+  }
+  cached = buildTree()
+  return cached
+}
+
+const markdownConfig = buildTreeCached()
 export default markdownConfig

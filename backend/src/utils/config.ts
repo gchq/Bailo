@@ -24,7 +24,7 @@ export interface Config {
    *
    * See [https://expressjs.com/en/api.html#app.listen](https://expressjs.com/en/api.html#app.listen) */
   api: {
-    /** Host is redundant in our app */
+    /** @deprecated Host is unused in our app */
     host: string
     /** Port number to expose the express backend on (usually 3001) */
     port: number
@@ -252,7 +252,7 @@ export interface Config {
     service: string
     /** The registry issuer */
     issuer: string
-    /** Redundant  */
+    /** @deprecated Redundant with connection.insecure */
     insecure: boolean
   }
   /** ### UI Configuration
