@@ -1,7 +1,7 @@
 import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
-import { generateEscalationHeaders } from '../../services/escalation.js'
+import { generateEscalationHeaders } from '../../services/escalation/sendingEscalation.js'
 import { isBailoError } from '../../types/error.js'
 import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
 import { GenericError, InternalError } from '../../utils/error.js'

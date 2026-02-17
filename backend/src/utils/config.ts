@@ -61,6 +61,7 @@ export interface Config {
   federation: {
     state: FederationStateKeys
     id: string
+    isEscalationEnabled?: boolean
     peers: Map<string, RemoteFederationConfig>
   }
 

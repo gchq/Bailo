@@ -1,32 +1,19 @@
+/**
+ * This file contains functions used by a Bailo instance on
+ * receipt of user escalation requests from other Bailo instances.
+ */
+
 import { Request } from 'express'
 
-import log from '../services/log.js'
-import { EscalationDetails } from '../types/types.js'
-import config from '../utils/config.js'
-
-const USER_HEADER = 'x-user'
-const BAILO_ID_HEADER = 'x-bailo-id'
-
-/**
- * Generate headers to escalate the request in the receiving Bailo instance.
- */
-export const generateEscalationHeaders = (requestingUserId: string): Headers => {
-  // If user is provided and escalation is enabled
-  if (requestingUserId !== '' && config.escalation.isEnabled) {
-    return new Headers({
-      [USER_HEADER]: requestingUserId,
-      [BAILO_ID_HEADER]: config.federation.id,
-    })
-  }
-  return new Headers({
-    [BAILO_ID_HEADER]: config.federation.id,
-  })
-}
+import { EscalationDetails } from '../../types/types.js'
+import config from '../../utils/config.js'
+import log from '../log.js'
+import { BAILO_ID_HEADER, USER_HEADER } from './sendingEscalation.js'
 
 /**
  * Checks if the provided user is in the allow list under an allowed bailo instance.
- * @param user The users id
- * @param instance The Bailo instance id
+ * @param user The userId
+ * @param instance The Bailo instanceId
  */
 export const isAuthorisedToEscalate = (userId: string, instanceId: string): boolean => {
   const allowedInstances = config?.escalation?.allowed
@@ -55,10 +42,9 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
  * If the user is provided as a header then assume escalation is required,
  * if so then check if authorised to escalate.
  */
-export const escalateUserIfAuthorised = (req: Request): Request => {
-  const headers = req.headers
-  const requestingUser = headers[USER_HEADER]
-  const bailoId = headers[BAILO_ID_HEADER]
+export const escalateUserIfAuthorised = (req: Request) => {
+  const requestingUser = req.header(USER_HEADER)
+  const bailoId = req.header(BAILO_ID_HEADER)
 
   if (requestingUser && bailoId && typeof bailoId === 'string') {
     // Check the requesting proc user is authorised and part of an accepted Bailo instance
@@ -69,5 +55,4 @@ export const escalateUserIfAuthorised = (req: Request): Request => {
       log.info({}, `The system user ${req.user.dn} has been escalated to user ${requestingUser}.`)
     }
   }
-  return req
 }

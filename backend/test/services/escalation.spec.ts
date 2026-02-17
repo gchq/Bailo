@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import {
-  escalateUserIfAuthorised,
-  generateEscalationHeaders,
-  isAuthorisedToEscalate,
-} from '../../src/services/escalation.js'
+import { escalateUserIfAuthorised, isAuthorisedToEscalate } from '../../src/services/escalation/receivingEscalation.js'
+import { generateEscalationHeaders } from '../../src/services/escalation/sendingEscalation.js'
 import config from '../../src/utils/config.js'
 
 describe('escalation > isAuthorisedToEscalate', () => {
@@ -54,7 +51,7 @@ describe('escalation > isAuthorisedToEscalate', () => {
 })
 
 describe('escalation > escalateUserIfAuthorised', () => {
-  test('escalateUserIfAuthorised > should escalate when system user is authorised', () => {
+  beforeEach(() => {
     vi.spyOn(config, 'escalation', 'get').mockReturnValue({
       isEnabled: true,
       allowed: [
@@ -64,6 +61,8 @@ describe('escalation > escalateUserIfAuthorised', () => {
         },
       ],
     })
+  })
+  test('escalateUserIfAuthorised > should escalate when system user is authorised', () => {
     const req = {
       headers: {
         'x-user': 'app-user-1',
@@ -71,21 +70,12 @@ describe('escalation > escalateUserIfAuthorised', () => {
       },
       user: { dn: 'system-user-1' },
     }
-    const result = escalateUserIfAuthorised(req as any)
-    expect(result.user).toEqual({
+    escalateUserIfAuthorised(req as any)
+    expect(req.user).toEqual({
       dn: 'app-user-1',
     })
   })
   test('escalateUserIfAuthorised > should not escalate when system user is not authorised', () => {
-    vi.spyOn(config, 'escalation', 'get').mockReturnValue({
-      isEnabled: true,
-      allowed: [
-        {
-          instanceId: 'bailo-instance-1',
-          userIds: ['system-user-1'],
-        },
-      ],
-    })
     const req = {
       headers: {
         'x-user': 'app-user-1',
@@ -93,21 +83,12 @@ describe('escalation > escalateUserIfAuthorised', () => {
       },
       user: { dn: 'system-user-2' },
     }
-    const result = escalateUserIfAuthorised(req as any)
-    expect(result.user).toEqual({
+    escalateUserIfAuthorised(req as any)
+    expect(req.user).toEqual({
       dn: 'system-user-2',
     })
   })
   test('escalateUserIfAuthorised > should not escalate when instance is not in allowed list', () => {
-    vi.spyOn(config, 'escalation', 'get').mockReturnValue({
-      isEnabled: true,
-      allowed: [
-        {
-          instanceId: 'bailo-instance-1',
-          userIds: ['system-user-1'],
-        },
-      ],
-    })
     const req = {
       headers: {
         'x-user': 'app-user-1',
@@ -115,8 +96,8 @@ describe('escalation > escalateUserIfAuthorised', () => {
       },
       user: { dn: 'system-user-2' },
     }
-    const result = escalateUserIfAuthorised(req as any)
-    expect(result.user).toEqual({
+    escalateUserIfAuthorised(req as any)
+    expect(req.user).toEqual({
       dn: 'system-user-2',
     })
   })
