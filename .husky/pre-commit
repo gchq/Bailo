@@ -43,7 +43,7 @@ else
 fi
 
 
-# ---- Ripgrep Keyword Check ----
+# ---- Grep Keyword Check ----
 
 # Load local Husky config
 HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/husky-config.conf"
@@ -121,22 +121,7 @@ if ! git diff --cached --name-only --diff-filter=ACM | grep -q .; then
   exit 0
 fi
 
-# Run ripgrep only on staged files
-# if git diff --cached --name-only -z --diff-filter=ACM |
-#   xargs -0 rg \
-#     -n \
-#     -F \
-#     -f "$TMP_KEYWORDS_FILE" \
-#     --glob '!:node_modules/**' \
-#     --glob '!:.husky/**'
-# then
-#   echo ""
-#   echo "ERROR: Keywords detected in staged files."
-#   [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
-#   exit 1
-# fi
-
-
+# Run grep only on staged files
 if git grep -n -F -f "$TMP_KEYWORDS_FILE" --cached -- $STAGED_FILES
 then
   echo ""
