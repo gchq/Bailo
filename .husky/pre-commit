@@ -43,7 +43,7 @@ else
 fi
 
 
-# ---- Grep Keyword Check ----
+# ---- Check Husky Config for Additional Checks ----
 
 # Load local Husky config
 HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/husky-config.conf"
@@ -55,6 +55,12 @@ else
   echo "Create it locally (it is gitignored)."
   exit 1
 fi
+
+# Will use these staged files for both checks
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+
+# ---- Optional: Keyword Check - if enabled ----
 
 RUN_KEYWORD_CHECK="${RUN_KEYWORD_CHECK:-false}"
 
@@ -119,8 +125,8 @@ if [ "$RUN_KEYWORD_CHECK" = "true" ]; then
 
   # Get list of staged files (Added, Copied, Modified)
   # STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
-  STAGED_FILES_TMP="$(mktemp)"
-  git diff --cached --name-only -z --diff-filter=ACM > "$STAGED_FILES_TMP"
+  # STAGED_FILES_TMP="$(mktemp)"
+  # git diff --cached --name-only -z --diff-filter=ACM > "$STAGED_FILES_TMP"
 
   # If nothing is staged, skip (cheap pre-check)
   if [ -z "$STAGED_FILES" ]; then
