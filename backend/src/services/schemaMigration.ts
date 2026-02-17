@@ -1,6 +1,6 @@
 import { ModelAction, SchemaMigrationAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { ModelDoc } from '../models/Model.js'
+import ModelModel, { EntryKind, ModelDoc } from '../models/Model.js'
 import ModelCardRevisionModel from '../models/ModelCardRevision.js'
 import SchemaMigrationModel, { SchemaMigrationInterface } from '../models/SchemaMigration.js'
 import { UserInterface } from '../models/User.js'
@@ -91,6 +91,14 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
 
   if (!model.card) {
     throw BadReq('Model cannot be migrated as it does not have a valid model card.', { modelId })
+  }
+
+  if (EntryKind.MirroredModel === model.kind) {
+    if (model.card?.schemaId === model.mirroredCard?.schemaId) {
+      throw BadReq(
+        'This mirrored model cannot be migrated as the schema matches that of the source model. Please migrate the source model first.',
+      )
+    }
   }
 
   const migrationPlan = await SchemaMigrationModel.findOne({ id: migrationPlanId })

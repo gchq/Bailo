@@ -9,7 +9,8 @@ import config from '../../utils/config.js'
 import { getConnectionURI } from '../../utils/database.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
 import { InternalError, NotFound } from '../../utils/error.js'
-import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
+import { BaseAuthenticationConnector } from './Base.js'
+import { RoleKeys, Roles, UserInformation } from './constants.js'
 
 const OauthEntityKind = {
   User: 'user',
@@ -66,7 +67,9 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
 
     router.get('/api/logout', (req, res) => {
       req.session.destroy(function (err: unknown) {
-        if (err) throw err
+        if (err) {
+          throw err
+        }
         res.redirect('/')
       })
     })

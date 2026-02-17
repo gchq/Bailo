@@ -1,7 +1,7 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { useGetEntry } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
-import { useGetModel } from 'actions/model'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
@@ -43,7 +43,11 @@ export default function NewRelease() {
   const router = useRouter()
 
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
 
   useEffect(() => {
     if (model && modelCardVersion !== model.card.version) {
@@ -176,7 +180,9 @@ export default function NewRelease() {
   const error = MultipleErrorWrapper(`Unable to load release page`, {
     isModelError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

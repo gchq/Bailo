@@ -58,6 +58,39 @@ const eslintConfig = [
       'simple-import-sort/exports': 'warn',
       'no-duplicate-imports': 'warn',
       'no-console': 'warn',
+      curly: ['error', 'all'],
+    },
+  },
+
+  // Restrict Zod imports in src/
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    ignores: ['test/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'zod',
+              message:
+                'Do not import runtime values from "zod". `import { z } from "src/lib/zod.js"` instead so OpenAPI extensions are applied. `import type { ... } from "zod"` is permitted.',
+              /**
+               * Allow type-only imports:
+               *   import type { ZodSchema } from "zod"
+               */
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Exception: Zod bootstrap file
+  {
+    files: ['src/lib/zod.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
 ]

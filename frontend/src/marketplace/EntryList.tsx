@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Paginate from 'src/common/Paginate'
@@ -23,11 +23,6 @@ interface EntryListProps {
   displayState?: boolean
   displayPeers?: boolean
   peers?: Map<string, PeerConfigStatus>
-}
-
-interface RowProps {
-  data: EntrySearchResult[]
-  index: number
 }
 
 type ListRef = {
@@ -70,9 +65,11 @@ export default function EntryList({
     }
   }, [entries, ref])
 
-  if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
+  if (entriesErrorMessage) {
+    return <MessageAlert message={entriesErrorMessage} severity='error' />
+  }
 
-  const Row = ({ data, index }: RowProps) => (
+  const Row = ({ data }) => (
     <EntryListRow
       selectedChips={selectedChips}
       onSelectedChipsChange={onSelectedChipsChange}
@@ -82,8 +79,7 @@ export default function EntryList({
       onSelectedStatesChange={onSelectedStatesChange}
       selectedPeers={selectedPeers}
       onSelectedPeersChange={onSelectedPeersChange}
-      data={data}
-      index={index}
+      entry={data}
       style={{ padding: theme.spacing(2.5) }}
       displayOrganisation={displayOrganisation}
       displayState={displayState}

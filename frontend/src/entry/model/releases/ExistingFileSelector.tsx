@@ -86,16 +86,16 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
     [existingReleaseFiles, checkedFiles],
   )
 
-  const FileRow = memoize(({ data, index }) => (
-    <ListItem key={data[index]._id} disablePadding>
-      <ListItemButton dense onClick={handleToggle(data[index])} disabled={isFileDisabled(data[index])}>
+  const FileRow = memoize(({ data }) => (
+    <ListItem key={data._id} disablePadding>
+      <ListItemButton dense onClick={handleToggle(data)} disabled={isFileDisabled(data)}>
         <ListItemIcon>
           <Checkbox
             edge='start'
             checked={
-              checkedFiles.find((checkedFile) => checkedFile._id === data[index]._id) !== undefined ||
+              checkedFiles.find((checkedFile) => checkedFile._id === data._id) !== undefined ||
               existingReleaseFiles.find(
-                (existingFile) => isFileInterface(existingFile) && existingFile._id === data[index]._id,
+                (existingFile) => isFileInterface(existingFile) && existingFile._id === data._id,
               ) !== undefined
             }
             tabIndex={-1}
@@ -106,16 +106,16 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
           primary={
             <Stack>
               <Typography color='primary' component='span'>
-                {data[index].name}
+                {data.name}
               </Typography>
-              {isFileDisabled(data[index]) && (
+              {isFileDisabled(data) && (
                 <Typography variant='caption' color={theme.palette.error.main}>
                   A file with this name has either been selected, or is already on this release
                 </Typography>
               )}
             </Stack>
           }
-          secondary={`Added on ${formatDateString(data[index].createdAt.toString())} - ${prettyBytes(data[index].size)}`}
+          secondary={`Added on ${formatDateString(data.createdAt.toString())} - ${prettyBytes(data.size)}`}
         />
       </ListItemButton>
     </ListItem>
@@ -155,7 +155,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-          <Button onClick={handleAddFilesOnClick} disabled={checkedFiles.length === 0}>
+          <Button onClick={handleAddFilesOnClick} disabled={checkedFiles.length === 0} variant='contained'>
             Add files
           </Button>
         </DialogActions>

@@ -16,8 +16,8 @@ describe('Create new model', () => {
     cy.visit(newModelUrl)
     cy.get('[data-test=createModelButton]').click()
 
-    cy.get('[data-test=entryNameInput]').type('test model')
-    cy.get('[data-test=entryDescriptionInput]').type('test description')
+    cy.get('[data-test=entryNameInput]').type('test model', { force: true })
+    cy.get('[data-test=entryDescriptionInput]').type('test description', { force: true })
 
     cy.get('[data-test=publicButtonSelector]').click()
     cy.get('[data-test=createEntryButton]').click()
@@ -38,8 +38,8 @@ describe('Create new model', () => {
     cy.get('[data-test=createModelButton]').click()
 
     cy.log('Filling out the form to make a private model and submitting')
-    cy.get('[data-test=entryNameInput]').type('test model')
-    cy.get('[data-test=entryDescriptionInput]').type('test description')
+    cy.get('[data-test=entryNameInput]').type('test model', { force: true })
+    cy.get('[data-test=entryDescriptionInput]').type('test description', { force: true })
 
     cy.get('[data-test=privateButtonSelector]').click()
     cy.get('[data-test=createEntryButton]').click()
@@ -67,13 +67,27 @@ describe('Create new model', () => {
     cy.log('Test that we can edit the model card')
     cy.contains('Edit model card')
     cy.get('[data-test=editEntryCardButton]').click({ force: true })
-    cy.get('#root_modelSummary').type('This is a test summary', { force: true })
+    // Wait for debounce to finish rendering change
+    cy.get('#root_modelSummary').type('This is a test summary', { force: true }).wait(500)
     cy.get('[data-test=cancelEditEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary').should('not.exist')
     cy.get('[data-test=openEntryOverviewActions]').click()
     cy.get('[data-test=editEntryCardButton]').click({ force: true })
-    cy.get('#root_modelSummary').type('This is a test summary', { force: true })
+    // Wait for debounce to finish rendering change
+    cy.get('#root_modelSummary').type('This is a test summary', { force: true }).wait(500)
     cy.get('[data-test=saveEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary')
+  })
+
+  it('can view the model card history of an existing model', () => {
+    cy.log('Navigating to an existing model')
+    cy.visit(`/model/${modelUuid}`)
+    cy.log('Test that we can edit the model card')
+    cy.get('[data-test=openEntryOverviewActions]').click()
+    cy.contains('View History')
+    cy.get('[data-test=viewHistoryButton]').click()
+    cy.contains('Model Card History')
+    cy.visit(`/model/${modelUuid}/history/1`)
+    cy.contains('Back to model')
   })
 })

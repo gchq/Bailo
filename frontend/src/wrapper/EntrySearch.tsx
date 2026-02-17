@@ -1,7 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, Chip, InputBase, List, ListItem, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { useListEntries } from 'actions/entry'
 import { ChangeEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -19,7 +19,6 @@ const Search = styled('div')(({ theme }) => ({
   },
   width: '100%',
   [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
     width: 'auto',
   },
 }))
@@ -46,11 +45,19 @@ export default function EntrySearch() {
   const debouncedFilter = useDebounce(modelFilter, 250)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
-  const {
-    models: entries,
-    isModelsLoading: isEntriesLoading,
-    isModelsError: isEntriesError,
-  } = useListModels(undefined, [], '', [], [], [], [], debouncedFilter, false, '', true)
+  const { entries, isEntriesLoading, isEntriesError } = useListEntries(
+    undefined,
+    [],
+    '',
+    [],
+    [],
+    [],
+    [],
+    debouncedFilter,
+    false,
+    '',
+    true,
+  )
 
   const modelList = useMemo(
     () =>

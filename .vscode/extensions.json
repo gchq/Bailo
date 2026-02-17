@@ -1,15 +1,27 @@
 {
   "recommendations": [
+    "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
     "editorconfig.editorconfig",
+    "esbenp.prettier-vscode",
+    "mongodb.mongodb-vscode",
+    "ms-azuretools.vscode-docker",
+    "ms-python.black-formatter",
+    "ms-python.debugpy",
+    "ms-python.flake8",
+    "ms-python.isort",
+    "ms-python.pylint",
     "ms-python.python",
     "ms-python.vscode-pylance",
-    "ms-python.pylint",
-    "ms-python.isort",
-    "ms-python.flake8",
-    "ms-python.black-formatter",
+    "ms-python.vscode-python-envs",
+    "ms-toolsai.jupyter",
+    "ms-toolsai.jupyter-keymap",
+    "ms-toolsai.jupyter-renderers",
+    "njpwerner.autodocstring",
     "ryanluker.vscode-coverage-gutters",
-    "tamasfe.even-better-toml"
+    "shardulm94.trailing-spaces",
+    "streetsidesoftware.code-spell-checker",
+    "tamasfe.even-better-toml",
+    "timonwong.shellcheck",
   ]
 }

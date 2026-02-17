@@ -1,9 +1,11 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { FieldPathId, Registry, RJSFSchema } from '@rjsf/utils'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface RichTextInputProps {
   value: string
@@ -15,6 +17,8 @@ interface RichTextInputProps {
   readOnly?: boolean
   id: string
   rawErrors?: string[]
+  fieldPath?: FieldPathId
+  schema: RJSFSchema
 }
 
 export default function RichTextInput({
@@ -26,6 +30,7 @@ export default function RichTextInput({
   disabled,
   id,
   rawErrors,
+  schema,
 }: RichTextInputProps) {
   const theme = useTheme()
 
@@ -33,12 +38,20 @@ export default function RichTextInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   if (!registry.formContext.editMode) {
     return (
-      <>
-        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-          {label}
-        </Typography>
+      <AdditionalInformation
+        editMode={registry.formContext.editMode}
+        mirroredState={mirroredState ? <MarkdownDisplay>{mirroredState}</MarkdownDisplay> : undefined}
+        display={registry.formContext.mirroredModel && value}
+        label={label}
+        required={required}
+        id={id}
+        mirroredModel={registry.formContext.mirroredModel}
+        description={schema.description}
+      >
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
         ) : (
@@ -51,25 +64,27 @@ export default function RichTextInput({
             Unanswered
           </Typography>
         )}
-      </>
+      </AdditionalInformation>
     )
   }
 
   return (
-    <>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
+    >
       <RichTextEditor
         value={value}
         onChange={onChange}
         textareaProps={{ disabled, id }}
         errors={rawErrors}
-        label={
-          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
-        }
         key={label}
       />
-    </>
+    </AdditionalInformation>
   )
 }

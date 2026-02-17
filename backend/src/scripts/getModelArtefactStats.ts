@@ -22,6 +22,7 @@ import log from '../services/log.js'
 import { joinDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 function calculateAverages(values: number[]) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length
@@ -204,7 +205,9 @@ async function script() {
         dispatcher: agent,
       }).then((res) => res.json())) as { name: string; tags: string[] }
 
-      if (!tagsList.tags) return // no tags = skip
+      if (!tagsList.tags) {
+        return
+      } // no tags = skip
 
       // 5️⃣ Process each tag
       await Promise.all(
@@ -213,12 +216,14 @@ async function script() {
           const manifest = (await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => res.json())) as { layers?: { size: number }[] }
 
-          if (!manifest.layers) return
+          if (!manifest.layers) {
+            return
+          }
 
           // Calculate total image size for this image (sum of layer sizes)
           const totalImageSize = manifest.layers.reduce((sum, layer) => sum + (layer.size || 0), 0)

@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
+from bailo_modelscan_api import trivy
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.main import app, get_settings
 

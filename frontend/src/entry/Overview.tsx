@@ -1,6 +1,6 @@
 import { Box, Container, Stack } from '@mui/material'
 import { useMemo } from 'react'
-import OrganisationAndStateDetails from 'src/entry/model/OrganisationStateCollaboratorsDetails'
+import EntryOverviewDetails from 'src/entry/EntryOverviewDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
@@ -16,17 +16,19 @@ type OverviewPageKeys = (typeof OverviewPage)[keyof typeof OverviewPage]
 
 type OverviewProps = {
   entry: EntryInterface
-  readOnly?: boolean
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
 
-export default function Overview({ entry, readOnly = false, mutateEntry }: OverviewProps) {
+export default function Overview({ entry, mutateEntry }: OverviewProps) {
   const page: OverviewPageKeys = useMemo(
-    () => (entry.card && entry.card.schemaId ? OverviewPage.FORM : OverviewPage.TEMPLATE),
-    [entry.card],
+    () =>
+      (entry.card || entry.mirroredCard) && (entry.card.schemaId || entry.mirroredCard?.schemaId)
+        ? OverviewPage.FORM
+        : OverviewPage.TEMPLATE,
+    [entry.card, entry.mirroredCard],
   )
 
-  return entry.kind === EntryKind.MIRRORED_MODEL && !entry.card ? (
+  return entry.kind === EntryKind.MIRRORED_MODEL && !entry.mirroredCard?.metadata ? (
     <>
       <MessageAlert
         severity='warning'
@@ -34,24 +36,18 @@ export default function Overview({ entry, readOnly = false, mutateEntry }: Overv
       />
     </>
   ) : (
-    <Box sx={{ my: 2 }}>
+    <Container maxWidth='xl'>
       <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
-        <Box sx={{ p: 2 }}>
-          <OrganisationAndStateDetails entry={entry} />
+        <Box sx={{ pt: 2 }}>
+          <EntryOverviewDetails entry={entry} />
         </Box>
         <Box width='100%'>
           <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
-            {entry.kind === EntryKind.MIRRORED_MODEL && (
-              <MessageAlert
-                message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`}
-                severity='info'
-              />
-            )}
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-            {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} mutateEntry={mutateEntry} />}
+            {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
           </Container>
         </Box>
       </Stack>
-    </Box>
+    </Container>
   )
 }

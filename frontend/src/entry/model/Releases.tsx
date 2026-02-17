@@ -1,3 +1,4 @@
+import { Create } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -26,11 +27,11 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
 
-  const ReleaseListItem = memoize(({ data, index }) => (
+  const ReleaseListItem = memoize(({ data }) => (
     <ReleaseDisplay
-      key={data[index].semver}
+      key={data.semver}
       model={model}
-      release={data[index]}
+      release={data}
       latestRelease={latestRelease}
       hideReviewBanner={
         !hasRole(
@@ -79,6 +80,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
                   onClick={handleDraftNewRelease}
                   disabled={!model.card}
                   data-test='draftNewReleaseButton'
+                  startIcon={<Create />}
                 >
                   Draft new release
                 </Button>

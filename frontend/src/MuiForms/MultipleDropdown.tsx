@@ -1,8 +1,10 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { Registry, RJSFSchema } from '@rjsf/utils'
+import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface MultipleDropdownProps {
   label?: string
@@ -16,6 +18,7 @@ interface MultipleDropdownProps {
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
   id: string
+  schema: RJSFSchema
 }
 
 export default function MultipleDropdown({
@@ -27,6 +30,7 @@ export default function MultipleDropdown({
   required,
   rawErrors,
   id,
+  schema,
 }: MultipleDropdownProps) {
   const theme = useTheme()
 
@@ -50,16 +54,33 @@ export default function MultipleDropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  /**
+   * In some instances where we use mirroredCard data to structure the form, arrays might be initialised
+   * as [null]. If this is the case, we need to make sure it is removed from the state.
+   *
+   */
+  if (value.length === 1 && value[0] === null) {
+    onChange([])
+  }
+
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value.length > 0 && value[0] !== null}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
+    >
       {registry.formContext.editMode && (
         <Autocomplete
           multiple
           size='small'
+          getOptionLabel={(option) => option}
           options={multipleDropdownOptions}
           sx={(theme) => ({
             input: {
@@ -120,6 +141,6 @@ export default function MultipleDropdown({
           )}
         </>
       )}
-    </Fragment>
+    </AdditionalInformation>
   )
 }

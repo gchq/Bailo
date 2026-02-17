@@ -2,11 +2,13 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntityObject } from 'types/types'
+import { getMirroredState } from 'utils/formUtils'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -20,6 +22,7 @@ interface EntitySelectorProps {
   registry?: Registry
   rawErrors?: string[]
   id: string
+  schema: RJSFSchema
 }
 
 export default function EntitySelector({
@@ -30,6 +33,7 @@ export default function EntitySelector({
   registry,
   rawErrors,
   id,
+  schema,
 }: EntitySelectorProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
@@ -92,18 +96,28 @@ export default function EntitySelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
+  if (isCurrentUserLoading) {
+    return <Loading />
+  }
+
   return (
-    <>
-      {isCurrentUserLoading && <Loading />}
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && currentValue.length > 0}
+      label={label}
+      id={id}
+      mirroredModel={registry.formContext.mirroredModel}
+      required={required}
+      description={schema.description}
+    >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
       {currentUser && registry.formContext && registry.formContext.editMode && (
         <>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Autocomplete<EntityObject, true, true>
             multiple
             data-test='entitySelector'
@@ -125,7 +139,7 @@ export default function EntitySelector({
             noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
             options={users || []}
-            renderTags={(value, getTagProps) =>
+            renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Box key={option.id} sx={{ maxWidth: '200px' }}>
                   <Chip
@@ -141,7 +155,7 @@ export default function EntitySelector({
                 {...params}
                 placeholder='Username or group name'
                 slotProps={{
-                  htmlInput: { 'aria-label': `input field for ${label}` },
+                  htmlInput: { ...params.inputProps, 'aria-label': `input field for ${label}` },
                 }}
                 error={rawErrors && rawErrors.length > 0}
                 id={id}
@@ -157,10 +171,6 @@ export default function EntitySelector({
       )}
       {registry.formContext && !registry.formContext.editMode && (
         <>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           {currentValue.length === 0 && (
             <Typography
               sx={{
@@ -180,6 +190,6 @@ export default function EntitySelector({
           </Box>
         </>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

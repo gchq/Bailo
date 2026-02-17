@@ -21,7 +21,7 @@ class Datacard(Entry):
     :param organisation: Organisation responsible for the datacard, defaults to None
     :param state: Development readiness of the datacard, defaults to None
     :param tags: Tags to assign to the datacard, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the datacard's collaborators (a.k.a. model access) are, defaults to None
+    :param collaborators: List of CollaboratorEntry to define who the datacard's collaborators (a.k.a. model access) are, defaults to None
     :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -72,7 +72,7 @@ class Datacard(Entry):
         :param organisation: Organisation responsible for the datacard, defaults to None
         :param state: Development readiness of the datacard, defaults to None
         :param tags: Tags to assign to the datacard, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the datacard's collaborators (a.k.a. datacard access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the datacard's collaborators (a.k.a. datacard access) are, defaults to None
         :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Datacard object
         """

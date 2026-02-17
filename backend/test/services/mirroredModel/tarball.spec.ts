@@ -42,12 +42,12 @@ vi.mock('../../../src/services/mirroredModel/s3.js', () => s3Mocks)
 
 const mirroredModelMocks = vi.hoisted(() => {
   const processEntrySpy = vi.fn()
-  const finishListenerSpy = vi.fn((resolve) => resolve())
-  const errorListenerSpy = vi.fn((error, _resolve, reject) => reject(error))
+  const handleStreamCompletionSpy = vi.fn((resolve) => resolve())
+  const handleStreamErrorSpy = vi.fn((error, _resolve, reject) => reject(error))
   const mockImporterClass = vi.fn(() => ({
     processEntry: processEntrySpy,
-    finishListener: finishListenerSpy,
-    errorListener: errorListenerSpy,
+    handleStreamCompletion: handleStreamCompletionSpy,
+    handleStreamError: handleStreamErrorSpy,
   }))
 
   return {
@@ -58,11 +58,20 @@ const mirroredModelMocks = vi.hoisted(() => {
     },
     getImporter: vi.fn(() => mockImporterClass()),
     processEntrySpy,
-    finishListenerSpy,
-    errorListenerSpy,
+    handleStreamCompletionSpy: handleStreamCompletionSpy,
+    handleStreamErrorSpy: handleStreamErrorSpy,
   }
 })
 vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+
+const dummyMetadata = {
+  schemaVersion: 1,
+  mirroredModelId: 'mid',
+  sourceModelId: 'sid',
+  importKind: mirroredModelMocks.MirrorKind.Documents,
+  exporter: 'user',
+  exportId: 'exportId',
+}
 
 function setUpExtractTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
@@ -198,16 +207,11 @@ describe('service > mirroredModel > tarball', () => {
   describe('extractTarGzStream', () => {
     test('success importKind Documents', async () => {
       const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      const meta = {
-        schemaVersion: 1,
-        mirroredModelId: 'mid',
-        sourceModelId: 'sid',
-        importKind: mirroredModelMocks.MirrorKind.Documents,
-        exporter: 'user',
-        exportId: 'exportId',
-      }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+      tarStream.entry(
+        { name: config.modelMirror!.metadataFile!, type: 'file' },
+        Buffer.from(JSON.stringify(dummyMetadata)),
+      )
       tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
       tarStream.finalize()
       authMocks.default.model.mockResolvedValue({ success: true })
@@ -216,7 +220,7 @@ describe('service > mirroredModel > tarball', () => {
 
       expect(authMocks.default.model).toHaveBeenCalled()
       expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
-      expect(mirroredModelMocks.finishListenerSpy).toHaveBeenCalled()
+      expect(mirroredModelMocks.handleStreamCompletionSpy).toHaveBeenCalled()
     })
 
     test('success importKind File', async () => {
@@ -240,7 +244,7 @@ describe('service > mirroredModel > tarball', () => {
 
       expect(authMocks.default.model).toHaveBeenCalled()
       expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
-      expect(mirroredModelMocks.finishListenerSpy).toHaveBeenCalled()
+      expect(mirroredModelMocks.handleStreamCompletionSpy).toHaveBeenCalled()
     })
 
     test('success importKind Image', async () => {
@@ -264,144 +268,199 @@ describe('service > mirroredModel > tarball', () => {
 
       expect(authMocks.default.model).toHaveBeenCalled()
       expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
-      expect(mirroredModelMocks.finishListenerSpy).toHaveBeenCalled()
+      expect(mirroredModelMocks.handleStreamCompletionSpy).toHaveBeenCalled()
     })
 
-    test('error when first entry is not metadata', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      tarStream.entry({ name: 'wrong.txt', type: 'file' }, Buffer.from('abc'))
-      tarStream.finalize()
+    describe('error', () => {
+      test('first entry is not metadata', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        tarStream.entry({ name: 'wrong.txt', type: 'file' }, Buffer.from('abc'))
+        tarStream.finalize()
 
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-      await expect(promise).rejects.toThrowError(/^Expected 'meta.json' as first entry, found 'wrong.txt'/)
-    })
-
-    test('error invalid schemaVersion', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      const meta = {
-        schemaVersion: -1,
-        mirroredModelId: 'mid',
-        sourceModelId: 'sid',
-        importKind: mirroredModelMocks.MirrorKind.Documents,
-        exporter: 'user',
-        exportId: 'exportId',
-      }
-      servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.finalize()
-
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
-
-      await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
-    })
-
-    test('error auth fails', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      const meta = {
-        schemaVersion: 1,
-        mirroredModelId: 'mid',
-        sourceModelId: 'sid',
-        importKind: mirroredModelMocks.MirrorKind.Documents,
-        exporter: 'user',
-        exportId: 'exportId',
-      }
-      servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.finalize()
-      authMocks.default.model.mockResolvedValue({ success: false, info: 'nope' })
-
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
-
-      await expect(promise).rejects.toThrowError(/^nope/)
-    })
-
-    test('error non-Bailo', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      const meta = { mirroredModelId: 'mid', sourceModelId: 'sid', importKind: mirroredModelMocks.MirrorKind.Documents }
-      servicesModelMocks.validateMirroredModel.mockRejectedValue('Error')
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
-      tarStream.finalize()
-
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
-
-      await expect(promise).rejects.toThrowError('Error')
-    })
-
-    test('error getImporter', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      const meta = {
-        schemaVersion: 1,
-        mirroredModelId: 'mid',
-        sourceModelId: 'sid',
-        importKind: mirroredModelMocks.MirrorKind.Documents,
-        exporter: 'user',
-        exportId: 'exportId',
-      }
-      servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.finalize()
-      authMocks.default.model.mockResolvedValue({ success: true })
-      mirroredModelMocks.getImporter.mockImplementationOnce(() => {
-        throw new Error('fail')
+        await expect(promise).rejects.toThrowError(/^Expected 'meta.json' as first entry, found 'wrong.txt'/)
       })
 
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+      test('invalid schemaVersion', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        const meta = {
+          schemaVersion: -1,
+          mirroredModelId: 'mid',
+          sourceModelId: 'sid',
+          importKind: mirroredModelMocks.MirrorKind.Documents,
+          exporter: 'user',
+          exportId: 'exportId',
+        }
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+        tarStream.finalize()
 
-      await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
-      expect(authMocks.default.model).toHaveBeenCalled()
-      expect(mirroredModelMocks.errorListenerSpy).not.toHaveBeenCalled()
-    })
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-    test('error importer', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      const meta = {
-        schemaVersion: 1,
-        mirroredModelId: 'mid',
-        sourceModelId: 'sid',
-        importKind: mirroredModelMocks.MirrorKind.Documents,
-        exporter: 'user',
-        exportId: 'exportId',
-      }
-      servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
-      tarStream.finalize()
-      authMocks.default.model.mockResolvedValue({ success: true })
-      mirroredModelMocks.processEntrySpy.mockRejectedValueOnce('Error')
+        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+      })
 
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+      test('auth fails', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        tarStream.entry(
+          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          Buffer.from(JSON.stringify(dummyMetadata)),
+        )
+        tarStream.finalize()
+        authMocks.default.model.mockResolvedValue({ success: false, info: 'nope' })
 
-      await expect(promise).rejects.toThrowError('Error')
-      expect(authMocks.default.model).toHaveBeenCalled()
-      expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
-      expect(mirroredModelMocks.errorListenerSpy).toHaveBeenCalled()
-    })
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-    test('error early finish', async () => {
-      const { tarStream, passThrough } = setUpExtractTarGzStreams()
-      tarStream.finalize()
+        await expect(promise).rejects.toThrowError(/^nope/)
+      })
 
-      const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+      test('non-Bailo', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        const meta = {
+          mirroredModelId: 'mid',
+          sourceModelId: 'sid',
+          importKind: mirroredModelMocks.MirrorKind.Documents,
+        }
+        servicesModelMocks.validateMirroredModel.mockRejectedValue('Error')
+        tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.finalize()
 
-      await expect(promise).rejects.toThrowError(/^Tarball finished processing before expected./)
-    })
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-    test('error tar data is invalid', async () => {
-      const gzippedJunk = zlib.gzipSync(Buffer.from('not a tar archive'))
-      const badStream = new PassThrough()
-      badStream.end(gzippedJunk)
+        await expect(promise).rejects.toThrowError('Error')
+      })
 
-      const promise = extractTarGzStream(badStream, { dn: 'user' }, {} as any)
+      test('getImporter', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        tarStream.entry(
+          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          Buffer.from(JSON.stringify(dummyMetadata)),
+        )
+        tarStream.finalize()
+        authMocks.default.model.mockResolvedValue({ success: true })
+        mirroredModelMocks.getImporter.mockImplementationOnce(() => {
+          throw new Error('fail')
+        })
 
-      await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
-    })
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-    test('error gzip stream is invalid', async () => {
-      const promise = extractTarGzStream(Readable.from(['']), { dn: 'user' }, {} as any)
+        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+        expect(authMocks.default.model).toHaveBeenCalled()
+        expect(mirroredModelMocks.handleStreamErrorSpy).not.toHaveBeenCalled()
+      })
 
-      await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+      test('importer processEntry', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        tarStream.entry(
+          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          Buffer.from(JSON.stringify(dummyMetadata)),
+        )
+        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.finalize()
+        authMocks.default.model.mockResolvedValue({ success: true })
+        mirroredModelMocks.processEntrySpy.mockRejectedValueOnce('Error')
+
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+
+        await expect(promise).rejects.toThrowError('Error')
+        expect(authMocks.default.model).toHaveBeenCalled()
+        expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
+        expect(mirroredModelMocks.handleStreamErrorSpy).toHaveBeenCalled()
+      })
+
+      test('early finish', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        tarStream.finalize()
+
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+
+        await expect(promise).rejects.toThrowError(/^Tarball finished before importer initialisation./)
+      })
+
+      test('tar data is invalid', async () => {
+        const gzippedJunk = zlib.gzipSync(Buffer.from('not a tar archive'))
+        const badStream = new PassThrough()
+        badStream.end(gzippedJunk)
+
+        const promise = extractTarGzStream(badStream, { dn: 'user' }, {} as any)
+
+        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+      })
+
+      test('gzip stream is invalid', async () => {
+        const promise = extractTarGzStream(Readable.from(['']), { dn: 'user' }, {} as any)
+
+        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+      })
+
+      test('async entry handler routed via handleStreamError', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        authMocks.default.model.mockResolvedValue({ success: true })
+        tarStream.entry(
+          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          Buffer.from(JSON.stringify(dummyMetadata)),
+        )
+        // async failure after await
+        mirroredModelMocks.processEntrySpy.mockImplementationOnce(async () => {
+          await Promise.resolve()
+          throw new Error('async importer failure')
+        })
+        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.finalize()
+
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+
+        await expect(promise).rejects.toThrowError('async importer failure')
+        expect(mirroredModelMocks.handleStreamErrorSpy).toHaveBeenCalled()
+        expect(mirroredModelMocks.handleStreamCompletionSpy).not.toHaveBeenCalled()
+      })
+
+      test('importer throws then tar safely finishes', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        authMocks.default.model.mockResolvedValue({ success: true })
+        tarStream.entry(
+          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          Buffer.from(JSON.stringify(dummyMetadata)),
+        )
+        mirroredModelMocks.processEntrySpy.mockRejectedValueOnce(new Error('entry failure'))
+        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.finalize()
+        const rejectSpy = vi.fn()
+        const resolveSpy = vi.fn()
+
+        await extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+          .then(resolveSpy)
+          .catch(rejectSpy)
+        expect(rejectSpy).toHaveBeenCalledTimes(1)
+        expect(resolveSpy).not.toHaveBeenCalled()
+      })
+
+      test('no AbortError when importer fails mid-stream', async () => {
+        const { tarStream, passThrough } = setUpExtractTarGzStreams()
+        servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+        authMocks.default.model.mockResolvedValue({ success: true })
+        tarStream.entry(
+          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          Buffer.from(JSON.stringify(dummyMetadata)),
+        )
+        mirroredModelMocks.processEntrySpy.mockImplementationOnce(async () => {
+          await new Promise((r) => setTimeout(r, 1))
+          throw new Error('late async failure')
+        })
+        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.finalize()
+
+        const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
+
+        await expect(promise).rejects.not.toThrow(/AbortError/)
+      })
     })
   })
 })

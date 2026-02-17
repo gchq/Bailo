@@ -29,6 +29,7 @@ interface PageWithTabsProps {
   titleToCopy?: string
   subheadingToCopy?: string
   additionalHeaderDisplay?: ReactElement
+  actionButtonIcon?: ReactElement
 }
 
 export default function PageWithTabs({
@@ -43,12 +44,14 @@ export default function PageWithTabs({
   titleToCopy = '',
   subheadingToCopy = '',
   additionalHeaderDisplay,
+  actionButtonIcon,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
 
   const [currentTab, setCurrentTab] = useState('')
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const [showFullText, setShowFullText] = useState(false)
   const theme = useTheme()
 
   const currentTabChanged = useEffectEvent((newTab: string) => {
@@ -56,7 +59,9 @@ export default function PageWithTabs({
   })
 
   useEffect(() => {
-    if (!tabs.length) return
+    if (!tabs.length) {
+      return
+    }
     currentTabChanged(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
@@ -102,6 +107,22 @@ export default function PageWithTabs({
     [currentTab, tabs],
   )
 
+  const announcementText = useMemo(() => {
+    if (!additionalInfo) {
+      return
+    }
+    return additionalInfo.length > 100 ? (
+      <Typography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+        {showFullText ? additionalInfo : `${additionalInfo.slice(0, 100)}...`}
+        <Button sx={{ ml: 1 }} variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
+          {showFullText ? 'Show less' : 'Show more'}
+        </Button>
+      </Typography>
+    ) : (
+      additionalInfo
+    )
+  }, [additionalInfo, showFullText])
+
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
       if (sendWarning()) {
@@ -127,7 +148,7 @@ export default function PageWithTabs({
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
-        sx={{ px: 2, pb: 2 }}
+        sx={{ pb: 2, px: 2 }}
         direction={{ xs: 'column', sm: 'row' }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
@@ -164,13 +185,28 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
+          <Button
+            sx={{ minWidth: '154px' }}
+            variant='contained'
+            onClick={actionButtonOnClick}
+            startIcon={actionButtonIcon ? actionButtonIcon : <></>}
+          >
             {actionButtonTitle}
           </Button>
         )}
         {additionalHeaderDisplay}
       </Stack>
-      <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
+      <Box
+        sx={{
+          pl: 2,
+          pb: 1,
+          flexGrow: 1,
+          minWidth: 0,
+          maxWidth: '900px',
+        }}
+      >
+        {announcementText}
+      </Box>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}

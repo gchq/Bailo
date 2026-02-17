@@ -1,7 +1,7 @@
 import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
 import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import { CSSProperties, useMemo } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
@@ -17,8 +17,7 @@ interface EntryListRowProps {
   onSelectedStatesChange: (states: string[]) => void
   selectedPeers: string[]
   onSelectedPeersChange: (peers: string[]) => void
-  data: EntrySearchResult[]
-  index: number
+  entry: EntrySearchResult
   style: CSSProperties
   displayOrganisation?: boolean
   displayState?: boolean
@@ -35,8 +34,7 @@ export default function EntryListRow({
   onSelectedStatesChange,
   selectedPeers,
   onSelectedPeersChange,
-  data,
-  index,
+  entry,
   style,
   displayOrganisation = true,
   displayState = true,
@@ -44,7 +42,6 @@ export default function EntryListRow({
   peers,
 }: EntryListRowProps) {
   const theme = useTheme()
-  const entry = data[index]
 
   const entryKindForRedirect = useMemo(() => {
     return entry.kind === EntryKind.MODEL || entry.kind === EntryKind.MIRRORED_MODEL ? EntryKind.MODEL : entry.kind
@@ -108,13 +105,13 @@ export default function EntryListRow({
                 <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
               )}
               {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
+              {isExternal && <LaunchOutlined />}
             </Stack>
-            {isExternal && <LaunchOutlined />}
           </Stack>
           {displayPeers && isExternal && (
             <ChipSelector
               chipTooltipTitle={'Filter by external repository'}
-              options={peers ? Array.from(peers.keys()) : []}
+              options={peers && entry?.peerId && peers.has(entry.peerId) ? [entry.peerId] : []}
               expandThreshold={10}
               variant='outlined'
               multiple

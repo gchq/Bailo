@@ -1,3 +1,4 @@
+import { FileUpload } from '@mui/icons-material'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -13,7 +14,9 @@ import SchemaTab from 'src/schemas/SchemaTab'
 export default function SchemasPage() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  if (isCurrentUserLoading) return <Loading />
+  if (isCurrentUserLoading) {
+    return <Loading />
+  }
 
   if (!currentUser || !currentUser.isAdmin) {
     return (
@@ -28,7 +31,9 @@ export default function SchemasPage() {
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isCurrentUserError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>
@@ -58,6 +63,7 @@ function Schemas() {
         displayActionButton
         actionButtonTitle='Upload a new schema'
         actionButtonOnClick={() => router.push('/schemas/new')}
+        actionButtonIcon={<FileUpload />}
       />
     </>
   )

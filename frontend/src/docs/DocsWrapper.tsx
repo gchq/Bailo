@@ -13,7 +13,7 @@ import Stack from '@mui/material/Stack'
 import { styled, useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
+import React, { Fragment, ReactElement, ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Title from '../common/Title'
@@ -32,6 +32,7 @@ const paddingIncrement = 2
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
   const { pathname, push } = useRouter()
+  const ref = useRef(null)
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -42,6 +43,16 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       },
     },
   })
+
+  useEffect(() => {
+    if (ref && pathname) {
+      const section = document.getElementById(pathname.replaceAll('/', '-')) as HTMLElement
+      if (!section) {
+        return
+      }
+      section.scrollIntoView({ block: 'center' })
+    }
+  }, [ref, pathname])
 
   const createDocElement = useCallback(
     (doc: DirectoryTree, paddingLeft = paddingIncrement) => {
@@ -61,7 +72,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       return (
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
-            <ListItem dense sx={{ pl: paddingLeft }}>
+            <ListItem dense sx={{ pl: 1 + paddingLeft }} id={path.replaceAll('/', '-')}>
               <ListItemText
                 primary={doc.title}
                 slotProps={{
@@ -70,9 +81,9 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               />
             </ListItem>
           ) : (
-            <ListItem dense sx={{ pl: paddingLeft }}>
+            <ListItem dense sx={{ pl: paddingLeft }} id={path.replaceAll('/', '-')}>
               <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                <ListItemButton dense selected={isSelected} sx={{ pl: 0 }}>
+                <ListItemButton dense selected={isSelected} sx={{ pl: 1 }}>
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
@@ -128,12 +139,13 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             overflow: 'auto',
             py: 2,
           })}
-          height={{ xs: '250px', sm: 'calc(100vh - 96px)' }}
+          position={{ xs: 'relative', sm: 'fixed' }}
+          height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
         >
           <StyledList>{createDocElement(directory)}</StyledList>
         </Box>
-        <Box flex={1} overflow='auto' height={{ xs: '250px', sm: 'unset' }}>
-          <Box display='flex' flexDirection='column' height='100%'>
+        <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
+          <Box display='flex' flexDirection='column'>
             <Container
               maxWidth='lg'
               sx={{

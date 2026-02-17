@@ -12,8 +12,10 @@ import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
 import { getModelSystemRoles } from '../../services/model.js'
 import { checkAccessRequestsApproved } from '../../services/response.js'
 import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
+import { isBailoError } from '../../types/error.js'
 import { toEntity } from '../../utils/entity.js'
-import { Roles } from '../authentication/Base.js'
+import { BadReq } from '../../utils/error.js'
+import { Roles } from '../authentication/constants.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestAction,
@@ -46,7 +48,9 @@ export class BasicAuthorisationConnector {
     }
 
     const roles = await getModelSystemRoles(user, model)
-    if (roles.length === 0) return false
+    if (roles.length === 0) {
+      return false
+    }
 
     return true
   }
@@ -100,8 +104,8 @@ export class BasicAuthorisationConnector {
     return (await this.files(user, model, [file], action))[0]
   }
 
-  async image(user: UserInterface, model: ModelDoc, access: Access) {
-    return (await this.images(user, model, [access]))[0]
+  async image(user: UserInterface, model: ModelDoc, access: Access, admin?: boolean) {
+    return (await this.images(user, model, [access], admin))[0]
   }
 
   async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
@@ -376,38 +380,55 @@ export class BasicAuthorisationConnector {
     )
   }
 
-  async images(user: UserInterface, model: ModelDoc, accesses: Array<Access>): Promise<Array<Response>> {
+  async images(
+    user: UserInterface,
+    model: ModelDoc,
+    accesses: Array<Access>,
+    admin: boolean = false,
+  ): Promise<Array<Response>> {
     // Does the user have a valid access request for this model?
     const hasAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
     return Promise.all(
       accesses.map(async (access) => {
-        const actions = access.actions.map((action) => {
-          switch (action) {
-            case '*':
-              return ImageAction.Wildcard
-            case 'delete':
-              return ImageAction.Delete
-            case 'list':
-              return ImageAction.List
-            case 'pull':
-              return ImageAction.Pull
-            case 'push':
-              return ImageAction.Push
+        let actions: ImageActionKeys[]
+        try {
+          actions = access.actions.map((action) => {
+            switch (action) {
+              case '*':
+                return ImageAction.Wildcard
+              case 'delete':
+                return ImageAction.Delete
+              case 'list':
+                return ImageAction.List
+              case 'pull':
+                return ImageAction.Pull
+              case 'push':
+                return ImageAction.Push
+              default:
+                throw BadReq('Unrecognised action included in the access request.', { id: access.name })
+            }
+          })
+        } catch (err) {
+          if (isBailoError(err)) {
+            return {
+              success: false,
+              info: err.message,
+              id: access.name,
+            }
           }
-        })
-
-        // Don't allow anything beyond pushing, pulling and deleting actions.
-        if (
-          !actions.every((action) =>
-            ([ImageAction.Push, ImageAction.Pull, ImageAction.Delete, ImageAction.List] as ImageActionKeys[]).includes(
-              action,
-            ),
-          )
-        ) {
           return {
             success: false,
-            info: 'You are not allowed to complete any actions beyond `push`, `pull` or `delete` on an image.',
+            info: String(err),
+            id: access.name,
+          }
+        }
+
+        // Enforce users are explicit on the actions they wish to perform but allow admins to use wildcard `*`
+        if (!admin && actions.some((action) => action === ImageAction.Wildcard)) {
+          return {
+            success: false,
+            info: 'No use of `*` action without an admin token.',
             id: access.name,
           }
         }
@@ -421,10 +442,15 @@ export class BasicAuthorisationConnector {
         }
 
         // If they are not listed on the model, don't let them upload or delete images.
-        if ((await missingRequiredRole(user, model, ['owner', 'contributor'])) && actions.includes(ImageAction.Push)) {
+        if (
+          (await missingRequiredRole(user, model, ['owner', 'contributor'])) &&
+          actions.some((action) =>
+            ([ImageAction.Push, ImageAction.Delete, ImageAction.Wildcard] as ImageActionKeys[]).includes(action),
+          )
+        ) {
           return {
             success: false,
-            info: 'You do not have permission to upload an image.',
+            info: 'You do not have permission to write to an image.',
             id: access.name,
           }
         }
@@ -432,7 +458,7 @@ export class BasicAuthorisationConnector {
         if (
           !hasAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'contributor', 'consumer'])) &&
-          actions.includes(ImageAction.Pull) &&
+          actions.some((action) => ([ImageAction.Pull, ImageAction.Wildcard] as ImageActionKeys[]).includes(action)) &&
           !model.settings.ungovernedAccess
         ) {
           return {

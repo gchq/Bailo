@@ -1,5 +1,7 @@
 import { AgentOptions } from 'node:https'
 
+import { ResponseChecksumValidation } from '@aws-sdk/middleware-flexible-checksums'
+import { Provider } from '@aws-sdk/types'
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -194,6 +196,7 @@ export interface Config {
     region: string
     forcePathStyle: boolean
     rejectUnauthorized: boolean
+    responseChecksumValidation: ResponseChecksumValidation | Provider<ResponseChecksumValidation>
 
     automaticallyCreateBuckets: boolean
     /** Chunk size for uploading files via multipart upload */

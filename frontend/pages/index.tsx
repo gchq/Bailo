@@ -1,5 +1,6 @@
-import { ExpandMore } from '@mui/icons-material'
+import { Add, ExpandMore, RestartAlt } from '@mui/icons-material'
 import SubjectIcon from '@mui/icons-material/Subject'
+import TitleIcon from '@mui/icons-material/Title'
 import {
   Accordion,
   AccordionDetails,
@@ -24,7 +25,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useGetPopularEntryTags, useListModels } from 'actions/model'
+import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -68,11 +69,11 @@ export default function Marketplace() {
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
   const {
-    models,
-    errors: modelsErrors,
-    isModelsError,
-    isModelsLoading,
-  } = useListModels(
+    entries: models,
+    entryErrors: modelsErrors,
+    isEntriesError: isModelsError,
+    isEntriesLoading: isModelsLoading,
+  } = useListEntries(
     EntryKind.MODEL,
     selectedRoles,
     '',
@@ -87,11 +88,11 @@ export default function Marketplace() {
   )
 
   const {
-    models: dataCards,
-    errors: dataCardsErrors,
-    isModelsError: isDataCardsError,
-    isModelsLoading: isDataCardsLoading,
-  } = useListModels(
+    entries: dataCards,
+    entryErrors: dataCardsErrors,
+    isEntriesError: isDataCardsError,
+    isEntriesLoading: isDataCardsLoading,
+  } = useListEntries(
     EntryKind.DATA_CARD,
     selectedRoles,
     '',
@@ -106,10 +107,10 @@ export default function Marketplace() {
   )
 
   const {
-    models: mirroredModels,
-    isModelsError: isMirroredModelsError,
-    isModelsLoading: isMirroredModelsLoading,
-  } = useListModels(
+    entries: mirroredModels,
+    isEntriesError: isMirroredModelsError,
+    isEntriesLoading: isMirroredModelsLoading,
+  } = useListEntries(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,
     '',
@@ -140,7 +141,9 @@ export default function Marketplace() {
   } = router.query
 
   useEffect(() => {
-    if (filterFromQuery) setFilter(filterFromQuery as string)
+    if (filterFromQuery) {
+      setFilter(filterFromQuery as string)
+    }
     if (tagsFromQuery) {
       let tagsAsArray: string[] = []
       if (typeof tagsFromQuery === 'string') {
@@ -217,7 +220,9 @@ export default function Marketplace() {
   )
 
   const unreachablePeerList: string[] = useMemo(() => {
-    if (!peers) return []
+    if (!peers) {
+      return []
+    }
     return Array.from(peers.entries())
       .filter(([_key, value]) => isEnabled(value) && !isReachable(value))
       .map(([key]) => key)
@@ -346,7 +351,7 @@ export default function Marketplace() {
       <Container maxWidth='xl'>
         <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
           <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '300px' } }}>
-            <Button component={Link} href='/entry/new' variant='contained'>
+            <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
@@ -368,7 +373,7 @@ export default function Marketplace() {
                 onSubmit={onFilterSubmit}
               >
                 <InputLabel htmlFor='entry-filter-input'>
-                  {titleOnly ? 'Search by title (partial)' : 'Search by full text (exact)'}
+                  {titleOnly ? 'Search by name' : 'Search by full text'}
                 </InputLabel>
                 <FilledInput
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
@@ -379,12 +384,8 @@ export default function Marketplace() {
                   onChange={handleFilterChange}
                   endAdornment={
                     <Tooltip title='Full Text'>
-                      <IconButton
-                        aria-label='titleOnly'
-                        onClick={handleChangeTitleOnly}
-                        color={titleOnly ? 'primary' : 'secondary'}
-                      >
-                        <SubjectIcon />
+                      <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
+                        {titleOnly ? <TitleIcon /> : <SubjectIcon />}
                       </IconButton>
                     </Tooltip>
                   }
@@ -464,7 +465,7 @@ export default function Marketplace() {
                   <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
                     <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
                       <Typography component='h2' variant='h6'>
-                        Mirrored Models
+                        Mirrored models
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ p: 1 }}>
@@ -491,7 +492,9 @@ export default function Marketplace() {
                 </Box>
               </Stack>
               <Box justifySelf='center' marginTop={1}>
-                <Button onClick={handleResetFilters}>Reset filters</Button>
+                <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
+                  Reset filters
+                </Button>
               </Box>
             </Container>
           </Stack>
@@ -555,6 +558,8 @@ export default function Marketplace() {
                     onSelectedStatesChange={handleStatesOnChange}
                     selectedPeers={selectedPeers}
                     onSelectedPeersChange={handlePeersOnChange}
+                    displayPeers={federationEnabled}
+                    peers={peers}
                   />
                 </div>
               )}

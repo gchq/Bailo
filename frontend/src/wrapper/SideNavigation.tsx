@@ -1,7 +1,7 @@
 import {
+  AccessibilityNew,
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
-  Settings as SettingsIcon,
   SupervisorAccount,
 } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
@@ -36,7 +36,7 @@ const StyledList = styled(List)(({ theme }) => ({
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme }) => ({
   '& .MuiDrawer-paper': {
-    position: 'relative',
+    position: 'fixed',
     whiteSpace: 'nowrap',
     width: '230px',
     transition: theme.transitions.create('width', {
@@ -55,10 +55,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          width: theme.spacing(7),
-          [theme.breakpoints.up('sm')]: {
-            width: '60px',
-          },
+          width: '60px',
         },
       },
     },
@@ -67,6 +64,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 export interface SideNavigationProps {
   page: string
+  bannerVisible: boolean
   currentUser: User
   toggleDrawer: () => void
   onError: (errorMessage: string) => void
@@ -77,6 +75,7 @@ export interface SideNavigationProps {
 
 export default function SideNavigation({
   page,
+  bannerVisible,
   currentUser,
   toggleDrawer,
   onResetErrorMessage,
@@ -110,6 +109,7 @@ export default function SideNavigation({
       {(isReviewsLoading || isResponsesLoading) && <Loading />}
       <Toolbar
         sx={(theme) => ({
+          marginTop: bannerVisible ? 4 : 0,
           alignItems: 'center',
           justifyContent: 'flex-end',
           px: [1],
@@ -197,13 +197,13 @@ export default function SideNavigation({
           <StyledList>
             <Divider aria-hidden='true' />
             <NavMenuItem
-              href='/settings'
+              href='/accessibility/statement'
               selectedPage={page}
-              primaryText='Settings'
+              primaryText='Accessibility'
               drawerOpen={drawerOpen}
-              menuPage='settings'
-              title='User settings'
-              icon={<SettingsIcon />}
+              menuPage='accessibility'
+              title='Accessibility'
+              icon={<AccessibilityNew />}
             />
             <Divider aria-hidden='true' />
             <ListItem disablePadding>

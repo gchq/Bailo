@@ -1,3 +1,4 @@
+import { Create } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -21,16 +22,16 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
 
-  const AccessRequestListItem = memoize(({ data, index }) => (
+  const AccessRequestListItem = memoize(({ data }) => (
     <AccessRequestDisplay
-      accessRequest={data[index]}
-      key={data[index].metadata.overview.name}
+      accessRequest={data}
+      key={data.metadata.overview.name}
       hideReviewBanner={
         !hasRole(
           currentUserRoles,
           reviewRoles
             .filter((role) => {
-              const accessRequestSchema = schemas.find((schema) => schema.id === data[index].schemaId)
+              const accessRequestSchema = schemas.find((schema) => schema.id === data.schemaId)
               if (accessRequestSchema && accessRequestSchema.reviewRoles) {
                 return accessRequestSchema.reviewRoles.includes(role.shortName)
               } else {
@@ -64,7 +65,7 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/model/${model.id}/access-request/schema`}>
-            <Button variant='outlined' disabled={!model.card} data-test='requestAccessButton'>
+            <Button variant='outlined' disabled={!model.card} data-test='requestAccessButton' startIcon={<Create />}>
               Request access
             </Button>
           </Link>

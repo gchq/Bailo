@@ -14,11 +14,8 @@ type ReviewsListProps = {
 export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(status === 'open')
 
-  const ReviewListItem = memoize(({ data, index }) => (
-    <ReviewItem
-      review={data[index]}
-      key={`${data[index].model.id}-${data[index].semver || data[index].accessRequestId}-${data[index].role}`}
-    />
+  const ReviewListItem = memoize(({ data }) => (
+    <ReviewItem review={data} key={`${data.model.id}-${data.semver || data.accessRequestId}-${data.role}`} />
   ))
 
   if (isReviewsError) {

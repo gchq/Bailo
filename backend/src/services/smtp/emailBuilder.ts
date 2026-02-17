@@ -17,16 +17,16 @@ export type actions = {
   url: string
 }
 
-export function buildEmail(
+export async function buildEmail(
   title: string,
   metadata: Info[],
   actions: actions[],
   actionRequired?: boolean,
-): EmailContent {
+): Promise<EmailContent> {
   return {
     subject: actionRequired ? `ACTION REQUIRED: ${title}` : title,
     text: emailText(title, metadata, actions),
-    html: emailHtml(title, metadata, actions),
+    html: await emailHtml(title, metadata, actions),
   }
 }
 
@@ -48,8 +48,8 @@ function textActions(actionsList: actions[]) {
   return `${actionsList.map((action) => `${action.name}: '${action.url}'\n`).join('')}`
 }
 
-function emailHtml(title, reviewMetadata, reviewActions) {
-  return mjml2html(
+async function emailHtml(title, reviewMetadata, reviewActions) {
+  const email = await mjml2html(
     wrapper(`
     <mj-section padding-bottom="5px" css-class='gradient-bg' padding-bottom="5px">
       <mj-column width="100%">
@@ -70,7 +70,8 @@ function emailHtml(title, reviewMetadata, reviewActions) {
       ${htmlActions(reviewActions)}
     </mj-section>
   `),
-  ).html
+  )
+  return email.html
 }
 
 function htmlMetadata(reviewMetadata: Info[]) {
@@ -104,27 +105,27 @@ function wrapper(children: string) {
       <mj-head>
         <mj-style>
           .diagonal {
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: 0;
-          width: 100%;
-          height: 50px;
-          background-color: #f0f0f0;
-          z-index: 0;
-          transform: skewY(2deg);
-          transform-origin: top right;
-          height: 12px;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: #f0f0f0;
+            z-index: 0;
+            transform: skewY(2deg);
+            transform-origin: top right;
+            height: 12px;
           }
           .gradient-bg {
-          background: linear-gradient(276deg, rgba(214,37,96) 0%, rgba(84,39,142) 100%);
+            background: linear-gradient(276deg, rgba(214,37,96) 0%, rgba(84,39,142) 100%);
           }
           .gradient-bg-border {
-          background: linear-gradient(276deg, rgba(209,73,118) 0%, rgba(126,66,204) 100%);
-          height: 12px;
+            background: linear-gradient(276deg, rgba(209,73,118) 0%, rgba(126,66,204) 100%);
+            height: 12px;
           }
           .text {
-          height: 12px;
+            height: 12px;
           }
         </mj-style>
       </mj-head>

@@ -19,7 +19,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetFileScannerInfo } from 'actions/fileScanning'
-import { useGetModelCardRevisions } from 'actions/modelCard'
+import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
 import { ChangeEvent, useCallback, useMemo } from 'react'
@@ -108,7 +108,7 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
-  const { modelCardRevisions, isModelCardRevisionsLoading, isModelCardRevisionsError } = useGetModelCardRevisions(
+  const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -138,7 +138,7 @@ export default function ReleaseForm({
   )
 
   const modelCardVersionList = useMemo(() => {
-    return modelCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
+    return entryCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
       <MenuItem key={revision.version} value={revision.version}>
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>{revision.version} -</Typography>
@@ -146,7 +146,7 @@ export default function ReleaseForm({
         </Stack>
       </MenuItem>
     ))
-  }, [modelCardRevisions])
+  }, [entryCardRevisions])
 
   const handleDeleteFile = (fileToDelete: File | FileInterface) => {
     if (formData.files) {
@@ -170,11 +170,11 @@ export default function ReleaseForm({
   )
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
-  const FileRowItem = memoize(({ data, index }) =>
-    isFileInterface(data[index]) && !isScannersLoading ? (
+  const FileRowItem = memoize(({ data }) =>
+    isFileInterface(data) && !isScannersLoading ? (
       <FileDisplay
-        key={data[index].name}
-        file={data[index]}
+        key={data.name}
+        file={data}
         modelId={model.id}
         showMenuItems={{ rescanFile: scanners.length > 0 }}
         mutator={mutateReleases}
@@ -190,8 +190,8 @@ export default function ReleaseForm({
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
-  if (isModelCardRevisionsError) {
-    return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
+  if (isEntryCardRevisionsError) {
+    return <MessageAlert message={isEntryCardRevisionsError.info.message} severity='error' />
   }
 
   if (isScannersError) {
@@ -199,10 +199,12 @@ export default function ReleaseForm({
   }
 
   const error = MultipleErrorWrapper('Unable to load release form', {
-    isModelCardRevisionsError,
+    isModelCardRevisionsError: isEntryCardRevisionsError,
     isReleasesError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <Stack spacing={2}>
@@ -252,8 +254,8 @@ export default function ReleaseForm({
             </Typography>
           ) : (
             <>
-              {isModelCardRevisionsLoading && <Loading />}
-              {!isModelCardRevisionsLoading && (
+              {isEntryCardRevisionsLoading && <Loading />}
+              {!isEntryCardRevisionsLoading && (
                 <>
                   <Select
                     size='small'

@@ -37,7 +37,9 @@ function buildTree() {
           .map((tag) => tag.comment)
           .filter(Boolean)
           .join(' ')
-        if (!doc) return
+        if (!doc) {
+          return
+        }
         const symbol = convertType(checker, checker.getTypeFromTypeNode(member.type)).getSymbol()
         const node = { name, type, doc, children: [] }
         documentationNode.push(node)

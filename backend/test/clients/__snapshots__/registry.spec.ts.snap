@@ -7,7 +7,7 @@ exports[`clients > registry > deleteManifest > success 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "method": "DELETE",
@@ -31,7 +31,7 @@ exports[`clients > registry > doesLayerExist > success false 1`] = `
       },
       "method": "HEAD",
       "signal": {
-        "aborted": false,
+        "aborted": true,
         "onabort": null,
       },
     },
@@ -58,14 +58,88 @@ exports[`clients > registry > doesLayerExist > success true 1`] = `
 ]
 `;
 
-exports[`clients > registry > getImageTagManifest > success 1`] = `
+exports[`clients > registry > getApiVersion > bad version 1`] = `
+[
+  [
+    "https://localhost:5000/v2/",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": true,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getApiVersion > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success OCI spec 2`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -84,7 +158,7 @@ exports[`clients > registry > getRegistryLayerStream > success 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -133,10 +207,41 @@ exports[`clients > registry > listImageTags > success 1`] = `
 ]
 `;
 
+exports[`clients > registry > listImageTags > success multiple pages 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/tags/list",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+  [
+    "https://localhost:5000/http://example.com/v2/_catalog?n=20&last=b",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
 exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
 [
   [
-    "https://localhost:5000/v2/_catalog?n=100&last=modelId",
+    "https://localhost:5000/v2/_catalog?n=100",
     {
       "dispatcher": "mock agent",
       "headers": {

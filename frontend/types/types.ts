@@ -49,6 +49,8 @@ export interface UiConfig {
   modelMirror: {
     import: {
       enabled: boolean
+      additionalInfoHeading: string
+      originalAnswerHeading: string
     }
     export: {
       enabled: boolean
@@ -218,6 +220,7 @@ export interface EntryCardRevisionInterface {
   createdBy: string
   createdAt: string
   updatedAt: string
+  mirrored: boolean
 }
 
 export const RoleKind = {
@@ -378,6 +381,7 @@ export interface StepNoRender {
   uiSchema?: UiSchema
 
   state: any
+  mirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>
@@ -400,12 +404,14 @@ export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVis
 export const EntryCardKindLabel = {
   model: 'model card',
   'data-card': 'data card',
+  'mirrored-model': 'mirrored model',
 } as const
 export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
 
 export const EntryCardKind = {
   model: 'model-card',
   'data-card': 'data-card',
+  'mirrored-model': 'mirrored-model',
 } as const
 export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
 
@@ -413,6 +419,7 @@ export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  mirrored: boolean
   metadata: unknown
 }
 
@@ -456,6 +463,7 @@ export interface EntryInterface {
     }
   }
   card: EntryCardInterface
+  mirroredCard?: EntryCardInterface
   visibility: EntryVisibilityKeys
   collaborators: CollaboratorEntry[]
   createdBy: string
@@ -702,4 +710,19 @@ export type SystemStatus = {
 export type PeerConfigStatus = {
   config: RemoteFederationConfig
   status: SystemStatus
+}
+
+// For completion stats on the model info page
+export interface FormStats {
+  totalQuestions: number
+  totalAnswers: number
+  percentageQuestionsComplete: number
+  formCompleted: boolean
+}
+
+// For completion stats on the model info page
+export interface ModelFormStats extends FormStats {
+  totalPages: number
+  pagesCompleted: number
+  percentagePagesComplete: number
 }

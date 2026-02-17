@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.2.2-ubi9
+    image: mongodb/mongodb-community-server:8.2.5-ubi9
     networks:
       internal:
     environment:

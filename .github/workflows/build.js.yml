@@ -50,6 +50,8 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -71,14 +73,28 @@ jobs:
         if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan'
         id: modelscan_version_changed
         run: |
-          git fetch origin main --depth=2
-          OLD_VERSION=$(git show HEAD^:lib/modelscan_api/bailo_modelscan_api/config.py | grep 'app_version' | head -n1 | cut -d'"' -f2)
+          set -euo pipefail
+
+          # debug logging
+          echo "Git context HEAD commit:"
+          git --no-pager log -1 --oneline
+
+          git fetch origin main
+
+          PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
+          echo "Previous main commit: $PREV_MAIN_COMMIT"
+
+          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/modelscan_api/bailo_modelscan_api/config.py" | grep 'app_version' | head -n1 | cut -d'"' -f2)
           NEW_VERSION=$(grep 'app_version' lib/modelscan_api/bailo_modelscan_api/config.py | head -n1 | cut -d'"' -f2)
+          echo "OLD_VERSION=$OLD_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION"
 
           if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "Result: app_version has changed"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
+            echo "Result: app_version has NOT changed"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
@@ -120,7 +136,7 @@ jobs:
           docker push $LATEST_TAG
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.component.artifact }}
           path: ${{ matrix.component.tar }}
@@ -138,11 +154,11 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.11.1
+          node-version: 24
           cache: "npm"
 
       - name: Cache npm dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
@@ -169,51 +185,59 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.11.1
-          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Get Bailo Docker image
+      # jq is required so that `npm ci` is not needed to generate certs
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
-          name: bailo_backend
-          path: /tmp
-      - name: Download artifact
-        uses: actions/download-artifact@v6
-        with:
-          name: bailo_frontend
-          path: /tmp
-      - name: Download artifact
-        uses: actions/download-artifact@v6
-        with:
-          name: bailo_modelscan
+          pattern: bailo_*
           path: /tmp
 
+      - name: List downloaded artifacts
+        run: ls -R /tmp/bailo_*
+
       - name: Start minikube
-        uses: medyagh/setup-minikube@master
+        uses: medyagh/setup-minikube@latest
+        with:
+          driver: docker
+          kubernetes-version: v1.35.0
+          start-args: |
+            --cpus=2
+            --memory=4096
+            --addons=none
 
       - name: List Cluster
         run: kubectl get pods -A
 
-      - name: Load docker image to minikube
+      - name: Load docker images into minikube
         run: |
-          eval $(minikube -p minikube docker-env)
-          docker load -i /tmp/bailo_backend.tar
-          docker load -i /tmp/bailo_frontend.tar
-          docker load -i /tmp/bailo_modelscan.tar
+          set -euo pipefail
 
-      - name: Install dependencies
-        run: npm ci
+          eval "$(minikube -p minikube docker-env)"
 
-      - name: Create certs
-        run: sudo chown -R runner:docker backend/certs && npm run certs
+          # Load all Bailo images downloaded as artifacts
+          for image in /tmp/bailo_*/*.tar; do
+            echo "Loading image: $image"
+            docker load -i "$image"
+          done
+
+      - name: Create certs (without npm)
+        run: |
+          set -euo pipefail
+          CERT_DIR="backend/certs"
+          sudo chown -R runner:docker "$CERT_DIR"
+          mkdir -p "$CERT_DIR"
+          openssl genrsa -out "$CERT_DIR/key.pem" 2048
+          openssl req -new -x509 -key "$CERT_DIR/key.pem" -out "$CERT_DIR/cert.pem" -config "$CERT_DIR/san.cnf" -extensions 'v3_req' -days 360
+          ./backend/src/scripts/generateJWKS.sh
 
       # Add bailo NodePort
       - name: Create NodePort Config
@@ -239,8 +263,12 @@ jobs:
           cat << EOT >> infrastructure/helm/bailo/local.yaml
           ---
           # Instance Settings
-          securityContext:
-            runAsUser: 1002
+          frontend:
+            podSecurityContext:
+              runAsUser: 1001
+          backend:
+            podSecurityContext:
+              runAsUser: 1001
           config:
             ui:
               banner:
@@ -304,21 +332,6 @@ jobs:
           echo "---------------curl connect to bailo---------------"
           curl $(minikube service node-port --url)
 
-      # Run Cypress integration tests
-      #- run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
-
-      - uses: actions/upload-artifact@v5
-        if: failure()
-        with:
-          name: cypress-screenshots-k8s
-          path: cypress/screenshots
-
-      # - uses: actions/upload-artifact@v5
-      #   if: always()
-      #   with:
-      #     name: cypress-videos
-      #     path: cypress/videos
-
       - name: Print application logs
         if: always()
         run: kubectl logs -l app.kubernetes.io/instance=bailo --tail=-1
@@ -337,7 +350,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.11.1
+          node-version: 24
           cache: "npm"
 
       # Setup BuildX
@@ -346,17 +359,17 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: bailo_modelscan
           path: /tmp
@@ -419,7 +432,7 @@ jobs:
           --wait --wait-timeout 60
 
       # e2e with Cypress
-      - uses: cypress-io/github-action@v6
+      - uses: cypress-io/github-action@v7
         if: matrix.job_name == 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
@@ -432,11 +445,11 @@ jobs:
         if: matrix.job_name == 'integration_python'
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Cache python pip
         if: matrix.job_name == 'integration_python'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -476,7 +489,7 @@ jobs:
           PYTEST_RUN_PATH: "lib/python"
 
       # Upload all artifacts & logs
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure() && matrix.job_name == 'end_to_end'
         with:
           name: cypress-screenshots-e2e
@@ -490,7 +503,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always() && matrix.job_name == 'end_to_end'
         with:
           name: logs

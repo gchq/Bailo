@@ -9,13 +9,14 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
-import { GetImageTagManifestResponse } from '../clients/registryResponses.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { OCIEmptyMediaType } from '../utils/registryResponses.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -123,10 +124,7 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * This does _not_ also update any mongo data, and does _not_ do any auth checks on the destination.
  */
 export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
-  let manifest: {
-    body: GetImageTagManifestResponse
-    headers: Record<string, string>
-  }
+  let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
     manifest = await getImageManifest(user, source)
   } catch (err) {
@@ -135,6 +133,9 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
       throw NotFound('The requested image was not found.', { ...source })
     }
     throw err
+  }
+  if (!manifest.body) {
+    throw InternalError('The registry returned a response but the body was missing.', { ...source, manifest })
   }
 
   const allLayers = [manifest.body.config, ...manifest.body.layers]
@@ -167,7 +168,8 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
   }
 
   log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
-  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), manifest.body['mediaType'])
+  const mediaType = manifest.body.mediaType == OCIEmptyMediaType ? manifest.body.artifactType : manifest.body.mediaType
+  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), mediaType)
   log.trace({ source }, 'Deleting the original manifest.')
   await deleteManifest(multiRepositoryToken, source)
 
@@ -198,7 +200,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
     await deleteManifest(multiRepositoryToken, {
       repository: source.repository,
       name: source.name,
-      tag: manifest.headers['docker-content-digest'],
+      tag: manifest.headers['docker-content-digest'] as string,
     })
   }
 }
@@ -210,7 +212,7 @@ export async function softDeleteImage(
   session?: ClientSession | undefined,
 ) {
   const model = await getModelById(user, imageRef.repository)
-  if (model.settings?.mirror?.sourceModelId && !deleteMirroredModel) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot remove image from a mirrored model.')
   }
 

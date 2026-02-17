@@ -13,34 +13,34 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = [
     "requests==2.32.5",
     "semantic-version==2.10.0",
-    "tqdm==4.67.1"
+    "tqdm==4.67.3"
 ]
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny[mlserver]==3.1.4"
+    "mlflow-skinny[mlserver]==3.9.0"
 ]
 test = [
-    "black==25.11.0",
+    "black==26.1.0",
     "check-manifest==0.51",
-    "pre-commit==4.3.0",
-    "pylint==3.3.9",
+    "pre-commit==4.5.1",
+    "pylint==4.0.4",
     "pylint_junit==0.3.5",
     "pytest-cov==7.0.0",
     "pytest-mock==3.15.1",
     "pytest-runner==6.0.1",
-    "pytest==8.4.2",
+    "pytest==9.0.2",
     "pytest-github-actions-annotate-failures==0.3.0",
     "requests_mock==1.12.1",
     "shellcheck-py==0.11.0.1",
@@ -72,12 +72,12 @@ exclude = [
     "**/node_modules",
     "**/__pycache__",
 ]
-venv = "env39"
+venv = "env310"
 
 reportMissingImports = true
 reportMissingTypeStubs = false
 
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 pythonPlatform = "Linux"
 
 executionEnvironments = [

@@ -138,7 +138,9 @@ export default function NewSchema() {
   const error = MultipleErrorWrapper(`Unable to load new schema page`, {
     isReviewRolesError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   if (isReviewRolesLoading) {
     return <Loading />

@@ -2,12 +2,12 @@ import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
-import { Roles } from '../connectors/authentication/Base.js'
+import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKind, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
@@ -30,6 +30,7 @@ import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
 import { getFilesByModel, removeFiles } from './file.js'
 import { getInferencesByModel, removeInferences } from './inference.js'
+import log from './log.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
@@ -38,7 +39,7 @@ import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot alter a mirrored model.`)
   }
 }
@@ -104,7 +105,13 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   return model
 }
 
-export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
+/**
+ * Get a model by its ID without doing any auth checks.
+ *
+ * @remarks
+ * _Only_ use this function when an auth check would break expected functionality, otherwise use `getModelById`.
+ */
+export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
   const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
@@ -113,6 +120,12 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   if (!model) {
     throw NotFound('The requested entry was not found.', { modelId })
   }
+
+  return model
+}
+
+export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+  const model = await getModelByIdNoAuth(modelId, kind)
 
   const auth = await authorisation.model(user, model, ModelAction.View)
   if (!auth.success) {
@@ -296,7 +309,9 @@ export async function searchModels(
         }
         if (response.errors) {
           for (const [peerId, error] of Object.entries(response.errors)) {
-            if (!results.errors) results.errors = {}
+            if (!results.errors) {
+              results.errors = {}
+            }
             results.errors[peerId] = error
             results.errors[peerId].message = error.message
           }
@@ -414,6 +429,7 @@ export async function getModelCard(
   user: UserInterface,
   modelId: string,
   version: number | GetModelCardVersionOptionsKeys,
+  mirrored: boolean = false,
 ) {
   if (version === GetModelCardVersionOptions.Latest) {
     const card = (await getModelById(user, modelId)).card
@@ -424,12 +440,17 @@ export async function getModelCard(
 
     return card
   } else {
-    return getModelCardRevision(user, modelId, version)
+    return getModelCardRevision(user, modelId, version, mirrored)
   }
 }
 
-export async function getModelCardRevision(user: UserInterface, modelId: string, version: number) {
-  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
+export async function getModelCardRevision(
+  user: UserInterface,
+  modelId: string,
+  version: number,
+  mirrored: boolean = false,
+) {
+  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version, mirrored })
   const model = await getModelById(user, modelId)
 
   if (!modelCard) {
@@ -480,8 +501,6 @@ export async function _setModelCard(
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
 
-  checkModelRestriction(model)
-
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
@@ -494,6 +513,7 @@ export async function _setModelCard(
 
     version,
     metadata,
+    mirrored: false,
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
@@ -512,7 +532,6 @@ export async function updateModelCard(
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  checkModelRestriction(model)
 
   if (!model.card) {
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
@@ -546,7 +565,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (modelDiff.settings?.mirror?.sourceModelId) {
     throw BadReq('Cannot change standard model to be a mirrored model.')
   }
-  if (model.settings.mirror.sourceModelId && modelDiff.settings?.mirror?.destinationModelId) {
+  if (EntryKind.MirroredModel === model.kind && modelDiff.settings?.mirror?.destinationModelId) {
     throw BadReq('Cannot set a destination model ID for a mirrored model.')
   }
   if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
@@ -574,7 +593,9 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (!recheckAuth.success) {
     throw Forbidden(recheckAuth.info, { userDn: user.dn })
   }
+
   await model.save()
+  log.debug({ updates: modelDiff, modelId }, 'Model updated')
 
   return model
 }
@@ -710,17 +731,17 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     throw error
   }
 
-  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
-    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
-    modelCardRevision,
-    {
-      upsert: true,
-    },
-  )
+  const foundModelCardRevision = await ModelCardRevisionModel.findOne({
+    modelId: modelCardRevision.modelId,
+    version: modelCardRevision.version,
+    mirrored: true,
+  })
 
   if (!foundModelCardRevision && modelCardRevision.version !== 1) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
     // Ignore model cards with a version number of 1 as these will always be blank.
+    const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
+    await newModelCardRevision.save()
     return modelCardRevision
   }
 }
@@ -731,16 +752,27 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
  * Do not expose this functionality to users.
  */
 export async function setLatestImportedModelCard(modelId: string) {
-  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: true }, undefined, {
+    sort: { version: -1 },
+  })
+
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
   }
 
-  const updatedModel = await ModelModel.findOneAndUpdate(
-    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
-    { $set: { card: latestModelCard } },
-    { returnOriginal: false },
-  )
+  let latestNonMirroredCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: false }, undefined, {
+    sort: { version: -1 },
+  })
+
+  if (!latestNonMirroredCard) {
+    latestNonMirroredCard = latestModelCard
+  }
+
+  const updatedModel = await ModelModel.findOne({
+    id: modelId,
+    'settings.mirror.sourceModelId': { $exists: true, $ne: '' },
+  })
+
   if (!updatedModel) {
     throw InternalError('Unable to set latest model card of mirrored model.', {
       modelId,
@@ -748,6 +780,18 @@ export async function setLatestImportedModelCard(modelId: string) {
     })
   }
 
+  updatedModel.mirroredCard = { ...latestModelCard }
+  if (updatedModel.card === undefined || updatedModel.card.metadata === undefined) {
+    const newCard = new ModelCardRevisionModel({
+      modelId: updatedModel.id,
+      schemaId: latestModelCard.schemaId,
+      version: 1,
+      mirrored: false,
+      metadata: {},
+    })
+    updatedModel.card = newCard
+  }
+  await updatedModel.save()
   return updatedModel
 }
 

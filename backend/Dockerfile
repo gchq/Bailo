@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13.9-bookworm AS sphinx-docs
+FROM python:3.14.2-bookworm AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r req
 
 RUN make dirhtml
 
-FROM node:24.12.0-alpine AS base
+FROM node:24.13.1-alpine AS base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update
@@ -58,7 +58,13 @@ RUN npm run build
 FROM base AS prod
 ENV NODE_ENV=production
 
-COPY --from=build /app/config config
-COPY --from=build /app/dist .
+# Don't run production as root (match frontend UID)
+RUN addgroup --system --gid 1001 backend && \
+    adduser --system --uid 1001 --ingroup backend backend
+
+COPY --from=build --chown=backend:backend /app/config config
+COPY --from=build --chown=backend:backend /app/dist .
+
+USER backend
 
 CMD ["node", "src/index.js"]
