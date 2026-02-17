@@ -528,7 +528,7 @@ export async function deleteReleases(
   modelId: string,
   semvers: string[],
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
@@ -563,7 +563,7 @@ export async function deleteRelease(
   modelId: string,
   semver: string,
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   await deleteReleases(user, modelId, [semver], deleteMirroredModel, session)
   return { modelId, semver }
@@ -573,8 +573,14 @@ export function getReleaseName(release: ReleaseDoc): string {
   return `${release.modelId} - v${release.semver}`
 }
 
-export async function removeFileFromReleases(user: UserInterface, model: ModelDoc, fileId: string) {
-  if (EntryKind.MirroredModel === model.kind) {
+export async function removeFileFromReleases(
+  user: UserInterface,
+  model: ModelDoc,
+  fileId: string,
+  deleteMirroredModel: boolean = false,
+  session?: ClientSession,
+) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq(`Cannot remove a file from a mirrored model.`)
   }
 
@@ -594,9 +600,13 @@ export async function removeFileFromReleases(user: UserInterface, model: ModelDo
     })
   }
 
-  const result = await ReleaseModel.updateMany(query, {
-    $pull: { fileIds: fileId },
-  })
+  const result = await ReleaseModel.updateMany(
+    query,
+    {
+      $pull: { fileIds: fileId },
+    },
+    session,
+  )
 
   return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
 }
@@ -650,7 +660,7 @@ export async function findAndDeleteImageFromReleases(
   user: UserInterface,
   modelId: string,
   imageRef: ImageRefInterface,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   // Handles auth
   await getModelById(user, modelId)

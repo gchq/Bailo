@@ -278,6 +278,22 @@ describe('services > release', () => {
     )
   })
 
+  test('createRelease > release with previously deleted semver', async () => {
+    ReleaseModelMock.findOne.mockResolvedValue({ id: 'id' })
+    const result = createRelease(
+      {} as any,
+      {
+        semver: 'used semver',
+        modelCardVersion: 999,
+      } as any,
+    )
+    await expect(result).rejects.toThrowError(
+      /^A release using this semver has been deleted. Please use a different semver or contact an admin to restore the deleted release./,
+    )
+
+    expect(ReleaseModelMock.save).not.toBeCalled()
+  })
+
   test('updateRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
@@ -489,7 +505,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > no permission', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', settings: { mirror: { sourceModelId: '' } } }
+    const mockModel: any = { id: 'test' }
     const mockRelease = { _id: 'release' }
 
     vi.mocked(authorisation.releases).mockResolvedValue([
@@ -510,7 +526,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > success', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', settings: { mirror: { sourceModelId: '' } } }
+    const mockModel: any = { id: 'test' }
     const mockRelease = { _id: 'release' }
     const resultObject = { modifiedCount: 2, matchedCount: 2 }
 
@@ -530,6 +546,20 @@ describe('services > release', () => {
       /^Cannot remove a file from a mirrored model./,
     )
     expect(ReleaseModelMock.delete).not.toBeCalled()
+  })
+
+  test('removeFileFromReleases > allow removing a file from a mirrored model with arg', async () => {
+    const mockUser: any = { dn: 'test' }
+    const mockModel: any = { id: 'test', kind: 'mirrored-model' }
+    const mockRelease = { _id: 'release' }
+    const resultObject = { modifiedCount: 2, matchedCount: 2 }
+
+    ReleaseModelMock.find.mockResolvedValueOnce([mockRelease, mockRelease])
+    ReleaseModelMock.updateMany.mockResolvedValueOnce(resultObject)
+
+    const result = await removeFileFromReleases(mockUser, mockModel, '', true)
+
+    expect(result).toEqual(resultObject)
   })
 
   test('getFileByReleaseFileName > success', async () => {

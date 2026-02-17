@@ -360,7 +360,7 @@ export async function removeFiles(
   modelId: string,
   fileIds: string[],
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
@@ -376,7 +376,7 @@ export async function removeFiles(
       throw Forbidden(auth.info, { userDn: user.dn })
     }
 
-    await removeFileFromReleases(user, model, fileId)
+    await removeFileFromReleases(user, model, fileId, deleteMirroredModel, session)
 
     await ScanModel.deleteMany({ fileId: { $eq: file.id } }, session)
 
@@ -393,7 +393,7 @@ export async function removeFile(
   modelId: string,
   fileId: string,
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   return (await removeFiles(user, modelId, [fileId], deleteMirroredModel, session))[0]
 }
