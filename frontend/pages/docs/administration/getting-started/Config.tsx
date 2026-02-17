@@ -1,12 +1,16 @@
 import { compile, run } from '@mdx-js/mdx'
 import { Box } from '@mui/material'
 import { repeat } from 'lodash-es'
-import { Fragment, useEffect, useState } from 'react'
+import { type ComponentType, Fragment, useEffect, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 
 import { useGetConfigDocs } from '../../../../actions/uiConfig'
+
+type MDXModule = {
+  default: ComponentType
+}
 
 async function mdx(text) {
   return await run(
@@ -20,7 +24,7 @@ async function mdx(text) {
 }
 
 function Property({ name, type, doc, children, level = 0, nameStack = '' }) {
-  const [mdxModule, setMdxModule] = useState()
+  const [mdxModule, setMdxModule] = useState<MDXModule | null>(null)
   const Content = mdxModule ? mdxModule.default : Fragment
   useEffect(() => {
     let cancelled = false
