@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # ---- Typescript Linting ----
 
 # Run lint-staged for TypeScript frontend + backend
@@ -17,8 +18,8 @@ for venv_dir in $(find . -maxdepth 3 -type d \( -name 'venv' -o -name '.venv' -o
     fi
 done
 
-# ---- Python Linting ----
 
+# ---- Python Linting ----
 # Determine Python command from current environment (venv or system)
 PYTHON_CMD=$(command -v python3 || command -v python)
 
@@ -41,6 +42,7 @@ else
   echo "Python not found. Skipping Python linting."
 fi
 
+
 # ---- Ripgrep Keyword Check ----
 
 # Load local Husky config
@@ -54,16 +56,20 @@ else
   exit 1
 fi
 
-# Validate USE_S3 is set
-if [ -z "${USE_S3:-}" ]; then
-  echo "ERROR: USE_S3 is not set in husky-config.conf (true|false)"
-  exit 1
-fi
+# Default USE_S3 to false if not set
+USE_S3="${USE_S3:-false}"
 
 TMP_KEYWORDS_FILE=""
 
 if [ "$USE_S3" = "true" ]; then
+
   # --- S3 mode ---
+
+  # Check if AWS cli is installed
+  command -v aws >/dev/null 2>&1 || {
+    echo "ERROR: 'aws' CLI is required when USE_S3=true."
+    exit 1
+  }
 
   # Validate KEYWORDS_S3_URI is set
   if [ -z "${KEYWORDS_S3_URI:-}" ]; then
@@ -108,26 +114,37 @@ echo "Scanning staged files for keywords..."
 # Get list of staged files (Added, Copied, Modified)
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
-# If nothing is staged, skip
-if [ -z "$STAGED_FILES" ]; then
+# If nothing is staged, skip (cheap pre-check)
+if ! git diff --cached --name-only --diff-filter=ACM | grep -q .; then
   echo "No staged files to scan."
   [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
   exit 0
 fi
 
 # Run ripgrep only on staged files
-if echo "$STAGED_FILES" | xargs rg \
-  -n \
-  -F \
-  -f "$TMP_KEYWORDS_FILE" \
-  --glob '!:node_modules/**' \
-  --glob '!:.husky/**'
+# if git diff --cached --name-only -z --diff-filter=ACM |
+#   xargs -0 rg \
+#     -n \
+#     -F \
+#     -f "$TMP_KEYWORDS_FILE" \
+#     --glob '!:node_modules/**' \
+#     --glob '!:.husky/**'
+# then
+#   echo ""
+#   echo "ERROR: Keywords detected in staged files."
+#   [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
+#   exit 1
+# fi
+
+
+if git grep -n -F -f "$TMP_KEYWORDS_FILE" --cached -- $STAGED_FILES
 then
   echo ""
   echo "ERROR: Keywords detected in staged files."
   [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
   exit 1
 fi
+
 
 # Cleanup (only for S3 temp file)
 [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
@@ -139,17 +156,25 @@ echo "Pre-commit check passed."
 
 RUN_TRUFFLE_HOGGING="${RUN_TRUFFLE_HOGGING:-false}"
 
-# Validate RUN_TRUFFLE_HOGGING is set
-if [ -z "${RUN_TRUFFLE_HOGGING:-}" ]; then
-  echo "ERROR: RUN_TRUFFLE_HOGGING is not set in husky-config.conf (true|false)"
-  exit 1
-fi
-
 # Check if we need to run
 if [ "$RUN_TRUFFLE_HOGGING" != "true" ]; then
   echo "Trufflehog disabled (RUN_TRUFFLE=$RUN_TRUFFLE_HOGGING)"
   exit 0
 fi
+
+# Check if trufflehog is installed
+command -v trufflehog >/dev/null 2>&1 || {
+  echo "ERROR: 'trufflehog' is not installed or not on PATH."
+  exit 1
+}
+
+# Check if jq is installed (required to parse trufflehog JSON)
+command -v jq >/dev/null 2>&1 || {
+  echo "ERROR: 'jq' is required to parse TruffleHog output."
+  echo "Install jq and try again."
+  exit 1
+}
+
 
 echo "Running Trufflehog..."
 

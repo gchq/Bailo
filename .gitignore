@@ -6,7 +6,7 @@ node_modules
 # misc
 .DS_Store
 husky-config.conf
-misk-items.txt
+misc-items.txt
 
 # debug logs
 npm-debug.log*
