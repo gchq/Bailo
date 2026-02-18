@@ -85,10 +85,10 @@ import { postSchema } from './routes/v2/schema/postSchema.js'
 import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
 import { putSchemaMigration } from './routes/v2/schema/putSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
-import { deleteAllowedBailoInstanceRoute } from './routes/v2/system/bailoinstance/deleteBailoInstance.js'
-import { getAllowedBailoInstances } from './routes/v2/system/bailoinstance/getBailoInstanes.js'
-import { createAllowedBailoInstanceRoute } from './routes/v2/system/bailoinstance/postBailoInstance.js'
-import { updateAllowedBailoInstanceRoute } from './routes/v2/system/bailoinstance/putBailoInstance.js'
+// import { deleteAllowedBailoInstanceRoute } from './routes/v2/system/bailoinstance/deleteBailoInstance.js'
+// import { getAllowedBailoInstances } from './routes/v2/system/bailoinstance/getBailoInstanes.js'
+// import { createAllowedBailoInstanceRoute } from './routes/v2/system/bailoinstance/postBailoInstance.js'
+// import { updateAllowedBailoInstanceRoute } from './routes/v2/system/bailoinstance/putBailoInstance.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
@@ -118,10 +118,10 @@ server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
 server.get('/api/v2/system/status', ...getSystemStatus)
 server.get('/api/v2/system/peers', ...getPeerStatus)
-server.get('/api/v2/system/allowed-instances', ...getAllowedBailoInstances)
-server.post('/api/v2/system/allowed-instances', ...createAllowedBailoInstanceRoute)
-server.put('/api/v2/system/allowed-instances/:id', ...updateAllowedBailoInstanceRoute)
-server.delete('/api/v2/system/allowed-instances/:id', ...deleteAllowedBailoInstanceRoute)
+// server.get('/api/v2/system/allowed-instances', ...getAllowedBailoInstances)
+// server.post('/api/v2/system/allowed-instances', ...createAllowedBailoInstanceRoute)
+// server.put('/api/v2/system/allowed-instances/:id', ...updateAllowedBailoInstanceRoute)
+// server.delete('/api/v2/system/allowed-instances/:id', ...deleteAllowedBailoInstanceRoute)
 
 server.post('/api/v2/models', ...postModel)
 server.get('/api/v2/models/search', ...getModelsSearch)

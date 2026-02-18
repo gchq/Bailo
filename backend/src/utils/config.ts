@@ -62,7 +62,7 @@ export interface Config {
     state: FederationStateKeys
     id: string
     isEscalationEnabled?: boolean
-    peers: Map<string, RemoteFederationConfig>
+    peers: Record<string, RemoteFederationConfig>
   }
 
   smtp: {

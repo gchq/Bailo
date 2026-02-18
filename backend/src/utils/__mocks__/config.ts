@@ -132,9 +132,6 @@ const config: PartialDeep<Config> = {
     contentDirectory: 'content-dir',
     metadataFile: 'meta.json',
   },
-  escalation: {
-    allowed: [],
-  },
 }
 
 export default config
