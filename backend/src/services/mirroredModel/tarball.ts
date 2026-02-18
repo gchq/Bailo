@@ -8,7 +8,7 @@ import { extract, Pack, pack } from 'tar-stream'
 import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { UserInterface } from '../../models/User.js'
-import { isBailoError } from '../../types/error.js'
+import { isBailoError, toBailoError } from '../../types/error.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorInformation, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
@@ -147,7 +147,7 @@ export async function extractTarGzStream(
       ungzipStream.destroy()
       untarStream.destroy()
 
-      reject(err)
+      reject(toBailoError(err))
     }
 
     // Centralised failure path for all synchronous and asynchronous errors.

@@ -166,7 +166,7 @@ export const getDownloadFile = [
         res.destroy(err as Error)
       }
 
-      log.error(bailoError, { fileId })
+      log.error(bailoError, { fileId, modelId: params.modelId })
     })
 
     // Commit headers only when first byte is about to flow
@@ -185,7 +185,10 @@ export const getDownloadFile = [
     // Client disconnect cleanup
     res.once('close', () => {
       if (!stream.readableEnded && !stream.destroyed) {
-        log.debug({ fileId }, 'Response has been closed before file stream has finished. Destroying file stream.')
+        log.debug(
+          { fileId, modelId: params.modelId },
+          'Response has been closed before file stream has finished. Destroying file stream.',
+        )
         stream.destroy()
       }
     })

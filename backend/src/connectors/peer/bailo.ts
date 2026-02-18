@@ -1,10 +1,10 @@
 import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
-import { isBailoError } from '../../types/error.js'
+import { toBailoError } from '../../types/error.js'
 import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { GenericError, InternalError } from '../../utils/error.js'
+import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 const emptyPing: SystemStatus = {
@@ -54,21 +54,9 @@ export class BailoPeerConnector extends BasePeerConnector {
     }
 
     return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
-      if (isBailoError(err)) {
-        return {
-          error: err,
-          ...emptyPing,
-        }
-      } else if (err instanceof Error) {
-        return {
-          error: InternalError(err.message, { err }),
-          ...emptyPing,
-        }
-      } else {
-        return {
-          error: GenericError(500, String(err), { cause: err }),
-          ...emptyPing,
-        }
+      return {
+        error: toBailoError(err),
+        ...emptyPing,
       }
     })
   }
