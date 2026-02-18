@@ -84,8 +84,7 @@ export class BailoPeerConnector extends BasePeerConnector {
 
     // If user is provided and escalation is enabled then add the user header
     if (user && user.dn !== '' && config.federation.isEscalationEnabled) {
-      // headers.set(USER_HEADER, user.dn)
-      headers.set(USER_HEADER, 'mr bob the app user')
+      headers.set(USER_HEADER, user.dn)
     }
 
     try {
