@@ -12,7 +12,6 @@ export const BAILO_ID_HEADER = 'x-bailo-id'
  * @param instance The Bailo federation instanceId.
  */
 export const isAuthorisedToEscalate = (userId: string, instanceId: string): boolean => {
-  // const peer = config.federation.peers.get(instanceId)
   const peer = config.federation.peers[instanceId]
   if (!peer) {
     log.warn(`${instanceId} is not a known Bailo instance, please update the config if it is missing.`)

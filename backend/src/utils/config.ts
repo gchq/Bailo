@@ -209,12 +209,6 @@ export interface Config {
   inference: {
     authorisationToken: string
   }
-
-  // escalation: {
-  //   isEnabled: boolean
-  //   // the list of users allowed to perform escalation
-  //   allowed: EscalationDetails[]
-  // }
 }
 
 const config: Config = _config.util.toObject()
