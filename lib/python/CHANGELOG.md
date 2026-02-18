@@ -10,7 +10,7 @@ All dates are formatted dd/mm/yyyy.
 
 ### Breaking Changes
 
-- `MirroredModel.model_card` and `MirroredModel.model_card_version` implement 'card' and 'additional_information' keys
+- `MirroredModel.model_card` and `MirroredModel.model_card_version` implement 'card' and 'additional_information' keys.
 
 ## 3.5.0 - 03/02/2026
 

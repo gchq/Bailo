@@ -307,7 +307,7 @@ class MirroredModel(Entry):
         else:
             warnings.warn(f"ID {self.id} does not have any associated additional information.")
 
-    def _unpack_card(self, res, mirrored=False):
+    def _unpack_card(self, res, mirrored=False) -> None:
         if mirrored:
             super()._unpack_card(res)
         else:
