@@ -2,9 +2,9 @@ import { AgentOptions } from 'node:https'
 
 import { ResponseChecksumValidation } from '@aws-sdk/middleware-flexible-checksums'
 import { Provider } from '@aws-sdk/types'
-import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
+import { LevelWithSilentOrString } from 'pino'
 
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
@@ -90,7 +90,7 @@ export interface Config {
   }
 
   log: {
-    level: bunyan.LogLevel
+    level: LevelWithSilentOrString
   }
 
   s3: {
