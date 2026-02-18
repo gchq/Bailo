@@ -42,16 +42,16 @@ export abstract class ArtefactBaseScanningConnector {
 
   async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult> {
     log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
-    const scanResults = await this.queue
+    const scanResult = await this.queue
       .add(() => this._scan(artefact))
       .catch((error) => {
         return this.scanError('Queued scan threw an error.', { error, artefact })
       })
     // return type of `queue.add()` is Promise<void | ...> so reject void responses
-    if (scanResults === null || typeof scanResults !== 'object') {
+    if (scanResult === null || typeof scanResult !== 'object') {
       return this.scanError('Queued scan failed to correctly return.', { artefact })
     }
-    return scanResults
+    return scanResult
   }
 
   async scanError(message: string, context?: object): Promise<ArtefactScanResult> {

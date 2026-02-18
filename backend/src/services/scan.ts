@@ -109,6 +109,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
       lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
+
     const resultsArray = await scanners.startScans(file)
     await updateFileWithResults(file._id, resultsArray)
   }

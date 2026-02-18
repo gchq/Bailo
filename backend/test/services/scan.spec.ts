@@ -50,6 +50,11 @@ vi.mock('../../src/utils/config.js', () => ({
   default: configMock,
 }))
 
+const idMock = vi.hoisted(() => ({
+  longId: vi.fn(() => 'mock-long-id'),
+}))
+vi.mock('../../src/utils/id.js', () => idMock)
+
 const fileScanResult: ArtefactScanResult = {
   state: 'complete',
   toolName: 'Test',
@@ -58,12 +63,12 @@ const fileScanResult: ArtefactScanResult = {
 
 const fileScanningMock = vi.hoisted(() => ({
   scannersInfo: vi.fn(() => ({ scannerNames: [] })),
-  startScans: vi.fn(() => new Promise(() => [fileScanResult])),
+  startScans: vi.fn(() => [fileScanResult]),
 }))
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ settings: { mirror: { sourceModelId: '' } } })),
+  getModelById: vi.fn(() => ({ kind: 'model' })),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -88,6 +93,11 @@ describe('services > scan', () => {
       {
         state: ArtefactScanState.Complete,
         lastRunAt: new Date(createdAtTimeInMilliseconds),
+      },
+    ])
+    ScanModelMock.updateOne.mockResolvedValueOnce([
+      {
+        modifiedCount: 1,
       },
     ])
     const scanStatus = await rerunFileScan({} as any, 'model123', testFileId)
