@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanResult } from '../../../../src/connectors/artefactScanning/Base.js'
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
-import { FileScanResult } from '../../../../src/connectors/fileScanning/Base.js'
 import { postAccessRequestSchema } from '../../../../src/routes/v2/model/accessRequest/postAccessRequest.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
@@ -11,29 +11,28 @@ vi.mock('../../../../src/services/accessRequest.js', async () => ({
   createAccessRequest: vi.fn(() => ({ _id: 'test' })),
 }))
 
-const fileScanResult: FileScanResult = {
+const ArtefactScanResult: ArtefactScanResult = {
   state: 'complete',
-  isInfected: false,
   lastRunAt: new Date(),
   toolName: 'Test',
 }
 
 const baseScannerMock = vi.hoisted(() => ({
-  ScanState: {
+  ArtefactScanState: {
     NotScanned: 'notScanned',
     InProgress: 'inProgress',
     Complete: 'complete',
     Error: 'error',
   },
 }))
-vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 
 const fileScanningMock = vi.hoisted(() => ({
   info: vi.fn(() => []),
-  scan: vi.fn(() => new Promise(() => [fileScanResult])),
+  scan: vi.fn(() => new Promise(() => [ArtefactScanResult])),
   init: vi.fn(() => {}),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
+vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 describe('routes > accessRequest > postAccessRequest', () => {
   test('200 > ok', async () => {

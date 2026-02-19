@@ -9,11 +9,11 @@ import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger } from './routes/middleware/expressLogger.js'
 import { requestId } from './routes/middleware/requestId.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
+import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
+import { putFileScan } from './routes/v2/artefactScanning/putFileScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
-import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
-import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -235,7 +235,7 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
 
-server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+server.get('/api/v2/filescanning/info', ...getArtefactScanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)

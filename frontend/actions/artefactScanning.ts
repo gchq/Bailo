@@ -3,7 +3,7 @@ import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyScannerList = []
 
-export function useGetFileScannerInfo() {
+export function useGetArtefactScannerInfo() {
   const { data, isLoading, error, mutate } = useSWR<
     {
       scanners: string[]
@@ -19,8 +19,8 @@ export function useGetFileScannerInfo() {
   }
 }
 
-export function rerunFileScan(modelId: string, fileId: string) {
-  return fetch(`/api/v2/filescanning/model/${modelId}/file/${fileId}/scan`, {
+export function rerunArtefactScan(modelId: string, artefactId: string) {
+  return fetch(`/api/v2/filescanning/model/${modelId}/file/${artefactId}/scan`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
   })

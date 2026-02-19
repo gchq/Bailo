@@ -6,10 +6,10 @@ import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
 
+import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
-import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
@@ -90,12 +90,12 @@ export interface Config {
     audit: {
       kind: AuditKindKeys
     }
-    /** File scanners
-     *  Information specific to how Bailo connects with the file scanners
+    /** Artefact scanners
+     *  Information specific to how Bailo connects with the file and image scanners
      */
-    fileScanners: {
-      /** List of file scanners to use. */
-      kinds: FileScanKindKeys[]
+    artefactScanners: {
+      /** List of artefact scanners to use. */
+      kinds: ArtefactScanKindKeys[]
       /** Normal retry connection time */
       retryDelayInMinutes: number
       /** Max retries to connect scanners */
@@ -343,13 +343,13 @@ export interface Config {
     debug: boolean
   }
 
-  /** ### Antivirus Scanning
+  /** ### Artefact Scanning
    *
-   * Antivirus scanning for files within models.
+   * Scanning for files and images within models, including AV and CVEs.
    *
    * Scanners operate a priority queue
    */
-  avScanning: {
+  artefactScanning: {
     /** ### Clam Antivirus
      *
      * ClamAV is an open-source file scanning toolkit.
@@ -366,9 +366,9 @@ export interface Config {
       port: number
     }
 
-    /** ### Model Scan
+    /** ### ModelScan
      *
-     * Model scan is an open source tool to scan specifically on models
+     * ModelScan is an open source tool to scan specifically on models
      *
      * [Read on Github](https://github.com/protectai/modelscan)
      *
