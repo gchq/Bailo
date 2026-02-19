@@ -10,7 +10,7 @@ interface ArtefactScanInfoResponse {
   apiName: string
   apiVersion: string
   scannerName: string
-  artefactscanVersion: string
+  modelscanVersion: string
 }
 
 interface ArtefactScanResponse {

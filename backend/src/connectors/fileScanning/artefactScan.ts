@@ -18,7 +18,7 @@ export class ArtefactScanFileScanningConnector extends BaseQueueFileScanningConn
 
   async init() {
     const artefactScanInfo = await getArtefactScanInfo()
-    this.version = artefactScanInfo.artefactscanVersion
+    this.version = artefactScanInfo.modelscanVersion
     return this
   }
 
