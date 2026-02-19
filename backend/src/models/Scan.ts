@@ -22,7 +22,7 @@ export type ScanInterface = {
       fileId: string
     }
   | {
-      //TODO - Change this - if necessary - when implementing image scanning.
+      //NOTE - Change this - if necessary - when implementing image scanning.
       artefactKind: typeof ArtefactKind.Image
       repositoryName: string
       layerDigest: string
@@ -43,7 +43,7 @@ export type ClamAVSummary = {
 
 export type ScanAdditionalInfo = ModelScanAdditionalInfo[]
 
-//TODO to be changed
+//NOTE: to be implemented alongside Image scanning
 export type ModelScanAdditionalInfo = {
   [x: string]: unknown
 }

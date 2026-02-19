@@ -174,7 +174,7 @@ export default function FileDisplay({
   const updateChipDetails = useEffectEvent(() => {
     if (!isFileInterface(file) || file.scanResults === undefined) {
       setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
-      return ``
+      return
     } else if (findings(file as FileInterface)) {
       setChipDisplay({
         label: `Scan failed: ${plural(findings(file as FileInterface), 'finding')}`,

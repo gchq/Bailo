@@ -6,14 +6,12 @@ import { ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import { ArtefactTypeKeys } from '../../types/types.js'
 
-//TODO Remove file-specific mentions, but do I replace with artefact? or keep bare?
-
 export type ArtefactScanResult = Pick<
   ScanInterface,
   'toolName' | 'scannerVersion' | 'state' | 'summary' | 'additionalInfo' | 'lastRunAt'
 >
 
-//TODO this may need to change
+//NOTE: This is a placeholder, in preparation towards image scanning implementation
 export type ArtefactInterface = FileInterface | ImageRefInterface
 
 export const ArtefactScanState = {
