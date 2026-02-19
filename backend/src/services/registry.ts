@@ -209,7 +209,7 @@ export async function softDeleteImage(
   user: UserInterface,
   imageRef: ImageRefInterface,
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, imageRef.repository)
   if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {

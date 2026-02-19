@@ -26,7 +26,7 @@ export default function Files({ model }: FilesProps) {
     <Box key={data._id} sx={{ width: '100%' }}>
       <Stack spacing={1} p={2}>
         <FileDisplay
-          showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+          showMenuItems={{ associatedReleases: true, deleteFile: model.kind == EntryKind.MODEL, rescanFile: true }}
           file={data}
           modelId={model.id}
           mutator={mutateModelFiles}
