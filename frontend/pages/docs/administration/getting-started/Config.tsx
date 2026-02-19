@@ -1,3 +1,8 @@
+/**
+ * Dynamically generated config docs for frontend pages.
+ *
+ * See also: ./Config.static.tsx for static implementation.
+ */
 import { compile, run } from '@mdx-js/mdx'
 import { Box } from '@mui/material'
 import { repeat } from 'lodash-es'

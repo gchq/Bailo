@@ -25,7 +25,13 @@ export function useGetConfigDocs() {
       config: any
     },
     ErrorInfo
-  >('/api/v2/config', fetcher)
+  >('/api/v2/config', async (url: string) => {
+    try {
+      return await fetcher(url)
+    } catch {
+      return await fetcher('/config/config-docs.json')
+    }
+  })
   return {
     uiConfig: data?.config,
     isUiConfigLoading: isLoading,
