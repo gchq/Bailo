@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: config-docs
-          path: ./dist/config-docs.json
+          path: ./backend/dist/config-docs.json
 
   # Build job
   build:

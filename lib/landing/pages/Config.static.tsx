@@ -1,12 +1,11 @@
 /**
  * Statically generated config docs for lib/landing pages.
  *
- * See also: ./Config.tsx for dynamic implementation.
+ * See also: `frontend/pages/docs/administration/getting-started/Config.tsx` for dynamic implementation.
  */
 import { JSX } from 'react'
 
-// @ts-expect-error path correct for lib/landing
-import configDocs from '../../../../public/config/config-docs.json'
+import configDocs from '../public/config/config-docs.json'
 
 type Node = {
   name: string

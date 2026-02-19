@@ -1,7 +1,7 @@
 /**
  * Dynamically generated config docs for frontend pages.
  *
- * See also: ./Config.static.tsx for static implementation.
+ * See also: `lib/landing/pages/docs/administration/getting-started/Config.static.tsx` for static implementation.
  */
 import { compile, run } from '@mdx-js/mdx'
 import { Box } from '@mui/material'
