@@ -9,14 +9,14 @@ const bcryptMocks = vi.hoisted(() => ({
 vi.mock('bcryptjs', () => ({ default: bcryptMocks }))
 
 const baseScannerMock = vi.hoisted(() => ({
-  ScanState: {
+  ArtefactScanState: {
     NotScanned: 'notScanned',
     InProgress: 'inProgress',
     Complete: 'complete',
     Error: 'error',
   },
 }))
-vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 
 const sha256Mocks = vi.hoisted(() => ({
   digest: vi.fn(),

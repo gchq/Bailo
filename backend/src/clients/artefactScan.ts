@@ -51,7 +51,7 @@ interface ArtefactScanResponse {
 }
 
 export async function getArtefactScanInfo() {
-  const url = `${config.avScanning.artefactscan.protocol}://${config.avScanning.artefactscan.host}:${config.avScanning.artefactscan.port}`
+  const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
   try {
@@ -70,7 +70,7 @@ export async function getArtefactScanInfo() {
 }
 
 export async function scanStream(stream: Readable, fileName: string) {
-  const url = `${config.avScanning.artefactscan.protocol}://${config.avScanning.artefactscan.host}:${config.avScanning.artefactscan.port}`
+  const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
   try {

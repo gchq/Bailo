@@ -299,7 +299,7 @@ export async function getModelReleases(
             from: 'v2_scans',
             localField: 'id',
             foreignField: 'fileId',
-            as: 'avScan',
+            as: 'scanResults',
           },
         },
       ],

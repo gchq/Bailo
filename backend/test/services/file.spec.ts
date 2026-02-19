@@ -2,9 +2,9 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { FileScanResult, ScanState } from '../../src/connectors/fileScanning/Base.js'
 import {
   downloadFile,
   finishUploadMultipartFile,
@@ -13,7 +13,6 @@ import {
   getTotalFileSize,
   removeFile,
   removeFiles,
-  rerunFileScan,
   startUploadMultipartFile,
   updateFile,
   uploadFile,
@@ -22,7 +21,7 @@ import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/connectors/fileScanning/index.js')
+vi.mock('../../src/connectors/artefactScanning/index.js')
 vi.mock('pretty-bytes')
 
 const FileModelMock = getTypedModelMock('FileModel')
@@ -39,7 +38,7 @@ vi.mock('../../src/services/log.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
-      avScanning: {
+      artefactScanning: {
         clamdscan: {
           host: 'test',
           port: 8080,
@@ -53,7 +52,7 @@ const configMock = vi.hoisted(
         },
       },
       connectors: {
-        fileScanners: {
+        artefactScanners: {
           kinds: ['clamAV'],
           retryDelayInMinutes: 5,
           maxInitRetries: 5,
@@ -72,18 +71,17 @@ const idMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/utils/id.js', () => idMock)
 
-const fileScanResult: FileScanResult = {
+const fileScanResult: ArtefactScanResult = {
   state: 'complete',
-  isInfected: false,
   toolName: 'Test',
   lastRunAt: new Date(),
 }
 
 const fileScanningMock = vi.hoisted(() => ({
-  info: vi.fn(() => []),
-  scan: vi.fn(() => new Promise(() => [fileScanResult])),
+  scannersInfo: vi.fn(() => ({ scannerNames: [] })),
+  startScans: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
+vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
@@ -108,14 +106,14 @@ const testFileId = '73859F8D26679D2E52597326'
 const testFileIdReversed = testFileId.split('').reverse().join('')
 
 const baseScannerMock = vi.hoisted(() => ({
-  ScanState: {
+  ArtefactScanState: {
     NotScanned: 'notScanned',
     InProgress: 'inProgress',
     Complete: 'complete',
     Error: 'error',
   },
 }))
-vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 
 const clamscan = vi.hoisted(() => ({ on: vi.fn() }))
 vi.mock('clamscan', () => ({
@@ -149,9 +147,9 @@ describe('services > file', () => {
   })
 
   test('uploadFile > virus scan initialised', async () => {
-    vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ clamdscan: 'test' })
+    vi.spyOn(configMock, 'artefactScanning', 'get').mockReturnValue({ clamdscan: 'test' })
     vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
-      fileScanners: {
+      artefactScanners: {
         kinds: ['clamAV'],
       },
     })
@@ -433,7 +431,7 @@ describe('services > file', () => {
 
   test('getFilesByIds > success', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { example: 'file', avScan: [], _id: { toString: vi.fn(() => testFileId) } },
+      { example: 'file', scanResults: [], _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const user = { dn: 'testUser' } as any
@@ -450,12 +448,12 @@ describe('services > file', () => {
       {
         example: 'file',
         _id: '123',
-        avScan: [{ fileId: '123' }, { fileId: '123' }],
+        scanResults: [{ fileId: '123' }, { fileId: '123' }],
       },
       {
         example: 'file',
         _id: '321',
-        avScan: [{ fileId: '321' }],
+        scanResults: [{ fileId: '321' }],
       },
     ])
     vi.mocked(authorisation.files).mockResolvedValueOnce([
@@ -505,7 +503,7 @@ describe('services > file', () => {
       },
     ])
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { example: 'file', avScan: [], _id: { toString: vi.fn(() => testFileId) } },
+      { example: 'file', scanResults: [], _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const user = { dn: 'testUser' } as any
@@ -557,57 +555,6 @@ describe('services > file', () => {
     const size = await getTotalFileSize(['1', '2', '3'])
 
     expect(size).toBe(42)
-  })
-
-  test('rerunFileScan > successfully reruns a file scan', async () => {
-    const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      {
-        name: 'file.txt',
-        size: 123,
-        _id: { toString: vi.fn(() => testFileId) },
-      },
-    ])
-    ScanModelMock.find.mockResolvedValueOnce([
-      {
-        state: ScanState.Complete,
-        lastRunAt: new Date(createdAtTimeInMilliseconds),
-      },
-    ])
-    const scanStatus = await rerunFileScan({} as any, 'model123', testFileId)
-    expect(scanStatus).toBe('Scan started for file.txt')
-  })
-
-  test('rerunFileScan > throws bad request when attempting to upload an empty file', async () => {
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      {
-        name: 'file.txt',
-        size: 0,
-        _id: { toString: vi.fn(() => testFileId) },
-      },
-    ])
-    ScanModelMock.find.mockResolvedValueOnce([
-      {
-        state: ScanState.Complete,
-      },
-    ])
-    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
-      /^Cannot run scan on an empty file/,
-    )
-  })
-
-  test('rerunFileScan > does not rerun file scan before delay is over', async () => {
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      {
-        name: 'file.txt',
-        size: 123,
-        _id: { toString: vi.fn(() => testFileId) },
-      },
-    ])
-    ScanModelMock.find.mockResolvedValueOnce([{ state: ScanState.Complete, lastRunAt: new Date() }])
-    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
-      /^Please wait 5 minutes before attempting a rescan file.txt/,
-    )
   })
 
   test('isFileInterfaceDoc > success', async () => {

@@ -1,4 +1,4 @@
-import { Delete, Done, Error, Info, LocalOffer, MoreVert, Refresh, Warning } from '@mui/icons-material'
+import { Delete, Done, Error, Info, LocalOffer, MoreVert, Pending, Refresh, Warning } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -16,9 +16,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { rerunArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
-import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import {
@@ -41,7 +41,14 @@ import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { FileInterface, isFileInterface, ReleaseInterface, ScanState } from 'types/types'
+import {
+  ClamAVScanSummary,
+  FileInterface,
+  isFileInterface,
+  ModelScanSummary,
+  ReleaseInterface,
+  ScanState,
+} from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
@@ -155,58 +162,60 @@ export default function FileDisplay({
 
   const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
 
-  const threatsFound = useCallback((file: FileInterface) => {
-    if (file.avScan === undefined) {
+  const findings = useCallback((file: FileInterface) => {
+    if (file.scanResults === undefined) {
       return 0
     }
-    return file.avScan.reduce((acc, scan) => {
-      return scan.viruses ? scan.viruses.length + acc : acc
+    return file.scanResults.reduce((acc, scan) => {
+      return scan.summary ? scan.summary.length + acc : acc
     }, 0)
   }, [])
 
   const updateChipDetails = useEffectEvent(() => {
-    if (!isFileInterface(file) || file.avScan === undefined) {
-      setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
+    if (!isFileInterface(file) || file.scanResults === undefined) {
+      setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
       return
-    } else if (threatsFound(file as FileInterface)) {
+    } else if (findings(file as FileInterface)) {
       setChipDisplay({
-        label: `Virus scan failed: ${plural(threatsFound(file as FileInterface), 'threat')} found`,
+        label: `Scan failed: ${plural(findings(file as FileInterface), 'finding')}`,
         colour: 'error',
         icon: <Error />,
       })
       return
     } else if (
       isFileInterface(file) &&
-      file.avScan !== undefined &&
-      file.avScan.some((scan) => scan.state === ScanState.Error)
+      file.scanResults !== undefined &&
+      file.scanResults.some((scan) => scan.state === ScanState.Error)
     ) {
-      setChipDisplay({ label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> })
+      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Warning /> })
       return
-    } else if (!threatsFound(file as FileInterface)) {
-      setChipDisplay({ label: 'Virus scan passed', colour: 'success', icon: <Done /> })
+    } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
+      setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
+    } else if (file.scanResults.some((scan) => scan.state === ScanState.NotScanned)) {
+      setChipDisplay({ label: 'Not scanned', colour: 'warning', icon: <Warning /> })
+    } else if (!findings(file as FileInterface)) {
+      setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
     } else {
       setChipDisplay({
         label: 'There was a problem fetching the file scan results',
-        colour: 'warning',
+        colour: 'error',
         icon: <Warning />,
       })
     }
   })
 
   useEffect(() => {
-    if (chipDisplay === undefined) {
-      updateChipDetails()
-    }
-  }, [chipDisplay, file])
+    updateChipDetails()
+  }, [file])
 
   const sendNotification = useNotification()
-  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
+  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
 
   const openMore = Boolean(anchorElMore)
   const openScan = Boolean(anchorElScan)
 
   const handleRerunFileScanOnClick = useCallback(async () => {
-    const res = await rerunFileScan(modelId, (file as FileInterface)._id)
+    const res = await rerunArtefactScan(modelId, (file as FileInterface)._id)
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -236,17 +245,7 @@ export default function FileDisplay({
     )
   }, [handleRerunFileScanOnClick, showMenuItems.rescanFile])
 
-  const avChip = useMemo(() => {
-    if (
-      !isFileInterface(file) ||
-      file.avScan === undefined ||
-      file.avScan.every((scan) => scan.state === ScanState.NotScanned)
-    ) {
-      return <Chip size='small' label='Virus scan results could not be found' />
-    }
-    if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
-      return <Chip size='small' label='Virus scan in progress' />
-    }
+  const scanResultChip = useMemo(() => {
     if (!chipDisplay) {
       return <Skeleton variant='text' sx={{ fontSize: '1rem', width: '150px' }} />
     }
@@ -262,6 +261,7 @@ export default function FileDisplay({
           />
         )}
         <Popover
+          hidden={file.scanResults && file.scanResults.some((res) => res.state === ScanState.InProgress)}
           open={openScan}
           anchorEl={anchorElScan}
           onClose={() => setAnchorElScan(null)}
@@ -275,39 +275,52 @@ export default function FileDisplay({
           }}
         >
           <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
-            {file.avScan.map((scanResult) => (
-              <Fragment key={scanResult.toolName}>
-                {scanResult.isInfected ? (
-                  <Stack spacing={2}>
-                    <Stack spacing={1} direction='row'>
-                      <Error color='error' />
-                      <Typography>
-                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
-                      </Typography>
+            {file.scanResults &&
+              file.scanResults.map((scanResult) => (
+                <Fragment key={scanResult.toolName}>
+                  {scanResult.summary && scanResult.summary.length > 0 ? (
+                    <Stack spacing={2}>
+                      <Stack spacing={1} direction='row'>
+                        <Error color='error' />
+                        <Typography>
+                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following:
+                        </Typography>
+                      </Stack>
+                      {scanResult.scannerVersion && (
+                        <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                      )}
+                      <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
+                      <ul>
+                        {scanResult.toolName === 'ModelScan'
+                          ? scanResult.summary.map((vulnerability) => (
+                              <li
+                                key={(vulnerability as ModelScanSummary).vulnerabilityDescription}
+                              >{`${((vulnerability as ModelScanSummary).severity as string).toUpperCase()}: ${(vulnerability as ModelScanSummary).vulnerabilityDescription}`}</li>
+                            ))
+                          : scanResult.summary.map((vulnerability) => (
+                              <li
+                                key={(vulnerability as ClamAVScanSummary).virus}
+                              >{`Virus found: ${(vulnerability as ClamAVScanSummary).virus}`}</li>
+                            ))}
+                      </ul>
                     </Stack>
-                    {scanResult.scannerVersion && (
-                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
-                    )}
-                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                    <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
-                  </Stack>
-                ) : (
-                  <Stack spacing={2}>
-                    <Stack spacing={1} direction='row'>
-                      {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
-                      <Typography>
-                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                        {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
-                      </Typography>
+                  ) : (
+                    <Stack spacing={2}>
+                      <Stack spacing={1} direction='row'>
+                        {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
+                        <Typography>
+                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
+                          {scanResult.state === 'error' ? ' was not able to be run' : ' did not find anything'}
+                        </Typography>
+                      </Stack>
+                      {scanResult.scannerVersion && (
+                        <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                      )}
+                      <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                     </Stack>
-                    {scanResult.scannerVersion && (
-                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
-                    )}
-                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                  </Stack>
-                )}
-              </Fragment>
-            ))}
+                  )}
+                </Fragment>
+              ))}
           </Stack>
         </Popover>
       </>
@@ -390,7 +403,7 @@ export default function FileDisplay({
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
               {scanners.length > 0 && (
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  {avChip}
+                  {scanResultChip}
                 </Stack>
               )}
               <Stack>

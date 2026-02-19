@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetFileScannerInfo } from 'actions/fileScanning'
+import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
@@ -111,7 +111,7 @@ export default function ReleaseForm({
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
-  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
+  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
