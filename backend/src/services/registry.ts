@@ -10,6 +10,7 @@ import {
   putManifest,
 } from '../clients/registry.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
@@ -208,10 +209,10 @@ export async function softDeleteImage(
   user: UserInterface,
   imageRef: ImageRefInterface,
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, imageRef.repository)
-  if (model.settings?.mirror?.sourceModelId && !deleteMirroredModel) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot remove image from a mirrored model.')
   }
 

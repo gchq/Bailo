@@ -5,7 +5,7 @@ import { Optional } from 'utility-types'
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
-import { ModelDoc, ModelInterface } from '../models/Model.js'
+import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import Review, { ReviewDoc } from '../models/Review.js'
@@ -133,7 +133,7 @@ export type CreateReleaseParams = Optional<
 >
 export async function createRelease(user: UserInterface, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot create a release from a mirrored model.`)
   }
 
@@ -178,7 +178,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     await release.save()
   } catch (error) {
     if (isMongoServerError(error) && error.code === 11000) {
-      throw BadReq(`A release with this semver already exists for this model.`, {
+      throw BadReq('A release with this semver already exists for this model.', {
         modelId: releaseParams.modelId,
         semver: releaseParams.semver,
       })
@@ -209,7 +209,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
 export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'modelCardVersion' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot update a release on a mirrored model.`)
   }
   const release = await getReleaseBySemver(user, model, semver)
@@ -243,7 +243,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 
 export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, comment: string) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
 
@@ -528,10 +528,10 @@ export async function deleteReleases(
   modelId: string,
   semvers: string[],
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot delete a release on a mirrored model.')
   }
   for (const semver of semvers) {
@@ -547,9 +547,9 @@ export async function deleteReleases(
       semver,
     })
 
-    release.delete(session)
-    removeReleaseReviews(modelId, semver, session)
-    removeResponsesByParentIds(
+    await release.delete(session)
+    await removeReleaseReviews(modelId, semver, session)
+    await removeResponsesByParentIds(
       [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
       session,
     )
@@ -563,7 +563,7 @@ export async function deleteRelease(
   modelId: string,
   semver: string,
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   await deleteReleases(user, modelId, [semver], deleteMirroredModel, session)
   return { modelId, semver }
@@ -573,8 +573,14 @@ export function getReleaseName(release: ReleaseDoc): string {
   return `${release.modelId} - v${release.semver}`
 }
 
-export async function removeFileFromReleases(user: UserInterface, model: ModelDoc, fileId: string) {
-  if (model.settings.mirror.sourceModelId) {
+export async function removeFileFromReleases(
+  user: UserInterface,
+  model: ModelDoc,
+  fileId: string,
+  deleteMirroredModel: boolean = false,
+  session?: ClientSession,
+) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq(`Cannot remove a file from a mirrored model.`)
   }
 
@@ -594,9 +600,13 @@ export async function removeFileFromReleases(user: UserInterface, model: ModelDo
     })
   }
 
-  const result = await ReleaseModel.updateMany(query, {
-    $pull: { fileIds: fileId },
-  })
+  const result = await ReleaseModel.updateMany(
+    query,
+    {
+      $pull: { fileIds: fileId },
+    },
+    session,
+  )
 
   return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
 }
@@ -650,7 +660,7 @@ export async function findAndDeleteImageFromReleases(
   user: UserInterface,
   modelId: string,
   imageRef: ImageRefInterface,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   // Handles auth
   await getModelById(user, modelId)

@@ -12,9 +12,10 @@ import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
 import Releases from 'src/entry/model/Releases'
-import Overview from 'src/entry/overview/Overview'
+import Overview from 'src/entry/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import MessageAlert from 'src/MessageAlert'
 import { EntryKind } from 'types/types'
 import { getCurrentUserRoles } from 'utils/roles'
 
@@ -119,6 +120,17 @@ export default function Model() {
           requiredUrlParams={{ modelId: entry.id }}
           titleToCopy={entry.name}
           subheadingToCopy={entry.id}
+          additionalHeaderDisplay={
+            entry.kind === EntryKind.MIRRORED_MODEL ? (
+              <MessageAlert
+                message={`This is a mirrored model, some sections will be read-only.`}
+                subHeading={`Source model ID: ${entry.settings.mirror?.sourceModelId}`}
+                severity='info'
+              />
+            ) : (
+              <></>
+            )
+          }
         />
       )}
     </>

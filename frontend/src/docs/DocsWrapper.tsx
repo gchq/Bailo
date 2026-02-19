@@ -139,11 +139,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             overflow: 'auto',
             py: 2,
           })}
+          position={{ xs: 'relative', sm: 'fixed' }}
           height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
         >
           <StyledList>{createDocElement(directory)}</StyledList>
         </Box>
-        <Box flex={1} overflow='auto' sx={{ height: 'calc(100vh - 80px)' }}>
+        <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
           <Box display='flex' flexDirection='column'>
             <Container
               maxWidth='lg'

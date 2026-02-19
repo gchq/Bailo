@@ -13,6 +13,8 @@ permissions:
 
 jobs:
   label:
+    # Don't run on PRs from forks as we lack permissions
+    if: ${{ github.event.pull_request.head.repo.id == 336277921 }} # ID is for github.com/gchq/bailo
     runs-on: ubuntu-latest
     steps:
       - name: Apply labels

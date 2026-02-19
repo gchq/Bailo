@@ -3,11 +3,13 @@ import 'dayjs/locale/en-gb'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
@@ -20,9 +22,10 @@ interface DateSelectorProps {
   onChange: (newValue: string | undefined) => void
   InputProps?: any
   id: string
+  schema: RJSFSchema
 }
 
-export default function DateSelector({ onChange, value, label, registry, required, id }: DateSelectorProps) {
+export default function DateSelector({ onChange, value, label, registry, required, id, schema }: DateSelectorProps) {
   const theme = useTheme()
 
   const handleChange = (dateInput: Dayjs | null) => {
@@ -37,11 +40,19 @@ export default function DateSelector({ onChange, value, label, registry, require
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
+    >
       {registry.formContext.editMode && (
         <DatePicker
           value={value ? dayjs(value) : undefined}
@@ -52,15 +63,17 @@ export default function DateSelector({ onChange, value, label, registry, require
         />
       )}
       {!registry.formContext.editMode && (
-        <Typography
-          sx={{
-            fontStyle: value ? 'unset' : 'italic',
-            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-          }}
-        >
-          {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
-        </Typography>
+        <>
+          <Typography
+            sx={{
+              fontStyle: value ? 'unset' : 'italic',
+              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+            }}
+          >
+            {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
+          </Typography>
+        </>
       )}
-    </Fragment>
+    </AdditionalInformation>
   )
 }

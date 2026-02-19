@@ -7,7 +7,7 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKind, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
@@ -30,6 +30,7 @@ import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
 import { getFilesByModel, removeFiles } from './file.js'
 import { getInferencesByModel, removeInferences } from './inference.js'
+import log from './log.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
@@ -38,7 +39,7 @@ import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot alter a mirrored model.`)
   }
 }
@@ -500,8 +501,6 @@ export async function _setModelCard(
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
 
-  checkModelRestriction(model)
-
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
@@ -566,7 +565,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (modelDiff.settings?.mirror?.sourceModelId) {
     throw BadReq('Cannot change standard model to be a mirrored model.')
   }
-  if (model.settings.mirror.sourceModelId && modelDiff.settings?.mirror?.destinationModelId) {
+  if (EntryKind.MirroredModel === model.kind && modelDiff.settings?.mirror?.destinationModelId) {
     throw BadReq('Cannot set a destination model ID for a mirrored model.')
   }
   if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
@@ -594,7 +593,9 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (!recheckAuth.success) {
     throw Forbidden(recheckAuth.info, { userDn: user.dn })
   }
+
   await model.save()
+  log.debug({ updates: modelDiff, modelId }, 'Model updated')
 
   return model
 }
