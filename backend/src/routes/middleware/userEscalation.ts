@@ -41,11 +41,12 @@ export async function escalateUser(req: Request, _res: Response, next: NextFunct
 
     if (requestingUser && bailoId && typeof bailoId === 'string') {
       // Check the requesting proc user is authorised and part of an accepted Bailo instance
-      const isAuthorised = isAuthorisedToEscalate(req.user.dn, bailoId)
+      const procUser = req.user.dn
+      const isAuthorised = isAuthorisedToEscalate(procUser, bailoId)
       if (isAuthorised) {
         // Escalate from the system proc user to the original requesting user
         req.user = { dn: requestingUser }
-        log.info({}, `The system user ${req.user.dn} has been escalated to user ${requestingUser}.`)
+        log.info({}, `The system user ${procUser} has been escalated to user ${requestingUser}.`)
       }
     }
   }
