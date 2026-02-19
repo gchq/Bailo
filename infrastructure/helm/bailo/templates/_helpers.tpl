@@ -42,7 +42,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Mongo host defination
+Mongo host definition
 */}}
 {{- define "bailo.mongo.host" -}}
 {{- if and (.Values.mongodb.enabled) (eq .Values.mongodb.architecture "standalone") -}}
@@ -62,7 +62,7 @@ mongodb://{{ include "bailo.mongo.host" . }}
 {{- end }}
 
 {{/*
-Mail host defination
+Mail host definition
 */}}
 {{- define "bailo.mail.host" -}}
 {{- if .Values.mail.enabled -}}
@@ -73,7 +73,7 @@ Mail host defination
 {{- end -}}
 
 {{/*
-Minio host defination
+Minio host definition
 */}}
 {{- define "bailo.minio.host" -}}
 {{- if .Values.minio.enabled -}}
@@ -84,7 +84,7 @@ Minio host defination
 {{- end -}}
 
 {{/*
-Registry host defination
+Registry host definition
 */}}
 {{- define "bailo.registry.host" -}}
 {{- if .Values.registry.enabled -}}
@@ -141,7 +141,7 @@ federation:
         statusModelId: {{ $v.statusModelId }}
   {{ end }}
   {{ end }}
-avScanning:
+artefactScanning:
   clamdscan:
     concurrency: {{ .Values.clamav.concurrency }}
     host: {{ include "bailo.fullname" . }}-clamav
@@ -233,11 +233,11 @@ connectors:
     kind: {{ .Values.connectors.authorisation.kind }}
   audit:
     kind: {{ .Values.connectors.audit.kind }}
-  fileScanners:
-    kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
-    retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }}
-    maxInitRetries:  {{ .Values.connectors.fileScanners.maxInitRetries }}
-    initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }}
+  artefactScanners:
+    kinds: {{ toJson .Values.connectors.artefactScanners.kinds }}
+    retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }}
+    maxInitRetries:  {{ .Values.connectors.artefactScanners.maxInitRetries }}
+    initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }}
 instrumentation:
   enabled: {{ .Values.instrumentation.enabled }}
   endpoint: {{ .Values.instrumentation.endpoint }}
