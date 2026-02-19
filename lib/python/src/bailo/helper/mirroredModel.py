@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import warnings
+from typing import Any
 
 from semantic_version import Version
 
@@ -57,6 +59,9 @@ class MirroredModel(Entry):
         )
         self.sourceModelId = sourceModelId
         self.model_id = model_id
+
+        self._mirrored_card = None
+        self._mirrored_card_version = None
 
     @classmethod
     def create(
@@ -280,13 +285,46 @@ class MirroredModel(Entry):
         """
         raise NotImplementedError
 
+    def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
+        """Upload and retrieve any changes to the editable mirrored model card on Bailo.
+
+        :param model_card: Model card dictionary, defaults to None
+
+        ..note:: If a model card is not provided, the current model card attribute value is used
+        """
+        self._update_card(card=model_card)
+
+    def get_card_latest(self) -> None:
+        """Get the latest card from Bailo."""
+        res = self.client.get_model(model_id=self.id)
+        if "card" in res["model"]:
+            self._unpack_card(res["model"]["card"])
+            logger.info("Latest card for ID %s successfully retrieved.", self.id)
+        else:
+            warnings.warn(f"ID {self.id} does not have any associated model card.")
+        if "mirroredCard" in res["model"]:
+            self._unpack_card(res["model"]["mirroredCard"], True)
+        else:
+            warnings.warn(f"ID {self.id} does not have any associated additional information.")
+
+    def _unpack_card(self, res, mirrored=False) -> None:
+        if mirrored:
+            super()._unpack_card(res)
+        else:
+            self._mirrored_card_version = res["version"]
+
+            try:
+                self._mirrored_card = res["metadata"]
+            except KeyError:
+                self._mirrored_card = None
+
     @property
     def model_card(self):
         """Get the data of the model card.
 
         :return: Model card data.
         """
-        return self._card
+        return {"card": self._card, "additional_information": self._mirrored_card}
 
     @property
     def model_card_version(self):
@@ -294,7 +332,10 @@ class MirroredModel(Entry):
 
         :return: Model card version.
         """
-        return self._card_version
+        return {
+            "card": self._card_version,
+            "additional_information": self._mirrored_card_version,
+        }
 
     @property
     def model_card_schema(self):
