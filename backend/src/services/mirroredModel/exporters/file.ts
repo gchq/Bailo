@@ -1,7 +1,7 @@
+import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
+import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { ScanState } from '../../../connectors/fileScanning/Base.js'
-import scanners from '../../../connectors/fileScanning/index.js'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
@@ -32,13 +32,16 @@ export class FileExporter extends BaseExporter {
       })
     }
 
-    if (scanners.info()) {
-      if (!this.file.avScan || this.file.avScan.length === 0) {
-        throw BadReq('The file is missing AV scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
-        throw BadReq('The file has incomplete AV scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.avScan.some((scanResult) => scanResult.isInfected)) {
-        throw BadReq('The file has failed AV scan(s).', { filename: this.file.name, fileId: this.file.id })
+    if (scanners.scannersInfo().scannerNames.length > 0) {
+      if (!this.file.scanResults || this.file.scanResults.length === 0) {
+        throw BadReq('The file is missing vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
+      } else if (this.file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+        throw BadReq('The file has incomplete vulnerability scan(s).', {
+          filename: this.file.name,
+          fileId: this.file.id,
+        })
+      } else if (this.file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary.length > 0)) {
+        throw BadReq('The file has failed vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }
   }

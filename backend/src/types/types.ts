@@ -239,3 +239,10 @@ export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInfor
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
+
+export const ArtefactType = {
+  FILE: 'file',
+  IMAGE: 'image',
+} as const
+
+export type ArtefactTypeKeys = (typeof ArtefactType)[keyof typeof ArtefactType]

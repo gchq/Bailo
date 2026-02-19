@@ -73,7 +73,7 @@ const configMock = vi.hoisted(() => ({
     },
   ],
   connectors: {
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
     audit: {

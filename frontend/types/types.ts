@@ -91,8 +91,8 @@ export interface FileInterface {
 
   complete: boolean
 
-  // Older files may not have AV run against them
-  avScan?: AvScanResult[]
+  // Older files may not have scans run against them
+  scanResults?: AvScanResult[]
 
   tags: string[]
 
@@ -100,20 +100,31 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export type FileWithScanResultsInterface = FileInterface & { avScan: ScanResultInterface[]; id: string }
+export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanResultInterface[]; id: string }
 
 export interface ScanResultInterface {
   _id: string
   state: ScanStateKeys
   scannerVersion?: string
-  isInfected?: boolean
-  viruses?: Array<string>
+  summary?: Array<ModelScanSummary | ClamAVScanSummary>
   toolName: string
   lastRunAt: string
 
   createdAt: Date
   updatedAt: Date
 }
+
+export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescription: string }
+export type ClamAVScanSummary = { virus: string }
+
+export const SeverityLevel = {
+  UNKNOWN: 'unknown',
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+} as const
+export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
 export const ScanState = {
   NotScanned: 'notScanned',

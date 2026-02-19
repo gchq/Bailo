@@ -29,7 +29,7 @@ export interface FileInterface {
 // object from Mongoose it should use this interface
 export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
 // `id` is used by the python API so we need to keep this to prevent a breaking change
-export type FileWithScanResultsInterface = FileInterface & { avScan: ScanInterface[]; id: string }
+export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanInterface[]; id: string }
 
 const FileSchema = new Schema<FileInterfaceDoc>(
   {
