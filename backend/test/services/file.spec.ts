@@ -2,7 +2,7 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
+import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import {
@@ -17,7 +17,6 @@ import {
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
-import { rerunFileScan } from '../../src/services/scan.js'
 import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -556,57 +555,6 @@ describe('services > file', () => {
     const size = await getTotalFileSize(['1', '2', '3'])
 
     expect(size).toBe(42)
-  })
-
-  test('rerunFileScan > successfully reruns a file scan', async () => {
-    const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      {
-        name: 'file.txt',
-        size: 123,
-        _id: { toString: vi.fn(() => testFileId) },
-      },
-    ])
-    ScanModelMock.find.mockResolvedValueOnce([
-      {
-        state: ArtefactScanState.Complete,
-        lastRunAt: new Date(createdAtTimeInMilliseconds),
-      },
-    ])
-    const scanStatus = await rerunFileScan({} as any, 'model123', testFileId)
-    expect(scanStatus).toBe('Scan started for file.txt')
-  })
-
-  test('rerunFileScan > throws bad request when attempting to upload an empty file', async () => {
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      {
-        name: 'file.txt',
-        size: 0,
-        _id: { toString: vi.fn(() => testFileId) },
-      },
-    ])
-    ScanModelMock.find.mockResolvedValueOnce([
-      {
-        state: ArtefactScanState.Complete,
-      },
-    ])
-    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
-      /^Cannot run scan on an empty file/,
-    )
-  })
-
-  test('rerunFileScan > does not rerun file scan before delay is over', async () => {
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      {
-        name: 'file.txt',
-        size: 123,
-        _id: { toString: vi.fn(() => testFileId) },
-      },
-    ])
-    ScanModelMock.find.mockResolvedValueOnce([{ state: ArtefactScanState.Complete, lastRunAt: new Date() }])
-    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
-      /^Please wait 5 minutes before attempting a rescan file.txt/,
-    )
   })
 
   test('isFileInterfaceDoc > success', async () => {
