@@ -2,7 +2,7 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.6.0 - 17/02/2026
+## 3.6.0 - 19/02/2026
 
 ### Changes
 
