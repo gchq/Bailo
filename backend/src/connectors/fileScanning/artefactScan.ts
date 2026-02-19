@@ -9,7 +9,7 @@ import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Bas
 
 export class ArtefactScanFileScanningConnector extends BaseQueueFileScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.avScanning.artefactscan.concurrency })
-  toolName: string = 'ArtefactScan'
+  toolName: string = 'ModelScan'
   version: string | undefined = undefined
 
   constructor() {
