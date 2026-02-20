@@ -1,6 +1,6 @@
 import { ArrowDropDown } from '@mui/icons-material'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, Typography } from '@mui/material'
-import { useGetFileScannerInfo } from 'actions/fileScanning'
+import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { memoize } from 'lodash-es'
 import { useState } from 'react'
@@ -25,7 +25,7 @@ export default function ReleaseAssetsAccordion({
 }: ReleaseAssetsAccordionProps) {
   const [expanded, setExpanded] = useState<'files' | 'images' | false>(false)
 
-  const { scanners } = useGetFileScannerInfo()
+  const { scanners } = useGetArtefactScannerInfo()
   const { uiConfig } = useGetUiConfig()
 
   const handleAccordionChange = (panel: 'files' | 'images') => (_: unknown, isExpanded: boolean) => {

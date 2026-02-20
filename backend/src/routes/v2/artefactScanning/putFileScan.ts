@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { rerunFileScan } from '../../../services/file.js'
+import { rerunFileScan } from '../../../services/scan.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -18,7 +18,7 @@ export const putFileScanSchema = z.object({
 registerPath({
   method: 'put',
   path: '/api/v2/filescanning/model/{modelId}/file/{fileId}/scan',
-  tags: ['filescanning'],
+  tags: ['artefact-scanning'],
   description: 'Manually re-request a new antivirus scan for a file',
   schema: putFileScanSchema,
   responses: {

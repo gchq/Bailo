@@ -1,6 +1,6 @@
 import { model, ObjectId, Schema } from 'mongoose'
 
-import { ScanState, ScanStateKeys } from '../connectors/fileScanning/Base.js'
+import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export type ScanInterface = {
@@ -8,9 +8,10 @@ export type ScanInterface = {
 
   toolName: string
   scannerVersion?: string
-  state: ScanStateKeys
-  isInfected?: boolean
-  viruses?: string[]
+  state: ArtefactScanStateKeys
+  summary?: ScanSummary
+  additionalInfo?: ScanAdditionalInfo
+
   lastRunAt: Date
 
   createdAt: Date
@@ -21,13 +22,40 @@ export type ScanInterface = {
       fileId: string
     }
   | {
+      //NOTE - Change this - if necessary - when implementing image scanning.
       artefactKind: typeof ArtefactKind.Image
       repositoryName: string
-      // use Digest as image Tags can be overwritten but digests are immutable
-      imageDigest: string
-      // TODO: ultimately use backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
+      layerDigest: string
+      packageList: string[]
     }
 )
+
+export type ScanSummary = (ModelScanSummary | ClamAVSummary)[]
+
+export type ModelScanSummary = {
+  severity: SeverityLevelKeys
+  vulnerabilityDescription: string
+}
+
+export type ClamAVSummary = {
+  virus: string
+}
+
+export type ScanAdditionalInfo = ModelScanAdditionalInfo[]
+
+//NOTE: to be implemented alongside Image scanning
+export type ModelScanAdditionalInfo = {
+  [x: string]: unknown
+}
+
+export const SeverityLevel = {
+  UNKNOWN: 'unknown',
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+} as const
+export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
 export const ArtefactKind = {
   File: 'file',
@@ -42,13 +70,18 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     artefactKind: { type: String, enum: Object.values(ArtefactKind), required: true },
     fileId: { type: String },
     repositoryName: { type: String },
-    imageDigest: { type: String },
+    layerDigest: { type: String },
+    packageList: [{ type: String }],
 
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
-    state: { type: String, enum: Object.values(ScanState), required: true },
-    isInfected: { type: Boolean },
-    viruses: [{ type: String }],
+    state: { type: String, enum: Object.values(ArtefactScanState), required: true },
+    summary: [
+      {
+        type: Schema.Types.Mixed,
+      },
+    ],
+    additionalInfo: [{ type: Schema.Types.Mixed }],
     lastRunAt: { type: Schema.Types.Date, required: true },
   },
   {

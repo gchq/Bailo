@@ -1,13 +1,60 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
+from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, Role
 
 # isort: split
 
 from bailo import Client, Datacard, Experiment, MirroredModel, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
+
+
+def test_model_card_defaults(local_mirrored_model):
+    assert local_mirrored_model.model_card == {
+        "card": None,
+        "additional_information": None,
+    }
+
+    assert local_mirrored_model.model_card_version == {
+        "card": None,
+        "additional_information": None,
+    }
+
+
+def test_get_card_latest_with_card_and_mirrored_card(local_mirrored_model, requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "kind": EntryKind.MIRRORED_MODEL,
+                "card": {
+                    "schemaId": "minimal-general-v10",
+                    "version": 1,
+                    "metadata": {"overview": {"summary": "some additional info"}},
+                    "schema": {"id": "schema-1"},
+                },
+                "mirroredCard": {
+                    "schemaId": "minimal-general-v10",
+                    "version": 2,
+                    "metadata": {"overview": {"summary": "main card"}},
+                },
+            }
+        },
+    )
+
+    local_mirrored_model.get_card_latest()
+
+    assert local_mirrored_model.model_card == {
+        "card": {"overview": {"summary": "main card"}},
+        "additional_information": {"overview": {"summary": "some additional info"}},
+    }
+
+    assert local_mirrored_model.model_card_version == {
+        "card": 2,
+        "additional_information": 1,
+    }
 
 
 def test_mirrored_model(local_mirrored_model):
