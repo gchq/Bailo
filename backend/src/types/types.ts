@@ -92,6 +92,8 @@ export interface RemoteFederationConfig {
   extra?: {
     [key: string]: any
   }
+  // the list of system users allowed to perform escalation
+  allowedSystemUserIds?: string[]
 }
 
 export type FederationStatus = {

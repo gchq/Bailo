@@ -1,6 +1,7 @@
 import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
+import { BAILO_ID_HEADER, USER_HEADER } from '../../routes/middleware/userEscalation.js'
 import { toBailoError } from '../../types/error.js'
 import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
@@ -16,7 +17,7 @@ export class BailoPeerConnector extends BasePeerConnector {
     return Promise.resolve(true)
   }
 
-  async searchEntries(_user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
+  async searchEntries(user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
     const query: URLSearchParams = new URLSearchParams()
     if (opts.search) {
       query.append('search', opts.search)
@@ -37,7 +38,7 @@ export class BailoPeerConnector extends BasePeerConnector {
       opts.filters.forEach((filter) => query.append('filters', filter))
     }
 
-    const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
+    const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`, user)
 
     return {
       models: results.models.map((model) => ({
@@ -61,15 +62,23 @@ export class BailoPeerConnector extends BasePeerConnector {
     })
   }
 
-  async request<T>(path: string) {
+  async request<T>(path: string, user?: UserInterface) {
     let res: Response
     const requestUrl = this.config.baseUrl.concat(path)
+
+    const headers = new Headers({
+      [BAILO_ID_HEADER]: config.federation.id,
+    })
+
+    // If user is provided and escalation is enabled then add the user header
+    if (user && user.dn !== '' && config.federation.isEscalationEnabled) {
+      headers.set(USER_HEADER, user.dn)
+    }
+
     try {
       res = await fetch(requestUrl, {
         agent: this.getHttpsAgent(),
-        headers: {
-          'x-bailo-id': config.federation.id,
-        },
+        headers,
       })
     } catch (err) {
       throw InternalError('Unable to communicate with peer.', {
