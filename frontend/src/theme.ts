@@ -7,12 +7,20 @@ declare module '@mui/material/styles' {
     customTextInput: PaletteColor
     topNavigation: PaletteColor
     markdownBorder: PaletteColor
+    vulnerabilityCritical: PaletteColor
+    vulnerabilityHigh: PaletteColor
+    vulnerabilityMedium: PaletteColor
+    vulnerabilityLow: PaletteColor
   }
   interface PaletteOptions {
     container: PaletteColorOptions
     customTextInput: PaletteColorOptions
     topNavigation: PaletteColorOptions
     markdownBorder: PaletteColorOptions
+    vulnerabilityCritical: PaletteColorOptions
+    vulnerabilityHigh: PaletteColorOptions
+    vulnerabilityMedium: PaletteColorOptions
+    vulnerabilityLow: PaletteColorOptions
   }
 }
 
@@ -152,6 +160,21 @@ export const lightTheme = createTheme({
     markdownBorder: {
       main: '#b8b8b8',
     },
+    vulnerabilityCritical: {
+      main: red.A700,
+      light: '',
+      dark: '',
+      contrastText: '',
+    },
+    vulnerabilityHigh: {
+      main: '#c62828',
+    },
+    vulnerabilityMedium: {
+      main: '#e65100',
+    },
+    vulnerabilityLow: {
+      main: '#ff9800',
+    },
   },
 })
 
@@ -197,6 +220,18 @@ export const darkTheme = createTheme({
     },
     markdownBorder: {
       main: '#b8b8b8',
+    },
+    vulnerabilityCritical: {
+      main: red.A700,
+    },
+    vulnerabilityHigh: {
+      main: '#c62828',
+    },
+    vulnerabilityMedium: {
+      main: '#e65100',
+    },
+    vulnerabilityLow: {
+      main: '#ff9800',
     },
   },
   components: {

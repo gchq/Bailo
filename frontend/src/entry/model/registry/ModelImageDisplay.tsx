@@ -1,10 +1,11 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
+import { ExpandLess, ExpandMore, LocalOffer } from '@mui/icons-material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Grid, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
+import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import MessageAlert from 'src/MessageAlert'
 import { ModelImage } from 'types/types'
 
@@ -21,10 +22,29 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
   }
 
   const modelImageTag = ({ data }) => (
-    <Box key={`${modelImage.repository}-${modelImage.name}-${data.tag}`} sx={{ p: 1 }}>
-      <CodeLine
-        line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
-      />
+    <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${data.tag}`}>
+      <Grid container alignItems='center' spacing={2}>
+        <Grid size={1}>
+          <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
+            <LocalOffer color='primary' />
+            <Typography color='primary'>{data.tag}</Typography>
+          </Stack>
+        </Grid>
+        <Grid size='auto'>
+          <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' justifyContent='left' spacing={2}>
+            <Typography fontWeight='bold'>Vulnerabilities: </Typography>
+            <VulnerabilityResult />
+          </Stack>
+        </Grid>
+        <Grid size='auto'>
+          <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' spacing={2}>
+            <Typography fontWeight='bold'>URI: </Typography>
+            <CodeLine
+              line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
+            />
+          </Stack>
+        </Grid>
+      </Grid>
     </Box>
   )
 
@@ -80,10 +100,35 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
             </Accordion>
           ) : (
             modelImage.tags.map((imageTag) => (
-              <CodeLine
-                key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}
-                line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
-              />
+              <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}>
+                <Grid container alignItems='center' spacing={2}>
+                  <Grid size={1}>
+                    <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
+                      <LocalOffer color='primary' />
+                      <Typography color='primary'>{imageTag}</Typography>
+                    </Stack>
+                  </Grid>
+                  <Grid size='auto'>
+                    <Stack
+                      direction={{ sm: 'column', md: 'row' }}
+                      alignItems='center'
+                      justifyContent='left'
+                      spacing={2}
+                    >
+                      <Typography fontWeight='bold'>Vulnerabilities: </Typography>
+                      <VulnerabilityResult />
+                    </Stack>
+                  </Grid>
+                  <Grid size='auto'>
+                    <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' spacing={2}>
+                      <Typography fontWeight='bold'>URI: </Typography>
+                      <CodeLine
+                        line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
+                      />
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </Box>
             ))
           )}
         </Stack>
