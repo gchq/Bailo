@@ -1,4 +1,4 @@
-name: ArtefactScan Python REST API Unit Test
+name: ModelScan Python REST API Unit Test
 
 on:
   push:
