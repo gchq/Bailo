@@ -40,11 +40,11 @@ export async function escalateUser(req: Request, _res: Response, next: NextFunct
     const bailoId = req.header(BAILO_ID_HEADER)
 
     if (requestingUser && req.user.dn && bailoId && typeof bailoId === 'string') {
-      // Check the requesting proc user is authorised and part of an accepted Bailo instance
+      // Check the requesting system user is authorised and part of an accepted Bailo instance
       const systemUser = req.user.dn
       const isAuthorised = isAuthorisedToEscalate(systemUser, bailoId)
       if (isAuthorised) {
-        // Escalate from the system proc user to the original requesting user
+        // Escalate from the system system user to the original requesting user
         req.user = { dn: requestingUser }
         log.info({ systemUser, requestingUser }, 'System user escalation applied.')
       }
