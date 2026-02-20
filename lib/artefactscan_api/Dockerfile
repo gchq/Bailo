@@ -31,20 +31,20 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     apt-get dist-upgrade -y
 
 WORKDIR /app
-CMD ["python3", "/venv/bin/fastapi", "run", "bailo_modelscan_api/main.py", "--port", "3311"]
+CMD ["python3", "/venv/bin/fastapi", "run", "bailo_artefactscan_api/main.py", "--port", "3311"]
 FROM base AS dev
 
 COPY --from=build /venv /venv
 COPY --from=aquasec/trivy:0.68.2 /usr/local/bin/trivy /usr/local/bin/trivy
 # Ensure app dir exists before mounting
-RUN mkdir -p /app/bailo_modelscan_api
-CMD ["python3", "/venv/bin/fastapi", "dev", "bailo_modelscan_api/main.py", "--host", "0.0.0.0", "--port", "3311"]
+RUN mkdir -p /app/bailo_artefactscan_api
+CMD ["python3", "/venv/bin/fastapi", "dev", "bailo_artefactscan_api/main.py", "--host", "0.0.0.0", "--port", "3311"]
 
 FROM base AS prod
 
 COPY --from=build --chown=65532:65532 /venv /venv
 COPY --from=aquasec/trivy:0.68.2 /usr/local/bin/trivy /usr/local/bin/trivy
 # Copy application files
-COPY --chown=65532:65532 ./bailo_modelscan_api /app/bailo_modelscan_api
+COPY --chown=65532:65532 ./bailo_artefactscan_api /app/bailo_artefactscan_api
 # Run as non-root
 USER 65532

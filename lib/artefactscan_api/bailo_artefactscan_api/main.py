@@ -1,4 +1,4 @@
-"""FastAPI app to provide a ModelScan REST API."""
+"""FastAPI app to provide a ArtefactScan REST API."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from typing import Annotated, Any
 
 import modelscan
 import uvicorn
-from bailo_modelscan_api import trivy
+from bailo_artefactscan_api import trivy
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 # isort: split
 
-from bailo_modelscan_api.config import Settings
+from bailo_artefactscan_api.config import Settings
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -104,9 +104,9 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
 @app.post(
     "/scan/file",
     summary="Upload and scan a file",
-    description="Upload a file which is scanned by ModelScan and return the result of the scan",
+    description="Upload a file which is scanned by ArtefactScan and return the result of the scan",
     status_code=HTTPStatus.OK.value,
-    response_description="The result from ModelScan",
+    response_description="The result from ArtefactScan",
     response_model=dict[str, Any],
     # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
     responses={

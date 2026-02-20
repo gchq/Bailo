@@ -1,13 +1,13 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
+import { ArtefactScanFileScanningConnector } from './artefactScan.js'
 import { ArtefactBaseScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
-import { ModelScanFileScanningConnector } from './modelScan.js'
 import { ArtefactScanningWrapper } from './wrapper.js'
 
 export const ArtefactScanKind = {
   ClamAv: 'clamAV',
-  ModelScan: 'modelScan',
+  ArtefactScan: 'artefactScan',
 } as const
 export type ArtefactScanKindKeys = (typeof ArtefactScanKind)[keyof typeof ArtefactScanKind]
 
@@ -29,12 +29,12 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
           throw ConfigurationError('Could not configure or initialise Clam AV', { error })
         }
         break
-      case ArtefactScanKind.ModelScan:
+      case ArtefactScanKind.ArtefactScan:
         try {
-          const scanner = new ModelScanFileScanningConnector()
+          const scanner = new ArtefactScanFileScanningConnector()
           artefactScanConnectors.add(scanner)
         } catch (error) {
-          throw ConfigurationError('Could not configure or initialise ModelScan', { error })
+          throw ConfigurationError('Could not configure or initialise ArtefactScan', { error })
         }
         break
       default:

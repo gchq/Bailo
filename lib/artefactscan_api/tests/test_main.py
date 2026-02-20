@@ -12,9 +12,9 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
-from bailo_modelscan_api import trivy
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.main import app, get_settings
+from bailo_artefactscan_api import trivy
+from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.main import app, get_settings
 
 client = TestClient(app)
 
@@ -79,7 +79,7 @@ def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any,
     mock_scan.assert_called_once()
 
 
-@patch("bailo_modelscan_api.main.is_valid_pickle")
+@patch("bailo_artefactscan_api.main.is_valid_pickle")
 @patch("modelscan.modelscan.ModelScan.scan")
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),

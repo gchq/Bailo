@@ -104,7 +104,7 @@ const config: PartialDeep<Config> = {
       port: 8080,
     },
 
-    modelscan: {
+    artefactscan: {
       protocol: 'http',
       host: '127.0.0.1',
       port: 8081,

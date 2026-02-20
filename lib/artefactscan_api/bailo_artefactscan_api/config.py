@@ -14,10 +14,10 @@ class Settings(BaseSettings):
     :param BaseSettings: Default template object.
     """
 
-    app_name: str = "Bailo ModelScan API"
+    app_name: str = "Bailo ArtefactScan API"
     app_summary: str = "REST API wrapper for ModelScan package for use with Bailo."
     app_description: str = """
-    Bailo ModelScan API allows for easy programmatic interfacing with ProtectAI's ModelScan package to scan and detect potential threats within files stored in Bailo.
+    Bailo ArtefactScan API allows for easy programmatic interfacing with ProtectAI's ModelScan package to scan and detect potential threats within files stored in Bailo.
 
     You can upload files and view modelscan's result."""
     app_version: str = "3.0.0"

@@ -1,6 +1,6 @@
 import PQueue from 'p-queue'
 
-import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
+import { getArtefactScanInfo, scanStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
@@ -9,8 +9,8 @@ import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState } from './Base.js'
 
-export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.modelscan.concurrency })
+export class ArtefactScanFileScanningConnector extends ArtefactBaseScanningConnector {
+  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
   artefactType: ArtefactTypeKeys = ArtefactType.FILE
   toolName: string = 'ModelScan'
   version: string | undefined = undefined
@@ -20,8 +20,8 @@ export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnecto
   }
 
   async init() {
-    const modelScanInfo = await getModelScanInfo()
-    this.version = modelScanInfo.modelscanVersion
+    const artefactScanInfo = await getArtefactScanInfo()
+    this.version = artefactScanInfo.modelscanVersion
     return this
   }
 
@@ -29,7 +29,7 @@ export class ModelScanFileScanningConnector extends ArtefactBaseScanningConnecto
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ModelScan as it is not running.', { ...scannerInfo })
+      return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
     }
 
     const s3Stream = await getObjectStream(file.path)

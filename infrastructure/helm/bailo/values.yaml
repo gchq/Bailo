@@ -8,8 +8,8 @@ image:
   frontendTag: imageTag
   backendRepository: "backend-image-registry.location"
   backendTag: imageTag
-  modelscanRepository: "modelscan-image-registry.location"
-  modelscanTag: imageTag
+  artefactscanRepository: "artefactscan-image-registry.location"
+  artefactscanTag: imageTag
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 
@@ -367,11 +367,11 @@ clamav:
     - ReadWriteOnce
   size: 10G
 
-modelscan:
+artefactscan:
   enabled: false
   concurrency: 2
   protocol: http
   port: 3311
   accessModes:
     - ReadWriteOnce
-  size: 20G  # modelscan saves each incoming file to the disk so needs plenty of storage
+  size: 20G  # artefactscan saves each incoming file to the disk so needs plenty of storage

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`clients > modelScan > getModelScanInfo > success 1`] = `
+exports[`clients > artefactScan > getArtefactScanInfo > success 1`] = `
 [
   [
     "undefined://undefined:undefined/info",
@@ -14,7 +14,7 @@ exports[`clients > modelScan > getModelScanInfo > success 1`] = `
 ]
 `;
 
-exports[`clients > modelScan > scanStream > success 1`] = `
+exports[`clients > artefactScan > scanStream > success 1`] = `
 [
   [
     "undefined://undefined:undefined/scan/file",
@@ -59,7 +59,7 @@ exports[`clients > modelScan > scanStream > success 1`] = `
 ]
 `;
 
-exports[`clients > modelScan > scanStream > success 2`] = `
+exports[`clients > artefactScan > scanStream > success 2`] = `
 [
   [],
 ]

@@ -176,7 +176,7 @@ export interface Config {
       port: number
     }
 
-    modelscan: {
+    artefactscan: {
       concurrency: number
       protocol: string
       host: string

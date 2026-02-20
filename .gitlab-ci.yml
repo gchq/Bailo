@@ -67,7 +67,7 @@ os-frontend-build:
     - docker tag frontend-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/frontend-ci:$OS_TAG
     - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/frontend-ci:$OS_TAG
 
-os-modelscan-build:
+os-artefactscan-build:
   stage: os_build
   rules:
     - when: manual
@@ -81,15 +81,15 @@ os-modelscan-build:
     - name: docker:27.5.1-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
-    - cd lib/modelscan_api
+    - cd lib/artefactscan_api
   script:
-    - DOCKER_BUILDKIT=1 docker build -t modelscan-ci:$OS_TAG .
-    - docker tag modelscan-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/modelscan-ci:$OS_TAG
-    - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/modelscan-ci:$OS_TAG
+    - DOCKER_BUILDKIT=1 docker build -t artefactscan-ci:$OS_TAG .
+    - docker tag artefactscan-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/artefactscan-ci:$OS_TAG
+    - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/artefactscan-ci:$OS_TAG
 
 openshift-deploy:
   stage: os_build
-  needs: ['os-frontend-build', 'os-backend-build', 'os-modelscan-build']
+  needs: ['os-frontend-build', 'os-backend-build', 'os-artefactscan-build']
   rules:
     - when: manual
       allow_failure: true
@@ -124,8 +124,8 @@ openshift-deploy:
         frontendTag: $OS_TAG
         backendRepository: "$BACKEND_REPO"
         backendTag: $OS_TAG
-        modelscanRepository: "$MODELSCAN_REPO"
-        modelscanTag: $OS_TAG
+        artefactscanRepository: "$ARTEFACTSCAN_REPO"
+        artefactscanTag: $OS_TAG
       # Used for openshift
       route:
         enabled: true
@@ -144,7 +144,7 @@ openshift-deploy:
         namespace: $OPENSHIFT_PROJECTNAME
       clamav:
         enabled: true
-      modelscan:
+      artefactscan:
         enabled: true
       EOF
     - cat ci-dev.yaml
@@ -204,7 +204,7 @@ aws-frontend-build:
     - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG
     - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$OS_TAG
 
-aws-modelscan-build:
+aws-artefactscan-build:
   stage: aws_build
   rules:
     - when: manual
@@ -223,9 +223,9 @@ aws-modelscan-build:
     - aws --version
     - docker info
     - docker --version
-    - cd lib/modelscan_api
+    - cd lib/artefactscan_api
   script:
-    - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$AWS_TAG .
-    - docker tag $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$AWS_TAG $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$OS_TAG
-    - docker push $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$AWS_TAG
-    - docker push $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$OS_TAG
+    - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_ARTEFACTSCAN:$AWS_TAG .
+    - docker tag $DOCKER_REGISTRY/$APP_NAME_ARTEFACTSCAN:$AWS_TAG $DOCKER_REGISTRY/$APP_NAME_ARTEFACTSCAN:$OS_TAG
+    - docker push $DOCKER_REGISTRY/$APP_NAME_ARTEFACTSCAN:$AWS_TAG
+    - docker push $DOCKER_REGISTRY/$APP_NAME_ARTEFACTSCAN:$OS_TAG
