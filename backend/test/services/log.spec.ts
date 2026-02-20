@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const configMock = vi.hoisted(
@@ -39,7 +38,7 @@ describe('services > log', () => {
     vi.stubEnv('NO_COLOR', '1')
     vi.stubEnv('NODE_ENV', 'development')
 
-    const { default: logger } = await import('../../src/services/log.js')
+    await import('../../src/services/log.js')
     const pino = (await import('pino')).default
 
     expect(pino).toHaveBeenCalledWith(
@@ -60,7 +59,7 @@ describe('services > log', () => {
   test('targets > instrumentation', async () => {
     vi.spyOn(configMock.instrumentation, 'enabled', 'get').mockReturnValueOnce(true)
 
-    const { default: logger } = await import('../../src/services/log.js')
+    await import('../../src/services/log.js')
     const pino = (await import('pino')).default
 
     expect(pino).toHaveBeenCalledWith(
@@ -79,7 +78,7 @@ describe('services > log', () => {
   test('targets > production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
 
-    const { default: logger } = await import('../../src/services/log.js')
+    await import('../../src/services/log.js')
     const pino = (await import('pino')).default
 
     expect(pino).toHaveBeenCalledWith(
