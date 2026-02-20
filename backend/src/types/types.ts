@@ -80,13 +80,19 @@ export const FederationState = {
 export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
 
 export interface RemoteFederationConfig {
+  /** Whether a peer is enabled */
   state: FederationStateKeys
+  /** The url of the peer to communicate to */
   baseUrl: string
+  /** Does nothing */
   label: string
+  /** Either another Bailo instance or hugging face */
   kind: PeerKindKeys
   proxy?: string
   httpConfig?: ProxyAgentOptions
+  /** Defines how long search requests should exist for */
   cache?: {
+    /** Time to live in seconds */
     query?: number
   }
   extra?: {
@@ -111,61 +117,99 @@ export type PeerConfigStatus = {
 }
 
 export interface UiConfig {
+  /** ### Banner
+   * Viewable top level banner at the top of the window screen */
   banner: {
+    /** Banner is enabled */
     enabled: boolean
+    /** Banner text */
     text: string
+    /** Banner colour */
     colour: string
   }
-
+  /** ### Help Detail
+   * Contact details for help page
+   */
   issues: {
+    /** If you have experienced any issues with Bailo, then please report it to the `blank`. */
     label: string
+    /** Support contact email */
     supportHref: string
+    /** Help contact email */
     contactHref: string
   }
 
   registry: {
+    /** The host name of registry usually the domain name*/
     host: string
   }
 
   modelMirror: {
     import: {
+      /** Available to import models */
       enabled: boolean
       additionalInfoHeading: string
       originalAnswerHeading: string
     }
     export: {
+      /** Available to export models */
       enabled: boolean
+      /** Message to display on export */
       disclaimer: string
     }
   }
 
   inference: {
+    /** Enables frontend usage of inference spec */
     enabled: boolean
+    /** Connection string to  */
     connection: {
       host: string
     }
+    /** Token name */
     authorizationTokenName: string
+    /** GPU limits avalible */
     gpus: { [key: string]: string }
   }
 
   announcement: {
+    /** Announcement message to appear to the top of the screen */
     enabled: boolean
+    /** Announcement text to appear at the top of the screen */
     text: string
-    startTimestamp: string
+    /** timestamp to start displaying the announcement. Uses standard Date object */
+    startTimestamp: number | string
   }
-
+  /** ### Help Pop over Text
+   * Customisable text on frontend
+   */
   helpPopoverText: {
+    /** This text appears in under the "Manage Model Access" within each of the model settings */
     manualEntryAccess: string
   }
 
+  /** ### Model Details
+   *
+   * Sets of customisable tags on the marketplace for discoverability
+   *
+   */
   modelDetails: {
+    /** Organisation a model can belong to */
     organisations: string[]
+    /** Status of Lifecycle */
     states: string[]
   }
 
+  /** ### Role Display Names
+   *
+   * Frontend appearance for user roles on the frontend.
+   */
   roleDisplayNames: {
+    /** This role includes all permissions, such as managing model access and model deletion */
     owner: string
+    /** This role allows users edit the model card and draft releases */
     contributor: string
+    /** This provides read only permissions for the model. If a model is private, these users will be able to view the model and create access requests */
     consumer: string
   }
 }

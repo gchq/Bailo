@@ -18,3 +18,23 @@ export function useGetUiConfig() {
     isUiConfigError: error,
   }
 }
+
+export function useGetConfigDocs() {
+  const { data, isLoading, error } = useSWRImmutable<
+    {
+      config: any
+    },
+    ErrorInfo
+  >('/api/v2/config', async (url: string) => {
+    try {
+      return await fetcher(url)
+    } catch {
+      return await fetcher('/config/config-docs.json')
+    }
+  })
+  return {
+    uiConfig: data?.config,
+    isUiConfigLoading: isLoading,
+    isUiConfigError: error,
+  }
+}

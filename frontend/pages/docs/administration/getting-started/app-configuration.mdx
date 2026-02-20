@@ -1,4 +1,8 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+// Note that this gets overwritten to be `import Config from './Config.static'` by `lib/landing/scripts/generate.js`
+import Config from './Config'
+import { useGetConfigDocs } from '../../../../actions/uiConfig'
+import { MDXProvider } from '@mdx-js/react'
 
 # App Configuration
 
@@ -19,34 +23,12 @@ override the default configuration.
 The full order of configuration inheritance can be found
 [on the node-config wiki](https://github.com/node-config/node-config/wiki/Configuration-Files).
 
-Given the following set of files:
+## Configuration Specification
 
-```javascript
-// default.js
-{ a: 5, b: "ten", c: { d: 20, e: 25 } }
+Please Refer to the following specification for details on setup and modification.
 
-// production.cjs
-{ b: 10, c: { d: "d" } }
+These are automatically updated with type documentation in our config at build time.
 
-// local.js
-{ c: { d: 999 } }
-```
-
-The result is:
-
-```javascript
-{
-  a: 5, // no overrides
-  b: 10, // overridden in production.cjs
-  c: {
-    d: 999, // overridden in production.cjs, then again in local.js
-    e: 25 // not overwritten, objects are merged together.
-  }
-}
-```
-
-When deploying using `helm`, configuration is primarily handled through `values.yaml` controlling
-`helm/bailo/templates/bailo/bailo.configmap.yaml`. Configuration is loaded when the application starts. The application
-must be restarted when configuration changes.
+<Config />
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
