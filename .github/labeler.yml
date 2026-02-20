@@ -61,7 +61,7 @@ python:
           - "**/pyproject.toml"
           - "**/requirements*.txt"
           - "lib/python/**"
-          - "lib/modelscan_api/**"
+          - "lib/artefactscan_api/**"
 
 tests:
   - changed-files:

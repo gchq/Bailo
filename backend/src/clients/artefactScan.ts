@@ -6,14 +6,14 @@ import fetch, { Response as FetchResponse } from 'node-fetch'
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'
 
-interface ModelScanInfoResponse {
+interface ArtefactScanInfoResponse {
   apiName: string
   apiVersion: string
   scannerName: string
   modelscanVersion: string
 }
 
-interface ModelScanResponse {
+interface ArtefactScanResponse {
   summary: {
     total_issues: number
     total_issues_by_severity: {
@@ -50,8 +50,8 @@ interface ModelScanResponse {
   }[]
 }
 
-export async function getModelScanInfo() {
-  const url = `${config.artefactScanning.modelscan.protocol}://${config.artefactScanning.modelscan.host}:${config.artefactScanning.modelscan.port}`
+export async function getArtefactScanInfo() {
+  const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
   try {
@@ -60,17 +60,17 @@ export async function getModelScanInfo() {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    throw InternalError('Unable to communicate with the ModelScan service.', { err })
+    throw InternalError('Unable to communicate with the ArtefactScan service.', { err })
   }
   if (!res.ok) {
-    throw BadReq('Unrecognised response returned by the ModelScan service.')
+    throw BadReq('Unrecognised response returned by the ArtefactScan service.')
   }
 
-  return (await res.json()) as ModelScanInfoResponse
+  return (await res.json()) as ArtefactScanInfoResponse
 }
 
 export async function scanStream(stream: Readable, fileName: string) {
-  const url = `${config.artefactScanning.modelscan.protocol}://${config.artefactScanning.modelscan.host}:${config.artefactScanning.modelscan.port}`
+  const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
   try {
@@ -87,13 +87,13 @@ export async function scanStream(stream: Readable, fileName: string) {
     })
   } catch (err) {
     stream.destroy()
-    throw InternalError('Unable to communicate with the ModelScan service.', { err })
+    throw InternalError('Unable to communicate with the ArtefactScan service.', { err })
   }
   if (!res.ok) {
-    throw BadReq('Unrecognised response returned by the ModelScan service.', {
+    throw BadReq('Unrecognised response returned by the ArtefactScan service.', {
       body: JSON.stringify(await res.text()),
     })
   }
 
-  return (await res.json()) as ModelScanResponse
+  return (await res.json()) as ArtefactScanResponse
 }

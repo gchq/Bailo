@@ -1,4 +1,4 @@
-# ModelScan REST API
+# Artefactscan REST API
 
 ![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
 ![Python](https://img.shields.io/badge/version-3.0.0-orange.svg?style=for-the-badge)
@@ -14,7 +14,7 @@ This directory provides all of the necessary functionality to interact with
 > TensorFlow, Keras, Sklearn, XGBoost, with more on the way.
 
 This API is used as a file scanner and is not published to PyPI. The built image is published to
-[GHCR bailo_modelscan](https://github.com/gchq/Bailo/pkgs/container/bailo_modelscan).
+[GHCR bailo_artefactscan](https://github.com/gchq/Bailo/pkgs/container/bailo_artefactscan).
 
 ## Quickstart
 
@@ -22,11 +22,11 @@ This API is used as a file scanner and is not published to PyPI. The built image
 
 ### Build and Run via Docker
 
-This is the fastest way to get ModelScan REST API running.
+This is the fastest way to get ArtefactScan REST API running.
 
 ```bash
-docker build -t modelscan_rest_api:latest .
-docker run -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
+docker build -t artefactscan_rest_api:latest .
+docker run -p 0.0.0.0:3311:3311 artefactscan_rest_api:latest
 ```
 
 > **Note:** API runs on **port 3311**, not 8000. Adjust requests accordingly.
@@ -59,11 +59,11 @@ The following steps are only required for users who wish to extend or develop th
 
 ### Python Setup
 
-From within the `lib/modelscan_api` directory:
+From within the `lib/artefactscan_api` directory:
 
 ```bash
-python3 -m venv modelscanvenv
-source modelscanvenv/bin/activate
+python3 -m venv artefactscanvenv
+source artefactscanvenv/bin/activate
 pip install -r requirements-dev.txt
 ```
 
@@ -72,8 +72,8 @@ pip install -r requirements-dev.txt
 This mode mounts your source code for real-time changes.
 
 ```bash
-docker build -t modelscan_rest_api:latest --target dev .
-docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
+docker build -t artefactscan_rest_api:latest --target dev .
+docker run -v ./bailo_artefactscan_api:/app/bailo_artefactscan_api -p 0.0.0.0:3311:3311 artefactscan_rest_api:latest
 ```
 
 ### Running Tests
@@ -90,7 +90,7 @@ To run the integration tests (does not require any externally running services):
 pytest -m integration
 ```
 
-> **Note:** the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
+> **Note:** the integration tests use safe but technically "malicious" file(s) to check ArtefactScan's performance. Please
 refer to [test_integration](./tests/test_integration/README.md) for details.
 
 ## Docker Build Stages

@@ -1,4 +1,4 @@
-"""Integration tests for working with ModelScan."""
+"""Integration tests for working with ArtefactScan."""
 
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
+from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
 
 
 @lru_cache

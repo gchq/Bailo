@@ -192,7 +192,7 @@ module.exports = {
       port: 3310,
     },
 
-    modelscan: {
+    artefactscan: {
       concurrency: 2,
       protocol: 'http',
       host: '127.0.0.1',
