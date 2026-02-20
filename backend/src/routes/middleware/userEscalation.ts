@@ -22,7 +22,7 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
   const isAuthorised = allowedUsers.includes(userId)
 
   if (!isAuthorised) {
-    log.warn({}, `The system user ${userId} is not in the allow list under instance ${instanceId}.`)
+    log.warn(`The system user ${userId} is not in the allow list under instance ${instanceId}.`)
     return false
   }
 
@@ -39,7 +39,7 @@ export async function escalateUser(req: Request, _res: Response, next: NextFunct
     const requestingUser = req.header(USER_HEADER)
     const bailoId = req.header(BAILO_ID_HEADER)
 
-    if (requestingUser && bailoId && typeof bailoId === 'string') {
+    if (requestingUser && req.user.dn && bailoId && typeof bailoId === 'string') {
       // Check the requesting proc user is authorised and part of an accepted Bailo instance
       const procUser = req.user.dn
       const isAuthorised = isAuthorisedToEscalate(procUser, bailoId)
