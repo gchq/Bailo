@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 
+import log from '../../services/log.js'
 import { getTokenFromAuthHeader as getTokenFromAuthHeaderService } from '../../services/token.js'
 import { Unauthorized } from '../../utils/error.js'
 
@@ -25,7 +26,7 @@ export function checkAuthentication(req, res, next) {
   if (!req.user) {
     throw Unauthorized('No valid authentication provided.')
   }
-  req.log.trace(
+  log.trace(
     {
       user: req.user,
     },
