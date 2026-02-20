@@ -25,7 +25,7 @@ describe('middleware > userEscalation', () => {
           cache: {
             query: 60,
           },
-          allowedProcUserIds: ['system-user-1'],
+          allowedSystemUserIds: ['system-user-1'],
         },
       },
     })
@@ -114,7 +114,7 @@ describe('escalation > isAuthorisedToEscalate', () => {
           cache: {
             query: 60,
           },
-          allowedProcUserIds: ['system-user-1'],
+          allowedSystemUserIds: ['system-user-1'],
         },
       },
     })
@@ -134,7 +134,7 @@ describe('escalation > isAuthorisedToEscalate', () => {
           cache: {
             query: 60,
           },
-          allowedProcUserIds: ['system-user-1'],
+          allowedSystemUserIds: ['system-user-1'],
         },
       },
     })
@@ -154,7 +154,7 @@ describe('escalation > isAuthorisedToEscalate', () => {
           cache: {
             query: 60,
           },
-          allowedProcUserIds: ['system-user-1'],
+          allowedSystemUserIds: ['system-user-1'],
         },
       },
     })

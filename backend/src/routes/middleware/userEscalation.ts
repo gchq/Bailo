@@ -8,7 +8,7 @@ export const BAILO_ID_HEADER = 'x-bailo-id'
 
 /**
  * Checks if the provided user is in the allow list under an allowed bailo instance.
- * @param user The userId - This will be the system or proc user.
+ * @param user The userId - This will be the system or system user.
  * @param instance The Bailo federation instanceId.
  */
 export const isAuthorisedToEscalate = (userId: string, instanceId: string): boolean => {
@@ -18,7 +18,7 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
     return false
   }
 
-  const allowedUsers = peer.allowedProcUserIds ?? []
+  const allowedUsers = peer.allowedSystemUserIds ?? []
   const isAuthorised = allowedUsers.includes(userId)
 
   if (!isAuthorised) {
@@ -31,7 +31,7 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
 
 /**
  * Check if a request needs escalation, and if authorised then escalate it
- * from the system proc user to the original requesting user.
+ * from the system system user to the original requesting user.
  */
 export async function escalateUser(req: Request, _res: Response, next: NextFunction) {
   // If escalation is enabled then check if the request requires escalating

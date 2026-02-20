@@ -13,7 +13,7 @@ module.exports = {
         cache: {
           query: 60,
         },
-        allowedProcUserIds: ['user'],
+        allowedSystemUserIds: ['user'],
       },
     },
   },
