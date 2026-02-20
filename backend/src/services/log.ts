@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
     level: config.log.level,
     target: 'pino-pretty',
     options: {
-      colorize: true,
+      colorize: !process.env.NO_COLOR,
     },
   })
 } else {
