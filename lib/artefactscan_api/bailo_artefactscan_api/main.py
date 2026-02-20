@@ -14,7 +14,6 @@ from typing import Annotated, Any
 
 import modelscan
 import uvicorn
-from bailo_artefactscan_api import trivy
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
@@ -22,7 +21,10 @@ from pydantic import BaseModel
 
 # isort: split
 
+from bailo_artefactscan_api import trivy
 from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.openapi.scan_file_responses import SCAN_FILE_RESPONSES
+from bailo_artefactscan_api.openapi.scan_image_responses import SCAN_IMAGE_RESPONSES
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -77,8 +79,10 @@ class ApiInformation(BaseModel):
 
     apiName: str
     apiVersion: str
-    scannerName: str
+    modelscanScannerName: str
     modelscanVersion: str
+    trivyScannerName: str
+    trivyVersion: str
 
 
 @app.get(
@@ -96,169 +100,21 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
     return ApiInformation(
         apiName=settings.app_name,
         apiVersion=settings.app_version,
-        scannerName=modelscan.__name__,
+        modelscanScannerName=modelscan.__name__,
         modelscanVersion=modelscan.__version__,
+        trivyScannerName=trivy.__name__.split(".")[-1],
+        trivyVersion=trivy.get_trivy_version(),
     )
 
 
 @app.post(
     "/scan/file",
-    summary="Upload and scan a file",
-    description="Upload a file which is scanned by ArtefactScan and return the result of the scan",
+    summary="Upload and scan a file with modelscan",
+    description="Upload a file which is scanned by ModelScan and returns the result of the scan",
     status_code=HTTPStatus.OK.value,
-    response_description="The result from ArtefactScan",
+    response_description="The result from ModelScan",
     response_model=dict[str, Any],
-    # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
-    responses={
-        HTTPStatus.OK.value: {
-            "description": "modelscan returned results",
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "Normal": {
-                            "value": {
-                                "summary": {
-                                    "total_issues_by_severity": {
-                                        "LOW": 0,
-                                        "MEDIUM": 0,
-                                        "HIGH": 0,
-                                        "CRITICAL": 0,
-                                    },
-                                    "total_issues": 0,
-                                    "input_path": "/foo/bar/safe_model.pkl",
-                                    "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
-                                    "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {
-                                        "total_scanned": 1,
-                                        "scanned_files": ["safe_model.pkl"],
-                                    },
-                                    "skipped": {
-                                        "total_skipped": 0,
-                                        "skipped_files": [],
-                                    },
-                                },
-                                "issues": [],
-                                "errors": [],
-                            }
-                        },
-                        "Issue": {
-                            "value": {
-                                "summary": {
-                                    "total_issues_by_severity": {
-                                        "LOW": 0,
-                                        "MEDIUM": 1,
-                                        "HIGH": 0,
-                                        "CRITICAL": 0,
-                                    },
-                                    "total_issues": 1,
-                                    "input_path": "/foo/bar/unsafe_model.h5",
-                                    "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
-                                    "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {
-                                        "total_scanned": 1,
-                                        "scanned_files": ["unsafe_model.h5"],
-                                    },
-                                    "skipped": {
-                                        "total_skipped": 0,
-                                        "skipped_files": [],
-                                    },
-                                },
-                                "issues": [
-                                    {
-                                        "description": "Use of unsafe operator 'Lambda' from module 'Keras'",
-                                        "operator": "Lambda",
-                                        "module": "Keras",
-                                        "source": "unsafe_model.h5",
-                                        "scanner": "modelscan.scanners.H5LambdaDetectScan",
-                                        "severity": "MEDIUM",
-                                    }
-                                ],
-                                "errors": [],
-                            }
-                        },
-                        "Skipped": {
-                            "value": {
-                                "errors": [],
-                                "issues": [],
-                                "summary": {
-                                    "input_path": "/foo/bar/empty.txt",
-                                    "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
-                                    "scanned": {"total_scanned": 0},
-                                    "skipped": {
-                                        "skipped_files": [
-                                            {
-                                                "category": "SCAN_NOT_SUPPORTED",
-                                                "description": "Model Scan did not scan file",
-                                                "source": "empty.txt",
-                                            }
-                                        ],
-                                        "total_skipped": 1,
-                                    },
-                                    "timestamp": "2024-11-19T12:00:00.000000",
-                                    "total_issues": 0,
-                                    "total_issues_by_severity": {
-                                        "CRITICAL": 0,
-                                        "HIGH": 0,
-                                        "LOW": 0,
-                                        "MEDIUM": 0,
-                                    },
-                                },
-                            }
-                        },
-                        "Error": {
-                            "value": {
-                                "summary": {
-                                    "total_issues_by_severity": {
-                                        "LOW": 0,
-                                        "MEDIUM": 0,
-                                        "HIGH": 0,
-                                        "CRITICAL": 0,
-                                    },
-                                    "total_issues": 0,
-                                    "input_path": "/foo/bar/null.h5",
-                                    "absolute_path": "/foo/bar",
-                                    "modelscan_version": "0.8.1",
-                                    "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 0},
-                                    "skipped": {
-                                        "total_skipped": 1,
-                                        "skipped_files": [
-                                            {
-                                                "category": "SCAN_NOT_SUPPORTED",
-                                                "description": "Model Scan did not scan file",
-                                                "source": "null.h5",
-                                            }
-                                        ],
-                                    },
-                                },
-                                "issues": [],
-                                "errors": [
-                                    {
-                                        "category": "MODEL_SCAN",
-                                        "description": "Unable to synchronously open file (file signature not found)",
-                                        "source": "null.h5",
-                                    }
-                                ],
-                            }
-                        },
-                    }
-                }
-            },
-        },
-        HTTPStatus.INTERNAL_SERVER_ERROR.value: {
-            "description": "The server could not complete the request",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "The following error was raised during a pytorch scan:\nInvalid magic number for file: /tmp/tmpzlugzlrh.pt"
-                    }
-                }
-            },
-        },
-    },
+    responses=SCAN_FILE_RESPONSES,
 )
 def scan_file(
     in_file: UploadFile,
@@ -342,52 +198,7 @@ def scan_file(
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
 
 
-@app.post(
-    "/scan/image",
-    responses={
-        HTTPStatus.OK.value: {
-            "description": "trivy returned an sbom",
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "Empty": {
-                            "value": {
-                                "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
-                                "bomFormat": "CycloneDX",
-                                "specVersion": "1.6",
-                                "serialNumber": "urn:uuid:c950496a-eebc-4022-8ff3-812500eab6ab",
-                                "version": 1,
-                                "metadata": {
-                                    "timestamp": "1970-01-01T00:00:00+00:00",
-                                    "tools": {
-                                        "components": [
-                                            {
-                                                "type": "application",
-                                                "manufacturer": {"name": "Aqua Security Software Ltd."},
-                                                "group": "aquasecurity",
-                                                "name": "trivy",
-                                                "version": "0.68.2",
-                                            }
-                                        ]
-                                    },
-                                    "component": {
-                                        "bom-ref": "1641bd45-e2ea-4ca8-8dea-78f047e68aac",
-                                        "type": "application",
-                                        "name": "/tmp/tmp",
-                                        "properties": [{"name": "aquasecurity:trivy:SchemaVersion", "value": "2"}],
-                                    },
-                                },
-                                "components": [],
-                                "dependencies": [{"ref": "1641bd45-e2ea-4ca8-8dea-78f047e68aac", "dependsOn": []}],
-                                "vulnerabilities": [],
-                            }
-                        }
-                    }
-                }
-            },
-        }
-    },
-)
+@app.post("/scan/image", responses=SCAN_IMAGE_RESPONSES)
 def scan_image(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,

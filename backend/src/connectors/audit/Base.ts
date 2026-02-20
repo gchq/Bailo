@@ -121,6 +121,7 @@ export const AuditInfo = {
   },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
+  UpdateImage: { typeId: 'UpdateImage', description: 'Image Information Updated', auditKind: AuditKind.Update },
   DeleteImage: { typeId: 'DeleteImage', description: 'Image Information Deleted', auditKind: AuditKind.Delete },
 
   CreateInference: { typeId: 'CreateInference', description: 'Inference Service Created', auditKind: AuditKind.Create },
@@ -233,6 +234,7 @@ export abstract class BaseAuditConnector {
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
   ): Promise<void>
+  abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
   abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[]): Promise<void>

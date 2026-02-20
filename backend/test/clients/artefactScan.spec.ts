@@ -2,7 +2,7 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { getArtefactScanInfo, scanStream } from '../../src/clients/artefactScan.js'
+import { getArtefactScanInfo, scanFileStream } from '../../src/clients/artefactScan.js'
 
 const configMock = vi.hoisted(() => ({
   artefactScanning: {
@@ -122,7 +122,7 @@ describe('clients > artefactScan', () => {
     const date = new Date(1970, 0, 1, 0)
     vi.setSystemTime(date)
 
-    const response = await scanStream({} as Readable, 'safe_model.h5')
+    const response = await scanFileStream({} as Readable, 'safe_model.h5')
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
@@ -140,7 +140,7 @@ describe('clients > artefactScan', () => {
       json: vi.fn(),
     })
 
-    await expect(() => scanStream({} as Readable, 'safe_model.h5')).rejects.toThrowError(
+    await expect(() => scanFileStream({} as Readable, 'safe_model.h5')).rejects.toThrowError(
       /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
@@ -149,7 +149,7 @@ describe('clients > artefactScan', () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
 
     // use a real Readable to make sure `.destroy()` is also called
-    await expect(() => scanStream(Readable.from(''), 'safe_model.h5')).rejects.toThrowError(
+    await expect(() => scanFileStream(Readable.from(''), 'safe_model.h5')).rejects.toThrowError(
       /^Unable to communicate with the ArtefactScan service./,
     )
   })

@@ -5,6 +5,7 @@ import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { ImageRefInterface } from '../models/Release.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
@@ -114,4 +115,37 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
     await updateFileWithResults(file._id, resultsArray)
   }
   return `Scan started for ${file.name}`
+}
+
+export async function rerunImageScan(user: UserInterface, modelId: string, image: ImageRefInterface) {
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw BadReq('Cannot find requested model', { modelId: modelId })
+  }
+  // TODO: get file
+
+  const rerunArtefactScanAuth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: model.id,
+    actions: ['pull'],
+  })
+
+  if (!rerunArtefactScanAuth.success) {
+    throw Forbidden(rerunArtefactScanAuth.info, { userDn: user.dn, modelId, image })
+  }
+
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
+  }
+  const scannersInfo = scanners.scannersInfo()
+  if (scannersInfo && scannersInfo.scannerNames) {
+    const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
+      toolName: scannerName,
+      state: ArtefactScanState.InProgress,
+      lastRunAt: new Date(),
+    }))
+    // TODO update results
+  }
+  return `Scan started for ${image.repository}/${image.name}:${image.tag}`
 }

@@ -71,6 +71,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _modelId: string,
     _images: { repository: string; name: string; tags: string[] }[],
   ) {}
+  async onUpdateImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   async onCreateImport(

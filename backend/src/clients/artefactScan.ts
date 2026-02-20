@@ -9,11 +9,13 @@ import { BadReq, InternalError } from '../utils/error.js'
 interface ArtefactScanInfoResponse {
   apiName: string
   apiVersion: string
-  scannerName: string
+  modelscanScannerName: string
   modelscanVersion: string
+  trivyScannerName: string
+  trivyVersion: string
 }
 
-interface ArtefactScanResponse {
+interface ModelScanResponse {
   summary: {
     total_issues: number
     total_issues_by_severity: {
@@ -50,6 +52,43 @@ interface ArtefactScanResponse {
   }[]
 }
 
+interface TrivyResponse {
+  $schema: string
+  bomFormat: string
+  specVersion: string
+  serialNumber: string
+  version: number
+  metadata: {
+    timestamp: string
+    tools: {
+      components: {
+        type: string
+        manufacturer: {
+          name: string
+        }
+        group: string
+        name: string
+        version: string
+      }[]
+      component: {
+        'bom-ref': string
+        type: string
+        name: string
+        properties: {
+          name: string
+          value: string
+        }[]
+      }
+    }
+  }
+  components: []
+  dependencies: {
+    ref: string
+    dependsOn: []
+  }[]
+  vulnerabilities: []
+}
+
 export async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
@@ -69,7 +108,7 @@ export async function getArtefactScanInfo() {
   return (await res.json()) as ArtefactScanInfoResponse
 }
 
-export async function scanStream(stream: Readable, fileName: string) {
+async function scanStream(stream: Readable, fileName: string, endpoint: 'file' | 'image') {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
@@ -77,7 +116,7 @@ export async function scanStream(stream: Readable, fileName: string) {
     const formData = new FormData()
     formData.append('in_file', stream, { filename: fileName, contentType: 'application/octet-stream' })
 
-    res = await fetch(`${url}/scan/file`, {
+    res = await fetch(`${url}/scan/${endpoint}}`, {
       method: 'POST',
       headers: {
         ...formData.getHeaders(),
@@ -95,5 +134,13 @@ export async function scanStream(stream: Readable, fileName: string) {
     })
   }
 
-  return (await res.json()) as ArtefactScanResponse
+  return await res.json()
+}
+
+export async function scanFileStream(stream: Readable, fileName: string) {
+  return (await scanStream(stream, fileName, 'file')) as ModelScanResponse
+}
+
+export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
+  return (await scanStream(stream, blobDigest, 'image')) as TrivyResponse
 }

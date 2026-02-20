@@ -20,7 +20,23 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn.error")
 
-__version__ = "0.68.2"
+
+@lru_cache
+def get_trivy_version() -> str:
+    try:
+        result = subprocess.run(
+            (get_settings().BINARY, "--version"),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        # Example output: "Version: 0.68.2\n..."
+        for line in result.stdout.splitlines():
+            if line.startswith("Version:"):
+                return line.split(":", 1)[1].strip()
+    except Exception:
+        pass
+    return "unknown"
 
 
 def safe_extract(tar: tarfile.TarFile, path: str) -> None:

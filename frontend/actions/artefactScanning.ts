@@ -9,7 +9,7 @@ export function useGetArtefactScannerInfo() {
       scanners: string[]
     },
     ErrorInfo
-  >('/api/v2/filescanning/info', fetcher)
+  >('/api/v2/artefactscanning/info', fetcher)
 
   return {
     scannersMutate: mutate,
@@ -20,7 +20,7 @@ export function useGetArtefactScannerInfo() {
 }
 
 export function rerunArtefactScan(modelId: string, artefactId: string) {
-  return fetch(`/api/v2/filescanning/model/${modelId}/file/${artefactId}/scan`, {
+  return fetch(`/api/v2/artefactscanning/model/${modelId}/file/${artefactId}/scan`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
   })

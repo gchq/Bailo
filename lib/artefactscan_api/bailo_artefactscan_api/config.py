@@ -15,12 +15,14 @@ class Settings(BaseSettings):
     """
 
     app_name: str = "Bailo ArtefactScan API"
-    app_summary: str = "REST API wrapper for ModelScan package for use with Bailo."
+    app_summary: str = "REST API wrapper for ModelScan package and Trivy DB for use with Bailo."
     app_description: str = """
-    Bailo ArtefactScan API allows for easy programmatic interfacing with ProtectAI's ModelScan package to scan and detect potential threats within files stored in Bailo.
+    Bailo ArtefactScan API allows for easy programmatic interfacing with:
+    * ProtectAI's ModelScan package to scan and detect potential threats within files.
+    * Aqua's Trivy DB to scan and detect vulnerabilities within images.
 
-    You can upload files and view modelscan's result."""
-    app_version: str = "3.0.0"
+    You can POST files & images then view the result."""
+    app_version: str = "4.0.0"
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB

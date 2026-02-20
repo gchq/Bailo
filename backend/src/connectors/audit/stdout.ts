@@ -355,6 +355,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onUpdateImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.checkEventType(AuditInfo.UpdateImage, req)
+    const event = this.generateEvent(req, { modelId, image })
+    req.log.info(event, req.audit.description)
+  }
+
   async onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
     this.checkEventType(AuditInfo.DeleteImage, req)
     const event = this.generateEvent(req, { modelId, image })

@@ -1,7 +1,7 @@
 # Artefactscan REST API
 
 ![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
-![Python](https://img.shields.io/badge/version-3.0.0-orange.svg?style=for-the-badge)
+![Python](https://img.shields.io/badge/version-4.0.0-orange.svg?style=for-the-badge)
 [![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
 This directory provides all of the necessary functionality to interact with
