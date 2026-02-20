@@ -39,13 +39,13 @@ jobs:
             artifact: bailo_frontend
             cache_scope: frontend
             tag: bailo_frontend:latest,bailo_frontend:prod
-          - name: modelscan
-            context: lib/modelscan_api
-            dockerfile: lib/modelscan_api/Dockerfile
-            tar: /tmp/bailo_modelscan.tar
-            artifact: bailo_modelscan
-            cache_scope: modelscan
-            tag: bailo_modelscan:latest,bailo_modelscan:prod
+          - name: artefactscan
+            context: lib/artefactscan_api
+            dockerfile: lib/artefactscan_api/Dockerfile
+            tar: /tmp/bailo_artefactscan.tar
+            artifact: bailo_artefactscan
+            cache_scope: artefactscan
+            tag: bailo_artefactscan:latest,bailo_artefactscan:prod
 
     steps:
       # Clone repository
