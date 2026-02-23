@@ -27,7 +27,7 @@ abstract class ArtefactScanBaseScanningConnector extends ArtefactBaseScanningCon
   }
 }
 
-export class ArtefactScanFileScanningConnector extends ArtefactScanBaseScanningConnector {
+export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConnector {
   artefactType: ArtefactTypeKeys = ArtefactType.FILE
   toolName: string = 'ModelScan'
 
@@ -81,7 +81,7 @@ export class ArtefactScanFileScanningConnector extends ArtefactScanBaseScanningC
   }
 }
 
-export class ArtefactScanImageScanningConnector extends ArtefactScanBaseScanningConnector {
+export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnector {
   artefactType: ArtefactTypeKeys = ArtefactType.IMAGE
   toolName: string = 'Trivy'
 

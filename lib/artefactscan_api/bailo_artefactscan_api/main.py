@@ -87,8 +87,8 @@ class ApiInformation(BaseModel):
 
 @app.get(
     "/info",
-    summary="Simple information endpoint",
-    description="Utility to get the key information about the API.",
+    summary="Retrieve API metadata",
+    description="Returns basic information about the ArtefactScan API, including configuration and service metadata.",
     status_code=HTTPStatus.OK.value,
     response_description="A populated ApiInformation object",
 )
@@ -109,8 +109,8 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
 
 @app.post(
     "/scan/file",
-    summary="Upload and scan a file with modelscan",
-    description="Upload a file which is scanned by ModelScan and returns the result of the scan",
+    summary="Scan a file for security threats",
+    description="Upload a file to be analysed using ProtectAI ModelScan. The endpoint returns the results of the threat detection scan.",
     status_code=HTTPStatus.OK.value,
     response_description="The result from ModelScan",
     response_model=dict[str, Any],
@@ -198,7 +198,14 @@ def scan_file(
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
 
 
-@app.post("/scan/image", responses=SCAN_IMAGE_RESPONSES)
+@app.post(
+    "/scan/image",
+    summary="Scan a container image layer for vulnerabilities",
+    description="Upload a container image layer to be scanned against the Trivy vulnerability database. The endpoint returns detected vulnerabilities and metadata.",
+    status_code=HTTPStatus.OK.value,
+    response_description="The result from Trivy",
+    responses=SCAN_IMAGE_RESPONSES,
+)
 def scan_image(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,

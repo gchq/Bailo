@@ -1,6 +1,6 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { ArtefactScanFileScanningConnector, ArtefactScanImageScanningConnector } from './artefactScan.js'
+import { ModelScanFileScanningConnector, TrivyImageScanningConnector } from './artefactScan.js'
 import { ArtefactBaseScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
 import { ArtefactScanningWrapper } from './wrapper.js'
@@ -32,7 +32,7 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
         break
       case ArtefactScanKind.ModelScan:
         try {
-          const scanner = new ArtefactScanFileScanningConnector()
+          const scanner = new ModelScanFileScanningConnector()
           artefactScanConnectors.add(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise ArtefactScan for file scanning', { error })
@@ -40,7 +40,7 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
         break
       case ArtefactScanKind.Trivy:
         try {
-          const scanner = new ArtefactScanImageScanningConnector()
+          const scanner = new TrivyImageScanningConnector()
           artefactScanConnectors.add(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise ArtefactScan for image scanning', { error })
