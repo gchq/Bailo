@@ -106,7 +106,9 @@ export class ArtefactScanImageScanningConnector extends ArtefactScanBaseScanning
       )
 
       try {
-        const result = await scanImageBlobStream(stream, layer.layerDigest)
+        // strip prefix from blob identifier to get just the name
+        const layerDigestName = layer.layerDigest.replace(/^(sha256:)/, '')
+        const result = await scanImageBlobStream(stream, layerDigestName)
 
         // map trivy -> model scan summary
         for (const vuln of result.vulnerabilities ?? []) {
