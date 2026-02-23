@@ -22,9 +22,7 @@ export type ScanInterface = {
       fileId: string
     }
   | {
-      //NOTE - Change this - if necessary - when implementing image scanning.
       artefactKind: typeof ArtefactKind.Image
-      repositoryName: string
       layerDigest: string
       packageList: string[]
     }
@@ -69,7 +67,6 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
   {
     artefactKind: { type: String, enum: Object.values(ArtefactKind), required: true },
     fileId: { type: String },
-    repositoryName: { type: String },
     layerDigest: { type: String },
     packageList: [{ type: String }],
 

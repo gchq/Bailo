@@ -11,8 +11,8 @@ export type ArtefactScanResult = Pick<
   'toolName' | 'scannerVersion' | 'state' | 'summary' | 'additionalInfo' | 'lastRunAt'
 >
 
-//NOTE: This is a placeholder, in preparation towards image scanning implementation
-export type ArtefactInterface = FileInterface | ImageRefInterface
+export type LayerRefInterface = ImageRefInterface & { layerDigest: string }
+export type ArtefactInterface = FileInterface | LayerRefInterface
 
 export const ArtefactScanState = {
   NotScanned: 'notScanned',

@@ -1,10 +1,8 @@
-import { Schema } from 'mongoose'
-
 import { ArtefactScanResult, ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ImageRefInterface } from '../models/Release.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
@@ -12,24 +10,29 @@ import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { getFileById } from './file.js'
+import { getImageLayers } from './images/getImageLayers.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 
-//This file is purposely incomplete as further image scanning work is prequisite. It does not contain enough logic towards handling the scanning of images
+type ArtefactScanIdentifier =
+  | { artefactKind: typeof ArtefactKind.File; fileId: string }
+  | { artefactKind: typeof ArtefactKind.Image; layerDigest: string }
 
 export async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
+  const fileIdentifier = { artefactKind: ArtefactKind.File, fileId: file.id }
   if (scannersInfo && scannersInfo.scannerNames.length > 0 && file.size > 0) {
     const resultsInprogress: ArtefactScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
-    await updateFileWithResults(file._id, resultsInprogress)
+    await updateArtefactScanWithResults(fileIdentifier, resultsInprogress)
     const resultsArray = await scanners.startScans(file)
-    await updateFileWithResults(file._id, resultsArray)
+    await updateArtefactScanWithResults(fileIdentifier, resultsArray)
   }
 
-  const scanResults = await ScanModel.find({ fileId: file._id.toString() })
+  const scanResults = await ScanModel.find(fileIdentifier)
   const ret: FileWithScanResultsInterface = {
     ...file.toObject(),
     scanResults,
@@ -39,35 +42,38 @@ export async function scanFile(file: FileInterfaceDoc) {
   return ret
 }
 
-async function updateFileWithResults(_id: Schema.Types.ObjectId, results: ArtefactScanResult[] | undefined) {
+async function updateArtefactScanWithResults(
+  scanIdentifier: ArtefactScanIdentifier,
+  results: ArtefactScanResult[] | undefined,
+) {
   if (results === undefined) {
     throw InternalError(`No results provided`)
   }
   for (const result of results) {
     const updateExistingResult = await ScanModel.updateOne(
-      { fileId: _id.toString(), toolName: result.toolName },
+      { ...scanIdentifier, toolName: result.toolName },
       {
         $set: { ...result },
       },
     )
     if (updateExistingResult.modifiedCount === 0) {
       await ScanModel.create({
-        artefactKind: ArtefactKind.File,
-        fileId: _id.toString(),
+        ...scanIdentifier,
         ...result,
       })
     }
   }
 }
 
-async function fileScanDelay(file: FileInterface): Promise<number> {
+async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promise<number> {
   const delay = config.connectors.artefactScanners.retryDelayInMinutes
   if (delay === undefined) {
     return 0
   }
   let minutesBeforeRetrying = 0
-  const fileScans = await ScanModel.find({ fileId: (file as FileInterface)._id.toString() })
-  for (const scanResults of fileScans) {
+
+  const artefactScans = await ScanModel.find(scanIdentifier)
+  for (const scanResults of artefactScans) {
     const delayInMilliseconds = delay * 60000
     const scanTimeAtLimit = scanResults.lastRunAt.getTime() + delayInMilliseconds
     if (scanTimeAtLimit > new Date().getTime()) {
@@ -83,25 +89,32 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
   }
+
   const file = await getFileById(user, fileId)
   if (!file) {
     throw BadReq('Cannot find requested file', { modelId: modelId, artefactId: fileId })
   }
+
   const rerunArtefactScanAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!rerunArtefactScanAuth.success) {
     throw Forbidden(rerunArtefactScanAuth.info, { userDn: user.dn, modelId, file })
   }
+
   if (!file.size || file.size === 0) {
     throw BadReq('Cannot run scan on an empty file')
   }
-  const minutesBeforeRescanning = await fileScanDelay(file)
+
+  const fileIdentifier = { artefactKind: ArtefactKind.File, fileId: file.id }
+  const minutesBeforeRescanning = await artefactScanDelay(fileIdentifier)
   if (minutesBeforeRescanning > 0) {
     throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
   }
+
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
+
   const scannersInfo = scanners.scannersInfo()
   if (scannersInfo && scannersInfo.scannerNames) {
     const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
@@ -109,10 +122,10 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
       state: ArtefactScanState.InProgress,
       lastRunAt: new Date(),
     }))
-    await updateFileWithResults(file._id, resultsInprogress)
+    await updateArtefactScanWithResults(fileIdentifier, resultsInprogress)
 
     const resultsArray = await scanners.startScans(file)
-    await updateFileWithResults(file._id, resultsArray)
+    await updateArtefactScanWithResults(fileIdentifier, resultsArray)
   }
   return `Scan started for ${file.name}`
 }
@@ -122,14 +135,11 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
   }
-  // TODO: get file
-
   const rerunArtefactScanAuth = await authorisation.image(user, model, {
     type: 'repository',
     name: model.id,
     actions: ['pull'],
   })
-
   if (!rerunArtefactScanAuth.success) {
     throw Forbidden(rerunArtefactScanAuth.info, { userDn: user.dn, modelId, image })
   }
@@ -138,14 +148,32 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
+
   const scannersInfo = scanners.scannersInfo()
-  if (scannersInfo && scannersInfo.scannerNames) {
-    const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
-      toolName: scannerName,
-      state: ArtefactScanState.InProgress,
-      lastRunAt: new Date(),
-    }))
-    // TODO update results
+  const imageLayers = await getImageLayers(user, image)
+  log.debug({ scannersInfo, imageLayers })
+  for (const imageLayer of imageLayers) {
+    const layerIdentifier = { artefactKind: ArtefactKind.Image, layerDigest: imageLayer.digest }
+    const minutesBeforeRescanning = await artefactScanDelay(layerIdentifier)
+    if (minutesBeforeRescanning > 0) {
+      throw BadReq(
+        `Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${image.repository}/${image.name}:${image.tag}`,
+      )
+    }
+
+    if (scannersInfo && scannersInfo.scannerNames) {
+      const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
+        toolName: scannerName,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }))
+
+      await updateArtefactScanWithResults(layerIdentifier, resultsInprogress)
+
+      log.debug({ ...image, layerDigest: imageLayer.digest }, 'Calling `scanners.startScans`')
+      const resultsArray = await scanners.startScans({ ...image, layerDigest: imageLayer.digest })
+      await updateArtefactScanWithResults(layerIdentifier, resultsArray)
+    }
   }
   return `Scan started for ${image.repository}/${image.name}:${image.tag}`
 }

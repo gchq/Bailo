@@ -1,20 +1,14 @@
-import { getImageTagManifest } from '../../clients/registry.js'
 import { ImageRefInterface } from '../../models/Release.js'
+import { UserInterface } from '../../models/User.js'
 import { InternalError } from '../../utils/error.js'
+import { Descriptors } from '../../utils/registryResponses.js'
+import { getImageManifest } from '../registry.js'
 
-export interface ImageLayer {
-  digest: string
-  size?: number
-}
-
-export async function getImageLayers(registryToken: string, image: ImageRefInterface): Promise<ImageLayer[]> {
-  const res = await getImageTagManifest(registryToken, image)
+export async function getImageLayers(user: UserInterface, image: ImageRefInterface): Promise<Descriptors[]> {
+  const res = await await getImageManifest(user, image)
   if (!res.body) {
     throw InternalError('Registry manifest body missing.', { image })
   }
 
-  return [res.body.config, ...res.body.layers].map((layer) => ({
-    digest: layer.digest,
-    size: layer.size,
-  }))
+  return [res.body.config, ...res.body.layers]
 }

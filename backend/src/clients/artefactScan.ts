@@ -86,7 +86,24 @@ interface TrivyResponse {
     ref: string
     dependsOn: []
   }[]
-  vulnerabilities: []
+  vulnerabilities: {
+    id: string
+    source: object
+    ratings: {
+      source: { object: string }
+      score: number
+      severity: string
+      method: string
+      vector: string
+    }[]
+    cwes: []
+    description: string
+    recommendation: string
+    advisories: string
+    published: string
+    updated: string
+    affects: []
+  }[]
 }
 
 export async function getArtefactScanInfo() {
@@ -116,7 +133,7 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
     const formData = new FormData()
     formData.append('in_file', stream, { filename: fileName, contentType: 'application/octet-stream' })
 
-    res = await fetch(`${url}/scan/${endpoint}}`, {
+    res = await fetch(`${url}/scan/${endpoint}`, {
       method: 'POST',
       headers: {
         ...formData.getHeaders(),

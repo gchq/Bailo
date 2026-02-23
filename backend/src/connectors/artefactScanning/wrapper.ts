@@ -1,10 +1,14 @@
 import { FileInterface } from '../../models/File.js'
-import { ImageRefInterface } from '../../models/Release.js'
 import log from '../../services/log.js'
 import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { ConfigurationError, InternalError } from '../../utils/error.js'
-import { ArtefactBaseScanningConnector, ArtefactInterface, ArtefactScanningConnectorInfo } from './Base.js'
+import {
+  ArtefactBaseScanningConnector,
+  ArtefactInterface,
+  ArtefactScanningConnectorInfo,
+  LayerRefInterface,
+} from './Base.js'
 
 export class ArtefactScanningWrapper {
   scanners: Set<ArtefactBaseScanningConnector> = new Set<ArtefactBaseScanningConnector>()
@@ -61,7 +65,7 @@ export class ArtefactScanningWrapper {
   ): { matching: boolean; artefactType: ArtefactTypeKeys } {
     let artefactType: ArtefactTypeKeys | undefined = undefined
     switch (true) {
-      case !!(artefact as ImageRefInterface).tag:
+      case !!(artefact as LayerRefInterface).tag:
         artefactType = ArtefactType.IMAGE
         break
       case !!(artefact as FileInterface)._id:
@@ -95,9 +99,7 @@ export class ArtefactScanningWrapper {
               case ArtefactType.IMAGE:
                 log.info(
                   {
-                    repository: (artefact as ImageRefInterface).repository,
-                    name: (artefact as ImageRefInterface).name,
-                    tag: (artefact as ImageRefInterface).tag,
+                    ...(artefact as LayerRefInterface),
                     toolName: scanner.toolName,
                   },
                   'Scan started.',

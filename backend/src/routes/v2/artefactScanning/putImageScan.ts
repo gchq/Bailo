@@ -7,7 +7,7 @@ import { rerunImageScan } from '../../../services/scan.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const putFileScanSchema = z.object({
+export const putImageScanSchema = z.object({
   params: z.object({
     modelId: z.string(),
     name: z.string(),
@@ -21,7 +21,7 @@ registerPath({
   path: '/api/v2/artefactscanning/model/{modelId}/image/{name}/{tag}/scan',
   tags: ['artefact-scanning'],
   description: 'Manually re-request a new scan for an image',
-  schema: putFileScanSchema,
+  schema: putImageScanSchema,
   responses: {
     200: {
       description: ``,
@@ -36,16 +36,16 @@ registerPath({
   },
 })
 
-interface PutFileScanResponse {
+interface PutImageScanResponse {
   status: string
 }
 
-export const putFileScan = [
-  async (req: Request, res: Response<PutFileScanResponse>): Promise<void> => {
-    req.audit = AuditInfo.UpdateFile
+export const putImageScan = [
+  async (req: Request, res: Response<PutImageScanResponse>): Promise<void> => {
+    req.audit = AuditInfo.UpdateImage
     const {
       params: { modelId, name, tag },
-    } = parse(req, putFileScanSchema)
+    } = parse(req, putImageScanSchema)
     const imageRef = { repository: modelId, name, tag }
 
     await rerunImageScan(req.user, modelId, imageRef)
