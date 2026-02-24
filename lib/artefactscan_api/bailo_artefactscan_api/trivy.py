@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(env_prefix="TRIVY_")
+
     BINARY: str = "/usr/local/bin/trivy"
     TEMP_DIR: str = "/tmp"
     CACHE_DIR: str = f"{TEMP_DIR}/trivy"
@@ -62,6 +63,12 @@ class Settings(BaseSettings):
     CREATE_TIMEOUT_SECONDS: int = 900
 
     SCAN_TIMEOUT_SECONDS: int = 60
+
+    ORAS_CLIENT_KWARGS: dict[str, Any] = {
+        # examples - override via env if required
+        # "tls_verify": "/certs/artefactscan-ca.pem",
+        # "insecure": true,
+    }
 
 
 @lru_cache
@@ -203,13 +210,14 @@ def download_database():
 
     https://trivy.dev/docs/latest/guide/advanced/self-hosting/#__tabbed_1_1
     """
-    client = oras.client.OrasClient()
-    logger.info("Pulling trivy database via Oras API")
-    dbpaths = client.pull(target=get_settings().DB_IMAGE, outdir=get_settings().DB_DIR, overwrite=True)
+    settings = get_settings()
+    logger.info("Pulling trivy database via Oras API (image=%s)", settings.DB_IMAGE)
+    client = oras.client.OrasClient(**settings.ORAS_CLIENT_KWARGS)
+    dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)
     for path in dbpaths:
-        logger.info("Extracting file %s into %s", path, get_settings().DB_DIR)
+        logger.info("Extracting file %s into %s", path, settings.DB_DIR)
         with tarfile.open(path) as tarf:
-            safe_extract(tarf, get_settings().DB_DIR)
+            safe_extract(tarf, settings.DB_DIR)
         try:
             os.remove(path)
         except OSError:

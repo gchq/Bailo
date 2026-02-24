@@ -28,6 +28,9 @@ spec:
             protocol: TCP
         image: "{{ .Values.image.artefactscanRepository }}:{{ .Values.image.artefactscanTag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: TRIVY_ORAS_CLIENT_KWARGS
+            value: {{ .Values.artefactscan.trivy.orasClientKwargs | toJson | quote }}
         resources:
           requests:
             memory: "100Mi"
@@ -38,6 +41,12 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        {{- if .Values.artefactscan.trivy.ca.enabled }}
+        - name: artefactscan-ca
+          mountPath: {{ .Values.artefactscan.trivy.ca.mountPath }}
+          subPath: {{ .Values.artefactscan.trivy.ca.secretKey }}
+          readOnly: true
+        {{- end }}
         securityContext:
           allowPrivilegeEscalation: false
       volumes:
@@ -45,4 +54,9 @@ spec:
           emptyDir: {}
         - name: artefactscan-log
           emptyDir: {}
+        {{- if .Values.artefactscan.trivy.ca.enabled }}
+        - name: artefactscan-ca
+          secret:
+            secretName: {{ .Values.artefactscan.trivy.ca.secretName }}
+        {{- end }}
 {{- end }}
