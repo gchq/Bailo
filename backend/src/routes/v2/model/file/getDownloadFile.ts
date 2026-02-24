@@ -151,22 +151,22 @@ export const getDownloadFile = [
     // Attach error handler early
     stream.once('error', (err: unknown) => {
       // Handle stream errors BEFORE headers are committed
-      const bailoError: BailoError = {
+      const error: BailoError = {
         code: 500,
         name: 'File download error',
         message: 'Error occurred whilst streaming file',
         status: 500,
         cause: err instanceof Error ? err.message : String(err),
-        context: { fileId },
+        context: { fileId, modelId: params.modelId },
       }
 
       if (!headersCommitted && !res.headersSent) {
-        res.status(500).json(bailoError)
+        res.status(500).json(error)
       } else {
         res.destroy(err as Error)
       }
 
-      log.error(bailoError, { fileId, modelId: params.modelId })
+      log.error({ error })
     })
 
     // Commit headers only when first byte is about to flow

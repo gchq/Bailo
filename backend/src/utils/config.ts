@@ -2,9 +2,9 @@ import { AgentOptions } from 'node:https'
 
 import { ResponseChecksumValidation } from '@aws-sdk/middleware-flexible-checksums'
 import { Provider } from '@aws-sdk/types'
-import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
+import { LevelWithSilentOrString } from 'pino'
 
 import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
@@ -61,7 +61,8 @@ export interface Config {
   federation: {
     state: FederationStateKeys
     id: string
-    peers: Map<string, RemoteFederationConfig>
+    isEscalationEnabled?: boolean
+    peers: Record<string, RemoteFederationConfig>
   }
 
   smtp: {
@@ -90,7 +91,7 @@ export interface Config {
   }
 
   log: {
-    level: bunyan.LogLevel
+    level: LevelWithSilentOrString
   }
 
   s3: {
