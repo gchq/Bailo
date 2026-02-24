@@ -11,6 +11,24 @@ export function findDuplicates<T>(arr: Array<T>): Array<T> {
 }
 
 /**
+ * Deduplicate an array while preserving order.
+ * Uses SameValueZero equality (as per Set).
+ */
+export function dedupe<T>(input: readonly T[]): T[] {
+  const seen = new Set<T>()
+  const result: T[] = []
+
+  for (const item of input) {
+    if (!seen.has(item)) {
+      seen.add(item)
+      result.push(item)
+    }
+  }
+
+  return result
+}
+
+/**
  * Returns the mode (most frequent value) of an array.
  * If multiple modes exist, returns the first encountered.
  * Returns undefined for an empty array.

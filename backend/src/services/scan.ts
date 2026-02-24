@@ -6,6 +6,7 @@ import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.j
 import { ImageRefInterface } from '../models/Release.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
+import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { plural } from '../utils/string.js'
@@ -150,7 +151,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   }
 
   const scannersInfo = scanners.scannersInfo()
-  const imageLayers = await getImageLayers(user, image)
+  const imageLayers = dedupe(await getImageLayers(user, image))
   log.debug({ scannersInfo, imageLayers })
   for (const imageLayer of imageLayers) {
     const layerIdentifier = { artefactKind: ArtefactKind.Image, layerDigest: imageLayer.digest }
