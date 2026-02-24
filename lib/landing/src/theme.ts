@@ -14,6 +14,12 @@ const theme = createTheme({
     error: {
       main: red.A400,
     },
+    markdownBorder: {
+      main: '#b8b8b8',
+    },
+    container: {
+      main: '#f3f1f1',
+    },
   },
 })
 

@@ -40,6 +40,7 @@ src/Copyright.tsx
 src/Link.tsx
 src/docs
 src/common/Title.tsx
+src/common/MarkdownDisplay.tsx
 
 pages/docs
 pages/accessibility
