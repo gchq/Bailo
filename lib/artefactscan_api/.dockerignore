@@ -11,11 +11,7 @@ Dockerfile
 **.py[cod]
 **$py.class
 
-# Environments
-.env
-*env/
-*ENV/
-*env.bak/
+# Python venv
 artefactscanvenv/
 
 # Test files

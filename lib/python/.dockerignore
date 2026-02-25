@@ -1,3 +1,11 @@
+# Docker artefacts
+Dockerfile
+.dockerignore
+
+# Git artefacts
+.git
+.gitignore
+
 # Byte-compiled / optimized / DLL files
 **/__pycache__/
 **/*.py[cod]
@@ -39,6 +47,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+tests/
 htmlcov/
 .tox/
 .nox/
@@ -136,3 +145,6 @@ resnet50_weights.pth
 # MLFlow
 mlartifacts/
 mlruns/
+
+# Misc
+CHANGELOG.md
