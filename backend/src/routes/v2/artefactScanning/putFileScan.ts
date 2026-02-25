@@ -17,7 +17,7 @@ export const putFileScanSchema = z.object({
 
 registerPath({
   method: 'put',
-  path: '/api/v2/artefactscanning/model/{modelId}/file/{fileId}/scan',
+  path: '/api/v2/filescanning/model/{modelId}/file/{fileId}/scan',
   tags: ['artefact-scanning'],
   description: 'Manually re-request a new antivirus scan for a file',
   schema: putFileScanSchema,

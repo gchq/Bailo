@@ -18,7 +18,7 @@ export const putImageScanSchema = z.object({
 
 registerPath({
   method: 'put',
-  path: '/api/v2/artefactscanning/model/{modelId}/image/{name}/{tag}/scan',
+  path: '/api/v2/filescanning/model/{modelId}/image/{name}/{tag}/scan',
   tags: ['artefact-scanning'],
   description: 'Manually re-request a new scan for an image',
   schema: putImageScanSchema,
