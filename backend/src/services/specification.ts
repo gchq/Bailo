@@ -59,6 +59,24 @@ export const systemStatusSchema = z.object({
   }),
 })
 
+export const modelTransferSchema = z.object({
+  id: z.string().openapi({ example: 'ABCD-1234-EFGH-5678' }),
+  modelId: z.string().openapi({ example: 'ABCD-1234-EFGH-5678' }),
+  status: z.string().openapi({ example: 'in_progress' }),
+  createdBy: z.string().openapi({ example: 'bob' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const modelTransferStatusSchema = z.object({
+  id: z.string().openapi({ example: 'ABCD-1234-EFGH-5678' }),
+  modelId: z.string().openapi({ example: 'ABCD-1234-EFGH-5678' }),
+  status: z.string().openapi({ example: 'in_progress' }),
+  createdBy: z.string().openapi({ example: 'bob' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const remoteFederationConfigSchema = z.object({
   state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
   baseUrl: z.string().openapi({ example: 'https://example.com' }),
