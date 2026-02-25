@@ -234,9 +234,9 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
 
-server.get('/api/v2/artefactscanning/info', ...getArtefactScanningInfo)
-server.put('/api/v2/artefactscanning/model/:modelId/file/:fileId/scan', ...putFileScan)
-server.put('/api/v2/artefactscanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
+server.get('/api/v2/filescanning/info', ...getArtefactScanningInfo)
+server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
+server.put('/api/v2/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)

@@ -19,17 +19,17 @@ abstract class ArtefactScanBaseScanningConnector extends ArtefactBaseScanningCon
   constructor() {
     super()
   }
+}
+
+export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConnector {
+  artefactType: ArtefactTypeKeys = ArtefactType.FILE
+  toolName: string = 'ModelScan'
 
   async init() {
     const artefactScanInfo = await getArtefactScanInfo()
     this.version = artefactScanInfo.modelscanVersion
     return this
   }
-}
-
-export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConnector {
-  artefactType: ArtefactTypeKeys = ArtefactType.FILE
-  toolName: string = 'ModelScan'
 
   async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     await this.init()
@@ -84,6 +84,12 @@ export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConn
 export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnector {
   artefactType: ArtefactTypeKeys = ArtefactType.IMAGE
   toolName: string = 'Trivy'
+
+  async init() {
+    const artefactScanInfo = await getArtefactScanInfo()
+    this.version = artefactScanInfo.trivyVersion
+    return this
+  }
 
   async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
     await this.init()
