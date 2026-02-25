@@ -12,11 +12,12 @@ registerPath({
   method: 'get',
   path: '/api/v2/filescanning/info',
   tags: ['artefact-scanning'],
-  description: 'Get the current user',
+  description:
+    'Retrieve metadata about the configured artefact scanning connectors, including supported artefact kinds and scanner versions.',
   schema: getArtefactScanningInfoSchema,
   responses: {
     200: {
-      description: 'Details about the currently logged in user.',
+      description: 'A list of available artefact scanning connectors and their capabilities.',
       content: {
         'application/json': {
           schema: z.object({ scanners: artefactScanningConnectorInfo }),
