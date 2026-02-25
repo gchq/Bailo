@@ -21,8 +21,15 @@ import log from './log.js'
 import { getModelById } from './model.js'
 
 type ArtefactScanIdentifier =
-  | { artefactKind: typeof ArtefactKind.FILE; fileId: string }
-  | { artefactKind: typeof ArtefactKind.IMAGE; layerDigest: string }
+  | {
+      artefactKind: typeof ArtefactKind.FILE
+      fileId: string
+    }
+  | {
+      artefactKind: typeof ArtefactKind.IMAGE
+      layerDigest: string
+      imageName: string // Expected to be of format `${image.repository}/${image.name}:${image.tag}`
+    }
 
 export async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
@@ -41,12 +48,25 @@ export async function scanFile(file: FileInterfaceDoc) {
 
 async function updateArtefactScanWithResults(scanIdentifier: ArtefactScanIdentifier, results: ArtefactScanResult[]) {
   for (const result of results) {
-    const updateExistingResult = await ScanModel.updateOne(
-      { ...scanIdentifier, toolName: result.toolName },
-      { $set: { ...result } },
-    )
+    const update: any = {
+      $set: { ...result },
+    }
+
+    if (scanIdentifier.artefactKind === ArtefactKind.IMAGE && scanIdentifier.imageName) {
+      update.$addToSet = {
+        imagesContainingLayer: scanIdentifier.imageName, // `${image.repository}/${image.name}:${image.tag}`
+      }
+    }
+
+    const updateExistingResult = await ScanModel.updateOne({ ...scanIdentifier, toolName: result.toolName }, update)
     if (updateExistingResult.modifiedCount === 0) {
-      await ScanModel.create({ ...scanIdentifier, ...result })
+      await ScanModel.create({
+        ...scanIdentifier,
+        ...result,
+        ...(scanIdentifier.artefactKind === ArtefactKind.IMAGE && scanIdentifier.imageName
+          ? { imagesContainingLayer: [scanIdentifier.imageName] }
+          : {}),
+      })
     }
   }
 }
@@ -154,11 +174,15 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   const imageLayers = dedupe(await getImageLayers(user, image))
   log.debug({ scannersInfo, imageLayers })
   for (const imageLayer of imageLayers) {
-    const layerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayer.digest }
+    const layerIdentifier = {
+      artefactKind: ArtefactKind.IMAGE,
+      layerDigest: imageLayer.digest,
+      imageName: `${image.repository}/${image.name}:${image.tag}`,
+    }
     const minutesBeforeRescanning = await artefactScanDelay(layerIdentifier)
     if (minutesBeforeRescanning > 0) {
       throw BadReq(
-        `Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${image.repository}/${image.name}:${image.tag}`,
+        `Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${layerIdentifier.imageName}`,
       )
     }
 

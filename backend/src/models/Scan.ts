@@ -24,7 +24,8 @@ export type ScanInterface = {
   | {
       artefactKind: typeof ArtefactKind.IMAGE
       layerDigest: string
-      packageList: string[]
+      // useful for lookups by image rather than querying all layers
+      imagesContainingLayer: string[]
     }
 )
 
@@ -68,7 +69,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
     artefactKind: { type: String, enum: Object.values(ArtefactKind), required: true },
     fileId: { type: String },
     layerDigest: { type: String },
-    packageList: [{ type: String }],
+    imagesContainingLayer: [{ type: String }],
 
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
