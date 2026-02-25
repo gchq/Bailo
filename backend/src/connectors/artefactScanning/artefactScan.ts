@@ -97,7 +97,7 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
     }
 
     try {
-      // TODO: pass this in
+      // User does not pull the layer so attribute to the scanner
       const repositoryToken = await getAccessToken({ dn: this.toolName }, [
         { type: 'repository', name: `${layer.repository}/${layer.name}`, actions: ['pull'] },
       ])
@@ -126,12 +126,12 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
           }
         }
 
-        log.info({ summaries })
-
+        const summary = Array.from(summaries)
+        log.debug({ layer, result: { summary }, ...scannerInfo }, 'Scan complete.')
         return {
           ...scannerInfo,
           state: ArtefactScanState.Complete,
-          summary: Array.from(summaries),
+          summary,
           additionalInfo: results,
           lastRunAt: new Date(),
         }

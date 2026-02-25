@@ -11,6 +11,7 @@ import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.j
 import { ImageRefInterface } from '../models/Release.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
+import { toBailoError } from '../types/error.js'
 import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden } from '../utils/error.js'
@@ -103,10 +104,7 @@ async function runScans(
 
         await updateArtefactScanWithResults(scanIdentifier, failedResults, imageName)
       } catch (nestedError) {
-        log.error(
-          { scannersInfo, scanIdentifier, imageName, nestedError, error },
-          'Unable to set failure state after failing to run scans. Safely aborting.',
-        )
+        throw toBailoError(nestedError, { scannersInfo, scanIdentifier, imageName, previousError: error })
       }
     }
   }
@@ -180,7 +178,12 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   const scannersInfo = scanners.scannersInfo()
 
   // Do not await so that the endpoint can return early (fire-and-forget)
-  void runScans(scannersInfo, fileIdentifier, file)
+  void runScans(scannersInfo, fileIdentifier, file).catch((error) => {
+    log.error(
+      { scannersInfo, scanIdentifier: fileIdentifier, file, error },
+      'Unable to set failure state after failing to run file scans. Safely aborted.',
+    )
+  })
   return `File scan started for ${file.name}`
 }
 
@@ -215,7 +218,12 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
     }
 
     // Do not await so that the endpoint can return early (fire-and-forget)
-    void runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }, imageName)
+    runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }, imageName).catch((error) => {
+      log.error(
+        { scannersInfo, scanIdentifier: layerIdentifier, image, imageName, error },
+        'Unable to set failure state after failing to run image scans. Safely aborted.',
+      )
+    })
   }
   return `Image scan started for ${imageName}`
 }
