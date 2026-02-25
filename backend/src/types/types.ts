@@ -5,6 +5,7 @@ import type { ZodSchema, ZodTypeDef } from 'zod'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
+import { ScanInterface } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -225,6 +226,26 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   peers: coerceArray(z.array(z.string()).optional()),
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
+
+export type ModelImages = ModelImageTags[]
+export type ModelImageTags = {
+  repository: string
+  name: string
+  tags: Array<string>
+}
+export type ModelImageWithScans = ModelImageTags & {
+  scanResults: ScanInterfaceDetail[]
+}
+
+export type ScanInterfaceDetail =
+  | (ScanInterface & { imageScanDetail: ImageScanDetail.FULL })
+  | (Omit<ScanInterface, 'additionalInfo'> & { imageScanDetail: ImageScanDetail.SUMMARY })
+  | { imageScanDetail: ImageScanDetail.NONE }
+export enum ImageScanDetail {
+  NONE = 'none',
+  SUMMARY = 'summary',
+  FULL = 'full',
+}
 
 export const MirrorKind = {
   Documents: 'documents',

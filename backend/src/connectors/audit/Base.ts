@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 
 const AuditKind = {
   Create: 'Create',
@@ -229,11 +229,7 @@ export abstract class BaseAuditConnector {
   abstract onUpdateInference(req: Request, inference: InferenceDoc): Promise<void>
   abstract onDeleteInference(req: Request, inference: InferenceDoc): Promise<void>
 
-  abstract onViewModelImages(
-    req: Request,
-    modelId: string,
-    images: { repository: string; name: string; tags: string[] }[],
-  ): Promise<void>
+  abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
   abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
   abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 

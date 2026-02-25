@@ -1,6 +1,7 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import type { AnyZodObject } from 'zod'
 
+import { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
@@ -8,7 +9,7 @@ import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind, SeverityLevel } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
-import { FederationState, MirrorKind } from '../types/types.js'
+import { FederationState, ImageScanDetail, MirrorKind } from '../types/types.js'
 import config from '../utils/config.js'
 
 export const registry = new OpenAPIRegistry()
@@ -133,20 +134,26 @@ export const artefactScanningConnectorInfo = z.array(
 export const scanInterfaceSchema = z.object({
   artefactKind: z.nativeEnum(ArtefactKind).openapi({ example: 'file' }),
   fileId: z.string().optional().openapi({ example: '507f1f77bcf86cd799439011' }),
-  repositoryName: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
-  imageDigest: z
+  layerDigest: z
     .string()
     .optional()
     .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
+  imagesContainingLayer: z
+    .array(
+      z.string().openapi({ example: 'example-model-abc123/ghcr.io/aquasecurity/trivy-test-images:alpine-distroless' }),
+    )
+    .optional(),
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
   state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
   summary: z
     .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
     .optional(),
+  additionalInfo: z.union([TrivyScanResultResponse, ModelScanResponse]).optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
   _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
   id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
+  imageScanDetail: z.nativeEnum(ImageScanDetail),
 })
 
 export const fileWithScanInterfaceSchema = z.object({
@@ -164,6 +171,19 @@ export const fileWithScanInterfaceSchema = z.object({
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const imageWithScanResultsSchema = z.object({
+  repository: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  name: z.string().openapi({ example: 'yolo' }),
+  tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
+  scanResults: z.array(
+    z.union([
+      scanInterfaceSchema, // FULL
+      scanInterfaceSchema.omit({ additionalInfo: true }), // SUMMARY
+      z.object({ imageScanDetail: z.literal(ImageScanDetail.NONE) }), // NONE
+    ]),
+  ),
 })
 
 export const releaseInterfaceSchema = z.object({

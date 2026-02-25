@@ -16,7 +16,7 @@ const ArtefactScanInfoResponse = z.object({
   trivyVersion: z.string(),
 })
 
-const ModelScanResponse = z.object({
+export const ModelScanResponse = z.object({
   summary: z.object({
     total_issues: z.number().nonnegative(),
     total_issues_by_severity: z.object({
@@ -139,7 +139,7 @@ const ResultSchema = z.object({
   Vulnerabilities: z.array(VulnerabilitySchema).optional(),
 })
 
-const TrivyScanResultResponse = z.object({
+export const TrivyScanResultResponse = z.object({
   SchemaVersion: z.literal(2),
   CreatedAt: z.string(),
   ArtifactName: z.string(),

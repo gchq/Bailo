@@ -12,9 +12,11 @@ import {
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import ScanModel, { ArtefactKind, ScanInterface } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
+import { ImageScanDetail, ModelImages, ModelImageWithScans, ScanInterfaceDetail } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { OCIEmptyMediaType } from '../utils/registryResponses.js'
 import log from './log.js'
@@ -80,7 +82,7 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function listModelImages(user: UserInterface, modelId: string) {
+export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
   await checkUserAuth(user, modelId, ['list'])
 
   const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
@@ -94,6 +96,74 @@ export async function listModelImages(user: UserInterface, modelId: string) {
       return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
     }),
   )
+}
+
+export async function listModelImagesWithScanResults(
+  user: UserInterface,
+  modelId: string,
+  scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
+): Promise<ModelImageWithScans[]> {
+  const modelImages = await listModelImages(user, modelId)
+
+  if (scanDetail === ImageScanDetail.NONE) {
+    return modelImages.map((img) => ({
+      ...img,
+      scanResults: [{ imageScanDetail: ImageScanDetail.NONE }],
+    }))
+  }
+
+  const imageNames = modelImages.flatMap((repo) => repo.tags.map((tag) => `${repo.repository}/${repo.name}:${tag}`))
+
+  const scans = await ScanModel.find({
+    artefactKind: 'image',
+    imagesContainingLayer: { $in: imageNames },
+  })
+    .lean<ScanInterface[]>()
+    .exec()
+
+  const scansByImage = groupScansByImage(scans)
+
+  return modelImages.map((img) => ({
+    repository: img.repository,
+    name: img.name,
+    tags: img.tags,
+    scanResults: img.tags.flatMap((tag) =>
+      (scansByImage.get(`${img.repository}/${img.name}:${tag}`) ?? []).map(
+        (scan): ScanInterfaceDetail =>
+          scanDetail === ImageScanDetail.FULL
+            ? { ...scan, imageScanDetail: ImageScanDetail.FULL }
+            : {
+                ...omitAdditionalInfo(scan),
+                imageScanDetail: ImageScanDetail.SUMMARY,
+              },
+      ),
+    ),
+  }))
+}
+
+function groupScansByImage(scans: ScanInterface[]): Map<string, ScanInterface[]> {
+  const map = new Map<string, ScanInterface[]>()
+
+  for (const scan of scans) {
+    if (scan.artefactKind !== ArtefactKind.IMAGE) {
+      continue
+    }
+
+    for (const image of scan.imagesContainingLayer) {
+      if (!map.has(image)) {
+        map.set(image, [])
+      }
+      map.get(image)!.push(scan)
+    }
+  }
+
+  return map
+}
+
+function omitAdditionalInfo(scan: ScanInterface): Omit<ScanInterface, 'additionalInfo'> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { additionalInfo, ...rest } = scan
+  return rest
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
