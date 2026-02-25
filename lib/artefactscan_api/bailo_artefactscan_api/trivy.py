@@ -16,6 +16,7 @@ from typing import Any
 
 import oras.client
 from fastapi import BackgroundTasks, HTTPException, UploadFile
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn.error")
@@ -58,17 +59,18 @@ class Settings(BaseSettings):
     DB_DIR: str = f"{CACHE_DIR}/db"
 
     # Default trivy database on Github.
-    DB_IMAGE: str = "ghcr.io/aquasecurity/trivy-db:2"
+    DB_HOSTNAME: str = "ghcr.io"
+    DB_IMAGE: str = f"{DB_HOSTNAME}/aquasecurity/trivy-db:2"
+
+    DB_TLS_VERIFY: bool | str = True
+    DB_INSECURE: bool = False
+
+    DB_USERNAME: str | None = None
+    DB_PASSWORD: SecretStr | None = None
 
     CREATE_TIMEOUT_SECONDS: int = 900
 
     SCAN_TIMEOUT_SECONDS: int = 60
-
-    ORAS_CLIENT_KWARGS: dict[str, Any] = {
-        # examples - override via env if required
-        # "tls_verify": "/certs/artefactscan-ca.pem",
-        # "insecure": true,
-    }
 
 
 @lru_cache
@@ -212,7 +214,14 @@ def download_database():
     """
     settings = get_settings()
     logger.info("Pulling trivy database via Oras API (image=%s)", settings.DB_IMAGE)
-    client = oras.client.OrasClient(**settings.ORAS_CLIENT_KWARGS)
+    client = oras.client.OrasClient(settings.DB_HOSTNAME, settings.DB_INSECURE, settings.DB_TLS_VERIFY)
+    if settings.DB_USERNAME and settings.DB_PASSWORD:
+        client.login(
+            settings.DB_USERNAME,
+            settings.DB_PASSWORD.get_secret_value(),
+            tls_verify=settings.DB_TLS_VERIFY != False,
+            hostname=settings.DB_HOSTNAME,
+        )
     dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)
     for path in dbpaths:
         logger.info("Extracting file %s into %s", path, settings.DB_DIR)

@@ -29,8 +29,10 @@ spec:
         image: "{{ .Values.image.artefactscanRepository }}:{{ .Values.image.artefactscanTag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-          - name: TRIVY_ORAS_CLIENT_KWARGS
-            value: {{ .Values.artefactscan.trivy.orasClientKwargs | toJson | quote }}
+          {{- range $variable, $value := .Values.artefactscan.env }}
+          - name: {{ $variable }}
+            value: {{ $value | quote }}
+          {{- end }}
         resources:
           requests:
             memory: "100Mi"

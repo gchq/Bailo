@@ -376,12 +376,11 @@ artefactscan:
     - ReadWriteOnce
   size: 20G  # artefactscan saves each incoming file to the disk so needs plenty of storage
   trivy:
-    orasClientKwargs:
-      # examples
-      # tls_verify: "/certs/artefactscan-ca.pem"
-      # insecure: true
     ca:
-      enabled: true
+      enabled: false
       secretName: bailo-certs
       secretKey: cert.pem
       mountPath: /certs/artefactscan-ca.pem
+  # env: # Override settings here
+  #   - name: TRIVY_DB_HOSTNAME
+  #     value: 'ghcr'
