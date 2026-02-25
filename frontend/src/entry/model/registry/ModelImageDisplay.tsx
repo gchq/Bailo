@@ -1,11 +1,22 @@
 import { ExpandLess, ExpandMore, LocalOffer } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Grid, Stack, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Card,
+  Grid,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { ModelImage } from 'types/types'
 
@@ -102,10 +113,14 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
             modelImage.tags.map((imageTag) => (
               <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}>
                 <Grid container alignItems='center' spacing={2}>
-                  <Grid size={1}>
+                  <Grid size={2}>
                     <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
                       <LocalOffer color='primary' />
-                      <Typography color='primary'>{imageTag}</Typography>
+                      <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${imageTag}`}>
+                        <Button size='large' color='primary'>
+                          {imageTag}
+                        </Button>
+                      </Link>
                     </Stack>
                   </Grid>
                   <Grid size='auto'>
