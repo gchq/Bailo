@@ -45,9 +45,11 @@ describe('clients > artefactScan', () => {
   test('getArtefactScanInfo > success', async () => {
     const expectedResponse = {
       apiName: 'Bailo ArtefactScan API',
-      apiVersion: '1.0.0',
-      scannerName: 'artefactscan',
-      artefactscanVersion: '0.8.1',
+      apiVersion: '4.0.0',
+      modelscanScannerName: 'modelscan',
+      modelscanVersion: '0.8.8',
+      trivyScannerName: 'trivy',
+      trivyVersion: '0.69.1',
     }
     fetchMock.default.mockReturnValueOnce({
       ok: true,
