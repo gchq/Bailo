@@ -137,11 +137,11 @@ export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 export type AvScanResult = ScanResultInterface &
   (
     | {
-        artefactKind: typeof ArtefactKind.File
+        artefactKind: typeof ArtefactKind.FILE
         fileId: string
       }
     | {
-        artefactKind: typeof ArtefactKind.Image
+        artefactKind: typeof ArtefactKind.IMAGE
         repositoryName: string
         imageDigest: string
         // TODO: ultimately use a mapped version of backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
@@ -149,8 +149,8 @@ export type AvScanResult = ScanResultInterface &
   )
 
 export const ArtefactKind = {
-  File: 'file',
-  Image: 'image',
+  FILE: 'file',
+  IMAGE: 'image',
 } as const
 export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 

@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
+import { ArtefactKind } from '../../src/models/Scan.js'
 import { rerunFileScan } from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -74,6 +75,7 @@ const fileScanResult: ArtefactScanResult = {
   state: 'complete',
   toolName: 'Test',
   lastRunAt: new Date(),
+  artefactKind: ArtefactKind.FILE,
 }
 
 const fileScanningMock = vi.hoisted(() => ({

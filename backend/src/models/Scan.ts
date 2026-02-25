@@ -18,11 +18,11 @@ export type ScanInterface = {
   updatedAt: Date
 } & (
   | {
-      artefactKind: typeof ArtefactKind.File
+      artefactKind: typeof ArtefactKind.FILE
       fileId: string
     }
   | {
-      artefactKind: typeof ArtefactKind.Image
+      artefactKind: typeof ArtefactKind.IMAGE
       layerDigest: string
       packageList: string[]
     }
@@ -56,8 +56,8 @@ export const SeverityLevel = {
 export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
 export const ArtefactKind = {
-  File: 'file',
-  Image: 'image',
+  FILE: 'file',
+  IMAGE: 'image',
 } as const
 export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 

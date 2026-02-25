@@ -4,10 +4,15 @@ import { getArtefactScanInfo, scanFileStream, scanImageBlobStream } from '../../
 import { getRegistryLayerStream } from '../../clients/registry.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ModelScanSummary, SeverityLevel, SeverityLevelKeys } from '../../models/Scan.js'
+import {
+  ArtefactKind,
+  ArtefactKindKeys,
+  ModelScanSummary,
+  SeverityLevel,
+  SeverityLevelKeys,
+} from '../../models/Scan.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
-import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import { mode } from '../../utils/array.js'
 import config from '../../utils/config.js'
 import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, LayerRefInterface } from './Base.js'
@@ -22,7 +27,7 @@ abstract class ArtefactScanBaseScanningConnector extends ArtefactBaseScanningCon
 }
 
 export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConnector {
-  artefactType: ArtefactTypeKeys = ArtefactType.FILE
+  artefactType: ArtefactKindKeys = ArtefactKind.FILE
   toolName: string = 'ModelScan'
 
   async init() {
@@ -82,7 +87,7 @@ export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConn
 }
 
 export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnector {
-  artefactType: ArtefactTypeKeys = ArtefactType.IMAGE
+  artefactType: ArtefactKindKeys = ArtefactKind.IMAGE
   toolName: string = 'Trivy'
 
   async init() {

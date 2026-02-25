@@ -2,13 +2,12 @@ import PQueue from 'p-queue'
 
 import { FileInterface } from '../../models/File.js'
 import { ImageRefInterface } from '../../models/Release.js'
-import { ScanInterface } from '../../models/Scan.js'
+import { ArtefactKindKeys, ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
-import { ArtefactTypeKeys } from '../../types/types.js'
 
 export type ArtefactScanResult = Pick<
   ScanInterface,
-  'toolName' | 'scannerVersion' | 'state' | 'summary' | 'additionalInfo' | 'lastRunAt'
+  'toolName' | 'scannerVersion' | 'state' | 'summary' | 'additionalInfo' | 'lastRunAt' | 'artefactKind'
 >
 
 export type LayerRefInterface = ImageRefInterface & { layerDigest: string }
@@ -22,16 +21,17 @@ export const ArtefactScanState = {
 } as const
 export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
-export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion'>
+export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion' | 'artefactKind'>
 
 export abstract class ArtefactBaseScanningConnector {
   abstract readonly toolName: string
   abstract readonly version: string | undefined
+  abstract readonly artefactType: ArtefactKindKeys
+
   abstract readonly queue: PQueue
-  abstract artefactType: ArtefactTypeKeys
 
   info(): ArtefactScanningConnectorInfo {
-    return { toolName: this.toolName, scannerVersion: this.version }
+    return { toolName: this.toolName, scannerVersion: this.version, artefactKind: this.artefactType }
   }
 
   abstract init()

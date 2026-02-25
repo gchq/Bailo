@@ -5,6 +5,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { ArtefactKind } from '../../src/models/Scan.js'
 import {
   downloadFile,
   finishUploadMultipartFile,
@@ -90,6 +91,7 @@ const fileScanResult: ArtefactScanResult = {
   state: 'complete',
   toolName: 'Test',
   lastRunAt: new Date(),
+  artefactKind: ArtefactKind.FILE,
 }
 
 const fileScanningMock = vi.hoisted(() => ({

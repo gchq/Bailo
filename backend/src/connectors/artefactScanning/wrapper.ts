@@ -1,6 +1,6 @@
 import { FileInterface } from '../../models/File.js'
+import { ArtefactKind, ArtefactKindKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
-import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { ConfigurationError, InternalError } from '../../utils/error.js'
 import {
@@ -50,26 +50,23 @@ export class ArtefactScanningWrapper {
     )
   }
 
-  scannersInfo(): ArtefactScanningConnectorInfo & { scannerNames: string[] } {
-    const scannersInfo = Array.from(this.scanners).map((scanner) => {
+  scannersInfo(): ArtefactScanningConnectorInfo[] {
+    return Array.from(this.scanners).map((scanner) => {
       return scanner.info()
     })
-
-    const scannerNames = scannersInfo.map((scannerInfo) => scannerInfo.toolName)
-    return { toolName: this.constructor.name, scannerNames: scannerNames }
   }
 
   isMatchingInterface(
     artefact: ArtefactInterface,
     scanner: ArtefactBaseScanningConnector,
-  ): { matching: boolean; artefactType: ArtefactTypeKeys } {
-    let artefactType: ArtefactTypeKeys | undefined = undefined
+  ): { matching: boolean; artefactType: ArtefactKindKeys } {
+    let artefactType: ArtefactKindKeys | undefined = undefined
     switch (true) {
       case !!(artefact as LayerRefInterface).tag:
-        artefactType = ArtefactType.IMAGE
+        artefactType = ArtefactKind.IMAGE
         break
       case !!(artefact as FileInterface)._id:
-        artefactType = ArtefactType.FILE
+        artefactType = ArtefactKind.FILE
     }
     if (artefactType !== undefined) {
       return { matching: artefactType === scanner.artefactType, artefactType }
@@ -85,7 +82,7 @@ export class ArtefactScanningWrapper {
           const artefactMatch = this.isMatchingInterface(artefact, scanner)
           if (artefactMatch.matching) {
             switch (artefactMatch.artefactType) {
-              case ArtefactType.FILE:
+              case ArtefactKind.FILE:
                 log.info(
                   {
                     modelId: (artefact as FileInterface).modelId,
@@ -96,7 +93,7 @@ export class ArtefactScanningWrapper {
                   'Scan started.',
                 )
                 break
-              case ArtefactType.IMAGE:
+              case ArtefactKind.IMAGE:
                 log.info(
                   {
                     ...(artefact as LayerRefInterface),
