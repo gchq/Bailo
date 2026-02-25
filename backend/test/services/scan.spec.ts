@@ -118,7 +118,7 @@ describe('services > scan', () => {
       },
     ])
     const scanStatus = await rerunFileScan({} as any, 'model123', testFileId)
-    expect(scanStatus).toBe('Scan started for file.txt')
+    expect(scanStatus).toBe('File scan started for file.txt')
   })
   test('rerunFileScan > throws bad request when attempting to upload an empty file', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
