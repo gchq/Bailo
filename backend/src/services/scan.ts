@@ -71,8 +71,7 @@ async function runScans(
       const resultsInprogress = scannersInfo.reduce((res, scannerInfo) => {
         if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
           res.push({
-            toolName: scannerInfo.toolName,
-            artefactKind: scannerInfo.artefactKind,
+            ...scannerInfo,
             state: ArtefactScanState.InProgress,
             lastRunAt: new Date(),
           })
@@ -93,8 +92,7 @@ async function runScans(
         const failedResults = scannersInfo.reduce((res, scannerInfo) => {
           if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
             res.push({
-              toolName: scannerInfo.toolName,
-              artefactKind: scannerInfo.artefactKind,
+              ...scannerInfo,
               state: ArtefactScanState.Error,
               lastRunAt: new Date(),
             })
