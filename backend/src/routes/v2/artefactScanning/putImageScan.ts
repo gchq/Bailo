@@ -28,7 +28,9 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            status: z.string().openapi({ example: 'Image scan started' }),
+            status: z.string().openapi({
+              example: 'Image scan started for example-model-abc123/alpine:latest',
+            }),
           }),
         },
       },
@@ -48,12 +50,12 @@ export const putImageScan = [
     } = parse(req, putImageScanSchema)
     const imageRef = { repository: modelId, name, tag }
 
-    await rerunImageScan(req.user, modelId, imageRef)
+    const status = await rerunImageScan(req.user, modelId, imageRef)
 
     await audit.onUpdateImage(req, modelId, imageRef)
 
     res.json({
-      status: 'Scan started',
+      status,
     })
   },
 ]

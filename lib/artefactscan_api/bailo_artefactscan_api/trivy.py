@@ -163,7 +163,7 @@ def scan_sbom(blob_digest: str) -> Any:
         "--offline-scan",
         "--no-progress",
         "--format",
-        "cyclonedx",
+        "json",
         "--cache-dir",
         get_settings().CACHE_DIR,
         "--output",

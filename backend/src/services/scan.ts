@@ -28,33 +28,21 @@ type ArtefactScanIdentifier =
   | {
       artefactKind: typeof ArtefactKind.IMAGE
       layerDigest: string
-      imageName: string // Expected to be of format `${image.repository}/${image.name}:${image.tag}`
     }
 
-export async function scanFile(file: FileInterfaceDoc) {
-  const scannersInfo = scanners.scannersInfo()
-  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
-  await runScans(scannersInfo, fileIdentifier, file)
-
-  const scanResults = await ScanModel.find(fileIdentifier)
-  const ret: FileWithScanResultsInterface = {
-    ...file.toObject(),
-    scanResults,
-    id: file._id.toString(),
-  }
-
-  return ret
-}
-
-async function updateArtefactScanWithResults(scanIdentifier: ArtefactScanIdentifier, results: ArtefactScanResult[]) {
+async function updateArtefactScanWithResults(
+  scanIdentifier: ArtefactScanIdentifier,
+  results: ArtefactScanResult[],
+  imageName?: string, // Expected to be of format `${image.repository}/${image.name}:${image.tag}`
+) {
   for (const result of results) {
     const update: any = {
       $set: { ...result },
     }
 
-    if (scanIdentifier.artefactKind === ArtefactKind.IMAGE && scanIdentifier.imageName) {
+    if (scanIdentifier.artefactKind === ArtefactKind.IMAGE && imageName) {
       update.$addToSet = {
-        imagesContainingLayer: scanIdentifier.imageName, // `${image.repository}/${image.name}:${image.tag}`
+        imagesContainingLayer: imageName,
       }
     }
 
@@ -63,8 +51,8 @@ async function updateArtefactScanWithResults(scanIdentifier: ArtefactScanIdentif
       await ScanModel.create({
         ...scanIdentifier,
         ...result,
-        ...(scanIdentifier.artefactKind === ArtefactKind.IMAGE && scanIdentifier.imageName
-          ? { imagesContainingLayer: [scanIdentifier.imageName] }
+        ...(scanIdentifier.artefactKind === ArtefactKind.IMAGE && imageName
+          ? { imagesContainingLayer: [imageName] }
           : {}),
       })
     }
@@ -75,24 +63,52 @@ async function runScans(
   scannersInfo: ArtefactScanningConnectorInfo[],
   scanIdentifier: ArtefactScanIdentifier,
   artefact: ArtefactInterface,
+  imageName?: string, // Expected to be of format `${image.repository}/${image.name}:${image.tag}`
 ) {
   if (scannersInfo && scannersInfo.length > 0) {
-    const resultsInprogress = scannersInfo.reduce((res, scannerInfo) => {
-      if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
-        res.push({
-          toolName: scannerInfo.toolName,
-          artefactKind: scannerInfo.artefactKind,
-          state: ArtefactScanState.InProgress,
-          lastRunAt: new Date(),
-        })
+    try {
+      const resultsInprogress = scannersInfo.reduce((res, scannerInfo) => {
+        if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
+          res.push({
+            toolName: scannerInfo.toolName,
+            artefactKind: scannerInfo.artefactKind,
+            state: ArtefactScanState.InProgress,
+            lastRunAt: new Date(),
+          })
+        }
+        return res
+      }, [] as ArtefactScanResult[])
+
+      await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, imageName)
+
+      const resultsArray = await scanners.startScans(artefact)
+      await updateArtefactScanWithResults(scanIdentifier, resultsArray, imageName)
+    } catch (error) {
+      try {
+        log.warn(
+          { scannersInfo, scanIdentifier, imageName, error },
+          'Unable to run scans. Attempting to set failure state.',
+        )
+        const failedResults = scannersInfo.reduce((res, scannerInfo) => {
+          if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
+            res.push({
+              toolName: scannerInfo.toolName,
+              artefactKind: scannerInfo.artefactKind,
+              state: ArtefactScanState.Error,
+              lastRunAt: new Date(),
+            })
+          }
+          return res
+        }, [] as ArtefactScanResult[])
+
+        await updateArtefactScanWithResults(scanIdentifier, failedResults, imageName)
+      } catch (nestedError) {
+        log.error(
+          { scannersInfo, scanIdentifier, imageName, nestedError, error },
+          'Unable to set failure state after failing to run scans. Safely aborting.',
+        )
       }
-      return res
-    }, [] as ArtefactScanResult[])
-
-    await updateArtefactScanWithResults(scanIdentifier, resultsInprogress)
-
-    const resultsArray = await scanners.startScans(artefact)
-    await updateArtefactScanWithResults(scanIdentifier, resultsArray)
+    }
   }
 }
 
@@ -113,6 +129,21 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
     }
   }
   return Math.round(minutesBeforeRetrying / 60000)
+}
+
+export async function scanFile(file: FileInterfaceDoc) {
+  const scannersInfo = scanners.scannersInfo()
+  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
+  await runScans(scannersInfo, fileIdentifier, file)
+
+  const scanResults = await ScanModel.find(fileIdentifier)
+  const ret: FileWithScanResultsInterface = {
+    ...file.toObject(),
+    scanResults,
+    id: file._id.toString(),
+  }
+
+  return ret
 }
 
 export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string) {
@@ -147,8 +178,10 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   }
 
   const scannersInfo = scanners.scannersInfo()
-  await runScans(scannersInfo, fileIdentifier, file)
-  return `Scan started for ${file.name}`
+
+  // Do not await so that the endpoint can return early (fire-and-forget)
+  void runScans(scannersInfo, fileIdentifier, file)
+  return `File scan started for ${file.name}`
 }
 
 export async function rerunImageScan(user: UserInterface, modelId: string, image: ImageRefInterface) {
@@ -172,21 +205,17 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
 
   const scannersInfo = scanners.scannersInfo()
   const imageLayers = dedupe(await getImageLayers(user, image))
+  const imageName = `${image.repository}/${image.name}:${image.tag}`
   log.debug({ scannersInfo, imageLayers })
   for (const imageLayer of imageLayers) {
-    const layerIdentifier = {
-      artefactKind: ArtefactKind.IMAGE,
-      layerDigest: imageLayer.digest,
-      imageName: `${image.repository}/${image.name}:${image.tag}`,
-    }
+    const layerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayer.digest }
     const minutesBeforeRescanning = await artefactScanDelay(layerIdentifier)
     if (minutesBeforeRescanning > 0) {
-      throw BadReq(
-        `Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${layerIdentifier.imageName}`,
-      )
+      throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${imageName}`)
     }
 
-    await runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest })
+    // Do not await so that the endpoint can return early (fire-and-forget)
+    void runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }, imageName)
   }
-  return `Scan started for ${image.repository}/${image.name}:${image.tag}`
+  return `Image scan started for ${imageName}`
 }

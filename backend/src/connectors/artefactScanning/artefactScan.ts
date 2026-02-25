@@ -4,16 +4,9 @@ import { getArtefactScanInfo, scanFileStream, scanImageBlobStream } from '../../
 import { getRegistryLayerStream } from '../../clients/registry.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import {
-  ArtefactKind,
-  ArtefactKindKeys,
-  ModelScanSummary,
-  SeverityLevel,
-  SeverityLevelKeys,
-} from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys, ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
-import { mode } from '../../utils/array.js'
 import config from '../../utils/config.js'
 import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState, LayerRefInterface } from './Base.js'
 
@@ -103,7 +96,6 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
       return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
     }
 
-    const summaries: Set<ModelScanSummary> = new Set<ModelScanSummary>()
     try {
       // TODO: pass this in
       const repositoryToken = await getAccessToken({ dn: this.toolName }, [
@@ -119,29 +111,33 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
       try {
         // strip prefix from blob identifier to get just the name
         const layerDigestName = layer.layerDigest.replace(/^(sha256:)/, '')
-        const result = await scanImageBlobStream(stream, layerDigestName)
+        const results = await scanImageBlobStream(stream, layerDigestName)
 
-        // map trivy -> model scan summary
-        for (const vuln of result.vulnerabilities ?? []) {
-          summaries.add({
-            severity: (
-              mode(vuln.ratings.map((r) => r.severity)) ?? SeverityLevel.UNKNOWN
-            ).toLowerCase() as SeverityLevelKeys,
-            vulnerabilityDescription: vuln.id,
-          })
+        const summaries: Set<ModelScanSummary> = new Set<ModelScanSummary>()
+        for (const result of results.Results ?? []) {
+          if (!result.Vulnerabilities) {
+            continue
+          }
+          for (const vulnerability of result.Vulnerabilities) {
+            summaries.add({
+              severity: vulnerability.Severity.toLowerCase() as SeverityLevelKeys,
+              vulnerabilityDescription: `${vulnerability.VulnerabilityID} ${vulnerability.Title}`,
+            })
+          }
+        }
+
+        log.info({ summaries })
+
+        return {
+          ...scannerInfo,
+          state: ArtefactScanState.Complete,
+          summary: Array.from(summaries),
+          additionalInfo: results,
+          lastRunAt: new Date(),
         }
       } catch (err) {
         abort()
         throw err
-      }
-
-      log.info({ summaries })
-
-      return {
-        ...scannerInfo,
-        state: ArtefactScanState.Complete,
-        summary: Array.from(summaries),
-        lastRunAt: new Date(),
       }
     } catch (error) {
       return this.scanError(`This image layer could not be scanned due to an error caused by ${this.toolName}`, {

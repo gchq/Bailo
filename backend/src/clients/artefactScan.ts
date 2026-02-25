@@ -3,6 +3,7 @@ import { Readable } from 'node:stream'
 import FormData from 'form-data'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
+import { z } from '../lib/zod.js'
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'
 
@@ -52,59 +53,100 @@ interface ModelScanResponse {
   }[]
 }
 
-interface TrivyResponse {
-  $schema: string
-  bomFormat: string
-  specVersion: string
-  serialNumber: string
-  version: number
-  metadata: {
-    timestamp: string
-    tools: {
-      components: {
-        type: string
-        manufacturer: {
-          name: string
-        }
-        group: string
-        name: string
-        version: string
-      }[]
-      component: {
-        'bom-ref': string
-        type: string
-        name: string
-        properties: {
-          name: string
-          value: string
-        }[]
-      }
-    }
-  }
-  components: []
-  dependencies: {
-    ref: string
-    dependsOn: []
-  }[]
-  vulnerabilities: {
-    id: string
-    source: object
-    ratings: {
-      source: { object: string }
-      score: number
-      severity: string
-      method: string
-      vector: string
-    }[]
-    cwes: []
-    description: string
-    recommendation: string
-    advisories: string
-    published: string
-    updated: string
-    affects: []
-  }[]
-}
+const ImageHistorySchema = z.object({
+  created: z.string(),
+  created_by: z.string(),
+  comment: z.string().optional(),
+  empty_layer: z.boolean().optional(),
+})
+
+const ImageConfigSchema = z
+  .object({
+    architecture: z.string(),
+    created: z.string(),
+    history: z.array(ImageHistorySchema),
+    os: z.string(),
+    rootfs: z.object({
+      type: z.string(),
+      diff_ids: z.array(z.string()),
+    }),
+    config: z.object({
+      Cmd: z.array(z.string()).optional(),
+      Env: z.array(z.string()).optional(),
+      WorkingDir: z.string().optional(),
+      ArgsEscaped: z.boolean().optional(),
+    }),
+  })
+  .optional()
+
+const VulnerabilitySchema = z.object({
+  VulnerabilityID: z.string(),
+  PkgID: z.string(),
+  PkgName: z.string(),
+  PkgIdentifier: z.object({
+    PURL: z.string(),
+    UID: z.string(),
+  }),
+  InstalledVersion: z.string(),
+  FixedVersion: z.string().optional(),
+  Status: z.string(),
+  Layer: z
+    .object({
+      DiffID: z.string(),
+    })
+    .optional(),
+  PrimaryURL: z.string().url().optional(),
+  DataSource: z.object({
+    ID: z.string(),
+    Name: z.string(),
+    URL: z.string().url(),
+  }),
+  Title: z.string(),
+  Description: z.string(),
+  Severity: z.string(),
+  CweIDs: z.array(z.string()).optional(),
+  VendorSeverity: z.record(z.number()).optional(),
+  CVSS: z
+    .record(
+      z.object({
+        V3Vector: z.string(),
+        V3Score: z.number(),
+      }),
+    )
+    .optional(),
+  References: z.array(z.string().url()).optional(),
+  PublishedDate: z.string(),
+  LastModifiedDate: z.string(),
+})
+
+const ResultSchema = z.object({
+  Target: z.string(),
+  Class: z.string(),
+  Type: z.string(),
+  Vulnerabilities: z.array(VulnerabilitySchema).optional(),
+})
+
+export const TrivyScanResultSchema = z.object({
+  SchemaVersion: z.literal(2),
+  CreatedAt: z.string(),
+  ArtifactName: z.string(),
+  ArtifactType: z.string(),
+  Metadata: z
+    .object({
+      OS: z.object({
+        Family: z.string(),
+        Name: z.string(),
+      }),
+      ImageID: z.string().optional(),
+      DiffIDs: z.array(z.string()).optional(),
+      RepoTags: z.array(z.string()).optional(),
+      RepoDigests: z.array(z.string()).optional(),
+      ImageConfig: ImageConfigSchema,
+    })
+    .optional(),
+  Results: z.array(ResultSchema).optional(),
+})
+export type TrivyScanResultSchema = z.infer<typeof TrivyScanResultSchema>
 
 export async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
@@ -159,5 +201,5 @@ export async function scanFileStream(stream: Readable, fileName: string) {
 }
 
 export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
-  return (await scanStream(stream, blobDigest, 'image')) as TrivyResponse
+  return TrivyScanResultSchema.parse(await scanStream(stream, blobDigest, 'image'))
 }
