@@ -5,7 +5,7 @@ import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { listModelImagesWithScanResults } from '../../../../services/registry.js'
 import { imageWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
-import { ImageScanDetail, ModelImages } from '../../../../types/types.js'
+import { ImageScanDetail, ModelImageWithScans } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
@@ -40,7 +40,7 @@ registerPath({
 })
 
 interface GetImagesResponse {
-  images: ModelImages
+  images: ModelImageWithScans[]
 }
 
 export const getImages = [

@@ -31,30 +31,17 @@ type ArtefactScanIdentifier =
       layerDigest: string
     }
 
-async function updateArtefactScanWithResults(
-  scanIdentifier: ArtefactScanIdentifier,
-  results: ArtefactScanResult[],
-  imageName?: string, // Expected to be of format `${image.repository}/${image.name}:${image.tag}`
-) {
+async function updateArtefactScanWithResults(scanIdentifier: ArtefactScanIdentifier, results: ArtefactScanResult[]) {
   for (const result of results) {
-    const update: any = {
-      $set: { ...result },
-    }
+    const updateExistingResult = await ScanModel.updateOne(
+      { ...scanIdentifier, toolName: result.toolName },
+      { $set: { ...result } },
+    )
 
-    if (scanIdentifier.artefactKind === ArtefactKind.IMAGE && imageName) {
-      update.$addToSet = {
-        imagesContainingLayer: imageName,
-      }
-    }
-
-    const updateExistingResult = await ScanModel.updateOne({ ...scanIdentifier, toolName: result.toolName }, update)
     if (updateExistingResult.modifiedCount === 0) {
       await ScanModel.create({
         ...scanIdentifier,
         ...result,
-        ...(scanIdentifier.artefactKind === ArtefactKind.IMAGE && imageName
-          ? { imagesContainingLayer: [imageName] }
-          : {}),
       })
     }
   }
@@ -64,7 +51,6 @@ async function runScans(
   scannersInfo: ArtefactScanningConnectorInfo[],
   scanIdentifier: ArtefactScanIdentifier,
   artefact: ArtefactInterface,
-  imageName?: string, // Expected to be of format `${image.repository}/${image.name}:${image.tag}`
 ) {
   if (scannersInfo && scannersInfo.length > 0) {
     try {
@@ -79,16 +65,13 @@ async function runScans(
         return res
       }, [] as ArtefactScanResult[])
 
-      await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, imageName)
+      await updateArtefactScanWithResults(scanIdentifier, resultsInprogress)
 
       const resultsArray = await scanners.startScans(artefact)
-      await updateArtefactScanWithResults(scanIdentifier, resultsArray, imageName)
+      await updateArtefactScanWithResults(scanIdentifier, resultsArray)
     } catch (error) {
       try {
-        log.warn(
-          { scannersInfo, scanIdentifier, imageName, error },
-          'Unable to run scans. Attempting to set failure state.',
-        )
+        log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
         const failedResults = scannersInfo.reduce((res, scannerInfo) => {
           if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
             res.push({
@@ -100,9 +83,9 @@ async function runScans(
           return res
         }, [] as ArtefactScanResult[])
 
-        await updateArtefactScanWithResults(scanIdentifier, failedResults, imageName)
+        await updateArtefactScanWithResults(scanIdentifier, failedResults)
       } catch (nestedError) {
-        throw toBailoError(nestedError, { scannersInfo, scanIdentifier, imageName, previousError: error })
+        throw toBailoError(nestedError, { scannersInfo, scanIdentifier, previousError: error })
       }
     }
   }
@@ -216,7 +199,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
     }
 
     // Do not await so that the endpoint can return early (fire-and-forget)
-    runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }, imageName).catch((error) => {
+    runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }).catch((error) => {
       log.error(
         { scannersInfo, scanIdentifier: layerIdentifier, image, imageName, error },
         'Unable to set failure state after failing to run image scans. Safely aborted.',

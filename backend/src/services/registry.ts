@@ -19,6 +19,7 @@ import { isBailoError } from '../types/error.js'
 import { ImageScanDetail, ModelImages, ModelImageWithScans, ScanInterfaceDetail } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -103,61 +104,73 @@ export async function listModelImagesWithScanResults(
   modelId: string,
   scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
 ): Promise<ModelImageWithScans[]> {
-  const modelImages = await listModelImages(user, modelId)
+  const modelImages: ModelImages = await listModelImages(user, modelId)
 
-  if (scanDetail === ImageScanDetail.NONE) {
-    return modelImages.map((img) => ({
-      ...img,
-      scanResults: [{ imageScanDetail: ImageScanDetail.NONE }],
-    }))
+  return Promise.all(
+    modelImages.map(async (img) => {
+      const scanResults = await Promise.all(
+        img.tags.map(async (tag): Promise<{ tag: string; results: ScanInterfaceDetail[] }> => {
+          if (scanDetail === ImageScanDetail.NONE) {
+            return {
+              tag,
+              results: [{ imageScanDetail: ImageScanDetail.NONE }],
+            }
+          }
+
+          const imageRef: ImageRefInterface = {
+            repository: img.repository,
+            name: img.name,
+            tag,
+          }
+
+          const scans = await getScansForImageTag(user, imageRef)
+
+          if (scans.length === 0) {
+            return {
+              tag,
+              results: [{ imageScanDetail: ImageScanDetail.NONE }],
+            }
+          }
+
+          return {
+            tag,
+            results: scans.map(
+              (scan): ScanInterfaceDetail =>
+                scanDetail === ImageScanDetail.FULL
+                  ? { ...scan, imageScanDetail: ImageScanDetail.FULL }
+                  : {
+                      ...omitAdditionalInfo(scan),
+                      imageScanDetail: ImageScanDetail.SUMMARY,
+                    },
+            ),
+          }
+        }),
+      )
+
+      return {
+        repository: img.repository,
+        name: img.name,
+        tags: img.tags,
+        scanResults,
+      }
+    }),
+  )
+}
+
+async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
+  const layers = await getImageLayers(user, image)
+  const layerDigests = layers.map((l) => l.digest)
+
+  if (layerDigests.length === 0) {
+    return []
   }
 
-  const imageNames = modelImages.flatMap((repo) => repo.tags.map((tag) => `${repo.repository}/${repo.name}:${tag}`))
-
-  const scans = await ScanModel.find({
-    artefactKind: 'image',
-    imagesContainingLayer: { $in: imageNames },
+  return ScanModel.find({
+    artefactKind: ArtefactKind.IMAGE,
+    layerDigest: { $in: layerDigests },
   })
     .lean<ScanInterface[]>()
     .exec()
-
-  const scansByImage = groupScansByImage(scans)
-
-  return modelImages.map((img) => ({
-    repository: img.repository,
-    name: img.name,
-    tags: img.tags,
-    scanResults: img.tags.flatMap((tag) =>
-      (scansByImage.get(`${img.repository}/${img.name}:${tag}`) ?? []).map(
-        (scan): ScanInterfaceDetail =>
-          scanDetail === ImageScanDetail.FULL
-            ? { ...scan, imageScanDetail: ImageScanDetail.FULL }
-            : {
-                ...omitAdditionalInfo(scan),
-                imageScanDetail: ImageScanDetail.SUMMARY,
-              },
-      ),
-    ),
-  }))
-}
-
-function groupScansByImage(scans: ScanInterface[]): Map<string, ScanInterface[]> {
-  const map = new Map<string, ScanInterface[]>()
-
-  for (const scan of scans) {
-    if (scan.artefactKind !== ArtefactKind.IMAGE) {
-      continue
-    }
-
-    for (const image of scan.imagesContainingLayer) {
-      if (!map.has(image)) {
-        map.set(image, [])
-      }
-      map.get(image)!.push(scan)
-    }
-  }
-
-  return map
 }
 
 function omitAdditionalInfo(scan: ScanInterface): Omit<ScanInterface, 'additionalInfo'> {

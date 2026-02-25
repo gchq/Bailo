@@ -234,7 +234,10 @@ export type ModelImageTags = {
   tags: Array<string>
 }
 export type ModelImageWithScans = ModelImageTags & {
-  scanResults: ScanInterfaceDetail[]
+  scanResults: Array<{
+    tag: string
+    results: ScanInterfaceDetail[]
+  }>
 }
 
 export type ScanInterfaceDetail =

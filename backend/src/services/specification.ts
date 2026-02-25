@@ -138,11 +138,6 @@ export const scanInterfaceSchema = z.object({
     .string()
     .optional()
     .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
-  imagesContainingLayer: z
-    .array(
-      z.string().openapi({ example: 'example-model-abc123/ghcr.io/aquasecurity/trivy-test-images:alpine-distroless' }),
-    )
-    .optional(),
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
   state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
@@ -173,17 +168,22 @@ export const fileWithScanInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
-export const imageWithScanResultsSchema = z.object({
-  repository: z.string().openapi({ example: 'yolo-v4-abcdef' }),
-  name: z.string().openapi({ example: 'yolo' }),
-  tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
-  scanResults: z.array(
+export const imageTagScanResultsSchema = z.object({
+  tag: z.string().openapi({ example: 'v1-cpu' }),
+  results: z.array(
     z.union([
       scanInterfaceSchema, // FULL
       scanInterfaceSchema.omit({ additionalInfo: true }), // SUMMARY
       z.object({ imageScanDetail: z.literal(ImageScanDetail.NONE) }), // NONE
     ]),
   ),
+})
+
+export const imageWithScanResultsSchema = z.object({
+  repository: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  name: z.string().openapi({ example: 'yolo' }),
+  tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
+  scanResults: z.array(imageTagScanResultsSchema),
 })
 
 export const releaseInterfaceSchema = z.object({
