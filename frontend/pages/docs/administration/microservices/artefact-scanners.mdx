@@ -1,9 +1,10 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-# File Scanners
+# Artefact Scanners
 
-Within Bailo, it is possible to optionally deploy file scanners which are designed to help manage any potential risk of
-files being uploaded with potentially malicious contents. We provide two file scanners by default:
+Within Bailo, it is possible to optionally deploy artefact scanners which are designed to help manage any potential risk
+of artefacts being uploaded with potentially malicious contents. We provide two artefact scanners by default:
+
 [ClamAV](https://www.clamav.net/) and [ModelScan](https://github.com/protectai/modelscan).
 
 ## ClamAV
@@ -16,9 +17,9 @@ communicate with ClamAV using [clamscan](https://www.npmjs.com/package/clamscan)
 
 ## ModelScan
 
-We have a [dockerised REST API](https://github.com/gchq/Bailo/tree/main/lib/modelscan_api) to programmatically interact
-with ModelScan via a
-[custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/artefactScanning/modelScan.ts).
+We have a [dockerised REST API](https://github.com/gchq/Bailo/tree/main/lib/artefactscan_api) to programmatically
+interact with ModelScan via a
+[custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/fileScanning/artefactScan.ts).
 
 > ModelScan is an open source project from Protect AI that scans models to determine if they contain unsafe code. It is
 > the first model scanning tool to support multiple model formats. ModelScan currently supports: H5, Pickle, and

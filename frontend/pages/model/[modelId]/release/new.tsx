@@ -50,7 +50,7 @@ export default function NewRelease() {
   } = useGetEntry(modelId, EntryKind.MODEL)
 
   useEffect(() => {
-    if (model && modelCardVersion !== model.card.version) {
+    if (model && !modelCardVersion) {
       setModelCardVersion(model.card.version)
     }
   }, [model, setModelCardVersion, modelCardVersion])

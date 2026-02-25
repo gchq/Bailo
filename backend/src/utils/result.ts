@@ -1,4 +1,4 @@
-import Logger from 'bunyan'
+import { Logger } from 'pino'
 
 type ErrorDetails =
   | string

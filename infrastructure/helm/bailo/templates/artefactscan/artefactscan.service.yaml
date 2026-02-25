@@ -1,0 +1,17 @@
+{{- if .Values.artefactscan.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bailo.fullname" . }}-artefactscan
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.artefactscan.port }}
+      targetPort: {{ .Values.artefactscan.port }}
+      protocol: TCP
+      name: {{ .Values.artefactscan.protocol }}
+  selector:
+    name: artefactscan
+{{- end }}

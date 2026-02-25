@@ -93,11 +93,11 @@ data:
           port: {{ .Values.clamav.port }},
         },
 
-        modelscan: {
-          concurrency: {{ .Values.modelscan.concurrency }},
-          host: '{{ include "bailo.fullname" . }}-modelscan',
-          port: {{ .Values.modelscan.port }},
-          protocol: '{{ .Values.modelscan.protocol }}',
+        artefactscan: {
+          concurrency: {{ .Values.artefactscan.concurrency }},
+          host: '{{ include "bailo.fullname" . }}-artefactscan',
+          port: {{ .Values.artefactscan.port }},
+          protocol: '{{ .Values.artefactscan.protocol }}',
         },
       },
 
