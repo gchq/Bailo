@@ -7,51 +7,64 @@ import { z } from '../lib/zod.js'
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'
 
-interface ArtefactScanInfoResponse {
-  apiName: string
-  apiVersion: string
-  modelscanScannerName: string
-  modelscanVersion: string
-  trivyScannerName: string
-  trivyVersion: string
-}
+const ArtefactScanInfoResponse = z.object({
+  apiName: z.string(),
+  apiVersion: z.string(),
+  modelscanScannerName: z.string(),
+  modelscanVersion: z.string(),
+  trivyScannerName: z.string(),
+  trivyVersion: z.string(),
+})
 
-interface ModelScanResponse {
-  summary: {
-    total_issues: number
-    total_issues_by_severity: {
-      LOW: number
-      MEDIUM: number
-      HIGH: number
-      CRITICAL: number
-    }
-    input_path: string
-    absolute_path: string
-    modelscan_version: string
-    timestamp: string
-    scanned: {
-      total_scanned: number
-      scanned_files: string[]
-    }
-    skipped: {
-      total_skipped: number
-      skipped_files: string[]
-    }
-  }
-  issues: {
-    description: string
-    operator: string
-    module: string
-    source: string
-    scanner: string
-    severity: string
-  }[]
-  errors: {
-    category: string
-    description: string
-    source: string
-  }[]
-}
+const ModelScanResponse = z.object({
+  summary: z.object({
+    total_issues: z.number().nonnegative(),
+    total_issues_by_severity: z.object({
+      LOW: z.number().nonnegative(),
+      MEDIUM: z.number().nonnegative(),
+      HIGH: z.number().nonnegative(),
+      CRITICAL: z.number().nonnegative(),
+    }),
+    input_path: z.string(),
+    absolute_path: z.string(),
+    modelscan_version: z.string(),
+    timestamp: z.string(),
+    scanned: z.object({
+      total_scanned: z.number().nonnegative(),
+      scanned_files: z.array(z.string()).optional(),
+    }),
+    skipped: z.object({
+      total_skipped: z.number().nonnegative(),
+      skipped_files: z
+        .array(
+          z.object({
+            category: z.string(),
+            description: z.string(),
+            source: z.string(),
+          }),
+        )
+        .optional(),
+    }),
+  }),
+  issues: z.array(
+    z.object({
+      description: z.string(),
+      operator: z.string(),
+      module: z.string(),
+      source: z.string(),
+      scanner: z.string(),
+      severity: z.string(),
+    }),
+  ),
+  errors: z.array(
+    z.object({
+      category: z.string(),
+      description: z.string(),
+      source: z.string(),
+    }),
+  ),
+})
+export type ModelScanResponse = z.infer<typeof ModelScanResponse>
 
 const ImageHistorySchema = z.object({
   created: z.string(),
@@ -126,7 +139,7 @@ const ResultSchema = z.object({
   Vulnerabilities: z.array(VulnerabilitySchema).optional(),
 })
 
-export const TrivyScanResultSchema = z.object({
+const TrivyScanResultResponse = z.object({
   SchemaVersion: z.literal(2),
   CreatedAt: z.string(),
   ArtifactName: z.string(),
@@ -146,7 +159,7 @@ export const TrivyScanResultSchema = z.object({
     .optional(),
   Results: z.array(ResultSchema).optional(),
 })
-export type TrivyScanResultSchema = z.infer<typeof TrivyScanResultSchema>
+export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponse>
 
 export async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
@@ -164,7 +177,7 @@ export async function getArtefactScanInfo() {
     throw BadReq('Unrecognised response returned by the ArtefactScan service.')
   }
 
-  return (await res.json()) as ArtefactScanInfoResponse
+  return ArtefactScanInfoResponse.parse(await res.json())
 }
 
 async function scanStream(stream: Readable, fileName: string, endpoint: 'file' | 'image') {
@@ -197,9 +210,9 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
 }
 
 export async function scanFileStream(stream: Readable, fileName: string) {
-  return (await scanStream(stream, fileName, 'file')) as ModelScanResponse
+  return ModelScanResponse.parse(await scanStream(stream, fileName, 'file'))
 }
 
 export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
-  return TrivyScanResultSchema.parse(await scanStream(stream, blobDigest, 'image'))
+  return TrivyScanResultResponse.parse(await scanStream(stream, blobDigest, 'image'))
 }

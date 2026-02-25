@@ -4,7 +4,7 @@ import { getArtefactScanInfo, scanFileStream, scanImageBlobStream } from '../../
 import { getRegistryLayerStream } from '../../clients/registry.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys, ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
@@ -49,12 +49,12 @@ export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConn
         })
       }
 
-      const summary: ModelScanSummary[] = scanResults.issues.map(
+      const summary: ArtefactScanSummary[] = scanResults.issues.map(
         (issue) =>
           ({
             severity: issue.severity.toLowerCase() as SeverityLevelKeys,
             vulnerabilityDescription: `${issue.description}. (scanner: ${issue.scanner})`,
-          }) as ModelScanSummary,
+          }) as ArtefactScanSummary,
       )
 
       log.debug({ file, result: { summary }, ...scannerInfo }, 'Scan complete.')
@@ -62,6 +62,7 @@ export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConn
         ...scannerInfo,
         state: ArtefactScanState.Complete,
         summary,
+        additionalInfo: scanResults,
         lastRunAt: new Date(),
       }
     } catch (error) {
@@ -113,7 +114,7 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
         const layerDigestName = layer.layerDigest.replace(/^(sha256:)/, '')
         const results = await scanImageBlobStream(stream, layerDigestName)
 
-        const summaries: Set<ModelScanSummary> = new Set<ModelScanSummary>()
+        const summaries: Set<ArtefactScanSummary> = new Set<ArtefactScanSummary>()
         for (const result of results.Results ?? []) {
           if (!result.Vulnerabilities) {
             continue

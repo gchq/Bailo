@@ -1,6 +1,6 @@
 import { model, type ObjectId, Schema } from 'mongoose'
 
-import { type TrivyScanResultSchema } from '../clients/artefactScan.js'
+import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -11,7 +11,7 @@ export type ScanInterface = {
   scannerVersion?: string
   state: ArtefactScanStateKeys
   summary?: ScanSummary
-  additionalInfo?: ScanAdditionalInfo
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
 
   lastRunAt: Date
 
@@ -30,9 +30,9 @@ export type ScanInterface = {
     }
 )
 
-export type ScanSummary = (ModelScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
 
-export type ModelScanSummary = {
+export type ArtefactScanSummary = {
   severity: SeverityLevelKeys
   vulnerabilityDescription: string
 }
@@ -40,8 +40,6 @@ export type ModelScanSummary = {
 export type ClamAVSummary = {
   virus: string
 }
-
-export type ScanAdditionalInfo = TrivyScanResultSchema
 
 export const SeverityLevel = {
   UNKNOWN: 'unknown',

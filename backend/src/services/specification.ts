@@ -122,6 +122,14 @@ export const modelInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const artefactScanningConnectorInfo = z.array(
+  z.object({
+    toolName: z.string().openapi({ example: 'Clam AV' }),
+    scannerVersion: z.string().optional().openapi({ example: '2.4.0' }),
+    artefactKind: z.nativeEnum(ArtefactKind).openapi({ example: 'file' }),
+  }),
+)
+
 export const scanInterfaceSchema = z.object({
   artefactKind: z.nativeEnum(ArtefactKind).openapi({ example: 'file' }),
   fileId: z.string().optional().openapi({ example: '507f1f77bcf86cd799439011' }),
