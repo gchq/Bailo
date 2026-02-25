@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
 import { ModelTransferInterface } from '../../../models/ModelTransfer.js'
-import { createModelTransfer, findModelTransferById } from '../../../services/modelTransfer.js'
+import { findModelTransferById } from '../../../services/modelTransfer.js'
 import { modelTransferSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -37,20 +37,6 @@ interface ModelTransferResponse {
 export const getModelTransfer = [
   async (req: Request, res: Response<ModelTransferResponse>): Promise<void> => {
     const { params } = parse(req, getModelTransferSchema)
-
-    if (params.transferId == '001') {
-      await createModelTransfer({
-        modelId: 'abcdef2134432234',
-        status: 'in_progress',
-        createdBy: 'bob',
-      })
-    } else if (params.transferId == '002') {
-      await createModelTransfer({
-        modelId: 'cvbsdf333fefvdfgdfg',
-        status: 'completed',
-        createdBy: 'bob',
-      })
-    }
 
     const modelTransfer = await findModelTransferById(params.transferId)
 
