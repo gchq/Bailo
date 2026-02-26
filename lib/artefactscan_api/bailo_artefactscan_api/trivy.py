@@ -263,7 +263,7 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
         logger.exception("Calculated digest %s does not match expected digest %s", blob_digest, filename)
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST.value,
-            detail=f"Blob {filename} has been modified",
+            detail=f"Uploaded blob {filename} did not match expected digest",
         )
 
     if not Path(

@@ -161,7 +161,7 @@ export const TrivyScanResultResponse = z.object({
 })
 export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponse>
 
-export async function getArtefactScanInfo() {
+async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
@@ -215,4 +215,20 @@ export async function scanFileStream(stream: Readable, fileName: string) {
 
 export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
   return TrivyScanResultResponse.parse(await scanStream(stream, blobDigest, 'image'))
+}
+
+// 5 mins
+const CACHE_TTL_MS = 5 * 60 * 1000
+let cachedArtefactScanInfo: { value: z.infer<typeof ArtefactScanInfoResponse>; expiresAt: number } | undefined
+export async function getCachedArtefactScanInfo() {
+  const now = Date.now()
+
+  if (!cachedArtefactScanInfo || cachedArtefactScanInfo.expiresAt < now) {
+    cachedArtefactScanInfo = {
+      value: await getArtefactScanInfo(),
+      expiresAt: now + CACHE_TTL_MS,
+    }
+  }
+
+  return cachedArtefactScanInfo.value
 }

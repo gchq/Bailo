@@ -1,6 +1,6 @@
 import PQueue from 'p-queue'
 
-import { getArtefactScanInfo, scanFileStream, scanImageBlobStream } from '../../clients/artefactScan.js'
+import { getCachedArtefactScanInfo, scanFileStream, scanImageBlobStream } from '../../clients/artefactScan.js'
 import { getRegistryLayerStream } from '../../clients/registry.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
@@ -24,8 +24,10 @@ export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConn
   toolName: string = 'ModelScan'
 
   async init() {
-    const artefactScanInfo = await getArtefactScanInfo()
-    this.version = artefactScanInfo.modelscanVersion
+    if (!this.version) {
+      const artefactScanInfo = await getCachedArtefactScanInfo()
+      this.version = artefactScanInfo.modelscanVersion
+    }
     return this
   }
 
@@ -85,8 +87,10 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
   toolName: string = 'Trivy'
 
   async init() {
-    const artefactScanInfo = await getArtefactScanInfo()
-    this.version = artefactScanInfo.trivyVersion
+    if (!this.version) {
+      const artefactScanInfo = await getCachedArtefactScanInfo()
+      this.version = artefactScanInfo.trivyVersion
+    }
     return this
   }
 
@@ -114,20 +118,22 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
         const layerDigestName = layer.layerDigest.replace(/^(sha256:)/, '')
         const results = await scanImageBlobStream(stream, layerDigestName)
 
-        const summaries: Set<ArtefactScanSummary> = new Set<ArtefactScanSummary>()
+        // Set compares object identity so instead use a Map where we control the key for string equality
+        const summaries = new Map<string, ArtefactScanSummary>()
         for (const result of results.Results ?? []) {
           if (!result.Vulnerabilities) {
             continue
           }
           for (const vulnerability of result.Vulnerabilities) {
-            summaries.add({
+            const key = `${vulnerability.VulnerabilityID}:${vulnerability.PkgName}`
+            summaries.set(key, {
               severity: vulnerability.Severity.toLowerCase() as SeverityLevelKeys,
               vulnerabilityDescription: `${vulnerability.VulnerabilityID} ${vulnerability.Title}`,
             })
           }
         }
 
-        const summary = Array.from(summaries)
+        const summary = Array.from(summaries.values())
         log.debug({ layer, result: { summary }, ...scannerInfo }, 'Scan complete.')
         return {
           ...scannerInfo,

@@ -36,6 +36,7 @@ async function updateArtefactScanWithResults(scanIdentifier: ArtefactScanIdentif
     const updateExistingResult = await ScanModel.updateOne(
       { ...scanIdentifier, toolName: result.toolName },
       { $set: { ...result } },
+      { upsert: true },
     )
 
     if (updateExistingResult.modifiedCount === 0) {

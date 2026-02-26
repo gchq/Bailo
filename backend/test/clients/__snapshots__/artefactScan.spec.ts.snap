@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`clients > artefactScan > getArtefactScanInfo > success 1`] = `
+exports[`clients > artefactScan > getCachedArtefactScanInfo > success 1`] = `
 [
   [
     "undefined://undefined:undefined/info",

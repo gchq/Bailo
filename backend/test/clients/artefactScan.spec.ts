@@ -1,8 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { describe, expect, test, vi } from 'vitest'
-
-import { getArtefactScanInfo, scanFileStream } from '../../src/clients/artefactScan.js'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const configMock = vi.hoisted(() => ({
   artefactScanning: {
@@ -41,8 +39,19 @@ const formDataMock = vi.hoisted(() => ({
 }))
 vi.mock('form-data', async () => formDataMock)
 
+async function loadClient() {
+  return await import('../../src/clients/artefactScan.js')
+}
+
 describe('clients > artefactScan', () => {
-  test('getArtefactScanInfo > success', async () => {
+  beforeEach(() => {
+    // required due to cached `getCachedArtefactScanInfo` function
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  test('getCachedArtefactScanInfo > success', async () => {
+    const { getCachedArtefactScanInfo } = await loadClient()
     const expectedResponse = {
       apiName: 'Bailo ArtefactScan API',
       apiVersion: '4.0.0',
@@ -58,14 +67,15 @@ describe('clients > artefactScan', () => {
         return expectedResponse
       }),
     })
-    const response = await getArtefactScanInfo()
+    const response = await getCachedArtefactScanInfo()
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  test('getArtefactScanInfo > bad response', async () => {
+  test('getCachedArtefactScanInfo > bad response', async () => {
+    const { getCachedArtefactScanInfo } = await loadClient()
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(function () {
@@ -74,20 +84,22 @@ describe('clients > artefactScan', () => {
       json: vi.fn(),
     })
 
-    await expect(() => getArtefactScanInfo()).rejects.toThrowError(
+    await expect(() => getCachedArtefactScanInfo()).rejects.toThrowError(
       /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
 
-  test('getArtefactScanInfo > rejected', async () => {
+  test('getCachedArtefactScanInfo > rejected', async () => {
+    const { getCachedArtefactScanInfo } = await loadClient()
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    await expect(() => getArtefactScanInfo()).rejects.toThrowError(
+    await expect(() => getCachedArtefactScanInfo()).rejects.toThrowError(
       /^Unable to communicate with the ArtefactScan service./,
     )
   })
 
   test('scanStream > success', async () => {
+    const { scanFileStream } = await loadClient()
     const expectedResponse = {
       summary: {
         total_issues: 0,
@@ -134,6 +146,7 @@ describe('clients > artefactScan', () => {
   })
 
   test('scanStream > bad response', async () => {
+    const { scanFileStream } = await loadClient()
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(function () {
@@ -148,6 +161,7 @@ describe('clients > artefactScan', () => {
   })
 
   test('scanStream > rejected', async () => {
+    const { scanFileStream } = await loadClient()
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
 
     // use a real Readable to make sure `.destroy()` is also called

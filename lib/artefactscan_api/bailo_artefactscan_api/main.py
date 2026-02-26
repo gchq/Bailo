@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 # isort: split
 
-from bailo_artefactscan_api import trivy
+import bailo_artefactscan_api.trivy as trivy
 from bailo_artefactscan_api.config import Settings
 from bailo_artefactscan_api.openapi.scan_file_responses import SCAN_FILE_RESPONSES
 from bailo_artefactscan_api.openapi.scan_image_responses import SCAN_IMAGE_RESPONSES

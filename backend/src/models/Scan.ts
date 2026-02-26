@@ -81,6 +81,10 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
 )
 
 ScanSchema.plugin(softDeletionPlugin)
+ScanSchema.index(
+  { artefactKind: 1, layerDigest: 1, toolName: 1 },
+  { unique: true, partialFilterExpression: { artefactKind: 'image' } },
+)
 
 const ScanModel = model<ScanInterfaceDoc>('v2_Scan', ScanSchema)
 
