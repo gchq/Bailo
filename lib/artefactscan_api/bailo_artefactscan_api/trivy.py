@@ -217,9 +217,9 @@ def download_database():
     client = oras.client.OrasClient(settings.DB_HOSTNAME, settings.DB_INSECURE, settings.DB_TLS_VERIFY)
     if settings.DB_USERNAME and settings.DB_PASSWORD:
         client.login(
-            settings.DB_USERNAME,
-            settings.DB_PASSWORD.get_secret_value(),
-            tls_verify=settings.DB_TLS_VERIFY != False,
+            username=settings.DB_USERNAME,
+            password=settings.DB_PASSWORD.get_secret_value(),
+            tls_verify=settings.DB_TLS_VERIFY != False,  # Verify TLS unless pulling from an insecure registry
             hostname=settings.DB_HOSTNAME,
         )
     dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)

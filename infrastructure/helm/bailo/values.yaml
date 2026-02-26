@@ -382,5 +382,5 @@ artefactscan:
       secretKey: cert.pem
       mountPath: /certs/artefactscan-ca.pem
   # env: # Override settings here
-  #   - name: TRIVY_DB_HOSTNAME
-  #     value: 'ghcr'
+  #   TRIVY_DB_HOSTNAME: ghcr.io
+  #   TRIVY_DB_INSECURE: false
