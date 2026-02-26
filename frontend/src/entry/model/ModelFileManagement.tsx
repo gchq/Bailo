@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material'
-import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Container, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useState } from 'react'
@@ -62,7 +62,17 @@ export default function Files({ model }: FilesProps) {
             sx={{ py: 0.5, width: '100%', px: 2 }}
           >
             {model.kind !== EntryKind.MIRRORED_MODEL && (
-              <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
+              <Restricted
+                action='createRelease'
+                disableToolTip
+                fallback={
+                  <Tooltip title='You do not have permission to upload a file'>
+                    <Box>
+                      <Button disabled>Add new files</Button>
+                    </Box>
+                  </Tooltip>
+                }
+              >
                 <>
                   <Button
                     component='span'
