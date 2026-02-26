@@ -9,16 +9,15 @@ function assertValidObjectId(id: string): void {
   }
 }
 
-export async function findModelTransferById(transferId: string): Promise<ModelTransferInterface> {
-  assertValidObjectId(transferId)
+export async function findModelTransferById(id: string): Promise<ModelTransferInterface> {
+  assertValidObjectId(id)
 
   const transfer = await ModelTransferModel.findOne({
-    _id: transferId,
-    deletedAt: { $exists: false },
+    _id: id,
   })
 
   if (!transfer) {
-    throw NotFound('The requested model transfer was not found.', { transferId })
+    throw NotFound('The requested model transfer was not found.', { id })
   }
 
   return transfer
@@ -29,33 +28,34 @@ export async function createModelTransfer(input: {
   status: TransferStatusKeys
   createdBy: string
 }): Promise<ModelTransferInterface> {
-  const created = await ModelTransferModel.create(input)
-  return created.toObject()
+  const transfer = new ModelTransferModel(input)
+  await transfer.save()
+  return transfer
 }
 
-export async function updateModelTransferStatus(
-  transferId: string,
-  status: TransferStatusKeys,
-): Promise<ModelTransferInterface> {
-  assertValidObjectId(transferId)
-  const updated = await ModelTransferModel.findOneAndUpdate(
-    { _id: transferId, deletedAt: { $exists: false } },
-    { status },
-    { new: true },
-  ).lean()
+export async function updateModelTransfer(id: string, status: TransferStatusKeys): Promise<ModelTransferInterface> {
+  assertValidObjectId(id)
+  const updated = await ModelTransferModel.findOneAndUpdate({ _id: id }, { status }, { new: true }).lean()
 
   if (!updated) {
-    throw NotFound('The requested model transfer was not found.', { transferId })
+    throw NotFound('The requested model transfer was not found.', { id })
   }
 
   return updated
 }
 
-export async function deleteModelTransfer(transferId: string): Promise<void> {
-  assertValidObjectId(transferId)
-  const result = await ModelTransferModel.findOneAndUpdate({ _id: transferId }, { deletedAt: new Date() })
+export async function deleteModelTransfer(id: string): Promise<string> {
+  assertValidObjectId(id)
 
-  if (!result) {
-    throw NotFound('The requested model transfer was not found.', { transferId })
+  const transfer = await ModelTransferModel.findOne({
+    _id: id,
+  })
+
+  if (!transfer) {
+    throw NotFound('The requested model transfer was not found.', { id })
   }
+
+  await transfer.delete()
+
+  return transfer._id
 }

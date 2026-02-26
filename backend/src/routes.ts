@@ -58,7 +58,6 @@ import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
 import { putWebhook } from './routes/v2/model/webhook/putWebhook.js'
 import { getModelTransfer } from './routes/v2/modelTransfer/getModelTransfer.js'
-import { getModelTransferStatus } from './routes/v2/modelTransfer/getTransferStatus.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -226,7 +225,6 @@ server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
 server.get('/api/v2/transfer/:transferId', ...getModelTransfer)
-server.get('/api/v2/transfer/:transferId/status', ...getModelTransferStatus)
 
 server.get('/api/v2/config/ui', ...getUiConfig)
 
