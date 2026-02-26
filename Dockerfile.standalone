@@ -69,7 +69,7 @@ RUN wget -q https://dl.min.io/server/minio/release/linux-amd64/minio && \
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
     wget -qO - https://pgp.mongodb.com/server-8.0.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-8.0.gpg && \
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-8.0.list && \
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.2 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-8.2.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends mongodb-org && \
     mkdir -m 777 -p /data/db
@@ -92,8 +92,8 @@ ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem \
 
 COPY infrastructure/standalone/registry.conf /registry.conf
 
-RUN wget -q https://github.com/tweedegolf/mailcrab/releases/download/v1.6.2/mailcrab-linux-x86-64-gnu-v1.6.2 && \
-    install -m755 mailcrab-linux-x86-64-gnu-v1.6.2 /usr/local/bin/mailcrab
+RUN wget -q https://github.com/tweedegolf/mailcrab/releases/download/v1.6.4/mailcrab-linux-x86-64-gnu-v1.6.4 && \
+    install -m755 mailcrab-linux-x86-64-gnu-v1.6.4 /usr/local/bin/mailcrab
 
 # Backend
 WORKDIR /app/backend

@@ -211,5 +211,5 @@ export interface Config {
   }
 }
 
-const config: Config = _config.util.toObject()
+const config = _config.util.toObject(_config)
 export default deepFreeze(config) as Config

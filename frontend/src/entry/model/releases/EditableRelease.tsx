@@ -212,7 +212,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     const updatedRelease: UpdateReleaseParams = {
       modelId: model.id,
       semver,
-      modelCardVersion: model.card.version,
+      modelCardVersion: modelCardVersion,
       notes: releaseNotes,
       minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
