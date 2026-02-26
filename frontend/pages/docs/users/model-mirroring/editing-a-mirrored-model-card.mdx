@@ -1,0 +1,52 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import editMirroredModel from 'public/docs/edit-mirrored-model.png'
+import editMirroredModelForm from 'public/docs/edit-mirrored-model-form.png'
+import editMirroredModelResult from 'public/docs/edit-mirrored-model-result.png'
+import tokens from 'public/docs/bailo_tokens.png'
+
+# Editing a mirrored model card
+
+Mirrored models are read-only with respect to information originating from the source model. This ensures the source
+model remains the authoritative version.
+
+You cannot directly edit source content in a mirrored model, however, you can add additional local information to
+provide context that is specific to your environment or use case.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='access request schema selection' src={editMirroredModel} />
+</Box>
+
+## Adding additional information
+
+Instead of an **Edit** button, mirrored models display an **Add additional information** button. Selecting this option
+allows you to add local responses alongside the source content:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='access request schema selection' src={editMirroredModelForm} />
+</Box>
+
+Key points:
+
+- Additional information does not overwrite source data
+- The input type matches the original question
+  - Rich text -> rich text
+  - Number -> number
+  - Structured input -> structured input
+- Validation rules remain the same as the source question
+
+## How additional information is displayed
+
+Once saved, your additional information is shown beneath the source answer. This makes it clear which content originates
+from the source model and which content is locally added.
+
+<Box sx={{ maxWidth: '40%', margin: 'auto' }}>
+  <Image alt='access request schema selection' src={editMirroredModelResult} />
+</Box>
+
+Additional information can be updated at any time and will persist across future synchronisations when the source model
+is re-exported.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
