@@ -8,7 +8,6 @@ import {
   findModelTransferById,
   updateModelTransfer,
 } from '../../src/services/modelTransfer.js'
-import { BadReq, NotFound } from '../../src/utils/error.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const ModelTransferModelMock = getTypedModelMock('ModelTransferModel')
@@ -29,22 +28,11 @@ vi.mock('../../src/services/log.js', async () => ({
 
 describe('services > modelTransfer', () => {
   const validObjectId = new Types.ObjectId().toHexString()
-  const invalidObjectId = '001'
-
-  test('findModelTransferById > throws BadReq for invalid ObjectId', async () => {
-    ModelTransferModelMock.findOne.mockImplementation(() => {
-      throw BadReq('Invalid transfer id.', { transferId: 'test' })
-    })
-
-    const res = findModelTransferById(invalidObjectId)
-
-    await expect(res).rejects.toThrowError(/^Invalid transfer id/)
-  })
 
   test('findModelTransferById > throws NotFound when transfer does not exist', async () => {
-    ModelTransferModelMock.findOne.mockImplementation(() => {
-      throw NotFound('The requested model transfer was not found.', { transferId: 'test' })
-    })
+    ModelTransferModelMock.findOne.mockImplementation(() => ({
+      lean: vi.fn().mockResolvedValue(undefined),
+    }))
 
     const res = findModelTransferById(validObjectId)
 
@@ -97,13 +85,9 @@ describe('services > modelTransfer', () => {
   })
 
   test('updateModelTransferStatus > throws NotFound when transfer does not exist', async () => {
-    ModelTransferModelMock.findOneAndUpdate.mockImplementation(() => {
-      return {
-        lean: vi.fn(() => {
-          throw NotFound('The requested model transfer was not found.', { transferId: 'test' })
-        }),
-      }
-    })
+    ModelTransferModelMock.findOneAndUpdate.mockImplementation(() => ({
+      lean: vi.fn().mockResolvedValue(undefined),
+    }))
 
     const res = updateModelTransfer(validObjectId, TransferStatus.Completed)
 
