@@ -33,18 +33,11 @@ type ArtefactScanIdentifier =
 
 async function updateArtefactScanWithResults(scanIdentifier: ArtefactScanIdentifier, results: ArtefactScanResult[]) {
   for (const result of results) {
-    const updateExistingResult = await ScanModel.updateOne(
+    await ScanModel.updateOne(
       { ...scanIdentifier, toolName: result.toolName },
       { $set: { ...result } },
       { upsert: true },
     )
-
-    if (updateExistingResult.modifiedCount === 0) {
-      await ScanModel.create({
-        ...scanIdentifier,
-        ...result,
-      })
-    }
   }
 }
 
