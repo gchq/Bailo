@@ -14,7 +14,7 @@ export async function findModelTransferById(id: string): Promise<ModelTransferIn
 
   const transfer = await ModelTransferModel.findOne({
     _id: id,
-  })
+  }).lean()
 
   if (!transfer) {
     throw NotFound('The requested model transfer was not found.', { id })

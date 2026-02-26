@@ -52,9 +52,14 @@ describe('services > modelTransfer', () => {
   })
 
   test('findModelTransferById > returns transfer when found', async () => {
-    const transfer = { _id: validObjectId, status: TransferStatus.InProgress }
+    const transfer = {
+      _id: validObjectId,
+      status: TransferStatus.InProgress,
+    }
 
-    ModelTransferModelMock.findOne.mockResolvedValue(transfer)
+    ModelTransferModelMock.findOne.mockImplementation(() => ({
+      lean: vi.fn().mockResolvedValue(transfer),
+    }))
 
     const result = await findModelTransferById(validObjectId)
 

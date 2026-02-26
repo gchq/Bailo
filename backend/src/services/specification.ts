@@ -60,16 +60,7 @@ export const systemStatusSchema = z.object({
 })
 
 export const modelTransferSchema = z.object({
-  id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
-  modelId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
-  status: z.string().openapi({ example: 'in_progress' }),
-  createdBy: z.string().openapi({ example: 'bob' }),
-  createdAt: z.string().openapi({ example: new Date().toISOString() }),
-  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
-})
-
-export const modelTransferStatusSchema = z.object({
-  id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   modelId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   status: z.string().openapi({ example: 'in_progress' }),
   createdBy: z.string().openapi({ example: 'bob' }),
