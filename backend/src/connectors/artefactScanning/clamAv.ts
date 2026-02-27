@@ -52,12 +52,7 @@ export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
     try {
       const { viruses } = await this.av.scanStream(s3Stream)
       log.debug({ file, result: { viruses }, ...scannerInfo }, 'Scan complete.')
-      const summary: ClamAVSummary[] = viruses.map(
-        (virus) =>
-          ({
-            virus,
-          }) as ClamAVSummary,
-      )
+      const summary: ClamAVSummary[] = viruses.map((virus) => ({ virus }) as ClamAVSummary)
 
       return {
         ...scannerInfo,
