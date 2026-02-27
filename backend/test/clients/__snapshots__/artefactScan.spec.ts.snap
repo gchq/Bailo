@@ -14,6 +14,57 @@ exports[`clients > artefactScan > getCachedArtefactScanInfo > success 1`] = `
 ]
 `;
 
+exports[`clients > artefactScan > scanFileStream > success 1`] = `
+[
+  [
+    "undefined://undefined:undefined/scan/file",
+    {
+      "body": {
+        "append": [MockFunction] {
+          "calls": [
+            [
+              "in_file",
+              {},
+              {
+                "contentType": "application/octet-stream",
+                "filename": "safe_model.h5",
+              },
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "getHeaders": [MockFunction] {
+          "calls": [
+            [],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
+      "headers": {
+        "accept": "application/json",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`clients > artefactScan > scanFileStream > success 2`] = `
+[
+  [],
+]
+`;
+
 exports[`clients > artefactScan > scanStream > success 1`] = `
 [
   [

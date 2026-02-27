@@ -74,6 +74,77 @@ describe('clients > artefactScan', () => {
     expect(response).toStrictEqual(expectedResponse)
   })
 
+  test('getCachedArtefactScanInfo > uses cached value within TTL', async () => {
+    const { getCachedArtefactScanInfo } = await loadClient()
+
+    const expectedResponse = {
+      apiName: 'Bailo ArtefactScan API',
+      apiVersion: '4.0.0',
+      modelscanScannerName: 'modelscan',
+      modelscanVersion: '0.8.8',
+      trivyScannerName: 'trivy',
+      trivyVersion: '0.69.1',
+    }
+
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => expectedResponse),
+    })
+
+    const first = await getCachedArtefactScanInfo()
+    const second = await getCachedArtefactScanInfo()
+
+    expect(first).toStrictEqual(expectedResponse)
+    expect(second).toStrictEqual(expectedResponse)
+    expect(fetchMock.default).toHaveBeenCalledTimes(1)
+  })
+
+  test('getCachedArtefactScanInfo > refreshes cache after TTL expiry', async () => {
+    const { getCachedArtefactScanInfo } = await loadClient()
+
+    const response1 = {
+      apiName: 'API',
+      apiVersion: '1',
+      modelscanScannerName: 'modelscan',
+      modelscanVersion: '1',
+      trivyScannerName: 'trivy',
+      trivyVersion: '1',
+    }
+
+    const response2 = {
+      apiName: 'API',
+      apiVersion: '2',
+      modelscanScannerName: 'modelscan',
+      modelscanVersion: '2',
+      trivyScannerName: 'trivy',
+      trivyVersion: '2',
+    }
+
+    fetchMock.default
+      .mockReturnValueOnce({
+        ok: true,
+        text: vi.fn(),
+        json: vi.fn(() => response1),
+      })
+      .mockReturnValueOnce({
+        ok: true,
+        text: vi.fn(),
+        json: vi.fn(() => response2),
+      })
+
+    vi.setSystemTime(new Date(0))
+    const first = await getCachedArtefactScanInfo()
+
+    // advance time beyond 5 min TTL
+    vi.setSystemTime(new Date(6 * 60 * 1000))
+    const second = await getCachedArtefactScanInfo()
+
+    expect(first).toStrictEqual(response1)
+    expect(second).toStrictEqual(response2)
+    expect(fetchMock.default).toHaveBeenCalledTimes(2)
+  })
+
   test('getCachedArtefactScanInfo > bad response', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
     fetchMock.default.mockResolvedValueOnce({
@@ -98,7 +169,7 @@ describe('clients > artefactScan', () => {
     )
   })
 
-  test('scanStream > success', async () => {
+  test('scanFileStream > success', async () => {
     const { scanFileStream } = await loadClient()
     const expectedResponse = {
       summary: {
@@ -145,7 +216,19 @@ describe('clients > artefactScan', () => {
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  test('scanStream > bad response', async () => {
+  test('scanFileStream > invalid response fails schema validation', async () => {
+    const { scanFileStream } = await loadClient()
+
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => ({ invalid: 'payload' })),
+    })
+
+    await expect(() => scanFileStream({} as Readable, 'file.bin')).rejects.toThrow()
+  })
+
+  test('scanFileStream > bad response', async () => {
     const { scanFileStream } = await loadClient()
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
@@ -160,7 +243,7 @@ describe('clients > artefactScan', () => {
     )
   })
 
-  test('scanStream > rejected', async () => {
+  test('scanFileStream > rejected', async () => {
     const { scanFileStream } = await loadClient()
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
 
@@ -168,5 +251,61 @@ describe('clients > artefactScan', () => {
     await expect(() => scanFileStream(Readable.from(''), 'safe_model.h5')).rejects.toThrowError(
       /^Unable to communicate with the ArtefactScan service./,
     )
+  })
+
+  test('scanImageBlobStream > success', async () => {
+    const { scanImageBlobStream } = await loadClient()
+
+    const expectedResponse = {
+      SchemaVersion: 2,
+      CreatedAt: '2024-11-27T12:00:00Z',
+      ArtifactName: 'sha256:abc',
+      ArtifactType: 'container_image',
+      Metadata: {
+        OS: { Family: 'debian', Name: '12' },
+      },
+      Results: [],
+    }
+
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => expectedResponse),
+    })
+
+    const response = await scanImageBlobStream({} as Readable, 'sha256:abc')
+
+    expect(fetchMock.default).toBeCalled()
+    expect(formDataMock.default).toBeCalled()
+    expect(response).toStrictEqual(expectedResponse)
+  })
+
+  test('scanImageBlobStream > bad response', async () => {
+    const { scanImageBlobStream } = await loadClient()
+
+    fetchMock.default.mockResolvedValueOnce({
+      ok: false,
+      text: vi.fn(() => 'Bad response'),
+      json: vi.fn(),
+    })
+
+    await expect(() => scanImageBlobStream({} as Readable, 'sha256:abc')).rejects.toThrowError(
+      /^Unrecognised response returned by the ArtefactScan service./,
+    )
+  })
+
+  test('scanImageBlobStream > rejected fetch destroys stream', async () => {
+    const { scanImageBlobStream } = await loadClient()
+
+    fetchMock.default.mockRejectedValueOnce(new Error('network error'))
+
+    const stream = Readable.from('data')
+    const destroySpy = vi.spyOn(stream, 'destroy')
+
+    await expect(() => scanImageBlobStream(stream, 'sha256:abc')).rejects.toThrowError(
+      /^Unable to communicate with the ArtefactScan service./,
+    )
+
+    expect(destroySpy).toBeCalled()
   })
 })
