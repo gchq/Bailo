@@ -124,12 +124,20 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
           if (!result.Vulnerabilities) {
             continue
           }
+
           for (const vulnerability of result.Vulnerabilities) {
-            const key = `${vulnerability.VulnerabilityID}:${vulnerability.PkgName}`
-            summaries.set(key, {
-              severity: vulnerability.Severity.toLowerCase() as SeverityLevelKeys,
-              vulnerabilityDescription: `${vulnerability.VulnerabilityID} ${vulnerability.Title}`,
-            })
+            const key = vulnerability.VulnerabilityID
+            const title = vulnerability.Title ?? ''
+
+            const existing = summaries.get(key)
+            if (!existing) {
+              summaries.set(key, {
+                severity: vulnerability.Severity.toLowerCase() as SeverityLevelKeys,
+                vulnerabilityDescription: `${key}: ${title}`,
+              })
+            } else if (title) {
+              existing.vulnerabilityDescription += `; ${title}`
+            }
           }
         }
 
