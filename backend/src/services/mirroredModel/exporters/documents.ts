@@ -190,7 +190,7 @@ export class DocumentsExporter extends BaseExporter {
         error,
         modelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
-        releaseId: release.id,
+        releaseId: release._id.toString(),
         ...this.logData,
       })
     }
