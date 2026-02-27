@@ -77,7 +77,7 @@ export async function removeResponses(parentIds: string[]) {
       responseDeletions.push(await response.delete())
     } catch (error) {
       throw InternalError('The requested response could not be deleted.', {
-        responseId: response.id,
+        responseId: response._id.toString(),
         error,
       })
     }

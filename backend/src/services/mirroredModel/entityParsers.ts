@@ -80,7 +80,7 @@ export async function parseFile(
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
   }
 
-  file.path = createFilePath(mirroredModelId, file.id)
+  file.path = createFilePath(mirroredModelId, file._id.toString())
 
   try {
     file.complete = await objectExists(file.path)
