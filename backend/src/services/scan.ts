@@ -9,12 +9,12 @@ import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ImageRefInterface } from '../models/Release.js'
-import ScanModel, { ArtefactKind } from '../models/Scan.js'
+import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { toBailoError } from '../types/error.js'
 import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden } from '../utils/error.js'
+import { BadReq, Forbidden, ServiceUnavailable } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
@@ -151,6 +151,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   }
 
   const scannersInfo = scanners.scannersInfo()
+  throwIfNoScanners(scannersInfo, ArtefactKind.FILE)
 
   // Do not await so that the endpoint can return early (fire-and-forget)
   void runScans(scannersInfo, fileIdentifier, file).catch((error) => {
@@ -182,6 +183,8 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   }
 
   const scannersInfo = scanners.scannersInfo()
+  throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
+
   const imageLayers = dedupe(await getImageLayers(user, image))
   const imageName = `${image.repository}/${image.name}:${image.tag}`
   log.debug({ scannersInfo, imageLayers })
@@ -201,4 +204,10 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
     })
   }
   return `Image scan started for ${imageName}`
+}
+
+function throwIfNoScanners(scannersInfo: ArtefactScanningConnectorInfo[], artefactKind: ArtefactKindKeys) {
+  if (!scannersInfo.some((scannerInfo) => scannerInfo.artefactKind === artefactKind)) {
+    throw ServiceUnavailable(`No ${artefactKind} scanners are enabled.`)
+  }
 }

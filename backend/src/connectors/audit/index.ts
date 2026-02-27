@@ -1,5 +1,5 @@
 import config from '../../utils/config.js'
-import { ConfigurationError } from '../../utils/error.js'
+import { ServiceUnavailable } from '../../utils/error.js'
 import { BaseAuditConnector } from './Base.js'
 import { SillyAuditConnector } from './silly.js'
 import { StdoutAuditConnector } from './stdout.js'
@@ -24,7 +24,7 @@ export function getAuditConnector(cache = true) {
       auditConnector = new StdoutAuditConnector()
       break
     default:
-      throw ConfigurationError(`'${config.connectors.audit.kind}' is not a valid audit kind.`, {
+      throw ServiceUnavailable(`'${config.connectors.audit.kind}' is not a valid audit kind.`, {
         validKinds: Object.values(AuditKind),
       })
   }

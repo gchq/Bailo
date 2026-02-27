@@ -2,7 +2,7 @@ import { FileInterface } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ConfigurationError, InternalError } from '../../utils/error.js'
+import { InternalError, ServiceUnavailable } from '../../utils/error.js'
 import {
   ArtefactBaseScanningConnector,
   ArtefactInterface,
@@ -41,7 +41,7 @@ export class ArtefactScanningWrapper {
           }
         }
         if (attempt > config.connectors.artefactScanners.maxInitRetries) {
-          throw ConfigurationError(
+          throw ServiceUnavailable(
             `Could not initialise scanner after max attempts, make sure that it is setup and configured correctly.`,
             { failedAttempts: attempt, toolName: scanner.toolName },
           )
