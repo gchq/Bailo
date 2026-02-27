@@ -342,6 +342,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onViewScanners(req: Request) {
+    this.checkEventType(AuditInfo.ViewScanners, req)
+    const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
   async onViewModelImages(req: Request, modelId: string, images: ModelImages) {
     this.checkEventType(AuditInfo.ViewModelImages, req)
     const event = this.generateEvent(req, {

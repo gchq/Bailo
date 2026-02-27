@@ -14,7 +14,7 @@ describe('routes > artefactscanning > putFileScan', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(putFileScanSchema)
     const res = await testPut(
-      `/api/v2/filescanning/model/${fixture.params.modelId}/file/$${fixture.params.fileId}/scan`,
+      `/api/v2/filescanning/model/${fixture.params.modelId}/file/${fixture.params.fileId}/scan`,
       fixture,
     )
 
@@ -25,7 +25,7 @@ describe('routes > artefactscanning > putFileScan', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(putFileScanSchema)
     const res = await testPut(
-      `/api/v2/filescanning/model/${fixture.params.modelId}/file/$${fixture.params.fileId}/scan`,
+      `/api/v2/filescanning/model/${fixture.params.modelId}/file/${fixture.params.fileId}/scan`,
       fixture,
     )
 

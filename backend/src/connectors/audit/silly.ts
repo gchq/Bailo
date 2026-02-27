@@ -66,6 +66,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewInferences(_req: Request, _inferences: InferenceDoc[]) {}
   async onUpdateInference(_req: Request, _inferences: InferenceDoc) {}
   async onDeleteInference(_req: Request, _inferences: InferenceDoc) {}
+  async onViewScanners(_req: Request) {}
   async onViewModelImages(_req: Request, _modelId: string, _images: ModelImages) {}
   async onUpdateImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}

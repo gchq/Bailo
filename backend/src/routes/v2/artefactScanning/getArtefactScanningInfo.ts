@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 
 import { ArtefactScanningConnectorInfo } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
+import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { artefactScanningConnectorInfo, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -33,6 +34,10 @@ interface GetArtefactScanningInfoResponse {
 export const getArtefactScanningInfo = [
   async (req: Request, res: Response<GetArtefactScanningInfoResponse>): Promise<void> => {
     const _ = parse(req, getArtefactScanningInfoSchema)
-    res.json({ scanners: scanners.scannersInfo() })
+
+    const scannersInfo = scanners.scannersInfo()
+
+    await audit.onViewScanners(req)
+    res.json({ scanners: scannersInfo })
   },
 ]
