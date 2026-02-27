@@ -1,4 +1,4 @@
-import { Callback, CallbackWithoutResultAndOptionalError, ClientSession, Document, Schema, Types } from 'mongoose'
+import { Callback, ClientSession, Document, Schema, Types } from 'mongoose'
 
 export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'restore'>, SoftDeleteInterface {
   delete(session?: ClientSession, fn?: Callback<this>): Promise<this>
@@ -96,28 +96,23 @@ export function softDeletionPlugin(schema: Schema) {
     return await this.save({ session })
   }
 
-  schema.pre('find', function (next: CallbackWithoutResultAndOptionalError) {
+  schema.pre('find', function () {
     if (this['_conditions'].deleted) {
       this.where('deleted').equals(this['_conditions'].deleted)
-      next()
     } else {
       this.or([{ deleted: { $exists: false } }, { deleted: false }])
-      next()
     }
   })
 
-  schema.pre('findOne', function (next: CallbackWithoutResultAndOptionalError) {
+  schema.pre('findOne', function () {
     if (this['_conditions'].deleted) {
       this.where('deleted').equals(this['_conditions'].deleted)
-      next()
     } else {
       this.or([{ deleted: { $exists: false } }, { deleted: false }])
-      next()
     }
   })
 
-  schema.pre('aggregate', function (next: CallbackWithoutResultAndOptionalError) {
+  schema.pre('aggregate', function () {
     this.pipeline().unshift({ $match: { deleted: { $ne: true } } })
-    next()
   })
 }
