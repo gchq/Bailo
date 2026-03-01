@@ -97,7 +97,7 @@
     "@types/nodemailer": "^7.0.9",
     "@types/semver": "^7.7.1",
     "@types/shelljs": "^0.10.0",
-    "@types/supertest": "^6.0.2",
+    "@types/supertest": "^7.2.0",
     "@types/tar-stream": "^3.1.4",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.31.1",
