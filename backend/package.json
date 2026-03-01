@@ -64,7 +64,7 @@
     "p-queue": "^9.1.0",
     "pino": "^10.3.0",
     "pino-http": "^11.0.0",
-    "pino-opentelemetry-transport": "^2.0.0",
+    "pino-opentelemetry-transport": "^3.0.0",
     "pretty-bytes": "^7.1.0",
     "proxy-agent": "^6.5.0",
     "qs": "^6.15.0",
