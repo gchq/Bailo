@@ -25,7 +25,7 @@
     "@aws-sdk/client-sesv2": "^3.1000.0",
     "@aws-sdk/lib-storage": "3.1000.0",
     "@eslint/eslintrc": "3.3.4",
-    "@eslint/js": "^9.39.3",
+    "@eslint/js": "^10.0.1",
     "@huggingface/hub": "^2.10.3",
     "@opentelemetry/auto-instrumentations-node": "^0.70.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.212.0",
