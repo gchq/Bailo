@@ -196,7 +196,7 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: bailo_*
           path: /tmp
@@ -359,17 +359,17 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: bailo_artefactscan
           path: /tmp
