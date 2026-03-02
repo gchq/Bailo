@@ -65,6 +65,10 @@ describe('services > modelTransfer', () => {
       _id: 'mock-id',
       ...input,
       save: vi.fn().mockResolvedValue(undefined),
+      toObject: vi.fn().mockReturnValue({
+        _id: 'mock-id',
+        ...input,
+      }),
     }
 
     ModelTransferModelMock.mockImplementationOnce(function () {
@@ -75,7 +79,10 @@ describe('services > modelTransfer', () => {
 
     expect(ModelTransferModelMock).toHaveBeenCalledWith(input)
     expect(instance.save).toHaveBeenCalled()
-    expect(result).toEqual(instance)
+    expect(result).toEqual({
+      _id: 'mock-id',
+      ...input,
+    })
   })
 
   test('updateModelTransferStatus > throws BadReq for invalid ObjectId', async () => {
@@ -134,6 +141,7 @@ describe('services > modelTransfer', () => {
   test('deleteModelTransfer > soft deletes transfer', async () => {
     const transfer = {
       _id: validObjectId,
+      id: validObjectId,
       delete: vi.fn().mockResolvedValue(undefined),
     }
 
