@@ -30,7 +30,7 @@ export async function createModelTransfer(input: {
 }): Promise<ModelTransferInterface> {
   const transfer = new ModelTransferModel(input)
   await transfer.save()
-  return transfer
+  return transfer.toObject()
 }
 
 export async function updateModelTransfer(id: string, status: TransferStatusKeys): Promise<ModelTransferInterface> {
@@ -57,5 +57,5 @@ export async function deleteModelTransfer(id: string): Promise<string> {
 
   await transfer.delete()
 
-  return transfer._id
+  return transfer.id
 }
