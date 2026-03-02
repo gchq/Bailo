@@ -39,4 +39,24 @@ We rely on many NPM packages. The full list is available in `package-lock.json`,
 Instructions on installing `cypress` without internet are available
 [here](https://docs.cypress.io/guides/references/advanced-installation).
 
+## Trivy Database
+
+To give greater visibility of Bailo's registry and it's containing images, some environments may use Trivy to scan for
+threats, packages and more.
+
+In order for the scanner to keep up to date with current threats of images in isolated environments, Trivy may require a
+custom setup to pull the necessary database.
+
+There are a number of environment variables that can be configured to customise the database. They are configured in our
+`artefactscan` container and all prefixed with `TRIVY_`:
+
+- `TRIVY_DB_HOSTNAME=ghcr.io` - Host to retrieve the database from
+- `TRIVY_DB_IMAGE=ghcr.io/aquasecurity/trivy-db:2` - Image to retrieve the database from
+
+- `TRIVY_DB_TLS_VERIFY=True` - Enable or disable TLS verification or use a path to point to a custom certificate
+- `TRIVY_DB_INSECURE=False` - Enable if database host is not using TLS or has a custom certificate implementation
+
+- `TRIVY_DB_USERNAME` - Registry login username
+- `TRIVY_DB_PASSWORD` - Registry login password
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
