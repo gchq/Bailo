@@ -33,16 +33,16 @@ export async function startScheduler(): Promise<Agenda> {
   await agenda.every(
     '1 minute', // Interval to run
     PRINT_JOB_NAME, // Job to run
-    { info: 'Hello this will run every 1 minute' }, // Parameters we want to supply to the job
+    { info: 'This will run every 1 minute' }, // Parameters we want to supply to the job
     {
       // Additional options
       skipImmediate: true, // Skip the immediate first run
     },
   )
 
-  // Example - Running a one-off job at a future time - 28th March 2026 at 02:00am
-  await agenda.schedule(new Date('2026-03-28T02:00:00Z'), PRINT_JOB_NAME, {
-    info: 'Hello this will run every 1 minute',
+  // Example - Running a one-off job at a future time - 3rd March 2026 at 09:25am
+  await agenda.schedule(new Date('2026-03-03T09:25:00Z'), PRINT_JOB_NAME, {
+    info: 'This will run on the 3rd March 2026 at 09:25am',
   })
 
   return agenda
