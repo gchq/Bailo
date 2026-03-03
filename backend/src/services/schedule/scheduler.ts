@@ -1,67 +1,49 @@
-// // services/schedule/scheduler.ts
-// import Agenda from 'agenda'
-
-// const mongoConnectionString = process.env.MONGODB_URI ?? 'mongodb://localhost:27017/agenda'
-
-// export const agenda = new Agenda({
-//   db: {
-//     address: mongoConnectionString,
-//     collection: 'agendaJobs',
-//   },
-//   processEvery: '30 seconds',
-// })
-
-// agenda.on('ready', () => {
-//   console.log('Agenda connected to MongoDB')
-// })
-
-// agenda.on('error', (err) => {
-//   console.error('Agenda connection error:', err)
-// })
-
-// ---------------------
-
-// import { MongoBackend } from '@agendajs/mongo-backend'
-// import { Agenda } from 'agenda'
-
-// // Via connection string
-// const agenda = new Agenda({
-//   backend: new MongoBackend({ address: 'mongodb://localhost/agenda' }),
-// })
-
-// // Via existing MongoDB connection
-// const agenda = new Agenda({
-//   backend: new MongoBackend({ mongo: existingDb }),
-// })
-
-// ------------------
-
 import { MongoBackend } from '@agendajs/mongo-backend'
 import { Agenda } from 'agenda'
 
 import { getConnectionURI } from '../../utils/database.js'
+import log from '../log.js'
+import { PRINT_JOB_NAME, registerPrintJob } from './jobs/printExample.js'
 
-// export const agenda = new Agenda({
-//   db: {
-//     address: process.env.MONGO_URI,
-//     collection: 'agendaJobs',
-//   },
-// })
+let agenda: Agenda
 
-// const mongoConnection = getConnectionURI()
+export function getAgenda(): Agenda {
+  if (!agenda) {
+    throw new Error('Agenda has not been initialised')
+  }
+  return agenda
+}
 
-// Via existing MongoDB connection
-// const agenda = new Agenda({
-//   backend: new MongoBackend({ mongo: mongoConnection }),
-// })
-const agenda = new Agenda({
-  backend: new MongoBackend({ address: getConnectionURI() }),
-})
+export async function startScheduler(): Promise<Agenda> {
+  agenda = new Agenda({
+    backend: new MongoBackend({
+      address: getConnectionURI(),
+    }),
+  })
 
-// agenda.define('send email', async (job) => {
-//   // job logic
-// })
+  // Register all jobs here
+  registerPrintJob(agenda)
 
-export async function startScheduler() {
+  log.info('Starting up scheduler...')
   await agenda.start()
+
+  // Initiate any jobs here
+
+  // Example - Running a job every 1 minute
+  await agenda.every(
+    '1 minute', // Interval to run
+    PRINT_JOB_NAME, // Job to run
+    { info: 'Hello this will run every 1 minute' }, // Parameters we want to supply to the job
+    {
+      // Additional options
+      skipImmediate: true, // Skip the immediate first run
+    },
+  )
+
+  // Example - Running a one-off job at a future time - 28th March 2026 at 02:00am
+  await agenda.schedule(new Date('2026-03-28T02:00:00Z'), PRINT_JOB_NAME, {
+    info: 'Hello this will run every 1 minute',
+  })
+
+  return agenda
 }
