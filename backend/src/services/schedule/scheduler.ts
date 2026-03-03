@@ -45,5 +45,8 @@ export async function startScheduler(): Promise<Agenda> {
     info: 'This will run on the 3rd March 2026 at 09:25am',
   })
 
+  // Example - Cancelling a future one-off job
+  await agenda.cancel({ name: PRINT_JOB_NAME })
+
   return agenda
 }
