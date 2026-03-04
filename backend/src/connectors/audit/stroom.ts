@@ -4,7 +4,7 @@ import os from 'os'
 import { ParsedQs } from 'qs'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
@@ -23,7 +23,7 @@ import { processBatch, saveEvent } from '../../services/stroom.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, isFileMirrorInformation, isMongoDocumentMirrorInformation } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { AuditKind, BaseAuditConnector } from './Base.js'
+import { AuditKind, BaseAuditConnector, DeleteFileArgs } from './Base.js'
 
 export type EventDetail = {
   TypeId: string
@@ -245,10 +245,11 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditFileEvent(req, files)
   }
 
-  // mismatch with HS implementation (file: FileWithScanResultsInterface replaced with modelId: string, fileId: string)
-  // which itself is causing an error given the file specific audit function implemented...
-  async onDeleteFile(req: Request, file: FileWithScanResultsInterface) {
-    this.auditFileEvent(req, [file])
+  async onDeleteFile(req: Request, args: DeleteFileArgs) {
+    if (args.kind !== 'byFile') {
+      throw new Error('StroomAuditConnector only supports deletion by file')
+    }
+    this.auditFileEvent(req, [args.file])
   }
 
   async onUpdateFile(req: Request, modelId: string, fileId: string) {

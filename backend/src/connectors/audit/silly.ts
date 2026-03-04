@@ -13,7 +13,7 @@ import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
-import { BaseAuditConnector } from './Base.js'
+import { BaseAuditConnector, DeleteFileArgs } from './Base.js'
 
 export class SillyAuditConnector extends BaseAuditConnector {
   constructor() {
@@ -33,7 +33,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewFile(_req: Request, _file: FileInterfaceDoc) {}
   async onViewFiles(_req: Request, _modelId: string, _files: FileInterface[]) {}
   async onUpdateFile(_req: Request, _modelId: string, _fileId: string) {}
-  async onDeleteFile(_req: Request, _modelId: string, _fileId: string) {}
+  async onDeleteFile(_req: Request, _args: DeleteFileArgs) {}
   async onCreateRelease(_req: Request, _release: ReleaseDoc) {}
   async onViewRelease(_req: Request, _release: ReleaseDoc) {}
   async onViewReleases(_req: Request, _releases: ReleaseDoc[]) {}

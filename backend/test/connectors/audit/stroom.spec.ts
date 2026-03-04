@@ -1,9 +1,10 @@
 import { Request } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
+import { DeleteFileArgs } from '../../../src/connectors/audit/Base.js'
 import { StroomAuditConnector } from '../../../src/connectors/audit/stroom.js'
 import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
-import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
+import { FileInterfaceDoc } from '../../../src/models/File.js'
 import { InferenceDoc } from '../../../src/models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
@@ -172,9 +173,10 @@ describe('connectors > audit > gchq', () => {
 
   test('onDeleteFile > save expected event', async () => {
     await connector.onDeleteFile(deleteEventRequest, {
+      kind: 'byId',
       _id: 'test-file',
       name: 'myFile',
-    } as unknown as FileWithScanResultsInterface)
+    } as unknown as DeleteFileArgs)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

@@ -13,7 +13,7 @@ import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
-import { AuditInfo, BaseAuditConnector } from './Base.js'
+import { AuditInfo, BaseAuditConnector, DeleteFileArgs } from './Base.js'
 
 interface Outcome {
   Success: boolean
@@ -108,7 +108,11 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteFile(req: Request, modelId: string, fileId: string) {
+  async onDeleteFile(req: Request, args: DeleteFileArgs) {
+    if (args.kind !== 'byId') {
+      throw new Error('StdoutAuditConnector only supports deletion by Id')
+    }
+    const { modelId, fileId } = args
     this.checkEventType(AuditInfo.DeleteFile, req)
     const event = this.generateEvent(req, { modelId, fileId })
     req.log.info(event, req.audit.description)

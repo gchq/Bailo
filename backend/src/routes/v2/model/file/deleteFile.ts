@@ -47,7 +47,11 @@ export const deleteFile = [
 
     await removeFile(req.user, modelId, fileId)
 
-    await audit.onDeleteFile(req, modelId, fileId)
+    await audit.onDeleteFile(req, {
+      kind: 'byId',
+      modelId: modelId,
+      fileId: fileId,
+    })
 
     res.json({
       message: 'Successfully removed file.',
