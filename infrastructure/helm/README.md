@@ -400,6 +400,7 @@ The following tables describe selected configuration options available in `value
 | `registry.enabled` | Using image registry:3.0.0. Must use registry:3.0.0 if registry.serviceAccount is defined | `true` |
 | `clamav.enabled` | Optional. Using image clamav/clamav:1.4.2_base | `false` |
 | `artefactscan.enabled` | Optional. Image defined in image.artefactscanRepository | `false` |
+| `artefactscan.env` | Optional. Environment variables to be mounted to the artefactscan pod | `null` |
 
 ### Bailo Instance Settings
 
