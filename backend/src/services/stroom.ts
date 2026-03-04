@@ -1,5 +1,7 @@
+import { create } from 'xmlbuilder2'
+
 import { sendEvents } from '../clients/stroom.js'
-import StroomEvent from '../models/StroomEvent.js'
+import StroomEvent, { StroomEventObject } from '../models/StroomEvent.js'
 import { longId } from '../utils/id.js'
 import { log } from './log.js'
 
