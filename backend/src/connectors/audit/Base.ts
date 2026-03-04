@@ -14,14 +14,34 @@ import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
 
-const AuditKind = {
+export const AuditKind = {
   Create: 'Create',
   View: 'View',
   Update: 'Update',
   Delete: 'Delete',
   Search: 'Search',
+  Download: 'Download',
+  CreateImport: 'Import',
 } as const
 export type AuditKindKeys = (typeof AuditKind)[keyof typeof AuditKind]
+
+export const ResourceKind = {
+  Model: 'model',
+  ModelCard: 'model card',
+  File: 'file',
+  Release: 'release',
+  Token: 'token',
+  AccessRequest: 'access request',
+  Review: 'review',
+  Response: 'response',
+  ReviewResponse: 'review response',
+  Schema: 'schema',
+  SchemaMigration: 'schemaMigration',
+  Image: 'image',
+  Inference: 'inference',
+  Export: 'export',
+}
+export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
 export const AuditInfo = {
   CreateModel: { typeId: 'CreateModel', description: 'Model Created', auditKind: AuditKind.Create },
@@ -40,6 +60,7 @@ export const AuditInfo = {
   UpdateModelCard: { typeId: 'UpdateModelCard', description: 'Model Card Updated', auditKind: AuditKind.Update },
 
   CreateFile: { typeId: 'CreateFile', description: 'File Information Created', auditKind: AuditKind.Create },
+  DownloadFile: { typeId: 'DownloadFile', description: 'File downloaded', auditKind: AuditKind.Download },
   ViewFile: { typeId: 'ViewFile', description: 'File Downloaded', auditKind: AuditKind.View },
   ViewFiles: { typeId: 'ViewFiles', description: 'File Information Viewed', auditKind: AuditKind.View },
   DeleteFile: { typeId: 'DeleteFile', description: 'File Information Deleted', auditKind: AuditKind.Delete },

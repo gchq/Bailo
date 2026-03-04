@@ -170,6 +170,14 @@ export interface Config {
     debug: boolean
   }
 
+  stroom: {
+    enabled: boolean
+    environment: string
+    url: string
+    feed: string
+    interval: number
+  }
+
   artefactScanning: {
     clamdscan: {
       concurrency: number

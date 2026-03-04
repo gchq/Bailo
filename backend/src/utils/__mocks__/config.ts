@@ -66,6 +66,13 @@ const config: PartialDeep<Config> = {
   instrumentation: {
     enabled: false,
   },
+  stroom: {
+    enabled: true,
+    feed: 'feed',
+    url: 'https://url',
+    environment: 'local',
+    interval: 1000 * 50,
+  },
   session: {
     secret: '',
   },
