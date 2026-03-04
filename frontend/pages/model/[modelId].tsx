@@ -81,6 +81,7 @@ export default function Model() {
             {
               title: 'Settings',
               path: 'settings',
+              datatest: 'settingsTab',
               disabled: !settingsPermission.hasPermission,
               disabledText: settingsPermission.info,
               view: <Settings entry={entry} />,

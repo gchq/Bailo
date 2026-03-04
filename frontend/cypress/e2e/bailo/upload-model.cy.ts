@@ -4,6 +4,7 @@ const newModelUrl = '/entry/new'
 
 let modelUuid = ''
 const schemaId = 'minimal-general-v10'
+const releaseVersion = '1.0.0'
 
 describe('Create new model', () => {
   it('loads the Create a new model Page', () => {
@@ -61,6 +62,26 @@ describe('Create new model', () => {
     cy.contains('Edit model card', { timeout: 5000 })
   })
 
+  it('can create release on an existing', () => {
+    cy.intercept('POST', `/api/v2/model/${modelUuid}/releases`).as('postRelease')
+    cy.visit(`/model/${modelUuid}`)
+    cy.contains(modelUuid)
+
+    cy.log('Navigating to releases tab to draft a new release')
+    cy.get('[data-test=releasesTab]').click({ force: true })
+    cy.contains('Draft new release')
+    cy.get('[data-test=draftNewReleaseButton').click()
+    cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
+
+    cy.log('Filling out release form and submitting')
+    cy.get('[data-test=releaseSemanticVersionTextField]').type(releaseVersion, { force: true })
+    cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
+    cy.get('[data-test=uploadFileButton]').selectFile('cypress/fixtures/test.txt', { force: true })
+    cy.get('[data-test=createReleaseButton]').click({ force: true })
+    cy.wait('@postRelease')
+    cy.url().should('contain', `release/${releaseVersion}`)
+  })
+
   it('can edit an existing model', () => {
     cy.log('Navigating to an existing model')
     cy.visit(`/model/${modelUuid}`)
@@ -89,5 +110,24 @@ describe('Create new model', () => {
     cy.contains('Model Card History')
     cy.visit(`/model/${modelUuid}/history/1`)
     cy.contains('Back to model')
+  })
+
+  it('can soft delete the model', () => {
+    //checl for not found in component, not whole page
+    cy.intercept('DELETE', '/api/v2/model/*').as('deleteModel')
+    cy.log('Navigating to existing model settings')
+    cy.visit(`/model/${modelUuid}`)
+    cy.log('Go to settings tab')
+    cy.get('[data-test=settingsTab]').click()
+    cy.log('Select deletion menu button')
+    cy.get('[data-test=entryDeletionMenuItem]').should('be.visible').wait(500).click()
+    cy.log('Delete Entry')
+    cy.get('[data-test=deleteEntryButton]').click()
+    cy.get('[data-test=deleteEntryInputVerification]').type('test model', { force: true })
+    cy.get('[data-test=deleteEntryConfirm]').click()
+    cy.wait('@deleteModel')
+    cy.title().should('equal', 'Marketplace · Bailo')
+    cy.visit(`/model/${modelUuid}`)
+    cy.contains('Not Found: The requested entry was not found.')
   })
 })
