@@ -6,6 +6,7 @@ import {
   createModelTransfer,
   deleteModelTransfer,
   findModelTransferById,
+  findModelTransfersByModelId,
   updateModelTransfer,
 } from '../../src/services/modelTransfer.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -54,9 +55,54 @@ describe('services > modelTransfer', () => {
     expect(result).toEqual(transfer)
   })
 
+  test('findModelTransfersByModelId > returns empty array when no transfers exist', async () => {
+    ModelTransferModelMock.find.mockImplementation(() => ({
+      sort: vi.fn().mockReturnThis(),
+      lean: vi.fn().mockResolvedValue([]),
+    }))
+
+    const result = await findModelTransfersByModelId(validObjectId)
+
+    expect(ModelTransferModelMock.find).toHaveBeenCalledWith({
+      modelId: validObjectId,
+    })
+    expect(result).toEqual([])
+  })
+
+  test('findModelTransfersByModelId > returns transfers when found', async () => {
+    const modelId = new Types.ObjectId().toHexString()
+    const transfers = [
+      {
+        _id: new Types.ObjectId().toHexString(),
+        modelId: new Types.ObjectId().toHexString(),
+        peerId: 'peer-123',
+        status: TransferStatus.Requested,
+      },
+      {
+        _id: new Types.ObjectId().toHexString(),
+        modelId: new Types.ObjectId().toHexString(),
+        peerId: 'peer-123',
+        status: TransferStatus.Completed,
+      },
+    ]
+
+    ModelTransferModelMock.find.mockImplementation(() => ({
+      sort: vi.fn().mockReturnThis(),
+      lean: vi.fn().mockResolvedValue(transfers),
+    }))
+
+    const result = await findModelTransfersByModelId(modelId)
+
+    expect(ModelTransferModelMock.find).toHaveBeenCalledWith({
+      modelId: modelId,
+    })
+    expect(result).toEqual(transfers)
+  })
+
   test('createModelTransfer > creates and returns transfer', async () => {
     const input = {
       modelId: 'model-123',
+      peerId: 'peer-123',
       status: TransferStatus.Requested,
       createdBy: 'user:test',
     }
@@ -88,7 +134,7 @@ describe('services > modelTransfer', () => {
   test('updateModelTransferStatus > throws BadReq for invalid ObjectId', async () => {
     const res = updateModelTransfer('001', TransferStatus.Completed)
 
-    await expect(res).rejects.toThrowError(/^Invalid transfer id/)
+    await expect(res).rejects.toThrowError(/^Invalid object id/)
   })
 
   test('updateModelTransferStatus > throws NotFound when transfer does not exist', async () => {
@@ -127,7 +173,7 @@ describe('services > modelTransfer', () => {
   test('deleteModelTransfer > throws BadReq for invalid ObjectId', async () => {
     const res = deleteModelTransfer('001')
 
-    await expect(res).rejects.toThrowError(/^Invalid transfer id/)
+    await expect(res).rejects.toThrowError(/^Invalid object id/)
   })
 
   test('deleteModelTransfer > throws NotFound when transfer does not exist', async () => {

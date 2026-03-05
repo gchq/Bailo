@@ -14,6 +14,8 @@ export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferSt
 export interface ModelTransferInterface {
   _id: string
   modelId: string
+  // The Bailo instance ID where the model is being transferred from
+  peerId: string
   status: TransferStatusKeys
   createdBy: string
   createdAt: Date
@@ -29,6 +31,7 @@ export type ModelTransferDoc = ModelTransferInterface & SoftDeleteDocument
 const ModelTransferSchema = new Schema<ModelTransferDoc>(
   {
     modelId: { type: String, required: true },
+    peerId: { type: String, required: true },
     status: { type: String, enum: Object.values(TransferStatus), required: true },
     createdBy: { type: String, required: true },
   },
@@ -40,7 +43,7 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
 
 ModelTransferSchema.plugin(softDeletionPlugin)
 
-ModelTransferSchema.index({ modelId: 1, status: 1 })
+ModelTransferSchema.index({ modelId: 1, createdBy: 1 })
 
 const ModelTransferModel = model<ModelTransferDoc>('v2_Model_Transfer', ModelTransferSchema)
 

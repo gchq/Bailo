@@ -5,7 +5,7 @@ import { BadReq, NotFound } from '../utils/error.js'
 
 function assertValidObjectId(id: string): void {
   if (!Types.ObjectId.isValid(id)) {
-    throw BadReq('Invalid transfer id', { transferId: id })
+    throw BadReq('Invalid object id', { objectId: id })
   }
 }
 
@@ -21,6 +21,18 @@ export async function findModelTransferById(id: string): Promise<ModelTransferIn
   }
 
   return transfer
+}
+
+export async function findModelTransfersByModelId(id: string): Promise<ModelTransferInterface[]> {
+  assertValidObjectId(id)
+
+  const transfers = await ModelTransferModel.find({
+    modelId: id,
+  })
+    .sort({ createdAt: -1 })
+    .lean()
+
+  return transfers
 }
 
 export async function createModelTransfer(input: {
