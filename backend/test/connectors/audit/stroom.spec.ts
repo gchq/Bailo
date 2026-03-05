@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { DeleteFileArgs } from '../../../src/connectors/audit/Base.js'
 import { StroomAuditConnector } from '../../../src/connectors/audit/stroom.js'
 import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
-import { FileInterfaceDoc } from '../../../src/models/File.js'
+import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
 import { InferenceDoc } from '../../../src/models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
@@ -173,9 +173,8 @@ describe('connectors > audit > gchq', () => {
 
   test('onDeleteFile > save expected event', async () => {
     await connector.onDeleteFile(deleteEventRequest, {
-      kind: 'byId',
-      _id: 'test-file',
-      name: 'myFile',
+      kind: 'byFile',
+      file: { _id: 'test-file', name: 'myFile' } as unknown as FileWithScanResultsInterface,
     } as unknown as DeleteFileArgs)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
@@ -211,7 +210,7 @@ describe('connectors > audit > gchq', () => {
   })
 
   test('onViewUserToken > save expected event', async () => {
-    await connector.onViewUserTokens(createEventRequest, [{ accessKey: 'access' } as TokenDoc])
+    await connector.onViewUserTokens(viewEventRequest, [{ accessKey: 'access' } as TokenDoc])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -228,14 +227,14 @@ describe('connectors > audit > gchq', () => {
   })
 
   test('onViewAccessRequest > save expected event', async () => {
-    await connector.onViewAccessRequest(createEventRequest, {
+    await connector.onViewAccessRequest(viewEventRequest, {
       id: 'id',
     } as AccessRequestDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewAccessRequests > save expected event', async () => {
-    await connector.onViewAccessRequests(createEventRequest, [
+    await connector.onViewAccessRequests(viewEventRequest, [
       {
         id: 'id',
       } as AccessRequestDoc,
@@ -355,7 +354,7 @@ describe('connectors > audit > gchq', () => {
 
   // HS - incorrect test, may need to configure!
   test('onUpdateResponse > save expected event', async () => {
-    await connector.onUpdateResponse(createEventRequest, { _id: 'acb' as any } as ResponseInterface)
+    await connector.onUpdateResponse(updateEventRequest, { _id: 'acb' as any } as ResponseInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

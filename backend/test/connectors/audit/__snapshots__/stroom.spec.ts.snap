@@ -1,0 +1,1541 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > audit > gchq > onCreateAccessRequest > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateCommentResponse > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "acb",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateFile > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "File": {
+          "Created": undefined,
+          "Description": "test description",
+          "Id": "myFile (test-file)",
+          "Modified": undefined,
+          "Name": "testKind",
+          "Path": "uploads/undefined",
+          "Size": undefined,
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateInference > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "undefined/undefined:undefined",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateModel > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-model",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateModelCard > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-model:1",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateRelease > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "model ID:1.2.3",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateReviewResponse > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "abc",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateSchema > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onCreateUserToken > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "access",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onDeleteAccessRequest > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onDeleteFile > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "File": {
+          "Created": undefined,
+          "Description": "test description",
+          "Id": "myFile (test-file)",
+          "Modified": undefined,
+          "Name": "testKind",
+          "Path": "uploads/undefined",
+          "Size": undefined,
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onDeleteRelease > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Description": "test description",
+          "Id": "model ID:1.2.3",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onDeleteSchema > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onDeleteUserToken > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Description": "test description",
+          "Id": "access",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onError > save expected event for Create error 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Name": "testKind",
+        },
+        "Outcome": {
+          "Description": "Error - undefined",
+          "Success": false,
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onError > save expected event for Delete error 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Name": "testKind",
+        },
+        "Outcome": {
+          "Description": "Error - undefined",
+          "Success": false,
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onError > save expected event for Search error 1`] = `
+[
+  {
+    "EventDetail": {
+      "Search": {
+        "Description": "test description",
+        "Outcome": {
+          "Description": "Error - undefined",
+          "Success": false,
+        },
+        "Query": {
+          "Raw": "All testKinds",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onError > save expected event for Update error 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Name": "testKind",
+          },
+        },
+        "Outcome": {
+          "Description": "Error - undefined",
+          "Success": false,
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onError > save expected event for View error 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Name": "testKind",
+        },
+        "Outcome": {
+          "Description": "Error - undefined",
+          "Success": false,
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onSearchModel > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Search": {
+        "Description": "test description",
+        "Query": {
+          "Raw": "All testKinds",
+        },
+        "Results": {
+          "SearchResult": [
+            {
+              "Id": "test-model",
+            },
+          ],
+        },
+        "TotalResults": 1,
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onSearchReviews > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Search": {
+        "Description": "test description",
+        "Query": {
+          "Advanced": {
+            "And": {
+              "Term": [
+                {
+                  "Condition": "Equals",
+                  "Name": "test",
+                  "Value": "query",
+                },
+              ],
+            },
+          },
+        },
+        "Results": {
+          "SearchResult": [
+            {
+              "Id": " abc:1.2.3",
+            },
+          ],
+        },
+        "TotalResults": 1,
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onSearchSchemas > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Search": {
+        "Description": "test description",
+        "Query": {
+          "Raw": "All testKinds",
+        },
+        "Results": {
+          "SearchResult": [
+            {
+              "Id": "id",
+            },
+          ],
+        },
+        "TotalResults": 1,
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateAccessRequest > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateInference > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": "undefined/undefined:undefined",
+            "Name": "testKind",
+          },
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateModel > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-model",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateModelCard > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": "test-model:1",
+            "Name": "testKind",
+          },
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateRelease > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": "model ID:1.2.3",
+            "Name": "testKind",
+          },
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateResponse > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": {
+              "_id": "acb",
+            },
+            "Name": "testKind",
+          },
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onUpdateSchema > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": "id",
+            "Name": "testKind",
+          },
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewAccessRequest > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewAccessRequests > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "id",
+            "Name": "access Request",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewFile > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "File": [
+          {
+            "Created": undefined,
+            "Description": "test description",
+            "Id": "myFile (test-file)",
+            "Modified": undefined,
+            "Name": "testKind",
+            "Path": "uploads/undefined",
+            "Size": undefined,
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewFiles > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "File": [
+          {
+            "Created": undefined,
+            "Description": "test description",
+            "Id": "myFile (test-file)",
+            "Modified": undefined,
+            "Name": "testKind",
+            "Path": "uploads/undefined",
+            "Size": undefined,
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewInference > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "undefined/undefined:undefined",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewInferences > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "undefined/undefined:undefined",
+            "Name": "inference",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewModel > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-model",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewModelCard > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-model:1",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewModelImages > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "repo/name:tag",
+            "Name": "docker image",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewRelease > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "model ID:1.2.3",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewReleases > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "model ID:1.2.3",
+            "Name": "release",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewResponses > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "acb",
+            "Name": "testKind",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewSchema > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "id",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > gchq > onViewUserToken > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "access",
+            "Name": "token",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
