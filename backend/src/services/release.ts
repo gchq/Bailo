@@ -362,7 +362,7 @@ export function semverObjectToString(semver: SemverObject): string {
   if (!semver) {
     return ''
   }
-  let metadata = ''
+  let metadata: string
   if (semver.metadata != undefined) {
     metadata = `-${semver.metadata}`
   } else {

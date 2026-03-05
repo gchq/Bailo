@@ -16,6 +16,7 @@ from typing import Any
 
 import oras.client
 from fastapi import BackgroundTasks, HTTPException, UploadFile
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn.error")
@@ -66,6 +67,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(env_prefix="TRIVY_")
+
     BINARY: str = "/usr/local/bin/trivy"
     TEMP_DIR: str = "/tmp"
     CACHE_DIR: str = f"{TEMP_DIR}/trivy"
@@ -73,7 +75,14 @@ class Settings(BaseSettings):
     DB_DIR: str = f"{CACHE_DIR}/db"
 
     # Default trivy database on Github.
-    DB_IMAGE: str = "ghcr.io/aquasecurity/trivy-db:2"
+    DB_HOSTNAME: str = "ghcr.io"
+    DB_IMAGE: str = f"{DB_HOSTNAME}/aquasecurity/trivy-db:2"
+
+    DB_TLS_VERIFY: bool | str = True
+    DB_INSECURE: bool = False
+
+    DB_USERNAME: str | None = None
+    DB_PASSWORD: SecretStr | None = None
 
     CREATE_TIMEOUT_SECONDS: int = 900
 
@@ -219,13 +228,21 @@ def download_database():
 
     https://trivy.dev/docs/latest/guide/advanced/self-hosting/#__tabbed_1_1
     """
-    client = oras.client.OrasClient()
-    logger.info("Pulling trivy database via Oras API")
-    dbpaths = client.pull(target=get_settings().DB_IMAGE, outdir=get_settings().DB_DIR, overwrite=True)
+    settings = get_settings()
+    logger.info("Pulling trivy database via Oras API (image=%s)", settings.DB_IMAGE)
+    client = oras.client.OrasClient(settings.DB_HOSTNAME, settings.DB_INSECURE, settings.DB_TLS_VERIFY)
+    if settings.DB_USERNAME and settings.DB_PASSWORD:
+        client.login(
+            username=settings.DB_USERNAME,
+            password=settings.DB_PASSWORD.get_secret_value(),
+            tls_verify=settings.DB_TLS_VERIFY != False,  # Verify TLS unless pulling from an insecure registry
+            hostname=settings.DB_HOSTNAME,
+        )
+    dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)
     for path in dbpaths:
-        logger.info("Extracting file %s into %s", path, get_settings().DB_DIR)
+        logger.info("Extracting file %s into %s", path, settings.DB_DIR)
         with tarfile.open(path) as tarf:
-            safe_extract(tarf, get_settings().DB_DIR)
+            safe_extract(tarf, settings.DB_DIR)
         try:
             os.remove(path)
         except OSError:

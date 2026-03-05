@@ -59,7 +59,7 @@ export type ScanInterfaceDoc = ScanInterface & SoftDeleteDocument
 const ScanSchema = new Schema<ScanInterfaceDoc>(
   {
     artefactKind: { type: String, enum: Object.values(ArtefactKind), required: true },
-    fileId: { type: String },
+    fileId: { type: String, index: true },
     layerDigest: { type: String },
 
     toolName: { type: String, required: true },
