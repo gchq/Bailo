@@ -375,9 +375,8 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // HS - incorrect test, may need to configure!
   test('onUpdateResponse > save expected event', async () => {
-    await connector.onUpdateResponse(updateEventRequest, { _id: 'acb' as any } as ResponseInterface)
+    await connector.onUpdateResponse(updateEventRequest, 'acb')
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
