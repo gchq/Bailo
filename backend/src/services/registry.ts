@@ -12,11 +12,17 @@ import {
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ScanInterface } from '../models/Scan.js'
+import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
-import { ImageScanDetail, ModelImages, ModelImageWithScans, ScanInterfaceDetail } from '../types/types.js'
+import {
+  ImageScanDetail,
+  ModelImages,
+  ModelImageWithScans,
+  ScanInterfaceDetail,
+  SeverityCounts,
+} from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
@@ -134,15 +140,35 @@ export async function listModelImagesWithScanResults(
 
           return {
             tag,
-            results: scans.map(
-              (scan): ScanInterfaceDetail =>
-                scanDetail === ImageScanDetail.FULL
-                  ? { ...scan, imageScanDetail: ImageScanDetail.FULL }
-                  : {
-                      ...omitAdditionalInfo(scan),
-                      imageScanDetail: ImageScanDetail.SUMMARY,
-                    },
-            ),
+            results: scans.map((scan): ScanInterfaceDetail => {
+              const severityCounts = countSeverities(scan.summary || [])
+
+              switch (scanDetail) {
+                case ImageScanDetail.FULL:
+                  return {
+                    ...scan,
+                    severityCounts,
+                    imageScanDetail: ImageScanDetail.FULL,
+                  }
+
+                case ImageScanDetail.SUMMARY:
+                  return {
+                    ...omitFields(scan, ['additionalInfo'] as const),
+                    severityCounts,
+                    imageScanDetail: ImageScanDetail.SUMMARY,
+                  }
+
+                case ImageScanDetail.COUNT:
+                  return {
+                    ...omitFields(scan, ['additionalInfo', 'summary'] as const),
+                    severityCounts,
+                    imageScanDetail: ImageScanDetail.COUNT,
+                  }
+
+                default:
+                  return { imageScanDetail: ImageScanDetail.NONE }
+              }
+            }),
           }
         }),
       )
@@ -155,6 +181,17 @@ export async function listModelImagesWithScanResults(
       }
     }),
   )
+}
+
+function countSeverities(scanSummary: ScanSummary): SeverityCounts {
+  const initial = Object.fromEntries(Object.values(SeverityLevel).map((severity) => [severity, 0])) as SeverityCounts
+
+  return scanSummary.reduce((acc, item) => {
+    if ('severity' in item) {
+      acc[item.severity]++
+    }
+    return acc
+  }, initial)
 }
 
 async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
@@ -173,10 +210,12 @@ async function getScansForImageTag(user: UserInterface, image: ImageRefInterface
     .exec()
 }
 
-function omitAdditionalInfo(scan: ScanInterface): Omit<ScanInterface, 'additionalInfo'> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { additionalInfo, ...rest } = scan
-  return rest
+function omitFields<T, K extends readonly (keyof T)[]>(obj: T, keys: K): Omit<T, K[number]> {
+  const result = { ...obj }
+  for (const key of keys) {
+    delete result[key]
+  }
+  return result
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {

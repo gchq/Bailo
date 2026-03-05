@@ -15,7 +15,7 @@ export const getImagesSchema = z.object({
     }),
   }),
   query: z.object({
-    scanDetail: z.nativeEnum(ImageScanDetail).optional().default(ImageScanDetail.NONE),
+    scanDetail: z.nativeEnum(ImageScanDetail).optional().default(ImageScanDetail.COUNT),
   }),
 })
 

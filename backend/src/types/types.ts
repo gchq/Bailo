@@ -5,7 +5,7 @@ import type { ZodSchema, ZodTypeDef } from 'zod'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
-import { ScanInterface } from '../models/Scan.js'
+import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -240,12 +240,21 @@ export type ModelImageWithScans = ModelImageTags & {
   }>
 }
 
+export type SeverityCounts = Record<SeverityLevelKeys, number>
 export type ScanInterfaceDetail =
-  | (ScanInterface & { imageScanDetail: ImageScanDetail.FULL })
-  | (Omit<ScanInterface, 'additionalInfo'> & { imageScanDetail: ImageScanDetail.SUMMARY })
+  | (ScanInterface & { imageScanDetail: ImageScanDetail.FULL; severityCounts: SeverityCounts })
+  | (Omit<ScanInterface, 'additionalInfo'> & {
+      imageScanDetail: ImageScanDetail.SUMMARY
+      severityCounts: SeverityCounts
+    })
+  | (Omit<ScanInterface, 'additionalInfo' | 'summary'> & {
+      imageScanDetail: ImageScanDetail.COUNT
+      severityCounts: SeverityCounts
+    })
   | { imageScanDetail: ImageScanDetail.NONE }
 export enum ImageScanDetail {
   NONE = 'none',
+  COUNT = 'count',
   SUMMARY = 'summary',
   FULL = 'full',
 }

@@ -588,6 +588,50 @@ describe('services > registry', () => {
       })
     })
 
+    test('listModelImagesWithScanResults > ImageScanDetail.COUNTS', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({
+          exec: async () => [
+            {
+              artefactKind: 'image',
+              layerDigest: 'sha256:layer1',
+              state: 'complete',
+              additionalInfo: { foo: 'bar' },
+              summary: [
+                {
+                  severity: 'critical',
+                  vulnerabilityDescription: 'critical vulnerability',
+                },
+              ],
+            },
+          ],
+        }),
+      } as any)
+
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'count' as any)
+
+      expect(result[0].scanResults[0]).toEqual({
+        tag: 'latest',
+        results: [
+          {
+            artefactKind: 'image',
+            layerDigest: 'sha256:layer1',
+            state: 'complete',
+            imageScanDetail: 'count',
+            severityCounts: {
+              unknown: 0,
+              low: 0,
+              medium: 0,
+              high: 0,
+              critical: 1,
+            },
+          },
+        ],
+      })
+    })
+
     test('listModelImagesWithScanResults > ImageScanDetail.SUMMARY', async () => {
       registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
       registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
@@ -599,6 +643,12 @@ describe('services > registry', () => {
               layerDigest: 'sha256:layer1',
               state: 'complete',
               additionalInfo: { foo: 'bar' },
+              summary: [
+                {
+                  severity: 'critical',
+                  vulnerabilityDescription: 'critical vulnerability',
+                },
+              ],
             },
           ],
         }),
@@ -614,6 +664,19 @@ describe('services > registry', () => {
             layerDigest: 'sha256:layer1',
             state: 'complete',
             imageScanDetail: 'summary',
+            summary: [
+              {
+                severity: 'critical',
+                vulnerabilityDescription: 'critical vulnerability',
+              },
+            ],
+            severityCounts: {
+              unknown: 0,
+              low: 0,
+              medium: 0,
+              high: 0,
+              critical: 1,
+            },
           },
         ],
       })
@@ -622,7 +685,6 @@ describe('services > registry', () => {
     test('listModelImagesWithScanResults > ImageScanDetail.FULL', async () => {
       registryClientMocks.listModelRepos = vi.fn().mockResolvedValueOnce(['repo1/image1'])
       registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
-
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({
           exec: async () => [
@@ -631,6 +693,12 @@ describe('services > registry', () => {
               layerDigest: 'sha256:layer1',
               state: 'complete',
               additionalInfo: { foo: 'bar' },
+              summary: [
+                {
+                  severity: 'critical',
+                  vulnerabilityDescription: 'critical vulnerability',
+                },
+              ],
             },
           ],
         }),
@@ -646,7 +714,20 @@ describe('services > registry', () => {
             layerDigest: 'sha256:layer1',
             state: 'complete',
             additionalInfo: { foo: 'bar' },
+            summary: [
+              {
+                severity: 'critical',
+                vulnerabilityDescription: 'critical vulnerability',
+              },
+            ],
             imageScanDetail: 'full',
+            severityCounts: {
+              unknown: 0,
+              low: 0,
+              medium: 0,
+              high: 0,
+              critical: 1,
+            },
           },
         ],
       })
