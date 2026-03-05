@@ -43,6 +43,7 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
 
 ModelTransferSchema.plugin(softDeletionPlugin)
 
+// For GET transfers by modelId queries
 ModelTransferSchema.index({ modelId: 1 })
 
 const ModelTransferModel = model<ModelTransferDoc>('v2_Model_Transfer', ModelTransferSchema)
