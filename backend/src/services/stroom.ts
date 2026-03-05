@@ -3,7 +3,7 @@ import { create } from 'xmlbuilder2'
 import { sendEvents } from '../clients/stroom.js'
 import StroomEvent, { StroomEventObject } from '../models/StroomEvent.js'
 import { longId } from '../utils/id.js'
-import { log } from './log.js'
+import log from './log.js'
 
 export async function saveEvent(event: StroomEventObject) {
   log.info({ event }, 'Saving STROOM audit event.')
