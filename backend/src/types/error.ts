@@ -39,11 +39,11 @@ export function isBailoError(err: unknown): err is BailoError {
   return false
 }
 
-export function toBailoError(err: unknown, code: number = 500): BailoError {
+export function toBailoError(err: unknown, context?: BailoError['context'], code: number = 500): BailoError {
   if (isBailoError(err)) {
     return err
   } else if (Error.isError(err)) {
-    return InternalError(err.message, { err })
+    return InternalError(err.message, { ...context, err })
   }
-  return GenericError(code, String(err), { cause: err })
+  return GenericError(code, String(err), { ...context, cause: err })
 }

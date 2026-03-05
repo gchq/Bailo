@@ -3,54 +3,165 @@ import { Readable } from 'node:stream'
 import FormData from 'form-data'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
+import { z } from '../lib/zod.js'
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'
 
-interface ArtefactScanInfoResponse {
-  apiName: string
-  apiVersion: string
-  scannerName: string
-  modelscanVersion: string
-}
+const ArtefactScanInfoResponse = z.object({
+  apiName: z.string(),
+  apiVersion: z.string(),
+  modelscanScannerName: z.string(),
+  modelscanVersion: z.string(),
+  trivyScannerName: z.string(),
+  trivyVersion: z.string(),
+})
 
-interface ArtefactScanResponse {
-  summary: {
-    total_issues: number
-    total_issues_by_severity: {
-      LOW: number
-      MEDIUM: number
-      HIGH: number
-      CRITICAL: number
-    }
-    input_path: string
-    absolute_path: string
-    modelscan_version: string
-    timestamp: string
-    scanned: {
-      total_scanned: number
-      scanned_files: string[]
-    }
-    skipped: {
-      total_skipped: number
-      skipped_files: string[]
-    }
-  }
-  issues: {
-    description: string
-    operator: string
-    module: string
-    source: string
-    scanner: string
-    severity: string
-  }[]
-  errors: {
-    category: string
-    description: string
-    source: string
-  }[]
-}
+export const ModelScanResponse = z.object({
+  summary: z.object({
+    total_issues: z.number().nonnegative(),
+    total_issues_by_severity: z.object({
+      LOW: z.number().nonnegative(),
+      MEDIUM: z.number().nonnegative(),
+      HIGH: z.number().nonnegative(),
+      CRITICAL: z.number().nonnegative(),
+    }),
+    input_path: z.string(),
+    absolute_path: z.string(),
+    modelscan_version: z.string(),
+    timestamp: z.string(),
+    scanned: z.object({
+      total_scanned: z.number().nonnegative(),
+      scanned_files: z.array(z.string()).optional(),
+    }),
+    skipped: z.object({
+      total_skipped: z.number().nonnegative(),
+      skipped_files: z
+        .array(
+          z.object({
+            category: z.string(),
+            description: z.string(),
+            source: z.string(),
+          }),
+        )
+        .optional(),
+    }),
+  }),
+  issues: z.array(
+    z.object({
+      description: z.string(),
+      operator: z.string(),
+      module: z.string(),
+      source: z.string(),
+      scanner: z.string(),
+      severity: z.string(),
+    }),
+  ),
+  errors: z.array(
+    z.object({
+      category: z.string(),
+      description: z.string(),
+      source: z.string(),
+    }),
+  ),
+})
+export type ModelScanResponse = z.infer<typeof ModelScanResponse>
 
-export async function getArtefactScanInfo() {
+const ImageHistorySchema = z.object({
+  created: z.string(),
+  created_by: z.string(),
+  comment: z.string().optional(),
+  empty_layer: z.boolean().optional(),
+})
+
+const ImageConfigSchema = z
+  .object({
+    architecture: z.string(),
+    created: z.string(),
+    history: z.array(ImageHistorySchema),
+    os: z.string(),
+    rootfs: z.object({
+      type: z.string(),
+      diff_ids: z.array(z.string()),
+    }),
+    config: z.object({
+      Cmd: z.array(z.string()).optional(),
+      Env: z.array(z.string()).optional(),
+      WorkingDir: z.string().optional(),
+      ArgsEscaped: z.boolean().optional(),
+    }),
+  })
+  .optional()
+
+const VulnerabilitySchema = z.object({
+  VulnerabilityID: z.string(),
+  PkgID: z.string(),
+  PkgName: z.string(),
+  PkgIdentifier: z.object({
+    PURL: z.string(),
+    UID: z.string(),
+  }),
+  InstalledVersion: z.string(),
+  FixedVersion: z.string().optional(),
+  Status: z.string(),
+  Layer: z
+    .object({
+      DiffID: z.string(),
+    })
+    .optional(),
+  PrimaryURL: z.string().url().optional(),
+  DataSource: z.object({
+    ID: z.string(),
+    Name: z.string(),
+    URL: z.string().url(),
+  }),
+  Title: z.string(),
+  Description: z.string(),
+  Severity: z.string(),
+  CweIDs: z.array(z.string()).optional(),
+  VendorSeverity: z.record(z.number()).optional(),
+  CVSS: z
+    .record(
+      z.object({
+        V3Vector: z.string(),
+        V3Score: z.number(),
+      }),
+    )
+    .optional(),
+  References: z.array(z.string().url()).optional(),
+  PublishedDate: z.string(),
+  LastModifiedDate: z.string(),
+})
+
+const ResultSchema = z.object({
+  Target: z.string(),
+  Class: z.string(),
+  Type: z.string(),
+  Vulnerabilities: z.array(VulnerabilitySchema).optional(),
+})
+
+export const TrivyScanResultResponse = z.object({
+  SchemaVersion: z.literal(2),
+  CreatedAt: z.string(),
+  ArtifactName: z.string(),
+  ArtifactType: z.string(),
+  Metadata: z
+    .object({
+      OS: z.object({
+        Family: z.string(),
+        Name: z.string(),
+      }),
+      ImageID: z.string().optional(),
+      DiffIDs: z.array(z.string()).optional(),
+      RepoTags: z.array(z.string()).optional(),
+      RepoDigests: z.array(z.string()).optional(),
+      ImageConfig: ImageConfigSchema,
+    })
+    .optional(),
+  Results: z.array(ResultSchema).optional(),
+})
+export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponse>
+
+async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
@@ -66,10 +177,10 @@ export async function getArtefactScanInfo() {
     throw BadReq('Unrecognised response returned by the ArtefactScan service.')
   }
 
-  return (await res.json()) as ArtefactScanInfoResponse
+  return ArtefactScanInfoResponse.parse(await res.json())
 }
 
-export async function scanStream(stream: Readable, fileName: string) {
+async function scanStream(stream: Readable, fileName: string, endpoint: 'file' | 'image') {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
 
@@ -77,7 +188,7 @@ export async function scanStream(stream: Readable, fileName: string) {
     const formData = new FormData()
     formData.append('in_file', stream, { filename: fileName, contentType: 'application/octet-stream' })
 
-    res = await fetch(`${url}/scan/file`, {
+    res = await fetch(`${url}/scan/${endpoint}`, {
       method: 'POST',
       headers: {
         ...formData.getHeaders(),
@@ -95,5 +206,29 @@ export async function scanStream(stream: Readable, fileName: string) {
     })
   }
 
-  return (await res.json()) as ArtefactScanResponse
+  return await res.json()
+}
+
+export async function scanFileStream(stream: Readable, fileName: string) {
+  return ModelScanResponse.parse(await scanStream(stream, fileName, 'file'))
+}
+
+export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
+  return TrivyScanResultResponse.parse(await scanStream(stream, blobDigest, 'image'))
+}
+
+// 5 mins
+const CACHE_TTL_MS = 5 * 60 * 1000
+let cachedArtefactScanInfo: { value: z.infer<typeof ArtefactScanInfoResponse>; expiresAt: number } | undefined
+export async function getCachedArtefactScanInfo() {
+  const now = Date.now()
+
+  if (!cachedArtefactScanInfo || cachedArtefactScanInfo.expiresAt < now) {
+    cachedArtefactScanInfo = {
+      value: await getArtefactScanInfo(),
+      expiresAt: now + CACHE_TTL_MS,
+    }
+  }
+
+  return cachedArtefactScanInfo.value
 }

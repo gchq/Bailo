@@ -5,6 +5,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { ArtefactKind } from '../../src/models/Scan.js'
 import {
   downloadFile,
   finishUploadMultipartFile,
@@ -52,11 +53,26 @@ const configMock = vi.hoisted(
         },
       },
       connectors: {
+        authentication: {
+          kind: 'silly',
+        },
+        audit: {
+          kind: 'silly',
+        },
+        authorisation: {
+          kind: 'basic',
+        },
         artefactScanners: {
           kinds: ['clamAV'],
           retryDelayInMinutes: 5,
           maxInitRetries: 5,
           initRetryDelay: 5000,
+        },
+      },
+      registry: {
+        connection: {
+          internal: 'https://localhost:5000',
+          insecure: true,
         },
       },
     }) as any,
@@ -75,10 +91,11 @@ const fileScanResult: ArtefactScanResult = {
   state: 'complete',
   toolName: 'Test',
   lastRunAt: new Date(),
+  artefactKind: ArtefactKind.FILE,
 }
 
 const fileScanningMock = vi.hoisted(() => ({
-  scannersInfo: vi.fn(() => ({ scannerNames: [] })),
+  scannersInfo: vi.fn(() => []),
   startScans: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))

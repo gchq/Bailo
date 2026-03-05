@@ -8,7 +8,7 @@ import {
 
 import { UserInformation } from '../connectors/authentication/constants.js'
 import config from '../utils/config.js'
-import { ConfigurationError, InternalError } from '../utils/error.js'
+import { InternalError, ServiceUnavailable } from '../utils/error.js'
 
 async function setupCognitoClient() {
   let dnName: string
@@ -17,7 +17,7 @@ async function setupCognitoClient() {
     dnName = config.oauth.cognito.userIdAttribute
     userPoolId = config.oauth.cognito.userPoolId
   } catch (_e) {
-    throw ConfigurationError('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config.oauth })
+    throw ServiceUnavailable('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config.oauth })
   }
 
   let client: CognitoIdentityProviderClient

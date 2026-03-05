@@ -12,11 +12,14 @@ import {
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import ScanModel, { ArtefactKind, ScanInterface } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
+import { ImageScanDetail, ModelImages, ModelImageWithScans, ScanInterfaceDetail } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -80,7 +83,7 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function listModelImages(user: UserInterface, modelId: string) {
+export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
   await checkUserAuth(user, modelId, ['list'])
 
   const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
@@ -94,6 +97,86 @@ export async function listModelImages(user: UserInterface, modelId: string) {
       return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
     }),
   )
+}
+
+export async function listModelImagesWithScanResults(
+  user: UserInterface,
+  modelId: string,
+  scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
+): Promise<ModelImageWithScans[]> {
+  const modelImages: ModelImages = await listModelImages(user, modelId)
+
+  return Promise.all(
+    modelImages.map(async (img) => {
+      const scanResults = await Promise.all(
+        img.tags.map(async (tag): Promise<{ tag: string; results: ScanInterfaceDetail[] }> => {
+          if (scanDetail === ImageScanDetail.NONE) {
+            return {
+              tag,
+              results: [{ imageScanDetail: ImageScanDetail.NONE }],
+            }
+          }
+
+          const imageRef: ImageRefInterface = {
+            repository: img.repository,
+            name: img.name,
+            tag,
+          }
+
+          const scans = await getScansForImageTag(user, imageRef)
+
+          if (scans.length === 0) {
+            return {
+              tag,
+              results: [{ imageScanDetail: ImageScanDetail.NONE }],
+            }
+          }
+
+          return {
+            tag,
+            results: scans.map(
+              (scan): ScanInterfaceDetail =>
+                scanDetail === ImageScanDetail.FULL
+                  ? { ...scan, imageScanDetail: ImageScanDetail.FULL }
+                  : {
+                      ...omitAdditionalInfo(scan),
+                      imageScanDetail: ImageScanDetail.SUMMARY,
+                    },
+            ),
+          }
+        }),
+      )
+
+      return {
+        repository: img.repository,
+        name: img.name,
+        tags: img.tags,
+        scanResults,
+      }
+    }),
+  )
+}
+
+async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
+  const layers = await getImageLayers(user, image)
+  const layerDigests = layers.map((l) => l.digest)
+
+  if (layerDigests.length === 0) {
+    return []
+  }
+
+  return ScanModel.find({
+    artefactKind: ArtefactKind.IMAGE,
+    layerDigest: { $in: layerDigests },
+  })
+    .lean<ScanInterface[]>()
+    .exec()
+}
+
+function omitAdditionalInfo(scan: ScanInterface): Omit<ScanInterface, 'additionalInfo'> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { additionalInfo, ...rest } = scan
+  return rest
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {

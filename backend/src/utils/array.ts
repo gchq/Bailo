@@ -9,3 +9,21 @@ export function findDuplicates<T>(arr: Array<T>): Array<T> {
   // This is intentionally not an efficient implementation and is O(n^2).
   return arr.filter((item, index) => arr.indexOf(item) !== index)
 }
+
+/**
+ * Deduplicate an array while preserving order.
+ * Uses SameValueZero equality (as per Set).
+ */
+export function dedupe<T>(input: readonly T[]): T[] {
+  const seen = new Set<T>()
+  const result: T[] = []
+
+  for (const item of input) {
+    if (!seen.has(item)) {
+      seen.add(item)
+      result.push(item)
+    }
+  }
+
+  return result
+}

@@ -49,6 +49,8 @@ repos:
     rev: v2.4.1
     hooks:
       - id: codespell
+        # skip file with lots of application generated text
+        args: ['--skip=lib/artefactscan_api/bailo_artefactscan_api/openapi/scan_image_responses.py']
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
