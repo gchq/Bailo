@@ -129,14 +129,11 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
             const key = vulnerability.VulnerabilityID
             const title = vulnerability.Title ?? ''
 
-            const existing = summaries.get(key)
-            if (!existing) {
+            if (!summaries.get(key)) {
               summaries.set(key, {
                 severity: vulnerability.Severity.toLowerCase() as SeverityLevelKeys,
                 vulnerabilityDescription: `${key}: ${title}`,
               })
-            } else if (title) {
-              existing.vulnerabilityDescription += `; ${title}`
             }
           }
         }
