@@ -333,7 +333,6 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  // HS mismatch: _id no longer exists on ResponseInterface
   async onCreateReviewResponse(req: Request, response: ResponseInterface) {
     this.auditGenericEvent(req, `${response._id}`)
   }
@@ -459,8 +458,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, reviewRoleId)
   }
 
-  // HS mismatch? bunyan -> pino???
-  async onError(req, Request, error: BailoError) {
+  async onError(req: Request, error: BailoError) {
     if (!req.audit) {
       log.warn({ url: req.url }, 'Unable to audit')
       return
@@ -478,16 +476,16 @@ export class StroomAuditConnector extends BaseAuditConnector {
     let eventDetail: EventDetail
     switch (req.audit.auditKind) {
       case AuditKind.Create:
-        eventDetail = { TypeId: req.audit.TypeId, Create: eventInfo }
+        eventDetail = { TypeId: req.audit.typeId, Create: eventInfo }
         break
       case AuditKind.View:
-        eventDetail = { TypeId: req.audit.TypeId, View: eventInfo }
+        eventDetail = { TypeId: req.audit.typeId, View: eventInfo }
         break
       case AuditKind.Delete:
-        eventDetail = { TypeId: req.audit.TypeId, Delete: eventInfo }
+        eventDetail = { TypeId: req.audit.typeId, Delete: eventInfo }
         break
       case AuditKind.Update:
-        eventDetail = { TypeId: req.audit.TypeId, Update: updateEventInfo }
+        eventDetail = { TypeId: req.audit.typeId, Update: updateEventInfo }
         break
       case AuditKind.Search: {
         eventDetail = {
@@ -520,15 +518,13 @@ export class StroomAuditConnector extends BaseAuditConnector {
       default:
         throw Error('Unable to create Event Detail for an error event.')
     }
-    this.generateEvent(require, eventDetail)
+    this.generateEvent(req, eventDetail)
   }
 
-  // HS mismatch: _id no longer exists on ResponseInterface
   async onCreateCommentResponse(req: Request, response: ResponseInterface) {
     this.auditGenericEvent(req, `${response._id}`)
   }
 
-  // HS mismatch: _id no longer exists on ResponseInterface
   async onViewResponses(req: Request, responses: ResponseInterface[]) {
     this.auditMultipleViewEvent(
       req,
