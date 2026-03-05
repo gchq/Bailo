@@ -29,28 +29,22 @@ export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMe
   const { gzipStream, tarStream } = createTarGzStreams()
   // It is safer to have an extra PassThrough for handling backpressure and explicitly closing on error(s)
   const uploadStream = new PassThrough()
-  tarStream.pipe(gzipStream).pipe(uploadStream)
+  pipeline(tarStream, gzipStream, uploadStream).catch((err) => {
+    throw InternalError('Unable to handle entry for tar.gz packing stream.', { error: err })
+  })
 
   const uploadPromise = uploadToS3(fileName, uploadStream, logData)
 
-  try {
-    const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
-    log.debug(
-      { metadata, name: config.modelMirror.metadataFile, size: metadataBuffer.length, ...logData },
-      'Creating metadata entry.',
-    )
+  const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
+  log.debug(
+    { metadata, name: config.modelMirror.metadataFile, size: metadataBuffer.length, ...logData },
+    'Creating metadata entry.',
+  )
 
-    tarStream.entry(
-      { name: config.modelMirror.metadataFile, size: metadataBuffer.length, mode: 0o64, type: 'file' },
-      metadataBuffer,
-    )
-  } catch (error) {
-    // Ensure all streams are destroyed on error to prevent leaks
-    tarStream.destroy()
-    gzipStream.destroy()
-    uploadStream.destroy()
-    throw error
-  }
+  tarStream.entry(
+    { name: config.modelMirror.metadataFile, size: metadataBuffer.length, mode: 0o64, type: 'file' },
+    metadataBuffer,
+  )
   return { tarStream, gzipStream, uploadStream, uploadPromise }
 }
 
@@ -77,18 +71,16 @@ export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, lo
     const contentBuffer = Buffer.from(entry.content, 'utf8')
     tarStream.entry({ name: entryName, size: contentBuffer.length, mode: 0o644, type: 'file' }, contentBuffer)
   } else if (entry.type === 'stream') {
-    await new Promise<void>((resolve, reject) => {
-      const tarEntryStream = tarStream.entry(
-        { name: entryName, size: entry.size ?? undefined, mode: 0o644, type: 'file' },
-        (err) => {
-          if (err) {
-            reject(err)
-          }
-        },
-      )
+    const tarEntryStream = tarStream.entry(
+      { name: entryName, size: entry.size ?? undefined, mode: 0o644, type: 'file' },
+      (err) => {
+        if (err) {
+          throw err
+        }
+      },
+    )
 
-      entry.stream.pipe(tarEntryStream).on('finish', resolve).on('error', reject)
-    })
+    await pipeline(entry.stream, tarEntryStream)
   } else {
     throw InternalError('Unable to handle entry for tar.gz packing stream.', {
       entry,
@@ -143,7 +135,6 @@ export async function extractTarGzStream(
       }
       settled = true
 
-      tarGzStream.unpipe?.()
       ungzipStream.destroy()
       untarStream.destroy()
 
@@ -249,7 +240,7 @@ export async function extractTarGzStream(
 
           // Workaround `stream` sometimes being a reference rather than the stream itself
           const passThrough = new PassThrough()
-          entryStream.pipe(passThrough)
+          pipeline(entryStream, passThrough)
 
           await importer.processEntry(entry, passThrough)
           next()
@@ -261,9 +252,6 @@ export async function extractTarGzStream(
       })().catch((err) => fail(err))
     })
 
-    // Wire the stream chain using pipeline for correct teardown and automatic propagation of stream-level errors.
-    pipeline(tarGzStream, ungzipStream, untarStream).catch((err) => {
-      fail(err)
-    })
+    pipeline(tarGzStream, ungzipStream, untarStream).catch(fail)
   })
 }

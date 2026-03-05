@@ -1,4 +1,4 @@
-import { PassThrough, Readable } from 'node:stream'
+import { PassThrough, pipeline, Readable } from 'node:stream'
 import zlib from 'node:zlib'
 
 import { extract, pack } from 'tar-stream'
@@ -77,7 +77,7 @@ function setUpExtractTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
   const tarStream = pack()
   const passThrough = new PassThrough()
-  tarStream.pipe(gzipStream).pipe(passThrough)
+  pipeline(tarStream, gzipStream, passThrough, () => {})
   return { gzipStream, tarStream, passThrough }
 }
 
@@ -108,17 +108,9 @@ describe('service > mirroredModel > tarball', () => {
         throw new Error('bad-json')
       },
     } as any
-    // force pack.entry to throw
-    const gzipDestroySpy = vi.spyOn(zlib.createGzip().constructor.prototype, 'destroy')
-    const tarDestroySpy = vi.spyOn(pack().constructor.prototype, 'destroy')
-    const uploadDestroySpy = vi.spyOn(new PassThrough().constructor.prototype, 'destroy')
-
     const promise = initialiseTarGzUpload('file.tar.gz', badMeta, {} as any)
 
     await expect(promise).rejects.toThrowError('bad-json')
-    expect(gzipDestroySpy).toHaveBeenCalled()
-    expect(tarDestroySpy).toHaveBeenCalled()
-    expect(uploadDestroySpy).toHaveBeenCalled()
   })
 
   test('finaliseTarGzUpload > success', async () => {
@@ -178,7 +170,7 @@ describe('service > mirroredModel > tarball', () => {
     const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
       cb?.(new Error('cb-error')) // trigger the reject(err) code path
       const pt = new PassThrough()
-      pt.end() // ensure the stream closes so .pipe() won't hang
+      pt.end() // ensure the stream closes
       return pt
     })
     const stream = new PassThrough()

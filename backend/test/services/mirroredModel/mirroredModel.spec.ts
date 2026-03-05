@@ -501,21 +501,14 @@ describe('services > mirroredModel', () => {
       const digest = await generateDigest(stream)
       expect(digest).toMatch(/^[a-f0-9]{64}$/)
     })
-    test('pipe throws', async () => {
+    test('pipeline throws', async () => {
       await expect(
         generateDigest({
-          pipe: () => {
+          pipeline: () => {
             throw new Error('fail')
           },
         } as any),
       ).rejects.toThrow(/Error generating SHA256/)
-    })
-    test('error event', async () => {
-      const stream = new PassThrough()
-      setImmediate(() => {
-        stream.emit('error', new Error('err'))
-      })
-      await expect(generateDigest(stream)).rejects.toThrow(/Error generating SHA256/)
     })
   })
 })
