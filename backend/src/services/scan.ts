@@ -14,7 +14,7 @@ import { UserInterface } from '../models/User.js'
 import { toBailoError } from '../types/error.js'
 import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden, ServiceUnavailable } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
@@ -208,6 +208,6 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
 
 function throwIfNoScanners(scannersInfo: ArtefactScanningConnectorInfo[], artefactKind: ArtefactKindKeys) {
   if (!scannersInfo.some((scannerInfo) => scannerInfo.artefactKind === artefactKind)) {
-    throw ServiceUnavailable(`No ${artefactKind} scanners are enabled.`)
+    throw NotFound(`No ${artefactKind} scanners are enabled.`)
   }
 }
