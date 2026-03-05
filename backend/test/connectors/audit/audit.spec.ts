@@ -8,6 +8,12 @@ const configMock = vi.hoisted(() => ({
       kind: 'silly',
     },
   },
+  log: {
+    level: 'debug',
+  },
+  instrumentation: {
+    enabled: false,
+  },
 }))
 vi.mock('../../../src/utils/config.js', () => ({
   __esModule: true,
@@ -25,6 +31,12 @@ describe('connectors > audit', () => {
     const connector = getAuditConnector(false)
     expect(connector.constructor.name).toBe('StdoutAuditConnector')
   })
+
+  // test('stroom', () => {
+  //   configMock.connectors.audit.kind = 'stroom'
+  //   const connector = getAuditConnector(false)
+  //   expect(connector.constructor.name).toBe('StroomAuditConnector')
+  // })
 
   test('invalid', () => {
     const invalidConnector = 'invalid'

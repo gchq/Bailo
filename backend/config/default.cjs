@@ -320,6 +320,7 @@ module.exports = {
     url: 'https://url',
     environment: 'local',
     interval: 1000 * 50,
+    generator: 'Generator',
   },
 
   modelMirror: {

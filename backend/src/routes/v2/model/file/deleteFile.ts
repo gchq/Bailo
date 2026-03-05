@@ -45,13 +45,9 @@ export const deleteFile = [
       params: { modelId, fileId },
     } = parse(req, deleteFileSchema)
 
-    await removeFile(req.user, modelId, fileId)
+    const file = await removeFile(req.user, modelId, fileId)
 
-    await audit.onDeleteFile(req, {
-      kind: 'byId',
-      modelId: modelId,
-      fileId: fileId,
-    })
+    await audit.onDeleteFile(req, file)
 
     res.json({
       message: 'Successfully removed file.',

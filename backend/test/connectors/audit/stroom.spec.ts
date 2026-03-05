@@ -1,7 +1,6 @@
 import { Request } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
-import { DeleteFileArgs } from '../../../src/connectors/audit/Base.js'
 import { StroomAuditConnector } from '../../../src/connectors/audit/stroom.js'
 import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
@@ -14,7 +13,31 @@ import { SchemaInterface } from '../../../src/models/Schema.js'
 import { TokenDoc } from '../../../src/models/Token.js'
 import { InternalError } from '../../../src/utils/error.js'
 
-vi.mock('../../../src/utils/config.js')
+const configMock = vi.hoisted(() => ({
+  connectors: {
+    audit: {
+      kind: 'stroom',
+    },
+  },
+  stroom: {
+    enabled: true,
+    feed: 'feed',
+    url: 'https://url',
+    environment: 'local',
+    interval: 1000 * 50,
+    generator: 'Generator',
+  },
+  s3: {
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
+    },
+  },
+}))
+vi.mock('../../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: configMock,
+}))
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -173,9 +196,9 @@ describe('connectors > audit > gchq', () => {
 
   test('onDeleteFile > save expected event', async () => {
     await connector.onDeleteFile(deleteEventRequest, {
-      kind: 'byFile',
-      file: { _id: 'test-file', name: 'myFile' } as unknown as FileWithScanResultsInterface,
-    } as unknown as DeleteFileArgs)
+      _id: 'test-file',
+      name: 'myFile',
+    } as unknown as FileWithScanResultsInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

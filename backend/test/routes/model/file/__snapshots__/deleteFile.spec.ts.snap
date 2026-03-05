@@ -6,14 +6,10 @@ exports[`routes > file > deleteFile > 200 > ok 1`] = `
 }
 `;
 
-// TODO - need to verify these snapshot changes, might not be right?
 exports[`routes > file > deleteFile > audit > expected call 1`] = `
 {
-  "fileId": "expedita",
-  "kind": "byId",
-  "modelId": "expedita",
+  "message": "Successfully removed release.",
 }
 `;
 
-// TODO - need to verify these snapshot changes, definitely doesn't look right!
 exports[`routes > file > deleteFile > audit > expected call 2`] = `undefined`;

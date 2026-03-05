@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
@@ -13,7 +13,7 @@ import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
-import { AuditInfo, BaseAuditConnector, DeleteFileArgs } from './Base.js'
+import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
   Success: boolean
@@ -108,13 +108,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteFile(req: Request, args: DeleteFileArgs) {
-    if (args.kind !== 'byId') {
-      throw new Error('StdoutAuditConnector only supports deletion by Id')
-    }
-    const { modelId, fileId } = args
+  async onDeleteFile(req: Request, file: FileWithScanResultsInterface) {
     this.checkEventType(AuditInfo.DeleteFile, req)
-    const event = this.generateEvent(req, { modelId, fileId })
+    const event = this.generateEvent(req, file)
     req.log.info(event, req.audit.description)
   }
 

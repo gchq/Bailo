@@ -395,19 +395,6 @@ export const AuditInfo = {
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
-type DeleteFileById = {
-  kind: 'byId'
-  modelId: string
-  fileId: string
-}
-
-type DeleteFileByFile = {
-  kind: 'byFile'
-  file: FileWithScanResultsInterface
-}
-
-export type DeleteFileArgs = DeleteFileById | DeleteFileByFile
-
 export abstract class BaseAuditConnector {
   abstract onCreateModel(req: Request, model: ModelDoc): Promise<void>
   abstract onViewModel(req: Request, model: ModelDoc): Promise<void>
@@ -425,7 +412,7 @@ export abstract class BaseAuditConnector {
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[]): Promise<void>
   abstract onUpdateFile(req: Request, modelId: string, fileId: string): Promise<void>
 
-  abstract onDeleteFile(req: Request, args: DeleteFileArgs): Promise<void>
+  abstract onDeleteFile(req: Request, file: FileWithScanResultsInterface): Promise<void>
 
   abstract onCreateRelease(req: Request, release: ReleaseDoc): Promise<void>
   abstract onViewRelease(req: Request, release: ReleaseDoc): Promise<void>

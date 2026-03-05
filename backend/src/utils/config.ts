@@ -176,6 +176,7 @@ export interface Config {
     url: string
     feed: string
     interval: number
+    generator: string
   }
 
   artefactScanning: {
