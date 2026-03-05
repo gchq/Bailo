@@ -43,7 +43,7 @@ export async function getUserFromAuthHeader(
     return { user: { dn: '' }, admin: true }
   }
 
-  let tokenDoc: TokenDoc | undefined = undefined
+  let tokenDoc: TokenDoc | undefined
   try {
     tokenDoc = await getTokenFromAuthHeader(header)
   } catch (e: unknown) {
