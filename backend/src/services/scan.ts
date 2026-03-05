@@ -154,7 +154,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   throwIfNoScanners(scannersInfo, ArtefactKind.FILE)
 
   // Do not await so that the endpoint can return early (fire-and-forget)
-  void runScans(scannersInfo, fileIdentifier, file).catch((error) => {
+  runScans(scannersInfo, fileIdentifier, file).catch((error) => {
     log.error(
       { scannersInfo, scanIdentifier: fileIdentifier, file, error },
       'Unable to set failure state after failing to run file scans. Safely aborted.',
@@ -187,14 +187,17 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
 
   const imageLayers = dedupe(await getImageLayers(user, image))
   const imageName = `${image.repository}/${image.name}:${image.tag}`
-  log.debug({ scannersInfo, imageLayers })
+
+  // Only check timing for the config (which is effectively unique per manifest)
+  // config is always the first item in `imageLayers`
+  const configLayerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayers[0].digest }
+  const minutesBeforeRescanning = await artefactScanDelay(configLayerIdentifier)
+  if (minutesBeforeRescanning > 0) {
+    throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${imageName}`)
+  }
+
   for (const imageLayer of imageLayers) {
     const layerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayer.digest }
-    const minutesBeforeRescanning = await artefactScanDelay(layerIdentifier)
-    if (minutesBeforeRescanning > 0) {
-      throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${imageName}`)
-    }
-
     // Do not await so that the endpoint can return early (fire-and-forget)
     runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }).catch((error) => {
       log.error(
