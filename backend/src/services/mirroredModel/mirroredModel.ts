@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import { pipeline, Readable } from 'node:stream'
+import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
 
 import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
@@ -306,12 +307,10 @@ export async function addAndFinaliseExporters(exporters: BaseExporter[], logData
 export async function generateDigest(file: Readable) {
   try {
     const hash = createHash('sha256')
-    await pipeline(file, hash, (err) => {
-      throw InternalError('Error generating SHA256 digest for stream.', { error: err })
-    })
+    await pipeline(file, hash)
 
     return hash.digest('hex')
-  } catch (error: unknown) {
+  } catch (error) {
     throw InternalError('Error generating SHA256 digest for stream.', { error })
   }
 }
