@@ -122,11 +122,11 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
       try {
         // strip prefix from blob identifier to get just the name
         const layerDigestName = layer.layerDigest.replace(/^(sha256:)/, '')
-        const results = await scanImageBlobStream(stream, layerDigestName)
+        const scanResults = await scanImageBlobStream(stream, layerDigestName)
 
         // Set compares object identity so instead use a Map where we control the key for string equality
         const summaries = new Map<string, ArtefactScanSummary>()
-        for (const result of results.Results ?? []) {
+        for (const result of scanResults.Results ?? []) {
           if (!result.Vulnerabilities) {
             continue
           }
@@ -151,7 +151,7 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
           ...scannerInfo,
           state: ArtefactScanState.Complete,
           summary,
-          additionalInfo: results,
+          additionalInfo: scanResults,
           lastRunAt: new Date(),
         }
       } catch (err) {
