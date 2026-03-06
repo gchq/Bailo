@@ -10,10 +10,13 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
-from bailo_artefactscan_api import trivy
-from bailo_artefactscan_api.main import app
 from fastapi import BackgroundTasks, HTTPException, UploadFile
 from fastapi.testclient import TestClient
+
+# isort: split
+
+import bailo_artefactscan_api.trivy as trivy
+from bailo_artefactscan_api.main import app
 
 client = TestClient(app)
 
@@ -45,7 +48,7 @@ def test_scan_wrong_digest(file_name: str, file_content: Any):
         trivy.scan(UploadFile(BytesIO(file_content), filename=file_name), BackgroundTasks([]))
 
     assert exception.value.status_code == HTTPStatus.BAD_REQUEST.value
-    assert exception.value.detail == f"Blob {file_name} has been modified"
+    assert exception.value.detail == f"Uploaded blob {file_name} did not match expected digest"
 
 
 @patch("subprocess.Popen")

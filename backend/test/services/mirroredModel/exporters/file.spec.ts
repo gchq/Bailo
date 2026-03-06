@@ -90,7 +90,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init succeeds with valid inputs', () => {
-    scannersMocks.default.scannersInfo.mockReturnValue({ scannerNames: ['test'] })
+    scannersMocks.default.scannersInfo.mockReturnValue(['test'])
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
 
     // sync method, so just call and check no throw
@@ -134,7 +134,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init throws BadReq if vulnerability scans missing', () => {
-    scannersMocks.default.scannersInfo.mockReturnValue({ scannerNames: ['test'] })
+    scannersMocks.default.scannersInfo.mockReturnValue(['test'])
     const badFile = { ...mockFile, scanResults: [] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file is missing vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
@@ -147,7 +147,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init throws BadReq if vulnerability scans incomplete', () => {
-    scannersMocks.default.scannersInfo.mockReturnValue({ scannerNames: ['test'] })
+    scannersMocks.default.scannersInfo.mockReturnValue(['test'])
     const badFile = { ...mockFile, scanResults: [{ state: ArtefactScanState.InProgress }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has incomplete vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
@@ -160,7 +160,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
   })
 
   test('_init throws BadReq if vulnerability scans infected', () => {
-    scannersMocks.default.scannersInfo.mockReturnValue({ scannerNames: ['test'] })
+    scannersMocks.default.scannersInfo.mockReturnValue(['test'])
     const badFile = {
       ...mockFile,
       scanResults: [{ state: ArtefactScanState.Complete, summary: [{ virus: 'Virus Found' }] }],

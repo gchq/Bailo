@@ -46,6 +46,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -288,6 +289,7 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
     "findOneAndDelete": [MockFunction],
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
+    "id": "mock-id",
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],
@@ -385,6 +387,7 @@ exports[`services > file > uploadFile > success 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -427,6 +430,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],

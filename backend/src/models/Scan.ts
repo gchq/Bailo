@@ -1,7 +1,8 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { model, type ObjectId, Schema } from 'mongoose'
 
-import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
+import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export type ScanInterface = {
   _id: ObjectId
@@ -10,7 +11,7 @@ export type ScanInterface = {
   scannerVersion?: string
   state: ArtefactScanStateKeys
   summary?: ScanSummary
-  additionalInfo?: ScanAdditionalInfo
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
 
   lastRunAt: Date
 
@@ -18,34 +19,24 @@ export type ScanInterface = {
   updatedAt: Date
 } & (
   | {
-      artefactKind: typeof ArtefactKind.File
+      artefactKind: typeof ArtefactKind.FILE
       fileId: string
     }
   | {
-      //NOTE - Change this - if necessary - when implementing image scanning.
-      artefactKind: typeof ArtefactKind.Image
-      repositoryName: string
+      artefactKind: typeof ArtefactKind.IMAGE
       layerDigest: string
-      packageList: string[]
     }
 )
 
-export type ScanSummary = (ModelScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
 
-export type ModelScanSummary = {
+export type ArtefactScanSummary = {
   severity: SeverityLevelKeys
   vulnerabilityDescription: string
 }
 
 export type ClamAVSummary = {
   virus: string
-}
-
-export type ScanAdditionalInfo = ModelScanAdditionalInfo[]
-
-//NOTE: to be implemented alongside Image scanning
-export type ModelScanAdditionalInfo = {
-  [x: string]: unknown
 }
 
 export const SeverityLevel = {
@@ -58,8 +49,8 @@ export const SeverityLevel = {
 export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
 export const ArtefactKind = {
-  File: 'file',
-  Image: 'image',
+  FILE: 'file',
+  IMAGE: 'image',
 } as const
 export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
@@ -69,9 +60,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
   {
     artefactKind: { type: String, enum: Object.values(ArtefactKind), required: true },
     fileId: { type: String, index: true },
-    repositoryName: { type: String },
     layerDigest: { type: String },
-    packageList: [{ type: String }],
 
     toolName: { type: String, required: true },
     scannerVersion: { type: String },
@@ -92,6 +81,10 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
 )
 
 ScanSchema.plugin(softDeletionPlugin)
+ScanSchema.index(
+  { artefactKind: 1, layerDigest: 1, toolName: 1 },
+  { unique: true, partialFilterExpression: { artefactKind: 'image' } },
+)
 
 const ScanModel = model<ScanInterfaceDoc>('v2_Scan', ScanSchema)
 

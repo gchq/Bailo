@@ -5,6 +5,7 @@ import type { ZodSchema, ZodTypeDef } from 'zod'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
+import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -226,6 +227,38 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
 
+export type ModelImages = ModelImageTags[]
+export type ModelImageTags = {
+  repository: string
+  name: string
+  tags: Array<string>
+}
+export type ModelImageWithScans = ModelImageTags & {
+  scanResults: Array<{
+    tag: string
+    results: ScanInterfaceDetail[]
+  }>
+}
+
+export type SeverityCounts = Record<SeverityLevelKeys, number>
+export type ScanInterfaceDetail =
+  | (ScanInterface & { imageScanDetail: ImageScanDetail.FULL; severityCounts: SeverityCounts })
+  | (Omit<ScanInterface, 'additionalInfo'> & {
+      imageScanDetail: ImageScanDetail.SUMMARY
+      severityCounts: SeverityCounts
+    })
+  | (Omit<ScanInterface, 'additionalInfo' | 'summary'> & {
+      imageScanDetail: ImageScanDetail.COUNT
+      severityCounts: SeverityCounts
+    })
+  | { imageScanDetail: ImageScanDetail.NONE }
+export enum ImageScanDetail {
+  NONE = 'none',
+  COUNT = 'count',
+  SUMMARY = 'summary',
+  FULL = 'full',
+}
+
 export const MirrorKind = {
   Documents: 'documents',
   File: 'file',
@@ -241,10 +274,3 @@ export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInfor
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
-
-export const ArtefactType = {
-  FILE: 'file',
-  IMAGE: 'image',
-} as const
-
-export type ArtefactTypeKeys = (typeof ArtefactType)[keyof typeof ArtefactType]
