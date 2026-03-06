@@ -27,6 +27,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { ChangeEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
+import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
@@ -175,6 +176,17 @@ export default function ImageTagInformation() {
     setModalTitle(cve)
   }, [])
 
+  const displayDescriptionSummary = (description: string) => {
+    if (description.includes('Issue summary') && description.includes('Impact summary')) {
+      return description.substring(
+        description.indexOf('Issue summary: ') + 15,
+        description.lastIndexOf('Impact summary'),
+      )
+    } else {
+      return description
+    }
+  }
+
   const tableRows = useCallback(() => {
     return formattedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
       <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
@@ -190,7 +202,10 @@ export default function ImageTagInformation() {
           </List>
         </TableCell>
         <TableCell>
-          <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+          <Stack spacing={2}>
+            <Typography>{displayDescriptionSummary(row.description)}</Typography>
+            <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+          </Stack>
         </TableCell>
       </TableRow>
     ))
@@ -217,6 +232,11 @@ export default function ImageTagInformation() {
   )
 
   const handleRescan = useCallback(async () => {
+    sendNotification({
+      variant: 'success',
+      msg: `Starting manual re-scan of ${name}:${tag}`,
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
     const response = await rerunImageArtefactScan(modelId as string, name as string, tag as string)
     if (response.status === 200) {
       mutateImages()
@@ -246,7 +266,7 @@ export default function ImageTagInformation() {
       <Title text={name && tag ? `${name}:${tag}` : 'Loading...'} />
       <Container maxWidth='xl' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper sx={{ p: 4 }}>
-          <Stack spacing={4}>
+          <Stack spacing={6}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
               spacing={2}
@@ -300,56 +320,59 @@ export default function ImageTagInformation() {
                 <Typography fontWeight='bold'>Vulnerability report</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Stack spacing={2}>
-                  <Stack direction='row' spacing={1} alignItems='center'>
-                    <Typography sx={{ pl: 2 }}>Filters:</Typography>
-                    <Chip
-                      color={filterList.includes('CRITICAL') ? 'secondary' : 'default'}
-                      onClick={() => handleFilterListChipOnClick('CRITICAL')}
-                      label='Critical'
-                    />
-                    <Chip
-                      color={filterList.includes('HIGH') ? 'secondary' : 'default'}
-                      onClick={() => handleFilterListChipOnClick('HIGH')}
-                      label='High'
-                    />
-                    <Chip
-                      color={filterList.includes('MEDIUM') ? 'secondary' : 'default'}
-                      onClick={() => handleFilterListChipOnClick('MEDIUM')}
-                      label='Medium'
-                    />
-                    <Chip
-                      color={filterList.includes('LOW') ? 'secondary' : 'default'}
-                      onClick={() => handleFilterListChipOnClick('LOW')}
-                      label='Low'
-                    />
-                    <Chip
-                      color={filterList.includes('UNKNOWN') ? 'secondary' : 'default'}
-                      onClick={() => handleFilterListChipOnClick('UNKNOWN')}
-                      label='Unknown'
+                {formattedData.length === 0 && <EmptyBlob text='No vulnerabilities found' />}
+                {formattedData.length > 0 && (
+                  <Stack spacing={2}>
+                    <Stack direction='row' spacing={1} alignItems='center'>
+                      <Typography sx={{ pl: 2 }}>Filters:</Typography>
+                      <Chip
+                        color={filterList.includes('CRITICAL') ? 'secondary' : 'default'}
+                        onClick={() => handleFilterListChipOnClick('CRITICAL')}
+                        label='Critical'
+                      />
+                      <Chip
+                        color={filterList.includes('HIGH') ? 'secondary' : 'default'}
+                        onClick={() => handleFilterListChipOnClick('HIGH')}
+                        label='High'
+                      />
+                      <Chip
+                        color={filterList.includes('MEDIUM') ? 'secondary' : 'default'}
+                        onClick={() => handleFilterListChipOnClick('MEDIUM')}
+                        label='Medium'
+                      />
+                      <Chip
+                        color={filterList.includes('LOW') ? 'secondary' : 'default'}
+                        onClick={() => handleFilterListChipOnClick('LOW')}
+                        label='Low'
+                      />
+                      <Chip
+                        color={filterList.includes('UNKNOWN') ? 'secondary' : 'default'}
+                        onClick={() => handleFilterListChipOnClick('UNKNOWN')}
+                        label='Unknown'
+                      />
+                    </Stack>
+                    <Table sx={{ minWidth: 650 }} size='small'>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>CVE name</TableCell>
+                          <TableCell>Severity</TableCell>
+                          <TableCell>Package List</TableCell>
+                          <TableCell>Description</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>{tableRows()}</TableBody>
+                    </Table>
+                    <TablePagination
+                      rowsPerPageOptions={[10]}
+                      component='div'
+                      count={formattedData.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                   </Stack>
-                  <Table sx={{ minWidth: 650 }}>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>CVE name</TableCell>
-                        <TableCell>Severity</TableCell>
-                        <TableCell>Package List</TableCell>
-                        <TableCell>Description</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>{tableRows()}</TableBody>
-                  </Table>
-                  <TablePagination
-                    rowsPerPageOptions={[10]}
-                    component='div'
-                    count={formattedData.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                  />
-                </Stack>
+                )}
               </AccordionDetails>
             </Accordion>
           </Stack>
