@@ -6,11 +6,16 @@ import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
 import { InferenceDoc } from '../../../src/models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/models/Model.js'
-import { ReleaseDoc } from '../../../src/models/Release.js'
+import { ImageRefInterface, ReleaseDoc } from '../../../src/models/Release.js'
 import { ResponseInterface } from '../../../src/models/Response.js'
 import { ReviewInterface } from '../../../src/models/Review.js'
+import { ReviewRoleInterface } from '../../../src/models/ReviewRole.js'
 import { SchemaInterface } from '../../../src/models/Schema.js'
+import { SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
 import { TokenDoc } from '../../../src/models/Token.js'
+import { MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
+import { FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
+import { ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
 import { InternalError } from '../../../src/utils/error.js'
 
 const configMock = vi.hoisted(() => ({
@@ -150,7 +155,10 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // TODO - onDeleteModel test
+  test('onDeleteModel > save expected event', async () => {
+    await connector.onDeleteModel(deleteEventRequest, 'test-model')
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
   test('onCreateModelCard > save expected event', async () => {
     await connector.onCreateModelCard(
@@ -166,7 +174,9 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // TODO - onViewModelCardRevisions
+  test('onViewModelCardRevisions > save expected event', async () => {
+    await connector.onViewModelCardRevisions(viewEventRequest, 'test-model', [{ version: 1 } as ModelCardInterface])
+  })
 
   test('onUpdateModelCard > save expected event', async () => {
     await connector.onUpdateModelCard(updateEventRequest, 'test-model', { version: 1 } as ModelCardInterface)
@@ -330,13 +340,25 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // TODO - onCreateSchemaMigration test
+  test('onCreateSchemaMigration > save expected event', async () => {
+    await connector.onCreateSchemaMigration(createEventRequest, { id: 'test-schema' } as SchemaMigrationInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onViewSchemaMigration test
+  test('onViewSchemaMigration > save expected event', async () => {
+    await connector.onViewSchemaMigration(viewEventRequest, { id: 'test-schema' } as SchemaMigrationInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onViewSchemaMigrations test
+  test('onViewSchemaMigrations > save expected event', async () => {
+    await connector.onViewSchemaMigrations(viewEventRequest, [{ id: 'test-schema' } as SchemaMigrationInterface])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onUpdateSchemaMigration test
+  test('onUpdateSchemaMigration > save expected event', async () => {
+    await connector.onUpdateSchemaMigration(updateEventRequest, { id: 'test-schema' } as SchemaMigrationInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
   test('onCreateInference > save expected event', async () => {
     await connector.onCreateInference(createEventRequest, { id: 'id' } as InferenceDoc)
@@ -358,7 +380,10 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // TODO - onDeleteInference test
+  test('onDeleteInference > save expected event', async () => {
+    await connector.onDeleteInference(deleteEventRequest, { id: 'id' } as InferenceDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
   test('onViewModelImages > save expected event', async () => {
     await connector.onViewModelImages(viewEventRequest, 'model id', [
@@ -371,19 +396,74 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // TODO - onDeleteImage test
+  test('onDeleteImage > save expected event', async () => {
+    await connector.onDeleteImage(deleteEventRequest, 'modelId', { tag: 'string' } as ImageRefInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onCreateS3Export test
+  test('onCreateS3Export > save expected event', async () => {
+    await connector.onCreateS3Export(createEventRequest, 'modelId', ['1.2.3'])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onCreateImport test
+  test('onCreateImport > save expected event for MongoDocumentMirrorInformation', async () => {
+    await connector.onCreateImport(
+      createEventRequest,
+      { id: 'mirrored-model' } as ModelInterface,
+      'source-model',
+      'exporter',
+      {
+        metadata: 'mongo-document',
+        modelCardVersions: { version: 'version' },
+        newModelCards: { modelId: 'modelId' },
+        releaseSemvers: { semver: '1.2.3' },
+        fileIds: 'fileId',
+      } as unknown as MongoDocumentMirrorInformation,
+    )
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onCreateReviewRole test
+  test('onCreateImport > save expected event for FileMirrorInformation', async () => {
+    await connector.onCreateImport(
+      createEventRequest,
+      { id: 'mirrored-model' } as ModelInterface,
+      'source-model',
+      'exporter',
+      { metadata: 'file', newPath: 'newPath' } as unknown as FileMirrorInformation,
+    )
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onViewReviewRoles test
+  test('onCreateImport > save expected event for ImageMirrorInformation', async () => {
+    await connector.onCreateImport(
+      createEventRequest,
+      { id: 'mirrored-model' } as ModelInterface,
+      'source-model',
+      'exporter',
+      { metadata: 'metadata', image: { imageName: 'string', imageTag: 'string' } } as unknown as ImageMirrorInformation,
+    )
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onUpdateReviewRole test
+  test('onCreateReviewRole > save expected event', async () => {
+    await connector.onCreateReviewRole(createEventRequest, { name: 'reviewRole' } as ReviewRoleInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
-  // TODO - onDeleteReviewRole test
+  test('onViewReviewRoles > save expected event', async () => {
+    await connector.onViewReviewRoles(viewEventRequest, [{ name: 'reviewRole' } as ReviewRoleInterface])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onUpdateReviewRole > save expected event', async () => {
+    await connector.onUpdateReviewRole(updateEventRequest, { name: 'reviewRole' } as ReviewRoleInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onDeleteReviewRole > save expected event', async () => {
+    await connector.onDeleteReviewRole(deleteEventRequest, 'reviewRoleId')
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
 
   test('onError > save expected event for Create error', async () => {
     await connector.onError(createEventRequest, InternalError('Error'))
