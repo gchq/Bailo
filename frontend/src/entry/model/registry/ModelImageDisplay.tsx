@@ -15,10 +15,10 @@ import { useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import Link from 'src/Link'
-import { ModelImage } from 'types/types'
+import { ImageScanDetail, ModelImageWithScans } from 'types/types'
 
 type ModelImageDisplayProps = {
-  modelImage: ModelImage
+  modelImage: ModelImageWithScans
 }
 
 export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
@@ -28,66 +28,12 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
     setExpanded(!expanded)
   }
 
-  const scanResults = [
-    {
-      tag: '1.0.0',
-      results: [
-        {
-          _id: '69a99b34c1be0e54d04071cd',
-          toolName: 'Trivy',
-          artefactKind: 'image',
-          layerDigest: 'sha256:1074353eec0db2c1d81d5af2671e56e00cf5738486f5762609ea33d606f88612',
-          __v: 0,
-          createdAt: '2026-03-05T15:03:16.406Z',
-          deleted: false,
-          deletedAt: '',
-          deletedBy: '',
-          lastRunAt: '2026-03-05T15:03:17.077Z',
-          scannerVersion: '0.69.1',
-          state: 'complete',
-          updatedAt: '2026-03-05T15:03:17.080Z',
-          severityCounts: {
-            unknown: 0,
-            low: 0,
-            medium: 9,
-            high: 2,
-            critical: 1,
-          },
-          imageScanDetail: 'counts',
-        },
-        {
-          _id: '69a99b34c1be0e54d04071cc',
-          layerDigest: 'sha256:e7b39c54cdeca0d2aae83114bb605753a5f5bc511fe8be7590e38f6d9f915dad',
-          artefactKind: 'image',
-          toolName: 'Trivy',
-          __v: 0,
-          createdAt: '2026-03-05T15:03:16.406Z',
-          deleted: false,
-          deletedAt: '',
-          deletedBy: '',
-          lastRunAt: '2026-03-05T15:03:16.725Z',
-          scannerVersion: '0.69.1',
-          state: 'complete',
-          updatedAt: '2026-03-05T15:03:16.727Z',
-          severityCounts: {
-            unknown: 0,
-            low: 0,
-            medium: 2,
-            high: 0,
-            critical: 0,
-          },
-          imageScanDetail: 'counts',
-        },
-      ],
-    },
-  ]
-
   const getScanResultCounts = (imageTag: string) => {
-    const tagResults = scanResults.find((tagResult) => tagResult.tag === imageTag)
+    const tagResults = modelImage.scanResults.find((tagResult) => tagResult.tag === imageTag)
     if (tagResults) {
       const combined = tagResults.results.reduce(
         (a, obj) =>
-          Object.entries(obj.severityCounts).reduce((a, [key, val]) => {
+          Object.entries(obj.imageScanDetail !== ImageScanDetail.NONE && obj.severityCounts).reduce((a, [key, val]) => {
             a[key] = (a[key] || 0) + val
             return a
           }, a),
