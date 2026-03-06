@@ -43,6 +43,15 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: certs
+          mountPath: /app/certs/cert.pem
+          subPath: cert.pem
+        - name: certs
+          mountPath: /app/certs/key.pem
+          subPath: key.pem
+        - name: certs
+          mountPath: /usr/local/share/ca-certificates/cert.pem
+          subPath: cert.pem
         {{- if .Values.artefactscan.trivy.ca.enabled }}
         - name: artefactscan-ca
           mountPath: {{ .Values.artefactscan.trivy.ca.mountPath }}
@@ -56,6 +65,14 @@ spec:
           emptyDir: {}
         - name: artefactscan-log
           emptyDir: {}
+        - name: certs
+          secret:
+            secretName: {{ include "bailo.fullname" . }}-certs
+            items:
+              - key: cert.pem
+                path: cert.pem
+              - key: key.pem
+                path: key.pem
         {{- if .Values.artefactscan.trivy.ca.enabled }}
         - name: artefactscan-ca
           secret:

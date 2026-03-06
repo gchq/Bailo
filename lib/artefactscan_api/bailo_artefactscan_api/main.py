@@ -237,7 +237,7 @@ async def registry_events(
     backend_settings: Annotated[BackendSettings, Depends(get_backend_settings)],
 ) -> Response:
     payload = await request.json()
-    logger.info(f"Received {payload=}")
+    logger.debug(f"Received {payload=}")
 
     async with httpx.AsyncClient(
         timeout=10.0,
