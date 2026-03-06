@@ -17,12 +17,12 @@ type AccessRequestsProps = {
 }
 
 export default function ModelImages({ model, readOnly = false }: AccessRequestsProps) {
-  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
+  const { modelImages, isModelImagesLoading, isModelImagesError, mutateModelImages } = useGetModelImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
 
   const modelImageListItem = ({ data }) => (
-    <ModelImageDisplay modelImage={data} key={`${data.repository}-${data.name}`} />
+    <ModelImageDisplay modelImage={data} key={`${data.repository}-${data.name}`} mutate={mutateModelImages} />
   )
 
   if (isModelImagesError) {

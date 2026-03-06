@@ -11,18 +11,24 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { rerunImageArtefactScan } from 'actions/artefactScanning'
+import { useCallback, useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import { ImageScanDetail, ModelImageWithScans } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 type ModelImageDisplayProps = {
   modelImage: ModelImageWithScans
+  mutate: () => void
 }
 
-export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
+export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisplayProps) {
   const [expanded, setExpanded] = useState(false)
+
+  const sendNotification = useNotification()
 
   function toggleExpand() {
     setExpanded(!expanded)
@@ -43,6 +49,22 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
     }
   }
 
+  const handleRescan = useCallback(
+    async (tag: string) => {
+      const response = await rerunImageArtefactScan(modelImage.repository, modelImage.name, tag)
+      if (response.status === 200) {
+        mutate()
+      } else {
+        sendNotification({
+          variant: 'error',
+          msg: await getErrorMessage(response),
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+    },
+    [modelImage.name, modelImage.repository, mutate, sendNotification],
+  )
+
   const modelImageTag = ({ data }) => (
     <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${data.tag}`}>
       <Grid container alignItems='center' spacing={2}>
@@ -55,7 +77,7 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
         <Grid size='auto'>
           <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' justifyContent='left' spacing={2}>
             <Typography fontWeight='bold'>Vulnerabilities: </Typography>
-            <VulnerabilityResult {...getScanResultCounts(data.tag)} />
+            <VulnerabilityResult {...getScanResultCounts(data.tag)} onRescan={() => handleRescan(data.tag)} />
           </Stack>
         </Grid>
       </Grid>
@@ -119,7 +141,7 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
                       </Button>
                     </Link>
                   </Stack>
-                  <VulnerabilityResult {...getScanResultCounts(imageTag)} />
+                  <VulnerabilityResult {...getScanResultCounts(imageTag)} onRescan={() => handleRescan(imageTag)} />
                 </Stack>
               </Box>
             ))

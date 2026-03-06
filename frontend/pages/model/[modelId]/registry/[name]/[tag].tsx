@@ -22,7 +22,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { useGetImageScanResults } from 'actions/artefactScanning'
+import { rerunImageArtefactScan, useGetImageScanResults } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { ChangeEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
@@ -32,10 +32,12 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { ImageScanDetail } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
+import { getErrorMessage } from 'utils/fetcher'
 
 interface VulnerabilityResultItem {
   cve: string
@@ -50,8 +52,12 @@ export default function ImageTagInformation() {
   const router = useRouter()
   const { modelId, name, tag }: { modelId?: string; name?: string; tag?: string } = router.query
 
-  const { images, isImagesLoading, isImagesError } = useGetImageScanResults(modelId as string, ImageScanDetail.FULL)
+  const { images, isImagesLoading, isImagesError, mutateImages } = useGetImageScanResults(
+    modelId as string,
+    ImageScanDetail.FULL,
+  )
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const sendNotification = useNotification()
 
   const [formattedData, setFormattedData] = useState<VulnerabilityResultItem[]>([])
   const [lowResults, setLowResults] = useState(0)
@@ -201,6 +207,19 @@ export default function ImageTagInformation() {
     [filterList],
   )
 
+  const handleRescan = useCallback(async () => {
+    const response = await rerunImageArtefactScan(modelId as string, name as string, tag as string)
+    if (response.status === 200) {
+      mutateImages()
+    } else {
+      sendNotification({
+        variant: 'error',
+        msg: await getErrorMessage(response),
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+  }, [modelId, mutateImages, name, sendNotification, tag])
+
   if (isImagesError) {
     return <MessageAlert message={isImagesError.info.message} severity='error' />
   }
@@ -263,6 +282,7 @@ export default function ImageTagInformation() {
                   high={highResults}
                   critical={criticalResults}
                   unknown={unknownResults}
+                  onRescan={handleRescan}
                 />
               </Stack>
             </Stack>

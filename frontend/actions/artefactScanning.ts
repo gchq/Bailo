@@ -27,6 +27,13 @@ export function rerunArtefactScan(modelId: string, artefactId: string) {
   })
 }
 
+export function rerunImageArtefactScan(modelId: string, name: string, tag: string) {
+  return fetch(`/api/v2/filescanning/model/${modelId}/image/${name}/${tag}/scan`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export function useGetImageScanResults(modelId: string, scanDetail: ImageScanDetail) {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -39,7 +46,7 @@ export function useGetImageScanResults(modelId: string, scanDetail: ImageScanDet
   )
 
   return {
-    imagesMutate: mutate,
+    mutateImages: mutate,
     images: data ? data.images : emptyList,
     isImagesLoading: isLoading,
     isImagesError: error,
