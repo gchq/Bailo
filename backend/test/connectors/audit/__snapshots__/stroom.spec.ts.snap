@@ -991,9 +991,7 @@ exports[`connectors > audit > gchq > onUpdateResponse > save expected event 1`] 
         "After": {
           "Object": {
             "Description": "test description",
-            "Id": {
-              "_id": "acb",
-            },
+            "Id": "acb",
             "Name": "testKind",
           },
         },

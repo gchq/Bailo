@@ -140,15 +140,17 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
+  test('onSearchModel > save expected event', async () => {
+    await connector.onSearchModel(searchEventRequest, [{ id: 'test-model' } as ModelInterface])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
   test('onUpdateModel > save expected event', async () => {
     await connector.onUpdateModel(createEventRequest, { id: 'test-model' } as ModelDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  test('onSearchModel > save expected event', async () => {
-    await connector.onSearchModel(searchEventRequest, [{ id: 'test-model' } as ModelInterface])
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
+  // TODO - onDeleteModel test
 
   test('onCreateModelCard > save expected event', async () => {
     await connector.onCreateModelCard(
@@ -156,7 +158,6 @@ describe('connectors > audit > gchq', () => {
       { id: 'test-model' } as ModelDoc,
       { version: 1 } as ModelCardInterface,
     )
-
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -165,7 +166,8 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  // HS conflict, updated test
+  // TODO - onViewModelCardRevisions
+
   test('onUpdateModelCard > save expected event', async () => {
     await connector.onUpdateModelCard(updateEventRequest, 'test-model', { version: 1 } as ModelCardInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
@@ -227,6 +229,25 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
+  test('onCreateReviewResponse > save expected event', async () => {
+    await connector.onCreateReviewResponse(createEventRequest, { _id: 'abc' as any } as ResponseInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onCreateCommentResponse > save expected event', async () => {
+    await connector.onCreateCommentResponse(createEventRequest, { _id: 'acb' as any } as ResponseInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewResponses > save expected event', async () => {
+    await connector.onViewResponses(viewEventRequest, [{ _id: 'acb' as any } as ResponseInterface])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+  test('onUpdateResponse > save expected event', async () => {
+    await connector.onUpdateResponse(updateEventRequest, 'acb')
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
   test('onCreateUserToken > save expected event', async () => {
     await connector.onCreateUserToken(createEventRequest, { accessKey: 'access' } as TokenDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
@@ -284,16 +305,6 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  test('onCreateReviewResponse > save expected event', async () => {
-    await connector.onCreateReviewResponse(createEventRequest, { _id: 'abc' as any } as ResponseInterface)
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('onSearchSchemas > save expected event', async () => {
-    await connector.onSearchSchemas(searchEventRequest, [{ id: 'id' } as SchemaInterface])
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
-
   test('onCreateSchema > save expected event', async () => {
     await connector.onCreateSchema(createEventRequest, { id: 'id' } as SchemaInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
@@ -301,6 +312,11 @@ describe('connectors > audit > gchq', () => {
 
   test('onViewSchema > save expected event', async () => {
     await connector.onViewSchema(viewEventRequest, { id: 'id' } as SchemaInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onSearchSchemas > save expected event', async () => {
+    await connector.onSearchSchemas(searchEventRequest, [{ id: 'id' } as SchemaInterface])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -314,6 +330,36 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
+  // TODO - onCreateSchemaMigration test
+
+  // TODO - onViewSchemaMigration test
+
+  // TODO - onViewSchemaMigrations test
+
+  // TODO - onUpdateSchemaMigration test
+
+  test('onCreateInference > save expected event', async () => {
+    await connector.onCreateInference(createEventRequest, { id: 'id' } as InferenceDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewInference > save expected event', async () => {
+    await connector.onViewInference(viewEventRequest, { id: 'id' } as InferenceDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewInferences > save expected event', async () => {
+    await connector.onViewInferences(viewEventRequest, [{ id: 'id' } as InferenceDoc])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onUpdateInference > save expected event', async () => {
+    await connector.onUpdateInference(updateEventRequest, { id: 'id' } as InferenceDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  // TODO - onDeleteInference test
+
   test('onViewModelImages > save expected event', async () => {
     await connector.onViewModelImages(viewEventRequest, 'model id', [
       {
@@ -325,25 +371,19 @@ describe('connectors > audit > gchq', () => {
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  test('onViewInferences > save expected event', async () => {
-    await connector.onViewInferences(viewEventRequest, [{ id: 'id' } as InferenceDoc])
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
+  // TODO - onDeleteImage test
 
-  test('onViewInference > save expected event', async () => {
-    await connector.onViewInference(viewEventRequest, { id: 'id' } as InferenceDoc)
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
+  // TODO - onCreateS3Export test
 
-  test('onUpdateInference > save expected event', async () => {
-    await connector.onUpdateInference(updateEventRequest, { id: 'id' } as InferenceDoc)
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
+  // TODO - onCreateImport test
 
-  test('onCreateInference > save expected event', async () => {
-    await connector.onCreateInference(createEventRequest, { id: 'id' } as InferenceDoc)
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
+  // TODO - onCreateReviewRole test
+
+  // TODO - onViewReviewRoles test
+
+  // TODO - onUpdateReviewRole test
+
+  // TODO - onDeleteReviewRole test
 
   test('onError > save expected event for Create error', async () => {
     await connector.onError(createEventRequest, InternalError('Error'))
@@ -367,21 +407,6 @@ describe('connectors > audit > gchq', () => {
 
   test('onError > save expected event for Search error', async () => {
     await connector.onError(searchEventRequest, InternalError('Error'))
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('onCreateCommentResponse > save expected event', async () => {
-    await connector.onCreateCommentResponse(createEventRequest, { _id: 'acb' as any } as ResponseInterface)
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('onUpdateResponse > save expected event', async () => {
-    await connector.onUpdateResponse(updateEventRequest, 'acb')
-    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('onViewResponses > save expected event', async () => {
-    await connector.onViewResponses(viewEventRequest, [{ _id: 'acb' as any } as ResponseInterface])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 })
