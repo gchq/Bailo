@@ -45,7 +45,6 @@ interface VulnerabilityResultItem {
   packageList: string[]
   severity: string
   toolName: string
-  lastRunAt: string
 }
 
 export default function ImageTagInformation() {
@@ -86,6 +85,7 @@ export default function ImageTagInformation() {
       mediumResultsFound: number,
       lowResultsFound: number,
       unknownResultsFound: number,
+      lastScanDate: string,
     ) => {
       setFormattedData(data)
       setCriticalResults(criticalResultsFound)
@@ -93,7 +93,7 @@ export default function ImageTagInformation() {
       setMediumResults(mediumResultsFound)
       setLowResults(lowResultsFound)
       setUnknownResults(unknownResultsFound)
-      setLastRanAt(formatDateTimeString(data[0].lastRunAt))
+      setLastRanAt(lastScanDate !== '' ? formatDateTimeString(lastScanDate) : 'N/A')
     },
   )
 
@@ -104,49 +104,50 @@ export default function ImageTagInformation() {
     let mediumResults = 0
     let lowResults = 0
     let unknownResults = 0
+    let lastScanDate = ''
     const imageForModel = images.find((image) => image.repository === modelId)
+
     if (!imageForModel) {
       return
     }
     const scanResultsForTag = imageForModel.scanResults.find((scanResult) => scanResult.tag === tag)
+
     if (scanResultsForTag) {
       for (const result of scanResultsForTag.results) {
         if (result.imageScanDetail === ImageScanDetail.FULL && result.additionalInfo !== undefined) {
-          for (const additionalInfo of result.additionalInfo) {
-            if (additionalInfo['Results']) {
-              for (const results of additionalInfo['Results']) {
-                for (const vulnerability of results.Vulnerabilities) {
-                  const existingItem = resultList.find(
-                    (resultListItem) => resultListItem.cve === vulnerability.VulnerabilityID,
-                  )
-                  if (existingItem) {
-                    existingItem.packageList.push(vulnerability.PkgID)
-                  } else {
-                    switch (vulnerability.Severity) {
-                      case 'CRITICAL':
-                        criticalResults++
-                        break
-                      case 'HIGH':
-                        highResults++
-                        break
-                      case 'MEDIUM':
-                        mediumResults++
-                        break
-                      case 'LOW':
-                        lowResults++
-                        break
-                      case 'UNKNOWN':
-                        unknownResults++
-                    }
-                    resultList.push({
-                      cve: vulnerability.VulnerabilityID,
-                      description: vulnerability.Description,
-                      severity: vulnerability.Severity,
-                      toolName: result.toolName,
-                      packageList: [vulnerability.PkgID],
-                      lastRunAt: result.lastRunAt,
-                    })
+          if (result.additionalInfo['Results'] !== undefined) {
+            for (const results of result.additionalInfo['Results']) {
+              for (const vulnerability of results.Vulnerabilities) {
+                const existingItem = resultList.find(
+                  (resultListItem) => resultListItem.cve === vulnerability.VulnerabilityID,
+                )
+                if (existingItem) {
+                  existingItem.packageList.push(vulnerability.PkgID)
+                } else {
+                  switch (vulnerability.Severity) {
+                    case 'CRITICAL':
+                      criticalResults++
+                      break
+                    case 'HIGH':
+                      highResults++
+                      break
+                    case 'MEDIUM':
+                      mediumResults++
+                      break
+                    case 'LOW':
+                      lowResults++
+                      break
+                    case 'UNKNOWN':
+                      unknownResults++
                   }
+                  lastScanDate = result.lastRunAt
+                  resultList.push({
+                    cve: vulnerability.VulnerabilityID,
+                    description: vulnerability.Description,
+                    severity: vulnerability.Severity,
+                    toolName: result.toolName,
+                    packageList: [vulnerability.PkgID],
+                  })
                 }
               }
             }
@@ -157,7 +158,15 @@ export default function ImageTagInformation() {
     if (filterList.length > 0) {
       resultList = resultList.filter((resultListItem) => filterList.includes(resultListItem.severity))
     }
-    setFormattedDataEvent(resultList, criticalResults, highResults, mediumResults, lowResults, unknownResults)
+    setFormattedDataEvent(
+      resultList,
+      criticalResults,
+      highResults,
+      mediumResults,
+      lowResults,
+      unknownResults,
+      lastScanDate,
+    )
   }, [filterList, name, images, tag, modelId])
 
   const handleModalOpen = useCallback((cve: string, description: string) => {

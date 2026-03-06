@@ -776,7 +776,7 @@ export type ScanInterface = {
   scannerVersion?: string
   state: ArtefactScanStateKeys
   summary?: ScanSummary
-  additionalInfo?: TrivyScanResultResponse[] | ModelScanResponse[]
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
 
   lastRunAt: string
 
