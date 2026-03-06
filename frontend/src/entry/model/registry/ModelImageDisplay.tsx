@@ -6,18 +6,15 @@ import {
   Box,
   Button,
   Card,
+  Divider,
   Grid,
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useState } from 'react'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
-import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
 import { ModelImage } from 'types/types'
 
 type ModelImageDisplayProps = {
@@ -25,11 +22,79 @@ type ModelImageDisplayProps = {
 }
 
 export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [expanded, setExpanded] = useState(false)
 
   function toggleExpand() {
     setExpanded(!expanded)
+  }
+
+  const scanResults = [
+    {
+      tag: '1.0.0',
+      results: [
+        {
+          _id: '69a99b34c1be0e54d04071cd',
+          toolName: 'Trivy',
+          artefactKind: 'image',
+          layerDigest: 'sha256:1074353eec0db2c1d81d5af2671e56e00cf5738486f5762609ea33d606f88612',
+          __v: 0,
+          createdAt: '2026-03-05T15:03:16.406Z',
+          deleted: false,
+          deletedAt: '',
+          deletedBy: '',
+          lastRunAt: '2026-03-05T15:03:17.077Z',
+          scannerVersion: '0.69.1',
+          state: 'complete',
+          updatedAt: '2026-03-05T15:03:17.080Z',
+          severityCounts: {
+            unknown: 0,
+            low: 0,
+            medium: 9,
+            high: 2,
+            critical: 1,
+          },
+          imageScanDetail: 'counts',
+        },
+        {
+          _id: '69a99b34c1be0e54d04071cc',
+          layerDigest: 'sha256:e7b39c54cdeca0d2aae83114bb605753a5f5bc511fe8be7590e38f6d9f915dad',
+          artefactKind: 'image',
+          toolName: 'Trivy',
+          __v: 0,
+          createdAt: '2026-03-05T15:03:16.406Z',
+          deleted: false,
+          deletedAt: '',
+          deletedBy: '',
+          lastRunAt: '2026-03-05T15:03:16.725Z',
+          scannerVersion: '0.69.1',
+          state: 'complete',
+          updatedAt: '2026-03-05T15:03:16.727Z',
+          severityCounts: {
+            unknown: 0,
+            low: 0,
+            medium: 2,
+            high: 0,
+            critical: 0,
+          },
+          imageScanDetail: 'counts',
+        },
+      ],
+    },
+  ]
+
+  const getScanResultCounts = (imageTag: string) => {
+    const tagResults = scanResults.find((tagResult) => tagResult.tag === imageTag)
+    if (tagResults) {
+      const combined = tagResults.results.reduce(
+        (a, obj) =>
+          Object.entries(obj.severityCounts).reduce((a, [key, val]) => {
+            a[key] = (a[key] || 0) + val
+            return a
+          }, a),
+        {},
+      )
+      return combined
+    }
   }
 
   const modelImageTag = ({ data }) => (
@@ -44,28 +109,15 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
         <Grid size='auto'>
           <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' justifyContent='left' spacing={2}>
             <Typography fontWeight='bold'>Vulnerabilities: </Typography>
-            <VulnerabilityResult />
-          </Stack>
-        </Grid>
-        <Grid size='auto'>
-          <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' spacing={2}>
-            <Typography fontWeight='bold'>URI: </Typography>
-            <CodeLine
-              line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
-            />
+            <VulnerabilityResult {...getScanResultCounts(data.tag)} />
           </Stack>
         </Grid>
       </Grid>
     </Box>
   )
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {isUiConfigLoading && <Loading />}
       <Card
         sx={{
           width: '100%',
@@ -112,37 +164,17 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
           ) : (
             modelImage.tags.map((imageTag) => (
               <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}>
-                <Grid container alignItems='center' spacing={2}>
-                  <Grid size={2}>
-                    <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
-                      <LocalOffer color='primary' />
-                      <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${imageTag}`}>
-                        <Button size='large' color='primary'>
-                          {imageTag}
-                        </Button>
-                      </Link>
-                    </Stack>
-                  </Grid>
-                  <Grid size='auto'>
-                    <Stack
-                      direction={{ sm: 'column', md: 'row' }}
-                      alignItems='center'
-                      justifyContent='left'
-                      spacing={2}
-                    >
-                      <Typography fontWeight='bold'>Vulnerabilities: </Typography>
-                      <VulnerabilityResult />
-                    </Stack>
-                  </Grid>
-                  <Grid size='auto'>
-                    <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' spacing={2}>
-                      <Typography fontWeight='bold'>URI: </Typography>
-                      <CodeLine
-                        line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
-                      />
-                    </Stack>
-                  </Grid>
-                </Grid>
+                <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />}>
+                  <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
+                    <LocalOffer color='primary' />
+                    <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${imageTag}`}>
+                      <Button size='large' color='primary'>
+                        {imageTag}
+                      </Button>
+                    </Link>
+                  </Stack>
+                  <VulnerabilityResult {...getScanResultCounts(imageTag)} />
+                </Stack>
               </Box>
             ))
           )}
