@@ -13,7 +13,7 @@ export const putImageScanSchema = z.object({
     name: z.string(),
     tag: z.string(),
   }),
-  body: z.object({}),
+  body: z.object({}).optional(),
 })
 
 registerPath({

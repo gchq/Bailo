@@ -12,7 +12,7 @@ export const putFileScanSchema = z.object({
     modelId: z.string(),
     fileId: z.string(),
   }),
-  body: z.object({}),
+  body: z.object({}).optional(),
 })
 
 registerPath({
