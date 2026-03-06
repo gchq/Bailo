@@ -66,99 +66,131 @@ export const ModelScanResponse = z.object({
 })
 export type ModelScanResponse = z.infer<typeof ModelScanResponse>
 
-const ImageHistorySchema = z.object({
-  created: z.string(),
-  created_by: z.string(),
-  comment: z.string().optional(),
-  empty_layer: z.boolean().optional(),
-})
+// There's no formal definition of the JSON schema so this must be permissive
+const ImageHistorySchema = z
+  .object({
+    created: z.string().optional(),
+    created_by: z.string().optional(),
+    comment: z.string().optional(),
+    empty_layer: z.boolean().optional(),
+  })
+  .passthrough()
 
 const ImageConfigSchema = z
   .object({
-    architecture: z.string(),
-    created: z.string(),
-    history: z.array(ImageHistorySchema),
-    os: z.string(),
-    rootfs: z.object({
-      type: z.string(),
-      diff_ids: z.array(z.string()),
-    }),
-    config: z.object({
-      Cmd: z.array(z.string()).optional(),
-      Env: z.array(z.string()).optional(),
-      WorkingDir: z.string().optional(),
-      ArgsEscaped: z.boolean().optional(),
-    }),
+    architecture: z.string().optional(),
+    created: z.string().optional(),
+    history: z.array(ImageHistorySchema).optional(),
+    os: z.string().optional(),
+    rootfs: z
+      .object({
+        type: z.string().optional(),
+        diff_ids: z.array(z.string()).optional(),
+      })
+      .passthrough()
+      .optional(),
+    config: z
+      .object({
+        Cmd: z.array(z.string()).optional(),
+        Env: z.array(z.string()).optional(),
+        WorkingDir: z.string().optional(),
+        ArgsEscaped: z.boolean().optional(),
+      })
+      .passthrough()
+      .optional(),
   })
-  .optional()
+  .passthrough()
 
-const VulnerabilitySchema = z.object({
-  VulnerabilityID: z.string(),
-  PkgID: z.string(),
-  PkgName: z.string(),
-  PkgIdentifier: z.object({
-    PURL: z.string(),
-    UID: z.string(),
-  }),
-  InstalledVersion: z.string(),
-  FixedVersion: z.string().optional(),
-  Status: z.string(),
-  Layer: z
-    .object({
-      DiffID: z.string(),
-    })
-    .optional(),
-  PrimaryURL: z.string().url().optional(),
-  DataSource: z.object({
-    ID: z.string(),
-    Name: z.string(),
-    URL: z.string().url(),
-  }),
-  Title: z.string(),
-  Description: z.string(),
-  Severity: z.string(),
-  CweIDs: z.array(z.string()).optional(),
-  VendorSeverity: z.record(z.number()).optional(),
-  CVSS: z
-    .record(
-      z.object({
-        V3Vector: z.string(),
-        V3Score: z.number(),
-      }),
-    )
-    .optional(),
-  References: z.array(z.string().url()).optional(),
-  PublishedDate: z.string(),
-  LastModifiedDate: z.string(),
-})
+const VulnerabilitySchema = z
+  .object({
+    VulnerabilityID: z.string(),
+    PkgID: z.string().optional(),
+    PkgName: z.string(),
+    PkgIdentifier: z
+      .object({
+        PURL: z.string(),
+        UID: z.string(),
+      })
+      .passthrough()
+      .optional(),
+    InstalledVersion: z.string().optional(),
+    FixedVersion: z.string().optional(),
+    Status: z.string().optional(),
+    Layer: z
+      .object({
+        DiffID: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    PrimaryURL: z.string().url().optional(),
+    DataSource: z
+      .object({
+        ID: z.string().optional(),
+        Name: z.string().optional(),
+        URL: z.string().url().optional(),
+      })
+      .passthrough()
+      .optional(),
+    Title: z.string().optional(),
+    Description: z.string().optional(),
+    Severity: z.string().optional(),
+    CweIDs: z.array(z.string()).optional(),
+    VendorSeverity: z.record(z.number()).optional(),
+    CVSS: z
+      .record(
+        z
+          .object({
+            V3Vector: z.string().optional(),
+            V3Score: z.number().optional(),
+          })
+          .passthrough()
+          .optional(),
+      )
+      .optional(),
+    References: z.array(z.string().url()).optional(),
+    PublishedDate: z.string().optional(),
+    LastModifiedDate: z.string().optional(),
+  })
+  .passthrough()
 
-const ResultSchema = z.object({
-  Target: z.string(),
-  Class: z.string(),
-  Type: z.string(),
-  Vulnerabilities: z.array(VulnerabilitySchema).optional(),
-})
+const ResultSchema = z
+  .object({
+    Target: z.string(),
+    Class: z.string().optional(),
+    Type: z.string(),
+    Vulnerabilities: z.array(VulnerabilitySchema).optional(),
+    Misconfigurations: z.array(z.unknown()).optional(),
+    Secrets: z.array(z.unknown()).optional(),
+    Licenses: z.array(z.unknown()).optional(),
+  })
+  .passthrough()
 
-export const TrivyScanResultResponse = z.object({
-  SchemaVersion: z.literal(2),
-  CreatedAt: z.string(),
-  ArtifactName: z.string(),
-  ArtifactType: z.string(),
-  Metadata: z
-    .object({
-      OS: z.object({
-        Family: z.string(),
-        Name: z.string(),
-      }),
-      ImageID: z.string().optional(),
-      DiffIDs: z.array(z.string()).optional(),
-      RepoTags: z.array(z.string()).optional(),
-      RepoDigests: z.array(z.string()).optional(),
-      ImageConfig: ImageConfigSchema,
-    })
-    .optional(),
-  Results: z.array(ResultSchema).optional(),
-})
+export const TrivyScanResultResponse = z
+  .object({
+    SchemaVersion: z.literal(2),
+    CreatedAt: z.string().optional(),
+    ArtifactName: z.string(),
+    ArtifactType: z.string().optional(),
+    Metadata: z
+      .object({
+        OS: z
+          .object({
+            Family: z.string().optional(),
+            Name: z.string().optional(),
+          })
+          .passthrough()
+          .optional(),
+        ImageID: z.string().optional(),
+        DiffIDs: z.array(z.string()).optional(),
+        RepoTags: z.array(z.string()).optional(),
+        RepoDigests: z.array(z.string()).optional(),
+        ImageConfig: ImageConfigSchema.optional(),
+      })
+      .passthrough()
+      .optional(),
+    Results: z.array(ResultSchema).optional(),
+  })
+  .passthrough()
 export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponse>
 
 async function getArtefactScanInfo() {

@@ -4,7 +4,13 @@ import { getCachedArtefactScanInfo, scanFileStream, scanImageBlobStream } from '
 import { getRegistryLayerStream } from '../../clients/registry.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
+import {
+  ArtefactKind,
+  ArtefactKindKeys,
+  ArtefactScanSummary,
+  SeverityLevel,
+  SeverityLevelKeys,
+} from '../../models/Scan.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
@@ -128,10 +134,11 @@ export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnect
           for (const vulnerability of result.Vulnerabilities) {
             const key = vulnerability.VulnerabilityID
             const title = vulnerability.Title ?? ''
+            const severity = vulnerability.Severity ?? SeverityLevel.UNKNOWN
 
             if (!summaries.get(key)) {
               summaries.set(key, {
-                severity: vulnerability.Severity.toLowerCase() as SeverityLevelKeys,
+                severity: severity.toLowerCase() as SeverityLevelKeys,
                 vulnerabilityDescription: `${key}: ${title}`,
               })
             }
