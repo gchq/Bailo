@@ -18,6 +18,9 @@ a,
 a:hover {
   color: var(--secondary);
 }
+.wy-nav-side a.icon.icon-home:hover {
+  color: #fff
+}
 
 .rst-content code.literal,
 .rst-content tt.literal {
