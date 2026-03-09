@@ -28,7 +28,10 @@ export function rerunArtefactScan(modelId: string, artefactId: string) {
 }
 
 export function rerunImageArtefactScan(modelId: string, name: string, tag: string) {
-  return fetch(`/api/v2/filescanning/model/${modelId}/image/${name}/${tag}/scan`, {
+  const encodedModelId = encodeURIComponent(modelId)
+  const encodedName = encodeURIComponent(name)
+  const encodedTag = encodeURIComponent(tag)
+  return fetch(`/api/v2/filescanning/model/${encodedModelId}/image/${encodedName}/${encodedTag}/scan`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
   })
