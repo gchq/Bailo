@@ -70,7 +70,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
         type: Schema.Types.Mixed,
       },
     ],
-    additionalInfo: [{ type: Schema.Types.Mixed }],
+    additionalInfo: { type: Schema.Types.Mixed },
     lastRunAt: { type: Schema.Types.Date, required: true },
   },
   {
