@@ -269,7 +269,14 @@ describe('services > model', () => {
       expect(ReviewModelMock.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
       expect(tokenMock.dropModelIdFromTokens).toBeCalledWith(user, modelId, Array(itemsFound).fill({}), undefined)
       expect(webhookMockDelete).toBeCalledTimes(itemsFound)
-      expect(fileMock.removeFiles).toBeCalledWith(user, modelId, Array(itemsFound).fill(fileId), true, undefined)
+      expect(fileMock.removeFiles).toBeCalledWith(
+        user,
+        modelId,
+        Array(itemsFound).fill(fileId),
+        true,
+        undefined,
+        undefined,
+      )
       expect(registryMock.softDeleteImage).toBeCalledTimes(itemsFound * 2)
       expect(registryMock.softDeleteImage.mock.calls.at(0)).toEqual([
         user,
