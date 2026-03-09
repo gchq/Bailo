@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { TransferStatus } from '../../src/models/ModelTransfer.js'
 import {
@@ -30,14 +30,6 @@ vi.mock('../../src/services/log.js', async () => ({
 const user = { dn: 'user:test' } as any
 
 describe('services > modelTransfer', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-
-    modelMock.getModelById.mockResolvedValue({
-      _id: 'model-id',
-    })
-  })
-
   const validObjectId = new Types.ObjectId().toHexString()
 
   test('findModelTransferById > throws NotFound when transfer does not exist', async () => {
