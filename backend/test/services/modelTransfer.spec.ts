@@ -42,7 +42,7 @@ describe('services > modelTransfer', () => {
     await expect(res).rejects.toThrowError(/^The requested model transfer was not found/)
   })
 
-  test('findModelTransferById > returns transfer when found', async () => {
+  test('findModelTransferById > returns valid transfer when found', async () => {
     const transfer = {
       _id: validObjectId,
       status: TransferStatus.InProgress,
