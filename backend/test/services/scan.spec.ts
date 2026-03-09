@@ -112,6 +112,16 @@ const imageMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => imageMocks)
 
+const registryClientMocks = vi.hoisted(() => ({
+  isImageTagManifestList: vi.fn(() => false),
+}))
+vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+
+const registryAuthMocks = vi.hoisted(() => ({
+  getAccessToken: vi.fn(() => 'token'),
+}))
+vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
+
 const testFileId = '73859F8D26679D2E52597326'
 
 describe('services > scan', () => {
@@ -298,6 +308,15 @@ describe('services > scan', () => {
 
       expect(result).toBe('Image scan started for repo/image:latest')
       expect(fileScanningMock.startScans).not.toHaveBeenCalled()
+    })
+
+    test('fail on manifest list', async () => {
+      registryClientMocks.isImageTagManifestList.mockResolvedValueOnce(true)
+      ScanModelMock.find.mockResolvedValueOnce([])
+
+      await expect(
+        rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
+      ).rejects.toThrowError(/^Bailo backend does not currently support scanning images with manifest lists./)
     })
 
     test('throws bad request when model is not found (image scan)', async () => {
