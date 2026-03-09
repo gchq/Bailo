@@ -99,11 +99,11 @@ import config from './utils/config.js'
 export const server = express()
 
 server.use('/api/v2', bodyParser.json())
+server.use('/api/v2', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
-server.use('/api/v2', httpLog)
 
 // Needs to be applied after authentication middleware as it requires the user details
 server.use('/api/v2/models', escalateUser)
