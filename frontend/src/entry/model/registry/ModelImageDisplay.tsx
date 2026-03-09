@@ -53,6 +53,11 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     async (tag: string) => {
       const response = await rerunImageArtefactScan(modelImage.repository, modelImage.name, tag)
       if (response.status === 200) {
+        sendNotification({
+          variant: 'success',
+          msg: `Starting manual re-scan of ${name}:${tag}`,
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
         mutate()
       } else {
         sendNotification({

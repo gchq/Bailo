@@ -232,13 +232,13 @@ export default function ImageTagInformation() {
   )
 
   const handleRescan = useCallback(async () => {
-    sendNotification({
-      variant: 'success',
-      msg: `Starting manual re-scan of ${name}:${tag}`,
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
     const response = await rerunImageArtefactScan(modelId as string, name as string, tag as string)
     if (response.status === 200) {
+      sendNotification({
+        variant: 'success',
+        msg: `Starting manual re-scan of ${name}:${tag}`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
       mutateImages()
     } else {
       sendNotification({
