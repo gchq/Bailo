@@ -44,7 +44,7 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
         initScanner(TrivyImageScanningConnector, artefactScanner)
         break
       default:
-        throw ServiceUnavailable(`'${artefactScanner}' is not a valid file scanning kind.`, {
+        throw ServiceUnavailable(`'${artefactScanner}' is not a valid scanning kind.`, {
           validKinds: Object.values(ArtefactScanKind),
         })
     }

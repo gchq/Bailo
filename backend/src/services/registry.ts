@@ -24,7 +24,8 @@ import {
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { omitFields } from '../utils/object.js'
+import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -195,7 +196,18 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
 }
 
 async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
-  const layers = await getImageLayers(user, image)
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
+  ])
+
+  let layers: Descriptors[] = []
+  try {
+    layers = await getImageLayers(repositoryToken, image)
+  } catch (err) {
+    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
+      throw err
+    }
+  }
   const layerDigests = layers.map((l) => l.digest)
 
   if (layerDigests.length === 0) {
@@ -208,14 +220,6 @@ async function getScansForImageTag(user: UserInterface, image: ImageRefInterface
   })
     .lean<ScanInterface[]>()
     .exec()
-}
-
-function omitFields<T, K extends readonly (keyof T)[]>(obj: T, keys: K): Omit<T, K[number]> {
-  const result = { ...obj }
-  for (const key of keys) {
-    delete result[key]
-  }
-  return result
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
