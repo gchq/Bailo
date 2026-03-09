@@ -12,7 +12,6 @@ export const TransferStatus = {
 export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferStatus]
 
 export interface ModelTransferInterface {
-  _id: string
   modelId: string
   // The Bailo instance ID where the model is being transferred from
   peerId: string
@@ -44,7 +43,7 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
 ModelTransferSchema.plugin(softDeletionPlugin)
 
 // For GET transfers by modelId queries
-ModelTransferSchema.index({ modelId: 1 })
+ModelTransferSchema.index({ modelId: 1, createdAt: -1 })
 
 const ModelTransferModel = model<ModelTransferDoc>('v2_Model_Transfer', ModelTransferSchema)
 

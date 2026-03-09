@@ -38,7 +38,7 @@ export const getModelTransfer = [
   async (req: Request, res: Response<ModelTransferResponse>): Promise<void> => {
     const { params } = parse(req, getModelTransferSchema)
 
-    const modelTransfer = await findModelTransferById(params.transferId)
+    const modelTransfer = await findModelTransferById(req.user, params.transferId)
 
     res.json({
       transfer: modelTransfer,

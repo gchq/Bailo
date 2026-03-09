@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { TransferStatus } from '../../src/models/ModelTransfer.js'
 import {
@@ -27,7 +27,17 @@ vi.mock('../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
+const user = { dn: 'user:test' } as any
+
 describe('services > modelTransfer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+
+    modelMock.getModelById.mockResolvedValue({
+      _id: 'model-id',
+    })
+  })
+
   const validObjectId = new Types.ObjectId().toHexString()
 
   test('findModelTransferById > throws NotFound when transfer does not exist', async () => {
@@ -35,7 +45,7 @@ describe('services > modelTransfer', () => {
       lean: vi.fn().mockResolvedValue(undefined),
     }))
 
-    const res = findModelTransferById(validObjectId)
+    const res = findModelTransferById(user, validObjectId)
 
     await expect(res).rejects.toThrowError(/^The requested model transfer was not found/)
   })
@@ -50,23 +60,20 @@ describe('services > modelTransfer', () => {
       lean: vi.fn().mockResolvedValue(transfer),
     }))
 
-    const result = await findModelTransferById(validObjectId)
+    const result = await findModelTransferById(user, validObjectId)
 
     expect(result).toEqual(transfer)
   })
 
-  test('findModelTransfersByModelId > returns empty array when no transfers exist', async () => {
+  test('findModelTransfersByModelId > throws NotFound when no transfers exist', async () => {
     ModelTransferModelMock.find.mockImplementation(() => ({
       sort: vi.fn().mockReturnThis(),
       lean: vi.fn().mockResolvedValue([]),
     }))
 
-    const result = await findModelTransfersByModelId(validObjectId)
+    const res = findModelTransfersByModelId(user, validObjectId)
 
-    expect(ModelTransferModelMock.find).toHaveBeenCalledWith({
-      modelId: validObjectId,
-    })
-    expect(result).toEqual([])
+    await expect(res).rejects.toThrowError(/^No model transfers found/)
   })
 
   test('findModelTransfersByModelId > returns transfers when found', async () => {
@@ -91,7 +98,7 @@ describe('services > modelTransfer', () => {
       lean: vi.fn().mockResolvedValue(transfers),
     }))
 
-    const result = await findModelTransfersByModelId(modelId)
+    const result = await findModelTransfersByModelId(user, modelId)
 
     expect(ModelTransferModelMock.find).toHaveBeenCalledWith({
       modelId: modelId,

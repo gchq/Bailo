@@ -1,7 +1,9 @@
 import { Types } from 'mongoose'
 
 import ModelTransferModel, { ModelTransferInterface, TransferStatusKeys } from '../models/ModelTransfer.js'
+import { UserInterface } from '../models/User.js'
 import { BadReq, NotFound } from '../utils/error.js'
+import { getModelById } from './model.js'
 
 function assertValidObjectId(id: string): void {
   if (!Types.ObjectId.isValid(id)) {
@@ -9,7 +11,7 @@ function assertValidObjectId(id: string): void {
   }
 }
 
-export async function findModelTransferById(id: string): Promise<ModelTransferInterface> {
+export async function findModelTransferById(user: UserInterface, id: string): Promise<ModelTransferInterface> {
   assertValidObjectId(id)
 
   const transfer = await ModelTransferModel.findOne({
@@ -20,11 +22,17 @@ export async function findModelTransferById(id: string): Promise<ModelTransferIn
     throw NotFound('The requested model transfer was not found.', { id })
   }
 
+  const modelId = transfer.modelId
+
+  // Check user is authorised to get the Model
+  await getModelById(user, modelId)
+
   return transfer
 }
 
-export async function findModelTransfersByModelId(id: string): Promise<ModelTransferInterface[]> {
-  assertValidObjectId(id)
+export async function findModelTransfersByModelId(user: UserInterface, id: string): Promise<ModelTransferInterface[]> {
+  // Check user is authorised to get the Model
+  await getModelById(user, id)
 
   const transfers = await ModelTransferModel.find({
     modelId: id,
@@ -32,11 +40,16 @@ export async function findModelTransfersByModelId(id: string): Promise<ModelTran
     .sort({ createdAt: -1 })
     .lean()
 
+  if (transfers.length === 0) {
+    throw NotFound('No model transfers found.', { id })
+  }
+
   return transfers
 }
 
 export async function createModelTransfer(input: {
   modelId: string
+  peerId: string
   status: TransferStatusKeys
   createdBy: string
 }): Promise<ModelTransferInterface> {
