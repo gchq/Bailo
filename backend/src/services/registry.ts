@@ -24,6 +24,7 @@ import {
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { omitFields } from '../utils/object.js'
 import { OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -208,14 +209,6 @@ async function getScansForImageTag(user: UserInterface, image: ImageRefInterface
   })
     .lean<ScanInterface[]>()
     .exec()
-}
-
-function omitFields<T, K extends readonly (keyof T)[]>(obj: T, keys: K): Omit<T, K[number]> {
-  const result = { ...obj }
-  for (const key of keys) {
-    delete result[key]
-  }
-  return result
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {

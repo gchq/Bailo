@@ -23,3 +23,12 @@ export function getPropValue<T = unknown>(source: unknown, path: string): T | un
     return acc != null ? acc[key] : undefined
   }, source)
 }
+
+export function omitFields<T, K extends readonly (keyof T)[]>(obj: T, keys: K): Omit<T, K[number]> {
+  // spread object to get a copy (preventing mutation of the original)
+  const result = { ...obj }
+  for (const key of keys) {
+    delete result[key]
+  }
+  return result
+}
