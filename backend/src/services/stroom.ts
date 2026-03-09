@@ -5,11 +5,13 @@ import StroomEvent, { StroomEventObject } from '../models/StroomEvent.js'
 import { longId } from '../utils/id.js'
 import log from './log.js'
 
-export async function saveEvent(event: StroomEventObject) {
+export async function saveEvent(event: StroomEventObject): Promise<string> {
   log.info({ event }, 'Saving STROOM audit event.')
   const stroomEvent = new StroomEvent({ event })
 
-  return await stroomEvent.save()
+  const savedEvent = await stroomEvent.save()
+
+  return savedEvent._id.toString()
 }
 
 export async function processBatch() {
