@@ -66,11 +66,7 @@ export const getModelsSearch = [
 
     const opts: { query: EntrySearchOptionsParams } = parse(req, getModelsSearchSchema)
 
-    let results: EntrySearchResultWithErrors = {
-      models: [],
-    }
-
-    results = await searchModels(req.user, opts.query)
+    const results = await searchModels(req.user, opts.query)
 
     await audit.onSearchModel(req, results.models)
 

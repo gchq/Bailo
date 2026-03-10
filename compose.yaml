@@ -64,6 +64,7 @@ services:
       context: ./lib/artefactscan_api
     volumes:
       - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
+      - ./backend/certs:/certs
     healthcheck:
       test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
       interval: 30s
