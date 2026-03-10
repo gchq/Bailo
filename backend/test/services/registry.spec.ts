@@ -52,7 +52,7 @@ const registryClientMocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
-  getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1' }] as any),
+  getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
 
@@ -737,6 +737,7 @@ describe('services > registry', () => {
         name: 'image1',
         tag: 'latest',
         scanResults: [{ imageScanDetail: 'none' }],
+        imageSize: 42134,
       })
     })
 
@@ -783,6 +784,7 @@ describe('services > registry', () => {
             },
           },
         ],
+        imageSize: 42134,
       })
     })
 
@@ -841,6 +843,7 @@ describe('services > registry', () => {
             },
           },
         ],
+        imageSize: 42134,
       })
     })
 
@@ -894,6 +897,7 @@ describe('services > registry', () => {
             },
           },
         ],
+        imageSize: 42134,
       })
     })
 
