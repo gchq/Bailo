@@ -28,6 +28,7 @@ const FileModelMock = getTypedModelMock('FileModel')
 const ScanModelMock = getTypedModelMock('ScanModel')
 
 const logMock = vi.hoisted(() => ({
+  debug: vi.fn(),
   info: vi.fn(),
   warn: vi.fn(),
 }))
