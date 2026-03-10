@@ -121,12 +121,15 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * Renames an image in the registry.
  *
  * @remarks
- * This does _not_ also update any mongo data, and does _not_ do any auth checks on the destination.
+ * This does _not_ also update any mongo data, and does _not_ do any auth checks on the source or destination.
  */
 export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
   let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
-    manifest = await getImageManifest(user, source)
+    const repositoryToken = await getAccessToken({ dn: user.dn }, [
+      { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['pull'] },
+    ])
+    manifest = await getImageTagManifest(repositoryToken, source)
   } catch (err) {
     // special case for 404 not found
     if (err && isBailoError(err) && err?.context?.status === 404) {
@@ -222,4 +225,20 @@ export async function softDeleteImage(
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
+}
+
+export async function restoreSoftDeletedImage(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  restoreMirroredModel: boolean = false,
+) {
+  const model = await getModelById(user, imageRef.repository)
+  if (EntryKind.MirroredModel === model.kind && !restoreMirroredModel) {
+    throw BadReq('Cannot restore image to a mirrored model.')
+  }
+
+  await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
+
+  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  await renameImage(user, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag }, imageRef)
 }
