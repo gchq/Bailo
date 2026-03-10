@@ -9,6 +9,7 @@ import {
   listModelImages,
   listModelImagesWithScanResults,
   renameImage,
+  restoreSoftDeletedImage,
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
@@ -718,6 +719,49 @@ describe('services > registry', () => {
 
       expect(result).toBe('stream')
       expect(registryClientMocks.getRegistryLayerStream).toHaveBeenCalled()
+    })
+
+    test('restoreSoftDeletedImage > success', async () => {
+      const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
+      registryClientMocks.getImageTagManifest.mockResolvedValue({
+        body: mockBody,
+        headers: { 'docker-content-digest': 'digest' },
+      })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['newTag'])
+      const source = { name: 'sourceName', repository: 'sourceRepository', tag: 'sourceTag' }
+
+      await restoreSoftDeletedImage({} as any, source)
+
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
+      expect(releaseMocks.findAndDeleteImageFromReleases).not.toHaveBeenCalled()
+    })
+
+    test('restoreSoftDeletedImage > success bypass mirrored model check', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        settings: { mirror: { sourceModelId: 'sourceModelId' } },
+      } as any)
+      const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
+      registryClientMocks.getImageTagManifest.mockResolvedValue({
+        body: mockBody,
+        headers: { 'docker-content-digest': 'digest' },
+      })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['newTag'])
+      const source = { name: 'sourceName', repository: 'sourceRepository', tag: 'sourceTag' }
+
+      await restoreSoftDeletedImage({} as any, source, true)
+
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
+    })
+
+    test('restoreSoftDeletedImage > fail on mirrored model', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        kind: 'mirrored-model',
+      } as any)
+
+      const promise = restoreSoftDeletedImage({} as any, {} as any)
+
+      await expect(promise).rejects.toThrowError(/^Cannot restore image to a mirrored model./)
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
     })
   })
 })
