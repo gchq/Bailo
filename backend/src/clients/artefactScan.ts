@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream'
 
 import FormData from 'form-data'
+import NodeCache from 'node-cache'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
 import { z } from '../lib/zod.js'
@@ -250,17 +251,33 @@ export async function scanImageBlobStream(
 }
 
 // 5 mins
-const CACHE_TTL_MS = 5 * 60 * 1000
-let cachedArtefactScanInfo: { value: z.infer<typeof ArtefactScanInfoResponse>; expiresAt: number } | undefined
-export async function getCachedArtefactScanInfo() {
-  const now = Date.now()
+const CACHE_TTL_SECONDS = 5 * 60
+const CACHE_KEY = 'artefactScanInfo'
 
-  if (!cachedArtefactScanInfo || cachedArtefactScanInfo.expiresAt < now) {
-    cachedArtefactScanInfo = {
-      value: await getArtefactScanInfo(),
-      expiresAt: now + CACHE_TTL_MS,
-    }
+const artefactScanCache = new NodeCache({
+  stdTTL: CACHE_TTL_SECONDS,
+  checkperiod: CACHE_TTL_SECONDS,
+  useClones: false,
+})
+
+let inFlight: Promise<z.infer<typeof ArtefactScanInfoResponse>> | undefined
+
+export async function getCachedArtefactScanInfo() {
+  const cached = artefactScanCache.get<z.infer<typeof ArtefactScanInfoResponse>>(CACHE_KEY)
+  if (cached) {
+    return cached
   }
 
-  return cachedArtefactScanInfo.value
+  // Prevent stampede
+  if (!inFlight) {
+    inFlight = (async () => {
+      const value = await getArtefactScanInfo()
+      artefactScanCache.set(CACHE_KEY, value)
+      return value
+    })().finally(() => {
+      inFlight = undefined
+    })
+  }
+
+  return inFlight
 }
