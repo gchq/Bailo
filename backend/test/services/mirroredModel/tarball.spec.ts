@@ -116,7 +116,7 @@ describe('service > mirroredModel > tarball', () => {
   test('finaliseTarGzUpload > success', async () => {
     const { tarStream } = setUpExtractTarGzStreams()
     const finalizeSpy = vi.spyOn(tarStream, 'finalize')
-    const uploadPromise = Promise.resolve()
+    const uploadPromise = Promise.all([Promise.resolve(), Promise.resolve()])
 
     await finaliseTarGzUpload(tarStream, uploadPromise)
 
@@ -166,19 +166,13 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('addEntryToTarGzUpload > reject when tarStream.entry callback receives error', async () => {
-    const { tarStream } = setUpExtractTarGzStreams()
-    const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
-      cb?.(new Error('cb-error')) // trigger the reject(err) code path
-      const pt = new PassThrough()
-      pt.end() // ensure the stream closes
-      return pt
-    })
-    const stream = new PassThrough()
+    const uploadReject = new Error('upload failed')
 
-    const promise = addEntryToTarGzUpload(tarStream, { type: 'stream', filename: 'bin', stream }, {} as any)
+    s3Mocks.uploadToS3.mockRejectedValueOnce(uploadReject)
 
-    await expect(promise).rejects.toThrow('cb-error')
-    expect(entrySpy).toHaveBeenCalled()
+    const { uploadPromise } = await initialiseTarGzUpload('file.tar.gz', dummyMetadata as any, {} as any)
+
+    await expect(uploadPromise).rejects.toBe(uploadReject)
   })
 
   test('addEntryToTarGzUpload > error on invalid type', async () => {

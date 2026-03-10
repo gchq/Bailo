@@ -188,7 +188,7 @@ export abstract class BaseExporter {
   protected tarStream?: Pack
   protected gzipStream?: zlib.Gzip
   protected uploadStream?: PassThrough
-  protected uploadPromise?: Promise<void>
+  protected uploadPromise?: Promise<[void, void]>
   protected initialised = false
   protected authCheck = false
 

@@ -27,13 +27,14 @@ function createTarGzStreams() {
 
 export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMetadata, logData: MirrorExportLogData) {
   const { gzipStream, tarStream } = createTarGzStreams()
+
   // It is safer to have an extra PassThrough for handling backpressure and explicitly closing on error(s)
   const uploadStream = new PassThrough()
-  pipeline(tarStream, gzipStream, uploadStream).catch((err) => {
-    throw InternalError('Unable to handle entry for tar.gz packing stream.', { error: err })
-  })
-
-  const uploadPromise = uploadToS3(fileName, uploadStream, logData)
+  const uploadPromise = Promise.all([
+    uploadToS3(fileName, uploadStream, logData),
+    // Errors have to be swallowed since the response may already be sent
+    pipeline(tarStream, gzipStream, uploadStream).catch((_err) => {}),
+  ])
 
   const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
   log.debug(
@@ -48,7 +49,7 @@ export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMe
   return { tarStream, gzipStream, uploadStream, uploadPromise }
 }
 
-export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promise<void>) {
+export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promise<[void, void]>) {
   tarStream.finalize()
   await uploadPromise
 }
@@ -71,14 +72,12 @@ export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, lo
     const contentBuffer = Buffer.from(entry.content, 'utf8')
     tarStream.entry({ name: entryName, size: contentBuffer.length, mode: 0o644, type: 'file' }, contentBuffer)
   } else if (entry.type === 'stream') {
-    const tarEntryStream = tarStream.entry(
-      { name: entryName, size: entry.size ?? undefined, mode: 0o644, type: 'file' },
-      (err) => {
-        if (err) {
-          throw err
-        }
-      },
-    )
+    const tarEntryStream = tarStream.entry({
+      name: entryName,
+      size: entry.size ?? undefined,
+      mode: 0o644,
+      type: 'file',
+    })
 
     await pipeline(entry.stream, tarEntryStream)
   } else {
@@ -240,9 +239,9 @@ export async function extractTarGzStream(
 
           // Workaround `stream` sometimes being a reference rather than the stream itself
           const passThrough = new PassThrough()
-          pipeline(entryStream, passThrough)
-
+          await pipeline(entryStream, passThrough)
           await importer.processEntry(entry, passThrough)
+
           next()
         } catch (error) {
           // throw the error and drain the stream
