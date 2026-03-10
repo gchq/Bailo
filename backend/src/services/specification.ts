@@ -1,7 +1,7 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import type { AnyZodObject } from 'zod'
 
-import { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
+import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
@@ -144,7 +144,7 @@ export const scanInterfaceSchema = z.object({
   summary: z
     .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
     .optional(),
-  additionalInfo: z.union([TrivyScanResultResponse, ModelScanResponse]).optional(),
+  additionalInfo: z.union([TrivyScanResultResponseSchema, ModelScanResponseSchema]).optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
   _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
   id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
