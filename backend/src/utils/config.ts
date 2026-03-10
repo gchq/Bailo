@@ -171,6 +171,7 @@ export interface Config {
   }
 
   stroom: {
+    rejectUnauthorized: boolean
     enabled: boolean
     environment: string
     url: string

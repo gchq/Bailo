@@ -20,7 +20,7 @@ export async function sendEvents(events: string) {
       Compression: 'gzip',
       Feed: config.stroom.feed,
     },
-    agent: getHttpsAgent({ rejectUnauthorized: false }),
+    agent: getHttpsAgent({ rejectUnauthorized: config.stroom.rejectUnauthorized }),
   })
 
   if (!res.ok) {

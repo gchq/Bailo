@@ -321,6 +321,7 @@ module.exports = {
     environment: 'local',
     interval: 1000 * 50,
     generator: 'Generator',
+    rejectUnauthorized: false,
   },
 
   modelMirror: {
