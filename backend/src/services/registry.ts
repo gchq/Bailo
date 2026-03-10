@@ -422,4 +422,20 @@ export async function softDeleteImage(
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
+  /**
+   * TODO: add a scheduled deletion of `ScanModel`s.
+   *
+   * Approach:
+   * - Before deleting/renaming an image, record all layer digests from its manifest.
+   * - Schedule a cleanup task to run after the registry's Garbage Collector (GC) window.
+   * - For each recorded layer digest:
+   *   - `HEAD` the blob in the registry.
+   *   - If the blob returns 404, treat the layer as orphaned and delete any
+   *     corresponding `ScanModel`s.
+   *
+   * Notes:
+   * - Blob existence does not guarantee the layer is still referenced; this is
+   *   best-effort cleanup and relies on registry GC behaviour.
+   * - Cleanup must be delayed to avoid false positives before GC has run.
+   */
 }

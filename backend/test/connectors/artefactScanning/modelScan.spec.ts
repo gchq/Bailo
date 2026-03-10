@@ -2,11 +2,8 @@ import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import {
-  ModelScanFileScanningConnector,
-  TrivyImageScanningConnector,
-} from '../../../src/connectors/artefactScanning/artefactScan.js'
 import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
+import { ModelScanFileScanningConnector } from '../../../src/connectors/artefactScanning/modelScan.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/clients/artefactScan.js')
@@ -18,7 +15,6 @@ vi.mock('../../../src/services/log.js')
 const artefactScanClientMocks = vi.hoisted(() => ({
   getCachedArtefactScanInfo: vi.fn(),
   scanFileStream: vi.fn(),
-  scanImageBlobStream: vi.fn(),
 }))
 vi.mock('../../../src/clients/artefactScan.js', () => artefactScanClientMocks)
 
@@ -26,11 +22,6 @@ const s3Mocks = vi.hoisted(() => ({
   getObjectStream: vi.fn(),
 }))
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
-
-const registryMocks = vi.hoisted(() => ({
-  getRegistryLayerStream: vi.fn(),
-}))
-vi.mock('../../../src/clients/registry.js', () => registryMocks)
 
 const authMocks = vi.hoisted(() => ({
   getAccessToken: vi.fn(),
@@ -55,7 +46,7 @@ vi.mock('p-queue', () => ({
   }),
 }))
 
-describe('connectors > artefactScanning > artefactScan', () => {
+describe('connectors > artefactScanning > modelScan', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -140,91 +131,6 @@ describe('connectors > artefactScanning > artefactScan', () => {
 
     expect(result.state).toBe(ArtefactScanState.Error)
     expect(result.toolName).toBe('ModelScan')
-    expect(result.scannerVersion).toBeUndefined()
-  })
-
-  test('TrivyImageScanningConnector > successful image scan', async () => {
-    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
-      trivyVersion: '0.69.1',
-    })
-    authMocks.getAccessToken.mockResolvedValueOnce('token')
-    const stream = Readable.from('layer')
-    registryMocks.getRegistryLayerStream.mockResolvedValueOnce({
-      stream,
-      abort: vi.fn(),
-    })
-    artefactScanClientMocks.scanImageBlobStream.mockResolvedValueOnce({
-      Results: [
-        {
-          Vulnerabilities: [
-            {
-              VulnerabilityID: 'CVE-1',
-              Severity: 'HIGH',
-              Title: 'Test vuln',
-            },
-            {
-              VulnerabilityID: 'CVE-2',
-              Severity: 'HIGH',
-              Title: 'Test vuln 2A',
-            },
-            {
-              VulnerabilityID: 'CVE-2',
-              Severity: 'HIGH',
-              Title: 'Test vuln 2B',
-            },
-          ],
-        },
-        {},
-      ],
-    })
-    const connector = new TrivyImageScanningConnector()
-
-    const result = await connector.scan({
-      repository: 'repo',
-      name: 'image',
-      layerDigest: 'sha256:abc',
-    } as any)
-
-    expect(result.state).toBe(ArtefactScanState.Complete)
-    expect(result.summary).toHaveLength(2)
-    expect(result.artefactKind).toBe(ArtefactKind.IMAGE)
-  })
-
-  test('TrivyImageScanningConnector > aborts registry stream on scan failure', async () => {
-    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
-      trivyVersion: '0.69.1',
-    })
-    authMocks.getAccessToken.mockResolvedValueOnce('token')
-    const abort = vi.fn()
-    registryMocks.getRegistryLayerStream.mockResolvedValueOnce({
-      stream: Readable.from('layer'),
-      abort,
-    })
-    artefactScanClientMocks.scanImageBlobStream.mockRejectedValueOnce(new Error('scan failed'))
-    const connector = new TrivyImageScanningConnector()
-
-    const result = await connector.scan({
-      repository: 'repo',
-      name: 'image',
-      layerDigest: 'sha256:abc',
-    } as any)
-
-    expect(result.state).toBe(ArtefactScanState.Error)
-    expect(abort).toBeCalled()
-  })
-
-  test('TrivyImageScanningConnector > returns error when scannerVersion is undefined', async () => {
-    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({})
-    const connector = new TrivyImageScanningConnector()
-
-    const result = await connector.scan({
-      repository: 'repo',
-      name: 'image',
-      layerDigest: 'sha256:abc',
-    } as any)
-
-    expect(result.state).toBe(ArtefactScanState.Error)
-    expect(result.toolName).toBe('Trivy')
     expect(result.scannerVersion).toBeUndefined()
   })
 })

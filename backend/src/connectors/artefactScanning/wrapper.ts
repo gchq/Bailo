@@ -4,15 +4,15 @@ import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { InternalError, ServiceUnavailable } from '../../utils/error.js'
 import {
-  ArtefactBaseScanningConnector,
   ArtefactInterface,
   ArtefactScanningConnectorInfo,
+  BaseArtefactScanningConnector,
   LayerRefInterface,
 } from './Base.js'
 
 export class ArtefactScanningWrapper {
-  scanners: Set<ArtefactBaseScanningConnector> = new Set<ArtefactBaseScanningConnector>()
-  constructor(scanners: Set<ArtefactBaseScanningConnector>) {
+  scanners: Set<BaseArtefactScanningConnector> = new Set<BaseArtefactScanningConnector>()
+  constructor(scanners: Set<BaseArtefactScanningConnector>) {
     this.scanners = scanners
   }
 
@@ -58,7 +58,7 @@ export class ArtefactScanningWrapper {
 
   isMatchingInterface(
     artefact: ArtefactInterface,
-    scanner: ArtefactBaseScanningConnector,
+    scanner: BaseArtefactScanningConnector,
   ): { matching: boolean; artefactType: ArtefactKindKeys } {
     let artefactType: ArtefactKindKeys | undefined = undefined
     switch (true) {

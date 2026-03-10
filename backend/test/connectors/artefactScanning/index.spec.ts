@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanKind } from '../../../src/connectors/artefactScanning/index.js'
+import config from '../../../src/utils/config.js'
 
 const clamAvMocks = vi.hoisted(() => ({
   ClamAvFileScanningConnector: vi.fn(function () {}),
@@ -19,17 +20,12 @@ vi.mock('../../../src/connectors/artefactScanning/wrapper.js', () => ({
   }),
 }))
 
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    artefactScanners: {
-      kinds: [] as any,
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+vi.mock('../../../src/utils/config.js', async () => {
+  const actual = await vi.importActual<typeof import('../../../src/utils/config.js')>('../../../src/utils/config.js')
+  const mutableConfig = structuredClone(actual.default)
+
+  return { __esModule: true, default: mutableConfig }
+})
 
 async function loadModule() {
   return await import('../../../src/connectors/artefactScanning/index.js')
@@ -42,21 +38,21 @@ describe('connectors > artefactScanning > index', () => {
   })
 
   test('initialise ClamAV scanner when enabled', async () => {
-    configMock.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
+    config.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
     const mod = await loadModule()
 
     expect(mod.default).toBeDefined()
   })
 
   test('initialise ModelScan and Trivy scanners when enabled', async () => {
-    configMock.connectors.artefactScanners.kinds = [ArtefactScanKind.ModelScan, ArtefactScanKind.Trivy]
+    config.connectors.artefactScanners.kinds = [ArtefactScanKind.ModelScan, ArtefactScanKind.Trivy]
     const mod = await loadModule()
 
     expect(mod.default).toBeDefined()
   })
 
   test('throw when scanner constructor throws', async () => {
-    configMock.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
+    config.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
     clamAvMocks.ClamAvFileScanningConnector.mockImplementationOnce(() => {
       throw new Error('init failed')
     })
@@ -65,13 +61,13 @@ describe('connectors > artefactScanning > index', () => {
   })
 
   test('throw for invalid scanner kind', async () => {
-    configMock.connectors.artefactScanners.kinds = ['invalidScanner'] as any
+    config.connectors.artefactScanners.kinds = ['invalidScanner'] as any
 
     await expect(loadModule()).rejects.toThrowError("'invalidScanner' is not a valid scanning kind.")
   })
 
   test('return cached scannerWrapper when cache is enabled', async () => {
-    configMock.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
+    config.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
 
     const firstImport = await loadModule()
     const secondImport = await loadModule()
