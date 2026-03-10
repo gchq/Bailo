@@ -1,8 +1,9 @@
 import config from '../../utils/config.js'
 import { ServiceUnavailable } from '../../utils/error.js'
-import { ModelScanFileScanningConnector, TrivyImageScanningConnector } from './artefactScan.js'
-import { ArtefactBaseScanningConnector } from './Base.js'
+import { BaseArtefactScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
+import { ModelScanFileScanningConnector } from './modelScan.js'
+import { TrivyImageScanningConnector } from './trivy.js'
 import { ArtefactScanningWrapper } from './wrapper.js'
 
 export const ArtefactScanKind = {
@@ -12,10 +13,10 @@ export const ArtefactScanKind = {
 } as const
 export type ArtefactScanKindKeys = (typeof ArtefactScanKind)[keyof typeof ArtefactScanKind]
 
-const artefactScanConnectors: Set<ArtefactBaseScanningConnector> = new Set<ArtefactBaseScanningConnector>()
+const artefactScanConnectors: Set<BaseArtefactScanningConnector> = new Set<BaseArtefactScanningConnector>()
 let scannerWrapper: undefined | ArtefactScanningWrapper = undefined
 
-function initScanner<T extends ArtefactBaseScanningConnector>(
+function initScanner<T extends BaseArtefactScanningConnector>(
   Scanner: new () => T,
   artefactScanner: ArtefactScanKindKeys,
 ) {

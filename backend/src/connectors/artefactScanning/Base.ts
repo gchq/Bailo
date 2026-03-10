@@ -23,7 +23,7 @@ export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof Arte
 
 export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion' | 'artefactKind'>
 
-export abstract class ArtefactBaseScanningConnector {
+export abstract class BaseArtefactScanningConnector {
   abstract readonly toolName: string
   abstract readonly version: string | undefined
   abstract readonly artefactType: ArtefactKindKeys

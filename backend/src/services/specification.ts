@@ -174,6 +174,7 @@ export const imageTagScanResultsSchema = z.object({
     z.union([
       scanInterfaceSchema, // FULL
       scanInterfaceSchema.omit({ additionalInfo: true }), // SUMMARY
+      scanInterfaceSchema.omit({ additionalInfo: true, summary: true }), // COUNT
       z.object({ imageScanDetail: z.literal(ImageScanDetail.NONE) }), // NONE
     ]),
   ),

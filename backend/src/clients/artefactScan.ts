@@ -16,15 +16,12 @@ const ArtefactScanInfoResponse = z.object({
   trivyVersion: z.string(),
 })
 
+const ModelScanSeverity = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
+const ModelScanSeverityCountMap = z.record(ModelScanSeverity, z.number().nonnegative())
 export const ModelScanResponse = z.object({
   summary: z.object({
     total_issues: z.number().nonnegative(),
-    total_issues_by_severity: z.object({
-      LOW: z.number().nonnegative(),
-      MEDIUM: z.number().nonnegative(),
-      HIGH: z.number().nonnegative(),
-      CRITICAL: z.number().nonnegative(),
-    }),
+    total_issues_by_severity: ModelScanSeverityCountMap,
     input_path: z.string(),
     absolute_path: z.string(),
     modelscan_version: z.string(),
@@ -53,7 +50,7 @@ export const ModelScanResponse = z.object({
       module: z.string(),
       source: z.string(),
       scanner: z.string(),
-      severity: z.string(),
+      severity: ModelScanSeverity,
     }),
   ),
   errors: z.array(
@@ -241,11 +238,11 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
   return await res.json()
 }
 
-export async function scanFileStream(stream: Readable, fileName: string) {
+export async function scanFileStream(stream: Readable, fileName: string): Promise<ModelScanResponse> {
   return ModelScanResponse.parse(await scanStream(stream, fileName, 'file'))
 }
 
-export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
+export async function scanImageBlobStream(stream: Readable, blobDigest: string): Promise<TrivyScanResultResponse> {
   return TrivyScanResultResponse.parse(await scanStream(stream, blobDigest, 'image'))
 }
 
