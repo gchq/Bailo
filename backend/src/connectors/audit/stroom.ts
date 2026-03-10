@@ -183,7 +183,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   constructor() {
     super()
-    this.hostIP = this.getHostDeviceIP()[0]
+    this.hostIP = this.getHostDeviceIP()[0] ?? '0.0.0.0'
     setInterval(() => {
       processBatch()
     }, config.stroom.interval)
