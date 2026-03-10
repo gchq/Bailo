@@ -147,10 +147,10 @@ artefactScanning:
     host: {{ include "bailo.fullname" . }}-clamav
     port: {{ .Values.clamav.port }}
   artefactscan:
-    concurrency: {{ .Values.modelscan.concurrency }}
-    host: {{ include "bailo.fullname" . }}-modelscan
-    port: {{ .Values.modelscan.port }}
-    protocol: "{{ .Values.modelscan.protocol }}"
+    concurrency: {{ .Values.artefactscan.concurrency }}
+    host: {{ include "bailo.fullname" . }}-artefactscan
+    port: {{ .Values.artefactscan.port }}
+    protocol: "{{ .Values.artefactscan.protocol }}"
 smtp:
   enabled: true
   transporter: {{ .Values.config.smtp.transporter }}
