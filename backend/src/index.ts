@@ -5,7 +5,7 @@ import shelljs from 'shelljs'
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
 import { addDefaultReviewRoles } from './services/review.js'
-import { registerPrintJob, testKickOffAnotherJob } from './services/schedule/jobs/printExample.js'
+import { kickOffRecurringJob, kickOffScheduledJob, registerPrintJob } from './services/schedule/jobs/printExample.js'
 import { getScheduler, startScheduler } from './services/schedule/scheduler.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
@@ -41,7 +41,9 @@ await startScheduler([
   // registerCleanupJob,
 ])
 
-await testKickOffAnotherJob(getScheduler())
+// Examples to be removed
+await kickOffRecurringJob(getScheduler())
+await kickOffScheduledJob(getScheduler())
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {

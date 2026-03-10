@@ -40,16 +40,5 @@ export async function startScheduler(jobRegistrars: JobRegistrar[] = []): Promis
   await agenda.start()
   log.info('Scheduler started')
 
-  // Test
-  await agenda.every(
-    '1 minute', // Interval to run
-    'print-example', // Job to run
-    { info: 'This will run every 1 minute' }, // Parameters we want to supply to the job
-    {
-      // Additional options
-      skipImmediate: true, // Skip the immediate first run
-    },
-  )
-
   return agenda
 }
