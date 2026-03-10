@@ -40,7 +40,7 @@ export type StroomEventInterfaceDoc = StroomEventInterface & SoftDeleteDocument
 
 const StroomEventSchema = new Schema<StroomEventInterface>(
   {
-    event: { type: String, required: true, get: getSchema, set: setSchema },
+    event: { type: Schema.Types.Mixed, required: true, get: getSchema, set: setSchema },
     batchId: { type: String, default: '' },
     inFlight: { type: Boolean, default: false },
     attempts: { type: Number, default: 0 },

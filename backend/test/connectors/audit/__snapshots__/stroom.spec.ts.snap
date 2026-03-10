@@ -470,7 +470,7 @@ exports[`connectors > audit > gchq > onCreateS3Export > save expected event 1`] 
       "Create": {
         "Object": {
           "Description": "test description",
-          "Id": "modelId - undefined",
+          "Id": "modelId - 1.2.3",
           "Name": "testKind",
         },
       },
