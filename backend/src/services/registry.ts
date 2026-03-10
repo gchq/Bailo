@@ -19,6 +19,8 @@ import { isBailoError } from '../types/error.js'
 import {
   ImageScanDetail,
   ModelImages,
+  ModelImageTags,
+  ModelImageTagWithScans,
   ModelImageWithScans,
   ScanInterfaceDetail,
   SeverityCounts,
@@ -106,6 +108,22 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
   )
 }
 
+export async function findModelImage(user: UserInterface, modelId: string): Promise<ModelImages> {
+  await checkUserAuth(user, modelId, ['list'])
+
+  const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
+  const repos = await listModelRepos(registryToken, modelId)
+  return await Promise.all(
+    repos.map(async (repo) => {
+      const [repository, name] = repo.split(/\/(.*)/s)
+      const repositoryToken = await getAccessToken({ dn: user.dn }, [
+        { type: 'repository', name: repo, actions: ['pull'] },
+      ])
+      return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
+    }),
+  )
+}
+
 export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
@@ -117,60 +135,7 @@ export async function listModelImagesWithScanResults(
     modelImages.map(async (img) => {
       const scanResults = await Promise.all(
         img.tags.map(async (tag): Promise<{ tag: string; results: ScanInterfaceDetail[] }> => {
-          if (scanDetail === ImageScanDetail.NONE) {
-            return {
-              tag,
-              results: [{ imageScanDetail: ImageScanDetail.NONE }],
-            }
-          }
-
-          const imageRef: ImageRefInterface = {
-            repository: img.repository,
-            name: img.name,
-            tag,
-          }
-
-          const scans = await getScansForImageTag(user, imageRef)
-
-          if (scans.length === 0) {
-            return {
-              tag,
-              results: [{ imageScanDetail: ImageScanDetail.NONE }],
-            }
-          }
-
-          return {
-            tag,
-            results: scans.map((scan): ScanInterfaceDetail => {
-              const severityCounts = countSeverities(scan.summary || [])
-
-              switch (scanDetail) {
-                case ImageScanDetail.FULL:
-                  return {
-                    ...scan,
-                    severityCounts,
-                    imageScanDetail: ImageScanDetail.FULL,
-                  }
-
-                case ImageScanDetail.SUMMARY:
-                  return {
-                    ...omitFields(scan, ['additionalInfo'] as const),
-                    severityCounts,
-                    imageScanDetail: ImageScanDetail.SUMMARY,
-                  }
-
-                case ImageScanDetail.COUNT:
-                  return {
-                    ...omitFields(scan, ['additionalInfo', 'summary'] as const),
-                    severityCounts,
-                    imageScanDetail: ImageScanDetail.COUNT,
-                  }
-
-                default:
-                  return { imageScanDetail: ImageScanDetail.NONE }
-              }
-            }),
-          }
+          return await scanImageTag(user, img, tag, scanDetail)
         }),
       )
 
@@ -182,6 +147,94 @@ export async function listModelImagesWithScanResults(
       }
     }),
   )
+}
+
+export async function modelImageWithScanResults(
+  user: UserInterface,
+  modelId: string,
+  name: string,
+  tag: string,
+  scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
+): Promise<ModelImageTagWithScans> {
+  const modelImage = (await listModelImages(user, modelId)).find((modelImage) => modelImage.repository === modelId)
+  if (!modelImage) {
+    throw BadReq('Cannot find requested model image', { modelId, name })
+  }
+
+  const results = await scanImageTag(user, modelImage, tag, scanDetail)
+
+  if (scanDetail === ImageScanDetail.NONE) {
+    return {
+      repository: modelImage.repository,
+      name: modelImage.name,
+      tag,
+      scanResults: [{ imageScanDetail: ImageScanDetail.NONE }],
+    }
+  }
+
+  return {
+    repository: modelImage.repository,
+    name: modelImage.name,
+    tag,
+    scanResults: results.results,
+  }
+}
+
+async function scanImageTag(user: UserInterface, image: ModelImageTags, tag: string, scanDetail: ImageScanDetail) {
+  if (scanDetail === ImageScanDetail.NONE) {
+    return {
+      tag,
+      results: [],
+    }
+  }
+
+  const imageRef: ImageRefInterface = {
+    repository: image.repository,
+    name: image.name,
+    tag,
+  }
+
+  const scans = await getScansForImageTag(user, imageRef)
+
+  if (scans.length === 0) {
+    return {
+      tag,
+      results: [],
+    }
+  }
+
+  return {
+    tag,
+    results: scans.map((scan): ScanInterfaceDetail => {
+      const severityCounts = countSeverities(scan.summary || [])
+
+      switch (scanDetail) {
+        case ImageScanDetail.FULL:
+          return {
+            ...scan,
+            severityCounts,
+            imageScanDetail: ImageScanDetail.FULL,
+          }
+
+        case ImageScanDetail.SUMMARY:
+          return {
+            ...omitFields(scan, ['additionalInfo'] as const),
+            severityCounts,
+            imageScanDetail: ImageScanDetail.SUMMARY,
+          }
+
+        case ImageScanDetail.COUNT:
+          return {
+            ...omitFields(scan, ['additionalInfo', 'summary'] as const),
+            severityCounts,
+            imageScanDetail: ImageScanDetail.COUNT,
+          }
+
+        default:
+          return { imageScanDetail: ImageScanDetail.NONE }
+      }
+    }),
+  }
 }
 
 function countSeverities(scanSummary: ScanSummary): SeverityCounts {

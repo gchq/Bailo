@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
+import { EntrySearchResult, MirrorInformation, ModelImages, ModelImageTagWithScans } from '../../types/types.js'
 
 const AuditKind = {
   Create: 'Create',
@@ -121,6 +121,7 @@ export const AuditInfo = {
   },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
+  ViewModelImage: { typeId: 'ViewModelImage', description: 'Model Image Viewed', auditKind: AuditKind.View },
   UpdateImage: { typeId: 'UpdateImage', description: 'Image Information Updated', auditKind: AuditKind.Update },
   DeleteImage: { typeId: 'DeleteImage', description: 'Image Information Deleted', auditKind: AuditKind.Delete },
 
@@ -234,6 +235,7 @@ export abstract class BaseAuditConnector {
   abstract onViewScanners(req: Request): Promise<void>
 
   abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
+  abstract onViewModelImage(req: Request, modelId: string, image: ModelImageTagWithScans): Promise<void>
   abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
   abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 

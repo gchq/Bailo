@@ -61,6 +61,7 @@ const audit = {
   onViewScanners: vi.fn(),
 
   onViewModelImages: vi.fn(),
+  onViewModelImage: vi.fn(),
   onUpdateImage: vi.fn(),
   onDeleteImage: vi.fn(),
 

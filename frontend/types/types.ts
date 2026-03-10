@@ -920,3 +920,10 @@ export type Vulnerabilities = {
   PublishedDate: string
   LastModifiedDate: string
 }
+
+export type ModelImageTagWithScans = {
+  repository: string
+  name: string
+  tag: string
+  scanResults: ScanInterfaceDetail[]
+}

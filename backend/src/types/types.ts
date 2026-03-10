@@ -239,6 +239,12 @@ export type ModelImageWithScans = ModelImageTags & {
     results: ScanInterfaceDetail[]
   }>
 }
+export type ModelImageTagWithScans = {
+  repository: string
+  name: string
+  tag: string
+  scanResults: ScanInterfaceDetail[]
+}
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
 export type ScanInterfaceDetail =
