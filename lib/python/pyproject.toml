@@ -29,7 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny[mlserver]==3.10.0"
+    "mlflow-skinny[mlserver]==3.10.1"
 ]
 test = [
     "black==26.1.0",

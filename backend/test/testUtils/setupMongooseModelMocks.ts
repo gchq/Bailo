@@ -188,6 +188,7 @@ export const modelMocks = {
   TokenModel: createMongooseModelMock('TokenModel'),
   UserModel: createMongooseModelMock('UserModel'),
   WebhookModel: createMongooseModelMock('WebhookModel'),
+  ModelTransferModel: createMongooseModelMock('ModelTransferModel'),
 }
 
 vi.mock('../../src/models/AccessRequest.ts', () => ({ default: modelMocks.AccessRequestModel }))
@@ -220,6 +221,13 @@ vi.mock('../../src/models/User.ts', () => ({ default: modelMocks.UserModel }))
 vi.mock('../../src/models/Webhook.ts', async (importOriginal) => {
   const actual = (await importOriginal()) as any
   return { ...actual, default: modelMocks.WebhookModel }
+})
+vi.mock('../../src/models/ModelTransfer.ts', async (importOriginal) => {
+  const actual = (await importOriginal()) as any
+  return {
+    ...actual,
+    default: modelMocks.ModelTransferModel,
+  }
 })
 
 // Automatically reset all model mocks before each test

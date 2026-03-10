@@ -5,6 +5,7 @@ import { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactS
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
+import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind, SeverityLevel } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
@@ -58,6 +59,16 @@ export const systemStatusSchema = z.object({
     id: z.string().openapi({ example: 'my-bailo' }),
     state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
   }),
+})
+
+export const modelTransferSchema = z.object({
+  _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  modelId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  peerId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  status: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
+  createdBy: z.string().openapi({ example: 'bob' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
 export const remoteFederationConfigSchema = z.object({
