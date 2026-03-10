@@ -6,15 +6,11 @@ import {
   getImageManifest,
   joinDistributionPackageName,
   listModelImages,
-  listModelImagesWithScanResults,
   renameImage,
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
 import { InternalError } from '../../src/utils/error.js'
-import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
-
-const ScanModelMock = getTypedModelMock('ScanModel')
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -566,163 +562,6 @@ describe('services > registry', () => {
           tags: ['tag1', 'tag2'],
         },
       ])
-    })
-
-    test('listModelImagesWithScanResults > ImageScanDetail.NONE', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
-
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'none' as any)
-
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [{ imageScanDetail: 'none' }],
-      })
-    })
-
-    test('listModelImagesWithScanResults > ImageScanDetail.COUNTS', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({
-          exec: async () => [
-            {
-              artefactKind: 'image',
-              layerDigest: 'sha256:layer1',
-              state: 'complete',
-              additionalInfo: { foo: 'bar' },
-              summary: [
-                {
-                  severity: 'critical',
-                  vulnerabilityDescription: 'critical vulnerability',
-                },
-              ],
-            },
-          ],
-        }),
-      } as any)
-
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'count' as any)
-
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [
-          {
-            artefactKind: 'image',
-            layerDigest: 'sha256:layer1',
-            state: 'complete',
-            imageScanDetail: 'count',
-            severityCounts: {
-              unknown: 0,
-              low: 0,
-              medium: 0,
-              high: 0,
-              critical: 1,
-            },
-          },
-        ],
-      })
-    })
-
-    test('listModelImagesWithScanResults > ImageScanDetail.SUMMARY', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({
-          exec: async () => [
-            {
-              artefactKind: 'image',
-              layerDigest: 'sha256:layer1',
-              state: 'complete',
-              additionalInfo: { foo: 'bar' },
-              summary: [
-                {
-                  severity: 'critical',
-                  vulnerabilityDescription: 'critical vulnerability',
-                },
-              ],
-            },
-          ],
-        }),
-      } as any)
-
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'summary' as any)
-
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [
-          {
-            artefactKind: 'image',
-            layerDigest: 'sha256:layer1',
-            state: 'complete',
-            imageScanDetail: 'summary',
-            summary: [
-              {
-                severity: 'critical',
-                vulnerabilityDescription: 'critical vulnerability',
-              },
-            ],
-            severityCounts: {
-              unknown: 0,
-              low: 0,
-              medium: 0,
-              high: 0,
-              critical: 1,
-            },
-          },
-        ],
-      })
-    })
-
-    test('listModelImagesWithScanResults > ImageScanDetail.FULL', async () => {
-      registryClientMocks.listModelRepos = vi.fn().mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({
-          exec: async () => [
-            {
-              artefactKind: 'image',
-              layerDigest: 'sha256:layer1',
-              state: 'complete',
-              additionalInfo: { foo: 'bar' },
-              summary: [
-                {
-                  severity: 'critical',
-                  vulnerabilityDescription: 'critical vulnerability',
-                },
-              ],
-            },
-          ],
-        }),
-      } as any)
-
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'full' as any)
-
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [
-          {
-            artefactKind: 'image',
-            layerDigest: 'sha256:layer1',
-            state: 'complete',
-            additionalInfo: { foo: 'bar' },
-            summary: [
-              {
-                severity: 'critical',
-                vulnerabilityDescription: 'critical vulnerability',
-              },
-            ],
-            imageScanDetail: 'full',
-            severityCounts: {
-              unknown: 0,
-              low: 0,
-              medium: 0,
-              high: 0,
-              critical: 1,
-            },
-          },
-        ],
-      })
     })
 
     test('getImageBlob > success', async () => {

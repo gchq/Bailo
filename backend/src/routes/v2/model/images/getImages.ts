@@ -5,8 +5,8 @@ import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { listModelImagesWithScanResults } from '../../../../services/registry.js'
 import { imageWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
-import { ImageScanDetail, ModelImageWithScans } from '../../../../types/types.js'
-import { parse } from '../../../../utils/validate.js'
+import { ModelImagesWithOptionalScanResults } from '../../../../types/types.js'
+import { parse, strictCoerceBoolean } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
   params: z.object({
@@ -15,7 +15,9 @@ export const getImagesSchema = z.object({
     }),
   }),
   query: z.object({
-    scanDetail: z.nativeEnum(ImageScanDetail).optional().default(ImageScanDetail.COUNT),
+    includeCount: strictCoerceBoolean(z.boolean().optional().default(false)),
+    includeSummary: strictCoerceBoolean(z.boolean().optional().default(false)),
+    includeFullDetail: strictCoerceBoolean(z.boolean().optional().default(false)),
   }),
 })
 
@@ -40,7 +42,7 @@ registerPath({
 })
 
 interface GetImagesResponse {
-  images: ModelImageWithScans[]
+  images: ModelImagesWithOptionalScanResults[]
 }
 
 export const getImages = [
@@ -48,10 +50,16 @@ export const getImages = [
     req.audit = AuditInfo.ViewModelImages
     const {
       params: { modelId },
-      query: { scanDetail },
+      query: { includeCount, includeSummary, includeFullDetail },
     } = parse(req, getImagesSchema)
 
-    const images = await listModelImagesWithScanResults(req.user, modelId, scanDetail)
+    const images = await listModelImagesWithScanResults(
+      req.user,
+      modelId,
+      includeCount,
+      includeSummary,
+      includeFullDetail,
+    )
     await audit.onViewModelImages(req, modelId, images)
 
     res.json({
