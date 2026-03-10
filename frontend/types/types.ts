@@ -926,4 +926,5 @@ export type ModelImageTagWithScans = {
   name: string
   tag: string
   scanResults: ScanInterfaceDetail[]
+  imageSize?: number
 }

@@ -25,6 +25,7 @@ import {
 import { rerunImageArtefactScan, useGetImageScanResults } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
+import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -95,6 +96,7 @@ export default function ImageTagInformation() {
       setLowResults(lowResultsFound)
       setUnknownResults(unknownResultsFound)
       setLastRanAt(lastScanDate !== '' ? formatDateTimeString(lastScanDate) : 'N/A')
+      setPage(0)
     },
   )
 
@@ -191,7 +193,7 @@ export default function ImageTagInformation() {
         </TableCell>
         <TableCell>{row.severity.toUpperCase()}</TableCell>
         <TableCell>
-          <List>
+          <List dense>
             {row.packageList.map((packageId) => (
               <ListItem key={packageId}>{packageId}</ListItem>
             ))}
@@ -200,7 +202,9 @@ export default function ImageTagInformation() {
         <TableCell>
           <Stack spacing={2}>
             <Typography>{displayDescriptionSummary(row.description)}</Typography>
-            <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+            {row.description.startsWith('Issue summary') && (
+              <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+            )}
           </Stack>
         </TableCell>
       </TableRow>
@@ -295,6 +299,10 @@ export default function ImageTagInformation() {
               alignItems='center'
               divider={<Divider flexItem orientation='vertical' />}
             >
+              <Stack spacing={1}>
+                <Typography fontWeight='bold'>Image size</Typography>
+                <Typography>{modelImage.imageSize ? prettyBytes(modelImage.imageSize) : 'Unknown size'}</Typography>
+              </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Last scanned</Typography>
                 <Typography>{lastRanAt}</Typography>

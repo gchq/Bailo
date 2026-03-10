@@ -232,6 +232,7 @@ export type ModelImageTags = {
   repository: string
   name: string
   tags: Array<string>
+  imageSize?: number
 }
 export type ModelImageWithScans = ModelImageTags & {
   scanResults: Array<{
@@ -244,6 +245,7 @@ export type ModelImageTagWithScans = {
   name: string
   tag: string
   scanResults: ScanInterfaceDetail[]
+  imageSize?: number
 }
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>

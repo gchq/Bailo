@@ -161,6 +161,25 @@ export async function modelImageWithScanResults(
     throw BadReq('Cannot find requested model image', { modelId, name })
   }
 
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${modelImage.repository}/${modelImage.name}`, actions: ['pull'] },
+  ])
+
+  let layers: Descriptors[] = []
+  try {
+    layers = await getImageLayers(repositoryToken, {
+      repository: modelImage.repository,
+      name: modelImage.name,
+      tag,
+    })
+  } catch (err) {
+    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
+      throw err
+    }
+  }
+
+  const totalLayerSize = layers.reduce((acc, item) => acc + Number(item.size), 0)
+
   const results = await scanImageTag(user, modelImage, tag, scanDetail)
 
   if (scanDetail === ImageScanDetail.NONE) {
@@ -169,6 +188,7 @@ export async function modelImageWithScanResults(
       name: modelImage.name,
       tag,
       scanResults: [{ imageScanDetail: ImageScanDetail.NONE }],
+      imageSize: totalLayerSize,
     }
   }
 
@@ -177,6 +197,7 @@ export async function modelImageWithScanResults(
     name: modelImage.name,
     tag,
     scanResults: results.results,
+    imageSize: totalLayerSize,
   }
 }
 
