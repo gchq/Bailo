@@ -437,7 +437,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     modelId: string,
     semvers?: string[] | undefined,
   ) {
-    this.auditGenericEvent(req, `${modelId} - ${semvers?.forEach((semver) => semver)}`)
+    this.auditGenericEvent(req, `${modelId} - ${semvers?.join(', ') ?? 'all'}`)
   }
 
   async onCreateImport(
