@@ -5,7 +5,8 @@ import shelljs from 'shelljs'
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
 import { addDefaultReviewRoles } from './services/review.js'
-import { startScheduler } from './services/schedule/scheduler.js'
+import { registerPrintJob, testKickOffAnotherJob } from './services/schedule/jobs/printExample.js'
+import { getScheduler, startScheduler } from './services/schedule/scheduler.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
@@ -32,7 +33,15 @@ await addDefaultReviewRoles()
 await addDefaultSchemas()
 
 // Start the scheduler
-await startScheduler()
+// await startScheduler()
+
+await startScheduler([
+  registerPrintJob,
+  // registerEmailJob,
+  // registerCleanupJob,
+])
+
+await testKickOffAnotherJob(getScheduler())
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
