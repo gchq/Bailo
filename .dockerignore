@@ -21,12 +21,20 @@ backend/.git
 backend/coverage
 backend/dist
 backend/node_modules
+backend/docs/backenddocsvenv
+backend/docs/_build
+backend/docs/python-docs
+backend/test
 
 frontend/.git
 frontend/.next
 frontend/.swc
 frontend/.turbo
+frontend/cache
 frontend/coverage
 frontend/cypress/screenshots/
 frontend/cypress/downloads/
 frontend/node_modules
+frontend/test
+
+README.md

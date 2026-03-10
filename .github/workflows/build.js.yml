@@ -39,13 +39,13 @@ jobs:
             artifact: bailo_frontend
             cache_scope: frontend
             tag: bailo_frontend:latest,bailo_frontend:prod
-          - name: modelscan
-            context: lib/modelscan_api
-            dockerfile: lib/modelscan_api/Dockerfile
-            tar: /tmp/bailo_modelscan.tar
-            artifact: bailo_modelscan
-            cache_scope: modelscan
-            tag: bailo_modelscan:latest,bailo_modelscan:prod
+          - name: artefactscan
+            context: lib/artefactscan_api
+            dockerfile: lib/artefactscan_api/Dockerfile
+            tar: /tmp/bailo_artefactscan.tar
+            artifact: bailo_artefactscan
+            cache_scope: artefactscan
+            tag: bailo_artefactscan:latest,bailo_artefactscan:prod
 
     steps:
       # Clone repository
@@ -68,10 +68,10 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
           outputs: type=docker,dest=${{ matrix.component.tar }}
 
-      # modelscan version check (separate to release versions)
-      - name: Check if modelscan_api version changed
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan'
-        id: modelscan_version_changed
+      # artefactscan version check (separate to release versions)
+      - name: Check if artefactscan_api version changed
+        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan'
+        id: artefactscan_version_changed
         run: |
           set -euo pipefail
 
@@ -84,8 +84,8 @@ jobs:
           PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
           echo "Previous main commit: $PREV_MAIN_COMMIT"
 
-          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/modelscan_api/bailo_modelscan_api/config.py" | grep 'app_version' | head -n1 | cut -d'"' -f2)
-          NEW_VERSION=$(grep 'app_version' lib/modelscan_api/bailo_modelscan_api/config.py | head -n1 | cut -d'"' -f2)
+          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/artefactscan_api/bailo_artefactscan_api/config.py" | grep 'app_version' | head -n1 | cut -d'"' -f2)
+          NEW_VERSION=$(grep 'app_version' lib/artefactscan_api/bailo_artefactscan_api/config.py | head -n1 | cut -d'"' -f2)
           echo "OLD_VERSION=$OLD_VERSION"
           echo "NEW_VERSION=$NEW_VERSION"
 
@@ -98,18 +98,18 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      # Log in to GHCR if release made or modelscan_api version changed
+      # Log in to GHCR if release made or artefactscan_api version changed
       - name: Log in to GHCR
-        if: (github.event_name == 'release' && matrix.component.name != 'modelscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true')
+        if: (github.event_name == 'release' && matrix.component.name != 'artefactscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true')
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Push backend & frontend to GHCR if release made (ignoring modelscan_api which is published separately)
+      # Push backend & frontend to GHCR if release made (ignoring artefactscan_api which is published separately)
       - name: Tag & push backend & frontend images to GHCR
-        if: github.event_name == 'release' && matrix.component.name != 'modelscan'
+        if: github.event_name == 'release' && matrix.component.name != 'artefactscan'
         run: |
           docker load -i ${{ matrix.component.tar }}
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
@@ -121,13 +121,13 @@ jobs:
           docker push $VERSION_TAG
           docker push $LATEST_TAG
 
-      # Push modelscan_api to GHCR if version bumped
-      - name: Tag & push modelscan image to GHCR
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true'
+      # Push artefactscan_api to GHCR if version bumped
+      - name: Tag & push artefactscan image to GHCR
+        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true'
         run: |
           docker load -i ${{ matrix.component.tar }}
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.modelscan_version_changed.outputs.version }}"
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version }}"
           LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
 
           docker tag $IMAGE_ID $VERSION_TAG
@@ -136,7 +136,7 @@ jobs:
           docker push $LATEST_TAG
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.component.artifact }}
           path: ${{ matrix.component.tar }}
@@ -196,7 +196,7 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: bailo_*
           path: /tmp
@@ -282,8 +282,8 @@ jobs:
             frontendTag: latest
             backendRepository: "bailo_backend"
             backendTag: latest
-            modelscanRepository: "bailo_modelscan"
-            modelscanTag: latest
+            artefactscanRepository: "bailo_artefactscan"
+            artefactscanTag: latest
           # Used for k8s not openshift
           ingress:
             enabled: false
@@ -359,28 +359,28 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
-          name: bailo_modelscan
+          name: bailo_artefactscan
           path: /tmp
 
       - name: Load image
         run: |
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
-          docker load --input /tmp/bailo_modelscan.tar
+          docker load --input /tmp/bailo_artefactscan.tar
           docker image ls -a
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_modelscan.tar
+          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_artefactscan.tar
 
       # Create logs directory
       - run: mkdir logs
@@ -489,7 +489,7 @@ jobs:
           PYTEST_RUN_PATH: "lib/python"
 
       # Upload all artifacts & logs
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure() && matrix.job_name == 'end_to_end'
         with:
           name: cypress-screenshots-e2e
@@ -503,7 +503,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always() && matrix.job_name == 'end_to_end'
         with:
           name: logs

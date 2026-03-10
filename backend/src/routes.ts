@@ -6,8 +6,7 @@ import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
-import { expressLogger } from './routes/middleware/expressLogger.js'
-import { requestId } from './routes/middleware/requestId.js'
+import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
 import { putFileScan } from './routes/v2/artefactScanning/putFileScan.js'
@@ -91,19 +90,22 @@ import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
 import markdownConfig from './utils/markdown.js'
 
 export const server = express()
 
-server.use('/api/v2', requestId)
 server.use('/api/v2', bodyParser.json())
-server.use('/api/v2', expressLogger)
+server.use('/api/v2', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
+
+// Needs to be applied after authentication middleware as it requires the user details
+server.use('/api/v2/models', escalateUser)
 
 server.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
 server.get('/api/v2/config', (_req, res) => {

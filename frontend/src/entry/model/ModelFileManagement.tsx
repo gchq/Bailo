@@ -62,7 +62,11 @@ export default function Files({ model }: FilesProps) {
             sx={{ py: 0.5, width: '100%', px: 2 }}
           >
             {model.kind !== EntryKind.MIRRORED_MODEL && (
-              <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
+              <Restricted
+                action='createRelease'
+                overrideTooltip='You do not have permission to upload a file'
+                fallback={<Button disabled>Add new files</Button>}
+              >
                 <>
                   <Button
                     component='span'

@@ -1,4 +1,4 @@
-import Logger from 'bunyan'
+import pino from 'pino'
 
 import { GenericError, InternalError } from '../utils/error.js'
 
@@ -24,7 +24,7 @@ export interface BailoError extends Error {
   }
 
   // A custom logger may be provided, otherwise a default is used
-  logger?: Logger
+  logger?: pino.Logger
 }
 
 export function isBailoError(err: unknown): err is BailoError {

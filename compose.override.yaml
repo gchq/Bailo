@@ -5,7 +5,7 @@ services:
     networks:
       default:
       internal:
-    image: tarampampam/webhook-tester:2.2.5
+    image: tarampampam/webhook-tester:2.2.6
     command: serve --auto-create-sessions
     ports:
       - 8082:8080
@@ -33,9 +33,9 @@ services:
     build:
       target: dev
 
-  modelscan:
+  artefactscan:
     volumes:
-      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
+      - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
     build:
       target: dev
 

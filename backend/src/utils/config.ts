@@ -2,9 +2,9 @@ import { AgentOptions } from 'node:https'
 
 import { ResponseChecksumValidation } from '@aws-sdk/middleware-flexible-checksums'
 import { Provider } from '@aws-sdk/types'
-import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
+import { LevelWithSilentOrString } from 'pino'
 
 import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
@@ -119,13 +119,8 @@ export interface Config {
     state: FederationStateKeys
     /** Unique identifier to be sent in response on peer request*/
     id: string
-
-    /** ### Peers
-     *
-     * Either Bailo or Hugging face peers that Bailo can search on.
-     *  peer list of bailo or Huggingface instances.
-     */
-    peers: { [key: string]: RemoteFederationConfig }
+    isEscalationEnabled?: boolean
+    peers: Record<string, RemoteFederationConfig>
   }
 
   /** ### Simple Mail Transfer Protocol
@@ -174,8 +169,7 @@ export interface Config {
    * Bunyan logs for debugging observability
    */
   log: {
-    /** Bunyan log level to display. Either: "trace", "debug", "info", "warn", "error" or "fatal" */
-    level: bunyan.LogLevel
+    level: LevelWithSilentOrString
   }
 
   /** ### S3
@@ -365,8 +359,9 @@ export interface Config {
       /** Port number for model scan api */
       port: number
     }
-
-    /** ### ModelScan
+    /** ### Artefactscan
+     *
+     * Artefactscan includes Trivy and ModelScan
      *
      * ModelScan is an open source tool to scan specifically on models
      *
@@ -375,8 +370,7 @@ export interface Config {
      * [Bailo RESTAPI](../../../lib/modelscan_api/README.md)
      *
      */
-    modelscan: {
-      /** Number of files scanned at one time */
+    artefactscan: {
       concurrency: number
       /** Scheme or protocol associated with model scan API */
       protocol: string
@@ -427,5 +421,5 @@ export interface Config {
   }
 }
 
-const config: Config = _config.util.toObject()
+const config = _config.util.toObject(_config)
 export default deepFreeze(config) as Config

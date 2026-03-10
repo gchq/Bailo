@@ -266,7 +266,7 @@ updates:
       - '/'
       - '/backend'
       - '/frontend'
-      - '/lib/modelscan_api'
+      - '/lib/artefactscan_api'
     # Check for updates once a week
     schedule:
       interval: 'weekly'
@@ -296,11 +296,11 @@ updates:
     versioning-strategy: increase
     open-pull-requests-limit: 10
 
-  # Enable version updates for python modelscan api
+  # Enable version updates for python artefactscan api
   - package-ecosystem: 'pip'
     # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
-      - '/lib/modelscan_api'
+      - '/lib/artefactscan_api'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase

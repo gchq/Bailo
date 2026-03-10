@@ -1,0 +1,57 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import mirrorCreateImage from 'public/docs/mirror-create.png'
+import mirrorCreateFormImage from 'public/docs/mirror-create-form.png'
+import mirrorSettingsFormImage from 'public/docs/mirror-settings-form.png'
+import tokens from 'public/docs/bailo_tokens.png'
+
+# Creating a mirrored model
+
+## What is model mirroring?
+
+Model mirroring allows you to create a read-only copy of an existing model that is synchronised from an external source.
+The source model may exist:
+
+- In another Bailo instance owned by the same organisation, or
+- In an external system that supports Bailo model exports
+
+The mirrored model uses the source model as the single source of truth. Core model information is kept in sync and
+cannot be edited locally. This ensures consistency while still allowing controlled reuse of model metadata. You may
+optionally add additional local context to a mirrored model without modifying the source model.
+
+## How to create a Mirrored Model
+
+If model mirroring is enabled for your instance, you will be able to create a mirrored model on the model creation page:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='access request schema selection' src={mirrorCreateImage} />
+</Box>
+
+1. Select **Create mirrored model**
+2. Provide the basic model details as prompted
+3. Enter the **Source Model ID** of the model you want to mirror
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='access request schema selection' src={mirrorCreateFormImage} />
+</Box>
+
+The Source Model ID must exactly match the ID of the source model. This is used to establish the synchronisation link.
+
+## Exporting the source model
+
+After creating the mirrored model, the source model must be exported so that its content can be synchronised. From the
+source model:
+
+1. Open the model settings
+2. Configure export options as required
+3. Export the model
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='access request schema selection' src={mirrorSettingsFormImage} />
+</Box>
+
+Once exported, the mirrored model will be populated with the source model's data and kept in sync on subsequent exports.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

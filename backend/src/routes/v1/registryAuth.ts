@@ -206,7 +206,7 @@ export const getDockerRegistryAuth = [
       return
     }
 
-    let scopes: Array<string> = []
+    let scopes: Array<string>
 
     if (Array.isArray(scope)) {
       scopes = scope as Array<string>

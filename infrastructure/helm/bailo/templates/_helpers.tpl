@@ -146,7 +146,7 @@ artefactScanning:
     concurrency: {{ .Values.clamav.concurrency }}
     host: {{ include "bailo.fullname" . }}-clamav
     port: {{ .Values.clamav.port }}
-  modelscan:
+  artefactscan:
     concurrency: {{ .Values.modelscan.concurrency }}
     host: {{ include "bailo.fullname" . }}-modelscan
     port: {{ .Values.modelscan.port }}
@@ -214,6 +214,8 @@ ui:
   modelMirror:
     import:
       enabled: {{ .Values.modelMirror.import.enabled }}
+      additionalInfoHeading: {{ .Values.modelMirror.import.additionalInfoHeading }}
+      originalAnswerHeading: {{ .Values.modelMirror.import.originalAnswerHeading }}
     export:
       enabled: {{ .Values.modelMirror.export.enabled }}
       disclaimer: {{ .Values.modelMirror.export.disclaimer }}
@@ -252,4 +254,13 @@ s3:
   buckets:
     uploads: {{ .Values.minio.uploadBucket }}
     registry: {{ .Values.minio.registryBucket }}
+  bucket: {{ .Values.modelMirror.export.bucket }}
+  concurrency: {{ .Values.modelMirror.export.concurrency }}
+modelMirror:
+  export:
+    kmsSignature:
+      KMSClient:
+        region: {{ .Values.modelMirror.export.kmsSignature.KMSClient.region }}
+      enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }}
+      keyId: {{ .Values.modelMirror.export.kmsSignature.keyId }}
 {{- end -}}

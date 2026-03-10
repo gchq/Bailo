@@ -21,6 +21,28 @@ const theme = createTheme({
       main: '#f3f1f1',
     },
   },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          '&:hover': {
+            backgroundColor: '#ececec',
+          },
+        },
+      },
+    },
+  },
 })
 
 export default theme

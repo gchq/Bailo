@@ -48,7 +48,7 @@ export const getResponses = [
       query: { parentIds, mine },
     } = parse(req, getResponseSchema)
 
-    let responses: ResponseInterface[] = []
+    let responses: ResponseInterface[]
     if (mine) {
       responses = await getResponsesByUser(req.user)
     } else {
