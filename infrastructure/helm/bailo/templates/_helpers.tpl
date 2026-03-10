@@ -254,10 +254,10 @@ s3:
   buckets:
     uploads: {{ .Values.minio.uploadBucket }}
     registry: {{ .Values.minio.registryBucket }}
-  bucket: {{ .Values.modelMirror.export.bucket }}
-  concurrency: {{ .Values.modelMirror.export.concurrency }}
 modelMirror:
   export:
+    bucket: {{ .Values.modelMirror.export.bucket }}
+    concurrency: {{ .Values.modelMirror.export.concurrency }}
     kmsSignature:
       KMSClient:
         region: {{ .Values.modelMirror.export.kmsSignature.KMSClient.region }}
