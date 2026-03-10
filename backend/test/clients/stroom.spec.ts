@@ -46,6 +46,6 @@ describe('clients > stroom', () => {
     const resp = sendEvents(events)
 
     expect(resp).rejects.toThrowError(`Failed to send logs to STROOM - Non-200 response`)
-    expect(fetchMock.default).not.toBeCalled()
+    expect(fetchMock.default).toBeCalled()
   })
 })

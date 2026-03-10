@@ -1,5 +1,7 @@
+import zlib from 'node:zlib'
+
 import fetch from 'node-fetch'
-import { gzip } from 'pako'
+import { Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -7,20 +9,24 @@ import config from '../utils/config.js'
 import { GenericError } from '../utils/error.js'
 
 export async function sendEvents(events: string) {
+  const sourceStream = Readable.from(events)
+  const gzipStream = zlib.createGzip()
+  const bodyStream = sourceStream.pipe(gzipStream)
+
   const res = await fetch(config.stroom.url, {
     method: 'POST',
-    body: Buffer.from((await gzip(events)).buffer),
+    body: bodyStream,
     headers: {
       Compression: 'gzip',
       Feed: config.stroom.feed,
     },
-    agent: await getHttpsAgent({ rejectUnauthorized: false }),
+    agent: getHttpsAgent({ rejectUnauthorized: false }),
   })
 
   if (!res.ok) {
     throw GenericError(res.status, 'Failed to send logs to STROOM - Non-200 response', {
       res,
-      body: await res.body,
+      body: res.body,
     })
   }
 

@@ -411,7 +411,6 @@ export abstract class BaseAuditConnector {
   abstract onViewFile(req: Request, file: FileInterface): Promise<void>
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[]): Promise<void>
   abstract onUpdateFile(req: Request, modelId: string, fileId: string): Promise<void>
-
   abstract onDeleteFile(req: Request, file: FileWithScanResultsInterface): Promise<void>
 
   abstract onCreateRelease(req: Request, release: ReleaseDoc): Promise<void>
