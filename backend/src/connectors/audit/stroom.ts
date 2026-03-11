@@ -134,7 +134,7 @@ type SearchResult = {
   SearchResult: Array<{ Id: string }>
 }
 
-type SearchTerm = { Name: string; Condition: string; Value: any }
+type SearchTerm = { Name: string; Condition: string; Value: string }
 
 type ExportEventDetail = {
   TypeId: string
@@ -709,23 +709,24 @@ export class StroomAuditConnector extends BaseAuditConnector {
     }
     const searchTerms: SearchTerm[] = []
     for (const query in req.query) {
-      if (req.query[query]) {
-        const requestQuery = req.query[query]
-        if (Array.isArray(requestQuery)) {
-          requestQuery.map((q) => {
+      const requestQuery = req.query[query]
+
+      if (Array.isArray(requestQuery)) {
+        for (const q of requestQuery) {
+          if (typeof q === 'string') {
             searchTerms.push({
               Name: query,
               Condition: 'Contains',
               Value: q,
             })
-          })
-        } else {
-          searchTerms.push({
-            Name: query,
-            Condition: 'Equals',
-            Value: req.query[query],
-          })
+          }
         }
+      } else if (typeof requestQuery === 'string') {
+        searchTerms.push({
+          Name: query,
+          Condition: 'Equals',
+          Value: requestQuery,
+        })
       }
     }
 
@@ -736,13 +737,13 @@ export class StroomAuditConnector extends BaseAuditConnector {
           Advanced: { And: { Term: searchTerms } },
         },
       }
-    } else {
-      return {
-        Description: req.audit.description,
-        Query: {
-          Raw: `All ${req.audit.resourceKind}s`,
-        },
-      }
+    }
+
+    return {
+      Description: req.audit.description,
+      Query: {
+        Raw: `All ${req.audit.resourceKind}s`,
+      },
     }
   }
 
