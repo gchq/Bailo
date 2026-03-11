@@ -896,7 +896,7 @@ export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResul
 export type ImageScanResults = {
   count?: {
     tag: string
-    count: SeverityCounts
+    severity: SeverityCounts
   }[]
 
   summary?: {

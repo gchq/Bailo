@@ -38,7 +38,7 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     if (modelImage && modelImage.count) {
       const tagResults = modelImage.count.find((tagResult) => tagResult.tag === imageTag)
       if (tagResults) {
-        return tagResults.count
+        return tagResults.severity
       }
     }
   }
