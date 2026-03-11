@@ -2,7 +2,7 @@ import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolution
 import type { AnyZodObject } from 'zod'
 
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
-import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
+import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
@@ -153,7 +153,18 @@ export const scanInterfaceSchema = z.object({
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
   state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
   summary: z
-    .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
+    .array(
+      z.object({
+        severity: z
+          .enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]])
+          .openapi(SeverityLevel.HIGH),
+        vulnerabilityDescription: z
+          .string()
+          .openapi(
+            'CVE-2025-69419: openssl: OpenSSL: Arbitrary code execution due to out-of-bounds write in PKCS#12 processing',
+          ),
+      }),
+    )
     .optional(),
   additionalInfo: z.union([TrivyScanResultResponseSchema, ModelScanResponseSchema]).optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -172,7 +183,21 @@ export const fileWithScanInterfaceSchema = z.object({
 
   complete: z.boolean().openapi({ example: true }),
 
-  scanResults: z.array(scanInterfaceSchema).optional(),
+  scanResults: z
+    .array(
+      scanInterfaceSchema.pick({
+        artefactKind: true,
+        fileId: true,
+        toolName: true,
+        scannerVersion: true,
+        state: true,
+        summary: true,
+        lastRunAt: true,
+        _id: true,
+        id: true,
+      }),
+    )
+    .optional(),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -182,17 +207,26 @@ export const SeverityCountsSchema = z.record(
   z.enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]]).openapi(SeverityLevel.HIGH),
   z.number().openapi('3'),
 )
-export const ArtefactScanSummarySchema = z.object({
-  severity: z
-    .enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]])
-    .openapi(SeverityLevel.HIGH),
-  vulnerabilityDescription: z
-    .string()
-    .openapi(
-      'CVE-2025-69419: openssl: OpenSSL: Arbitrary code execution due to out-of-bounds write in PKCS#12 processing',
-    ),
-})
-export const ScanSummarySchema = z.array(ArtefactScanSummarySchema)
+export const ArtefactScanStateCountsSchema = z.record(
+  z
+    .enum(Object.values(ArtefactScanState) as [ArtefactScanStateKeys, ...ArtefactScanStateKeys[]])
+    .openapi(ArtefactScanState.Complete),
+  z.number().openapi('2'),
+)
+
+export const LayerScanSummary = scanInterfaceSchema
+  .pick({
+    toolName: true,
+    scannerVersion: true,
+    state: true,
+    summary: true,
+    lastRunAt: true,
+    layerDigest: true,
+  })
+  .extend({
+    layerDigest: z.string(),
+  })
+export const ScanSummarySchema = z.array(LayerScanSummary)
 
 export const imageWithScanResultsSchema = z.object({
   repository: z.string().openapi({ example: 'yolo-v4-abcdef' }),
@@ -202,7 +236,8 @@ export const imageWithScanResultsSchema = z.object({
     .array(
       z.object({
         tag: z.string().openapi('v1-cpu'),
-        count: SeverityCountsSchema,
+        state: ArtefactScanStateCountsSchema,
+        severity: SeverityCountsSchema,
       }),
     )
     .optional(),
