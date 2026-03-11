@@ -2,11 +2,12 @@ import { ProxyAgentOptions } from 'proxy-agent'
 import { Optional } from 'utility-types'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
+import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
 import { ImageRefInterface } from '../models/Release.js'
-import { ArtefactScanSummary, ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
+import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -229,25 +230,33 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
 })
 
 export type ModelImages = ModelImageTags[]
+export type LayerScanSummary = Pick<
+  ScanInterface,
+  'toolName' | 'scannerVersion' | 'state' | 'summary' | 'lastRunAt'
+> & { layerDigest: string }
 export type ModelImageTags = {
   repository: string
   name: string
   tags: Array<string>
 }
 export type SingleImageTagScanResult = {
-  count?: SeverityCounts
-  summary?: ArtefactScanSummary[]
+  count?: {
+    state: ArtefactScanStateCounts
+    severity: SeverityCounts
+  }
+  summary?: LayerScanSummary[]
   fullDetail?: ScanInterface[]
 }
 export type ImageScanResults = {
   count?: {
     tag: string
-    count: SeverityCounts
+    state: ArtefactScanStateCounts
+    severity: SeverityCounts
   }[]
 
   summary?: {
     tag: string
-    summary: ArtefactScanSummary[]
+    summary: LayerScanSummary[]
   }[]
 
   fullDetail?: {
@@ -259,6 +268,7 @@ export type ImageWithOptionalScanResults = ImageRefInterface & SingleImageTagSca
 export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
+export type ArtefactScanStateCounts = Record<ArtefactScanStateKeys, number>
 
 export const MirrorKind = {
   Documents: 'documents',

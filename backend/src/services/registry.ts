@@ -9,26 +9,24 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
+import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
-import ScanModel, {
-  ArtefactKind,
-  ArtefactScanSummary,
-  ScanInterface,
-  ScanSummary,
-  SeverityLevel,
-} from '../models/Scan.js'
+import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import {
+  ArtefactScanStateCounts,
   ImageWithOptionalScanResults,
+  LayerScanSummary,
   ModelImages,
   ModelImagesWithOptionalScanResults,
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { omitFields } from '../utils/object.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -125,11 +123,23 @@ export async function getImageWithScanResults(
   }
 
   if (includeCount) {
-    result.count = countSeverities(scans.flatMap((s) => s.summary || []))
+    const initialStatus = Object.fromEntries(
+      Object.values(ArtefactScanState).map((state) => [state, 0]),
+    ) as ArtefactScanStateCounts
+
+    result.count = {
+      state: scans.reduce<ArtefactScanStateCounts>((acc, scan) => {
+        acc[scan.state]++
+        return acc
+      }, initialStatus),
+      severity: countSeverities(scans.flatMap((s) => s.summary || [])),
+    }
   }
 
   if (includeSummary) {
-    result.summary = scans.flatMap((s) => s.summary!).filter((s): s is ArtefactScanSummary => s !== undefined)
+    result.summary = scans
+      .flatMap((s) => omitFields(s, ['_id', 'additionalInfo', 'createdAt', 'updatedAt', 'artefactKind']))
+      .filter((s): s is LayerScanSummary => s !== undefined)
   }
 
   if (includeFullDetail) {
@@ -162,16 +172,17 @@ export async function listModelImagesWithScanResults(
 
       if (includeCount) {
         result.count = perTagScans
-          .filter((r): r is ImageWithOptionalScanResults & { count: SeverityCounts } => !!r.count)
+          .filter((r): r is ImageWithOptionalScanResults => !!r.count)
           .map((r) => ({
             tag: r.tag,
-            count: r.count!,
+            state: r.count!.state,
+            severity: r.count!.severity,
           }))
       }
 
       if (includeSummary) {
         result.summary = perTagScans
-          .filter((r): r is ImageWithOptionalScanResults & { summary: ArtefactScanSummary[] } => !!r.summary)
+          .filter((r): r is ImageWithOptionalScanResults => !!r.summary)
           .map((r) => ({
             tag: r.tag,
             summary: r.summary!,
@@ -180,13 +191,7 @@ export async function listModelImagesWithScanResults(
 
       if (includeFullDetail) {
         result.fullDetail = perTagScans
-          .filter(
-            (
-              r,
-            ): r is ImageWithOptionalScanResults & {
-              fullDetail: ScanInterface[]
-            } => !!r.fullDetail,
-          )
+          .filter((r): r is ImageWithOptionalScanResults => !!r.fullDetail)
           .map((r) => ({
             tag: r.tag,
             fullDetail: r.fullDetail!,

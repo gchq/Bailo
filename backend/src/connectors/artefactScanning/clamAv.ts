@@ -24,7 +24,6 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
   artefactType: ArtefactKindKeys = ArtefactKind.FILE
   toolName = 'Clam AV'
-  version: string | undefined = undefined
   av: NodeClam | undefined = undefined
 
   constructor() {
