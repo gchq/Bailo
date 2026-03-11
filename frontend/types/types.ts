@@ -896,13 +896,11 @@ export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResul
 export type ImageScanResults = {
   count?: {
     tag: string
-    imageSize?: number
     count: SeverityCounts
   }[]
 
   summary?: {
     tag: string
-    imageSize?: number
     summary: ArtefactScanSummary[]
   }[]
 
@@ -913,4 +911,5 @@ export type ModelImageTags = {
   repository: string
   name: string
   tags: Array<string>
+  imageSize?: number
 }

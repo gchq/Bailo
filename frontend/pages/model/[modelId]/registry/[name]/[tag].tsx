@@ -108,10 +108,6 @@ export default function ImageTagInformation() {
     let unknownResults = 0
     let lastScanDate = ''
 
-    if (!modelImage) {
-      return
-    }
-
     if (!modelImage || !modelImage.fullDetail) {
       return
     }
