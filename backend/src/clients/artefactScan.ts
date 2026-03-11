@@ -8,7 +8,7 @@ import { z } from '../lib/zod.js'
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'
 
-const ArtefactScanInfoResponse = z.object({
+const ArtefactScanInfoResponseSchema = z.object({
   apiName: z.string(),
   apiVersion: z.string(),
   modelscanScannerName: z.string(),
@@ -207,7 +207,7 @@ async function getArtefactScanInfo() {
     throw BadReq('Unrecognised response returned by the ArtefactScan service.')
   }
 
-  return ArtefactScanInfoResponse.parse(await res.json())
+  return ArtefactScanInfoResponseSchema.parse(await res.json())
 }
 
 async function scanStream(stream: Readable, fileName: string, endpoint: 'file' | 'image') {
@@ -260,10 +260,10 @@ const artefactScanCache = new NodeCache({
   useClones: false,
 })
 
-let inFlight: Promise<z.infer<typeof ArtefactScanInfoResponse>> | undefined
+let inFlight: Promise<z.infer<typeof ArtefactScanInfoResponseSchema>> | undefined
 
 export async function getCachedArtefactScanInfo() {
-  const cached = artefactScanCache.get<z.infer<typeof ArtefactScanInfoResponse>>(CACHE_KEY)
+  const cached = artefactScanCache.get<z.infer<typeof ArtefactScanInfoResponseSchema>>(CACHE_KEY)
   if (cached) {
     return cached
   }

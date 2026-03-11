@@ -9,7 +9,7 @@ import {
   EntrySearchResultWithErrors,
   SystemStatus,
 } from '../../types/types.js'
-import { BadReq, NotImplemented, ServiceUnavailable } from '../../utils/error.js'
+import { BadReq, ConfigurationError, NotImplemented } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 interface ExtraConfig {
@@ -21,7 +21,7 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
   getExtraConfig(): ExtraConfig {
     const extra = this.config.extra
     if (!extra || !Object.hasOwn(extra, 'statusModelId') || !Object.hasOwn(extra, 'statusModelName')) {
-      throw ServiceUnavailable(`Missing configuration for HuggingFaceHub ${this.id}`)
+      throw ConfigurationError(`Missing configuration for HuggingFaceHub ${this.id}`)
     }
     return this.config.extra as ExtraConfig
   }
