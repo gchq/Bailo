@@ -27,7 +27,7 @@ import {
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { omitFields } from '../utils/object.js'
-import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -156,9 +156,7 @@ async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInter
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
-  let layers: Descriptors[] = []
-  layers = await getImageLayers(repositoryToken, imageRef)
-  return layers
+  return await getImageLayers(repositoryToken, imageRef)
 }
 
 export async function listModelImagesWithScanResults(
