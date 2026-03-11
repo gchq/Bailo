@@ -653,6 +653,7 @@ describe('services > registry', () => {
       expect(result).toEqual({
         repository: 'repo',
         name: 'img',
+        imageSize: 42134,
         tag: 'v1',
         count: {
           severity: {
