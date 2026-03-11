@@ -33,15 +33,13 @@ await addDefaultReviewRoles()
 await addDefaultSchemas()
 
 // Start the scheduler
-// await startScheduler()
-
 await startScheduler([
+  // examples of passing in jobs to register
   registerPrintJob,
   // registerEmailJob,
-  // registerCleanupJob,
 ])
 
-// Examples to be removed
+// Examples of running jobs - to be removed
 await kickOffRecurringJob(getScheduler())
 await kickOffScheduledJob(getScheduler())
 
