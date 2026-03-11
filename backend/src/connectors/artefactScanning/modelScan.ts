@@ -1,12 +1,15 @@
+import PQueue from 'p-queue'
+
 import { getCachedArtefactScanInfo, scanFileStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
-import { ArtefactScanBaseScanningConnector } from './artefactScanBase.js'
-import { ArtefactScanResult, ArtefactScanState } from './Base.js'
+import config from '../../utils/config.js'
+import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
-export class ModelScanFileScanningConnector extends ArtefactScanBaseScanningConnector {
+export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
+  readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
   artefactType: ArtefactKindKeys = ArtefactKind.FILE
   toolName: string = 'ModelScan'
 
