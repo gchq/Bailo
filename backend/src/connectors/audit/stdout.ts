@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation, ModelImages, ModelImageTagWithScans } from '../../types/types.js'
+import { EntrySearchResult, ImageWithOptionalScanResults, MirrorInformation, ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
@@ -357,7 +357,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onViewModelImage(req: Request, modelId: string, image: ModelImageTagWithScans) {
+  async onViewModelImage(req: Request, modelId: string, image: ImageWithOptionalScanResults) {
     this.checkEventType(AuditInfo.ViewModelImages, req)
     const event = this.generateEvent(req, {
       modelId,
