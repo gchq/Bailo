@@ -10,20 +10,24 @@ import config from '../utils/config.js'
 import { GenericError } from '../utils/error.js'
 
 export async function sendEvents(events: string) {
+  const controller = new AbortController()
   const passThrough = new PassThrough()
-  pipeline(Readable.from(events), zlib.createGzip(), passThrough).catch((err) => {
-    log.error(err, 'Stroom sendEvents gzip pipeline failed')
+  const pipelinePromise = pipeline(Readable.from(events), zlib.createGzip(), passThrough).catch((err) => {
+    controller.abort()
+    throw err
   })
-
   const res = await fetch(config.stroom.url, {
     method: 'POST',
     body: passThrough,
+    signal: controller.signal,
     headers: {
-      Compression: 'gzip',
+      'Content-Encoding': 'gzip',
       Feed: config.stroom.feed,
     },
     agent: getHttpsAgent({ rejectUnauthorized: config.stroom.rejectUnauthorized }),
   })
+
+  await pipelinePromise
 
   if (!res.ok) {
     throw GenericError(res.status, 'Failed to send logs to STROOM - Non-200 response', {
