@@ -2,12 +2,11 @@ import { ProxyAgentOptions } from 'proxy-agent'
 import { Optional } from 'utility-types'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
-import { TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
 import { ImageRefInterface } from '../models/Release.js'
-import { ArtefactScanSummary, SeverityLevelKeys } from '../models/Scan.js'
+import { ArtefactScanSummary, ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -238,7 +237,7 @@ export type ModelImageTags = {
 export type SingleImageTagScanResult = {
   count?: SeverityCounts
   summary?: ArtefactScanSummary[]
-  fullDetail?: TrivyScanResultResponseSchema[]
+  fullDetail?: ScanInterface[]
 }
 export type ImageScanResults = {
   count?: {
@@ -253,7 +252,7 @@ export type ImageScanResults = {
 
   fullDetail?: {
     tag: string
-    fullDetail: TrivyScanResultResponseSchema[]
+    fullDetail: ScanInterface[]
   }[]
 }
 export type ImageWithOptionalScanResults = ImageRefInterface & SingleImageTagScanResult

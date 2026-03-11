@@ -627,7 +627,7 @@ describe('services > registry', () => {
         true,
       )
 
-      expect(result.fullDetail).toEqual([{ Results: [] }])
+      expect(result.fullDetail).toEqual([{ additionalInfo: [{ Results: [] }], summary: undefined }])
     })
 
     test('getImageWithScanResults > ignores manifest list not supported error', async () => {
@@ -705,7 +705,9 @@ describe('services > registry', () => {
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', false, true, true)
 
       expect(result[0].summary).toEqual([{ tag: 'v1', summary: [{ severity: 'HIGH' }] }])
-      expect(result[0].fullDetail).toEqual([{ tag: 'v1', fullDetail: [{ Results: [] }] }])
+      expect(result[0].fullDetail).toEqual([
+        { tag: 'v1', fullDetail: [{ additionalInfo: [{ Results: [] }], summary: [{ severity: 'HIGH' }] }] },
+      ])
     })
 
     test('getImageBlob > success', async () => {

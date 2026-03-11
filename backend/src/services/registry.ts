@@ -1,6 +1,5 @@
 import { ClientSession } from 'mongoose'
 
-import { TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import {
   deleteManifest,
   getImageTagManifest,
@@ -135,8 +134,6 @@ export async function getImageWithScanResults(
 
   if (includeFullDetail) {
     result.fullDetail = scans
-      .flatMap((s) => s.additionalInfo)
-      .filter((info): info is TrivyScanResultResponseSchema => info !== undefined)
   }
   return result
 }
@@ -187,7 +184,7 @@ export async function listModelImagesWithScanResults(
             (
               r,
             ): r is ImageWithOptionalScanResults & {
-              fullDetail: TrivyScanResultResponseSchema[]
+              fullDetail: ScanInterface[]
             } => !!r.fullDetail,
           )
           .map((r) => ({
