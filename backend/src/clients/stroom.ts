@@ -32,7 +32,7 @@ export async function sendEvents(events: string) {
     })
   }
 
-  const responseBody = await res.body
+  const responseBody = res.body
   log.info({ url: config.stroom.url, body: responseBody }, 'Successfully sent batch of events to STROOM.')
   return responseBody
 }
