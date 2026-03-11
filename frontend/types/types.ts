@@ -739,37 +739,7 @@ export interface ModelFormStats extends FormStats {
   percentagePagesComplete: number
 }
 
-export type ModelImages = ModelImageTags[]
-export type ModelImageTags = {
-  repository: string
-  name: string
-  tags: Array<string>
-}
-export type ModelImageWithScans = ModelImageTags & {
-  scanResults: Array<{
-    tag: string
-    results: ScanInterfaceDetail[]
-  }>
-}
-
 export type SeverityCounts = Record<SeverityLevelKeys, number>
-export type ScanInterfaceDetail =
-  | (ScanInterface & { imageScanDetail: ImageScanDetail.FULL; severityCounts: SeverityCounts })
-  | (Omit<ScanInterface, 'additionalInfo'> & {
-      imageScanDetail: ImageScanDetail.SUMMARY
-      severityCounts: SeverityCounts
-    })
-  | (Omit<ScanInterface, 'additionalInfo' | 'summary'> & {
-      imageScanDetail: ImageScanDetail.COUNT
-      severityCounts: SeverityCounts
-    })
-  | { imageScanDetail: ImageScanDetail.NONE }
-export enum ImageScanDetail {
-  NONE = 'none',
-  COUNT = 'count',
-  SUMMARY = 'summary',
-  FULL = 'full',
-}
 
 export type ScanInterface = {
   toolName: string
@@ -936,9 +906,11 @@ export type ImageScanResults = {
     summary: ArtefactScanSummary[]
   }[]
 
-  fullDetail?: {
-    tag: string
-    imageSize?: number
-    fullDetail: TrivyScanResultResponse[]
-  }[]
+  fullDetail?: ScanInterface[]
+}
+
+export type ModelImageTags = {
+  repository: string
+  name: string
+  tags: Array<string>
 }

@@ -17,11 +17,11 @@ import Paginate from 'src/common/Paginate'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
-import { ImageScanDetail, ModelImageWithScans } from 'types/types'
+import { ModelImagesWithOptionalScanResults } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ModelImageDisplayProps = {
-  modelImage: ModelImageWithScans
+  modelImage: ModelImagesWithOptionalScanResults
   mutate: () => void
 }
 
@@ -35,17 +35,11 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
   }
 
   const getScanResultCounts = (imageTag: string) => {
-    const tagResults = modelImage.scanResults.find((tagResult) => tagResult.tag === imageTag)
-    if (tagResults) {
-      const combined = tagResults.results.reduce(
-        (a, obj) =>
-          Object.entries(obj.imageScanDetail !== ImageScanDetail.NONE && obj.severityCounts).reduce((a, [key, val]) => {
-            a[key] = (a[key] || 0) + val
-            return a
-          }, a),
-        {},
-      )
-      return combined
+    if (modelImage && modelImage.count) {
+      const tagResults = modelImage.count.find((tagResult) => tagResult.tag === imageTag)
+      if (tagResults) {
+        return tagResults.count
+      }
     }
   }
 

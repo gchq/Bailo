@@ -220,7 +220,7 @@ export const imageWithScanResultsSchema = z.object({
     .array(
       z.object({
         tag: z.string().openapi('v1-cpu'),
-        fullDetail: z.array(TrivyScanResultResponseSchema),
+        fullDetail: z.array(scanInterfaceSchema),
       }),
     )
     .optional(),
