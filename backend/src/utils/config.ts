@@ -15,16 +15,19 @@ import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
 
+/**
+ * Transport mechanism used for outbound email.
+ */
 export type TransportOption = 'smtp' | 'aws'
 
 export interface Config {
   /** ### API
    *
-   * These are parameters for Express `app.Listen`. This is functionally the same as [http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen), and will bind connections to nginx at `/api/v2`.
-   *
-   * See [https://expressjs.com/en/api.html#app.listen](https://expressjs.com/en/api.html#app.listen) */
+   * Express [`listen`](https://expressjs.com/en/api.html#app.listen) configuration.
+   * These values define where the backend API binds internally. This is functionally the same as [http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen), and will bind connections to nginx at `/api/v2`.
+   */
   api: {
-    /** @deprecated Host is unused in our app */
+    /** @deprecated Host is unused and ignored */
     host: string
     /** Port number to expose the express backend on (usually 3001) */
     port: number
@@ -32,43 +35,46 @@ export interface Config {
 
   /** ### App
    *
-   * These contain configuration for a where to direct users in emails and registry authentication
+   * Public-facing application metadata used in:
+   *  - email links
+   *  - registry authentication
    *
    * During build time certificates are generated with open SSL. These are used to authenticate the backend against the registry.
    * You can generate the certificates manually using `npm run certs`
    *
    * */
   app: {
-    /** The scheme or protocol used in email links (usually https)*/
+    /** URL scheme used in generated links (e.g. https) */
     protocol: string
-    /** The domain or subdomain used in email links */
+    /** Public domain or hostname used in emails */
     host: string
-    /** The port number used in email links */
+    /** Public port used in email links */
     port: number
 
-    /** X.509 file used in generating a session between the backend and the registry */
+    /** X.509 private key for registry authentication */
     privateKey: string
 
-    /** X.509 file used to verify tokens sent by the backend to the registry. */
+    /** X.509 public certificate for registry token verification */
     publicKey: string
-    /** The JSON Web key set file that is used to verify the backend against the registry */
+    /** JSON Web Key Set used by the registry */
     jwks: string
   }
 
+  /** ### HTTP Client
+   *
+   * Default options for outbound HTTP/S requests.
+   */
   httpClient: {
-    /** Options in sending requests to external services using a proxy
-     *  [https://nodejs.org/api/https.html#class-httpsagent]
-     */
+    /** Default [HTTPS](https://nodejs.org/api/https.html#class-httpsagent) agent options (proxy, TLS, etc.) */
     defaultOpts: AgentOptions
   }
 
   /** ### Connectors
    *
-   * Keyed settings that decide what external systems Bailo talks to
-   *
+   * Defines which external systems Bailo integrates with.
    */
   connectors: {
-    /** Authentication label
+    /** Authentication strategy
      *  - 'silly' - No authentication every user is Joe Blogs
      *  - 'oauth' - Uses open authorisation to authenticate users.
      */
@@ -76,39 +82,39 @@ export interface Config {
       kind: AuthenticationKindKeys
     }
 
-    /** Authorisation label
+    /** Authorisation strategy
      *  - 'basic' - Usual checks on access apply
      */
     authorisation: {
       kind: AuthorisationKindKeys
     }
 
-    /** Audit label
+    /** Audit strategy
      *  - 'silly' - No events are tracked
      *  - 'stdout' - Events are streamed via standard output
      */
     audit: {
       kind: AuditKindKeys
     }
+
     /** Artefact scanners
      *  Information specific to how Bailo connects with the file and image scanners
      */
     artefactScanners: {
-      /** List of artefact scanners to use. */
+      /** Enabled artefact scanners */
       kinds: ArtefactScanKindKeys[]
-      /** Normal retry connection time */
+      /** Retry delay between scan attempts of a given artefact (minutes) */
       retryDelayInMinutes: number
-      /** Max retries to connect scanners */
+      /** Maximum number of initialisation retries */
       maxInitRetries: number
-      /** Initial delay for startup */
+      /** Retry delay between initialisation attempts (minutes) */
       initRetryDelay: number
     }
   }
 
   /** ### Federation
    *
-   * Allows Bailo to search models on other peers
-   *
+   * Enables searching and discovery across Bailo peers.
    */
   federation: {
     /** Status of federation search
@@ -117,28 +123,28 @@ export interface Config {
      * - 'disabled' - Doesn't create peer connections
      */
     state: FederationStateKeys
-    /** Unique identifier to be sent in response on peer request*/
+    /** Unique peer identifier */
     id: string
+    /** Allow escalation across federated peers */
     isEscalationEnabled?: boolean
+    /** Known federation peers */
     peers: Record<string, RemoteFederationConfig>
   }
 
-  /** ### Simple Mail Transfer Protocol
+  /** ### SMTP / Email
    *
-   * Emails will be sent with each access request and
-   *
+   * Controls outbound email behaviour.
    */
   smtp: {
-    /** Use emails */
+    /** Enable or disable all email sending */
     enabled: boolean
-    /** Send emails using AWS or otherwise */
+    /** Transport provider */
     transporter: TransportOption
 
-    /** Connection
+    /** SMTP Connection
      *
-     * Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
+     * Connection information for an SMTP server.  Settings are passed directly to [`node-mailer`](https://nodemailer.com/smtp/#1-single-connection).
      * */
-    // [https://nodemailer.com/smtp/#1-single-connection](https://nodemailer.com/smtp/#1-single-connection)
     connection: {
       /** Hostname for SMTP */
       host: string
@@ -154,32 +160,31 @@ export interface Config {
         rejectUnauthorized: boolean
       }
     }
-    /** Set the email address that Bailo should use, can be different from the SMTP server details. */
+    /** From address used by Bailo, can be different from the SMTP server details. */
     from: string
   }
 
+  /** ### AWS SES */
   ses: {
     endpoint: string
     /** AWS region */
     region: string
   }
 
-  /** ### Logging middleware
-   *
-   * Bunyan logs for debugging observability
-   */
+  /** ### Logging */
   log: {
+    /** Pino log level */
     level: LevelWithSilentOrString
   }
 
-  /** ### S3
+  /** ### S3/Object storage
    *
    * Defines storage behavior. Used for all artifacts including:
    * - registry artifacts
    * - files
    */
   s3: {
-    /** Object store credentials. Do not store in plaintext */
+    /** Object store credentials (do not store in plaintext in production) */
     credentials: {
       accessKeyId: string
       secretAccessKey: string
@@ -192,8 +197,9 @@ export interface Config {
     rejectUnauthorized: boolean
     responseChecksumValidation: ResponseChecksumValidation | Provider<ResponseChecksumValidation>
 
+    /** Automatically create buckets if missing */
     automaticallyCreateBuckets: boolean
-    /** Chunk size for uploading files via multipart upload */
+    /** Multipart upload chunk size (bytes) */
     multipartChunkSize: number
 
     /** ### Bucket names
@@ -207,54 +213,47 @@ export interface Config {
       registry: string
     }
   }
-  /** A mongo connection URI, can contain replica set information, etc.
-     * See: [https://www.mongodb.com/docs/manual/reference/connection-string/]
 
-     * This is usually embedded in a config map, so do not put usernames and
-     * passwords in the connection string. */
+  /** ### MongoDB
+   *
+   * A mongo connection URI, can contain [replica set information, etc.](https://www.mongodb.com/docs/manual/reference/connection-string/)
+   **/
   mongo: {
-    /** A mongo connection URI, can contain replica set information, etc.
-     * See: [https://www.mongodb.com/docs/manual/reference/connection-string/]
-
-     * This is usually embedded in a config map, so do not put usernames and
-     * passwords in the connection string. */
+    /** MongoDB connection URI (no credentials embedded) */
     uri: string
-
-    /** Override for URI if using secrets in production */
+    /** Username override (for secret-based auth) */
     user: string
-    /** Mongo password to be compiled on build  */
+    /** Password override (for secret-based auth) */
     pass: string
-
-    /** Whether to use transactions. Requires a replica set to be enabled */
+    /** Enable MongoDB transactions (requires replica set) */
     transactions: boolean
   }
 
-  /** Information required to set up the registry in token mode */
+  /** ### Registry */
   registry: {
-    /** ### Registry Connection
-     *
+    /**
      * Defines service information about the registry
      */
     connection: {
-      /** URI for the registry endpoint */
+      /** Internal registry endpoint */
       internal: string
-      /** Allow communication with an insecure registry (with self signed certificates) */
+      /** Allow self‑signed certificates */
       insecure: boolean
     }
 
-    /** The registry audience */
+    /** Registry audience */
     service: string
-    /** The registry issuer */
+    /** Registry issuer */
     issuer: string
-    /** @deprecated Redundant with connection.insecure */
+    /** @deprecated use connection.insecure */
     insecure: boolean
   }
+
   /** ### UI Configuration
    *
    * Some features on the UI are dynamic and customisable.
    *
    * The UI object contains all information that is user facing.
-   *
    */
   ui: UiConfig
 
@@ -265,19 +264,18 @@ export interface Config {
    * Should be rotated as best practice
    */
   session: {
-    /** Secret for signing express sessions for authentication */
+    /** Express session signing secret */
     secret: string
   }
 
-  /** ### Open Authorisation
+  /** ### OAuth/OpenID Connect
    *
    * Defines behaviour for user authorisation if the connector is enabled
    */
   oauth: {
     /** Redirect for the login to set a session cookie */
     provider: string
-    /** Grant configuration options, provide any option from:
-     * [https://www.npmjs.com/package/grant] */
+    /** [Grant configuration](https://www.npmjs.com/package/grant) options */
     grant: grant.GrantConfig | grant.GrantOptions
 
     /** Cognito
@@ -308,8 +306,7 @@ export interface Config {
    *
    * Defines default schemas that are loaded on startup. Use require to import.
    *
-   * eg. require('../src/scripts/example_schemas/minimal_model_schema.json')
-   *
+   * eg. `require('../src/scripts/example_schemas/minimal_model_schema.json')`
    */
   defaultSchemas: {
     /** Model card schemas that define the model card forms */
@@ -363,11 +360,10 @@ export interface Config {
      *
      * Artefactscan includes Trivy and ModelScan
      *
-     * ModelScan is an open source tool to scan specifically on models
+     * - [ModelScan](https://github.com/protectai/modelscan) is an open source tool to scan specifically on models
+     * - [Trivy](https://github.com/aquasecurity/trivy) identifies known vulnerabilities in container image layers
      *
-     * [Read on Github](https://github.com/protectai/modelscan)
-     *
-     * [Bailo RESTAPI](../../../lib/modelscan_api/README.md)
+     * [Bailo Artefactscan REST API](https://github.com/gchq/Bailo/blob/main/lib/artefactscan_api/README.md)
      *
      */
     artefactscan: {
@@ -416,7 +412,7 @@ export interface Config {
   /** ### Inference
    */
   inference: {
-    /** Shared authorisation secret */
+    /** Shared authorisation token for inference backends */
     authorisationToken: string
   }
 }
