@@ -524,7 +524,15 @@ export class StroomAuditConnector extends BaseAuditConnector {
         break
       }
       default:
-        throw Error('Unable to create Event Detail for an error event.')
+        log.error(
+          {
+            auditKind: req.audit.auditKind,
+            typeId: req.audit.typeId,
+            url: req.originalUrl,
+          },
+          'Unable to create Event Detail for an error event.',
+        )
+        return
     }
     this.generateEvent(req, eventDetail)
   }
@@ -573,12 +581,36 @@ export class StroomAuditConnector extends BaseAuditConnector {
         eventDetail = { TypeId: req.audit.typeId, Update: { After: eventInfo } }
         break
       case AuditKind.Download:
-        throw Error('Incorrect method called for a Download Event.')
+        log.error(
+          {
+            auditKind: req.audit.auditKind,
+            typeId: req.audit.typeId,
+            eventInfo: eventInfo,
+          },
+          'Incorrect method called for a Download Event.',
+        )
+        return
       case AuditKind.Search: {
-        throw Error('Incorrect method called for a Search Event.')
+        log.error(
+          {
+            auditKind: req.audit.auditKind,
+            typeId: req.audit.typeId,
+            eventInfo: eventInfo,
+          },
+          'Incorrect method called for a Search Event.',
+        )
+        return
       }
       default:
-        throw Error('Unable to create Event Detail')
+        log.error(
+          {
+            auditKind: req.audit.auditKind,
+            typeId: req.audit.typeId,
+            eventInfo: eventInfo,
+          },
+          'Unable to create Event Detail.',
+        )
+        return
     }
     this.generateEvent(req, eventDetail)
   }
@@ -589,7 +621,15 @@ export class StroomAuditConnector extends BaseAuditConnector {
       case AuditKind.Create: {
         const file = files.at(0)
         if (!file) {
-          throw Error('Missing file')
+          log.error(
+            {
+              auditkind: req.audit.auditKind,
+              typeId: req.audit.typeId,
+              files: files,
+            },
+            'Missing file',
+          )
+          return
         }
         eventDetail = {
           TypeId: req.audit.typeId,
@@ -610,7 +650,15 @@ export class StroomAuditConnector extends BaseAuditConnector {
       case AuditKind.Delete: {
         const file = files.at(0)
         if (!file) {
-          throw Error('Missing file')
+          log.error(
+            {
+              auditkind: req.audit.auditKind,
+              typeId: req.audit.typeId,
+              files: files,
+            },
+            'Missing file',
+          )
+          return
         }
         eventDetail = {
           TypeId: req.audit.typeId,
@@ -644,7 +692,15 @@ export class StroomAuditConnector extends BaseAuditConnector {
       case AuditKind.Download: {
         const file = files.at(0)
         if (!file) {
-          throw Error('Missing file')
+          log.error(
+            {
+              auditkind: req.audit.auditKind,
+              typeId: req.audit.typeId,
+              files: files,
+            },
+            'Missing file',
+          )
+          return
         }
         eventDetail = {
           TypeId: req.audit.typeId,
@@ -665,14 +721,29 @@ export class StroomAuditConnector extends BaseAuditConnector {
         break
       }
       default:
-        throw Error('Unable to create Event Detail`')
+        log.error(
+          {
+            auditkind: req.audit.auditKind,
+            typeId: req.audit.typeId,
+            files: files,
+          },
+          'Unable to create Event Detail',
+        )
+        return
     }
     this.generateEvent(req, eventDetail)
   }
 
   auditMultipleViewEvent(req: Request, ids: Array<{ Id: string }>, name: string) {
     if (req.audit.auditKind !== AuditKind.View) {
-      throw Error(`View Multiple Event method incorrectly called for ${req.audit.auditKind} Event`)
+      log.error(
+        {
+          auditkind: req.audit.auditKind,
+          typeId: req.audit.typeId,
+        },
+        `View Multiple Event method incorrectly called for ${req.audit.auditKind} Event`,
+      )
+      return
     }
     if (ids.length === 0) {
       return this.generateEvent(req, {
@@ -705,7 +776,13 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   getSearchDescriptionAndQuery(req: Request) {
     if (req.audit.auditKind !== AuditKind.Search) {
-      throw Error(`Search Event method incorrectly called for ${req.audit.auditKind} Event`)
+      log.error(
+        {
+          auditKind: req.audit.auditKind,
+          typeId: req.audit.typeId,
+        },
+        `Search Event method incorrectly called for ${req.audit.auditKind} Event`,
+      )
     }
     const searchTerms: SearchTerm[] = []
     for (const query in req.query) {
