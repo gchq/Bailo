@@ -25,8 +25,8 @@ export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' 
 
 export abstract class BaseArtefactScanningConnector {
   abstract readonly toolName: string
-  abstract readonly version: string | undefined
   abstract readonly artefactType: ArtefactKindKeys
+  version: string | undefined = undefined
 
   abstract readonly queue: PQueue
 
