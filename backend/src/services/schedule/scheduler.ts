@@ -33,6 +33,7 @@ export async function startScheduler(jobRegistrars: JobRegistrar[] = []): Promis
   })
 
   // Register jobs
+  log.info('Registering scheduler jobs...')
   for (const registerJob of jobRegistrars) {
     await registerJob(agenda)
   }
