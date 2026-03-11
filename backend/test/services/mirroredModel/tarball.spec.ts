@@ -116,7 +116,7 @@ describe('service > mirroredModel > tarball', () => {
   test('finaliseTarGzUpload > success', async () => {
     const { tarStream } = setUpExtractTarGzStreams()
     const finalizeSpy = vi.spyOn(tarStream, 'finalize')
-    const uploadPromise = Promise.all([Promise.resolve(), Promise.resolve()])
+    const uploadPromise = Promise.resolve()
 
     await finaliseTarGzUpload(tarStream, uploadPromise)
 

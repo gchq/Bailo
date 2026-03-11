@@ -32,9 +32,10 @@ export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMe
   const uploadStream = new PassThrough()
   const uploadPromise = Promise.all([
     uploadToS3(fileName, uploadStream, logData),
-    // Errors have to be swallowed since the response may already be sent
-    pipeline(tarStream, gzipStream, uploadStream).catch((_err) => {}),
-  ])
+    pipeline(tarStream, gzipStream, uploadStream).catch((err) => {
+      log.error({ err, fileName, ...logData }, 'Tar/Gzip pipeline failed')
+    }),
+  ]).then(() => undefined)
 
   const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
   log.debug(
@@ -49,7 +50,7 @@ export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMe
   return { tarStream, gzipStream, uploadStream, uploadPromise }
 }
 
-export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promise<[void, void]>) {
+export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promise<void>) {
   tarStream.finalize()
   await uploadPromise
 }
@@ -239,8 +240,9 @@ export async function extractTarGzStream(
 
           // Workaround `stream` sometimes being a reference rather than the stream itself
           const passThrough = new PassThrough()
-          await pipeline(entryStream, passThrough)
+          const entryStreamPipeline = pipeline(entryStream, passThrough).catch(fail)
           await importer.processEntry(entry, passThrough)
+          await entryStreamPipeline
 
           next()
         } catch (error) {
