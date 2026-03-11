@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream'
 
 import FormData from 'form-data'
+import NodeCache from 'node-cache'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
 import { z } from '../lib/zod.js'
@@ -16,15 +17,12 @@ const ArtefactScanInfoResponse = z.object({
   trivyVersion: z.string(),
 })
 
-export const ModelScanResponse = z.object({
+const ModelScanSeveritySchema = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
+const ModelScanSeverityCountMapSchema = z.record(ModelScanSeveritySchema, z.number().nonnegative())
+export const ModelScanResponseSchema = z.object({
   summary: z.object({
     total_issues: z.number().nonnegative(),
-    total_issues_by_severity: z.object({
-      LOW: z.number().nonnegative(),
-      MEDIUM: z.number().nonnegative(),
-      HIGH: z.number().nonnegative(),
-      CRITICAL: z.number().nonnegative(),
-    }),
+    total_issues_by_severity: ModelScanSeverityCountMapSchema,
     input_path: z.string(),
     absolute_path: z.string(),
     modelscan_version: z.string(),
@@ -53,7 +51,7 @@ export const ModelScanResponse = z.object({
       module: z.string(),
       source: z.string(),
       scanner: z.string(),
-      severity: z.string(),
+      severity: ModelScanSeveritySchema,
     }),
   ),
   errors: z.array(
@@ -64,7 +62,7 @@ export const ModelScanResponse = z.object({
     }),
   ),
 })
-export type ModelScanResponse = z.infer<typeof ModelScanResponse>
+export type ModelScanResponseSchema = z.infer<typeof ModelScanResponseSchema>
 
 // There's no formal definition of the JSON schema so this must be permissive
 const ImageHistorySchema = z
@@ -165,7 +163,7 @@ const ResultSchema = z
   })
   .passthrough()
 
-export const TrivyScanResultResponse = z
+export const TrivyScanResultResponseSchema = z
   .object({
     SchemaVersion: z.literal(2),
     CreatedAt: z.string().optional(),
@@ -191,7 +189,7 @@ export const TrivyScanResultResponse = z
     Results: z.array(ResultSchema).optional(),
   })
   .passthrough()
-export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponse>
+export type TrivyScanResultResponseSchema = z.infer<typeof TrivyScanResultResponseSchema>
 
 async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
@@ -241,26 +239,45 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
   return await res.json()
 }
 
-export async function scanFileStream(stream: Readable, fileName: string) {
-  return ModelScanResponse.parse(await scanStream(stream, fileName, 'file'))
+export async function scanFileStream(stream: Readable, fileName: string): Promise<ModelScanResponseSchema> {
+  return ModelScanResponseSchema.parse(await scanStream(stream, fileName, 'file'))
 }
 
-export async function scanImageBlobStream(stream: Readable, blobDigest: string) {
-  return TrivyScanResultResponse.parse(await scanStream(stream, blobDigest, 'image'))
+export async function scanImageBlobStream(
+  stream: Readable,
+  blobDigest: string,
+): Promise<TrivyScanResultResponseSchema> {
+  return TrivyScanResultResponseSchema.parse(await scanStream(stream, blobDigest, 'image'))
 }
 
 // 5 mins
-const CACHE_TTL_MS = 5 * 60 * 1000
-let cachedArtefactScanInfo: { value: z.infer<typeof ArtefactScanInfoResponse>; expiresAt: number } | undefined
-export async function getCachedArtefactScanInfo() {
-  const now = Date.now()
+const CACHE_TTL_SECONDS = 5 * 60
+const CACHE_KEY = 'artefactScanInfo'
 
-  if (!cachedArtefactScanInfo || cachedArtefactScanInfo.expiresAt < now) {
-    cachedArtefactScanInfo = {
-      value: await getArtefactScanInfo(),
-      expiresAt: now + CACHE_TTL_MS,
-    }
+const artefactScanCache = new NodeCache({
+  stdTTL: CACHE_TTL_SECONDS,
+  checkperiod: CACHE_TTL_SECONDS,
+  useClones: false,
+})
+
+let inFlight: Promise<z.infer<typeof ArtefactScanInfoResponse>> | undefined
+
+export async function getCachedArtefactScanInfo() {
+  const cached = artefactScanCache.get<z.infer<typeof ArtefactScanInfoResponse>>(CACHE_KEY)
+  if (cached) {
+    return cached
   }
 
-  return cachedArtefactScanInfo.value
+  // Prevent stampede
+  if (!inFlight) {
+    inFlight = (async () => {
+      const value = await getArtefactScanInfo()
+      artefactScanCache.set(CACHE_KEY, value)
+      return value
+    })().finally(() => {
+      inFlight = undefined
+    })
+  }
+
+  return inFlight
 }

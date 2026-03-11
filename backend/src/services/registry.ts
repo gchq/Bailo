@@ -12,19 +12,23 @@ import {
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
+import ScanModel, {
+  ArtefactKind,
+  ArtefactScanSummary,
+  ScanInterface,
+  ScanSummary,
+  SeverityLevel,
+} from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import {
-  ImageScanDetail,
+  ImageWithOptionalScanResults,
   ModelImages,
-  ModelImageWithScans,
-  ScanInterfaceDetail,
+  ModelImagesWithOptionalScanResults,
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { omitFields } from '../utils/object.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -106,80 +110,90 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
   )
 }
 
+export async function getImageWithScanResults(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  includeCount: boolean = false,
+  includeSummary: boolean = false,
+  includeFullDetail: boolean = false,
+): Promise<ImageWithOptionalScanResults> {
+  const scans = includeCount || includeSummary || includeFullDetail ? await getScansForImageTag(user, imageRef) : []
+  const result: ImageWithOptionalScanResults = {
+    repository: imageRef.repository,
+    name: imageRef.name,
+    tag: imageRef.tag,
+  }
+
+  if (includeCount) {
+    result.count = countSeverities(scans.flatMap((s) => s.summary || []))
+  }
+
+  if (includeSummary) {
+    result.summary = scans.flatMap((s) => s.summary!).filter((s): s is ArtefactScanSummary => s !== undefined)
+  }
+
+  if (includeFullDetail) {
+    result.fullDetail = scans
+  }
+  return result
+}
+
 export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
-  scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
-): Promise<ModelImageWithScans[]> {
+  includeCount: boolean = false,
+  includeSummary: boolean = false,
+  includeFullDetail: boolean = false,
+): Promise<ModelImagesWithOptionalScanResults[]> {
   const modelImages: ModelImages = await listModelImages(user, modelId)
 
   return Promise.all(
-    modelImages.map(async (img) => {
-      const scanResults = await Promise.all(
-        img.tags.map(async (tag): Promise<{ tag: string; results: ScanInterfaceDetail[] }> => {
-          if (scanDetail === ImageScanDetail.NONE) {
-            return {
-              tag,
-              results: [{ imageScanDetail: ImageScanDetail.NONE }],
-            }
-          }
-
-          const imageRef: ImageRefInterface = {
-            repository: img.repository,
-            name: img.name,
-            tag,
-          }
-
-          const scans = await getScansForImageTag(user, imageRef)
-
-          if (scans.length === 0) {
-            return {
-              tag,
-              results: [{ imageScanDetail: ImageScanDetail.NONE }],
-            }
-          }
-
-          return {
-            tag,
-            results: scans.map((scan): ScanInterfaceDetail => {
-              const severityCounts = countSeverities(scan.summary || [])
-
-              switch (scanDetail) {
-                case ImageScanDetail.FULL:
-                  return {
-                    ...scan,
-                    severityCounts,
-                    imageScanDetail: ImageScanDetail.FULL,
-                  }
-
-                case ImageScanDetail.SUMMARY:
-                  return {
-                    ...omitFields(scan, ['additionalInfo'] as const),
-                    severityCounts,
-                    imageScanDetail: ImageScanDetail.SUMMARY,
-                  }
-
-                case ImageScanDetail.COUNT:
-                  return {
-                    ...omitFields(scan, ['additionalInfo', 'summary'] as const),
-                    severityCounts,
-                    imageScanDetail: ImageScanDetail.COUNT,
-                  }
-
-                default:
-                  return { imageScanDetail: ImageScanDetail.NONE }
-              }
-            }),
-          }
-        }),
+    modelImages.map(async (img): Promise<ModelImagesWithOptionalScanResults> => {
+      const perTagScans = await Promise.all(
+        img.tags.map(
+          async (tag): Promise<ImageWithOptionalScanResults> =>
+            await getImageWithScanResults(user, { ...img, tag }, includeCount, includeSummary, includeFullDetail),
+        ),
       )
 
-      return {
-        repository: img.repository,
-        name: img.name,
-        tags: img.tags,
-        scanResults,
+      const result: ModelImagesWithOptionalScanResults = {
+        ...img,
       }
+
+      if (includeCount) {
+        result.count = perTagScans
+          .filter((r): r is ImageWithOptionalScanResults & { count: SeverityCounts } => !!r.count)
+          .map((r) => ({
+            tag: r.tag,
+            count: r.count!,
+          }))
+      }
+
+      if (includeSummary) {
+        result.summary = perTagScans
+          .filter((r): r is ImageWithOptionalScanResults & { summary: ArtefactScanSummary[] } => !!r.summary)
+          .map((r) => ({
+            tag: r.tag,
+            summary: r.summary!,
+          }))
+      }
+
+      if (includeFullDetail) {
+        result.fullDetail = perTagScans
+          .filter(
+            (
+              r,
+            ): r is ImageWithOptionalScanResults & {
+              fullDetail: ScanInterface[]
+            } => !!r.fullDetail,
+          )
+          .map((r) => ({
+            tag: r.tag,
+            fullDetail: r.fullDetail!,
+          }))
+      }
+
+      return result
     }),
   )
 }
@@ -247,12 +261,15 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * Renames an image in the registry.
  *
  * @remarks
- * This does _not_ also update any mongo data, and does _not_ do any auth checks on the destination.
+ * This does _not_ also update any mongo data, and does _not_ do any auth checks on the source or destination.
  */
 export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
   let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
-    manifest = await getImageManifest(user, source)
+    const repositoryToken = await getAccessToken({ dn: user.dn }, [
+      { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['pull'] },
+    ])
+    manifest = await getImageTagManifest(repositoryToken, source)
   } catch (err) {
     // special case for 404 not found
     if (err && isBailoError(err) && err?.context?.status === 404) {
@@ -348,4 +365,36 @@ export async function softDeleteImage(
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
+  /**
+   * TODO: add a scheduled deletion of `ScanModel`s.
+   *
+   * Approach:
+   * - Before deleting/renaming an image, record all layer digests from its manifest.
+   * - Schedule a cleanup task to run after the registry's Garbage Collector (GC) window.
+   * - For each recorded layer digest:
+   *   - `HEAD` the blob in the registry.
+   *   - If the blob returns 404, treat the layer as orphaned and delete any
+   *     corresponding `ScanModel`s.
+   *
+   * Notes:
+   * - Blob existence does not guarantee the layer is still referenced; this is
+   *   best-effort cleanup and relies on registry GC behaviour.
+   * - Cleanup must be delayed to avoid false positives before GC has run.
+   */
+}
+
+export async function restoreSoftDeletedImage(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  restoreMirroredModel: boolean = false,
+) {
+  const model = await getModelById(user, imageRef.repository)
+  if (EntryKind.MirroredModel === model.kind && !restoreMirroredModel) {
+    throw BadReq('Cannot restore image to a mirrored model.')
+  }
+
+  await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
+
+  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  await renameImage(user, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag }, imageRef)
 }

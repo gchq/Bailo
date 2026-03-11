@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactBaseScanningConnector, ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
+import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScanning/wrapper.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 
@@ -19,7 +19,7 @@ vi.mock('../../../src/utils/config.js', () => ({
   default: configMock,
 }))
 
-class TestFileScanner extends ArtefactBaseScanningConnector {
+class TestFileScanner extends BaseArtefactScanningConnector {
   toolName = 'FileScanner'
   artefactType = ArtefactKind.FILE
   version = '1.0.0'
@@ -35,7 +35,7 @@ class TestFileScanner extends ArtefactBaseScanningConnector {
   }))
 }
 
-class TestImageScanner extends ArtefactBaseScanningConnector {
+class TestImageScanner extends BaseArtefactScanningConnector {
   toolName = 'ImageScanner'
   artefactType = ArtefactKind.IMAGE
   version = '2.0.0'

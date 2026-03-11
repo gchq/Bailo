@@ -39,6 +39,15 @@ const formDataMock = vi.hoisted(() => ({
 }))
 vi.mock('form-data', async () => formDataMock)
 
+const expectedInfoResponse = {
+  apiName: 'Bailo ArtefactScan API',
+  apiVersion: '4.0.0',
+  modelscanScannerName: 'modelscan',
+  modelscanVersion: '0.8.8',
+  trivyScannerName: 'trivy',
+  trivyVersion: '0.69.1',
+}
+
 async function loadClient() {
   return await import('../../src/clients/artefactScan.js')
 }
@@ -52,52 +61,60 @@ describe('clients > artefactScan', () => {
 
   test('getCachedArtefactScanInfo > success', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
-    const expectedResponse = {
-      apiName: 'Bailo ArtefactScan API',
-      apiVersion: '4.0.0',
-      modelscanScannerName: 'modelscan',
-      modelscanVersion: '0.8.8',
-      trivyScannerName: 'trivy',
-      trivyVersion: '0.69.1',
-    }
     fetchMock.default.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(function () {
-        return expectedResponse
+        return expectedInfoResponse
       }),
     })
     const response = await getCachedArtefactScanInfo()
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
-    expect(response).toStrictEqual(expectedResponse)
+    expect(response).toStrictEqual(expectedInfoResponse)
   })
 
   test('getCachedArtefactScanInfo > uses cached value within TTL', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
 
-    const expectedResponse = {
-      apiName: 'Bailo ArtefactScan API',
-      apiVersion: '4.0.0',
-      modelscanScannerName: 'modelscan',
-      modelscanVersion: '0.8.8',
-      trivyScannerName: 'trivy',
-      trivyVersion: '0.69.1',
-    }
-
     fetchMock.default.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
-      json: vi.fn(() => expectedResponse),
+      json: vi.fn(() => expectedInfoResponse),
     })
 
     const first = await getCachedArtefactScanInfo()
     const second = await getCachedArtefactScanInfo()
 
-    expect(first).toStrictEqual(expectedResponse)
-    expect(second).toStrictEqual(expectedResponse)
+    expect(first).toStrictEqual(expectedInfoResponse)
+    expect(second).toStrictEqual(expectedInfoResponse)
     expect(fetchMock.default).toHaveBeenCalledTimes(1)
+  })
+
+  test('getCachedArtefactScanInfo > inFlight prevents duplicate fetches', async () => {
+    let resolveJson: (v: any) => void
+    const jsonPromise = new Promise((resolve) => {
+      resolveJson = resolve
+    })
+    fetchMock.default.mockResolvedValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => jsonPromise),
+    })
+
+    const { getCachedArtefactScanInfo } = await loadClient()
+
+    const p1 = getCachedArtefactScanInfo()
+    const p2 = getCachedArtefactScanInfo()
+
+    expect(fetchMock.default).toHaveBeenCalledOnce()
+
+    resolveJson!(expectedInfoResponse)
+
+    const [r1, r2] = await Promise.all([p1, p2])
+    expect(r1).toStrictEqual(expectedInfoResponse)
+    expect(r2).toStrictEqual(expectedInfoResponse)
   })
 
   test('getCachedArtefactScanInfo > refreshes cache after TTL expiry', async () => {

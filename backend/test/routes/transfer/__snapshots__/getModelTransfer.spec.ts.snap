@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > getModelTransfer > 200 > ok 1`] = `
+{
+  "transfer": {
+    "_id": "699ed901eaa620f4a39631d7",
+    "createdAt": "2026-02-25T11:12:01.972Z",
+    "createdBy": "bob",
+    "modelId": "822ed901eaa620f4a39631d8",
+    "status": "in_progress",
+    "updatedAt": "2026-02-25T11:12:01.972Z",
+  },
+}
+`;

@@ -4,10 +4,12 @@ import {
   checkUserAuth,
   getImageBlob,
   getImageManifest,
+  getImageWithScanResults,
   joinDistributionPackageName,
   listModelImages,
   listModelImagesWithScanResults,
   renameImage,
+  restoreSoftDeletedImage,
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
@@ -568,161 +570,144 @@ describe('services > registry', () => {
       ])
     })
 
-    test('listModelImagesWithScanResults > ImageScanDetail.NONE', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
+    test('getImageWithScanResults > includeCount only', async () => {
+      const scanResult = {
+        summary: [{ severity: 'high' }, { severity: 'low' }],
+        additionalInfo: undefined,
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
 
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'none' as any)
+      const result = await getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        true,
+        false,
+        false,
+      )
 
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [{ imageScanDetail: 'none' }],
+      expect(result.count).toEqual({ low: 1, medium: 0, high: 1, critical: 0, unknown: 0 })
+    })
+
+    test('getImageWithScanResults > includeSummary', async () => {
+      const scanResult = {
+        summary: [{ severity: 'CRITICAL' }],
+        additionalInfo: undefined,
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        false,
+        true,
+        false,
+      )
+
+      expect(result.summary).toEqual([{ severity: 'CRITICAL' }])
+    })
+
+    test('getImageWithScanResults > includeFullDetail', async () => {
+      const scanResult = {
+        summary: undefined,
+        additionalInfo: [{ Results: [] }],
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        false,
+        false,
+        true,
+      )
+
+      expect(result.fullDetail).toEqual([{ additionalInfo: [{ Results: [] }], summary: undefined }])
+    })
+
+    test('getImageWithScanResults > ignores manifest list not supported error', async () => {
+      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(
+        InternalError('Bailo backend does not currently support manifest lists.'),
+      )
+
+      const result = await getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        true,
+        true,
+        true,
+      )
+
+      expect(result).toEqual({
+        repository: 'repo',
+        name: 'img',
+        tag: 'v1',
+        count: {
+          low: 0,
+          medium: 0,
+          high: 0,
+          critical: 0,
+          unknown: 0,
+        },
+        summary: [],
+        fullDetail: [],
       })
     })
 
-    test('listModelImagesWithScanResults > ImageScanDetail.COUNTS', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({
-          exec: async () => [
-            {
-              artefactKind: 'image',
-              layerDigest: 'sha256:layer1',
-              state: 'complete',
-              additionalInfo: { foo: 'bar' },
-              summary: [
-                {
-                  severity: 'critical',
-                  vulnerabilityDescription: 'critical vulnerability',
-                },
-              ],
-            },
-          ],
-        }),
-      } as any)
+    test('getImageWithScanResults > rethrows unexpected getImageLayers error', async () => {
+      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(InternalError('Some other error'))
 
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'count' as any)
+      const promise = getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        true,
+        false,
+        false,
+      )
 
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [
-          {
-            artefactKind: 'image',
-            layerDigest: 'sha256:layer1',
-            state: 'complete',
-            imageScanDetail: 'count',
-            severityCounts: {
-              unknown: 0,
-              low: 0,
-              medium: 0,
-              high: 0,
-              critical: 1,
-            },
-          },
-        ],
-      })
+      await expect(promise).rejects.toThrowError('Some other error')
     })
 
-    test('listModelImagesWithScanResults > ImageScanDetail.SUMMARY', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
+    test('listModelImagesWithScanResults > includeCount', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
+
+      const scanResult = {
+        summary: [{ severity: 'medium' }],
+        additionalInfo: undefined,
+      }
       ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({
-          exec: async () => [
-            {
-              artefactKind: 'image',
-              layerDigest: 'sha256:layer1',
-              state: 'complete',
-              additionalInfo: { foo: 'bar' },
-              summary: [
-                {
-                  severity: 'critical',
-                  vulnerabilityDescription: 'critical vulnerability',
-                },
-              ],
-            },
-          ],
-        }),
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'summary' as any)
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', true, false, false)
 
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [
-          {
-            artefactKind: 'image',
-            layerDigest: 'sha256:layer1',
-            state: 'complete',
-            imageScanDetail: 'summary',
-            summary: [
-              {
-                severity: 'critical',
-                vulnerabilityDescription: 'critical vulnerability',
-              },
-            ],
-            severityCounts: {
-              unknown: 0,
-              low: 0,
-              medium: 0,
-              high: 0,
-              critical: 1,
-            },
-          },
-        ],
-      })
+      expect(result[0].count).toEqual([{ tag: 'v1', count: { low: 0, medium: 1, high: 0, critical: 0, unknown: 0 } }])
     })
 
-    test('listModelImagesWithScanResults > ImageScanDetail.FULL', async () => {
-      registryClientMocks.listModelRepos = vi.fn().mockResolvedValueOnce(['repo1/image1'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
+    test('listModelImagesWithScanResults > includeSummary and fullDetail', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
+
+      const scanResult = {
+        summary: [{ severity: 'HIGH' }],
+        additionalInfo: [{ Results: [] }],
+      }
       ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({
-          exec: async () => [
-            {
-              artefactKind: 'image',
-              layerDigest: 'sha256:layer1',
-              state: 'complete',
-              additionalInfo: { foo: 'bar' },
-              summary: [
-                {
-                  severity: 'critical',
-                  vulnerabilityDescription: 'critical vulnerability',
-                },
-              ],
-            },
-          ],
-        }),
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', 'full' as any)
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', false, true, true)
 
-      expect(result[0].scanResults[0]).toEqual({
-        tag: 'latest',
-        results: [
-          {
-            artefactKind: 'image',
-            layerDigest: 'sha256:layer1',
-            state: 'complete',
-            additionalInfo: { foo: 'bar' },
-            summary: [
-              {
-                severity: 'critical',
-                vulnerabilityDescription: 'critical vulnerability',
-              },
-            ],
-            imageScanDetail: 'full',
-            severityCounts: {
-              unknown: 0,
-              low: 0,
-              medium: 0,
-              high: 0,
-              critical: 1,
-            },
-          },
-        ],
-      })
+      expect(result[0].summary).toEqual([{ tag: 'v1', summary: [{ severity: 'HIGH' }] }])
+      expect(result[0].fullDetail).toEqual([
+        { tag: 'v1', fullDetail: [{ additionalInfo: [{ Results: [] }], summary: [{ severity: 'HIGH' }] }] },
+      ])
     })
 
     test('getImageBlob > success', async () => {
@@ -736,6 +721,49 @@ describe('services > registry', () => {
 
       expect(result).toBe('stream')
       expect(registryClientMocks.getRegistryLayerStream).toHaveBeenCalled()
+    })
+
+    test('restoreSoftDeletedImage > success', async () => {
+      const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
+      registryClientMocks.getImageTagManifest.mockResolvedValue({
+        body: mockBody,
+        headers: { 'docker-content-digest': 'digest' },
+      })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['newTag'])
+      const source = { name: 'sourceName', repository: 'sourceRepository', tag: 'sourceTag' }
+
+      await restoreSoftDeletedImage({} as any, source)
+
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
+      expect(releaseMocks.findAndDeleteImageFromReleases).not.toHaveBeenCalled()
+    })
+
+    test('restoreSoftDeletedImage > success bypass mirrored model check', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        settings: { mirror: { sourceModelId: 'sourceModelId' } },
+      } as any)
+      const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
+      registryClientMocks.getImageTagManifest.mockResolvedValue({
+        body: mockBody,
+        headers: { 'docker-content-digest': 'digest' },
+      })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['newTag'])
+      const source = { name: 'sourceName', repository: 'sourceRepository', tag: 'sourceTag' }
+
+      await restoreSoftDeletedImage({} as any, source, true)
+
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
+    })
+
+    test('restoreSoftDeletedImage > fail on mirrored model', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        kind: 'mirrored-model',
+      } as any)
+
+      const promise = restoreSoftDeletedImage({} as any, {} as any)
+
+      await expect(promise).rejects.toThrowError(/^Cannot restore image to a mirrored model./)
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
     })
   })
 })

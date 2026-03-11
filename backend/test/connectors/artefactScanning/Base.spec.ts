@@ -1,12 +1,12 @@
 import PQueue from 'p-queue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactBaseScanningConnector, ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
+import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/log.js')
 
-class TestConnector extends ArtefactBaseScanningConnector {
+class TestConnector extends BaseArtefactScanningConnector {
   toolName = 'TestScanner'
   version = '1.2.3'
   artefactType = ArtefactKind.FILE
