@@ -353,7 +353,7 @@ export async function removeFiles(
     // aws-sdk fails then the mongo session will roll back
     if (hardDelete) {
       log.debug({ file }, 'Permanently deleting file from object store.')
-      deleteObject(fileId)
+      deleteObject(file.path)
     }
   }
 
