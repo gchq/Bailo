@@ -1,7 +1,8 @@
+import { PassThrough, Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
 import zlib from 'node:zlib'
 
 import fetch from 'node-fetch'
-import { Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -9,13 +10,14 @@ import config from '../utils/config.js'
 import { GenericError } from '../utils/error.js'
 
 export async function sendEvents(events: string) {
-  const sourceStream = Readable.from(events)
-  const gzipStream = zlib.createGzip()
-  const bodyStream = sourceStream.pipe(gzipStream)
+  const passThrough = new PassThrough()
+  pipeline(Readable.from(events), zlib.createGzip(), passThrough).catch((err) => {
+    log.error(err, 'Stroom sendEvents gzip pipeline failed')
+  })
 
   const res = await fetch(config.stroom.url, {
     method: 'POST',
-    body: bodyStream,
+    body: passThrough,
     headers: {
       Compression: 'gzip',
       Feed: config.stroom.feed,
