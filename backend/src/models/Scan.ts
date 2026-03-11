@@ -1,6 +1,6 @@
 import { model, type ObjectId, Schema } from 'mongoose'
 
-import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
+import type { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -11,7 +11,7 @@ export type ScanInterface = {
   scannerVersion?: string
   state: ArtefactScanStateKeys
   summary?: ScanSummary
-  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
+  additionalInfo?: TrivyScanResultResponseSchema | ModelScanResponseSchema
 
   lastRunAt: Date
 

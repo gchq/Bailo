@@ -58,7 +58,7 @@ export default function ImageTagInformation() {
     isImageLoading,
     isImageError,
     mutateImages,
-  } = useGetImageScanResults(modelId as string, name as string, tag as string, ImageScanDetail.FULL)
+  } = useGetImageScanResults(modelId as string, name as string, tag as string)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
 
@@ -113,43 +113,41 @@ export default function ImageTagInformation() {
       return
     }
 
-    for (const result of modelImage.scanResults) {
-      if (result.imageScanDetail === ImageScanDetail.FULL && result.additionalInfo !== undefined) {
-        if (result.additionalInfo['Results'] !== undefined) {
-          for (const results of result.additionalInfo['Results']) {
-            for (const vulnerability of results.Vulnerabilities) {
-              const existingItem = resultList.find(
-                (resultListItem) => resultListItem.cve === vulnerability.VulnerabilityID,
-              )
-              if (existingItem) {
-                existingItem.packageList.push(vulnerability.PkgID)
-              } else {
-                switch (vulnerability.Severity) {
-                  case 'CRITICAL':
-                    criticalResults++
-                    break
-                  case 'HIGH':
-                    highResults++
-                    break
-                  case 'MEDIUM':
-                    mediumResults++
-                    break
-                  case 'LOW':
-                    lowResults++
-                    break
-                  case 'UNKNOWN':
-                    unknownResults++
-                }
-                lastScanDate = result.lastRunAt
-                resultList.push({
-                  cve: vulnerability.VulnerabilityID,
-                  description: vulnerability.Description,
-                  severity: vulnerability.Severity,
-                  toolName: result.toolName,
-                  packageList: [vulnerability.PkgID],
-                })
-              }
+    if (!modelImage) {
+      return
+    }
+
+    if (modelImage.fullDetail['Results'] !== undefined) {
+      for (const results of result.additionalInfo['Results']) {
+        for (const vulnerability of results.Vulnerabilities) {
+          const existingItem = resultList.find((resultListItem) => resultListItem.cve === vulnerability.VulnerabilityID)
+          if (existingItem) {
+            existingItem.packageList.push(vulnerability.PkgID)
+          } else {
+            switch (vulnerability.Severity) {
+              case 'CRITICAL':
+                criticalResults++
+                break
+              case 'HIGH':
+                highResults++
+                break
+              case 'MEDIUM':
+                mediumResults++
+                break
+              case 'LOW':
+                lowResults++
+                break
+              case 'UNKNOWN':
+                unknownResults++
             }
+            lastScanDate = result.lastRunAt
+            resultList.push({
+              cve: vulnerability.VulnerabilityID,
+              description: vulnerability.Description,
+              severity: vulnerability.Severity,
+              toolName: result.toolName,
+              packageList: [vulnerability.PkgID],
+            })
           }
         }
       }

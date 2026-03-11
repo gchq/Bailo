@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { ImageScanDetail, ModelImageTagWithScans, ModelImageWithScans } from 'types/types'
+import { ImageScanDetail, ModelImagesWithOptionalScanResults, ModelImageWithScans } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyList = []
@@ -56,18 +56,13 @@ export function useGetImagesScanResults(modelId: string, scanDetail: ImageScanDe
   }
 }
 
-export function useGetImageScanResults(modelId: string, name: string, tag: string, scanDetail: ImageScanDetail) {
+export function useGetImageScanResults(modelId: string, name: string, tag: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      image: ModelImageTagWithScans
+      image: ModelImagesWithOptionalScanResults
     },
     ErrorInfo
-  >(
-    scanDetail
-      ? `/api/v2/model/${modelId}/image/${name}/${tag}?scanDetail=${scanDetail}`
-      : `/api/v2/model/${modelId}/image/${name}/${tag}`,
-    fetcher,
-  )
+  >(`/api/v2/model/${modelId}/image/${name}/${tag}`, fetcher)
 
   return {
     mutateImages: mutate,

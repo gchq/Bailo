@@ -921,10 +921,24 @@ export type Vulnerabilities = {
   LastModifiedDate: string
 }
 
-export type ModelImageTagWithScans = {
-  repository: string
-  name: string
-  tag: string
-  scanResults: ScanInterfaceDetail[]
-  imageSize?: number
+export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
+
+export type ImageScanResults = {
+  count?: {
+    tag: string
+    imageSize?: number
+    count: SeverityCounts
+  }[]
+
+  summary?: {
+    tag: string
+    imageSize?: number
+    summary: ArtefactScanSummary[]
+  }[]
+
+  fullDetail?: {
+    tag: string
+    imageSize?: number
+    fullDetail: TrivyScanResultResponse[]
+  }[]
 }

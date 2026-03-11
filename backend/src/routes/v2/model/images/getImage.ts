@@ -3,9 +3,9 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { modelImageWithScanResults } from '../../../../services/registry.js'
+import { getImageWithScanResults } from '../../../../services/registry.js'
 import { imageWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
-import { ImageScanDetail, ModelImageTagWithScans } from '../../../../types/types.js'
+import { ImageWithOptionalScanResults } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getImageSchema = z.object({
@@ -19,9 +19,6 @@ export const getImageSchema = z.object({
     tag: z.string({
       required_error: 'Must specify image tag as param',
     }),
-  }),
-  query: z.object({
-    scanDetail: z.nativeEnum(ImageScanDetail).optional().default(ImageScanDetail.COUNT),
   }),
 })
 
@@ -46,7 +43,7 @@ registerPath({
 })
 
 interface GetImagesResponse {
-  image: ModelImageTagWithScans
+  image: ImageWithOptionalScanResults
 }
 
 export const getImage = [
@@ -54,10 +51,9 @@ export const getImage = [
     req.audit = AuditInfo.ViewModelImage
     const {
       params: { modelId, name, tag },
-      query: { scanDetail },
     } = parse(req, getImageSchema)
 
-    const image = await modelImageWithScanResults(req.user, modelId, name, tag, scanDetail)
+    const image = await getImageWithScanResults(req.user, { repository: modelId, name, tag }, true, true, true)
     await audit.onViewModelImage(req, modelId, image)
 
     res.json({

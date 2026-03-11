@@ -1,5 +1,6 @@
 import { ClientSession } from 'mongoose'
 
+import { TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import {
   deleteManifest,
   getImageTagManifest,
@@ -12,21 +13,23 @@ import {
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
+import ScanModel, {
+  ArtefactKind,
+  ArtefactScanSummary,
+  ScanInterface,
+  ScanSummary,
+  SeverityLevel,
+} from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import {
-  ImageScanDetail,
+  ImageWithOptionalScanResults,
   ModelImages,
-  ModelImageTags,
-  ModelImageTagWithScans,
-  ModelImageWithScans,
-  ScanInterfaceDetail,
+  ModelImagesWithOptionalScanResults,
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { omitFields } from '../utils/object.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -108,154 +111,94 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
   )
 }
 
-export async function findModelImage(user: UserInterface, modelId: string): Promise<ModelImages> {
-  await checkUserAuth(user, modelId, ['list'])
+export async function getImageWithScanResults(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  includeCount: boolean = false,
+  includeSummary: boolean = false,
+  includeFullDetail: boolean = false,
+): Promise<ImageWithOptionalScanResults> {
+  const scans = includeCount || includeSummary || includeFullDetail ? await getScansForImageTag(user, imageRef) : []
+  const result: ImageWithOptionalScanResults = {
+    repository: imageRef.repository,
+    name: imageRef.name,
+    tag: imageRef.tag,
+  }
 
-  const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
-  const repos = await listModelRepos(registryToken, modelId)
-  return await Promise.all(
-    repos.map(async (repo) => {
-      const [repository, name] = repo.split(/\/(.*)/s)
-      const repositoryToken = await getAccessToken({ dn: user.dn }, [
-        { type: 'repository', name: repo, actions: ['pull'] },
-      ])
-      return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
-    }),
-  )
+  if (includeCount) {
+    result.count = countSeverities(scans.flatMap((s) => s.summary || []))
+  }
+
+  if (includeSummary) {
+    result.summary = scans.flatMap((s) => s.summary!).filter((s): s is ArtefactScanSummary => s !== undefined)
+  }
+
+  if (includeFullDetail) {
+    result.fullDetail = scans
+      .flatMap((s) => s.additionalInfo)
+      .filter((info): info is TrivyScanResultResponseSchema => info !== undefined)
+  }
+  return result
 }
 
 export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
-  scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
-): Promise<ModelImageWithScans[]> {
+  includeCount: boolean = false,
+  includeSummary: boolean = false,
+  includeFullDetail: boolean = false,
+): Promise<ModelImagesWithOptionalScanResults[]> {
   const modelImages: ModelImages = await listModelImages(user, modelId)
 
   return Promise.all(
-    modelImages.map(async (img) => {
-      const scanResults = await Promise.all(
-        img.tags.map(async (tag): Promise<{ tag: string; results: ScanInterfaceDetail[] }> => {
-          return await scanImageTag(user, img, tag, scanDetail)
-        }),
+    modelImages.map(async (img): Promise<ModelImagesWithOptionalScanResults> => {
+      const perTagScans = await Promise.all(
+        img.tags.map(
+          async (tag): Promise<ImageWithOptionalScanResults> =>
+            await getImageWithScanResults(user, { ...img, tag }, includeCount, includeSummary, includeFullDetail),
+        ),
       )
 
-      return {
-        repository: img.repository,
-        name: img.name,
-        tags: img.tags,
-        scanResults,
+      const result: ModelImagesWithOptionalScanResults = {
+        ...img,
       }
+
+      if (includeCount) {
+        result.count = perTagScans
+          .filter((r): r is ImageWithOptionalScanResults & { count: SeverityCounts } => !!r.count)
+          .map((r) => ({
+            tag: r.tag,
+            count: r.count!,
+          }))
+      }
+
+      if (includeSummary) {
+        result.summary = perTagScans
+          .filter((r): r is ImageWithOptionalScanResults & { summary: ArtefactScanSummary[] } => !!r.summary)
+          .map((r) => ({
+            tag: r.tag,
+            summary: r.summary!,
+          }))
+      }
+
+      if (includeFullDetail) {
+        result.fullDetail = perTagScans
+          .filter(
+            (
+              r,
+            ): r is ImageWithOptionalScanResults & {
+              fullDetail: TrivyScanResultResponseSchema[]
+            } => !!r.fullDetail,
+          )
+          .map((r) => ({
+            tag: r.tag,
+            fullDetail: r.fullDetail!,
+          }))
+      }
+
+      return result
     }),
   )
-}
-
-export async function modelImageWithScanResults(
-  user: UserInterface,
-  modelId: string,
-  name: string,
-  tag: string,
-  scanDetail: ImageScanDetail = ImageScanDetail.SUMMARY,
-): Promise<ModelImageTagWithScans> {
-  const modelImage = (await listModelImages(user, modelId)).find((modelImage) => modelImage.repository === modelId)
-  if (!modelImage) {
-    throw BadReq('Cannot find requested model image', { modelId, name })
-  }
-
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${modelImage.repository}/${modelImage.name}`, actions: ['pull'] },
-  ])
-
-  let layers: Descriptors[] = []
-  try {
-    layers = await getImageLayers(repositoryToken, {
-      repository: modelImage.repository,
-      name: modelImage.name,
-      tag,
-    })
-  } catch (err) {
-    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
-      throw err
-    }
-  }
-
-  const totalLayerSize = layers.reduce((acc, item) => acc + Number(item.size), 0)
-
-  const results = await scanImageTag(user, modelImage, tag, scanDetail)
-
-  if (scanDetail === ImageScanDetail.NONE) {
-    return {
-      repository: modelImage.repository,
-      name: modelImage.name,
-      tag,
-      scanResults: [{ imageScanDetail: ImageScanDetail.NONE }],
-      imageSize: totalLayerSize,
-    }
-  }
-
-  return {
-    repository: modelImage.repository,
-    name: modelImage.name,
-    tag,
-    scanResults: results.results,
-    imageSize: totalLayerSize,
-  }
-}
-
-async function scanImageTag(user: UserInterface, image: ModelImageTags, tag: string, scanDetail: ImageScanDetail) {
-  if (scanDetail === ImageScanDetail.NONE) {
-    return {
-      tag,
-      results: [],
-    }
-  }
-
-  const imageRef: ImageRefInterface = {
-    repository: image.repository,
-    name: image.name,
-    tag,
-  }
-
-  const scans = await getScansForImageTag(user, imageRef)
-
-  if (scans.length === 0) {
-    return {
-      tag,
-      results: [],
-    }
-  }
-
-  return {
-    tag,
-    results: scans.map((scan): ScanInterfaceDetail => {
-      const severityCounts = countSeverities(scan.summary || [])
-
-      switch (scanDetail) {
-        case ImageScanDetail.FULL:
-          return {
-            ...scan,
-            severityCounts,
-            imageScanDetail: ImageScanDetail.FULL,
-          }
-
-        case ImageScanDetail.SUMMARY:
-          return {
-            ...omitFields(scan, ['additionalInfo'] as const),
-            severityCounts,
-            imageScanDetail: ImageScanDetail.SUMMARY,
-          }
-
-        case ImageScanDetail.COUNT:
-          return {
-            ...omitFields(scan, ['additionalInfo', 'summary'] as const),
-            severityCounts,
-            imageScanDetail: ImageScanDetail.COUNT,
-          }
-
-        default:
-          return { imageScanDetail: ImageScanDetail.NONE }
-      }
-    }),
-  }
 }
 
 function countSeverities(scanSummary: ScanSummary): SeverityCounts {

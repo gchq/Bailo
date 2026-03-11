@@ -2,10 +2,12 @@ import { ProxyAgentOptions } from 'proxy-agent'
 import { Optional } from 'utility-types'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
+import { TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
-import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
+import { ImageRefInterface } from '../models/Release.js'
+import { ArtefactScanSummary, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -234,38 +236,34 @@ export type ModelImageTags = {
   tags: Array<string>
   imageSize?: number
 }
-export type ModelImageWithScans = ModelImageTags & {
-  scanResults: Array<{
+export type SingleImageTagScanResult = {
+  count?: SeverityCounts
+  summary?: ArtefactScanSummary[]
+  fullDetail?: TrivyScanResultResponseSchema[]
+}
+export type ImageScanResults = {
+  count?: {
     tag: string
-    results: ScanInterfaceDetail[]
-  }>
+    imageSize?: number
+    count: SeverityCounts
+  }[]
+
+  summary?: {
+    tag: string
+    imageSize?: number
+    summary: ArtefactScanSummary[]
+  }[]
+
+  fullDetail?: {
+    tag: string
+    imageSize?: number
+    fullDetail: TrivyScanResultResponseSchema[]
+  }[]
 }
-export type ModelImageTagWithScans = {
-  repository: string
-  name: string
-  tag: string
-  scanResults: ScanInterfaceDetail[]
-  imageSize?: number
-}
+export type ImageWithOptionalScanResults = ImageRefInterface & SingleImageTagScanResult
+export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
-export type ScanInterfaceDetail =
-  | (ScanInterface & { imageScanDetail: ImageScanDetail.FULL; severityCounts: SeverityCounts })
-  | (Omit<ScanInterface, 'additionalInfo'> & {
-      imageScanDetail: ImageScanDetail.SUMMARY
-      severityCounts: SeverityCounts
-    })
-  | (Omit<ScanInterface, 'additionalInfo' | 'summary'> & {
-      imageScanDetail: ImageScanDetail.COUNT
-      severityCounts: SeverityCounts
-    })
-  | { imageScanDetail: ImageScanDetail.NONE }
-export enum ImageScanDetail {
-  NONE = 'none',
-  COUNT = 'count',
-  SUMMARY = 'summary',
-  FULL = 'full',
-}
 
 export const MirrorKind = {
   Documents: 'documents',
