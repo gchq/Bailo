@@ -243,13 +243,11 @@ export type SingleImageTagScanResult = {
 export type ImageScanResults = {
   count?: {
     tag: string
-    imageSize?: number
     count: SeverityCounts
   }[]
 
   summary?: {
     tag: string
-    imageSize?: number
     summary: ArtefactScanSummary[]
   }[]
 

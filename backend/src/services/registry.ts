@@ -135,7 +135,20 @@ export async function getImageWithScanResults(
   if (includeFullDetail) {
     result.fullDetail = scans
   }
+
+  const layers = await getLayersForImageTag(user, imageRef)
+  result.imageSize = layers.reduce((acc, obj) => acc + obj.size, 0)
+
   return result
+}
+
+async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface) {
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
+  ])
+  let layers: Descriptors[] = []
+  layers = await getImageLayers(repositoryToken, imageRef)
+  return layers
 }
 
 export async function listModelImagesWithScanResults(
@@ -210,18 +223,8 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
 }
 
 async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
-  ])
+  const layers = await getLayersForImageTag(user, image)
 
-  let layers: Descriptors[] = []
-  try {
-    layers = await getImageLayers(repositoryToken, image)
-  } catch (err) {
-    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
-      throw err
-    }
-  }
   const layerDigests = layers.map((l) => l.digest)
 
   if (layerDigests.length === 0) {
