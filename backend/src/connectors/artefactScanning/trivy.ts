@@ -1,3 +1,5 @@
+import PQueue from 'p-queue'
+
 import { getCachedArtefactScanInfo, scanImageBlobStream } from '../../clients/artefactScan.js'
 import { getRegistryLayerStream } from '../../clients/registry.js'
 import {
@@ -9,10 +11,11 @@ import {
 } from '../../models/Scan.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
-import { ArtefactScanBaseScanningConnector } from './artefactScanBase.js'
-import { ArtefactScanResult, ArtefactScanState, LayerRefInterface } from './Base.js'
+import config from '../../utils/config.js'
+import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
 
-export class TrivyImageScanningConnector extends ArtefactScanBaseScanningConnector {
+export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
+  readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
   artefactType: ArtefactKindKeys = ArtefactKind.IMAGE
   toolName: string = 'Trivy'
 
