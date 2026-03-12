@@ -250,7 +250,7 @@ async def registry_events(
 
             target = event.get("target", {})
             repository = target.get("repository")
-            [model_id, name] = repository.split("/", 1)
+            model_id, name, *_ = repository.split("/")
             tag = target.get("tag")
 
             if not model_id or not name or not tag:
