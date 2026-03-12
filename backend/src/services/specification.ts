@@ -2,7 +2,7 @@ import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolution
 import type { AnyZodObject } from 'zod'
 
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
-import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
+import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
@@ -207,12 +207,6 @@ export const SeverityCountsSchema = z.record(
   z.enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]]).openapi(SeverityLevel.HIGH),
   z.number().openapi('3'),
 )
-export const ArtefactScanStateCountsSchema = z.record(
-  z
-    .enum(Object.values(ArtefactScanState) as [ArtefactScanStateKeys, ...ArtefactScanStateKeys[]])
-    .openapi(ArtefactScanState.Complete),
-  z.number().openapi('2'),
-)
 
 export const LayerScanSummary = scanInterfaceSchema
   .pick({
@@ -232,33 +226,16 @@ export const imageWithScanResultsSchema = z.object({
   repository: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   name: z.string().openapi({ example: 'yolo' }),
   tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
-  count: z
-    .array(
-      z.object({
+  scanResults: z.array(
+    z.object({
+      lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
+      state: z.nativeEnum(ArtefactScanState),
+      summary: z.object({
         tag: z.string().openapi('v1-cpu'),
-        state: ArtefactScanStateCountsSchema,
         severity: SeverityCountsSchema,
       }),
-    )
-    .optional(),
-
-  summary: z
-    .array(
-      z.object({
-        tag: z.string().openapi('v1-cpu'),
-        summary: ScanSummarySchema,
-      }),
-    )
-    .optional(),
-
-  fullDetail: z
-    .array(
-      z.object({
-        tag: z.string().openapi('v1-cpu'),
-        fullDetail: z.array(scanInterfaceSchema),
-      }),
-    )
-    .optional(),
+    }),
+  ),
 })
 
 export const releaseInterfaceSchema = z.object({

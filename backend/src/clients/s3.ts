@@ -5,6 +5,7 @@ import {
   CreateBucketCommand,
   CreateBucketRequest,
   CreateMultipartUploadCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   GetObjectRequest,
   HeadBucketCommand,
@@ -189,6 +190,15 @@ export async function completeMultipartUpload(
     Key: key,
     UploadId: uploadId,
     MultipartUpload: { Parts: parts },
+  })
+  return client.send(command)
+}
+
+export async function deleteObject(key: string, bucket: string = config.s3.buckets.uploads) {
+  const client = await getS3Client()
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
   })
   return client.send(command)
 }

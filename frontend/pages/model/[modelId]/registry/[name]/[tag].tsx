@@ -111,11 +111,11 @@ export default function ImageTagInformation() {
     let unknownResults = 0
     let lastScanDate = ''
 
-    if (!modelImage || !modelImage.fullDetail) {
+    if (!modelImage) {
       return
     }
-    if (modelImage.fullDetail !== undefined) {
-      for (const results of modelImage.fullDetail) {
+    if (modelImage.additionalInfo !== undefined) {
+      for (const results of modelImage.additionalInfo) {
         if (
           results.additionalInfo !== undefined &&
           'Results' in results.additionalInfo &&
@@ -293,9 +293,7 @@ export default function ImageTagInformation() {
               </Stack>
             </Stack>
             <Box width='fit-content'>
-              <CodeLine
-                line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
-              />
+              <CodeLine line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`} />
             </Box>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}

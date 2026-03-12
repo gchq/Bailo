@@ -893,23 +893,24 @@ export type Vulnerabilities = {
 
 export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
 
-export type ImageScanResults = {
-  count?: {
-    tag: string
-    severity: SeverityCounts
-  }[]
-
-  summary?: {
-    tag: string
-    summary: ArtefactScanSummary[]
-  }[]
-
-  fullDetail?: ScanInterface[]
-}
-
 export type ModelImageTags = {
   repository: string
   name: string
   tags: Array<string>
   imageSize?: number
 }
+
+export type ImageTagResult = {
+  tag: string
+  state: ArtefactScanStateKeys
+  lastRunAt?: Date
+  summary: SeverityCounts
+  additionalInfo?: ScanInterface[]
+  imageSize?: number
+}
+
+export type ImageScanResults = {
+  scanResults: ImageTagResult[]
+}
+
+export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
