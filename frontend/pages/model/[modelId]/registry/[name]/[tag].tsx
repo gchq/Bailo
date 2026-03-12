@@ -22,6 +22,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { rerunImageArtefactScan, useGetImageScanResults } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
@@ -77,6 +78,8 @@ export default function ImageTagInformation() {
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+
+  const theme = useTheme()
 
   const setFormattedDataEvent = useEffectEvent(
     (
@@ -329,7 +332,7 @@ export default function ImageTagInformation() {
                 {formattedData.length > 0 && (
                   <Stack spacing={2}>
                     <Stack direction='row' spacing={1} alignItems='center'>
-                      <Typography sx={{ pl: 2 }}>Filters:</Typography>
+                      <Typography>Filters:</Typography>
                       <Chip
                         color={filterList.includes('CRITICAL') ? 'secondary' : 'default'}
                         onClick={() => handleFilterListChipOnClick('CRITICAL')}
@@ -356,17 +359,19 @@ export default function ImageTagInformation() {
                         label='Unknown'
                       />
                     </Stack>
-                    <Table sx={{ minWidth: 650 }} size='small'>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>CVE name</TableCell>
-                          <TableCell>Severity</TableCell>
-                          <TableCell>Package List</TableCell>
-                          <TableCell>Description</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>{tableRows()}</TableBody>
-                    </Table>
+                    <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
+                      <Table sx={{ minWidth: 650 }} size='small'>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>CVE name</TableCell>
+                            <TableCell>Severity</TableCell>
+                            <TableCell>Package List</TableCell>
+                            <TableCell>Description</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>{tableRows()}</TableBody>
+                      </Table>
+                    </Box>
                     <TablePagination
                       rowsPerPageOptions={[10]}
                       component='div'
