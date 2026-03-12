@@ -12,7 +12,7 @@ export const putFileScanSchema = z.object({
     modelId: z.string(),
     fileId: z.string(),
   }),
-  body: z.object({}),
+  body: z.object({}).optional(),
 })
 
 registerPath({
@@ -27,7 +27,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            status: z.string().openapi({ example: 'File scan started' }),
+            status: z.string().openapi({ example: 'File scan started for resnet50_weights.pth' }),
           }),
         },
       },
@@ -46,12 +46,12 @@ export const putFileScan = [
       params: { modelId, fileId },
     } = parse(req, putFileScanSchema)
 
-    await rerunFileScan(req.user, modelId, fileId)
+    const status = await rerunFileScan(req.user, modelId, fileId)
 
     await audit.onUpdateFile(req, modelId, fileId)
 
     res.json({
-      status: 'Scan started',
+      status,
     })
   },
 ]

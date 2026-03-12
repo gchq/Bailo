@@ -2,6 +2,12 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.7.0 - dd/mm/2026
+
+### Changes
+
+- Add `Client.put_image_scan` method.
+
 ## 3.6.0 - 19/02/2026
 
 ### Changes

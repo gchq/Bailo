@@ -34,6 +34,8 @@ services:
       target: dev
 
   artefactscan:
+    ports:
+      - 3311:3311
     volumes:
       - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
     build:

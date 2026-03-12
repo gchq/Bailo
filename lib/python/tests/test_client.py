@@ -459,3 +459,15 @@ def test_put_file_scan(requests_mock):
     result = client.put_file_scan(model_id="test_model_id", file_id="test_file_id")
 
     assert result == {"status": "Scan started"}
+
+
+def test_put_image_scan(requests_mock):
+    requests_mock.put(
+        "https://example.com/api/v2/filescanning/model/test_model_id/image/test_image_name/test_image_tag/scan",
+        json={"status": "Scan started"},
+    )
+
+    client = Client("https://example.com")
+    result = client.put_image_scan(model_id="test_model_id", image_name="test_image_name", image_tag="test_image_tag")
+
+    assert result == {"status": "Scan started"}

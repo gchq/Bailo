@@ -109,6 +109,9 @@ const BaseDescriptor = z.object({
   size: z.number().int().nonnegative(),
   digest: z.string(),
 })
+const DockerDescriptor = BaseDescriptor.extend({
+  urls: z.array(z.string()).optional(),
+})
 const OCIAnnotations = z.record(z.string(), z.string())
 const OCIDescriptor = BaseDescriptor.extend({
   urls: z.array(z.string()).optional(),
@@ -116,16 +119,14 @@ const OCIDescriptor = BaseDescriptor.extend({
   data: z.string().optional(),
   artifactType: z.string().optional(),
 })
+export const Descriptors = z.union([BaseDescriptor, DockerDescriptor, OCIDescriptor])
+export type Descriptors = z.infer<typeof Descriptors>
 
 const DockerImageManifestV2 = z.object({
   schemaVersion: z.literal(2),
   mediaType: z.literal(DockerManifestMediaType),
   config: BaseDescriptor,
-  layers: z.array(
-    BaseDescriptor.extend({
-      urls: z.array(z.string()).optional(),
-    }),
-  ),
+  layers: z.array(DockerDescriptor),
 })
 
 // helper for conditional setting

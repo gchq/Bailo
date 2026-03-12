@@ -2,14 +2,21 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   checkUserAuth,
+  getImageBlob,
   getImageManifest,
+  getImageWithScanResults,
   joinDistributionPackageName,
+  listModelImages,
+  listModelImagesWithScanResults,
   renameImage,
   restoreSoftDeletedImage,
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
 import { InternalError } from '../../src/utils/error.js'
+import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
+
+const ScanModelMock = getTypedModelMock('ScanModel')
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -19,11 +26,7 @@ const authMocks = vi.hoisted(() => ({
 vi.mock('../../src/connectors/authorisation/index.js', () => authMocks)
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(function () {
-    return {
-      _id: 'test',
-    }
-  }),
+  getModelById: vi.fn(() => ({ _id: 'test' })),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -33,9 +36,7 @@ const releaseMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(function () {
-    return 'token'
-  }),
+  getAccessToken: vi.fn(() => 'token'),
   softDeletePrefix: 'soft_deleted/',
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
@@ -43,13 +44,18 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
-  listImageTags: vi.fn(function () {
-    return [] as string[]
-  }),
+  getRegistryLayerStream: vi.fn(),
+  listImageTags: vi.fn(() => [] as string[]),
+  listModelRepos: vi.fn(),
   mountBlob: vi.fn(),
   putManifest: vi.fn(),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+
+const getImageLayersMocks = vi.hoisted(() => ({
+  getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1' }] as any),
+}))
+vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
 
 describe('services > registry', () => {
   describe('regex', () => {
@@ -374,6 +380,14 @@ describe('services > registry', () => {
       )
     })
 
+    test('renameImage > manifest body missing', async () => {
+      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({})
+
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+        'The registry returned a response but the body was missing.',
+      )
+    })
+
     test('renameImage > source manifest other error', async () => {
       registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error'))
 
@@ -539,6 +553,107 @@ describe('services > registry', () => {
       await expect(promise).rejects.toThrowError(/^Cannot remove image from a mirrored model./)
       expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
       expect(releaseMocks.findAndDeleteImageFromReleases).not.toHaveBeenCalled()
+    })
+
+    test('listModelImages > success', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1', 'tag2'])
+
+      const result = await listModelImages({ dn: 'user' } as any, 'modelId')
+
+      expect(result).toEqual([
+        {
+          repository: 'repo1',
+          name: 'image1',
+          tags: ['tag1', 'tag2'],
+        },
+      ])
+    })
+
+    test('getImageWithScanResults > includeFullDetail', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: 'complete',
+        additionalInfo: [{ Results: [] }],
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        true,
+      )
+
+      expect(result.additionalInfo).toEqual([
+        { additionalInfo: [{ Results: [] }], summary: undefined, state: 'complete' },
+      ])
+    })
+
+    test('getImageWithScanResults > ignores manifest list not supported error', async () => {
+      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(
+        InternalError('Bailo backend does not currently support manifest lists.'),
+      )
+
+      const result = await getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+      )
+
+      expect(result).toEqual({
+        state: 'notScanned',
+        summary: {
+          critical: 0,
+          high: 0,
+          low: 0,
+          medium: 0,
+          unknown: 0,
+        },
+        tag: 'v1',
+      })
+    })
+
+    test('getImageWithScanResults > rethrows unexpected getImageLayers error', async () => {
+      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(InternalError('Some other error'))
+
+      const promise = getImageWithScanResults(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+      )
+
+      await expect(promise).rejects.toThrowError('Some other error')
+    })
+
+    test('listModelImagesWithScanResults > includeCount', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
+
+      const scanResult = {
+        summary: [{ severity: 'medium' }],
+        additionalInfo: undefined,
+        state: 'error',
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
+
+      expect(result[0].scanResults[0].summary).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
+    })
+
+    test('getImageBlob > success', async () => {
+      registryClientMocks.getRegistryLayerStream.mockResolvedValueOnce('stream')
+
+      const result = await getImageBlob(
+        { dn: 'user' } as any,
+        { repository: 'repo', name: 'img' } as any,
+        'sha256:digest',
+      )
+
+      expect(result).toBe('stream')
+      expect(registryClientMocks.getRegistryLayerStream).toHaveBeenCalled()
     })
 
     test('restoreSoftDeletedImage > success', async () => {

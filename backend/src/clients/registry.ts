@@ -20,6 +20,8 @@ import {
   CommonRegistryHeaders,
   DeleteManifestResponseHeaders,
   ImageManifestV2,
+  ManifestListMediaType,
+  ManifestMediaType,
   ManifestResponseHeaders,
   RegistryErrorResponseBody,
   TagsListResponseBody,
@@ -272,6 +274,37 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
     }
     throw error
   }
+}
+
+export async function isImageTagManifestList(token: string, imageRef: ImageRefInterface): Promise<boolean> {
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+    // do not validate the body here as we only care about Content-Type
+    headersSchema: ManifestResponseHeaders,
+    extraHeaders: {
+      Accept: AcceptManifestMediaTypeHeaderValue,
+    },
+  })
+
+  const rawContentType = result.headers['content-type']
+  const contentType = rawContentType?.split(';')[0]?.trim()
+
+  if (!contentType) {
+    throw InternalError('Registry response missing Content-Type header.', {
+      imageRef,
+    })
+  }
+
+  if ((ManifestListMediaType.options as string[]).includes(contentType)) {
+    return true
+  }
+  if ((ManifestMediaType.options as string[]).includes(contentType)) {
+    return false
+  }
+
+  throw InternalError('Unrecognised manifest media type.', {
+    imageRef,
+    contentType,
+  })
 }
 
 export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
