@@ -149,7 +149,6 @@ async function sendReviewResponseNotification(
   reviewResponse: ResponseInterface,
   user: UserInterface,
 ) {
-  let reviewIdQuery
   switch (review.kind) {
     case ReviewKind.Access: {
       if (!review.accessRequestId) {
@@ -176,7 +175,11 @@ async function sendReviewResponseNotification(
       break
     }
     default:
-      throw InternalError('Review Kind not recognised', reviewIdQuery)
+      throw InternalError('Review Kind not recognised', {
+        reviewId: review.id,
+        modelId: review.modelId,
+        kind: review.kind,
+      })
   }
 }
 

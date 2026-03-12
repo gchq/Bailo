@@ -6,10 +6,11 @@ import { RestrictedActionKeys } from 'types/types'
 type RestrictedProps = {
   action: RestrictedActionKeys
   fallback?: ReactElement
+  overrideTooltip?: string
   children: ReactElement
 }
 
-export default function Restricted({ action, fallback, children }: RestrictedProps) {
+export default function Restricted({ action, fallback, overrideTooltip = '', children }: RestrictedProps) {
   const { userPermissions } = useContext(UserPermissionsContext)
 
   const permission = useMemo(() => userPermissions[action], [action, userPermissions])
@@ -20,7 +21,7 @@ export default function Restricted({ action, fallback, children }: RestrictedPro
 
   if (fallback) {
     return (
-      <Tooltip title={permission.info}>
+      <Tooltip title={overrideTooltip ? overrideTooltip : permission.info}>
         <div>{fallback}</div>
       </Tooltip>
     )

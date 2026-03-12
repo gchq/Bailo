@@ -65,7 +65,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     }
   }
 
-  let collaborators: CollaboratorEntry[] = []
+  let collaborators: CollaboratorEntry[]
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
     const collaboratorListContainsOwner = modelParams.collaborators.some((collaborator) =>
       collaborator.roles.some((role) => role === 'owner'),
@@ -219,6 +219,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
           modelId,
           allModelFiles.flatMap((file) => file.id),
           true,
+          undefined,
           session,
         ),
         // Only delete Images after deleting Releases as softDeleteImage modifies Releases.
@@ -758,14 +759,6 @@ export async function setLatestImportedModelCard(modelId: string) {
 
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
-  }
-
-  let latestNonMirroredCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: false }, undefined, {
-    sort: { version: -1 },
-  })
-
-  if (!latestNonMirroredCard) {
-    latestNonMirroredCard = latestModelCard
   }
 
   const updatedModel = await ModelModel.findOne({

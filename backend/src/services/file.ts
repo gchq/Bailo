@@ -5,6 +5,7 @@ import prettyBytes from 'pretty-bytes'
 
 import {
   completeMultipartUpload,
+  deleteObject,
   getObjectStream,
   headObject,
   putObjectPartStream,
@@ -324,6 +325,7 @@ export async function removeFiles(
   modelId: string,
   fileIds: string[],
   deleteMirroredModel: boolean = false,
+  hardDelete: boolean = false,
   session?: ClientSession,
 ) {
   const model = await getModelById(user, modelId)
@@ -344,9 +346,15 @@ export async function removeFiles(
 
     await ScanModel.deleteMany({ fileId: { $eq: file.id } }, session)
 
-    // We don't actually remove the file from storage, we only hide all
+    // Unless specified, we don't actually remove the file from storage, we only hide all
     // references to it.  This makes the file not visible to the user.
     await FileModel.findOneAndDelete({ _id: file._id }, session)
+    // We cannot use the mongo session with aws-sdk so send the aws-sdk API call last as if
+    // aws-sdk fails then the mongo session will roll back
+    if (hardDelete) {
+      log.debug({ file }, 'Permanently deleting file from object store.')
+      deleteObject(file.path)
+    }
   }
 
   return allFiles
@@ -357,9 +365,10 @@ export async function removeFile(
   modelId: string,
   fileId: string,
   deleteMirroredModel: boolean = false,
+  hardDelete: boolean = false,
   session?: ClientSession,
 ) {
-  return (await removeFiles(user, modelId, [fileId], deleteMirroredModel, session))[0]
+  return (await removeFiles(user, modelId, [fileId], deleteMirroredModel, hardDelete, session))[0]
 }
 
 export async function getTotalFileSize(fileIds: string[]) {
