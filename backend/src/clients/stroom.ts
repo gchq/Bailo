@@ -27,6 +27,8 @@ export async function sendEvents(events: string) {
     agent: getHttpsAgent({ rejectUnauthorized: config.stroom.rejectUnauthorized }),
   })
 
+  // This will ensure any error thrown by pipeline(...).catch(...) is handled in the main thread
+  // Any error/failure thrown will also abort the fetch signal
   await pipelinePromise
 
   if (!res.ok) {
