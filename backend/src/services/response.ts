@@ -176,7 +176,7 @@ async function sendReviewResponseNotification(
     }
     default:
       throw InternalError('Review Kind not recognised', {
-        reviewId: review.id,
+        reviewId: review._id.toString(),
         modelId: review.modelId,
         kind: review.kind,
       })
