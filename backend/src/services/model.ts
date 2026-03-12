@@ -219,6 +219,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
           modelId,
           allModelFiles.flatMap((file) => file.id),
           true,
+          undefined,
           session,
         ),
         // Only delete Images after deleting Releases as softDeleteImage modifies Releases.
