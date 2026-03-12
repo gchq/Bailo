@@ -5,19 +5,14 @@ import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { listModelImagesWithScanResults } from '../../../../services/registry.js'
 import { imageWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
-import { ModelImagesWithOptionalScanResults } from '../../../../types/types.js'
-import { parse, strictCoerceBoolean } from '../../../../utils/validate.js'
+import { ModelImagesWithScanResults } from '../../../../types/types.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
   params: z.object({
     modelId: z.string({
       required_error: 'Must specify model id as param',
     }),
-  }),
-  query: z.object({
-    includeCount: strictCoerceBoolean(z.boolean().optional().default(false)),
-    includeSummary: strictCoerceBoolean(z.boolean().optional().default(false)),
-    includeFullDetail: strictCoerceBoolean(z.boolean().optional().default(false)),
   }),
 })
 
@@ -42,7 +37,7 @@ registerPath({
 })
 
 interface GetImagesResponse {
-  images: ModelImagesWithOptionalScanResults[]
+  images: ModelImagesWithScanResults[]
 }
 
 export const getImages = [
@@ -50,16 +45,9 @@ export const getImages = [
     req.audit = AuditInfo.ViewModelImages
     const {
       params: { modelId },
-      query: { includeCount, includeSummary, includeFullDetail },
     } = parse(req, getImagesSchema)
 
-    const images = await listModelImagesWithScanResults(
-      req.user,
-      modelId,
-      includeCount,
-      includeSummary,
-      includeFullDetail,
-    )
+    const images = await listModelImagesWithScanResults(req.user, modelId)
     await audit.onViewModelImages(req, modelId, images)
 
     res.json({

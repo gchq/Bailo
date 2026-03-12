@@ -19,14 +19,12 @@ import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryA
 import { isBailoError } from '../types/error.js'
 import {
   ArtefactScanStateCounts,
-  ImageWithOptionalScanResults,
-  LayerScanSummary,
+  ImageTagResult,
   ModelImages,
-  ModelImagesWithOptionalScanResults,
+  ModelImagesWithScanResults,
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { omitFields } from '../utils/object.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -111,94 +109,61 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
 export async function getImageWithScanResults(
   user: UserInterface,
   imageRef: ImageRefInterface,
-  includeCount: boolean = false,
-  includeSummary: boolean = false,
-  includeFullDetail: boolean = false,
-): Promise<ImageWithOptionalScanResults> {
-  const scans = includeCount || includeSummary || includeFullDetail ? await getScansForImageTag(user, imageRef) : []
-  const result: ImageWithOptionalScanResults = {
-    repository: imageRef.repository,
-    name: imageRef.name,
+  includeFullDetail = false,
+): Promise<ImageTagResult> {
+  const scans = await getScansForImageTag(user, imageRef)
+
+  const initialState = Object.fromEntries(
+    Object.values(ArtefactScanState).map((state) => [state, 0]),
+  ) as ArtefactScanStateCounts
+
+  const stateCounts = scans.reduce<ArtefactScanStateCounts>((acc, scan) => {
+    acc[scan.state]++
+    return acc
+  }, initialState)
+
+  const STATE_PRIORITY = [
+    ArtefactScanState.Error,
+    ArtefactScanState.InProgress,
+    ArtefactScanState.NotScanned,
+    ArtefactScanState.Complete,
+  ]
+
+  const state = STATE_PRIORITY.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
+
+  const lastRunAt = scans
+    .map((s) => s.updatedAt ?? s.createdAt)
+    .sort()
+    .at(-1)
+
+  return {
     tag: imageRef.tag,
-  }
+    state,
+    lastRunAt,
+    summary: countSeverities(scans.flatMap((s) => s.summary || [])),
 
-  if (includeCount) {
-    const initialStatus = Object.fromEntries(
-      Object.values(ArtefactScanState).map((state) => [state, 0]),
-    ) as ArtefactScanStateCounts
-
-    result.count = {
-      state: scans.reduce<ArtefactScanStateCounts>((acc, scan) => {
-        acc[scan.state]++
-        return acc
-      }, initialStatus),
-      severity: countSeverities(scans.flatMap((s) => s.summary || [])),
-    }
+    ...(includeFullDetail && {
+      additionalInfo: scans,
+    }),
   }
-
-  if (includeSummary) {
-    result.summary = scans
-      .flatMap((s) => omitFields(s, ['_id', 'additionalInfo', 'createdAt', 'updatedAt', 'artefactKind']))
-      .filter((s): s is LayerScanSummary => s !== undefined)
-  }
-
-  if (includeFullDetail) {
-    result.fullDetail = scans
-  }
-  return result
 }
 
 export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
-  includeCount: boolean = false,
-  includeSummary: boolean = false,
-  includeFullDetail: boolean = false,
-): Promise<ModelImagesWithOptionalScanResults[]> {
-  const modelImages: ModelImages = await listModelImages(user, modelId)
+): Promise<ModelImagesWithScanResults[]> {
+  const modelImages = await listModelImages(user, modelId)
 
   return Promise.all(
-    modelImages.map(async (img): Promise<ModelImagesWithOptionalScanResults> => {
-      const perTagScans = await Promise.all(
-        img.tags.map(
-          async (tag): Promise<ImageWithOptionalScanResults> =>
-            await getImageWithScanResults(user, { ...img, tag }, includeCount, includeSummary, includeFullDetail),
-        ),
-      )
+    modelImages.map(async (img) => {
+      const scanResults = (
+        await Promise.all(img.tags.map((tag) => getImageWithScanResults(user, { ...img, tag })))
+      ).filter((r) => r.state !== ArtefactScanState.NotScanned)
 
-      const result: ModelImagesWithOptionalScanResults = {
+      return {
         ...img,
+        scanResults,
       }
-
-      if (includeCount) {
-        result.count = perTagScans
-          .filter((r): r is ImageWithOptionalScanResults => !!r.count)
-          .map((r) => ({
-            tag: r.tag,
-            state: r.count!.state,
-            severity: r.count!.severity,
-          }))
-      }
-
-      if (includeSummary) {
-        result.summary = perTagScans
-          .filter((r): r is ImageWithOptionalScanResults => !!r.summary)
-          .map((r) => ({
-            tag: r.tag,
-            summary: r.summary!,
-          }))
-      }
-
-      if (includeFullDetail) {
-        result.fullDetail = perTagScans
-          .filter((r): r is ImageWithOptionalScanResults => !!r.fullDetail)
-          .map((r) => ({
-            tag: r.tag,
-            fullDetail: r.fullDetail!,
-          }))
-      }
-
-      return result
     }),
   )
 }

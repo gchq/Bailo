@@ -6,7 +6,6 @@ import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
-import { ImageRefInterface } from '../models/Release.js'
 import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
@@ -239,33 +238,20 @@ export type ModelImageTags = {
   name: string
   tags: Array<string>
 }
-export type SingleImageTagScanResult = {
-  count?: {
-    state: ArtefactScanStateCounts
-    severity: SeverityCounts
-  }
-  summary?: LayerScanSummary[]
-  fullDetail?: ScanInterface[]
+
+export type ImageTagResult = {
+  tag: string
+  state: ArtefactScanStateKeys
+  lastRunAt?: Date
+  summary: SeverityCounts
+  additionalInfo?: ScanInterface[]
 }
+
 export type ImageScanResults = {
-  count?: {
-    tag: string
-    state: ArtefactScanStateCounts
-    severity: SeverityCounts
-  }[]
-
-  summary?: {
-    tag: string
-    summary: LayerScanSummary[]
-  }[]
-
-  fullDetail?: {
-    tag: string
-    fullDetail: ScanInterface[]
-  }[]
+  scanResults: ImageTagResult[]
 }
-export type ImageWithOptionalScanResults = ImageRefInterface & SingleImageTagScanResult
-export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
+
+export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
 export type ArtefactScanStateCounts = Record<ArtefactScanStateKeys, number>
