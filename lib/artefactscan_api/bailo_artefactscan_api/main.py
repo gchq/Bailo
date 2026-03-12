@@ -12,17 +12,18 @@ from pickletools import genops
 from tempfile import NamedTemporaryFile
 from typing import Annotated, Any
 
+import httpx
 import modelscan
 import uvicorn
 from content_size_limit_asgi import ContentSizeLimitMiddleware
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, Response, UploadFile
 from modelscan.modelscan import ModelScan
 from pydantic import BaseModel
 
 # isort: split
 
 import bailo_artefactscan_api.trivy as trivy
-from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.config import BackendSettings, Settings
 from bailo_artefactscan_api.openapi.scan_file_responses import SCAN_FILE_RESPONSES
 from bailo_artefactscan_api.openapi.scan_image_responses import SCAN_IMAGE_RESPONSES
 
@@ -36,6 +37,15 @@ def get_settings() -> Settings:
     :return: Evaluated Settings from config file.
     """
     return Settings()
+
+
+@lru_cache
+def get_backend_settings() -> BackendSettings:
+    """Fast way to only load backend settings from dotenv once.
+
+    :return: Evaluated BackendSettings from config file.
+    """
+    return BackendSettings()
 
 
 class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
@@ -219,6 +229,38 @@ def scan_image(
     logger.info("Upload started")
     res = trivy.scan(in_file, background_tasks, settings.block_size)
     return res
+
+
+@app.post("/registry/events", status_code=HTTPStatus.ACCEPTED)
+async def registry_events(
+    request: Request,
+    backend_settings: Annotated[BackendSettings, Depends(get_backend_settings)],
+) -> Response:
+    payload = await request.json()
+    logger.debug(f"Received {payload=}")
+
+    async with httpx.AsyncClient(
+        timeout=10.0,
+        cert=backend_settings.client_cert,
+        verify=backend_settings.ca_cert,
+    ) as client:
+        for event in payload.get("events", []):
+            if event.get("action") != "push":
+                continue
+
+            target = event.get("target", {})
+            repository = target.get("repository")
+            model_id, name, *_ = repository.split("/")
+            tag = target.get("tag")
+
+            if not model_id or not name or not tag:
+                continue
+
+            url = f"{backend_settings.base_url}/api/v2/filescanning/model/{model_id}/image/{name}/{tag}/scan"
+
+            await client.put(url)
+
+    return Response(status_code=HTTPStatus.ACCEPTED)
 
 
 def is_valid_pickle(file_path: Path, max_bytes: int = 2 * 1024 * 1024) -> bool:
