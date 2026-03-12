@@ -1,5 +1,5 @@
 import { Delete, Edit, FileCopy, ImportExport, Key, ManageAccounts } from '@mui/icons-material'
-import { Box, Container, Divider, List, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useEffect, useEffectEvent, useState } from 'react'
@@ -163,8 +163,9 @@ export default function Settings({ entry }: SettingsProps) {
             selected={selectedCategory === SettingsCategory.DELETION}
             onClick={() => handleListItemClick(SettingsCategory.DELETION)}
             icon={<Delete color={selectedCategory === SettingsCategory.DELETION ? 'secondary' : 'inherit'} />}
+            dataTest='entryDeletionMenuItem'
           >
-            <Box data-test='entryDeletionMenuItem'>Deletion</Box>
+            Deletion
           </SimpleListItemButton>
         </List>
         <Container sx={{ my: 2 }}>

@@ -6,6 +6,7 @@ let modelUuid = ''
 const schemaId = 'minimal-general-v10'
 const accessReqSchemaId = 'minimal-access-request-general-v10'
 const semver = '0.0.1'
+const version = '0.0.2'
 const notes = 'Test notes.'
 let accessReqId = ''
 
@@ -65,25 +66,25 @@ describe('Create new model', () => {
     cy.contains('Edit model card', { timeout: 5000 })
   })
 
-  // it('can create release on an existing model', () => {
-  //   cy.intercept('POST', `/api/v2/model/${modelUuid}/releases`).as('postRelease')
-  //   cy.visit(`/model/${modelUuid}`)
-  //   cy.contains(modelUuid)
+  it('can create release on an existing model', () => {
+    cy.intercept('POST', `/api/v2/model/${modelUuid}/releases`).as('postRelease')
+    cy.visit(`/model/${modelUuid}`)
+    cy.contains(modelUuid)
 
-  //   cy.log('Navigating to releases tab to draft a new release')
-  //   cy.get('[data-test=releasesTab]').click({ force: true })
-  //   cy.contains('Draft new release')
-  //   cy.get('[data-test=draftNewReleaseButton').click()
-  //   cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
+    cy.log('Navigating to releases tab to draft a new release')
+    cy.get('[data-test=releasesTab]').click({ force: true })
+    cy.contains('Draft new release')
+    cy.get('[data-test=draftNewReleaseButton').click()
+    cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
-  //   cy.log('Filling out release form and submitting')
-  //   cy.get('[data-test=releaseSemanticVersionTextField]').type(releaseVersion, { force: true })
-  //   cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
-  //   cy.get('[data-test=uploadFileButton]').selectFile('cypress/fixtures/test.txt', { force: true })
-  //   cy.get('[data-test=createReleaseButton]').click({ force: true })
-  //   cy.wait('@postRelease')
-  //   cy.url().should('contain', `release/${releaseVersion}`)
-  // })
+    cy.log('Filling out release form and submitting')
+    cy.get('[data-test=releaseSemanticVersionTextField]').type(version, { force: true })
+    cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
+    cy.get('[data-test=uploadFileButton]').selectFile('cypress/fixtures/test.txt', { force: true })
+    cy.get('[data-test=createReleaseButton]').click({ force: true })
+    cy.wait('@postRelease')
+    cy.url().should('contain', `release/${version}`)
+  })
 
   it('can edit an existing model', () => {
     cy.log('Navigating to an existing model')
@@ -116,7 +117,7 @@ describe('Create new model', () => {
   })
 
   it('can soft delete the model', () => {
-    cy.intercept('DELETE', '/api/v2/model/*').as('deleteModel')
+    cy.intercept('DELETE', `/api/v2/model/${modelUuid}`).as('deleteModel')
     cy.request('POST', `/api/v2/model/${modelUuid}/releases`, {
       semver,
       notes,
@@ -137,16 +138,21 @@ describe('Create new model', () => {
         cy.get('[data-test=entryDeletionMenuItem]').should('be.visible').wait(500).click()
         cy.log('Delete Entry')
         cy.get('[data-test=deleteEntryButton]').click()
+        cy.get('[data-test=deleteEntryConfirm]').should('be.disabled')
         cy.get('[data-test=deleteEntryInputVerification]').type('test model', { force: true })
+        cy.get('[data-test=deleteEntryConfirm]').should('be.enabled')
         cy.get('[data-test=deleteEntryConfirm]').click()
         cy.wait('@deleteModel')
         cy.title().should('equal', 'Marketplace · Bailo')
-        cy.visit(`/model/${modelUuid}`)
-        cy.contains('Not Found: The requested entry was not found.')
-        cy.visit(`/model/${modelUuid}/release/${semver}`)
-        cy.contains('Not Found: The requested entry was not found.')
-        cy.visit(`/model/${modelUuid}/access-request/${accessReqId}`)
-        cy.contains('Not Found: The requested access request was not found.')
+        cy.request('GET', `/model/${modelUuid}`).then((response) => {
+          expect(response.status).to.eq(200)
+          cy.visit(`/model/${modelUuid}`)
+          cy.contains('Not Found: The requested entry was not found.')
+          cy.visit(`/model/${modelUuid}/release/${semver}`)
+          cy.contains('Not Found: The requested entry was not found.')
+          cy.visit(`/model/${modelUuid}/access-request/${accessReqId}`)
+          cy.contains('Not Found: The requested access request was not found.')
+        })
       })
     })
   })
