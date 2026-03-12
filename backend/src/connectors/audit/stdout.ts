@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult, ImageWithOptionalScanResults, MirrorInformation, ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
@@ -342,16 +342,33 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onViewModelImages(
-    req: Request,
-    modelId: string,
-    images: { repository: string; name: string; tags: string[] }[],
-  ) {
+  async onViewScanners(req: Request) {
+    this.checkEventType(AuditInfo.ViewScanners, req)
+    const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewModelImages(req: Request, modelId: string, images: ModelImages) {
     this.checkEventType(AuditInfo.ViewModelImages, req)
     const event = this.generateEvent(req, {
       modelId,
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewModelImage(req: Request, modelId: string, image: ImageWithOptionalScanResults) {
+    this.checkEventType(AuditInfo.ViewModelImages, req)
+    const event = this.generateEvent(req, {
+      modelId,
+      image: { repository: image.repository, name: image.name },
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.checkEventType(AuditInfo.UpdateImage, req)
+    const event = this.generateEvent(req, { modelId, image })
     req.log.info(event, req.audit.description)
   }
 

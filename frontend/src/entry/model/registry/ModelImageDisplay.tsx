@@ -1,47 +1,96 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useState } from 'react'
-import Loading from 'src/common/Loading'
+import { ExpandLess, ExpandMore, LocalOffer } from '@mui/icons-material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Card,
+  Divider,
+  Stack,
+  Typography,
+} from '@mui/material'
+import { rerunImageArtefactScan } from 'actions/artefactScanning'
+import { useCallback, useState } from 'react'
 import Paginate from 'src/common/Paginate'
-import CodeLine from 'src/entry/model/registry/CodeLine'
-import MessageAlert from 'src/MessageAlert'
-import { ModelImage } from 'types/types'
+import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import useNotification from 'src/hooks/useNotification'
+import Link from 'src/Link'
+import { ModelImagesWithOptionalScanResults } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 type ModelImageDisplayProps = {
-  modelImage: ModelImage
+  modelImage: ModelImagesWithOptionalScanResults
+  mutate: () => void
 }
 
-export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisplayProps) {
   const [expanded, setExpanded] = useState(false)
+
+  const sendNotification = useNotification()
 
   function toggleExpand() {
     setExpanded(!expanded)
   }
 
-  const modelImageTag = ({ data }) => (
-    <Box key={`${modelImage.repository}-${modelImage.name}-${data.tag}`} sx={{ p: 1 }}>
-      <CodeLine
-        line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
-      />
+  const getScanResultCounts = (imageTag: string) => {
+    if (modelImage && modelImage.scanResults) {
+      const tagResults = modelImage.scanResults.find((tagResult) => tagResult.tag === imageTag)
+      if (tagResults) {
+        return tagResults.summary
+      }
+    }
+  }
+
+  const handleRescan = useCallback(
+    async (tag: string) => {
+      const response = await rerunImageArtefactScan(modelImage.repository, modelImage.name, tag)
+      if (response.status === 200) {
+        sendNotification({
+          variant: 'success',
+          msg: `Starting manual re-scan of ${name}:${tag}`,
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+        mutate()
+      } else {
+        sendNotification({
+          variant: 'error',
+          msg: await getErrorMessage(response),
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+    },
+    [modelImage.name, modelImage.repository, mutate, sendNotification],
+  )
+
+  const modelImageTag = (tag: string) => (
+    <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${tag}`} sx={{ py: 0.5 }}>
+      <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />}>
+        <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
+          <LocalOffer color='primary' />
+          <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${tag}`}>
+            <Button size='large' color='primary'>
+              {tag}
+            </Button>
+          </Link>
+        </Stack>
+        <VulnerabilityResult {...getScanResultCounts(tag)} onRescan={() => handleRescan(tag)} />
+      </Stack>
     </Box>
   )
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
+  const modelImageTagRow = ({ data }) => modelImageTag(data.tag)
 
   return (
     <>
-      {isUiConfigLoading && <Loading />}
       <Card
         sx={{
           width: '100%',
           p: 2,
+          border: 'none',
         }}
       >
-        <Stack direction='column' spacing={1}>
+        <Stack direction='column'>
           <Typography
             component='h2'
             variant='h6'
@@ -74,17 +123,12 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
                   hideBorders
                   hideDividers
                 >
-                  {modelImageTag}
+                  {modelImageTagRow}
                 </Paginate>
               </AccordionDetails>
             </Accordion>
           ) : (
-            modelImage.tags.map((imageTag) => (
-              <CodeLine
-                key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}
-                line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
-              />
-            ))
+            modelImage.tags.map((imageTag) => modelImageTag(imageTag))
           )}
         </Stack>
       </Card>

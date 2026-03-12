@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult, ImageWithOptionalScanResults, MirrorInformation, ModelImages } from '../../types/types.js'
 
 const AuditKind = {
   Create: 'Create',
@@ -121,6 +121,8 @@ export const AuditInfo = {
   },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
+  ViewModelImage: { typeId: 'ViewModelImage', description: 'Model Image Viewed', auditKind: AuditKind.View },
+  UpdateImage: { typeId: 'UpdateImage', description: 'Image Information Updated', auditKind: AuditKind.Update },
   DeleteImage: { typeId: 'DeleteImage', description: 'Image Information Deleted', auditKind: AuditKind.Delete },
 
   CreateInference: { typeId: 'CreateInference', description: 'Inference Service Created', auditKind: AuditKind.Create },
@@ -128,6 +130,8 @@ export const AuditInfo = {
   ViewInference: { typeId: 'ViewInference', description: 'Inference Service Viewed', auditKind: AuditKind.View },
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
   DeleteInference: { typeId: 'DeleteInferences', description: 'Inferences Deleted', auditKind: AuditKind.Delete },
+
+  ViewScanners: { typeId: 'ViewScanners', description: 'Scanners Viewed', auditKind: AuditKind.View },
 
   CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
   CreateImport: { typeId: 'CreateImport', description: 'Model Imported', auditKind: AuditKind.Create },
@@ -228,11 +232,11 @@ export abstract class BaseAuditConnector {
   abstract onUpdateInference(req: Request, inference: InferenceDoc): Promise<void>
   abstract onDeleteInference(req: Request, inference: InferenceDoc): Promise<void>
 
-  abstract onViewModelImages(
-    req: Request,
-    modelId: string,
-    images: { repository: string; name: string; tags: string[] }[],
-  ): Promise<void>
+  abstract onViewScanners(req: Request): Promise<void>
+
+  abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
+  abstract onViewModelImage(req: Request, modelId: string, image: ImageWithOptionalScanResults): Promise<void>
+  abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
   abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[]): Promise<void>

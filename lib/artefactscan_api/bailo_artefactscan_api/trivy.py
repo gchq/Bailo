@@ -21,7 +21,23 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn.error")
 
-__version__ = "0.68.2"
+
+@lru_cache
+def get_trivy_version() -> str:
+    try:
+        result = subprocess.run(
+            (get_settings().BINARY, "--version"),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        # Example output: "Version: 0.68.2\n..."
+        for line in result.stdout.splitlines():
+            if line.startswith("Version:"):
+                return line.split(":", 1)[1].strip()
+    except Exception:
+        pass
+    return "unknown"
 
 
 def safe_extract(tar: tarfile.TarFile, path: str) -> None:
@@ -156,7 +172,7 @@ def scan_sbom(blob_digest: str) -> Any:
         "--offline-scan",
         "--no-progress",
         "--format",
-        "cyclonedx",
+        "json",
         "--cache-dir",
         get_settings().CACHE_DIR,
         "--output",
@@ -261,9 +277,10 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
     blob_digest = blob_hash.hexdigest()
 
     if blob_digest != filename:
+        logger.exception("Calculated digest %s does not match expected digest %s", blob_digest, filename)
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST.value,
-            detail=f"Blob {filename} has been modified",
+            detail=f"Uploaded blob {filename} did not match expected digest",
         )
 
     if not Path(

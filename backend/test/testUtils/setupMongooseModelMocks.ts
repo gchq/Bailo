@@ -69,12 +69,13 @@ function createMockFns(): Record<MethodNames, MockedFunction<any>> {
   )
 }
 
-function createInstance<TDoc extends { _id?: any }>(
+function createInstance<TDoc extends { _id?: any; id: string }>(
   toObjectValue: Partial<TDoc>,
   doc: Partial<TDoc> | undefined,
   chainMocks: Record<MethodNames, MockedFunction<any>>,
 ): InstanceType<TDoc> {
   const instance: InstanceType<TDoc> = {
+    id: createId().toString(),
     _id: createId(),
     toObject: vi.fn(() => ({ ...toObjectValue, ...doc })),
   } as InstanceType<TDoc>
@@ -161,6 +162,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 export const modelMocks = {
   AccessRequestModel: createMongooseModelMock('AccessRequest'),
   FileModel: createMongooseModelMock('FileModel', {
+    id: 'mockFileId',
     _id: 'mockFileId',
     modelId: 'mockModelId',
     name: 'mockFileName',

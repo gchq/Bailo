@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > artefactscanning > putImageScan > 200 > ok 1`] = `{}`;
+
+exports[`routes > artefactscanning > putImageScan > audit > expected call 1`] = `"expedita"`;
+
+exports[`routes > artefactscanning > putImageScan > audit > expected call 2`] = `
+{
+  "name": "Dr. Garry Cummerata",
+  "repository": "expedita",
+  "tag": "expedita",
+}
+`;

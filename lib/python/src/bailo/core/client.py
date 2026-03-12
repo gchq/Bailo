@@ -693,13 +693,31 @@ class Client:
         file_id: str,
     ):
         """
-        Manually re-request a new antivirus scan for a file.
+        Manually re-request a new scan for a file.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
         :return: JSON response object
         """
         return self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan", json={}).json()
+
+    def put_image_scan(
+        self,
+        model_id: str,
+        image_name: str,
+        image_tag: str,
+    ):
+        """
+        Manually re-request a new scan for an image.
+
+        :param model_id: Unique model ID
+        :param image_name: Name of the image
+        :param image_tag: Unique tag of the image
+        :return: JSON response object
+        """
+        return self.agent.put(
+            f"{self.url}/v2/filescanning/model/{model_id}/image/{image_name}/{image_tag}/scan", json={}
+        ).json()
 
     def post_access_request_review(
         self,

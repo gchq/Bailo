@@ -10,6 +10,7 @@ import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
 import { putFileScan } from './routes/v2/artefactScanning/putFileScan.js'
+import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
@@ -34,6 +35,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { deleteImage } from './routes/v2/model/images/deleteImage.js'
+import { getImage } from './routes/v2/model/images/getImage.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -175,6 +177,7 @@ server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
 server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
+server.get('/api/v2/model/:modelId/image/:name/:tag', ...getImage)
 server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -240,6 +243,7 @@ server.get('/api/v2/specification', ...getSpecification)
 
 server.get('/api/v2/filescanning/info', ...getArtefactScanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
+server.put('/api/v2/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
