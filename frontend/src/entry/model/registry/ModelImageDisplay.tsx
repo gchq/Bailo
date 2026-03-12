@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   Divider,
-  Grid,
   Stack,
   Typography,
 } from '@mui/material'
@@ -64,24 +63,23 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     [modelImage.name, modelImage.repository, mutate, sendNotification],
   )
 
-  const modelImageTag = ({ data }) => (
-    <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${data.tag}`}>
-      <Grid container alignItems='center' spacing={2}>
-        <Grid size={1}>
-          <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
-            <LocalOffer color='primary' />
-            <Typography color='primary'>{data.tag}</Typography>
-          </Stack>
-        </Grid>
-        <Grid size='auto'>
-          <Stack direction={{ sm: 'column', md: 'row' }} alignItems='center' justifyContent='left' spacing={2}>
-            <Typography fontWeight='bold'>Vulnerabilities: </Typography>
-            <VulnerabilityResult {...getScanResultCounts(data.tag)} onRescan={() => handleRescan(data.tag)} />
-          </Stack>
-        </Grid>
-      </Grid>
+  const modelImageTag = (tag: string) => (
+    <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${tag}`} sx={{ py: 0.5 }}>
+      <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />}>
+        <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
+          <LocalOffer color='primary' />
+          <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${tag}`}>
+            <Button size='large' color='primary'>
+              {tag}
+            </Button>
+          </Link>
+        </Stack>
+        <VulnerabilityResult {...getScanResultCounts(tag)} onRescan={() => handleRescan(tag)} />
+      </Stack>
     </Box>
   )
+
+  const modelImageTagRow = ({ data }) => modelImageTag(data.tag)
 
   return (
     <>
@@ -89,9 +87,10 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
         sx={{
           width: '100%',
           p: 2,
+          border: 'none',
         }}
       >
-        <Stack direction='column' spacing={1}>
+        <Stack direction='column'>
           <Typography
             component='h2'
             variant='h6'
@@ -124,26 +123,12 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
                   hideBorders
                   hideDividers
                 >
-                  {modelImageTag}
+                  {modelImageTagRow}
                 </Paginate>
               </AccordionDetails>
             </Accordion>
           ) : (
-            modelImage.tags.map((imageTag) => (
-              <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}>
-                <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />}>
-                  <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
-                    <LocalOffer color='primary' />
-                    <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${imageTag}`}>
-                      <Button size='large' color='primary'>
-                        {imageTag}
-                      </Button>
-                    </Link>
-                  </Stack>
-                  <VulnerabilityResult {...getScanResultCounts(imageTag)} onRescan={() => handleRescan(imageTag)} />
-                </Stack>
-              </Box>
-            ))
+            modelImage.tags.map((imageTag) => modelImageTag(imageTag))
           )}
         </Stack>
       </Card>
