@@ -38,12 +38,6 @@ import { getSchemaById } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
-export function checkModelRestriction(model: ModelInterface) {
-  if (EntryKind.MirroredModel === model.kind) {
-    throw BadReq(`Cannot alter a mirrored model.`)
-  }
-}
-
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
 
 export type CreateModelParams = Pick<
@@ -650,7 +644,6 @@ export async function createModelCardFromSchema(
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  checkModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
@@ -703,7 +696,6 @@ export async function createModelCardFromTemplate(
   if (model.card?.schemaId) {
     throw BadReq('This model already has a model card.', { modelId })
   }
-  checkModelRestriction(model)
   const template = await getModelById(user, templateId)
   // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
   const templateAuth = await authorisation.model(user, template, ModelAction.View)

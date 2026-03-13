@@ -62,6 +62,7 @@
     "nodemailer": "^8.0.1",
     "outdent": "^0.8.0",
     "p-queue": "^9.1.0",
+    "path-to-regexp": "^8.3.0",
     "pino": "^10.3.0",
     "pino-http": "^11.0.0",
     "pino-opentelemetry-transport": "^3.0.0",
