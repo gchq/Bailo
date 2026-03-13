@@ -22,6 +22,7 @@ from mlflow.tracking import MlflowClient
 from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility, SchemaKind
 from bailo.helper.datacard import Datacard
+from bailo.helper.mirroredModel import MirroredModel
 from bailo.helper.model import Model
 from bailo.helper.schema import Schema
 
@@ -56,6 +57,18 @@ def example_model(integration_client, metrics_schema):
 
 
 @pytest.fixture
+def example_mirrored_model(integration_client):
+    mirrored_model = MirroredModel.create(
+        client=integration_client,
+        name="Yolo-v4",
+        sourceModelId="test-1234",
+        description="FooBarBaz!",
+        visibility=ModelVisibility.PUBLIC,
+    )
+    return mirrored_model
+
+
+@pytest.fixture
 def local_datacard():
     client = Client("https://example.com")
     visibility = ModelVisibility.PUBLIC
@@ -78,6 +91,21 @@ def local_model():
         model_id="test-id",
         name="test",
         description="test",
+        visibility=visibility,
+    )
+    return model
+
+
+@pytest.fixture
+def local_mirrored_model():
+    client = Client("https://example.com")
+    visibility = ModelVisibility.PUBLIC
+    model = MirroredModel(
+        client=client,
+        model_id="test-id",
+        name="test",
+        description="test",
+        sourceModelId="test-1234",
         visibility=visibility,
     )
     return model

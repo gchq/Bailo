@@ -39,17 +39,19 @@ jobs:
             artifact: bailo_frontend
             cache_scope: frontend
             tag: bailo_frontend:latest,bailo_frontend:prod
-          - name: modelscan
-            context: lib/modelscan_api
-            dockerfile: lib/modelscan_api/Dockerfile
-            tar: /tmp/bailo_modelscan.tar
-            artifact: bailo_modelscan
-            cache_scope: modelscan
-            tag: bailo_modelscan:latest,bailo_modelscan:prod
+          - name: artefactscan
+            context: lib/artefactscan_api
+            dockerfile: lib/artefactscan_api/Dockerfile
+            tar: /tmp/bailo_artefactscan.tar
+            artifact: bailo_artefactscan
+            cache_scope: artefactscan
+            tag: bailo_artefactscan:latest,bailo_artefactscan:prod
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -66,34 +68,48 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
           outputs: type=docker,dest=${{ matrix.component.tar }}
 
-      # modelscan version check (separate to release versions)
-      - name: Check if modelscan_api version changed
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan'
-        id: modelscan_version_changed
+      # artefactscan version check (separate to release versions)
+      - name: Check if artefactscan_api version changed
+        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan'
+        id: artefactscan_version_changed
         run: |
-          git fetch origin main --depth=2
-          OLD_VERSION=$(git show HEAD^:lib/modelscan_api/bailo_modelscan_api/config.py | grep 'app_version' | head -n1 | cut -d'"' -f2)
-          NEW_VERSION=$(grep 'app_version' lib/modelscan_api/bailo_modelscan_api/config.py | head -n1 | cut -d'"' -f2)
+          set -euo pipefail
+
+          # debug logging
+          echo "Git context HEAD commit:"
+          git --no-pager log -1 --oneline
+
+          git fetch origin main
+
+          PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
+          echo "Previous main commit: $PREV_MAIN_COMMIT"
+
+          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/artefactscan_api/bailo_artefactscan_api/config.py" | grep 'app_version' | head -n1 | cut -d'"' -f2)
+          NEW_VERSION=$(grep 'app_version' lib/artefactscan_api/bailo_artefactscan_api/config.py | head -n1 | cut -d'"' -f2)
+          echo "OLD_VERSION=$OLD_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION"
 
           if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "Result: app_version has changed"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
+            echo "Result: app_version has NOT changed"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      # Log in to GHCR if release made or modelscan_api version changed
+      # Log in to GHCR if release made or artefactscan_api version changed
       - name: Log in to GHCR
-        if: (github.event_name == 'release' && matrix.component.name != 'modelscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true')
+        if: (github.event_name == 'release' && matrix.component.name != 'artefactscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true')
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Push backend & frontend to GHCR if release made (ignoring modelscan_api which is published separately)
+      # Push backend & frontend to GHCR if release made (ignoring artefactscan_api which is published separately)
       - name: Tag & push backend & frontend images to GHCR
-        if: github.event_name == 'release' && matrix.component.name != 'modelscan'
+        if: github.event_name == 'release' && matrix.component.name != 'artefactscan'
         run: |
           docker load -i ${{ matrix.component.tar }}
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
@@ -105,13 +121,13 @@ jobs:
           docker push $VERSION_TAG
           docker push $LATEST_TAG
 
-      # Push modelscan_api to GHCR if version bumped
-      - name: Tag & push modelscan image to GHCR
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true'
+      # Push artefactscan_api to GHCR if version bumped
+      - name: Tag & push artefactscan image to GHCR
+        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true'
         run: |
           docker load -i ${{ matrix.component.tar }}
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.modelscan_version_changed.outputs.version }}"
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version }}"
           LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
 
           docker tag $IMAGE_ID $VERSION_TAG
@@ -120,7 +136,7 @@ jobs:
           docker push $LATEST_TAG
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.component.artifact }}
           path: ${{ matrix.component.tar }}
@@ -133,16 +149,16 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Use Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.5.0
+          node-version: 24
           cache: "npm"
 
       - name: Cache npm dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
@@ -168,52 +184,60 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v5
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24.5.0
-          cache: "npm"
+      - uses: actions/checkout@v6
 
       # Setup BuildX
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Get Bailo Docker image
+      # jq is required so that `npm ci` is not needed to generate certs
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
-          name: bailo_backend
-          path: /tmp
-      - name: Download artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: bailo_frontend
-          path: /tmp
-      - name: Download artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: bailo_modelscan
+          pattern: bailo_*
           path: /tmp
 
+      - name: List downloaded artifacts
+        run: ls -R /tmp/bailo_*
+
       - name: Start minikube
-        uses: medyagh/setup-minikube@master
+        uses: medyagh/setup-minikube@latest
+        with:
+          driver: docker
+          kubernetes-version: v1.35.0
+          start-args: |
+            --cpus=2
+            --memory=4096
+            --addons=none
 
       - name: List Cluster
         run: kubectl get pods -A
 
-      - name: Load docker image to minikube
+      - name: Load docker images into minikube
         run: |
-          eval $(minikube -p minikube docker-env)
-          docker load -i /tmp/bailo_backend.tar
-          docker load -i /tmp/bailo_frontend.tar
-          docker load -i /tmp/bailo_modelscan.tar
+          set -euo pipefail
 
-      - name: Install dependencies
-        run: npm ci
+          eval "$(minikube -p minikube docker-env)"
 
-      - name: Create certs
-        run: sudo chown -R runner:docker backend/certs && npm run certs
+          # Load all Bailo images downloaded as artifacts
+          for image in /tmp/bailo_*/*.tar; do
+            echo "Loading image: $image"
+            docker load -i "$image"
+          done
+
+      - name: Create certs (without npm)
+        run: |
+          set -euo pipefail
+          CERT_DIR="backend/certs"
+          sudo chown -R runner:docker "$CERT_DIR"
+          mkdir -p "$CERT_DIR"
+          openssl genrsa -out "$CERT_DIR/key.pem" 2048
+          openssl req -new -x509 -key "$CERT_DIR/key.pem" -out "$CERT_DIR/cert.pem" -config "$CERT_DIR/san.cnf" -extensions 'v3_req' -days 360
+          ./backend/src/scripts/generateJWKS.sh
 
       # Add bailo NodePort
       - name: Create NodePort Config
@@ -239,8 +263,12 @@ jobs:
           cat << EOT >> infrastructure/helm/bailo/local.yaml
           ---
           # Instance Settings
-          securityContext:
-            runAsUser: 1002
+          frontend:
+            podSecurityContext:
+              runAsUser: 1001
+          backend:
+            podSecurityContext:
+              runAsUser: 1001
           config:
             ui:
               banner:
@@ -254,8 +282,8 @@ jobs:
             frontendTag: latest
             backendRepository: "bailo_backend"
             backendTag: latest
-            modelscanRepository: "bailo_modelscan"
-            modelscanTag: latest
+            artefactscanRepository: "bailo_artefactscan"
+            artefactscanTag: latest
           # Used for k8s not openshift
           ingress:
             enabled: false
@@ -304,21 +332,6 @@ jobs:
           echo "---------------curl connect to bailo---------------"
           curl $(minikube service node-port --url)
 
-      # Run Cypress integration tests
-      #- run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
-
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-screenshots-k8s
-          path: cypress/screenshots
-
-      # - uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: cypress-videos
-      #     path: cypress/videos
-
       - name: Print application logs
         if: always()
         run: kubectl logs -l app.kubernetes.io/instance=bailo --tail=-1
@@ -332,12 +345,12 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.5.0
+          node-version: 24
           cache: "npm"
 
       # Setup BuildX
@@ -346,28 +359,28 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
-          name: bailo_modelscan
+          name: bailo_artefactscan
           path: /tmp
 
       - name: Load image
         run: |
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
-          docker load --input /tmp/bailo_modelscan.tar
+          docker load --input /tmp/bailo_artefactscan.tar
           docker image ls -a
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_modelscan.tar
+          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_artefactscan.tar
 
       # Create logs directory
       - run: mkdir logs
@@ -384,6 +397,10 @@ jobs:
         run: |
           cat <<EOT >> backend/config/local.cjs
           module.exports = {
+            mongo: {
+              uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
+            },
+
             minio: {
               accessKey: 'minioadmin',
               secretKey: 'minioadmin',
@@ -415,7 +432,7 @@ jobs:
           --wait --wait-timeout 60
 
       # e2e with Cypress
-      - uses: cypress-io/github-action@v6
+      - uses: cypress-io/github-action@v7
         if: matrix.job_name == 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
@@ -428,11 +445,11 @@ jobs:
         if: matrix.job_name == 'integration_python'
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Cache python pip
         if: matrix.job_name == 'integration_python'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -444,16 +461,23 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
-      - name: Start MLFlow
+      - name: Get MLFlow version from installed package
         if: matrix.job_name == 'integration_python'
-        run: mlflow server --port 5050 &
+        id: mlflow_version
+        run: |
+          version=$(python -m pip show mlflow | awk '/Version:/ {print $2}')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Start MLFlow via Docker
+        if: matrix.job_name == 'integration_python'
+        run: docker run -d --name mlflow_server -p 5050:5000 ghcr.io/mlflow/mlflow:v${{ steps.mlflow_version.outputs.version }} mlflow server --host 0.0.0.0 --port 5000
 
       - name: Wait for MLFlow
         if: matrix.job_name == 'integration_python'
         env:
           MLFLOW_URL: http://localhost:5050/ajax-api/2.0/mlflow/experiments/search?max_results=1
         run: |
-          for c in {1..5}; do test $(curl -s -o /dev/null -w "%{http_code}" ${MLFLOW_URL}) -eq 200 && break; done
+          for c in {1..10}; do test $(curl -s -o /dev/null -w "%{http_code}" ${MLFLOW_URL}) -eq 200 && break || sleep 3; done
 
       - name: Test with pytest
         if: matrix.job_name == 'integration_python'
@@ -465,7 +489,7 @@ jobs:
           PYTEST_RUN_PATH: "lib/python"
 
       # Upload all artifacts & logs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure() && matrix.job_name == 'end_to_end'
         with:
           name: cypress-screenshots-e2e
@@ -479,7 +503,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always() && matrix.job_name == 'end_to_end'
         with:
           name: logs

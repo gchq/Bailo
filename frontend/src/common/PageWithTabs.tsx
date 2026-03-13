@@ -1,9 +1,9 @@
-import { Box, Button, darken, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors/'
+import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
@@ -28,8 +28,8 @@ interface PageWithTabsProps {
   requiredUrlParams?: ParsedUrlQuery
   titleToCopy?: string
   subheadingToCopy?: string
-  sourceModelId?: string
   additionalHeaderDisplay?: ReactElement
+  actionButtonIcon?: ReactElement
 }
 
 export default function PageWithTabs({
@@ -43,19 +43,26 @@ export default function PageWithTabs({
   requiredUrlParams = {},
   titleToCopy = '',
   subheadingToCopy = '',
-  sourceModelId = '',
   additionalHeaderDisplay,
+  actionButtonIcon,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
 
   const [currentTab, setCurrentTab] = useState('')
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const [showFullText, setShowFullText] = useState(false)
   const theme = useTheme()
 
+  const currentTabChanged = useEffectEvent((newTab: string) => {
+    setCurrentTab(newTab)
+  })
+
   useEffect(() => {
-    if (!tabs.length) return
-    setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+    if (!tabs.length) {
+      return
+    }
+    currentTabChanged(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
   const tabsList = useMemo(
@@ -100,6 +107,22 @@ export default function PageWithTabs({
     [currentTab, tabs],
   )
 
+  const announcementText = useMemo(() => {
+    if (!additionalInfo) {
+      return
+    }
+    return additionalInfo.length > 100 ? (
+      <Typography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+        {showFullText ? additionalInfo : `${additionalInfo.slice(0, 100)}...`}
+        <Button sx={{ ml: 1 }} variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
+          {showFullText ? 'Show less' : 'Show more'}
+        </Button>
+      </Typography>
+    ) : (
+      additionalInfo
+    )
+  }, [additionalInfo, showFullText])
+
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
       if (sendWarning()) {
@@ -122,11 +145,11 @@ export default function PageWithTabs({
   return (
     <>
       <Stack
-        direction='row'
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
-        sx={{ px: 2, pb: 2 }}
+        sx={{ pb: 2, px: 2 }}
+        direction={{ xs: 'column', sm: 'row' }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
           <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
@@ -147,7 +170,7 @@ export default function PageWithTabs({
             <Stack direction='row' alignItems='center'>
               <Typography
                 variant='caption'
-                sx={{ color: darken(theme.palette.primary.main, 0.4), textOverflow: 'ellipsis', overflow: 'hidden' }}
+                sx={{ color: theme.palette.primary.main, textOverflow: 'ellipsis', overflow: 'hidden' }}
               >
                 {subheading}
               </Typography>
@@ -162,14 +185,28 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
+          <Button
+            sx={{ minWidth: '154px' }}
+            variant='contained'
+            onClick={actionButtonOnClick}
+            startIcon={actionButtonIcon ? actionButtonIcon : <></>}
+          >
             {actionButtonTitle}
           </Button>
         )}
-        {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
         {additionalHeaderDisplay}
       </Stack>
-      <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
+      <Box
+        sx={{
+          pl: 2,
+          pb: 1,
+          flexGrow: 1,
+          minWidth: 0,
+          maxWidth: '900px',
+        }}
+      >
+        {announcementText}
+      </Box>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}
@@ -177,6 +214,7 @@ export default function PageWithTabs({
         indicatorColor='secondary'
         scrollButtons='auto'
         variant='scrollable'
+        allowScrollButtonsMobile
       >
         {tabsList}
       </Tabs>

@@ -56,7 +56,7 @@ describe('Make and approve an access request', () => {
     cy.contains(modelNameForRegistry)
     cy.get('[data-test=releasesTab]').click({ force: true })
     cy.log('Opening the draft release page to see if we can see our image in the drop down list')
-    cy.contains('Draft new Release')
+    cy.contains('Draft new release')
     cy.get('[data-test=draftNewReleaseButton').click({ force: true })
     cy.get('[data-test=imageListAutocomplete').type('1')
     cy.contains('1')

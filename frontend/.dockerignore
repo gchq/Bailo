@@ -39,3 +39,6 @@ cache
 # cypress
 cypress/screenshots/
 cypress/downloads/
+
+# Tests
+test

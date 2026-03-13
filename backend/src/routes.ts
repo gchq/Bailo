@@ -5,15 +5,14 @@ import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
-import { expressLogger } from './routes/middleware/expressLogger.js'
-import { requestId } from './routes/middleware/requestId.js'
 import v1Router from './routes/v1/routes.js'
 import v2Router from './routes/v2/routes.js'
+import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 
 export const server = express()
 
-server.use(requestId, bodyParser.json(), expressLogger)
+server.use(bodyParser.json(), httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)

@@ -17,11 +17,12 @@ class Entry:
     :param id: A unique ID for the entry
     :param name: Name of the entry
     :param description: Description of the entry
-    :param kind: Represents whether entry type (i.e. Model or Datacard)
-    :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
-    :param organisation: Organisation responsible for the model, defaults to None
-    :param state: Development readiness of the model, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+    :param kind: Represents whether entry type (i.e. Model, Mirrored Model or Datacard)
+    :param visibility: Visibility of entry, using ModelVisibility enum (i.e. Public or Private), defaults to None
+    :param organisation: Organisation responsible for the entry, defaults to None
+    :param state: Development readiness of the entry, defaults to None
+    :param tags: Tags to assign to the entry, defaults to None
+    :param collaborators: List of CollaboratorEntry to define who the entry's collaborators (a.k.a. entry access) are, defaults to None
     """
 
     def __init__(
@@ -34,6 +35,7 @@ class Entry:
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ) -> None:
         self.client = client
@@ -45,6 +47,7 @@ class Entry:
         self.visibility = visibility
         self.organisation = organisation
         self.state = state
+        self.tags = tags
         self.collaborators = collaborators
 
         self._card = None
@@ -61,11 +64,19 @@ class Entry:
             visibility=self.visibility,
             organisation=self.organisation,
             state=self.state,
+            tags=self.tags,
             collaborators=self.collaborators,
         )
         self._unpack(res["model"])
 
         logger.info("ID %s updated locally and on server.", self.id)
+
+    def delete(self) -> Any:
+        """Delete the entry from Bailo."""
+        res = self.client.delete_model(self.id)
+        logger.info("Model %s successfully deleted.", self.id)
+
+        return res
 
     def card_from_schema(self, schema_id: str | None = None) -> None:
         """Create a card using a schema on Bailo.
@@ -81,14 +92,14 @@ class Entry:
                 raise NotImplementedError(f"No default schema set for {self.kind=}")
 
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
-        self.__unpack_card(res["card"])
+        self._unpack_card(res["card"])
 
         logger.info("Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
     def card_from_template(self, template_id: str) -> None:
         """Create a card using a template."""
         res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
-        self.__unpack_card(res["card"])
+        self._unpack_card(res["card"])
 
         logger.info("Card for ID %s successfully created using template ID %s", self.id, template_id)
 
@@ -96,7 +107,7 @@ class Entry:
         """Get the latest card from Bailo."""
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
-            self.__unpack_card(res["model"]["card"])
+            self._unpack_card(res["model"]["card"])
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(
@@ -109,7 +120,7 @@ class Entry:
         :param version: Entry card version
         """
         res = self.client.get_model_card(model_id=self.id, version=version)
-        self.__unpack_card(res["modelCard"])
+        self._unpack_card(res["modelCard"])
 
         logger.info("Card version %s for ID %s successfully retrieved.", version, self.id)
 
@@ -131,7 +142,7 @@ class Entry:
             card = self._card
 
         res = self.client.put_model_card(model_id=self.id, metadata=card)
-        self.__unpack_card(res["card"])
+        self._unpack_card(res["card"])
 
         logger.info("Card for %s successfully updated on server.", self.id)
 
@@ -151,7 +162,7 @@ class Entry:
 
         logger.info("Attributes for ID %s successfully unpacked.", self.id)
 
-    def __unpack_card(self, res):
+    def _unpack_card(self, res):
         """Private method. Unpack card metadata, version, and schema ID from API response.
 
         :param res: Card-related dictionary from the API response.

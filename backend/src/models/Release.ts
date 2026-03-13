@@ -26,9 +26,11 @@ export interface ReleaseInterface {
   updatedAt: Date
 }
 
-export interface ImageRefInterface {
+export interface RepoRefInterface {
   repository: string
   name: string
+}
+export interface ImageRefInterface extends RepoRefInterface {
   tag: string
 }
 
@@ -60,7 +62,9 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
       get: function (semver: SemverObject | string) {
         if (typeof semver === 'string') {
           return semver
-        } else return semverObjectToString(semver)
+        } else {
+          return semverObjectToString(semver)
+        }
       },
     },
 

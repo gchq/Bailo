@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > putSchemaMigration > audit > expected call 1`] = `
+{
+  "description": "This is a test migration plan",
+  "draft": false,
+  "id": "migration-plan-f2434",
+  "name": "my migration plan",
+  "questionMigrations": [
+    {
+      "id": "test",
+      "kind": "move",
+      "propertyType": "string",
+      "sourcePath": "s1.q1",
+      "targetPath": "s2.q1",
+    },
+  ],
+  "sourceSchema": "example-model-schema-1",
+  "targetSchema": "example-model-schema-2",
+}
+`;
+
+exports[`routes > schema > putSchemaMigration > successfully updates the schema migration 1`] = `
+{
+  "schemaMigration": {
+    "description": "This is a test migration plan",
+    "draft": false,
+    "id": "migration-plan-f2434",
+    "name": "my migration plan",
+    "questionMigrations": [
+      {
+        "id": "test",
+        "kind": "move",
+        "propertyType": "string",
+        "sourcePath": "s1.q1",
+        "targetPath": "s2.q1",
+      },
+    ],
+    "sourceSchema": "example-model-schema-1",
+    "targetSchema": "example-model-schema-2",
+  },
+}
+`;

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { z } from '../../../lib/zod.js'
 import { TokenActions } from '../../../models/Token.js'
 import { registerPath } from '../../../services/specification.js'
 

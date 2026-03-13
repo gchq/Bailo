@@ -18,6 +18,7 @@ import KubernetesIcon from 'public/kubernetes-icon.svg'
 import PodmanIcon from 'public/podman-logo.svg'
 import RktLogo from 'public/rkt-logo.svg'
 import { useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
@@ -36,6 +37,7 @@ type TokenDialogProps = {
 export default function TokenDialog({ token }: TokenDialogProps) {
   const router = useRouter()
   const [tokenCategory, setTokenCategory] = useState<TokenCategoryKeys>(TokenCategory.PERSONAL_ACCESS)
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
 
   const handleClose = () => {
     router.push('/settings?tab=authentication')
@@ -120,7 +122,14 @@ export default function TokenDialog({ token }: TokenDialogProps) {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button variant='contained' onClick={handleClose}>
+        <ConfirmationDialogue
+          open={confirmationOpen}
+          title=''
+          onCancel={() => setConfirmationOpen(false)}
+          onConfirm={handleClose}
+          dialogMessage={`You will not be able to view this token again once closed. Please make sure you have made a copy of these details in a secure location before closing.`}
+        />
+        <Button variant='contained' onClick={() => setConfirmationOpen(true)}>
           Close
         </Button>
       </DialogActions>

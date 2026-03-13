@@ -19,14 +19,15 @@ export default function SearchInfo() {
 
   return (
     <>
-      <Typography fontSize={16} fontWeight={'bold'}>
+      <Typography fontSize={16} fontWeight='bold'>
         Marketplace search
       </Typography>
       <List sx={{ listStyleType: 'disc', px: 3 }}>
         <ListItem sx={{ display: 'list-item' }}>
           <Typography>
-            The search input is used for filtering the marketplace for the current selected tab (
-            {listEntryKinds(' or ', false)})
+            {`The advanced search input is used for filtering the marketplace for the current selected tab (${listEntryKinds(' or ', false)}). By default it uses a full document search, so it will also look through the data of the
+            model card to find any items that exactly match your query. If you would like to query only on the title,
+            toggle off the "Full text" button. This will search with a partial match on the title.`}
           </Typography>
         </ListItem>
         <ListItem sx={{ display: 'list-item' }}>
@@ -46,7 +47,7 @@ export default function SearchInfo() {
           </ListItem>
         </ListItem>
       </List>
-      <Typography fontSize={16} fontWeight={'bold'}>
+      <Typography fontSize={16} fontWeight='bold'>
         Top-right search
       </Typography>
       <List sx={{ listStyleType: 'disc', px: 3 }}>

@@ -9,7 +9,7 @@ from __future__ import annotations
 # -- Project information -----------------------------------------------------
 
 project = "Bailo Python Client Docs"
-copyright = "2025, GCHQ"
+copyright = "2026, GCHQ"
 author = "Various"
 
 # The full version, including alpha/beta/rc tags
@@ -52,10 +52,11 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_theme_options = {
+    "style_nav_header_background": "#54278e",  # primary.main
+}
 
-html_css_files = [
-    'custom.css'
-]
+html_css_files = ["custom.css"]
 
 # Napoleon settings
 napoleon_include_init_with_doc = True

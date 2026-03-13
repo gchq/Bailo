@@ -1,4 +1,4 @@
-import { Delete } from '@mui/icons-material'
+import { Add, Delete } from '@mui/icons-material'
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -94,13 +94,14 @@ export default function AuthenticationTab() {
         sx={{ pb: 2 }}
       >
         <Typography fontWeight='bold' mb={1}>
-          Personal Access Tokens
+          Personal access tokens
         </Typography>
         <Button
           aria-label='add personal authentication token button'
           variant='outlined'
           loading={isLoading}
           onClick={handleAddToken}
+          startIcon={<Add />}
         >
           Add token
         </Button>

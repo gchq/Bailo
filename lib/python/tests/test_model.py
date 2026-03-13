@@ -22,26 +22,28 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "organisation", "state", "visibility", "collaborators"),
+    ("name", "description", "organisation", "state", "tags", "visibility", "collaborators"),
     [
-        ("test-model", "test", None, None, ModelVisibility.PUBLIC, None),
-        ("test-model", "test", None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        ("test-model", "test", None, None, None, ModelVisibility.PUBLIC, None),
+        ("test-model", "test", None, None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
         (
             "test-model",
             "test",
             "Example Organisation",
             "Development",
+            ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
         ),
     ],
 )
-def test_create_get_from_id_and_update(
+def test_create_get_from_id_update_and_delete_model(
     name: str,
     description: str,
     visibility: ModelVisibility | None,
     organisation: str | None,
     state: str | None,
+    tags: list[str] | None,
     collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
 ):
@@ -53,6 +55,7 @@ def test_create_get_from_id_and_update(
         visibility=visibility,
         organisation=organisation,
         state=state,
+        tags=tags,
         collaborators=collaborators,
     )
     model.card_from_schema("minimal-general-v10")
@@ -67,6 +70,9 @@ def test_create_get_from_id_and_update(
     assert get_model.description == "testing-1234"
 
     assert model.model_id == get_model.model_id
+
+    # Check that the model is deleted
+    assert model.delete()
 
 
 @pytest.mark.integration

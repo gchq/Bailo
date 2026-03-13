@@ -29,6 +29,8 @@ module.exports = {
 
     automaticallyCreateBuckets: true,
 
+    multipartChunkSize: 5 * 1024 * 1024,
+
     // Names of buckets that Bailo uses
     buckets: {
       uploads: 'uploads',
@@ -45,6 +47,7 @@ module.exports = {
 
   smtp: {
     enabled: true,
+    transporter: 'smtp',
 
     connection: {
       host: 'mailcrab',
@@ -59,19 +62,24 @@ module.exports = {
     from: '"Bailo 📝" <bailo@example.org>',
   },
 
-  avScanning: {
+  ses: {
+    endpoint: 'ignored',
+    region: 'ignored',
+  },
+
+  artefactScanning: {
     clamdscan: {
       host: 'clamd',
     },
 
-    modelscan: {
-      host: 'modelscan',
+    artefactscan: {
+      host: 'artefactscan',
     },
   },
 
   connectors: {
-    fileScanners: {
-      kinds: ['clamAV', 'modelScan'],
+    artefactScanners: {
+      kinds: ['clamAV', 'artefactScan'],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,

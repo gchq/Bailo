@@ -1,20 +1,25 @@
-import { Readable } from 'node:stream'
+import { ClientSession } from 'mongoose'
 
 import {
-  doesLayerExist,
+  deleteManifest,
   getImageTagManifest,
   getRegistryLayerStream,
-  initialiseUpload,
   listImageTags,
   listModelRepos,
+  mountBlob,
   putManifest,
-  uploadLayerMonolithic,
 } from '../clients/registry.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { EntryKind } from '../models/Model.js'
+import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
-import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
-import { Forbidden, InternalError } from '../utils/error.js'
+import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
+import { isBailoError } from '../types/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { OCIEmptyMediaType } from '../utils/registryResponses.js'
+import log from './log.js'
 import { getModelById } from './model.js'
+import { findAndDeleteImageFromReleases } from './release.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
 const imageRegex =
@@ -62,7 +67,7 @@ export function joinDistributionPackageName(distributionPackageName: Distributio
   return `${distributionPackageName.path}@${distributionPackageName['digest']}`
 }
 
-async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
+export async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
   const model = await getModelById(user, modelId)
 
   const auth = await authorisation.image(user, model, {
@@ -78,95 +83,162 @@ async function checkUserAuth(user: UserInterface, modelId: string, actions: Acti
 export async function listModelImages(user: UserInterface, modelId: string) {
   await checkUserAuth(user, modelId, ['list'])
 
-  const registryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'registry', class: '', name: 'catalog', actions: ['*'] },
-  ])
+  const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
   return await Promise.all(
     repos.map(async (repo) => {
-      const [namespace, image] = repo.split(/\/(.*)/s)
+      const [repository, name] = repo.split(/\/(.*)/s)
       const repositoryToken = await getAccessToken({ dn: user.dn }, [
-        { type: 'repository', class: '', name: repo, actions: ['pull'] },
+        { type: 'repository', name: repo, actions: ['pull'] },
       ])
-      return { repository: namespace, name: image, tags: await listImageTags(repositoryToken, { namespace, image }) }
+      return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
     }),
   )
 }
 
-export async function getImageManifest(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
-  await checkUserAuth(user, modelId, ['pull'])
+export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
+  await checkUserAuth(user, imageRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
+    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
 
   // get which layers exist for the model
-  return await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag)
+  return await getImageTagManifest(repositoryToken, imageRef)
 }
 
-export async function getImageBlob(user: UserInterface, modelId: string, imageName: string, digest: string) {
-  await checkUserAuth(user, modelId, ['pull'])
+export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterface, digest: string) {
+  await checkUserAuth(user, repoRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
+    { type: 'repository', name: `${repoRef.repository}/${repoRef.name}`, actions: ['pull'] },
   ])
 
-  return await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
+  return await getRegistryLayerStream(repositoryToken, repoRef, digest)
 }
 
-export async function doesImageLayerExist(user: UserInterface, modelId: string, imageName: string, digest: string) {
-  await checkUserAuth(user, modelId, ['pull'])
+/**
+ * Renames an image in the registry.
+ *
+ * @remarks
+ * This does _not_ also update any mongo data, and does _not_ do any auth checks on the source or destination.
+ */
+export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
+  let manifest: Awaited<ReturnType<typeof getImageManifest>>
+  try {
+    const repositoryToken = await getAccessToken({ dn: user.dn }, [
+      { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['pull'] },
+    ])
+    manifest = await getImageTagManifest(repositoryToken, source)
+  } catch (err) {
+    // special case for 404 not found
+    if (err && isBailoError(err) && err?.context?.status === 404) {
+      throw NotFound('The requested image was not found.', { ...source })
+    }
+    throw err
+  }
+  if (!manifest.body) {
+    throw InternalError('The registry returned a response but the body was missing.', { ...source, manifest })
+  }
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
+  const allLayers = [manifest.body.config, ...manifest.body.layers]
+  const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
+    { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
   ])
-  return await doesLayerExist(repositoryToken, { namespace: modelId, image: imageName }, digest)
+
+  // cross-mount layers from original to new image
+  for (const layer of allLayers) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
+    }
+    log.trace(
+      {
+        layerDigest,
+        source: { repository: source.repository, name: source.name },
+        destination: { repository: destination.repository, name: destination.name },
+      },
+      'CrossMounting registry layer to new repository.',
+    )
+
+    await mountBlob(
+      multiRepositoryToken,
+      { repository: source.repository, name: source.name },
+      { repository: destination.repository, name: destination.name },
+      layerDigest,
+    )
+  }
+
+  log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
+  const mediaType = manifest.body.mediaType == OCIEmptyMediaType ? manifest.body.artifactType : manifest.body.mediaType
+  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), mediaType)
+  log.trace({ source }, 'Deleting the original manifest.')
+  await deleteManifest(multiRepositoryToken, source)
+
+  let isOrphaned = true
+  try {
+    const remainingImages = await listImageTags(multiRepositoryToken, {
+      repository: source.repository,
+      name: source.name,
+    })
+    for (const tag of remainingImages) {
+      const tagHeaders = (await getImageManifest(user, { repository: source.repository, name: source.name, tag: tag }))
+        .headers
+      if (manifest.headers['docker-content-digest'] === tagHeaders['docker-content-digest']) {
+        isOrphaned = false
+        log.trace({ source }, "Found another tag matching digest. Won't delete digest.")
+        break
+      }
+    }
+  } catch (err) {
+    // error 404 is thrown by listImageTags when no tags remain but the digest still exists
+    if (!err || !isBailoError(err) || err?.context?.status !== 404) {
+      throw err
+    }
+  }
+
+  if (isOrphaned) {
+    log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
+    await deleteManifest(multiRepositoryToken, {
+      repository: source.repository,
+      name: source.name,
+      tag: manifest.headers['docker-content-digest'] as string,
+    })
+  }
 }
 
-export async function initialiseImageUpload(user: UserInterface, modelId: string, imageName: string) {
-  await checkUserAuth(user, modelId, ['push'])
-
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-  ])
-  return await initialiseUpload(repositoryToken, { namespace: modelId, image: imageName })
-}
-
-export async function putImageBlob(
+export async function softDeleteImage(
   user: UserInterface,
-  modelId: string,
-  imageName: string,
-  uploadURL: string,
-  digest: string,
-  blob: Readable | ReadableStream,
-  size: string,
+  imageRef: ImageRefInterface,
+  deleteMirroredModel: boolean = false,
+  session?: ClientSession,
 ) {
-  await checkUserAuth(user, modelId, ['push'])
+  const model = await getModelById(user, imageRef.repository)
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
+    throw BadReq('Cannot remove image from a mirrored model.')
+  }
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-  ])
-  return await uploadLayerMonolithic(repositoryToken, uploadURL, digest, blob, size)
+  await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
+
+  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
+
+  await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
 }
 
-export async function putImageManifest(
+export async function restoreSoftDeletedImage(
   user: UserInterface,
-  modelId: string,
-  imageName: string,
-  imageTag: string,
-  manifestText: string,
-  contentType: string,
+  imageRef: ImageRefInterface,
+  restoreMirroredModel: boolean = false,
 ) {
-  await checkUserAuth(user, modelId, ['push'])
+  const model = await getModelById(user, imageRef.repository)
+  if (EntryKind.MirroredModel === model.kind && !restoreMirroredModel) {
+    throw BadReq('Cannot restore image to a mirrored model.')
+  }
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-  ])
-  return await putManifest(
-    repositoryToken,
-    { namespace: modelId, image: imageName },
-    imageTag,
-    manifestText,
-    contentType,
-  )
+  await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
+
+  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  await renameImage(user, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag }, imageRef)
 }

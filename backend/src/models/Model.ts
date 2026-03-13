@@ -12,6 +12,7 @@ export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVis
 export const EntryKind = {
   Model: 'model',
   DataCard: 'data-card',
+  MirroredModel: 'mirrored-model',
 } as const
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
@@ -43,6 +44,7 @@ export interface ModelCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  mirrored: boolean
 
   metadata: ModelMetadata
 }
@@ -63,6 +65,7 @@ export interface ModelInterface {
   kind: EntryKindKeys
   description: string
   card?: ModelCardInterface
+  mirroredCard?: ModelCardInterface
   organisation: string
   state: string
   tags: string[]
@@ -93,6 +96,15 @@ const ModelSchema = new Schema<ModelDoc>(
       schemaId: { type: String },
       version: { type: Number },
       createdBy: { type: String },
+      mirrored: { type: Boolean },
+
+      metadata: { type: Schema.Types.Mixed },
+    },
+    mirroredCard: {
+      schemaId: { type: String },
+      version: { type: Number },
+      createdBy: { type: String },
+      mirrored: { type: Boolean },
 
       metadata: { type: Schema.Types.Mixed },
     },

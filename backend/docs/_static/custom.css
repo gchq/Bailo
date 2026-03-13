@@ -1,11 +1,75 @@
-a {
-    color: #54278e
+:root {
+  --primary: #54278e;
+  --secondary: #d62560;
+  --hover-bg: #f5f5f5;
+  --container-bg: #f3f1f1;
+  --text-main: rgba(0, 0, 0, 0.87);
+  --border-muted: #b8b8b8;
 }
 
-.rst-content code.literal, .rst-content tt.literal {
-    color: #d52560
+body {
+  color: var(--text-main);
+}
+
+a,
+.wy-menu.wy-menu-vertical > p.caption > span.caption-text {
+  color: var(--primary);
+}
+a:hover {
+  color: var(--secondary);
+}
+.wy-nav-side a.icon.icon-home:hover {
+  color: #fff
+}
+
+.rst-content code.literal,
+.rst-content tt.literal {
+  color: var(--secondary);
+}
+
+.wy-nav-side {
+  background: #fff;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+.wy-menu-vertical a {
+  color: var(--text-main);
+}
+.wy-menu-vertical a:hover {
+  background-color: var(--hover-bg);
+  border-right: 2px solid #f7a4c0;
+}
+.wy-menu-vertical li.current > a {
+  border-right: 2px solid var(--secondary);
+  background-color: var(--hover-bg);
+}
+.wy-nav-content {
+  background: var(--container-bg);
+}
+.wy-side-nav-search input[type=text] {
+  border-color: var(--border-muted)
+}
+
+.rst-content .admonition.info {
+  background: #e5f6fd;
+  border-left: 4px solid #0288d1;
+}
+.rst-content .admonition.warning {
+  background: #ffd08b;
+  border-left: 4px solid #C55302;
 }
 
 footer {
-    color: #2f2f2f;
+  color: #2f2f2f;
+}
+
+a.btn.btn-neutral {
+  color: var(--primary) !important;
+  background-color: rgba(0,0,0,0) !important;
+  border: none;
+  box-shadow: none;
+  border-radius: 4px;
+}
+a.btn.btn-neutral:hover {
+  color: var(--primary) !important;
+  background-color: rgba(84, 39, 142, 0.04) !important;
 }

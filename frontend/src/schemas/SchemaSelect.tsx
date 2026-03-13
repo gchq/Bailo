@@ -8,12 +8,12 @@ import {
   Box,
   Button,
   Container,
-  Grid2,
+  Grid,
   Paper,
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { postFromSchema } from 'actions/modelCard'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -44,7 +44,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const { mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
+  const { mutateEntry } = useGetEntry(entry.id, entry.kind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
@@ -132,7 +132,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     isSchemasError,
     isCurrentUserError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>
@@ -146,7 +148,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
               </Button>
             </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
-              <Typography variant='h6' color='primary'>
+              <Typography variant='h6' component='h1' color='primary'>
                 Select a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
@@ -156,17 +158,17 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
-              <Accordion defaultExpanded sx={accordionStyling}>
+              <Accordion defaultExpanded sx={accordionStyling} slotProps={{ heading: { component: 'h2' } }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h3'>
                     Active Schemas
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ m: 2 }}>
-                    <Grid2 container spacing={2} justifyContent='center'>
+                    <Grid container spacing={2} justifyContent='center'>
                       {activeSchemaButtons}
-                    </Grid2>
+                    </Grid>
                   </Box>
                 </AccordionDetails>
               </Accordion>
@@ -177,9 +179,17 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid2 container spacing={2} justifyContent='center'>
-                    {inactiveSchemaButtons}
-                  </Grid2>
+                  <Stack spacing={2}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant='caption'>
+                        The use of inactive schemas is discouraged as they are deprecated. You may still use them if you
+                        have feel you have a valid use-case.
+                      </Typography>
+                    </Box>
+                    <Grid container spacing={2} justifyContent='center'>
+                      {inactiveSchemaButtons}
+                    </Grid>
+                  </Stack>
                 </AccordionDetails>
               </Accordion>
             </Stack>

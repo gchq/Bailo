@@ -1,7 +1,7 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme, ThemeOptions } from '@mui/material/styles'
+import { createTheme, PaletteColor, PaletteColorOptions, ThemeOptions } from '@mui/material/styles'
 
-declare module '@mui/material/styles/createPalette' {
+declare module '@mui/material/styles' {
   interface Palette {
     container: PaletteColor
     customTextInput: PaletteColor
@@ -37,10 +37,52 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
     defaultProps: {
       disableElevation: true,
     },
+    styleOverrides: {
+      root: {
+        textTransform: 'none',
+      },
+    },
+  },
+  MuiTab: {
+    styleOverrides: {
+      root: {
+        textTransform: 'none',
+        '&:hover': {
+          backgroundColor: '#ececec',
+        },
+      },
+    },
+  },
+  MuiMenu: {
+    defaultProps: {
+      anchorOrigin: {
+        vertical: 'bottom',
+        horizontal: 'left',
+      },
+      transformOrigin: {
+        vertical: 'top',
+        horizontal: 'left',
+      },
+      slotProps: {
+        list: {
+          dense: true,
+        },
+      },
+    },
+    styleOverrides: {
+      root: {
+        marginTop: 4,
+      },
+    },
   },
 }
 
 export const lightTheme = createTheme({
+  typography: {
+    caption: {
+      fontSize: '0.9rem',
+    },
+  },
   components: {
     ...defaultComponentOverrides,
     MuiMenuItem: {

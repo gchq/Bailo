@@ -1,7 +1,6 @@
 import '@fontsource/pacifico'
 
 import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
   Box,
@@ -12,11 +11,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  MenuList,
   Stack,
-  Switch,
   Toolbar,
-  Tooltip,
   Typography,
   useMediaQuery,
 } from '@mui/material'
@@ -24,14 +20,13 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
+import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import EntrySearch from 'src/wrapper/EntrySearch'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
 import ExpandableButton from '../common/ExpandableButton'
-import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
 export type TopNavigationProps = {
@@ -71,11 +66,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
   const navbarMenuOpen = useMemo(() => !!navbarAnchorEl, [navbarAnchorEl])
-  const isDarkMode = useMemo(() => localStorage.getItem('dark_mode_enabled') === 'true', [])
 
   const router = useRouter()
   const theme = useTheme()
-  const { toggleDarkMode } = useContext(ThemeModeContext)
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
@@ -97,7 +90,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   return (
     <AppBar
       open={drawerOpen}
-      position='absolute'
+      position='fixed'
       data-test='appBar'
       sx={(theme) => ({
         ...pageTopStyling,
@@ -114,7 +107,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           pr: '24px', // keep right padding when drawer closed
         }}
       >
-        <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ width: '100%' }}>
+        <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' sx={{ width: '100%' }}>
           {!isSmOrLarger && (
             <Box>
               <IconButton onClick={handleNavMenuClicked}>
@@ -125,34 +118,30 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 open={navbarMenuOpen}
                 onClose={() => setNavbarAnchorEl(null)}
                 sx={{ py: 0 }}
+                role='menuitem'
               >
-                <Link href='/entry/new'>
-                  <MenuItem>
-                    <ListItemIcon>
-                      <Add fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>Create</ListItemText>
-                  </MenuItem>
-                </Link>
+                <MenuItem component='a' href='/entry/new'>
+                  <ListItemIcon>
+                    <Add fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Create</ListItemText>
+                </MenuItem>
+                <span style={{ marginLeft: 2 }}>
+                  <EntrySearch />
+                </span>
                 <Divider />
-                <Tooltip title='This feature has been temporarily disabled'>
-                  <span>
-                    <MenuItem disabled data-test='toggleDarkMode'>
-                      <ListItemIcon>
-                        <DarkModeIcon fontSize='small' />
-                      </ListItemIcon>
-                      <Switch size='small' checked={isDarkMode} onChange={toggleDarkMode} />
-                    </MenuItem>
-                  </span>
-                </Tooltip>
-                <Link href='/api/logout' color='inherit' underline='none'>
-                  <MenuItem data-test='logoutLink'>
-                    <ListItemIcon>
-                      <LogoutIcon fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>Sign Out</ListItemText>
-                  </MenuItem>
-                </Link>
+                <MenuItem component='a' href='/settings' data-test='settingsLink' role='menuitem'>
+                  <ListItemIcon>
+                    <Settings fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Settings</ListItemText>
+                </MenuItem>
+                <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Sign out</ListItemText>
+                </MenuItem>
               </Menu>
             </Box>
           )}
@@ -192,44 +181,29 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                       }}
                       onClick={handleUserMenuClicked}
                       data-test='userMenuButton'
+                      aria-label='User menu dropdown button'
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
                     </Button>
-                    <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose}>
-                      <MenuList>
-                        {/* TODO - currently breaks v1. Re-add when v2 is fully adopted
-                        <Tooltip title='This feature has been temporarily disabled'>
-                          <span>
-                            <MenuItem disabled data-test='toggleDarkMode'>
-                              <ListItemIcon>
-                                <DarkModeIcon fontSize='small' />
-                              </ListItemIcon>
-                              <Switch
-                                size='small'
-                                checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                                onChange={toggleDarkMode}
-                                inputProps={{ 'aria-label': 'controlled' }}
-                              />
-                            </MenuItem>
-                          </span>
-                        </Tooltip>*/}
-                        <Link href='/settings' color='inherit' underline='none'>
-                          <MenuItem data-test='settingsLink'>
-                            <ListItemIcon>
-                              <Settings fontSize='small' />
-                            </ListItemIcon>
-                            <ListItemText>Settings</ListItemText>
-                          </MenuItem>
-                        </Link>
-                        <Link href='/api/logout' color='inherit' underline='none'>
-                          <MenuItem data-test='logoutLink'>
-                            <ListItemIcon>
-                              <LogoutIcon fontSize='small' />
-                            </ListItemIcon>
-                            <ListItemText>Sign Out</ListItemText>
-                          </MenuItem>
-                        </Link>
-                      </MenuList>
+                    <Menu
+                      disableScrollLock
+                      anchorEl={userMenuAnchorEl}
+                      open={actionOpen}
+                      onClose={handleMenuClose}
+                      role='menu'
+                    >
+                      <MenuItem component='a' data-test='settingsLink' role='menuitem' href='/settings'>
+                        <ListItemIcon>
+                          <Settings fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                      <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
+                        <ListItemIcon>
+                          <LogoutIcon fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Sign out</ListItemText>
+                      </MenuItem>
                     </Menu>
                   </>
                 ) : (

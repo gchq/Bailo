@@ -1,4 +1,6 @@
-import Logger from 'bunyan'
+import pino from 'pino'
+
+import { GenericError, InternalError } from '../utils/error.js'
 
 export interface BailoError extends Error {
   // Inherited from 'Error'
@@ -6,6 +8,8 @@ export interface BailoError extends Error {
   // message: string
 
   // An HTTP response code that represents the error
+  name: string
+  message: string
   code: number
   status: number
 
@@ -20,7 +24,7 @@ export interface BailoError extends Error {
   }
 
   // A custom logger may be provided, otherwise a default is used
-  logger?: Logger
+  logger?: pino.Logger
 }
 
 export function isBailoError(err: unknown): err is BailoError {
@@ -33,4 +37,13 @@ export function isBailoError(err: unknown): err is BailoError {
   }
 
   return false
+}
+
+export function toBailoError(err: unknown, code: number = 500): BailoError {
+  if (isBailoError(err)) {
+    return err
+  } else if (Error.isError(err)) {
+    return InternalError(err.message, { err })
+  }
+  return GenericError(code, String(err), { cause: err })
 }

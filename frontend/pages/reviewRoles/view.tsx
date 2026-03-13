@@ -1,12 +1,11 @@
+import { Add, Create, Delete } from '@mui/icons-material'
 import Edit from '@mui/icons-material/Edit'
-import GroupsIcon from '@mui/icons-material/Groups'
-import PersonIcon from '@mui/icons-material/Person'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { FormEvent, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { FormEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -24,7 +23,7 @@ import { plural } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
 
@@ -52,12 +51,6 @@ export default function ReviewRoles() {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
-  useEffect(() => {
-    if (reviewRoles) {
-      setFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
-    }
-  }, [reviewRoles, selectedRole])
-
   function removeExcessReviewRoleParams(reviewRole: ReviewRoleInterface): UpdateReviewRolesParams {
     if (reviewRole) {
       return {
@@ -71,6 +64,16 @@ export default function ReviewRoles() {
       return { shortName: '', name: '', systemRole: '' }
     }
   }
+
+  const onSetFormData = useEffectEvent((newFormData: UpdateReviewRolesParams) => {
+    setFormData(newFormData)
+  })
+
+  useEffect(() => {
+    if (reviewRoles) {
+      onSetFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
+    }
+  }, [reviewRoles, selectedRole])
 
   const listRoles = useMemo(
     () =>
@@ -139,17 +142,11 @@ export default function ReviewRoles() {
     [defaultEntitiesEntry, formData, mutateReviewRoles],
   )
 
-  const displayEntityIcon = (defaultEntity: string) => {
-    const isUser = defaultEntity.startsWith('user:')
-    return isUser ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
-  }
-
   const displayReviewRoleDefaultEntities = useMemo(() => {
     return formData?.defaultEntities && formData?.defaultEntities.length > 0
       ? formData.defaultEntities.map((defaultEntity) => (
           <Stack key={defaultEntity} direction='row' alignItems='center' spacing={1}>
-            {displayEntityIcon(defaultEntity)}
-            <UserDisplay dn={defaultEntity} />
+            <UserDisplay dn={defaultEntity} showIcon />
           </Stack>
         ))
       : 'No entities assigned'
@@ -180,14 +177,14 @@ export default function ReviewRoles() {
                       System Role
                     </Typography>
                     <Typography>
-                      {formData.systemRole ? getRoleDisplayName(formData?.systemRole, modelRoles) : 'No system role'}
+                      {formData.systemRole ? getRoleDisplayName(formData?.systemRole, entryRoles) : 'No system role'}
                     </Typography>
                   </Box>
                   <Box>
                     <Typography color='primary' fontWeight='bold'>
                       Default entities
                     </Typography>
-                    <List>{displayReviewRoleDefaultEntities}</List>
+                    {displayReviewRoleDefaultEntities}
                   </Box>
                   <Box display='flex' ml='auto'>
                     <Stack direction='row' spacing={2}>
@@ -196,6 +193,7 @@ export default function ReviewRoles() {
                         sx={{ width: 'max-content' }}
                         variant='outlined'
                         onClick={() => setIsEdit(true)}
+                        startIcon={<Create />}
                       >
                         Edit Role
                       </Button>
@@ -204,6 +202,7 @@ export default function ReviewRoles() {
                         sx={{ width: 'max-content' }}
                         variant='contained'
                         onClick={handleOpenDeleteConfirmation}
+                        startIcon={<Delete />}
                       >
                         Delete role
                       </Button>
@@ -254,7 +253,7 @@ export default function ReviewRoles() {
       selectedRole,
       isEdit,
       formData,
-      modelRoles,
+      entryRoles,
       displayReviewRoleDefaultEntities,
       handleOpenDeleteConfirmation,
       handleSubmit,
@@ -267,7 +266,7 @@ export default function ReviewRoles() {
     ],
   )
 
-  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading || isModelRolesLoading) {
+  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading || isEntryRolesLoading) {
     return <Loading />
   }
 
@@ -283,8 +282,8 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isSchemasError.info.message} />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isEntryRolesError) {
+    return <ErrorWrapper message={isEntryRolesError.info.message} />
   }
 
   if (!currentUser || !currentUser.isAdmin) {
@@ -301,11 +300,11 @@ export default function ReviewRoles() {
     <>
       <Title text='View Review Roles' />
       <Stack mx={2} mb={1} direction='row' divider={<Divider flexItem orientation='vertical' />} spacing={2}>
-        <Typography component='h1' color='primary' variant='h6' noWrap>
+        <Typography component='h1' color='primary' variant='h6' noWrap data-test='ReviewRolesTitle'>
           Review Roles
         </Typography>
-        <Button variant='contained' href='/reviewRoles/new' color='primary'>
-          Create new Review Role
+        <Button variant='contained' href='/reviewRoles/new' color='primary' startIcon={<Add />}>
+          Create new review role
         </Button>
       </Stack>
       {reviewRoles ? (

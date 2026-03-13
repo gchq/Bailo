@@ -7,12 +7,13 @@ import bailoImageRelease from 'public/docs/bailo_add_image_to_release.png'
 
 # Uploading docker images
 
-Bailo uses a docker registry to store images of models. Unlike files, docker images are model specific; meaning that you
-upload them to a model and then add them to a release.
+Bailo uses a Docker registry to store container images associated with models. Unlike files, Docker images are
+**model‑specific**: you push an image to a model first, and then explicitly attach it to one or more releases.
 
-## Pushing a model to Bailo
+## Pushing an image to a model
 
-You can push a model to Bailo by following the instructions in the registry tab of your model.
+To push a Docker image to Bailo, navigate to your model and open the **Registry** tab. This tab provides step‑by‑step
+instructions tailored to your model and registry.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='instructions on how to push image to model' src={bailoPushImage} />
@@ -20,15 +21,18 @@ You can push a model to Bailo by following the instructions in the registry tab 
 
 ## Adding an image to a release
 
-Once your image has been pushed to Bailo's registry you can now add it to one of your releases.
+Once the image has been successfully pushed to Bailo’s registry, it becomes available to attach to a release.
+
+Edit an existing release or create a new one, then select the image from the available list.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='release being edited with new image attached' src={bailoImageRelease} />
 </Box>
 
-## What is a docker container?
+## What is a Docker container?
 
-In the context of bailo, a docker container is an isolated application or service that can be used to run your models
-from. This makes models easier to work with as models can just be 'spun-up' and inferenced from.
+In the context of Bailo, a Docker container is an isolated, self‑contained application environment used to run a model.
+Packaging models as containers allows them to be started quickly, run consistently across environments, and used for
+inference without additional setup.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

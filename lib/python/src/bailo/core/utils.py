@@ -7,13 +7,23 @@ NO_COLOR = "NO_COLOR" in os.environ
 
 
 def filter_none(json: dict[str, Any]) -> dict[str, Any]:
-    """Remove keys with None values from the given dictionary.
+    """Recursively remove keys with None values or empty dicts from the given dictionary.
 
     :param json: The dictionary to filter
-    :return: Dictionary with removed None-valued keys
+    :return: Dictionary with removed None-valued keys and empty sub-dicts
     """
-    res = {k: v for k, v in json.items() if v is not None}
-    return res
+
+    def _clean(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            cleaned = {k: _clean(v) for k, v in obj.items() if v is not None}
+            cleaned = {k: v for k, v in cleaned.items() if v != {}}
+            return cleaned
+        elif isinstance(obj, list):
+            return [_clean(item) for item in obj]
+        else:
+            return obj
+
+    return _clean(json)
 
 
 class NestedDict(dict):

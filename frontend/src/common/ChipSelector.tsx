@@ -1,5 +1,5 @@
 import { ExpandMore } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Tooltip } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
@@ -9,18 +9,21 @@ type PartialChipSelectorProps =
   | {
       multiple: true
       options: string[]
+      unreachableOptions?: string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
       options: string[]
+      unreachableOptions?: string[]
       selectedChips: string
       onChange: (value: string) => void
     }
 
 type ChipSelectorProps = {
   label?: string
+  subheading?: string
   size?: 'small' | 'medium'
   expandThreshold?: number
   chipTooltipTitle?: string
@@ -33,7 +36,9 @@ type ChipSelectorProps = {
 
 export default function ChipSelector({
   label,
+  subheading,
   options,
+  unreachableOptions,
   onChange,
   selectedChips,
   multiple,
@@ -66,16 +71,19 @@ export default function ChipSelector({
 
   const allOptions = options.map((option) => (
     <ChipItem
-      key={option}
+      key={option.toString()}
       chip={option}
       size={size}
       activeChip={selectedChips.includes(option)}
       handleChange={handleChange}
-      chipTooltipTitle={chipTooltipTitle}
+      chipTooltipTitle={
+        unreachableOptions && unreachableOptions.includes(option) ? 'This is unreachable.' : chipTooltipTitle
+      }
       ariaLabel={ariaLabel}
       variant={variant}
       icon={icon}
       style={style}
+      disabled={unreachableOptions && unreachableOptions.includes(option)}
     />
   ))
 
@@ -83,11 +91,27 @@ export default function ChipSelector({
     return (
       <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
         <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-          <Typography component='h2' variant='h6'>{`${label}`}</Typography>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography component='h2' variant='h6'>
+              {`${label}`}
+            </Typography>
+            <Typography variant='caption'>{subheading ? subheading : ''}</Typography>
+          </Stack>
         </AccordionSummary>
         <AccordionDetails sx={{ p: 0 }}>
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
+            {allOptions.length === 0 && (
+              <Typography color='text.secondary' textAlign='center'>
+                No items available
+              </Typography>
+            )}
             {expanded && allOptions}
             {options.length > expandThreshold && (
               <Button onClick={toggleExpansion}>{expanded ? 'Show less' : 'Show more...'}</Button>
@@ -122,6 +146,7 @@ type ChipItemProps = {
   variant?: 'filled' | 'outlined'
   icon?: ReactElement
   style?: CSSProperties
+  disabled?: boolean
 }
 
 function ChipItem({
@@ -134,21 +159,25 @@ function ChipItem({
   variant = 'filled',
   icon = <></>,
   style = {},
+  disabled = false,
 }: ChipItemProps) {
   return (
     <Tooltip title={chipTooltipTitle}>
-      <Chip
-        color={activeChip ? 'secondary' : 'default'}
-        size={size}
-        key={chip}
-        sx={{ mx: 0.5, mb: 1, ...style }}
-        label={chip}
-        data-test={`chipOption-${chip}`}
-        onClick={() => handleChange(chip)}
-        aria-label={ariaLabel}
-        variant={variant}
-        icon={icon}
-      />
+      <span>
+        <Chip
+          color={activeChip ? 'secondary' : 'default'}
+          size={size}
+          key={chip}
+          sx={{ mx: 0.5, mb: 1, ...style }}
+          label={chip}
+          data-test={`chipOption-${chip}`}
+          onClick={() => handleChange(chip)}
+          aria-label={ariaLabel}
+          variant={variant}
+          icon={icon}
+          disabled={disabled}
+        />
+      </span>
     </Tooltip>
   )
 }

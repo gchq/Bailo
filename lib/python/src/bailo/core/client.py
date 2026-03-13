@@ -29,34 +29,50 @@ class Client:
         name: str,
         kind: EntryKind,
         description: str,
+        sourceModelId: str | None = None,
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
-        :param kind: Either a Model or a Datacard
+        :param kind: Either a Model, Mirrored Model or a Datacard
         :param description: Description of the model
+        :param sourceModelId: Used for syncing a mirrored model to its source model
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param tags: Tags to assign to the model, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
         if visibility is not None:
             _visibility = str(visibility)
 
+        if sourceModelId is not None and kind != EntryKind.MIRRORED_MODEL:
+            raise ValueError("Only Mirrored Models may pass a `sourceModelId` argument.")
+
+        if sourceModelId is None and kind == EntryKind.MIRRORED_MODEL:
+            raise ValueError("Mirrored Models must specify a `sourceModelId` argument.")
+
         filtered_json = filter_none(
             {
                 "name": name,
                 "kind": kind,
                 "description": description,
+                "settings": {
+                    "mirror": {
+                        "sourceModelId": sourceModelId,
+                    },
+                },
                 "visibility": _visibility,
                 "organisation": organisation,
                 "state": state,
+                "tags": tags,
                 "collaborators": collaborators,
             }
         )
@@ -72,29 +88,61 @@ class Client:
         libraries: list[str] | None = None,
         filters: list[str] | None = None,
         search: str = "",
+        kind: EntryKind | None = None,
+        organisations: list[str] | None = None,
+        states: list[str] | None = None,
+        allow_templating: bool | None = None,
+        schema_id: str | None = None,
+        admin_access: bool | None = None,
+        peers: list[str] | None = None,
+        title_only: bool | None = None,
     ):
-        """Find and returns a list of models based on provided search terms.
+        """Search for models using a combination of structured filters and free-text search.
 
-        :param task: Model task (e.g. image classification), defaults to None
-        :param libraries: Model library (e.g. TensorFlow), defaults to None
-        :param filters: Custom filters, defaults to None
-        :param search: String to be located in model cards, defaults to ""
+        Calls `/api/v2/models/search` and returns a list of entry summaries visible to the current user.
+        Results may include both local models and, if requested, models returned from configured peers.
+        Any peer or local search errors are included alongside results.
+
+        :param task: Entry task (e.g. image classification), defaults to None
+        :param libraries: Entry library (e.g. TensorFlow), defaults to None
+        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
+            models where the current user is a collaborator. Otherwise, values are treated as collaborator
+            roles, defaults to None
+        :param search: Free-text search string. Always performs a partial, case-insensitive match against
+            the entry name. If `title_only` is False, a full-text search across entry content is also
+            performed, defaults to ""
+        :param kind: Entry kind to filter by (e.g. `EntryKind.MODEL`), defaults to None
+        :param organisations: List of organisation identifiers to restrict results, defaults to None
+        :param states: List of entry lifecycle states to restrict results, defaults to None
+        :param allow_templating: If True, restricts results to models with templating enabled, defaults to None
+        :param schema_id: Schema ID to restrict results to models using that schema, defaults to None
+        :param admin_access: If True, returns models requiring admin access. The caller must
+            have the Admin role or the request will be rejected by the backend, defaults to None
+        :param peers: List of peer identifiers to include remote search results from, defaults to None
+        :param title_only: If True, limits searching to entry titles only and disables
+            full-text search, defaults to None
         :return: JSON response object
         """
-        if libraries is None:
-            libraries = []
-
-        if filters is None:
-            filters = []
+        filtered_params = filter_none(
+            {
+                "kind": kind,
+                "task": task,
+                "libraries": libraries,
+                "organisations": organisations,
+                "states": states,
+                "filters": filters,
+                "search": search,
+                "allowTemplating": allow_templating,
+                "schemaId": schema_id,
+                "adminAccess": admin_access,
+                "peers": peers,
+                "titleOnly": title_only,
+            }
+        )
 
         return self.agent.get(
             f"{self.url}/v2/models/search",
-            params={
-                "task": task,
-                "libraries": libraries,
-                "filters": filters,
-                "search": search,
-            },
+            params=filtered_params,
         ).json()
 
     def get_model(
@@ -119,18 +167,20 @@ class Client:
         visibility: str | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Update a specific model using its unique ID.
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
-        :param kind: Either a Model or a Datacard, defaults to None
+        :param kind: Either a Model, Mirrored Model or a Datacard, defaults to None
         :param description: Description of the model, defaults to None
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param tags: Tags to assign to the model, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
@@ -142,24 +192,41 @@ class Client:
                 "description": description,
                 "visibility": visibility,
                 "collaborators": collaborators,
+                "tags": tags,
             }
         )
 
         return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
 
+    def delete_model(
+        self,
+        model_id: str,
+    ):
+        """
+        Delete a specific model and all associated artefacts.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """
+        return self.agent.delete(
+            f"{self.url}/v2/model/{model_id}",
+        ).json()
+
     def get_model_card(
         self,
         model_id: str,
         version: str,
+        mirrored: bool = False,
     ):
         """Retrieve a specific model card, using the unique model ID and version.
 
         :param model_id: Unique model ID
         :param version: Model card version
+        :param mirrored: Whether to get the read only model card
         :return: JSON response object
         """
         return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/model-card/{version}",
+            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={mirrored: mirrored}
         ).json()
 
     def put_model_card(
@@ -342,7 +409,7 @@ class Client:
         model_id: str,
         file_id: str,
     ):
-        """Download a specific file by it's id.
+        """Download a specific file by its id.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
@@ -476,7 +543,7 @@ class Client:
         :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
-        :param review_roles: list made up of the "shortName" property from a Review Role object
+        :param review_roles: List made up of the "shortName" property from a Review Role object
         :return: JSON response object
         """
         return self.agent.post(

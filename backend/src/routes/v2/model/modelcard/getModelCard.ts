@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { z } from '../../../../lib/zod.js'
 import { ModelCardInterface } from '../../../../models/Model.js'
 import { getModelCard as getModelCardService } from '../../../../services/model.js'
 import { modelCardInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/enums.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse, strictCoerceBoolean } from '../../../../utils/validate.js'
 
 export const getModelCardSchema = z.object({
   params: z.object({
@@ -16,6 +16,7 @@ export const getModelCardSchema = z.object({
     }),
     version: z.nativeEnum(GetModelCardVersionOptions).or(z.coerce.number()),
   }),
+  query: z.object({ mirrored: strictCoerceBoolean(z.boolean().optional().openapi({ example: false })) }),
 })
 
 registerPath({
@@ -47,9 +48,10 @@ export const getModelCard = [
     req.audit = AuditInfo.ViewModelCard
     const {
       params: { modelId, version },
+      query: { mirrored },
     } = parse(req, getModelCardSchema)
 
-    const modelCard = await getModelCardService(req.user, modelId, version)
+    const modelCard = await getModelCardService(req.user, modelId, version, mirrored)
 
     await audit.onViewModelCard(req, modelId, modelCard)
 

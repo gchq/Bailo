@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
-import Grid2 from '@mui/material/Grid2'
+import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
@@ -21,7 +21,9 @@ export default function Help() {
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <Container maxWidth='xl' sx={{ pb: 2 }}>
@@ -29,15 +31,15 @@ export default function Help() {
       {isUiConfigLoading && <Loading />}
       {uiConfig && (
         <Paper sx={{ py: 5, px: 5 }}>
-          <Box sx={{ mb: 5, textAlign: 'center' }}>
-            <Typography variant='h2' component='h1' color='primary'>
+          <Box sx={{ mb: 5 }}>
+            <Typography variant='h6' component='h1' color='primary' textAlign='center'>
               Contact us
             </Typography>
           </Box>
-          <Grid2 container spacing={4}>
-            <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
+          <Grid container spacing={4}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ height: 320 }}>
+                <CardContent sx={{ minHeight: '320px' }}>
                   <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Bug reports
@@ -57,10 +59,10 @@ export default function Help() {
                   </Button>
                 </CardActions>
               </Card>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ height: 320 }}>
+                <CardContent sx={{ minHeight: '320px' }}>
                   <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Documentation
@@ -77,10 +79,10 @@ export default function Help() {
                   </Link>
                 </CardActions>
               </Card>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ height: 320 }}>
+                <CardContent sx={{ minHeight: '320px' }}>
                   <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Get in touch
@@ -99,8 +101,8 @@ export default function Help() {
                   </Button>
                 </CardActions>
               </Card>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </Paper>
       )}
     </Container>

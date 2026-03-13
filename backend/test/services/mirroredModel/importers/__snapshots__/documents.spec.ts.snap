@@ -1,0 +1,164 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > mirroredModel > importers > DocumentsImporter > constructor > success 1`] = `
+DocumentsImporter {
+  "fileIds": [],
+  "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "imageIds": [],
+  "lazyMirroredModel": null,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "DocumentsImporter",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "importKind": "documents",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+  "modelCardRegex": /\\^content-dir\\\\/\\[0-9\\]\\+\\\\\\.json\\$/,
+  "modelCardVersions": [],
+  "newModelCards": [],
+  "newReleases": [],
+  "releaseRegex": /\\^content-dir\\\\/releases\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "releaseSemvers": [],
+  "user": {
+    "dn": "user",
+  },
+}
+`;
+
+exports[`connectors > mirroredModel > importers > DocumentsImporter > processEntry > success handle file entry 1`] = `
+DocumentsImporter {
+  "fileIds": [
+    "file-id",
+  ],
+  "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "imageIds": [],
+  "lazyMirroredModel": null,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "DocumentsImporter",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "importKind": "documents",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+  "modelCardRegex": /\\^content-dir\\\\/\\[0-9\\]\\+\\\\\\.json\\$/,
+  "modelCardVersions": [],
+  "newModelCards": [],
+  "newReleases": [],
+  "releaseRegex": /\\^content-dir\\\\/releases\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "releaseSemvers": [],
+  "user": {
+    "dn": "user",
+  },
+}
+`;
+
+exports[`connectors > mirroredModel > importers > DocumentsImporter > processEntry > success handle modelCard file 1`] = `
+DocumentsImporter {
+  "fileIds": [],
+  "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "imageIds": [],
+  "lazyMirroredModel": null,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "DocumentsImporter",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "importKind": "documents",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+  "modelCardRegex": /\\^content-dir\\\\/\\[0-9\\]\\+\\\\\\.json\\$/,
+  "modelCardVersions": [
+    1,
+  ],
+  "newModelCards": [
+    {
+      "saved": true,
+    },
+  ],
+  "newReleases": [],
+  "releaseRegex": /\\^content-dir\\\\/releases\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "releaseSemvers": [],
+  "user": {
+    "dn": "user",
+  },
+}
+`;
+
+exports[`connectors > mirroredModel > importers > DocumentsImporter > processEntry > success handle release file with auth success 1`] = `
+DocumentsImporter {
+  "fileIds": [],
+  "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "imageIds": [
+    "repo/path:tag",
+  ],
+  "lazyMirroredModel": {
+    "id": "mirroredModelId",
+  },
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "DocumentsImporter",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "importKind": "documents",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+  "modelCardRegex": /\\^content-dir\\\\/\\[0-9\\]\\+\\\\\\.json\\$/,
+  "modelCardVersions": [],
+  "newModelCards": [],
+  "newReleases": [
+    {
+      "saved": true,
+    },
+  ],
+  "releaseRegex": /\\^content-dir\\\\/releases\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "releaseSemvers": [
+    "1.0.0",
+  ],
+  "user": {
+    "dn": "user",
+  },
+}
+`;
+
+exports[`connectors > mirroredModel > importers > DocumentsImporter > processEntry > success skip non-file entry 1`] = `
+DocumentsImporter {
+  "fileIds": [],
+  "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "imageIds": [],
+  "lazyMirroredModel": null,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "DocumentsImporter",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "importKind": "documents",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+  "modelCardRegex": /\\^content-dir\\\\/\\[0-9\\]\\+\\\\\\.json\\$/,
+  "modelCardVersions": [],
+  "newModelCards": [],
+  "newReleases": [],
+  "releaseRegex": /\\^content-dir\\\\/releases\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
+  "releaseSemvers": [],
+  "user": {
+    "dn": "user",
+  },
+}
+`;

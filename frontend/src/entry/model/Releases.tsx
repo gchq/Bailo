@@ -1,9 +1,10 @@
+import { Create } from '@mui/icons-material'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import semver from 'semver'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
@@ -26,11 +27,11 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
 
-  const ReleaseListItem = memoize(({ data, index }) => (
+  const ReleaseListItem = memoize(({ data }) => (
     <ReleaseDisplay
-      key={data[index].semver}
+      key={data.semver}
       model={model}
-      release={data[index]}
+      release={data}
       latestRelease={latestRelease}
       hideReviewBanner={
         !hasRole(
@@ -41,9 +42,13 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     />
   ))
 
+  const onLatestReleaseChange = useEffectEvent((release: string) => {
+    setLatestRelease(release)
+  })
+
   useEffect(() => {
     if (model && releases.length > 0) {
-      setLatestRelease(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
+      onLatestReleaseChange(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
     }
   }, [latestRelease, model, releases])
 
@@ -75,8 +80,9 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
                   onClick={handleDraftNewRelease}
                   disabled={!model.card}
                   data-test='draftNewReleaseButton'
+                  startIcon={<Create />}
                 >
-                  Draft new Release
+                  Draft new release
                 </Button>
               </Restricted>
             </Box>
@@ -93,7 +99,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
             { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
             { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
           ]}
-          searchPlaceholderText='Search by semver'
+          searchPlaceholderText='Search by version'
           defaultSortProperty='semver'
         >
           {ReleaseListItem}

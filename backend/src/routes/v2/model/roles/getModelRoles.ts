@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { z } from '../../../../lib/zod.js'
 import { getAllEntryRoles } from '../../../../services/roles.js'
 import { Role } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'

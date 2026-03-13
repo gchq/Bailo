@@ -1,7 +1,7 @@
 import { LocalOffer } from '@mui/icons-material'
-import { Button, Chip, Grid2, TextField, Tooltip, Typography } from '@mui/material'
+import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
-import { useGetModelFiles } from 'actions/model'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -27,7 +27,7 @@ export default function MultiFileInputFileDisplay({
   const [newFileTags, setNewFileTags] = useState<string[]>([])
   const [fileTagCount, setFileTagCount] = useState(isFileInterface(file) ? file.tags.length : newFileTags.length)
 
-  const { mutateEntryFiles } = useGetModelFiles(isFileInterface(file) ? file.modelId : '')
+  const { mutateModelFiles } = useGetModelFiles(isFileInterface(file) ? file.modelId : '')
 
   const handleDelete = () => {
     onDelete(file)
@@ -43,7 +43,7 @@ export default function MultiFileInputFileDisplay({
     if (isFileInterface(file)) {
       setFileTagErrorMessage('')
       const res = await patchFile(file.modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
-      mutateEntryFiles()
+      mutateModelFiles()
       if (res.status !== 200) {
         setFileTagErrorMessage('You lack the required authorisation in order to add tags to a file.')
       }
@@ -60,13 +60,13 @@ export default function MultiFileInputFileDisplay({
   }
 
   return (
-    <Grid2 container spacing={1} alignItems='center' sx={{ width: '100%' }}>
-      <Grid2 size={{ xs: 4 }}>
+    <Grid container spacing={1} alignItems='center' sx={{ width: '100%' }}>
+      <Grid size={{ xs: 4 }}>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>
-      </Grid2>
-      <Grid2 size={{ xs: 7 }}>
+      </Grid>
+      <Grid size={{ xs: 7 }}>
         <Restricted action='editEntry' fallback={<></>}>
           <Button
             sx={{ width: 'fit-content' }}
@@ -91,10 +91,10 @@ export default function MultiFileInputFileDisplay({
           value={metadata}
           onChange={handleMetadataChange}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 1 }} textAlign='right'>
+      </Grid>
+      <Grid size={{ xs: 1 }} textAlign='right'>
         <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   )
 }

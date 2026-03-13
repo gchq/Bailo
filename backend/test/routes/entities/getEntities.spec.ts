@@ -2,8 +2,6 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { testGet } from '../../testUtils/routes.js'
 
-vi.mock('../../../src/utils/user.js')
-
 const authenticationMocks = vi.hoisted(() => ({
   authenticationMiddleware: vi.fn(() => []),
   queryEntities: vi.fn(() => [

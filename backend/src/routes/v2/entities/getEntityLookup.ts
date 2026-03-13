@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
-import { UserInformation } from '../../../connectors/authentication/Base.js'
+import { UserInformation } from '../../../connectors/authentication/constants.js'
 import authentication from '../../../connectors/authentication/index.js'
+import { z } from '../../../lib/zod.js'
 import { registerPath, UserInformationSchema } from '../../../services/specification.js'
 import { toEntity } from '../../../utils/entity.js'
 import { parse } from '../../../utils/validate.js'

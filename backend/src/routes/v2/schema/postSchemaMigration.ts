@@ -1,11 +1,12 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { SchemaMigrationInterface, SchemaMigrationKind } from '../../../models/SchemaMigration.js'
+import { z } from '../../../lib/zod.js'
+import { SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
 import { createSchemaMigrationPlan } from '../../../services/schemaMigration.js'
 import { registerPath } from '../../../services/specification.js'
+import { SchemaMigrationKind } from '../../../types/enums.js'
 import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -17,6 +18,7 @@ export const postSchemaMigrationSchema = z.object({
     description: z.string().optional().openapi({ example: 'This is an example migration plan' }),
     sourceSchema: z.string().openapi({ example: 'v1' }),
     targetSchema: z.string().openapi({ example: 'v2' }),
+    draft: z.coerce.boolean().optional().default(false),
     questionMigrations: z.array(
       z.object({
         id: z.string(),

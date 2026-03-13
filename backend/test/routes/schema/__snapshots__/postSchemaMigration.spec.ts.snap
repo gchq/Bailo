@@ -3,6 +3,7 @@
 exports[`routes > schema > postSchemaMigration > audit > expected call 1`] = `
 {
   "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+  "draft": false,
   "name": "Dr. Garry Cummerata",
   "questionMigrations": [
     {
@@ -43,6 +44,7 @@ exports[`routes > schema > postSchemaMigration > successfully stores the schema 
 {
   "schemaMigration": {
     "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+    "draft": false,
     "name": "Dr. Garry Cummerata",
     "questionMigrations": [
       {

@@ -62,24 +62,49 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
-      avScanning: {
+      federation: {
+        state: '{{ .Values.federation.state }}',
+        {{ if eq .Values.federation.state "enabled" }}
+        id: '{{ .Values.federation.id }}',
+        peers: {
+        {{- range $v := .Values.federation.peers }}
+          {{ $v.name }}: {
+            state: '{{ $v.state }}',
+            baseUrl: '{{ $v.baseUrl }}',
+            label: '{{ $v.label }}',
+            kind: '{{ $v.kind }}',
+            cache: {
+              query: {{ $v.cacheQuery }},
+            },
+            extra: {
+              statusModelName: '{{ $v.statusModelName }}',
+              statusModelId: '{{ $v.statusModelId }}',
+            },
+          },
+        {{- end }}
+        },
+        {{ end }}
+      },
+
+      artefactScanning: {
         clamdscan: {
           concurrency: {{ .Values.clamav.concurrency }},
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
         },
 
-        modelscan: {
-          concurrency: {{ .Values.modelscan.concurrency }},
-          host: '{{ include "bailo.fullname" . }}-modelscan',
-          port: {{ .Values.modelscan.port }},
-          protocol: '{{ .Values.modelscan.protocol }}',
+        artefactscan: {
+          concurrency: {{ .Values.artefactscan.concurrency }},
+          host: '{{ include "bailo.fullname" . }}-artefactscan',
+          port: {{ .Values.artefactscan.port }},
+          protocol: '{{ .Values.artefactscan.protocol }}',
         },
       },
 
       smtp: {
         // Enable / disable all email sending
         enabled: true,
+        transporter: '{{ .Values.config.smtp.transporter }}',
 
         // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
         // https://nodemailer.com/smtp/#1-single-connection
@@ -101,7 +126,7 @@ data:
       },
 
       log: {
-        level: 'info',
+        level: '{{ .Values.config.log.level }}',
       },
 
       session: {
@@ -182,6 +207,8 @@ data:
         modelMirror: {
           import: {
             enabled: {{ .Values.modelMirror.import.enabled }},
+            additionalInfoHeading: '{{ .Values.modelMirror.import.additionalInfoHeading }}',
+            originalAnswerHeading: '{{ .Values.modelMirror.import.originalAnswerHeading }}',
           },
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
@@ -218,16 +245,12 @@ data:
           kind: '{{ .Values.connectors.audit.kind }}',
         },
 
-        fileScanners: {
-          kinds: {{ toJson .Values.connectors.fileScanners.kinds }},
-          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }},
-          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
-          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
+        artefactScanners: {
+          kinds: {{ toJson .Values.connectors.artefactScanners.kinds }},
+          retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }},
+          maxInitRetries: {{ .Values.connectors.artefactScanners.maxInitRetries }},
+          initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }},
         },
-      },
-
-      log: {
-        level: 'trace',
       },
 
       instrumentation: {
@@ -236,10 +259,16 @@ data:
         debug: {{ .Values.instrumentation.debug }},
       },
 
+      ses: {
+        endpoint: '{{ .Values.aws.ses.endpoint }}',
+        region: '{{ .Values.aws.ses.region }}',
+      },
+
       s3: {
         endpoint: '{{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}',
         region: '{{ .Values.minio.region }}',
         forcePathStyle: true,
+        responseChecksumValidation: '{{ .Values.aws.s3.responseChecksumValidation }}',
 
         // Names of buckets that Bailo uses
         buckets: {

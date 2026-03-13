@@ -4,13 +4,13 @@ import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testReleaseReview } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
-vi.mock('../../../src/connectors/authorisation/index.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    findReviews: vi.fn(() => [testReleaseReview]),
+    findReviews: vi.fn(function () {
+      return [testReleaseReview]
+    }),
   }
 })
 vi.mock('../../../src/services/review.js', () => mockReviewService)

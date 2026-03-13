@@ -26,4 +26,13 @@ const auth = {
   images: vi.fn(() => [{ success: true }]),
 }
 
+export function resetAuthMock() {
+  for (const key of Object.keys(auth)) {
+    const fn = (auth as any)[key]
+    if (typeof fn === 'function' && 'mockReset' in fn) {
+      fn.mockReset()
+    }
+  }
+}
+
 export default auth

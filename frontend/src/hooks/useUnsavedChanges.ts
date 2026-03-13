@@ -14,12 +14,16 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
 
   useEffect(() => {
     const handleWindowClose = (e) => {
-      if (!unsavedChanges) return
+      if (!unsavedChanges) {
+        return
+      }
       e.preventDefault()
       return (e.returnValue = warningText)
     }
     const handleBrowseAway = () => {
-      if (!unsavedChanges) return
+      if (!unsavedChanges) {
+        return
+      }
       const res = window.confirm(warningText)
       if (res) {
         setUnsavedChanges(false)
@@ -38,7 +42,9 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
 
   const sendWarning = () => {
     const res = window.confirm(warningText)
-    if (res) setUnsavedChanges(false)
+    if (res) {
+      setUnsavedChanges(false)
+    }
     return res
   }
 

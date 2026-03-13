@@ -1,32 +1,36 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FormContextType } from '@rjsf/utils'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { Registry, RJSFSchema } from '@rjsf/utils'
+import { SyntheticEvent, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface DropdownProps {
   label?: string
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: FormContextType
+  registry?: Registry
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
   id: string
+  schema: RJSFSchema
 }
 
 export default function Dropdown({
   label,
-  formContext,
+  registry,
   value,
   onChange,
   options,
   required,
   rawErrors,
   id,
+  schema,
 }: DropdownProps) {
   const theme = useTheme()
 
@@ -46,17 +50,24 @@ export default function Dropdown({
     return options.enumOptions ? options.enumOptions.map((option) => option.value) : []
   }, [options])
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-        {label}
-        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-      </Typography>
-      {formContext.editMode && (
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
+    >
+      {registry.formContext.editMode && (
         <Autocomplete
           size='small'
           options={dropdownOptions}
@@ -80,7 +91,7 @@ export default function Dropdown({
           })}
           onChange={handleChange}
           value={value || ''}
-          disabled={!formContext.editMode}
+          disabled={!registry.formContext.editMode}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -93,7 +104,7 @@ export default function Dropdown({
           )}
         />
       )}
-      {!formContext.editMode && (
+      {!registry.formContext.editMode && (
         <Typography
           sx={{
             fontStyle: value ? 'unset' : 'italic',
@@ -103,6 +114,6 @@ export default function Dropdown({
           {value ? value : 'Unanswered'}
         </Typography>
       )}
-    </Fragment>
+    </AdditionalInformation>
   )
 }

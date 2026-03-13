@@ -1,6 +1,6 @@
 import { Container, Divider, List, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import SchemaList from 'src/schemas/SchemaList'
 import { isSchemaKind, SchemaKind, SchemaKindKeys } from 'types/types'
@@ -12,11 +12,15 @@ export default function SchemaTab() {
 
   const { category } = router.query
 
+  const onSelectedCategoryChange = useEffectEvent((category: SchemaKindKeys) => {
+    setSelectedCategory(category)
+  })
+
   useEffect(() => {
     if (isSchemaKind(category)) {
-      setSelectedCategory(category)
+      onSelectedCategoryChange(category)
     } else if (category) {
-      setSelectedCategory(SchemaKind.MODEL)
+      onSelectedCategoryChange(SchemaKind.MODEL)
       router.replace({
         query: { ...router.query, category: SchemaKind.MODEL },
       })

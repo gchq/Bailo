@@ -1,7 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Button, Card, Container, Dialog, DialogContent, Divider, Grid2, Paper, Stack, Typography } from '@mui/material'
+import { Button, Card, Container, Dialog, DialogContent, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -13,8 +13,7 @@ import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAc
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys } from 'types/types'
-import { EntryKind } from 'types/types'
+import { DecisionKeys, EntryKind } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -26,7 +25,11 @@ export default function AccessRequestReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isOpenAccessRequestDialogOpen, setIsOpenAccessRequestDialogOpen] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({
@@ -65,9 +68,9 @@ export default function AccessRequestReview() {
   const accessRequestEntities = useMemo(() => {
     if (accessRequest) {
       return accessRequest.metadata.overview.entities.map((entity) => (
-        <Grid2 size={{ xs: 3 }} key={entity}>
+        <Grid size={{ xs: 3 }} key={entity}>
           <UserDisplay dn={entity} />
-        </Grid2>
+        </Grid>
       ))
     }
   }, [accessRequest])
@@ -80,7 +83,9 @@ export default function AccessRequestReview() {
     isAccessRequestError,
     isModelError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>
@@ -141,7 +146,7 @@ export default function AccessRequestReview() {
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users
                 </Typography>
-                <Grid2 container>{accessRequestEntities}</Grid2>
+                <Grid container>{accessRequestEntities}</Grid>
               </Card>
             </Stack>
           </Stack>

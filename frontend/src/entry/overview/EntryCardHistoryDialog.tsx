@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import Dialog from '@mui/material/Dialog'
 import { useTheme } from '@mui/material/styles'
-import { useGetModelCardRevisions } from 'actions/modelCard'
+import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
@@ -28,11 +28,9 @@ type EntryCardHistoryDialogProps = {
 
 export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()
-  const {
-    modelCardRevisions: entryCardRevisions,
-    isModelCardRevisionsLoading: isEntryCardRevisionsLoading,
-    isModelCardRevisionsError: isEntryCardRevisionsError,
-  } = useGetModelCardRevisions(entry.id)
+  const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
+    entry.id,
+  )
   const sortedEntryCardRevisions = useMemo(
     () =>
       entryCardRevisions

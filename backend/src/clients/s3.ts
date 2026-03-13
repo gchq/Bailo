@@ -1,8 +1,11 @@
 import { PassThrough, Readable } from 'node:stream'
 
 import {
+  CompleteMultipartUploadCommand,
   CreateBucketCommand,
   CreateBucketRequest,
+  CreateMultipartUploadCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   GetObjectRequest,
   HeadBucketCommand,
@@ -11,6 +14,7 @@ import {
   HeadObjectRequest,
   S3Client,
   S3ServiceException,
+  UploadPartCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
@@ -32,6 +36,7 @@ async function getS3Client() {
     requestHandler: new NodeHttpHandler({
       httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
     }),
+    ...(config.s3.responseChecksumValidation && { responseChecksumValidation: config.s3.responseChecksumValidation }),
   })
 }
 
@@ -44,7 +49,7 @@ export async function putObjectStream(
   try {
     const upload = new Upload({
       client: await getS3Client(),
-      params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
+      params: { Bucket: bucket, Key: key, Body: body, ...(metadata && { Metadata: metadata }) },
       queueSize: 4,
       leavePartsOnError: false,
     })
@@ -77,8 +82,47 @@ export async function putObjectStream(
       internal: { error, bucket, key, metadata },
     })
   } finally {
-    // always cleanup the stream
-    body.destroy()
+    // cleanup the stream
+    if (!body?.destroyed) {
+      body.destroy()
+    }
+  }
+}
+
+export async function putObjectPartStream(
+  key: string,
+  uploadId: string,
+  partNumber: number,
+  body: PassThrough | Readable,
+  bodySize: number,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  try {
+    const client = await getS3Client()
+    const command = new UploadPartCommand({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: Number(partNumber),
+      Body: body,
+      ContentLength: bodySize,
+    })
+    const upload = await client.send(command)
+    if (!upload || !upload.ETag) {
+      throw InternalError('Failed to Upload Part.', { key, bucket, uploadId, partNumber, upload })
+    }
+    log.debug({ key, bucket, uploadId, partNumber }, 'Upload part completed.')
+
+    return upload.ETag
+  } catch (error) {
+    throw InternalError('Unable to upload the multipart object to the S3 service.', {
+      internal: { error, bucket, key, uploadId, partNumber },
+    })
+  } finally {
+    // cleanup the stream
+    if (!body?.destroyed) {
+      body.destroy()
+    }
   }
 }
 
@@ -101,7 +145,14 @@ export async function getObjectStream(
   try {
     const command = new GetObjectCommand(input)
     const response = await client.send(command)
-    return response
+
+    if (!response.Body) {
+      throw InternalError('Stream for object unavailable from the S3 service.', {
+        internal: { bucket, key, range },
+      })
+    }
+    // The AWS library doesn't seem to properly type 'Body' as being pipeable?
+    return response.Body as Readable
   } catch (error) {
     throw InternalError('Unable to retrieve the object from the S3 service.', {
       internal: { error, bucket, key, range },
@@ -109,10 +160,53 @@ export async function getObjectStream(
   }
 }
 
+export async function startMultipartUpload(
+  key: string,
+  contentType: string,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const client = await getS3Client()
+  const command = new CreateMultipartUploadCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: contentType,
+  })
+  const result = await client.send(command)
+  if (result.UploadId === undefined) {
+    throw InternalError('Failed to create Multipart Upload.', { key, contentType, bucket, result })
+  }
+  return { uploadId: result.UploadId }
+}
+
+export async function completeMultipartUpload(
+  key: string,
+  uploadId: string,
+  parts: Array<{ ETag: string; PartNumber: number }>,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const client = await getS3Client()
+  const command = new CompleteMultipartUploadCommand({
+    Bucket: bucket,
+    Key: key,
+    UploadId: uploadId,
+    MultipartUpload: { Parts: parts },
+  })
+  return client.send(command)
+}
+
+export async function deleteObject(key: string, bucket: string = config.s3.buckets.uploads) {
+  const client = await getS3Client()
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  })
+  return client.send(command)
+}
+
 export async function objectExists(key: string, bucket: string = config.s3.buckets.uploads) {
   try {
     log.info({ bucket, key }, `Searching for ${key} in ${bucket}`)
-    await headObject(bucket, key)
+    await headObject(key, bucket)
     return true
   } catch (error) {
     if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
@@ -142,7 +236,7 @@ export async function ensureBucketExists(bucket: string) {
   }
 }
 
-async function headObject(bucket: string, key: string) {
+export async function headObject(key: string, bucket: string = config.s3.buckets.uploads) {
   const client = await getS3Client()
 
   const input: HeadObjectRequest = {

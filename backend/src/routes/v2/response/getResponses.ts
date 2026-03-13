@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
 import { ResponseInterface } from '../../../models/Response.js'
 import { getResponsesByParentIds, getResponsesByUser } from '../../../services/response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
@@ -48,7 +48,7 @@ export const getResponses = [
       query: { parentIds, mine },
     } = parse(req, getResponseSchema)
 
-    let responses: ResponseInterface[] = []
+    let responses: ResponseInterface[]
     if (mine) {
       responses = await getResponsesByUser(req.user)
     } else {

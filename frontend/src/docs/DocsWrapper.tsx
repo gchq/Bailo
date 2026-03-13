@@ -13,8 +13,7 @@ import Stack from '@mui/material/Stack'
 import { styled, useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
-import React from 'react'
+import React, { Fragment, ReactElement, ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Title from '../common/Title'
@@ -33,6 +32,7 @@ const paddingIncrement = 2
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
   const { pathname, push } = useRouter()
+  const ref = useRef(null)
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -44,10 +44,21 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     },
   })
 
+  useEffect(() => {
+    if (ref && pathname) {
+      const section = document.getElementById(pathname.replaceAll('/', '-')) as HTMLElement
+      if (!section) {
+        return
+      }
+      section.scrollIntoView({ block: 'center' })
+    }
+  }, [ref, pathname])
+
   const createDocElement = useCallback(
     (doc: DirectoryTree, paddingLeft = paddingIncrement) => {
       let children: Array<any> = []
       if (doc.children) {
+        // eslint-disable-next-line react-hooks/immutability
         children = doc.children.map((child) => createDocElement(child, paddingLeft + paddingIncrement))
       }
 
@@ -61,7 +72,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       return (
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
-            <ListItem dense sx={{ pl: paddingLeft }}>
+            <ListItem dense sx={{ pl: 1 + paddingLeft }} id={path.replaceAll('/', '-')}>
               <ListItemText
                 primary={doc.title}
                 slotProps={{
@@ -70,9 +81,9 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               />
             </ListItem>
           ) : (
-            <ListItem dense sx={{ pl: paddingLeft }}>
+            <ListItem dense sx={{ pl: paddingLeft }} id={path.replaceAll('/', '-')}>
               <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                <ListItemButton dense selected={isSelected} sx={{ pl: 0 }}>
+                <ListItemButton dense selected={isSelected} sx={{ pl: 1 }}>
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
@@ -120,21 +131,21 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   return (
     <>
       <Title text='Documentation' />
-      {/* Banner height + Toolbar height = 96px */}
-      <Box display='flex' width='100%' height='calc(100vh - 96px)'>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Box
           sx={(theme) => ({
-            minWidth: 200,
             backgroundColor: theme.palette.background.paper,
             borderRight: `1px solid ${theme.palette.divider}`,
             overflow: 'auto',
             py: 2,
           })}
+          position={{ xs: 'relative', sm: 'fixed' }}
+          height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
         >
           <StyledList>{createDocElement(directory)}</StyledList>
         </Box>
-        <Box flex={1} overflow='auto'>
-          <Box display='flex' flexDirection='column' height='100%'>
+        <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
+          <Box display='flex' flexDirection='column'>
             <Container
               maxWidth='lg'
               sx={{
@@ -159,7 +170,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <Divider flexItem />
               {flatDirectory.length > 0 && (
                 <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
-                  <Stack direction='row' justifyContent='space-around'>
+                  <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-around'>
                     {currentIndex === 0 && (
                       <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
                         Home
@@ -188,7 +199,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             <Copyright sx={{ pb: 2, pt: 4 }} />
           </Box>
         </Box>
-      </Box>
+      </Stack>
     </>
   )
 }

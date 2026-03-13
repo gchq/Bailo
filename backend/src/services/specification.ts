@@ -1,13 +1,15 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
-import { AnyZodObject, z } from 'zod'
+import type { AnyZodObject } from 'zod'
 
-import { ScanState } from '../connectors/fileScanning/Base.js'
+import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
+import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
+import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
-import { ArtefactKind } from '../models/Scan.js'
+import { ArtefactKind, SeverityLevel } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
-import { FederationState } from '../types/types.js'
+import { FederationState, MirrorKind } from '../types/types.js'
 import config from '../utils/config.js'
 
 export const registry = new OpenAPIRegistry()
@@ -58,6 +60,16 @@ export const systemStatusSchema = z.object({
   }),
 })
 
+export const modelTransferSchema = z.object({
+  _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  modelId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  peerId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  status: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
+  createdBy: z.string().openapi({ example: 'bob' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const remoteFederationConfigSchema = z.object({
   state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
   baseUrl: z.string().openapi({ example: 'https://example.com' }),
@@ -78,9 +90,7 @@ export const modelCardInterfaceSchema = z.object({
   version: z.number().openapi({ example: 5 }),
   createdBy: z.string().openapi({ example: 'user' }),
   metadata: z.object({
-    overview: z.object({
-      tags: z.array(z.string()).openapi({ example: ['tag', 'tagb'] }),
-    }),
+    overview: z.object({}),
   }),
 })
 
@@ -90,9 +100,7 @@ export const modelCardRevisionInterfaceSchema = z.object({
 
   version: z.number().openapi({ example: 5 }),
   metadata: z.object({
-    overview: z.object({
-      tags: z.array(z.string()).openapi({ example: ['tag', 'tagb'] }),
-    }),
+    overview: z.object({}),
   }),
 
   createdBy: z.string().openapi({ example: 'user' }),
@@ -106,6 +114,9 @@ export const modelInterfaceSchema = z.object({
   name: z.string().openapi({ example: 'Yolo v4' }),
   kind: z.string().openapi({ example: 'model' }),
   description: z.string().openapi({ example: 'You only look once' }),
+  organisation: z.string().openapi({ example: 'Acme Corp' }),
+  state: z.string().openapi({ example: 'development' }),
+  tags: z.array(z.string()).openapi({ example: ['tag', 'tagb'] }),
   card: modelCardInterfaceSchema,
 
   collaborators: z.array(
@@ -132,9 +143,10 @@ export const scanInterfaceSchema = z.object({
     .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
-  state: z.nativeEnum(ScanState).openapi({ example: 'complete' }),
-  isInfected: z.boolean().optional().openapi({ example: true }),
-  viruses: z.array(z.string().openapi({ example: 'Win.Test.EICAR_HDB-1' })).optional(),
+  state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
+  summary: z
+    .array(z.object({ severity: z.nativeEnum(SeverityLevel), vulnerabilityDescription: z.string() }))
+    .optional(),
   lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
   _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
   id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
@@ -144,14 +156,14 @@ export const fileWithScanInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
 
   name: z.string().openapi({ example: 'yolo.tar.gz' }),
-  size: z.number().openapi({ example: 1024 }),
+  size: z.number().positive().openapi({ example: 1024 }),
   mime: z.string().openapi({ example: 'application/tar' }),
 
   path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),
 
   complete: z.boolean().openapi({ example: true }),
 
-  avScan: z.array(scanInterfaceSchema).optional(),
+  scanResults: z.array(scanInterfaceSchema).optional(),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -297,6 +309,20 @@ export const inferenceInterfaceSchema = z.object({
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
+
+const mirrorMetadataBaseSchema = z.object({
+  schemaVersion: z.literal(1),
+  importKind: z.string(),
+  sourceModelId: z.string(),
+  mirroredModelId: z.string(),
+  exporter: z.string(),
+  exportId: z.string(),
+})
+export const mirrorMetadataSchema = z.union([
+  mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.Documents) }),
+  mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.File), filePath: z.string() }),
+  mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.Image), distributionPackageName: z.string() }),
+])
 
 export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
   z.object({

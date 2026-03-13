@@ -8,8 +8,8 @@ image:
   frontendTag: imageTag
   backendRepository: "backend-image-registry.location"
   backendTag: imageTag
-  modelscanRepository: "modelscan-image-registry.location"
-  modelscanTag: imageTag
+  artefactscanRepository: "artefactscan-image-registry.location"
+  artefactscanTag: imageTag
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 
@@ -30,13 +30,6 @@ autoscaling:
 podSecurityContext:
   {}
   # fsGroup: 2000
-securityContext:
-  # capabilities:
-  #   drop:
-  #     - ALL
-  readOnlyRootFilesystem: false
-  runAsNonRoot: true
-  # runAsUser: 1002380001
 
 # Networking
 # Ingress/route implementation. Also, see appPublicRoute below.
@@ -88,11 +81,17 @@ oauth:
 # Used for aws storage
 aws:
   enabled: false
-  storageName: "sc-gp2"
+  storageName: "bailo-ebs-sc"
   pvcMinioName: "bailo-minio"
   pvcMinioStorage: 20Gi
   pvcMongoName: "bailo-mongodb"
   pvcMongoStorage: 10Gi
+  ses:
+    endpoint: ""
+    region: ""
+  s3:
+    # Potentially requires setting to avoid OOM/memory leak as per https://github.com/aws/aws-sdk-js-v3/issues/7657
+    responseChecksumValidation: ""
 
 # Pod resource
 resources:
@@ -159,7 +158,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnamilegacy/mongodb
-    tag: 8.0.13
+    tag: 8.0.13-debian-12-r0
 
 # MinIO Dependencies
 minio:
@@ -178,9 +177,6 @@ minio:
   uploadBucket: uploads # required for Bailo
   registryBucket: registry # required for Bailo
   host: "bailo-minio"
-  service:
-    ports:
-      api: 31111 # default 9000
   # skip the security verification check https://github.com/bitnami/charts/issues/30850
   global:
     security:
@@ -198,7 +194,7 @@ minio:
   image:
     registry: docker.io
     repository: bitnamilegacy/minio
-    tag: 2025.7.23
+    tag: 2025.7.23-debian-12-r1
     debug: true
 
 # Registry Dependencies
@@ -216,6 +212,19 @@ registry:
   keyFile: key.pem
   serviceAccount: ''
 
+federation:
+  id: 'localBailo'
+  state: 'disabled'
+  peers:
+    - name: 'huggingface'
+      state: 'enabled'
+      baseUrl: 'https://huggingface.co'
+      label: 'Hugging Face'
+      kind: 'huggingfacehub'
+      cacheQuery: 60
+      statusModelName: 'openai/whisper-large-v3'
+      statusModelId: '654a84cadff2f49007ce6c37'
+
 # Nginx Dependencies
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unprivileged user.
@@ -229,7 +238,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.2
+  image: marlonb/mailcrab:v1.6.4
 
 # Openshift specific configuration
 openshift:
@@ -238,6 +247,8 @@ openshift:
 
 # Instance Settings
 config:
+  log:
+    level: trace
   ui:
     banner:
       enabled: false
@@ -270,6 +281,7 @@ config:
     user: "mailuser"
     pass: "mailpass"
     from: "bailo@example.com"
+    transporter: "smtp"
 
   app:
     protocol: "https"
@@ -289,7 +301,7 @@ connectors:
   audit:
     kind: 'silly'
 
-  fileScanners:
+  artefactScanners:
     kinds: []
     retryDelayInMinutes: 60
     maxInitRetries: 5
@@ -302,6 +314,8 @@ instrumentation:
 modelMirror:
   import:
     enabled: false
+    additionalInfoHeading: 'Additional information'
+    originalAnswerHeading: 'Original answer'
   export:
     concurrency: 5
     enabled: false
@@ -314,6 +328,7 @@ modelMirror:
         accessKey: ''
         secretKey: ''
 
+
 # Inferencing cluster reference
 inference:
   enabled: false
@@ -325,6 +340,22 @@ inference:
 
 backend:
   serviceAccount: ''
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  securityContext:
+    readOnlyRootFilesystem: false
+    # capabilities:
+    #   drop:
+    #     - ALL
+    # runAsUser: 1002380001
+
+frontend:
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  securityContext:
+    readOnlyRootFilesystem: false
 
 clamav:
   enabled: false
@@ -336,11 +367,20 @@ clamav:
     - ReadWriteOnce
   size: 10G
 
-modelscan:
+artefactscan:
   enabled: false
   concurrency: 2
   protocol: http
   port: 3311
   accessModes:
     - ReadWriteOnce
-  size: 20G  # modelscan saves each incoming file to the disk so needs plenty of storage
+  size: 20G  # artefactscan saves each incoming file to the disk so needs plenty of storage
+  trivy:
+    ca:
+      enabled: false
+      secretName: bailo-certs
+      secretKey: cert.pem
+      mountPath: /certs/artefactscan-ca.pem
+  # env: # Override settings here
+  #   TRIVY_DB_HOSTNAME: ghcr.io
+  #   TRIVY_DB_INSECURE: false

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
 import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { updateModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'

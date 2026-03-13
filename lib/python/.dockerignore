@@ -1,3 +1,11 @@
+# Docker artefacts
+Dockerfile
+.dockerignore
+
+# Git artefacts
+.git
+.gitignore
+
 # Byte-compiled / optimized / DLL files
 **/__pycache__/
 **/*.py[cod]
@@ -39,6 +47,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+tests/
 htmlcov/
 .tox/
 .nox/
@@ -104,12 +113,10 @@ celerybeat.pid
 
 # Environments
 .env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+*env/
+*ENV/
+*env.bak/
+libpythonvenv/
 
 # Spyder project settings
 .spyderproject
@@ -138,3 +145,6 @@ resnet50_weights.pth
 # MLFlow
 mlartifacts/
 mlruns/
+
+# Misc
+CHANGELOG.md

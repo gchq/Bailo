@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
 import { SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
 import { searchSchemaMigrations } from '../../../services/schemaMigration.js'
 import { registerPath, schemaMigrationInterfaceSchema } from '../../../services/specification.js'
@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const getSchemaMigrationsSchema = z.object({
   query: z.object({
-    name: z.string().optional().openapi({ example: 'My Schema Migration' }),
+    sourceSchema: z.string().optional().openapi({ example: 'source-schema-v1' }),
   }),
 })
 
@@ -42,10 +42,10 @@ export const getSchemaMigrations = [
   async (req: Request, res: Response<GetSchemaMigrationsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchemaMigrations
     const {
-      query: { name },
+      query: { sourceSchema },
     } = parse(req, getSchemaMigrationsSchema)
 
-    const schemaMigrations = await searchSchemaMigrations(name)
+    const schemaMigrations = await searchSchemaMigrations(sourceSchema)
     await audit.onViewSchemaMigrations(req, schemaMigrations)
 
     res.json({

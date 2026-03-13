@@ -6,6 +6,7 @@ const config: PartialDeep<Config> = {
     protocol: '',
     host: '',
     port: 3000,
+    privateKey: 'privateKey',
   },
   federation: {
     state: 'disabled',
@@ -20,6 +21,7 @@ const config: PartialDeep<Config> = {
     forcePathStyle: true,
     rejectUnauthorized: true,
     automaticallyCreateBuckets: true,
+    multipartChunkSize: 5 * 1024 * 1024,
     buckets: {
       uploads: 'uploads',
       registry: 'registry',
@@ -35,7 +37,7 @@ const config: PartialDeep<Config> = {
     authorisation: {
       kind: 'basic',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },
@@ -58,6 +60,7 @@ const config: PartialDeep<Config> = {
   registry: {
     connection: {
       internal: 'https://localhost:5000',
+      insecure: true,
     },
   },
   instrumentation: {
@@ -95,13 +98,13 @@ const config: PartialDeep<Config> = {
       userIdAttribute: '',
     },
   },
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       host: '127.0.0.1',
       port: 8080,
     },
 
-    modelscan: {
+    artefactscan: {
       protocol: 'http',
       host: '127.0.0.1',
       port: 8081,
@@ -121,6 +124,13 @@ const config: PartialDeep<Config> = {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
+  },
+  modelMirror: {
+    export: {
+      concurrency: 1,
+    },
+    contentDirectory: 'content-dir',
+    metadataFile: 'meta.json',
   },
 }
 

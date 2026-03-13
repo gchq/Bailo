@@ -26,7 +26,7 @@ export default function Banner() {
   }
 
   return (
-    <Card sx={style}>
+    <Card sx={style} aria-hidden='true'>
       <Typography>{uiConfig.banner.text}</Typography>
     </Card>
   )

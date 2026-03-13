@@ -45,7 +45,7 @@ export async function getResponsesByParentIds(parentIds: string[]) {
 
 export async function getResponsesByUser(user: UserInterface) {
   const reviews = await findReviews(user, true, false)
-  return await getResponsesByParentIds(reviews.map((review) => review['_id']))
+  return await getResponsesByParentIds(reviews.map((review) => review['_id'].toString()))
 }
 
 export async function updateResponse(user: UserInterface, responseId: string, comment: string) {
@@ -149,7 +149,6 @@ async function sendReviewResponseNotification(
   reviewResponse: ResponseInterface,
   user: UserInterface,
 ) {
-  let reviewIdQuery
   switch (review.kind) {
     case ReviewKind.Access: {
       if (!review.accessRequestId) {
@@ -176,7 +175,11 @@ async function sendReviewResponseNotification(
       break
     }
     default:
-      throw InternalError('Review Kind not recognised', reviewIdQuery)
+      throw InternalError('Review Kind not recognised', {
+        reviewId: review.id,
+        modelId: review.modelId,
+        kind: review.kind,
+      })
   }
 }
 

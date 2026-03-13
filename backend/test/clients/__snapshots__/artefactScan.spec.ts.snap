@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`clients > artefactScan > getArtefactScanInfo > success 1`] = `
+[
+  [
+    "undefined://undefined:undefined/info",
+    {
+      "headers": {
+        "Content-Type": "application/json",
+      },
+      "method": "GET",
+    },
+  ],
+]
+`;
+
+exports[`clients > artefactScan > scanStream > success 1`] = `
+[
+  [
+    "undefined://undefined:undefined/scan/file",
+    {
+      "body": {
+        "append": [MockFunction] {
+          "calls": [
+            [
+              "in_file",
+              {},
+              {
+                "contentType": "application/octet-stream",
+                "filename": "safe_model.h5",
+              },
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "getHeaders": [MockFunction] {
+          "calls": [
+            [],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
+      "headers": {
+        "accept": "application/json",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`clients > artefactScan > scanStream > success 2`] = `
+[
+  [],
+]
+`;

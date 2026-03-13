@@ -1,5 +1,25 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`clients > registry > deleteManifest > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "method": "DELETE",
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
 exports[`clients > registry > doesLayerExist > success false 1`] = `
 [
   [
@@ -10,14 +30,9 @@ exports[`clients > registry > doesLayerExist > success false 1`] = `
         "Authorization": "Bearer token",
       },
       "method": "HEAD",
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": true,
+        "onabort": null,
       },
     },
   ],
@@ -34,38 +49,102 @@ exports[`clients > registry > doesLayerExist > success true 1`] = `
         "Authorization": "Bearer token",
       },
       "method": "HEAD",
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
 ]
 `;
 
-exports[`clients > registry > getImageTagManifest > success 1`] = `
+exports[`clients > registry > getApiVersion > bad version 1`] = `
+[
+  [
+    "https://localhost:5000/v2/",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": true,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getApiVersion > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success OCI spec 2`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
@@ -79,17 +158,12 @@ exports[`clients > registry > getRegistryLayerStream > success 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
@@ -106,14 +180,9 @@ exports[`clients > registry > initialiseUpload > success 1`] = `
         "Authorization": "Bearer token",
       },
       "method": "POST",
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
@@ -129,14 +198,40 @@ exports[`clients > registry > listImageTags > success 1`] = `
       "headers": {
         "Authorization": "Bearer token",
       },
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > listImageTags > success multiple pages 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/tags/list",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+  [
+    "https://localhost:5000/http://example.com/v2/_catalog?n=20&last=b",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
@@ -146,20 +241,35 @@ exports[`clients > registry > listImageTags > success 1`] = `
 exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
 [
   [
-    "https://localhost:5000/v2/_catalog?n=100&last=modelId",
+    "https://localhost:5000/v2/_catalog?n=100",
     {
       "dispatcher": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
       },
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > mountBlob > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/uploads/?from=modelId/image&mount=blob",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+        "Content-Length": "0",
+      },
+      "method": "POST",
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
@@ -180,14 +290,9 @@ exports[`clients > registry > putManifest > success 1`] = `
         "reference": "tag",
       },
       "method": "PUT",
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
     },
   ],
@@ -199,7 +304,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
   [
     "https://localhost:5000/v2/url&digest=digest",
     {
-      "body": [MockFunction spy],
+      "body": [MockFunction],
       "dispatcher": "mock agent",
       "duplex": "half",
       "headers": {
@@ -209,14 +314,9 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
       },
       "method": "PUT",
       "redirect": "error",
-      "signal": AbortSignal {
-        Symbol(kEvents): Map {},
-        Symbol(events.maxEventTargetListeners): 0,
-        Symbol(events.maxEventTargetListenersWarned): false,
-        Symbol(kHandlers): Map {},
-        Symbol(kAborted): false,
-        Symbol(kReason): undefined,
-        Symbol(kComposite): false,
+      "signal": {
+        "aborted": false,
+        "onabort": null,
       },
       "window": null,
     },

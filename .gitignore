@@ -5,6 +5,8 @@ node_modules
 
 # misc
 .DS_Store
+husky-config.conf
+misc-items.txt
 
 # debug logs
 npm-debug.log*

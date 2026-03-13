@@ -16,16 +16,16 @@ We rely on the following [Bitnami charts](https://charts.bitnami.com/):
 
 We rely on the following images:
 
-- mongo:7.0.15
-- bitnami/minio:2025.4.3
-- marlonb/mailcrab:v1.5.0
-- nginx:1.25.4-alpine3.18
+- mongodb/mongodb-community-server:8.2.2-ubi9
+- bitnami/minio:2025.7.23
+- marlonb/mailcrab:v1.6.2
+- nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
 - registry:3.0.0
-- node:24.5.0-alpine
+- node:24.11.1-alpine
 
-These will occasionally be updated. To retrieve the latest versions used, check `./compose.yaml` and
-`./backend/Dockerfile`. These versions can be configured using the `tag` attribute for each image in `values.yaml` to
-override the defaults. In general, keeping to the same major version will maintain compatibility with Bailo.
+These are regularly updated. To retrieve the latest versions used, check `./compose.yaml` and `./backend/Dockerfile`.
+These versions can be configured using the `tag` attribute for each image in `values.yaml` to override the defaults. In
+general, keeping to the same major version will maintain compatibility with Bailo.
 
 ## NPM
 
@@ -38,5 +38,25 @@ We rely on many NPM packages. The full list is available in `package-lock.json`,
 `sharp` includes instructions on installing / building without internet [here](https://sharp.pixelplumbing.com/install).
 Instructions on installing `cypress` without internet are available
 [here](https://docs.cypress.io/guides/references/advanced-installation).
+
+## Trivy Database
+
+To give greater visibility of Bailo's registry and it's containing images, some environments may use Trivy to scan for
+threats, packages and more.
+
+In order for the scanner to keep up to date with current threats of images in isolated environments, Trivy may require a
+custom setup to pull the necessary database.
+
+There are a number of environment variables that can be configured to customise the database. They are configured in our
+`artefactscan` container and all prefixed with `TRIVY_`:
+
+- `TRIVY_DB_HOSTNAME=ghcr.io` - Host to retrieve the database from
+- `TRIVY_DB_IMAGE=ghcr.io/aquasecurity/trivy-db:2` - Image to retrieve the database from
+
+- `TRIVY_DB_TLS_VERIFY=True` - Enable or disable TLS verification or use a path to point to a custom certificate
+- `TRIVY_DB_INSECURE=False` - Enable if database host is not using TLS or has a custom certificate implementation
+
+- `TRIVY_DB_USERNAME` - Registry login username
+- `TRIVY_DB_PASSWORD` - Registry login password
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

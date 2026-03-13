@@ -1,11 +1,12 @@
 import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Paginate from 'src/common/Paginate'
 import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
+import { PeerConfigStatus } from 'types/types'
 
 interface EntryListProps {
   entries: EntrySearchResult[]
@@ -15,14 +16,13 @@ interface EntryListProps {
   onSelectedOrganisationsChange: (chips: string[]) => void
   selectedStates: string[]
   onSelectedStatesChange: (chips: string[]) => void
+  selectedPeers: string[]
+  onSelectedPeersChange: (chips: string[]) => void
   entriesErrorMessage?: string
   displayOrganisation?: boolean
   displayState?: boolean
-}
-
-interface RowProps {
-  data: EntrySearchResult[]
-  index: number
+  displayPeers?: boolean
+  peers?: Map<string, PeerConfigStatus>
 }
 
 type ListRef = {
@@ -37,9 +37,13 @@ export default function EntryList({
   onSelectedOrganisationsChange,
   selectedStates,
   onSelectedStatesChange,
+  selectedPeers,
+  onSelectedPeersChange,
   entriesErrorMessage,
   displayOrganisation = true,
   displayState = true,
+  displayPeers = true,
+  peers,
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
 
@@ -61,9 +65,11 @@ export default function EntryList({
     }
   }, [entries, ref])
 
-  if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
+  if (entriesErrorMessage) {
+    return <MessageAlert message={entriesErrorMessage} severity='error' />
+  }
 
-  const Row = ({ data, index }: RowProps) => (
+  const Row = ({ data }) => (
     <EntryListRow
       selectedChips={selectedChips}
       onSelectedChipsChange={onSelectedChipsChange}
@@ -71,11 +77,14 @@ export default function EntryList({
       onSelectedOrganisationsChange={onSelectedOrganisationsChange}
       selectedStates={selectedStates}
       onSelectedStatesChange={onSelectedStatesChange}
-      data={data}
-      index={index}
+      selectedPeers={selectedPeers}
+      onSelectedPeersChange={onSelectedPeersChange}
+      entry={data}
       style={{ padding: theme.spacing(2.5) }}
       displayOrganisation={displayOrganisation}
       displayState={displayState}
+      displayPeers={displayPeers}
+      peers={peers}
     />
   )
 
@@ -93,15 +102,13 @@ export default function EntryList({
     <Box sx={{ py: 2 }}>
       <Paginate
         list={entries}
-        searchFilterProperty='name'
         sortingProperties={[
-          { value: 'name', title: 'Name', iconKind: 'text' },
           { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
           { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
         ]}
-        searchPlaceholderText='Search by name'
-        defaultSortProperty='createdAt'
         hideSearchInput
+        defaultSortProperty='createdAt'
+        searchFilterProperty='createdAt'
       >
         {Row}
       </Paginate>

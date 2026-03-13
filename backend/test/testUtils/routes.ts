@@ -15,34 +15,48 @@ interface Fixture {
   body?: unknown
   query?: unknown
   path?: unknown
+  headers?: Record<string, unknown>
 }
 
-export function testDelete(path: string) {
-  const request = supertest(server)
+function applyHeaders<T extends supertest.Test>(req: T, fixture: Fixture) {
+  if (fixture.headers) {
+    Object.entries(fixture.headers).forEach(([k, v]) => {
+      req.set(k, String(v))
+    })
+  }
+  return req
+}
 
-  return request.delete(path)
+export function testDelete(path: string, fixture?: Fixture) {
+  let request = supertest(server).delete(path)
+  if (fixture) {
+    request = applyHeaders(request, fixture)
+  }
+  return request
 }
 
 export function testPost(path: string, fixture: Fixture) {
-  const request = supertest(server)
-
-  return request.post(path).send(fixture.body as object)
+  let request = supertest(server).post(path)
+  request = applyHeaders(request, fixture)
+  return request.send(fixture.body as object)
 }
 
 export function testPatch(path: string, fixture: Fixture) {
-  const request = supertest(server)
-
-  return request.patch(path).send(fixture.body as object)
+  let request = supertest(server).patch(path)
+  request = applyHeaders(request, fixture)
+  return request.send(fixture.body as object)
 }
 
-export function testGet(path: string) {
-  const request = supertest(server)
-
-  return request.get(path)
+export function testGet(path: string, fixture?: Fixture) {
+  let request = supertest(server).get(path)
+  if (fixture) {
+    request = applyHeaders(request, fixture)
+  }
+  return request
 }
 
 export function testPut(path: string, fixture: Fixture) {
-  const request = supertest(server)
-
-  return request.put(path).send(fixture.body as object)
+  let request = supertest(server).put(path)
+  request = applyHeaders(request, fixture)
+  return request.send(fixture.body as object)
 }

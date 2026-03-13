@@ -1,9 +1,10 @@
+import { CSSProperties } from '@mui/material'
 import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
 import cookies from 'js-cookie'
 import { useRouter } from 'next/router'
-import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactElement, ReactNode, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Announcement from 'src/Announcement'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -35,14 +36,24 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const dismissedTimestamp = cookies.get(DISMISSED_COOKIE_NAME)
   const [announcementBannerOpen, setAnnouncementBannerOpen] = useState(false)
 
+  const onPageTopStylingChanged = useEffectEvent((newStyling: CSSProperties) => {
+    setPageTopStyling(newStyling)
+  })
+  const onContentTopStylingChanged = useEffectEvent((newStyling: CSSProperties) => {
+    setContentTopStyling(newStyling)
+  })
+  const onAnnouncementBannerOpenChanged = useEffectEvent((show: boolean) => {
+    setAnnouncementBannerOpen(show)
+  })
+
   useEffect(() => {
     if (!isUiConfigLoading) {
       if (uiConfig && uiConfig.banner.enabled) {
-        setPageTopStyling({
+        onPageTopStylingChanged({
           mt: 4,
         })
-        setContentTopStyling({
-          mt: isDocsPage ? 4 : 8,
+        onContentTopStylingChanged({
+          mt: isDocsPage ? 2 : 4,
         })
       }
     }
@@ -50,7 +61,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
 
   useEffect(() => {
     if (uiConfig) {
-      setAnnouncementBannerOpen(
+      onAnnouncementBannerOpenChanged(
         uiConfig.announcement.enabled &&
           (!dismissedTimestamp || new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp)),
       )
@@ -85,13 +96,14 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   return (
     <>
       <Banner />
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && (
+        {currentUser && uiConfig && (
           <>
             <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
               page={page}
+              bannerVisible={uiConfig.banner.enabled}
               currentUser={currentUser}
               drawerOpen={open}
               pageTopStyling={pageTopStyling}
@@ -107,30 +119,29 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),
           })}
         >
           <Toolbar />
-          <Box sx={contentTopStyling}>
+          <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
             {isDocsPage ? (
               children
             ) : (
               <>
                 {isCurrentUserLoading && <Loading />}
-                <MessageAlert message={errorMessage} severity='error' />
-                {children}
-                <Copyright sx={{ m: 2 }} />
+                {uiConfig && announcementBannerOpen && (
+                  <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
+                )}
+                <Box paddingTop={4}>
+                  <MessageAlert message={errorMessage} severity='error' />
+                  {children}
+                  <Copyright sx={{ p: 2 }} />
+                </Box>
               </>
             )}
           </Box>
-          {isUiConfigLoading && <Loading />}
-          {uiConfig && announcementBannerOpen && (
-            <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
-          )}
         </Box>
       </Box>
     </>

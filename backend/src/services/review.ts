@@ -6,8 +6,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
-import ReviewModel from '../models/Review.js'
-import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
+import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
@@ -61,7 +60,7 @@ export async function findReviews(
     stages.push({ $unset: ['responses', 'responseCount'] })
   }
 
-  const reviews = await Review.aggregate(stages)
+  const reviews = await ReviewModel.aggregate(stages)
 
   const auths = await authorisation.models(
     user,
@@ -90,7 +89,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
   )
 
   const createReviews = roleEntities.map((roleInfo) => {
-    const review = new Review({
+    const review = new ReviewModel({
       semver: release.semver,
       modelId: model.id,
       kind: ReviewKind.Release,
@@ -122,7 +121,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   )
 
   const createReviews = roleEntities.map((roleInfo) => {
-    const review = new Review({
+    const review = new ReviewModel({
       accessRequestId: accessRequest.id,
       modelId: model.id,
       kind: ReviewKind.Access,
@@ -138,7 +137,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export async function removeAccessRequestReviews(accessRequestId: string, session?: ClientSession | undefined) {
+export async function removeAccessRequestReviews(accessRequestId: string, session?: ClientSession) {
   // This can be improved with a bulk delete function from the soft delete plugin
   const accessRequestReviews = await findReviewsForAccessRequests([accessRequestId])
 
@@ -164,7 +163,7 @@ export async function removeReleaseReviews(
 ): Promise<ReviewDoc[]> {
   // finding and then calling potentially multiple deletes is inefficient but our soft delete
   // plugin doesn't cover bulkDelete
-  const reviews: ReviewDoc[] = await Review.find({
+  const reviews: ReviewDoc[] = await ReviewModel.find({
     modelId,
     semver,
   })
@@ -209,7 +208,7 @@ export async function findReviewForResponse(
   await getModelById(user, modelId)
 
   const review: ReviewDoc = (
-    await Review.aggregate()
+    await ReviewModel.aggregate()
       .match({
         modelId,
         ...reviewIdQuery,
@@ -232,7 +231,7 @@ export async function findReviewForResponse(
 
 //TODO This won't work for response refactor
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
-  return await Review.find({
+  return await ReviewModel.find({
     accessRequestId: accessRequestIds,
   })
 }
@@ -354,10 +353,10 @@ export async function findReviewRoles(schemaId?: string | string[]): Promise<Rev
     }
     if (schemas.length > 0) {
       const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
-      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles }).lean()
+      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
     }
   } else {
-    reviewRoles = await ReviewRoleModel.find().lean()
+    reviewRoles = await ReviewRoleModel.find()
   }
   return reviewRoles
 }
@@ -421,7 +420,7 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
         review.role === newReviewRole.shortName && review.modelId === model.id && review.semver === release.semver,
     )
     if (!Array.isArray(validReviews) || validReviews.length === 0) {
-      const review = new Review({
+      const review = new ReviewModel({
         semver: release.semver,
         modelId: model.id,
         kind: ReviewKind.Release,
@@ -439,7 +438,7 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
         review.accessRequestId === accessRequest.id,
     )
     if (!Array.isArray(validReviews) || validReviews.length === 0) {
-      const review = new Review({
+      const review = new ReviewModel({
         accessRequestId: accessRequest.id,
         modelId: model.id,
         kind: ReviewKind.Access,

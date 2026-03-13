@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { z } from '../../../../lib/zod.js'
 import { getCurrentUserPermissionsByAccessRequest } from '../../../../services/accessRequest.js'
 import { accessRequestUserPermissionsSchema, registerPath } from '../../../../services/specification.js'
 import { AccessRequestUserPermissions } from '../../../../types/types.js'

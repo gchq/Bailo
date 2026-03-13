@@ -24,8 +24,6 @@ export async function execute<T extends any[]>(
   return results
 }
 
-const transactionsNotEnabled = 'Database is not in replica set mode, cannot use transactions'
-
 /**
  * **Transaction Helper**
  *
@@ -40,7 +38,7 @@ export async function useTransaction<T extends any[]>(actions: {
   [K in keyof T]: TransactionCallback<T[K]>
 }): Promise<T> {
   if (!isTransactionsEnabled()) {
-    log.trace(transactionsNotEnabled)
+    log.trace('Not using transactions as they are not enabled in configuration')
     return execute(actions)
   } else {
     return await mongoose.connection.transaction((session) => execute(actions, session))

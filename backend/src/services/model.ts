@@ -2,25 +2,44 @@ import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
+import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
-import Model, { ModelInterface } from '../models/Model.js'
+import peers from '../connectors/peer/index.js'
+import ModelModel, { CollaboratorEntry, EntryKind, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { EntityKind, EntryUserPermissions } from '../types/types.js'
+import { isBailoError } from '../types/error.js'
+import {
+  EntityKind,
+  EntrySearchOptionsParams,
+  EntrySearchResultWithErrors,
+  EntryUserPermissions,
+  MirrorImportLogData,
+} from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
+import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
+import { getFilesByModel, removeFiles } from './file.js'
+import { getInferencesByModel, removeInferences } from './inference.js'
+import log from './log.js'
+import { listModelImages, softDeleteImage } from './registry.js'
+import { deleteReleases, getModelReleases } from './release.js'
+import { findReviews } from './review.js'
 import { getSchemaById } from './schema.js'
+import { dropModelIdFromTokens, getTokensForModel } from './token.js'
+import { getWebhooksByModel } from './webhook.js'
 
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
+
 export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
@@ -40,7 +59,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     }
   }
 
-  let collaborators: CollaboratorEntry[] = []
+  let collaborators: CollaboratorEntry[]
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
     const collaboratorListContainsOwner = modelParams.collaborators.some((collaborator) =>
       collaborator.roles.some((role) => role === 'owner'),
@@ -59,7 +78,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ]
   }
 
-  const model = new Model({
+  const model = new ModelModel({
     ...modelParams,
     id: modelId,
     collaborators,
@@ -80,15 +99,27 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   return model
 }
 
-export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
-  const model = await Model.findOne({
+/**
+ * Get a model by its ID without doing any auth checks.
+ *
+ * @remarks
+ * _Only_ use this function when an auth check would break expected functionality, otherwise use `getModelById`.
+ */
+export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+  const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
   })
 
   if (!model) {
-    throw NotFound(`The requested entry was not found.`, { modelId })
+    throw NotFound('The requested entry was not found.', { modelId })
   }
+
+  return model
+}
+
+export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+  const model = await getModelByIdNoAuth(modelId, kind)
 
   const auth = await authorisation.model(user, model, ModelAction.View)
   if (!auth.success) {
@@ -96,6 +127,116 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   }
 
   return model
+}
+
+export async function removeModel(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
+  const model = await ModelModel.findOne({
+    id: modelId,
+    ...(kind && { kind }),
+  })
+
+  if (!model) {
+    throw NotFound('The requested entry was not found.', { modelId })
+  }
+
+  const auth = await authorisation.model(user, model, ModelAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const [
+    allModelReviews,
+    allModelImages,
+    allModelReleases,
+    allModelTokens,
+    allModelWebhooks,
+    allModelCardRevisions,
+    allModelFiles,
+    allModelInferences,
+    allModelAccessRequests,
+  ] = await Promise.all([
+    findReviews(user, false, undefined, modelId),
+    listModelImages(user, modelId),
+    getModelReleases(user, modelId),
+    getTokensForModel(user, modelId),
+    getWebhooksByModel(user, modelId),
+    getModelCardRevisions(user, modelId),
+    getFilesByModel(user, modelId),
+    getInferencesByModel(user, modelId),
+    getAccessRequestsByModel(user, modelId),
+  ])
+
+  return await useTransaction([
+    // Initial concurrency has no overlapping Documents.
+    (session) =>
+      Promise.all([
+        // ModelCardRevision
+        Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
+        // Review
+        Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
+        // Token
+        dropModelIdFromTokens(user, modelId, allModelTokens, session),
+        // Webhook
+        Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
+        // Inference
+        removeInferences(
+          user,
+          allModelInferences.flatMap((inference) => ({
+            modelId: inference.modelId,
+            image: inference.image,
+            tag: inference.tag,
+          })),
+          session,
+        ),
+      ]),
+    // Only delete Releases after deleting Reviews as deleteReleases modifies Release, Review and Response Documents.
+    (session) =>
+      deleteReleases(
+        user,
+        modelId,
+        allModelReleases.flatMap((release) => release.semver),
+        true,
+        session,
+      ),
+    (session) =>
+      Promise.all([
+        // Only delete AccessRequests after deleting Releases as removeAccessRequests modifies AccessRequest, Review & Response Documents.
+        // Reviews are already deleted but Responses are only partially deleted and may overlap so cannot be concurrent.
+        removeAccessRequests(
+          user,
+          allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
+          session,
+        ),
+        // Only delete Files after deleting Releases as removeFiles modifies File, Scan & Release Documents.
+        removeFiles(
+          user,
+          modelId,
+          allModelFiles.flatMap((file) => file.id),
+          true,
+          undefined,
+          session,
+        ),
+        // Only delete Images after deleting Releases as softDeleteImage modifies Releases.
+        Promise.all(
+          allModelImages.flatMap((modelImage) =>
+            modelImage.tags.map((tag) =>
+              softDeleteImage(
+                user,
+                {
+                  repository: modelImage.repository,
+                  name: modelImage.name,
+                  tag,
+                },
+                true,
+                session,
+              ),
+            ),
+          ),
+        ),
+      ]),
+    // Finally, delete the Model
+    (session) => model.delete(session),
+  ])
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -113,56 +254,119 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 
 export async function searchModels(
   user: UserInterface,
-  kind: EntryKindKeys,
-  libraries: Array<string>,
-  organisations: Array<string>,
-  states: Array<string>,
-  filters: Array<string>,
-  search: string,
-  task?: string,
-  allowTemplating?: boolean,
-  schemaId?: string,
-): Promise<Array<ModelInterface>> {
+  opts: EntrySearchOptionsParams,
+): Promise<EntrySearchResultWithErrors> {
+  const results: EntrySearchResultWithErrors = {
+    models: [],
+  }
+
+  const localModelsPromise = searchLocalModels(user, opts)
+
+  localModelsPromise.catch((e) => {
+    if (!results.errors) {
+      results.errors = {}
+    }
+    if (isBailoError(e)) {
+      results.errors['local'] = e
+    } else {
+      results.errors['local'] = InternalError('Search error', { err: e })
+    }
+  })
+
+  const processLocalModels = localModelsPromise.then((localModels) => {
+    results.models.push(
+      ...localModels.map((model) => ({
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        tags: model.tags,
+        kind: model.kind,
+        organisation: model.organisation,
+        state: model.state,
+        collaborators: model.collaborators,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        sourceModelId: model.settings.mirror.sourceModelId,
+        visibility: model.visibility,
+      })),
+    )
+  })
+
+  const promises: Promise<any>[] = [processLocalModels]
+
+  if (opts.peers && opts.peers.length > 0) {
+    const remotePromise = peers.searchEntries(user, opts)
+
+    const processRemoteModels = remotePromise.then((remoteResponses) => {
+      for (const response of remoteResponses.flat()) {
+        if (response.models) {
+          results.models.push(...response.models)
+        }
+        if (response.errors) {
+          for (const [peerId, error] of Object.entries(response.errors)) {
+            if (!results.errors) {
+              results.errors = {}
+            }
+            results.errors[peerId] = error
+            results.errors[peerId].message = error.message
+          }
+        }
+      }
+    })
+    promises.push(processRemoteModels)
+  }
+
+  await Promise.all(promises)
+
+  return results
+}
+
+async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsParams): Promise<Array<ModelInterface>> {
   const query: any = {}
 
-  if (kind) {
-    query['kind'] = { $all: kind }
-  }
-
-  if (organisations.length) {
-    query.organisation = { $in: organisations }
-  }
-
-  if (states.length) {
-    query.state = { $in: states }
-  }
-
-  if (libraries.length) {
-    query.tags = { $all: libraries }
-  }
-
-  if (task) {
-    if (query.tags) {
-      query.tags.$all.push(task)
-    } else {
-      query.tags = { $all: [task] }
+  if (opts.adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
     }
   }
 
-  if (search) {
-    query.$text = { $search: search }
+  if (opts.kind) {
+    query['kind'] = { $all: opts.kind }
   }
 
-  if (schemaId) {
-    query['card.schemaId'] = { $all: schemaId }
+  if (opts.organisations?.length) {
+    query.organisation = { $in: opts.organisations }
   }
 
-  if (allowTemplating) {
+  if (opts.states?.length) {
+    query.state = { $in: opts.states }
+  }
+
+  if (opts.libraries?.length) {
+    query.tags = { $all: opts.libraries }
+  }
+
+  if (opts.task) {
+    if (query.tags) {
+      query.tags.$all.push(opts.task)
+    } else {
+      query.tags = { $all: [opts.task] }
+    }
+  }
+
+  if (opts.schemaId) {
+    query['card.schemaId'] = { $all: opts.schemaId }
+  }
+
+  if (opts.allowTemplating) {
     query['settings.allowTemplating'] = true
   }
 
-  if (filters.length > 0) {
-    if (filters.includes('mine')) {
+  if (opts.filters && opts.filters.length > 0) {
+    if (opts.filters?.includes('mine')) {
       query.collaborators = {
         $elemMatch: {
           entity: { $in: await authentication.getEntities(user) },
@@ -171,26 +375,47 @@ export async function searchModels(
     } else {
       query.collaborators = {
         $elemMatch: {
-          roles: { $elemMatch: { $in: filters } },
+          roles: { $elemMatch: { $in: opts.filters } },
           entity: { $in: await authentication.getEntities(user) },
         },
       }
     }
   }
 
-  let cursor = ModelModel
-    // Find only matching documents
-    .find(query)
-
-  if (!search) {
-    // Sort by last updated
-    cursor = cursor.sort({ updatedAt: -1 })
-  } else {
-    // Sort by text search
-    cursor = cursor.sort({ score: { $meta: 'textScore' } })
+  const projection = {
+    settings: false,
+    card: false,
+    deleted: false,
+    _id: false,
+    __v: false,
+    deletedBy: false,
+    deletedAt: false,
   }
 
-  const results = await cursor
+  // Always do a partial match on the model name
+  let results = await ModelModel.find(
+    opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query,
+    projection,
+  ).sort({
+    updatedAt: -1,
+  })
+
+  //Include all full text matches
+  if (opts.search && !opts.titleOnly) {
+    let fullTextOnlyResults = await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+      score: { $meta: 'textScore' },
+    })
+    // Remove duplicate items
+    const mask = new Set(results.map((model) => model.id))
+
+    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model.id))
+    results = results.concat(fullTextOnlyResults)
+  }
+
+  //Auth already checked, so just need to check if they require admin access
+  if (opts.adminAccess) {
+    return results
+  }
   const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
 }
@@ -199,6 +424,7 @@ export async function getModelCard(
   user: UserInterface,
   modelId: string,
   version: number | GetModelCardVersionOptionsKeys,
+  mirrored: boolean = false,
 ) {
   if (version === GetModelCardVersionOptions.Latest) {
     const card = (await getModelById(user, modelId)).card
@@ -209,12 +435,17 @@ export async function getModelCard(
 
     return card
   } else {
-    return getModelCardRevision(user, modelId, version)
+    return getModelCardRevision(user, modelId, version, mirrored)
   }
 }
 
-export async function getModelCardRevision(user: UserInterface, modelId: string, version: number) {
-  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
+export async function getModelCardRevision(
+  user: UserInterface,
+  modelId: string,
+  version: number,
+  mirrored: boolean = false,
+) {
+  const modelCard = await ModelCardRevisionModel.findOne({ modelId, version, mirrored })
   const model = await getModelById(user, modelId)
 
   if (!modelCard) {
@@ -277,6 +508,7 @@ export async function _setModelCard(
 
     version,
     metadata,
+    mirrored: false,
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
@@ -328,7 +560,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (modelDiff.settings?.mirror?.sourceModelId) {
     throw BadReq('Cannot change standard model to be a mirrored model.')
   }
-  if (model.settings.mirror.sourceModelId && modelDiff.settings?.mirror?.destinationModelId) {
+  if (EntryKind.MirroredModel === model.kind && modelDiff.settings?.mirror?.destinationModelId) {
     throw BadReq('Cannot set a destination model ID for a mirrored model.')
   }
   if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
@@ -356,7 +588,9 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (!recheckAuth.success) {
     throw Forbidden(recheckAuth.info, { userDn: user.dn })
   }
+
   await model.save()
+  log.debug({ updates: modelDiff, modelId }, 'Model updated')
 
   return model
 }
@@ -490,17 +724,17 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     throw error
   }
 
-  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
-    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
-    modelCardRevision,
-    {
-      upsert: true,
-    },
-  )
+  const foundModelCardRevision = await ModelCardRevisionModel.findOne({
+    modelId: modelCardRevision.modelId,
+    version: modelCardRevision.version,
+    mirrored: true,
+  })
 
   if (!foundModelCardRevision && modelCardRevision.version !== 1) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
     // Ignore model cards with a version number of 1 as these will always be blank.
+    const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
+    await newModelCardRevision.save()
     return modelCardRevision
   }
 }
@@ -511,16 +745,19 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
  * Do not expose this functionality to users.
  */
 export async function setLatestImportedModelCard(modelId: string) {
-  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId, mirrored: true }, undefined, {
+    sort: { version: -1 },
+  })
+
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
   }
 
-  const updatedModel = await ModelModel.findOneAndUpdate(
-    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
-    { $set: { card: latestModelCard } },
-    { returnOriginal: false },
-  )
+  const updatedModel = await ModelModel.findOne({
+    id: modelId,
+    'settings.mirror.sourceModelId': { $exists: true, $ne: '' },
+  })
+
   if (!updatedModel) {
     throw InternalError('Unable to set latest model card of mirrored model.', {
       modelId,
@@ -528,24 +765,40 @@ export async function setLatestImportedModelCard(modelId: string) {
     })
   }
 
+  updatedModel.mirroredCard = { ...latestModelCard }
+  if (updatedModel.card === undefined || updatedModel.card.metadata === undefined) {
+    const newCard = new ModelCardRevisionModel({
+      modelId: updatedModel.id,
+      schemaId: latestModelCard.schemaId,
+      version: 1,
+      mirrored: false,
+      metadata: {},
+    })
+    updatedModel.card = newCard
+  }
+  await updatedModel.save()
   return updatedModel
 }
 
-export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, importId: string) {
-  const model = await Model.findOne({
+export async function validateMirroredModel(
+  mirroredModelId: string,
+  sourceModelId: string,
+  logData: MirrorImportLogData,
+) {
+  const model = await ModelModel.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
 
   if (!model) {
-    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId, importId })
+    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId, ...logData })
   }
 
   if (model.settings.mirror.sourceModelId !== sourceModelId) {
     throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
       sourceModelId: model.settings.mirror.sourceModelId,
       importedModelId: sourceModelId,
-      importId,
+      ...logData,
     })
   }
 
@@ -616,4 +869,9 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
     .filter((collaborator) => entities.includes(collaborator.entity))
     .map((collaborator) => collaborator.roles)
     .flat()
+}
+
+export async function popularTagsForEntries() {
+  const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  return tags.map((tag) => tag._id) as string[]
 }

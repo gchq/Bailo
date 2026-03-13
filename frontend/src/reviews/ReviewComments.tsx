@@ -94,12 +94,12 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     return decisionsAndComments.sort(sortByCreatedAtAscending)
   }, [reviews, responses, release, accessRequest])
 
-  const ResponseListItem = memoize(({ data, index }) => {
-    if (data[index].kind === ResponseKind.Review) {
+  const ResponseListItem = memoize(({ data }) => {
+    if (data.kind === ResponseKind.Review) {
       return (
         <ReviewDecisionDisplay
-          key={data[index]._id}
-          response={data[index]}
+          key={data._id}
+          response={data}
           modelId={modelId}
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           currentUser={currentUser}
@@ -109,8 +109,8 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     } else {
       return (
         <ReviewCommentDisplay
-          key={data[index]._id}
-          response={data[index]}
+          key={data._id}
+          response={data}
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           currentUser={currentUser}
           mutateResponses={mutateResponses}

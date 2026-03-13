@@ -15,6 +15,28 @@ const theme = createTheme({
       main: red.A400,
     },
   },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          '&:hover': {
+            backgroundColor: '#ececec',
+          },
+        },
+      },
+    },
+  },
 })
 
 export default theme

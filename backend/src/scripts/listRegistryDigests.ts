@@ -3,12 +3,13 @@ import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 async function script() {
   await connectToMongoose()
 
   const registry = config.registry.connection.internal
-  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const authorisation = `Bearer ${token}`
   const agent = getHttpsUndiciAgent({
     connect: { rejectUnauthorized: !config.registry.connection.insecure },
@@ -24,7 +25,7 @@ async function script() {
   await Promise.all(
     catalog['repositories'].map(async (repositoryName) => {
       const repositoryToken = await getAccessToken({ dn: 'user' }, [
-        { type: 'repository', class: '', name: repositoryName, actions: ['*'] },
+        { type: 'repository', name: repositoryName, actions: ['*'] },
       ])
       const repositoryAuthorisation = `Bearer ${repositoryToken}`
 
@@ -40,7 +41,7 @@ async function script() {
           const repositoryDigest = await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => {

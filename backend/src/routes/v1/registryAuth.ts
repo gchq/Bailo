@@ -9,16 +9,20 @@ import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 import audit from '../../connectors/audit/index.js'
 import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../models/Model.js'
+import { EntryKind, EntryKindKeys, ModelDoc } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
 import config from '../../utils/config.js'
+import { getKid, getPublicKey } from '../../utils/registryUtils.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
 
 let adminToken: string | undefined
+
+// Similar to the MongoDB soft-delete plugin, specify the prefix for any deleted image names
+export const softDeletePrefix = 'soft_deleted/'
 
 export async function getAdminToken() {
   if (!adminToken) {
@@ -35,53 +39,6 @@ export async function getAdminToken() {
 
 async function getPrivateKey() {
   return readFile(config.app.privateKey, { encoding: 'utf-8' })
-}
-
-async function getPublicKey() {
-  return readFile(config.app.publicKey, { encoding: 'utf-8' })
-}
-
-function getBit(buffer: Buffer, index: number) {
-  const byte = ~~(index / 8)
-  const bit = index % 8
-  const idByte = buffer[byte]
-  return Number((idByte & (2 ** (7 - bit))) !== 0)
-}
-
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-function formatKid(keyBuffer: Buffer) {
-  const bitLength = keyBuffer.length * 8
-
-  if (bitLength % 40 !== 0) {
-    throw new Error('Invalid bitLength provided, expected multiple of 40')
-  }
-
-  let output = ''
-  for (let i = 0; i < bitLength; i += 5) {
-    let idx = 0
-    for (let j = 0; j < 5; j += 1) {
-      idx <<= 1
-      idx += getBit(keyBuffer, i + j)
-    }
-    output += alphabet[idx]
-  }
-
-  const match = output.match(/.{1,4}/g)
-  if (match === null) {
-    throw new Error('KeyBuffer format failed, match did not find any sections.')
-  }
-
-  return match.join(':')
-}
-
-export async function getKid(cert?: X509Certificate) {
-  if (!cert) {
-    cert = new X509Certificate(await getPublicKey())
-  }
-  const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha256').update(der).digest().slice(0, 30)
-
-  return formatKid(hash)
 }
 
 async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {
@@ -158,19 +115,45 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+export async function checkAccess(access: Access, user: UserInterface, admin?: boolean): Promise<AuthResponse> {
+  if (access.name.startsWith(softDeletePrefix)) {
+    const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
+    log.warn({ userDn: user.dn, access }, info)
+    return {
+      id: access.name,
+      success: false,
+      info,
+    }
+  }
+
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
     model = await getModelById(user, modelId)
   } catch (e) {
-    log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
-    // bad model id?
-    return { id: modelId, success: false, info: 'Bad modelId provided' }
+    log.warn({ userDn: user.dn, access, e }, 'ModelId not found.')
+    return { id: modelId, success: false, info: 'ModelId not found.' }
   }
 
-  const auth = await authorisation.image(user, model, access)
-  return auth
+  // Check for disallowed entry types (i.e. non model types)
+  if (!([EntryKind.Model, EntryKind.MirroredModel] as EntryKindKeys[]).includes(model.kind)) {
+    return { id: modelId, success: false, info: `No registry use allowed on ${model.kind}.` }
+  }
+
+  // Further restrict mirrored model actions
+  if (model.kind == EntryKind.MirroredModel && !isReadOnlyAccessRequestActions(access.actions, true)) {
+    return {
+      id: modelId,
+      success: false,
+      info: 'You are not allowed to complete any actions beyond `pull` or `list` on an image associated with a mirrored model.',
+    }
+  }
+
+  return await authorisation.image(user, model, access, admin)
+}
+
+function isReadOnlyAccessRequestActions(actions: Action[], includeWildCard: boolean = false) {
+  return actions.some((action) => (['pull', 'list', ...(includeWildCard ? ['*'] : [])] as Action[]).includes(action))
 }
 
 export const getDockerRegistryAuth = [
@@ -223,7 +206,7 @@ export const getDockerRegistryAuth = [
       return
     }
 
-    let scopes: Array<string> = []
+    let scopes: Array<string>
 
     if (Array.isArray(scope)) {
       scopes = scope as Array<string>
@@ -233,17 +216,42 @@ export const getDockerRegistryAuth = [
       throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
-    const accesses = scopes.map(generateAccess)
+    const requestedAccesses = scopes.map(generateAccess)
+    const grantedAccesses: Access[] = []
 
-    for (const access of accesses) {
-      const authResult = await checkAccess(access, user)
-      if (!admin && !authResult.success) {
+    for (const access of requestedAccesses) {
+      const authResult = await checkAccess(access, user, admin)
+      if (!authResult.success) {
+        // Ignore unauthorised read-only scopes (containerd cross-mount)
+        if (isReadOnlyAccessRequestActions(access.actions)) {
+          rlog.debug({ access }, 'Ignoring unauthorised scope.')
+          continue
+        }
+
         throw Forbidden({ access }, authResult.info, rlog)
       }
+
+      grantedAccesses.push({
+        ...access,
+        actions: access.actions,
+      })
     }
 
-    const accessToken = await getAccessToken(user, accesses)
-    rlog.trace('Successfully generated access token')
+    // Enforce non-empty write authorisation
+    if (
+      requestedAccesses.some((a) => a.actions.includes('push')) &&
+      !grantedAccesses.some((a) => a.actions.includes('push'))
+    ) {
+      throw Forbidden({ requestedAccesses }, 'No authorised push scopes.', rlog)
+    }
+
+    // Enforce non-empty authorisation
+    if (grantedAccesses.length === 0) {
+      throw Forbidden({ requestedAccesses }, 'Requested image is not accessible - no authorised scopes.', rlog)
+    }
+
+    const accessToken = await getAccessToken(user, grantedAccesses)
+    rlog.trace('Successfully generated access token.')
 
     res.json({ token: accessToken })
   },

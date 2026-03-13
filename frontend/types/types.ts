@@ -49,6 +49,8 @@ export interface UiConfig {
   modelMirror: {
     import: {
       enabled: boolean
+      additionalInfoHeading: string
+      originalAnswerHeading: string
     }
     export: {
       enabled: boolean
@@ -89,8 +91,8 @@ export interface FileInterface {
 
   complete: boolean
 
-  // Older files may not have AV run against them
-  avScan?: AvScanResult[]
+  // Older files may not have scans run against them
+  scanResults?: AvScanResult[]
 
   tags: string[]
 
@@ -98,20 +100,31 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export type FileWithScanResultsInterface = FileInterface & { avScan: ScanResultInterface[]; id: string }
+export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanResultInterface[]; id: string }
 
 export interface ScanResultInterface {
   _id: string
   state: ScanStateKeys
   scannerVersion?: string
-  isInfected?: boolean
-  viruses?: Array<string>
+  summary?: Array<ModelScanSummary | ClamAVScanSummary>
   toolName: string
   lastRunAt: string
 
   createdAt: Date
   updatedAt: Date
 }
+
+export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescription: string }
+export type ClamAVScanSummary = { virus: string }
+
+export const SeverityLevel = {
+  UNKNOWN: 'unknown',
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+} as const
+export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
 export const ScanState = {
   NotScanned: 'notScanned',
@@ -218,6 +231,7 @@ export interface EntryCardRevisionInterface {
   createdBy: string
   createdAt: string
   updatedAt: string
+  mirrored: boolean
 }
 
 export const RoleKind = {
@@ -378,6 +392,7 @@ export interface StepNoRender {
   uiSchema?: UiSchema
 
   state: any
+  mirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>
@@ -400,12 +415,14 @@ export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVis
 export const EntryCardKindLabel = {
   model: 'model card',
   'data-card': 'data card',
+  'mirrored-model': 'mirrored model',
 } as const
 export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
 
 export const EntryCardKind = {
   model: 'model-card',
   'data-card': 'data-card',
+  'mirrored-model': 'mirrored-model',
 } as const
 export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
 
@@ -413,6 +430,7 @@ export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  mirrored: boolean
   metadata: unknown
 }
 
@@ -431,18 +449,13 @@ export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindL
 export const EntryKind = {
   MODEL: 'model',
   DATA_CARD: 'data-card',
+  MIRRORED_MODEL: 'mirrored-model',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
-  return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
+  return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD || value === EntryKind.MIRRORED_MODEL)
 }
-
-export const CreateEntryKind = {
-  ...EntryKind,
-  MIRRORED_MODEL: 'mirrored-model',
-} as const
-export type CreateEntryKindKeys = (typeof CreateEntryKind)[keyof typeof CreateEntryKind]
 
 export interface EntryInterface {
   id: string
@@ -461,6 +474,7 @@ export interface EntryInterface {
     }
   }
   card: EntryCardInterface
+  mirroredCard?: EntryCardInterface
   visibility: EntryVisibilityKeys
   collaborators: CollaboratorEntry[]
   createdBy: string
@@ -659,10 +673,67 @@ export interface CombinedSchema {
 
 export interface SchemaMigrationInterface {
   name: string
+  id: string
   description?: string
   questionMigrations: QuestionMigration[]
+  draft: boolean
   sourceSchema: string
   targetSchema: string
   createdAt: string
   updatedAt: string
+}
+
+export const FederationState = {
+  DISABLED: 'disabled',
+  READ_ONLY: 'readOnly',
+  ENABLED: 'enabled',
+} as const
+
+export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
+
+export const PeerKind = {
+  Bailo: 'bailo',
+  HuggingFaceHub: 'huggingfacehub',
+} as const
+export type PeerKindKeys = (typeof PeerKind)[keyof typeof PeerKind]
+
+export interface RemoteFederationConfig {
+  state: FederationStateKeys
+  baseUrl: string
+  label: string
+  kind: PeerKindKeys
+  extra: {
+    [key: string]: any
+  }
+}
+
+export type FederationStatus = {
+  state: FederationStateKeys
+  id?: string
+}
+
+export type SystemStatus = {
+  ping: 'pong' | ''
+  federation?: FederationStatus
+  error?: BailoError
+}
+
+export type PeerConfigStatus = {
+  config: RemoteFederationConfig
+  status: SystemStatus
+}
+
+// For completion stats on the model info page
+export interface FormStats {
+  totalQuestions: number
+  totalAnswers: number
+  percentageQuestionsComplete: number
+  formCompleted: boolean
+}
+
+// For completion stats on the model info page
+export interface ModelFormStats extends FormStats {
+  totalPages: number
+  pagesCompleted: number
+  percentagePagesComplete: number
 }

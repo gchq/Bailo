@@ -2,7 +2,44 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.1.2 30/09/2025
+## 3.6.0 - 19/02/2026
+
+### Changes
+
+- `MirroredModel.update_model_card` helper method will patch additional information to the model card.
+
+### Breaking Changes
+
+- `MirroredModel.model_card` and `MirroredModel.model_card_version` implement 'card' and 'additional_information' keys.
+
+## 3.5.0 - 03/02/2026
+
+- Add additional params to `Client.get_models` and callers `Model.search` & `MirroredModel.search`
+
+## 3.4.0 - 14/01/2026
+
+### Breaking Changes
+
+- Change minimum supported Python version to 3.10 (was 3.9).
+
+### Changes
+
+- Change maximum supported Python version to 3.14 (was 3.13).
+
+## 3.3.0 - 28/11/2025
+
+- Add `Client.delete_model` to core and `Entry.delete` helper (and inherited classes `Model`, `MirroredModel` and
+  `Datacard`)
+
+## 3.2.1 - 30/10/2025
+
+- Add `tags` property to `Entry` (and inherited classes `Model`, `MirroredModel` and `Datacard`)
+
+## 3.2.0 29/10/2025
+
+- Added new `MirroredModel` class.
+
+## 3.1.2 - 30/09/2025
 
 - Fix broken `Client.put_file_scan` method.
 - Update package dependencies.

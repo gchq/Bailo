@@ -1,14 +1,10 @@
 import { Document, model, Schema } from 'mongoose'
 
-export const SchemaMigrationKind = {
-  Move: 'move',
-  Delete: 'delete',
-} as const
-export type SchemaMigrationKindKeys = (typeof SchemaMigrationKind)[keyof typeof SchemaMigrationKind]
+import { SchemaMigrationKind, SchemaMigrationKindKeys } from '../types/enums.js'
 
 export interface QuestionMigration {
   id: string
-  kind: string
+  kind: SchemaMigrationKindKeys
   sourcePath: string
   targetPath?: string
   propertyType: string
@@ -16,10 +12,13 @@ export interface QuestionMigration {
 
 export interface SchemaMigrationInterface {
   name: string
+  id: string
   description?: string
 
   sourceSchema: string
   targetSchema: string
+
+  draft: boolean
 
   questionMigrations: QuestionMigration[]
 
@@ -31,11 +30,14 @@ export type SchemaMigrationDoc = SchemaMigrationInterface & Document<any, any, S
 
 const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
   {
-    name: { type: String, unique: true, required: true },
+    name: { type: String, required: true },
+    id: { type: String, unique: true, required: true },
     description: { type: String, required: false, default: '' },
 
     sourceSchema: { type: String, required: true },
     targetSchema: { type: String, required: true },
+
+    draft: { type: Boolean, required: true },
 
     questionMigrations: [
       {

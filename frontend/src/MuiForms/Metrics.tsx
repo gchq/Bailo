@@ -11,11 +11,13 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FormContextType } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import MetricItem from 'src/MuiForms/MetricItem'
+import { getMirroredState } from 'utils/formUtils'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -34,20 +36,27 @@ interface MetricsProps {
   onChange: (newValue: MetricValue[]) => void
   value: MetricValue[]
   label: string
-  formContext?: FormContextType
+  id: string
+  registry?: Registry
   required?: boolean
+  schema: RJSFSchema
 }
 
-export default function Metrics({ onChange, value, label, formContext, required }: MetricsProps) {
+export default function Metrics({ onChange, value, label, id, registry, required, schema }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
+
   const theme = useTheme()
+
+  const onSetMetricsWithIds = useEffectEvent((newMetrics: MetricValueWithId[]) => {
+    setMetricsWithIds(newMetrics)
+  })
 
   useEffect(() => {
     const updatedMetricsWithIds = value.map((metric) => ({
       ...metric,
       id: uuidv4(),
     }))
-    setMetricsWithIds(updatedMetricsWithIds)
+    onSetMetricsWithIds(updatedMetricsWithIds)
   }, [value])
 
   const handleChange = useCallback(
@@ -62,6 +71,7 @@ export default function Metrics({ onChange, value, label, formContext, required 
       const updatedMetricArray = _.cloneDeep(metricsWithIds)
       const index = metricsWithIds.findIndex((metric) => metric.id === updatedMetricItem.id)
       updatedMetricArray[index] = updatedMetricItem
+      setMetricsWithIds(updatedMetricArray)
       onChange(
         updatedMetricArray.map((metric) => ({
           name: metric.name,
@@ -87,54 +97,79 @@ export default function Metrics({ onChange, value, label, formContext, required 
     ))
   }, [handleDeleteItem, handleMetricItemOnChange, metricsWithIds])
 
-  const metricsTableRows = useMemo(() => {
-    return value.map((metric) => (
+  const metricsTableRows = (metrics) => {
+    if (!metrics) {
+      return undefined
+    }
+    return metrics.map((metric) => (
       <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-        <TableCell component='th' scope='row'>
+        <TableCell
+          component='th'
+          scope='row'
+          sx={{
+            wordBreak: 'break-word',
+            maxWidth: '500px',
+          }}
+        >
           {metric.name}
         </TableCell>
         <TableCell align='right'>{metric.value}</TableCell>
       </TableRow>
     ))
-  }, [value])
+  }
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <>
-      {formContext && formContext.editMode && (
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={metricsTableRows(mirroredState)}
+      display={registry.formContext.mirroredModel && value !== undefined && value.length > 0}
+      label={label}
+      required={required}
+      id={id}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
+    >
+      {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Stack spacing={2}>{metricItems}</Stack>
           <Button onClick={() => handleChange([...value, { name: '', value: 0 }])} aria-label='add metric button'>
             Add item
           </Button>
         </Stack>
       )}
-      {formContext && !formContext.editMode && (
+      {registry.formContext && !registry.formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table sx={{ maxWidth: 'sm' }} size='small'>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Metric name</TableCell>
-                  <TableCell align='right'>Value</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>{metricsTableRows}</TableBody>
-            </Table>
-          </TableContainer>
+          {!registry.formContext.mirroredModel && value.length === 0 && (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+          {value.length > 0 && (
+            <TableContainer component={Paper}>
+              <Table sx={{ maxWidth: 'xs' }} size='small'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Metric name</TableCell>
+                    <TableCell align='right'>Value</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>{metricsTableRows(value)}</TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

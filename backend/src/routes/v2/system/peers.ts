@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import peers from '../../../connectors/peer/index.js'
+import { z } from '../../../lib/zod.js'
 import { peersConfigStatusSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -32,10 +32,9 @@ interface GetPeerStatusResponse {
 export const getPeerStatus = [
   async (req: Request, res: Response<GetPeerStatusResponse>): Promise<void> => {
     const _ = parse(req, getPeerStatusSchema)
-    const peersWrapper = await peers()
 
     res.json({
-      peers: Object.fromEntries(await peersWrapper.status()),
+      peers: Object.fromEntries(await peers.status()),
     })
   },
 ]

@@ -1,14 +1,13 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+vi.unmock('../../../../src/models/AccessRequest.js')
 import AccessRequestModel from '../../../../src/models/AccessRequest.js'
 import { getAccessRequestSchema } from '../../../../src/routes/v2/model/accessRequest/getAccessRequest.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 import { testAccessRequest } from '../../../testUtils/testModels.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
-vi.mock('../../../../src/connectors/authorisation/index.js')
 
 const accessRequestMock = vi.hoisted(() => {
   return {

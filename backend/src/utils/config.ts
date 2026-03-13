@@ -1,17 +1,21 @@
 import { AgentOptions } from 'node:https'
 
-import bunyan from 'bunyan'
+import { ResponseChecksumValidation } from '@aws-sdk/middleware-flexible-checksums'
+import { Provider } from '@aws-sdk/types'
 import _config from 'config'
 import grant from 'grant'
+import { LevelWithSilentOrString } from 'pino'
 
+import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
-import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
+
+export type TransportOption = 'smtp' | 'aws'
 
 export interface Config {
   api: {
@@ -46,8 +50,8 @@ export interface Config {
       kind: AuditKindKeys
     }
 
-    fileScanners: {
-      kinds: FileScanKindKeys[]
+    artefactScanners: {
+      kinds: ArtefactScanKindKeys[]
       retryDelayInMinutes: number
       maxInitRetries: number
       initRetryDelay: number
@@ -57,11 +61,13 @@ export interface Config {
   federation: {
     state: FederationStateKeys
     id: string
-    peers: Map<string, RemoteFederationConfig>
+    isEscalationEnabled?: boolean
+    peers: Record<string, RemoteFederationConfig>
   }
 
   smtp: {
     enabled: boolean
+    transporter: TransportOption
 
     connection: {
       host: string
@@ -79,8 +85,13 @@ export interface Config {
     from: string
   }
 
+  ses: {
+    endpoint: string
+    region: string
+  }
+
   log: {
-    level: bunyan.LogLevel
+    level: LevelWithSilentOrString
   }
 
   s3: {
@@ -93,8 +104,11 @@ export interface Config {
     region: string
     forcePathStyle: boolean
     rejectUnauthorized: boolean
+    responseChecksumValidation: ResponseChecksumValidation | Provider<ResponseChecksumValidation>
 
     automaticallyCreateBuckets: boolean
+
+    multipartChunkSize: number
 
     buckets: {
       uploads: string
@@ -156,14 +170,14 @@ export interface Config {
     debug: boolean
   }
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       concurrency: number
       host: string
       port: number
     }
 
-    modelscan: {
+    artefactscan: {
       concurrency: number
       protocol: string
       host: string
@@ -172,6 +186,8 @@ export interface Config {
   }
 
   modelMirror: {
+    metadataFile: string
+    contentDirectory: string
     export: {
       concurrency: number
       maxSize: number
@@ -195,5 +211,5 @@ export interface Config {
   }
 }
 
-const config: Config = _config.util.toObject()
+const config = _config.util.toObject(_config)
 export default deepFreeze(config) as Config

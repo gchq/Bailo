@@ -15,7 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { patchSchema } from 'actions/schema'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -25,7 +25,7 @@ import { plural } from 'utils/stringUtils'
 
 interface UpdateReviewRolesForSchemaDialogProps {
   open: boolean
-  onClose: (value: boolean) => void
+  onClose: () => void
   schema: SchemaInterface
 }
 
@@ -43,9 +43,13 @@ export default function UpdateReviewRolesForSchemaDialog({
 
   const theme = useTheme()
 
+  const onSetCheckedEvent = useEffectEvent((newReviewRoles: string[]) => {
+    setChecked(newReviewRoles)
+  })
+
   useEffect(() => {
     if (schema) {
-      setChecked(schema.reviewRoles)
+      onSetCheckedEvent(schema.reviewRoles)
     }
   }, [schema])
 
@@ -73,7 +77,7 @@ export default function UpdateReviewRolesForSchemaDialog({
 
   const handleOnClose = () => {
     setChecked(schema.reviewRoles)
-    onClose(false)
+    onClose()
   }
 
   const handleOpenDialog = () => {
@@ -102,7 +106,7 @@ export default function UpdateReviewRolesForSchemaDialog({
                 checked={checked.includes(role.shortName)}
                 tabIndex={-1}
                 disableRipple
-                slotProps={{ input: { 'aria-labelledby': role.shortName } }}
+                slotProps={{ input: { 'aria-label': role.shortName } }}
               />
             </ListItemIcon>
             <ListItemText primary={role.name} secondary={role.description} />

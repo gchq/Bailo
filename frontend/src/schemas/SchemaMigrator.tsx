@@ -1,13 +1,17 @@
 import { Close, ExpandMore } from '@mui/icons-material'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Button,
+  ButtonGroup,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
+  ListItemText,
+  Menu,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -16,17 +20,24 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
-import { postSchemaMigration } from 'actions/schemaMigration'
-import { useRouter } from 'next/router'
-import { useCallback, useMemo, useState } from 'react'
+import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { CombinedSchema, QuestionMigration } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
+import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {
   sourceSchema: CombinedSchema
   targetSchema: CombinedSchema
+  questionMigrations: QuestionMigration[]
+  setQuestionMigrations: Dispatch<SetStateAction<QuestionMigration[]>>
+  handleSubmitMigrationPlan: (draft: boolean) => void
+  submitErrorText: string
+  migrationName: string
+  setMigrationName: Dispatch<SetStateAction<string>>
+  migrationDescription: string
+  setMigrationDescription: Dispatch<SetStateAction<string>>
 }
 
 export const MigrationKind = {
@@ -35,26 +46,45 @@ export const MigrationKind = {
 } as const
 export type MigrationKindKeys = (typeof MigrationKind)[keyof typeof MigrationKind]
 
-export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMigratorProps) {
+export default function SchemaMigrator({
+  sourceSchema,
+  targetSchema,
+  questionMigrations,
+  setQuestionMigrations,
+  handleSubmitMigrationPlan,
+  submitErrorText = '',
+  migrationName,
+  setMigrationName,
+  migrationDescription,
+  setMigrationDescription,
+}: SchemaMigratorProps) {
   const [sourceSchemaQuestion, setSourceSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [targetSchemaQuestion, setTargetSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
-  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
   const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKindKeys>(MigrationKind.MOVE)
   const [actionErrorText, setActionErrorText] = useState('')
-  const [submitErrorText, setSubmitErrorText] = useState('')
+  const [draft, setDraft] = useState(false)
+
   const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
-  const [migrationName, setMigrationName] = useState('')
-  const [migrationDescription, setMigrationDescription] = useState('')
 
   const theme = useTheme()
-  const router = useRouter()
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(menuAnchorEl)
+
+  const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setMenuAnchorEl(null)
+  }
 
   const handleRemoveActionItem = useCallback(
     (action: QuestionMigration) => {
       setQuestionMigrations(questionMigrations.filter((questionMigration) => questionMigration.id !== action.id))
     },
-    [questionMigrations],
+    [questionMigrations, setQuestionMigrations],
   )
 
   const actionsList = useMemo(() => {
@@ -73,7 +103,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Close color='error' />
               </IconButton>
             </Tooltip>
-            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
+            <Typography sx={{ overflow: 'hidden', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> mapped to target
               field <span style={{ fontWeight: 'bold' }}>{migrationAction.targetPath}</span>
             </Typography>
@@ -98,6 +128,15 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     })
   }, [questionMigrations, handleRemoveActionItem])
 
+  const checkObjectsMatch = (...objects) => {
+    if (!sourceSchemaQuestion || !targetSchemaQuestion) {
+      return false
+    }
+    const keys = objects.reduce((keys, object) => keys.concat(Object.keys(object)), [])
+    const union = new Set(keys)
+    return objects.every((object) => union.size === Object.keys(object).length)
+  }
+
   const handleAddNewAction = () => {
     setActionErrorText('')
     if (!sourceSchemaQuestion) {
@@ -115,6 +154,14 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       sourceSchemaQuestion.schema.type !== targetSchemaQuestion?.schema.type
     ) {
       return setActionErrorText('You cannot map two questions with different value types')
+    }
+    if (
+      sourceSchemaQuestion.schema.type === 'object' &&
+      targetSchemaQuestion &&
+      targetSchemaQuestion.schema.type == 'object' &&
+      !checkObjectsMatch(sourceSchemaQuestion.schema.properties, targetSchemaQuestion.schema.properties)
+    ) {
+      return setActionErrorText('You cannot map two sub-sections that contain different questions')
     }
     const newQuestionMigration: QuestionMigration = {
       id: formId,
@@ -171,39 +218,16 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       schemaQuestion.schema.items['title']
     ) {
       // The title can be defined either inside the items child-object, or  at the root of the property
-      return schemaQuestion.schema.items['title']
+      return truncateText(schemaQuestion.schema.items['title'], 30)
     } else {
-      return schemaQuestion?.schema.title
-    }
-  }
-
-  // TODO After the API is implemented we should POST the migration plan to the backend
-  const handleSubmitMigrationPlan = async () => {
-    setSubmitErrorText('')
-    if (migrationName === '') {
-      return setSubmitErrorText('You must set a name for this migration plan')
-    }
-    if (questionMigrations.length === 0) {
-      return setSubmitErrorText('You must have at least one action before submitting a migration plan.')
-    }
-    const res = await postSchemaMigration({
-      name: migrationName,
-      description: migrationDescription,
-      sourceSchema: sourceSchema.schema.id,
-      targetSchema: targetSchema.schema.id,
-      questionMigrations: questionMigrations,
-    })
-    if (!res.ok) {
-      setSubmitErrorText(await getErrorMessage(res))
-    } else {
-      router.push('/schemas/list?tab=migrations')
+      return truncateText(schemaQuestion?.schema.title, 30)
     }
   }
 
   return (
     <>
-      <Grid2 container spacing={2}>
-        <Grid2
+      <Grid container spacing={2}>
+        <Grid
           size={{ sm: 12, md: 3 }}
           sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
         >
@@ -214,11 +238,14 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
             <Divider />
             <Stack sx={{ p: 2 }} spacing={2}>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Action type</Typography>
+                <Typography id='schema-action-type' fontWeight='bold'>
+                  Action type
+                </Typography>
                 <Select
                   defaultValue={MigrationKind.MOVE}
                   size='small'
                   sx={{ width: '100%' }}
+                  inputProps={{ 'aria-labelledby': 'schema-action-type' }}
                   value={questionMigrationKind}
                   onChange={handleMigrationKindOnChange}
                 >
@@ -230,7 +257,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Typography fontWeight='bold'>Source question</Typography>
                 <Button
                   size='small'
-                  variant='outlined'
                   sx={{
                     width: '100%',
                   }}
@@ -245,7 +271,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   <Typography fontWeight='bold'>Target question</Typography>
                   <Button
                     size='small'
-                    variant='outlined'
                     sx={{ width: '100%' }}
                     onClick={handleSelectTargetQuestion}
                     aria-label='select target schema question'
@@ -255,7 +280,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 </Stack>
               )}
               <Stack spacing={2}>
-                <Button onClick={handleAddNewAction} aria-label='add action'>
+                <Button variant='outlined' onClick={handleAddNewAction} aria-label='add action'>
                   Add action
                 </Button>
                 <Typography color='error'>{actionErrorText}</Typography>
@@ -277,25 +302,58 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               <Stack spacing={2}>
                 <Stack spacing={1}>
                   <Typography fontWeight='bold'>Migration name</Typography>
-                  <TextField size='small' value={migrationName} onChange={(e) => setMigrationName(e.target.value)} />
+                  <TextField
+                    size='small'
+                    value={migrationName}
+                    onChange={(e) => setMigrationName(e.target.value)}
+                    label='migration plan name input'
+                  />
                 </Stack>
                 <Stack spacing={1}>
                   <Typography fontWeight='bold'>Migration description (optional)</Typography>
                   <TextField
                     size='small'
+                    multiline
+                    label='migration plan description input'
+                    minRows={4}
+                    maxRows={10}
                     value={migrationDescription}
                     onChange={(e) => setMigrationDescription(e.target.value)}
                   />
                 </Stack>
-                <Button variant='contained' onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
-                  Submit migration plan
-                </Button>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <ButtonGroup variant='contained' color='primary'>
+                    <Button
+                      onClick={() => handleSubmitMigrationPlan(draft)}
+                      aria-label={`${draft ? 'draft' : 'submit'} migration plan`}
+                      fullWidth
+                    >
+                      {draft ? 'Draft migration Plan' : 'Submit migration plan'}
+                    </Button>
+                    <Button size='small' onClick={handleToggle} aria-label='dropdown for save options'>
+                      <ArrowDropDownIcon />
+                    </Button>
+                  </ButtonGroup>
+                </ClickAwayListener>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  open={open}
+                >
+                  <MenuItem selected={!draft} onClick={() => setDraft(false)} aria-label='submit migration plan'>
+                    <ListItemText>{'Submit migration plan'}</ListItemText>
+                  </MenuItem>
+                  <MenuItem selected={draft} onClick={() => setDraft(true)} aria-label='draft migration plan'>
+                    <ListItemText>{'Draft migration plan'}</ListItemText>
+                  </MenuItem>
+                </Menu>
                 <Typography color='error'>{submitErrorText}</Typography>
               </Stack>
             </Stack>
           </Stack>
-        </Grid2>
-        <Grid2 size={{ sm: 12, md: 9 }}>
+        </Grid>
+        <Grid size={{ sm: 12, md: 9 }}>
           {sourceSchema && isSourceSchemaActive && (
             <Stack
               spacing={2}
@@ -341,8 +399,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               <em>Select source or target question on the actions menu to view the schema</em>
             </Stack>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <Box paddingTop={2}></Box>
     </>
   )

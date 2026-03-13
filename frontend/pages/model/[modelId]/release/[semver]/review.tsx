@@ -6,13 +6,13 @@ import {
   Dialog,
   DialogContent,
   Divider,
-  Grid2,
+  Grid,
   Paper,
   Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -29,8 +29,7 @@ import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys } from 'types/types'
-import { EntryKind } from 'types/types'
+import { DecisionKeys, EntryKind } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -42,7 +41,11 @@ export default function ReleaseReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)
@@ -82,8 +85,8 @@ export default function ReleaseReview() {
   const releaseFiles = useMemo(() => {
     if (release && model) {
       return release.files.map((file) => (
-        <Grid2 container spacing={1} alignItems='center' key={file._id}>
-          <Grid2 size='auto'>
+        <Grid container spacing={1} alignItems='center' key={file._id}>
+          <Grid size='auto'>
             <Tooltip title={file.name}>
               <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
                 <Typography noWrap textOverflow='ellipsis' display='inline'>
@@ -91,11 +94,11 @@ export default function ReleaseReview() {
                 </Typography>
               </Link>
             </Tooltip>
-          </Grid2>
-          <Grid2 size={{ xs: 1 }} textAlign='right'>
+          </Grid>
+          <Grid size={{ xs: 1 }} textAlign='right'>
             <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       ))
     }
   }, [model, release])
@@ -121,7 +124,9 @@ export default function ReleaseReview() {
     isModelError,
     isUiConfigError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
     return <Loading />

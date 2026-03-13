@@ -70,6 +70,7 @@ module.exports = {
   smtp: {
     // Enable / disable all email sending
     enabled: true,
+    transporter: 'smtp',
 
     // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
     // https://nodemailer.com/smtp/#1-single-connection
@@ -85,6 +86,11 @@ module.exports = {
 
     // Set the email address that Bailo should use, can be different from the SMTP server details.
     from: '"Bailo 📝" <bailo@example.org>',
+  },
+
+  ses: {
+    endpoint: 'ignored',
+    region: 'ignored',
   },
 
   log: {
@@ -179,14 +185,14 @@ module.exports = {
     },
   },
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       concurrency: 2,
       host: '127.0.0.1',
       port: 3310,
     },
 
-    modelscan: {
+    artefactscan: {
       concurrency: 2,
       protocol: 'http',
       host: '127.0.0.1',
@@ -227,6 +233,8 @@ module.exports = {
     modelMirror: {
       import: {
         enabled: false,
+        additionalInfoHeading: 'Additional information',
+        originalAnswerHeading: 'Original answer',
       },
       export: {
         enabled: false,
@@ -269,7 +277,7 @@ module.exports = {
       kind: 'silly',
     },
 
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
@@ -289,6 +297,8 @@ module.exports = {
 
     automaticallyCreateBuckets: true,
 
+    multipartChunkSize: 5 * 1024 * 1024,
+
     // Names of buckets that Bailo uses
     buckets: {
       uploads: 'uploads',
@@ -305,6 +315,8 @@ module.exports = {
   },
 
   modelMirror: {
+    metadataFile: 'metadata.json',
+    contentDirectory: 'content',
     export: {
       concurrency: 5,
       maxSize: 100 * 1024 * 1024 * 1024,

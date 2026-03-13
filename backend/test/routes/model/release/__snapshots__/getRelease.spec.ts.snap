@@ -13,7 +13,7 @@ exports[`routes > release > getRelease > 200 > ok 1`] = `
 exports[`routes > release > getRelease > audit > expected call 1`] = `
 {
   "_id": "test",
-  "toObject": [MockFunction spy] {
+  "toObject": [MockFunction] {
     "calls": [
       [],
     ],

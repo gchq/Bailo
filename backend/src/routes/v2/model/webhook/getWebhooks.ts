@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { z } from '../../../../lib/zod.js'
 import { WebhookInterface } from '../../../../models/Webhook.js'
 import { registerPath, webhookInterfaceSchema } from '../../../../services/specification.js'
 import { getWebhooksByModel } from '../../../../services/webhook.js'

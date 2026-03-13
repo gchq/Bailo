@@ -1,4 +1,4 @@
-import { Grid2, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
+import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import {
   ArrayFieldTemplateForQuestionViewer,
   DescriptionFieldTemplate,
+  ObjectFieldTemplateForQuestionViewer,
   TitleFieldTemplate,
 } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
@@ -77,8 +78,8 @@ export default function JsonSchemaViewer({
   }
 
   return (
-    <Grid2 container spacing={2} sx={{ mt: 1 }}>
-      <Grid2 size={{ xs: 12, md: 3 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+    <Grid container spacing={2} sx={{ mt: 1 }}>
+      <Grid size={{ xs: 12, md: 3 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
@@ -102,8 +103,8 @@ export default function JsonSchemaViewer({
             ))}
           </List>
         </Stepper>
-      </Grid2>
-      <Grid2 size={{ xs: 12, md: 9 }}>
+      </Grid>
+      <Grid size={{ xs: 12, md: 9 }}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
@@ -124,13 +125,14 @@ export default function JsonSchemaViewer({
           }}
           templates={{
             DescriptionFieldTemplate,
-            TitleFieldTemplate,
+            TitleFieldTemplate: TitleFieldTemplate,
             ArrayFieldTemplate: ArrayFieldTemplateForQuestionViewer,
+            ObjectFieldTemplate: ObjectFieldTemplateForQuestionViewer,
           }}
         >
           <></>
         </Form>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   )
 }

@@ -1,10 +1,8 @@
-import { Readable } from 'node:stream'
-
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { z } from '../../../../lib/zod.js'
 import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { uploadFile } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
@@ -49,19 +47,12 @@ interface PostSimpleUpload {
 export const postSimpleUpload = [
   async (req: Request, res: Response<PostSimpleUpload>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
-    // Does user have permission to upload a file?
     const {
       params: { modelId },
       query: { name, mime, tags },
     } = parse(req, postSimpleUploadSchema)
 
-    // The `putObjectStream` function takes in a `StreamingBlobPayloadInputTypes`.  This type
-    // includes the 'Readable' interface for handling streaming payloads, but a request is not
-    // by default assignable to this type.
-    //
-    // In practice, it is fine, as the only reason this assignment is not possible is due
-    // to a missing `.locked` parameter which is not a required field for our uploads.
-    const file = await uploadFile(req.user, modelId, name, mime, req as unknown as Readable, tags)
+    const file = await uploadFile(req.user, modelId, name, mime, req, tags)
     await audit.onCreateFile(req, file)
 
     res.json({
