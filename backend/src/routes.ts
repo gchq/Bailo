@@ -95,6 +95,7 @@ import { postUserToken } from './routes/v2/user/postUserToken.js'
 import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
+import markdownConfig from './utils/markdown.js'
 
 export const server = express()
 
@@ -109,6 +110,9 @@ for (const middlewareConf of middlewareConfigs) {
 server.use('/api/v2/models', escalateUser)
 
 server.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
+server.get('/api/v2/config', (_req, res) => {
+  res.json({ config: markdownConfig })
+})
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
