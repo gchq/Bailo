@@ -1,4 +1,4 @@
-import { ClientSession } from 'mongoose'
+import { ClientSession, QueryFilter, Types } from 'mongoose'
 
 import ResponseModel, {
   Decision,
@@ -34,9 +34,16 @@ export async function findResponseById(responseId: string) {
 }
 
 export async function getResponsesByParentIds(parentIds: string[]) {
-  const responses = await ResponseModel.find({ parentId: { $in: parentIds } })
+  const objectIds = parentIds.map((id) => new Types.ObjectId(id))
 
-  if (!responses) {
+  const filter = {
+    parentId: { $in: objectIds },
+    // Hack/Workaround broken mongooose typing
+  } as unknown as QueryFilter<ResponseDoc>
+
+  const responses = await ResponseModel.find(filter)
+
+  if (responses.length === 0) {
     throw NotFound(`The requested response was not found.`, { parentIds })
   }
 
@@ -77,7 +84,7 @@ export async function removeResponses(parentIds: string[]) {
       responseDeletions.push(await response.delete())
     } catch (error) {
       throw InternalError('The requested response could not be deleted.', {
-        responseId: response.id,
+        responseId: response._id.toString(),
         error,
       })
     }
@@ -176,7 +183,7 @@ async function sendReviewResponseNotification(
     }
     default:
       throw InternalError('Review Kind not recognised', {
-        reviewId: review.id,
+        reviewId: review._id.toString(),
         modelId: review.modelId,
         kind: review.kind,
       })

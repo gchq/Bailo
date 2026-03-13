@@ -550,7 +550,7 @@ export async function deleteReleases(
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
     await removeResponsesByParentIds(
-      [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
+      [...reviewsForRelease.map((review) => review['_id'].toString()), release['_id'].toString()] as string[],
       session,
     )
   }
