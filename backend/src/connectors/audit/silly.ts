@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
@@ -33,7 +33,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewFile(_req: Request, _file: FileInterfaceDoc) {}
   async onViewFiles(_req: Request, _modelId: string, _files: FileInterface[]) {}
   async onUpdateFile(_req: Request, _modelId: string, _fileId: string) {}
-  async onDeleteFile(_req: Request, _modelId: string, _fileId: string) {}
+  async onDeleteFile(_req: Request, _file: FileWithScanResultsInterface) {}
   async onCreateRelease(_req: Request, _release: ReleaseDoc) {}
   async onViewRelease(_req: Request, _release: ReleaseDoc) {}
   async onViewReleases(_req: Request, _releases: ReleaseDoc[]) {}
