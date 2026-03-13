@@ -1,4 +1,4 @@
-import { ClientSession, Types } from 'mongoose'
+import { ClientSession, QueryFilter, Types } from 'mongoose'
 
 import ResponseModel, {
   Decision,
@@ -36,8 +36,12 @@ export async function findResponseById(responseId: string) {
 export async function getResponsesByParentIds(parentIds: string[]) {
   const objectIds = parentIds.map((id) => new Types.ObjectId(id))
 
-  // A (horrible) workaround a typing issue around using $in with filtering
-  const responses = await ResponseModel.where('parentId').in(objectIds).exec()
+  const filter = {
+    parentId: { $in: objectIds },
+    // Hack/Workaround broken mongooose typing
+  } as unknown as QueryFilter<ResponseDoc>
+
+  const responses = await ResponseModel.find(filter)
 
   if (responses.length === 0) {
     throw NotFound(`The requested response was not found.`, { parentIds })
@@ -45,6 +49,7 @@ export async function getResponsesByParentIds(parentIds: string[]) {
 
   return responses
 }
+
 export async function getResponsesByUser(user: UserInterface) {
   const reviews = await findReviews(user, true, false)
   return await getResponsesByParentIds(reviews.map((review) => review['_id'].toString()))
