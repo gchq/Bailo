@@ -122,36 +122,38 @@ export default function ImageTagInformation() {
           results.additionalInfo.Results !== undefined
         ) {
           for (const result of results.additionalInfo.Results) {
-            for (const vulnerability of result.Vulnerabilities) {
-              const existingItem = resultList.find(
-                (resultListItem) => resultListItem.cve === vulnerability.VulnerabilityID,
-              )
-              if (existingItem) {
-                existingItem.packageList.push(vulnerability.PkgID)
-              } else {
-                switch (vulnerability.Severity) {
-                  case 'CRITICAL':
-                    criticalResults++
-                    break
-                  case 'HIGH':
-                    highResults++
-                    break
-                  case 'MEDIUM':
-                    mediumResults++
-                    break
-                  case 'LOW':
-                    lowResults++
-                    break
-                  case 'UNKNOWN':
-                    unknownResults++
+            if (result.Vulnerabilities) {
+              for (const vulnerability of result.Vulnerabilities) {
+                const existingItem = resultList.find(
+                  (resultListItem) => resultListItem.cve === vulnerability.VulnerabilityID,
+                )
+                if (existingItem) {
+                  existingItem.packageList.push(vulnerability.PkgID)
+                } else {
+                  switch (vulnerability.Severity) {
+                    case 'CRITICAL':
+                      criticalResults++
+                      break
+                    case 'HIGH':
+                      highResults++
+                      break
+                    case 'MEDIUM':
+                      mediumResults++
+                      break
+                    case 'LOW':
+                      lowResults++
+                      break
+                    case 'UNKNOWN':
+                      unknownResults++
+                  }
+                  lastScanDate = results.lastRunAt
+                  resultList.push({
+                    cve: vulnerability.VulnerabilityID,
+                    description: vulnerability.Description,
+                    severity: vulnerability.Severity,
+                    packageList: [vulnerability.PkgID],
+                  })
                 }
-                lastScanDate = results.lastRunAt
-                resultList.push({
-                  cve: vulnerability.VulnerabilityID,
-                  description: vulnerability.Description,
-                  severity: vulnerability.Severity,
-                  packageList: [vulnerability.PkgID],
-                })
               }
             }
           }

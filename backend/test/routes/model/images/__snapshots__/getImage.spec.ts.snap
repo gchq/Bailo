@@ -12,10 +12,4 @@ exports[`routes > images > getImage > 200 > ok 1`] = `
 
 exports[`routes > images > getImage > audit > expected call 1`] = `"expedita"`;
 
-exports[`routes > images > getImage > audit > expected call 2`] = `
-[
-  {
-    "_id": "test",
-  },
-]
-`;
+exports[`routes > images > getImage > audit > expected call 2`] = `"Dr. Garry Cummerata"`;
