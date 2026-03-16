@@ -54,7 +54,7 @@ export const getImage = [
     } = parse(req, getImageSchema)
 
     const image = await getImageWithScanResults(req.user, { repository: modelId, name, tag }, true)
-    await audit.onViewModelImage(req, modelId, image)
+    await audit.onViewModelImage(req, modelId, name, tag)
 
     res.json({
       image,

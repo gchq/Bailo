@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, ImageWithOptionalScanResults, MirrorInformation, ModelImages } from '../../types/types.js'
+import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
 
 export class SillyAuditConnector extends BaseAuditConnector {
@@ -68,7 +68,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onDeleteInference(_req: Request, _inferences: InferenceDoc) {}
   async onViewScanners(_req: Request) {}
   async onViewModelImages(_req: Request, _modelId: string, _images: ModelImages) {}
-  async onViewModelImage(_req: Request, _modelId: string, _image: ImageWithOptionalScanResults) {}
+  async onViewModelImage(_req: Request, _modelId: string, _name: string, _tag: string) {}
   async onUpdateImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
