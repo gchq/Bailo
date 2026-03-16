@@ -124,15 +124,14 @@ You can test out your new deployment using the example models which can be found
 
 ### Components
 
-|                  |                                                                                                                                                                                              |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NGINX            | [![nginx][NGINX]](https://nginx.org/)                                                                                                                                                        |
-| UI               | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![React][React]](https://react.dev/) [![Cypress][Cypress]](https://www.cypress.io/) |
-| API              | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](#)              |
-| Docker Registry  | [![Docker][Docker]](https://www.docker.com/)                                                                                                                                                 |
-| Mongo            | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                |
-| S3               | [![MinIO][Minio]](https://www.min.io/)                                                                                                                                                       |
-| Event Processing | [Stroom](https://github.com/gchq/stroom)                                                                                                                                                     |
+|                 |                                                                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NGINX           | [![nginx][NGINX]](https://nginx.org/)                                                                                                                                                        |
+| UI              | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![React][React]](https://react.dev/) [![Cypress][Cypress]](https://www.cypress.io/) |
+| API             | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](#)              |
+| Docker Registry | [![Docker][Docker]](https://www.docker.com/)                                                                                                                                                 |
+| Mongo           | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                |
+| S3              | [![MinIO][Minio]](https://www.min.io/)                                                                                                                                                       |
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
@@ -146,8 +145,8 @@ You can test out your new deployment using the example models which can be found
 
 ## Stroom Integration
 
-Bailo integrated with [Stroom](https://github.com/gchq/stroom), a WEST-developed data storage, processing and analysis
-platform.
+Bailo integrated with [Stroom](https://github.com/gchq/stroom), a [GCHQ](https://github.com/gchq)-developed data
+storage, processing and analysis platform.
 
 This integration enables Bailo to create and send event logging to Stroom for ingestion and later analysis, creating an
 audit trail and ensuring health within a given Bailo deployment. The integration is optional.
