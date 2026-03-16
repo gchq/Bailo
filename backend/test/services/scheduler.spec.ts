@@ -32,13 +32,12 @@ describe('scheduler', () => {
     vi.clearAllMocks()
   })
 
-  test('getScheduler throws if not initialised', () => {
-    expect(() => getScheduler()).toThrow('The scheduler has not been initialised')
+  test('getScheduler throws if scheduler not started', () => {
+    expect(() => getScheduler()).toThrow('Scheduler has not been started')
   })
 
   test('startScheduler initialises and starts agenda', async () => {
     const agenda = await startScheduler()
-
     expect(agenda).toBeDefined()
     expect(agenda.start).toHaveBeenCalledOnce()
     expect(getScheduler()).toBe(agenda)
