@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`connectors > audit > gchq > onCreateAccessRequest > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateAccessRequest > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -33,7 +33,7 @@ exports[`connectors > audit > gchq > onCreateAccessRequest > save expected event
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateCommentResponse > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateCommentResponse > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -66,7 +66,7 @@ exports[`connectors > audit > gchq > onCreateCommentResponse > save expected eve
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateFile > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateFile > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -103,7 +103,7 @@ exports[`connectors > audit > gchq > onCreateFile > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateImport > save expected event for FileMirrorInformation 1`] = `
+exports[`connectors > audit > stroom > onCreateImport > save expected event for FileMirrorInformation 1`] = `
 [
   {
     "EventDetail": {
@@ -116,17 +116,17 @@ exports[`connectors > audit > gchq > onCreateImport > save expected event for Fi
         ],
         "Destination": {
           "Object": {
-            "Description": "Mirrored model on Bailo HS.",
+            "Description": "Mirrored model on Destination Bailo.",
             "Id": "mirrored-model",
           },
         },
         "Source": {
           "Object": {
-            "Description": "Model from Bailo LS.",
+            "Description": "Model from Source Bailo.",
             "Id": "source-model",
           },
           "User": {
-            "Description": "User on Bailo LS.",
+            "Description": "User on Source Bailo.",
             "Id": "exporter",
           },
         },
@@ -153,7 +153,7 @@ exports[`connectors > audit > gchq > onCreateImport > save expected event for Fi
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateImport > save expected event for ImageMirrorInformation 1`] = `
+exports[`connectors > audit > stroom > onCreateImport > save expected event for ImageMirrorInformation 1`] = `
 [
   {
     "EventDetail": {
@@ -170,17 +170,17 @@ exports[`connectors > audit > gchq > onCreateImport > save expected event for Im
         ],
         "Destination": {
           "Object": {
-            "Description": "Mirrored model on Bailo HS.",
+            "Description": "Mirrored model on Destination Bailo.",
             "Id": "mirrored-model",
           },
         },
         "Source": {
           "Object": {
-            "Description": "Model from Bailo LS.",
+            "Description": "Model from Source Bailo.",
             "Id": "source-model",
           },
           "User": {
-            "Description": "User on Bailo LS.",
+            "Description": "User on Source Bailo.",
             "Id": "exporter",
           },
         },
@@ -207,7 +207,7 @@ exports[`connectors > audit > gchq > onCreateImport > save expected event for Im
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateImport > save expected event for MongoDocumentMirrorInformation 1`] = `
+exports[`connectors > audit > stroom > onCreateImport > save expected event for MongoDocumentMirrorInformation 1`] = `
 [
   {
     "EventDetail": {
@@ -228,17 +228,17 @@ exports[`connectors > audit > gchq > onCreateImport > save expected event for Mo
         ],
         "Destination": {
           "Object": {
-            "Description": "Mirrored model on Bailo HS.",
+            "Description": "Mirrored model on Destination Bailo.",
             "Id": "mirrored-model",
           },
         },
         "Source": {
           "Object": {
-            "Description": "Model from Bailo LS.",
+            "Description": "Model from Source Bailo.",
             "Id": "source-model",
           },
           "User": {
-            "Description": "User on Bailo LS.",
+            "Description": "User on Source Bailo.",
             "Id": "exporter",
           },
         },
@@ -265,7 +265,7 @@ exports[`connectors > audit > gchq > onCreateImport > save expected event for Mo
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateInference > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateInference > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -298,7 +298,7 @@ exports[`connectors > audit > gchq > onCreateInference > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateModel > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateModel > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -331,7 +331,7 @@ exports[`connectors > audit > gchq > onCreateModel > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateModelCard > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateModelCard > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -364,7 +364,7 @@ exports[`connectors > audit > gchq > onCreateModelCard > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateRelease > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateRelease > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -397,7 +397,7 @@ exports[`connectors > audit > gchq > onCreateRelease > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateReviewResponse > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateReviewResponse > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -430,7 +430,7 @@ exports[`connectors > audit > gchq > onCreateReviewResponse > save expected even
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateReviewRole > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateReviewRole > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -463,7 +463,7 @@ exports[`connectors > audit > gchq > onCreateReviewRole > save expected event 1`
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateS3Export > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateS3Export > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -496,7 +496,7 @@ exports[`connectors > audit > gchq > onCreateS3Export > save expected event 1`] 
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateSchema > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateSchema > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -529,7 +529,7 @@ exports[`connectors > audit > gchq > onCreateSchema > save expected event 1`] = 
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateSchemaMigration > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateSchemaMigration > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -562,7 +562,7 @@ exports[`connectors > audit > gchq > onCreateSchemaMigration > save expected eve
 ]
 `;
 
-exports[`connectors > audit > gchq > onCreateUserToken > save expected event 1`] = `
+exports[`connectors > audit > stroom > onCreateUserToken > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -595,7 +595,7 @@ exports[`connectors > audit > gchq > onCreateUserToken > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteAccessRequest > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteAccessRequest > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -628,7 +628,7 @@ exports[`connectors > audit > gchq > onDeleteAccessRequest > save expected event
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteFile > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteFile > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -665,7 +665,7 @@ exports[`connectors > audit > gchq > onDeleteFile > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteImage > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteImage > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -698,7 +698,7 @@ exports[`connectors > audit > gchq > onDeleteImage > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteInference > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteInference > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -731,7 +731,7 @@ exports[`connectors > audit > gchq > onDeleteInference > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteModel > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteModel > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -764,7 +764,7 @@ exports[`connectors > audit > gchq > onDeleteModel > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteRelease > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteRelease > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -797,7 +797,7 @@ exports[`connectors > audit > gchq > onDeleteRelease > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteReviewRole > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteReviewRole > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -830,7 +830,7 @@ exports[`connectors > audit > gchq > onDeleteReviewRole > save expected event 1`
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteSchema > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteSchema > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -863,7 +863,7 @@ exports[`connectors > audit > gchq > onDeleteSchema > save expected event 1`] = 
 ]
 `;
 
-exports[`connectors > audit > gchq > onDeleteUserToken > save expected event 1`] = `
+exports[`connectors > audit > stroom > onDeleteUserToken > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -896,7 +896,7 @@ exports[`connectors > audit > gchq > onDeleteUserToken > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onError > save expected event for Create error 1`] = `
+exports[`connectors > audit > stroom > onError > save expected event for Create error 1`] = `
 [
   {
     "EventDetail": {
@@ -931,7 +931,7 @@ exports[`connectors > audit > gchq > onError > save expected event for Create er
 ]
 `;
 
-exports[`connectors > audit > gchq > onError > save expected event for Delete error 1`] = `
+exports[`connectors > audit > stroom > onError > save expected event for Delete error 1`] = `
 [
   {
     "EventDetail": {
@@ -966,7 +966,7 @@ exports[`connectors > audit > gchq > onError > save expected event for Delete er
 ]
 `;
 
-exports[`connectors > audit > gchq > onError > save expected event for Search error 1`] = `
+exports[`connectors > audit > stroom > onError > save expected event for Search error 1`] = `
 [
   {
     "EventDetail": {
@@ -1002,7 +1002,7 @@ exports[`connectors > audit > gchq > onError > save expected event for Search er
 ]
 `;
 
-exports[`connectors > audit > gchq > onError > save expected event for Update error 1`] = `
+exports[`connectors > audit > stroom > onError > save expected event for Update error 1`] = `
 [
   {
     "EventDetail": {
@@ -1039,7 +1039,7 @@ exports[`connectors > audit > gchq > onError > save expected event for Update er
 ]
 `;
 
-exports[`connectors > audit > gchq > onError > save expected event for View error 1`] = `
+exports[`connectors > audit > stroom > onError > save expected event for View error 1`] = `
 [
   {
     "EventDetail": {
@@ -1074,7 +1074,7 @@ exports[`connectors > audit > gchq > onError > save expected event for View erro
 ]
 `;
 
-exports[`connectors > audit > gchq > onSearchModel > save expected event 1`] = `
+exports[`connectors > audit > stroom > onSearchModel > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1114,7 +1114,7 @@ exports[`connectors > audit > gchq > onSearchModel > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onSearchReviews > save expected event 1`] = `
+exports[`connectors > audit > stroom > onSearchReviews > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1164,7 +1164,7 @@ exports[`connectors > audit > gchq > onSearchReviews > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onSearchSchemas > save expected event 1`] = `
+exports[`connectors > audit > stroom > onSearchSchemas > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1204,7 +1204,7 @@ exports[`connectors > audit > gchq > onSearchSchemas > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateAccessRequest > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateAccessRequest > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1237,7 +1237,7 @@ exports[`connectors > audit > gchq > onUpdateAccessRequest > save expected event
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateInference > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateInference > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1272,7 +1272,7 @@ exports[`connectors > audit > gchq > onUpdateInference > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateModel > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateModel > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1305,7 +1305,7 @@ exports[`connectors > audit > gchq > onUpdateModel > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateModelCard > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateModelCard > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1340,7 +1340,7 @@ exports[`connectors > audit > gchq > onUpdateModelCard > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateRelease > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateRelease > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1375,7 +1375,7 @@ exports[`connectors > audit > gchq > onUpdateRelease > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateResponse > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateResponse > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1410,7 +1410,7 @@ exports[`connectors > audit > gchq > onUpdateResponse > save expected event 1`] 
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateReviewRole > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateReviewRole > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1445,7 +1445,7 @@ exports[`connectors > audit > gchq > onUpdateReviewRole > save expected event 1`
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateSchema > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateSchema > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1480,7 +1480,7 @@ exports[`connectors > audit > gchq > onUpdateSchema > save expected event 1`] = 
 ]
 `;
 
-exports[`connectors > audit > gchq > onUpdateSchemaMigration > save expected event 1`] = `
+exports[`connectors > audit > stroom > onUpdateSchemaMigration > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1515,7 +1515,7 @@ exports[`connectors > audit > gchq > onUpdateSchemaMigration > save expected eve
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewAccessRequest > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewAccessRequest > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1548,7 +1548,7 @@ exports[`connectors > audit > gchq > onViewAccessRequest > save expected event 1
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewAccessRequests > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewAccessRequests > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1583,7 +1583,7 @@ exports[`connectors > audit > gchq > onViewAccessRequests > save expected event 
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewFile > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewFile > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1622,7 +1622,7 @@ exports[`connectors > audit > gchq > onViewFile > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewFiles > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewFiles > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1661,7 +1661,7 @@ exports[`connectors > audit > gchq > onViewFiles > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewInference > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewInference > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1694,7 +1694,7 @@ exports[`connectors > audit > gchq > onViewInference > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewInferences > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewInferences > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1729,7 +1729,7 @@ exports[`connectors > audit > gchq > onViewInferences > save expected event 1`] 
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewModel > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewModel > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1762,7 +1762,7 @@ exports[`connectors > audit > gchq > onViewModel > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewModelCard > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewModelCard > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1795,7 +1795,7 @@ exports[`connectors > audit > gchq > onViewModelCard > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewModelImages > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewModelImages > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1830,7 +1830,7 @@ exports[`connectors > audit > gchq > onViewModelImages > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewRelease > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewRelease > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1863,7 +1863,7 @@ exports[`connectors > audit > gchq > onViewRelease > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewReleases > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewReleases > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1898,7 +1898,7 @@ exports[`connectors > audit > gchq > onViewReleases > save expected event 1`] = 
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewResponses > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewResponses > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1933,7 +1933,7 @@ exports[`connectors > audit > gchq > onViewResponses > save expected event 1`] =
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewReviewRoles > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewReviewRoles > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1966,7 +1966,7 @@ exports[`connectors > audit > gchq > onViewReviewRoles > save expected event 1`]
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewSchema > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewSchema > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -1999,7 +1999,7 @@ exports[`connectors > audit > gchq > onViewSchema > save expected event 1`] = `
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewSchemaMigration > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewSchemaMigration > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -2032,7 +2032,7 @@ exports[`connectors > audit > gchq > onViewSchemaMigration > save expected event
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewSchemaMigrations > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewSchemaMigrations > save expected event 1`] = `
 [
   {
     "EventDetail": {
@@ -2067,7 +2067,7 @@ exports[`connectors > audit > gchq > onViewSchemaMigrations > save expected even
 ]
 `;
 
-exports[`connectors > audit > gchq > onViewUserToken > save expected event 1`] = `
+exports[`connectors > audit > stroom > onViewUserToken > save expected event 1`] = `
 [
   {
     "EventDetail": {

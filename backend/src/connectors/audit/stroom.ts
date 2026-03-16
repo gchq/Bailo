@@ -835,11 +835,11 @@ export class StroomAuditConnector extends BaseAuditConnector {
       TypeId: req.audit.typeId,
       Import: {
         Source: {
-          Object: { Id: sourceId, Description: 'Model from Bailo LS.' },
-          User: { Id: exporter, Description: 'User on Bailo LS.' },
+          Object: { Id: sourceId, Description: 'Model from Source Bailo.' },
+          User: { Id: exporter, Description: 'User on Source Bailo.' },
         },
         Destination: {
-          Object: { Id: mirroredModelId, Description: 'Mirrored model on Bailo HS.' },
+          Object: { Id: mirroredModelId, Description: 'Mirrored model on Destination Bailo.' },
         },
         Data: isMongoDocumentMirrorInformation(importResult)
           ? [

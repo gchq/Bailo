@@ -72,7 +72,7 @@ const osMock = vi.hoisted(() => ({
 }))
 vi.mock('os', async () => ({ default: osMock }))
 
-describe('connectors > audit > gchq', () => {
+describe('connectors > audit > stroom', () => {
   vi.useFakeTimers()
   vi.setSystemTime(0)
   const connector = new StroomAuditConnector()
