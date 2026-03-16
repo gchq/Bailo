@@ -242,7 +242,6 @@ export type ModelImageTags = {
 export type ImageTagResult = {
   tag: string
   state: ArtefactScanStateKeys
-  lastRunAt?: Date
   severityCounts: SeverityCounts
   scanResults?: ScanInterface[]
 }
