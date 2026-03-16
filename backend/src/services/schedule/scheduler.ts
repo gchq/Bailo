@@ -35,7 +35,7 @@ export async function startScheduler(jobRegistrars: JobRegistrar[] = []) {
     started = true
     log.info('Scheduler started')
   } catch (err) {
-    log.error({ err }, 'Failed to start scheduler')
+    log.error({ err }, 'Failed to start the scheduler')
   }
 
   return agenda
