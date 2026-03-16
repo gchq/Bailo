@@ -314,6 +314,16 @@ module.exports = {
     debug: false,
   },
 
+  stroom: {
+    logOnlyMode: true,
+    feed: 'feed',
+    url: 'https://url',
+    environment: 'local',
+    interval: 1000 * 50,
+    generator: 'Generator',
+    rejectUnauthorized: false,
+  },
+
   modelMirror: {
     metadataFile: 'metadata.json',
     contentDirectory: 'content',

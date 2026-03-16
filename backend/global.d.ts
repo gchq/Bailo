@@ -6,7 +6,7 @@ declare namespace Express {
   interface Request {
     user: UserInterface
 
-    audit: { typeId: string; description: string; auditKind: string }
+    audit: { typeId: string; description: string; auditKind: string; resourceKind: string }
 
     reqId: string
     log: Logger

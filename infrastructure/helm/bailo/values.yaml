@@ -311,6 +311,15 @@ instrumentation:
   enabled: false
   debug: false
 
+stroom:
+  logOnlyMode: true
+  feed: 'feed'
+  url: 'https://url'
+  environment: 'local'
+  interval: 1000 * 50
+  generator: 'Generator'
+  rejectUnauthorized: false
+
 modelMirror:
   import:
     enabled: false
@@ -327,7 +336,6 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
-
 
 # Inferencing cluster reference
 inference:

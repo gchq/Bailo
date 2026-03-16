@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -16,6 +16,7 @@ export const ResponseKind = {
 export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
+  _id: ObjectId
   entity: string
   kind: ResponseKindKeys
   role?: string
