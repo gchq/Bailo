@@ -58,7 +58,13 @@ export default function EntryDeletion({ entry }: EntryDeletionProps) {
         Deletion
       </Typography>
       <Divider />
-      <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
+      <Button
+        fullWidth
+        variant='contained'
+        color='error'
+        onClick={() => setOpenConfirm(true)}
+        data-test='deleteEntryButton'
+      >
         {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
       </Button>
       <Dialog
@@ -83,6 +89,9 @@ export default function EntryDeletion({ entry }: EntryDeletionProps) {
             placeholder={entry.name}
             autoFocus
             sx={{ mt: 2 }}
+            slotProps={{
+              htmlInput: { 'data-test': 'deleteEntryInputVerification' },
+            }}
           />
           {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
         </DialogContent>
@@ -97,6 +106,7 @@ export default function EntryDeletion({ entry }: EntryDeletionProps) {
             loading={loading}
             disabled={confirmInput.trim() !== entry.name}
             startIcon={<Delete />}
+            data-test='deleteEntryConfirm'
           >
             Delete
           </Button>
