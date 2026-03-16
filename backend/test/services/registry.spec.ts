@@ -575,7 +575,7 @@ describe('services > registry', () => {
       const scanResult = {
         summary: undefined,
         state: ArtefactScanState.Complete,
-        additionalInfo: [{ Results: [] }],
+        scanResults: [{ Results: [] }],
       }
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
@@ -587,8 +587,8 @@ describe('services > registry', () => {
         true,
       )
 
-      expect(result.additionalInfo).toEqual([
-        { additionalInfo: [{ Results: [] }], summary: undefined, state: ArtefactScanState.Complete },
+      expect(result.scanResults).toEqual([
+        { scanResults: [{ Results: [] }], summary: undefined, state: ArtefactScanState.Complete },
       ])
     })
 
@@ -604,7 +604,7 @@ describe('services > registry', () => {
 
       expect(result).toEqual({
         state: 'notScanned',
-        summary: {
+        severityCounts: {
           critical: 0,
           high: 0,
           low: 0,
@@ -641,7 +641,7 @@ describe('services > registry', () => {
 
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
-      expect(result[0].scanResults[0].summary).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
+      expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
     })
 
     test('getImageBlob > success', async () => {

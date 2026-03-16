@@ -226,11 +226,11 @@ export const imageWithScanResultsSchema = z.object({
   repository: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   name: z.string().openapi({ example: 'yolo' }),
   tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
-  scanResults: z.array(
+  scanSummaries: z.array(
     z.object({
       lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
       state: z.nativeEnum(ArtefactScanState),
-      summary: z.object({
+      severityCounts: z.object({
         tag: z.string().openapi('v1-cpu'),
         severity: SeverityCountsSchema,
       }),

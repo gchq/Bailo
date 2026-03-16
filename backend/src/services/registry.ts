@@ -140,10 +140,10 @@ export async function getImageWithScanResults(
     tag: imageRef.tag,
     state,
     lastRunAt,
-    summary: countSeverities(scans.flatMap((s) => s.summary || [])),
+    severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
 
     ...(includeFullDetail && {
-      additionalInfo: scans,
+      scanResults: scans,
     }),
   }
 }
@@ -156,13 +156,13 @@ export async function listModelImagesWithScanResults(
 
   return Promise.all(
     modelImages.map(async (img) => {
-      const scanResults = (
+      const scanSummaries = (
         await Promise.all(img.tags.map((tag) => getImageWithScanResults(user, { ...img, tag })))
       ).filter((r) => r.state !== ArtefactScanState.NotScanned)
 
       return {
         ...img,
-        scanResults,
+        scanSummaries,
       }
     }),
   )

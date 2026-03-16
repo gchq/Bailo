@@ -243,12 +243,12 @@ export type ImageTagResult = {
   tag: string
   state: ArtefactScanStateKeys
   lastRunAt?: Date
-  summary: SeverityCounts
-  additionalInfo?: ScanInterface[]
+  severityCounts: SeverityCounts
+  scanResults?: ScanInterface[]
 }
 
 export type ImageScanResults = {
-  scanResults: ImageTagResult[]
+  scanSummaries: ImageTagResult[]
 }
 
 export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
