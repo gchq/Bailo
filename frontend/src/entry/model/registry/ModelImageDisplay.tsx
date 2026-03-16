@@ -34,10 +34,11 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
   }
 
   const getScanResultCounts = (imageTag: string) => {
-    if (modelImage && modelImage.scanResults) {
-      const tagResults = modelImage.scanResults.find((tagResult) => tagResult.tag === imageTag)
+    if (modelImage && modelImage.scanSummaries) {
+      const tagResults = modelImage.scanSummaries.find((tagResult) => tagResult.tag === imageTag)
+
       if (tagResults) {
-        return tagResults.summary
+        return tagResults.severityCounts
       }
     }
   }

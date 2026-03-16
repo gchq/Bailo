@@ -114,8 +114,8 @@ export default function ImageTagInformation() {
     if (!modelImage) {
       return
     }
-    if (modelImage.additionalInfo !== undefined) {
-      for (const results of modelImage.additionalInfo) {
+    if (modelImage.scanResults !== undefined) {
+      for (const results of modelImage.scanResults) {
         if (
           results.additionalInfo !== undefined &&
           'Results' in results.additionalInfo &&
