@@ -25,7 +25,7 @@ const configMock = vi.hoisted(() => ({
     },
   },
   stroom: {
-    enabled: true,
+    logOnlyMode: true,
     feed: 'feed',
     url: 'https://url',
     environment: 'local',

@@ -171,13 +171,13 @@ export interface Config {
   }
 
   stroom: {
-    rejectUnauthorized: boolean
-    enabled: boolean
-    environment: string
-    url: string
+    logOnlyMode: boolean
     feed: string
+    url: string
+    environment: string
     interval: number
     generator: string
+    rejectUnauthorized: boolean
   }
 
   artefactScanning: {

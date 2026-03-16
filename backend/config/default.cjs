@@ -315,7 +315,7 @@ module.exports = {
   },
 
   stroom: {
-    enabled: true,
+    logOnlyMode: true,
     feed: 'feed',
     url: 'https://url',
     environment: 'local',
