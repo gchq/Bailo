@@ -67,7 +67,7 @@ const config: PartialDeep<Config> = {
     enabled: false,
   },
   stroom: {
-    enabled: true,
+    logOnlyMode: true,
     feed: 'feed',
     url: 'https://url',
     environment: 'local',
