@@ -201,7 +201,9 @@ export default function ImageTagInformation() {
         <TableCell>
           <List dense>
             {row.packageList.map((packageId) => (
-              <ListItem key={packageId}>{packageId}</ListItem>
+              <ListItem key={packageId} sx={{ pl: 0 }}>
+                {packageId}
+              </ListItem>
             ))}
           </List>
         </TableCell>
@@ -365,7 +367,7 @@ export default function ImageTagInformation() {
                           <TableRow>
                             <TableCell>CVE name</TableCell>
                             <TableCell>Severity</TableCell>
-                            <TableCell>Package List</TableCell>
+                            <TableCell>Package list</TableCell>
                             <TableCell>Description</TableCell>
                           </TableRow>
                         </TableHead>
