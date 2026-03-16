@@ -38,7 +38,6 @@ import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface VulnerabilityResultItem {
@@ -74,7 +73,6 @@ export default function ImageTagInformation() {
   const [modelContent, setModalContent] = useState('')
   const [modalTitle, setModalTitle] = useState('')
   const [filterList, setFilterList] = useState<string[]>([])
-  const [lastRanAt, setLastRanAt] = useState('')
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -89,7 +87,6 @@ export default function ImageTagInformation() {
       mediumResultsFound: number,
       lowResultsFound: number,
       unknownResultsFound: number,
-      lastScanDate: string,
     ) => {
       setFormattedData(data)
       setCriticalResults(criticalResultsFound)
@@ -97,7 +94,6 @@ export default function ImageTagInformation() {
       setMediumResults(mediumResultsFound)
       setLowResults(lowResultsFound)
       setUnknownResults(unknownResultsFound)
-      setLastRanAt(lastScanDate !== '' ? formatDateTimeString(lastScanDate) : 'N/A')
       setPage(0)
     },
   )
@@ -109,7 +105,6 @@ export default function ImageTagInformation() {
     let mediumResults = 0
     let lowResults = 0
     let unknownResults = 0
-    let lastScanDate = ''
 
     if (!modelImage) {
       return
@@ -146,7 +141,6 @@ export default function ImageTagInformation() {
                     case 'UNKNOWN':
                       unknownResults++
                   }
-                  lastScanDate = results.lastRunAt
                   resultList.push({
                     cve: vulnerability.VulnerabilityID,
                     description: vulnerability.Description,
@@ -163,15 +157,7 @@ export default function ImageTagInformation() {
     if (filterList.length > 0) {
       resultList = resultList.filter((resultListItem) => filterList.includes(resultListItem.severity))
     }
-    setFormattedDataEvent(
-      resultList,
-      criticalResults,
-      highResults,
-      mediumResults,
-      lowResults,
-      unknownResults,
-      lastScanDate,
-    )
+    setFormattedDataEvent(resultList, criticalResults, highResults, mediumResults, lowResults, unknownResults)
   }, [filterList, name, modelImage, tag, modelId])
 
   const handleModalOpen = useCallback((cve: string, description: string) => {
@@ -308,10 +294,6 @@ export default function ImageTagInformation() {
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Image size</Typography>
                 <Typography>{modelImage.imageSize ? prettyBytes(modelImage.imageSize) : 'Unknown size'}</Typography>
-              </Stack>
-              <Stack spacing={1}>
-                <Typography fontWeight='bold'>Last scanned</Typography>
-                <Typography>{lastRanAt}</Typography>
               </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Vulnerabilities</Typography>

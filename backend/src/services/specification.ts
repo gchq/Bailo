@@ -228,7 +228,6 @@ export const imageWithScanResultsSchema = z.object({
   tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
   scanSummaries: z.array(
     z.object({
-      lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
       state: z.nativeEnum(ArtefactScanState),
       severityCounts: z.object({
         tag: z.string().openapi('v1-cpu'),

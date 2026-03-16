@@ -130,23 +130,17 @@ export async function getImageWithScanResults(
   ]
 
   const state = statePriority.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
-
-  const lastRunAt = scans
-    .map((s) => s.updatedAt ?? s.createdAt)
-    .sort()
-    .at(-1)
-
   const layers = await getLayersForImageTag(user, imageRef)
 
   return {
     tag: imageRef.tag,
     state,
-    lastRunAt,
     severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
 
     ...(includeFullDetail && {
       scanResults: scans,
     }),
+
     imageSize: layers.reduce((acc, obj) => acc + obj.size, 0),
   }
 }
