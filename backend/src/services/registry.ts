@@ -122,14 +122,14 @@ export async function getImageWithScanResults(
     return acc
   }, initialState)
 
-  const STATE_PRIORITY = [
+  const statePriority = [
     ArtefactScanState.Error,
     ArtefactScanState.InProgress,
     ArtefactScanState.NotScanned,
     ArtefactScanState.Complete,
   ]
 
-  const state = STATE_PRIORITY.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
+  const state = statePriority.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
 
   const lastRunAt = scans
     .map((s) => s.updatedAt ?? s.createdAt)

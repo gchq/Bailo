@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import {
   checkUserAuth,
   getImageBlob,
@@ -573,7 +574,7 @@ describe('services > registry', () => {
     test('getImageWithScanResults > includeFullDetail', async () => {
       const scanResult = {
         summary: undefined,
-        state: 'complete',
+        state: ArtefactScanState.Complete,
         additionalInfo: [{ Results: [] }],
       }
       ScanModelMock.find.mockReturnValueOnce({
@@ -587,7 +588,7 @@ describe('services > registry', () => {
       )
 
       expect(result.additionalInfo).toEqual([
-        { additionalInfo: [{ Results: [] }], summary: undefined, state: 'complete' },
+        { additionalInfo: [{ Results: [] }], summary: undefined, state: ArtefactScanState.Complete },
       ])
     })
 
@@ -631,8 +632,8 @@ describe('services > registry', () => {
 
       const scanResult = {
         summary: [{ severity: 'medium' }],
-        additionalInfo: undefined,
-        state: 'error',
+        additionalInfo: [{ Results: [] }],
+        state: ArtefactScanState.Error,
       }
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
