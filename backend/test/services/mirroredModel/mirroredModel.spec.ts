@@ -1,4 +1,5 @@
-import { PassThrough, Readable } from 'node:stream'
+import { createHash } from 'node:crypto'
+import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -493,29 +494,21 @@ describe('services > mirroredModel', () => {
 
   describe('generateDigest', () => {
     test('success from stream', async () => {
-      const stream = new PassThrough()
-      setImmediate(() => {
-        stream.write('abc')
-        stream.end()
-      })
-      const digest = await generateDigest(stream)
-      expect(digest).toMatch(/^[a-f0-9]{64}$/)
+      const input = 'A file with words in.'
+      const file = Readable.from(input)
+
+      const expectedDigest = createHash('sha256').update(input).digest('hex')
+      const digest = await generateDigest(file)
+      expect(digest).toBe(expectedDigest)
     })
-    test('pipe throws', async () => {
-      await expect(
-        generateDigest({
-          pipe: () => {
-            throw new Error('fail')
-          },
-        } as any),
-      ).rejects.toThrow(/Error generating SHA256/)
-    })
-    test('error event', async () => {
-      const stream = new PassThrough()
-      setImmediate(() => {
-        stream.emit('error', new Error('err'))
+    test('pipeline throws', async () => {
+      const unreadableFile = new Readable({
+        read() {
+          this.destroy(new Error())
+        },
       })
-      await expect(generateDigest(stream)).rejects.toThrow(/Error generating SHA256/)
+
+      await expect(generateDigest(unreadableFile)).rejects.toThrow('Error generating SHA256 digest for stream.')
     })
   })
 })
