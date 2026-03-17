@@ -100,6 +100,18 @@ describe('registryAuth', () => {
       } as any)
     })
 
+    test('failure > no image name', async () => {
+      const name = 'model'
+
+      const auth = await checkAccess({ name } as any, user)
+
+      expect(auth).toStrictEqual({
+        id: name,
+        success: false,
+        info: `ModelId not found.`,
+      } as any)
+    })
+
     test.each(['push', 'pull', 'delete', 'list', '*'])('failure > bad modelId $0', async (action) => {
       const name = 'badModelId/fakeImage'
       const modelId = name.split('/')[0]
