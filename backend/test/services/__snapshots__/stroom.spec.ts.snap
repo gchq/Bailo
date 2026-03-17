@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > stroom > processBatch > cannot send logs 1`] = `[]`;
+
+exports[`services > stroom > processBatch > log on failed events 1`] = `
+[
+  [
+    "Audit events have failed to send after maximum number of attempts. Please take action.",
+  ],
+]
+`;

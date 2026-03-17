@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
@@ -108,9 +108,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteFile(req: Request, modelId: string, fileId: string) {
+  async onDeleteFile(req: Request, file: FileWithScanResultsInterface) {
     this.checkEventType(AuditInfo.DeleteFile, req)
-    const event = this.generateEvent(req, { modelId, fileId })
+    const event = this.generateEvent(req, file)
     req.log.info(event, req.audit.description)
   }
 

@@ -439,6 +439,13 @@ The following tables describe selected configuration options available in `value
 | `connectors.artefactScanners.initRetryDelay` | Delay between successive microservice pings in milliseconds | `5000` |
 | `instrumentation.enabled` | Enable OpenTelemetry instrumentation | `false` |
 | `instrumentation.debug` | Enable instrumentation debugging | `false` |
+| `stroom.logOnlyMode` | Enable Stroom audit logging | `true` |
+| `stroom.feed` | Name of the Stroom feed | `feed` |
+| `stroom.url` | URL for the associated Stroom feed | `https://url` |
+| `stroom.environment` | Stroom environment | `local` |
+| `stroom.interval` | Interval (in ms) on how frequently events should be sent to stroom | 1000 * 50 |
+| `stroom.generator` | Stroom generator | `Generator` |
+| `stroom.rejectUnauthorized` | TLS option | false |
 | `modelMirror.import.enabled` | Enable creation of mirrored models | `false` |
 | `modelMirror.export.enabled` | Enable the exporting of models to S3 | `false` |
 | `modelMirror.export.disclaimer` | Disclaimer shown to the user in the UI prior to exporting a model | `## Example Agreement \n I agree that this model is suitable for exporting` |

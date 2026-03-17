@@ -272,3 +272,15 @@ export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInfor
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
+
+export const isMongoDocumentMirrorInformation = (
+  value: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
+): value is MongoDocumentMirrorInformation => {
+  return !!(value as MongoDocumentMirrorInformation).newModelCards
+}
+
+export const isFileMirrorInformation = (
+  value: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
+): value is FileMirrorInformation => {
+  return !!(value as FileMirrorInformation).newPath
+}
