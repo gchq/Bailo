@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from ssl import SSLContext
 from typing import Any
 
+from httpx._types import CertTypes
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -30,3 +32,13 @@ class Settings(BaseSettings):
 
     # Load in a dotenv file to set/overwrite any properties with potentially sensitive values
     model_config = SettingsConfigDict(env_file=".env")
+
+
+class BackendSettings(BaseSettings):
+    """Authentication settings for the backend service."""
+
+    model_config = SettingsConfigDict(env_prefix="BACKEND_")
+
+    base_url: str = "http://backend:3001"
+    client_cert: CertTypes | None = ("/certs/cert.pem", "/certs/key.pem")
+    ca_cert: SSLContext | str | bool = False
