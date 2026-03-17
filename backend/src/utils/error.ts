@@ -65,8 +65,8 @@ export function NotImplemented(message: string, context?: BailoError['context'],
   return GenericError(501, message, context, logger)
 }
 
-export function ServiceUnavailable(message: string, context?: BailoError['context'], logger?: Logger) {
-  return GenericError(503, `BAILO service unavailable: ${message}`, context, logger)
+export function ConfigurationError(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(503, `BAILO configuration error: ${message}`, context, logger)
 }
 
 export function RegistryError(error: RegistryErrorResponseBody, context?: BailoError['context'], logger?: Logger) {

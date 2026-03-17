@@ -7,6 +7,7 @@ type SimpleListItemButtonProps = {
   children: ReactNode
   disabled?: boolean
   icon?: ReactElement
+  dataTest?: string
 }
 export default function SimpleListItemButton({
   selected,
@@ -14,10 +15,11 @@ export default function SimpleListItemButton({
   children,
   disabled = false,
   icon,
+  dataTest = '',
 }: SimpleListItemButtonProps) {
   return (
     <ListItem disablePadding>
-      <ListItemButton disabled={disabled} selected={selected} onClick={onClick}>
+      <ListItemButton disabled={disabled} selected={selected} onClick={onClick} data-test={dataTest}>
         {icon && <ListItemIcon>{icon}</ListItemIcon>}
         {children}
       </ListItemButton>

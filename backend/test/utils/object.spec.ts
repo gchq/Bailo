@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { deepFreeze, getPropValue, omitFields } from '../../src/utils/object.js'
+import { deepFreeze, getPropValue } from '../../src/utils/object.js'
 
 describe('utils > object', () => {
   test('deepFreeze', () => {
@@ -39,19 +39,5 @@ describe('utils > object', () => {
     expect(getPropValue(source, 'a.x.c')).toBeUndefined()
     expect(getPropValue(source, '')).toStrictEqual(source)
     expect(getPropValue(source, '   ')).toStrictEqual(source)
-  })
-
-  test('omitFields', () => {
-    const obj = {
-      a: 1,
-      b: 2,
-      c: 3,
-    }
-
-    const result = omitFields(obj, ['a', 'c'] as const)
-
-    expect(result).toStrictEqual({ b: 2 })
-    // original object is not mutated
-    expect(obj).toStrictEqual({ a: 1, b: 2, c: 3 })
   })
 })

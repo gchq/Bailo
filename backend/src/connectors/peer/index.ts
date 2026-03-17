@@ -1,7 +1,7 @@
 import log from '../../services/log.js'
 import { FederationState, RemoteFederationConfig } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ServiceUnavailable } from '../../utils/error.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { BailoPeerConnector } from './bailo.js'
 import { BasePeerConnector } from './base.js'
 import { HuggingFaceHubConnector } from './huggingface.js'
@@ -18,7 +18,7 @@ let peerWrapper: undefined | PeerConnectorWrapper = undefined
 
 function validate(id: string, cfg: RemoteFederationConfig): void {
   if (peers.has(id)) {
-    throw ServiceUnavailable('Duplicate ID specified in federation config', { id })
+    throw ConfigurationError('Duplicate ID specified in federation config', { id })
   }
 
   const keys = new Array<string>()
@@ -33,7 +33,7 @@ function validate(id: string, cfg: RemoteFederationConfig): void {
     keys.push('state')
   }
   if (keys.length > 0) {
-    throw ServiceUnavailable('Missing required configuration for peer', {
+    throw ConfigurationError('Missing required configuration for peer', {
       missingConfig: keys,
     })
   }
@@ -57,7 +57,7 @@ export async function getPeerConnectors(cache = true): Promise<PeerConnectorWrap
           const connector = new BailoPeerConnector(id, cfg)
           peers.set(id, connector)
         } catch (error) {
-          throw ServiceUnavailable('Could not configure or initialise Bailo connector', { error })
+          throw ConfigurationError('Could not configure or initialise Bailo connector', { error })
         }
         break
       case PeerKind.HuggingFaceHub:
@@ -65,11 +65,11 @@ export async function getPeerConnectors(cache = true): Promise<PeerConnectorWrap
           const connector = new HuggingFaceHubConnector(id, cfg)
           peers.set(id, connector)
         } catch (error) {
-          throw ServiceUnavailable('Could not configure or initialise HuggingFace connector', { error })
+          throw ConfigurationError('Could not configure or initialise HuggingFace connector', { error })
         }
         break
       default:
-        throw ServiceUnavailable(`'${cfg.kind}' is not a valid peer connector kind.`, {
+        throw ConfigurationError(`'${cfg.kind}' is not a valid peer connector kind.`, {
           validKinds: Object.values(PeerKind),
         })
     }

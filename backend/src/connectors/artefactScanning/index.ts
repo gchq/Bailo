@@ -1,5 +1,5 @@
 import config from '../../utils/config.js'
-import { ServiceUnavailable } from '../../utils/error.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { BaseArtefactScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
 import { ModelScanFileScanningConnector } from './modelScan.js'
@@ -24,7 +24,7 @@ function initScanner<T extends BaseArtefactScanningConnector>(
     const scanner = new Scanner()
     artefactScanConnectors.add(scanner)
   } catch (error) {
-    throw ServiceUnavailable(`Could not configure or initialise scanner ${artefactScanner}`, { error })
+    throw ConfigurationError(`Could not configure or initialise scanner ${artefactScanner}`, { error })
   }
 }
 
@@ -45,7 +45,7 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
         initScanner(TrivyImageScanningConnector, artefactScanner)
         break
       default:
-        throw ServiceUnavailable(`'${artefactScanner}' is not a valid scanning kind.`, {
+        throw ConfigurationError(`'${artefactScanner}' is not a valid scanning kind.`, {
           validKinds: Object.values(ArtefactScanKind),
         })
     }

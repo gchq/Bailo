@@ -1,5 +1,5 @@
 import config from '../../utils/config.js'
-import { ServiceUnavailable } from '../../utils/error.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { BasicAuthorisationConnector } from './base.js'
 
 export const AuthorisationKind = {
@@ -18,7 +18,7 @@ export function getAuthorisationConnector(cache = true): BasicAuthorisationConne
       authorisationConnector = new BasicAuthorisationConnector()
       break
     default:
-      throw ServiceUnavailable(`'${config.connectors.authorisation.kind}' is not a valid authorisation kind.`, {
+      throw ConfigurationError(`'${config.connectors.authorisation.kind}' is not a valid authorisation kind.`, {
         validKinds: Object.values(AuthorisationKind),
       })
   }

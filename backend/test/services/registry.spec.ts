@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import {
   checkUserAuth,
   getImageBlob,
@@ -570,57 +571,11 @@ describe('services > registry', () => {
       ])
     })
 
-    test('getImageWithScanResults > includeCount only', async () => {
-      const scanResult = {
-        state: 'notScanned',
-        summary: [{ severity: 'high' }, { severity: 'low' }],
-        additionalInfo: undefined,
-      }
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
-      } as any)
-
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        true,
-        false,
-        false,
-      )
-
-      expect(result.count).toEqual({
-        severity: { low: 1, medium: 0, high: 1, critical: 0, unknown: 0 },
-        state: { complete: 0, error: 0, inProgress: 0, notScanned: 1 },
-      })
-    })
-
-    test('getImageWithScanResults > includeSummary', async () => {
-      const scanResult = {
-        state: 'complete',
-        summary: [{ severity: 'CRITICAL' }],
-        _id: 'dropMe',
-        additionalInfo: undefined,
-      }
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
-      } as any)
-
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        false,
-        true,
-        false,
-      )
-
-      expect(result.summary).toEqual([{ state: 'complete', summary: [{ severity: 'CRITICAL' }] }])
-    })
-
     test('getImageWithScanResults > includeFullDetail', async () => {
       const scanResult = {
         summary: undefined,
-        state: 'complete',
-        additionalInfo: [{ Results: [] }],
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
       }
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
@@ -629,12 +584,12 @@ describe('services > registry', () => {
       const result = await getImageWithScanResults(
         { dn: 'user' } as any,
         { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        false,
-        false,
         true,
       )
 
-      expect(result.fullDetail).toEqual([{ additionalInfo: [{ Results: [] }], summary: undefined, state: 'complete' }])
+      expect(result.scanResults).toEqual([
+        { scanResults: [{ Results: [] }], summary: undefined, state: ArtefactScanState.Complete },
+      ])
     })
 
     test('getImageWithScanResults > ignores manifest list not supported error', async () => {
@@ -645,32 +600,18 @@ describe('services > registry', () => {
       const result = await getImageWithScanResults(
         { dn: 'user' } as any,
         { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        true,
-        true,
-        true,
       )
 
       expect(result).toEqual({
-        repository: 'repo',
-        name: 'img',
-        tag: 'v1',
-        count: {
-          severity: {
-            low: 0,
-            medium: 0,
-            high: 0,
-            critical: 0,
-            unknown: 0,
-          },
-          state: {
-            complete: 0,
-            error: 0,
-            inProgress: 0,
-            notScanned: 0,
-          },
+        state: 'notScanned',
+        severityCounts: {
+          critical: 0,
+          high: 0,
+          low: 0,
+          medium: 0,
+          unknown: 0,
         },
-        summary: [],
-        fullDetail: [],
+        tag: 'v1',
       })
     })
 
@@ -680,9 +621,6 @@ describe('services > registry', () => {
       const promise = getImageWithScanResults(
         { dn: 'user' } as any,
         { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        true,
-        false,
-        false,
       )
 
       await expect(promise).rejects.toThrowError('Some other error')
@@ -694,56 +632,16 @@ describe('services > registry', () => {
 
       const scanResult = {
         summary: [{ severity: 'medium' }],
-        additionalInfo: undefined,
-        state: 'error',
-      }
-      ScanModelMock.find.mockReturnValueOnce({
-        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
-      } as any)
-
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', true, false, false)
-
-      expect(result[0].count).toEqual([
-        {
-          tag: 'v1',
-          severity: { low: 0, medium: 1, high: 0, critical: 0, unknown: 0 },
-          state: {
-            complete: 0,
-            error: 1,
-            inProgress: 0,
-            notScanned: 0,
-          },
-        },
-      ])
-    })
-
-    test('listModelImagesWithScanResults > includeSummary and fullDetail', async () => {
-      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
-      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
-
-      const scanResult = {
-        summary: [{ severity: 'HIGH' }],
-        state: 'complete',
-        _id: 'mongoId',
         additionalInfo: [{ Results: [] }],
+        state: ArtefactScanState.Error,
       }
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
-      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId', false, true, true)
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
-      expect(result[0].summary).toEqual([
-        { tag: 'v1', summary: [{ state: 'complete', summary: [{ severity: 'HIGH' }] }] },
-      ])
-      expect(result[0].fullDetail).toEqual([
-        {
-          tag: 'v1',
-          fullDetail: [
-            { _id: 'mongoId', state: 'complete', additionalInfo: [{ Results: [] }], summary: [{ severity: 'HIGH' }] },
-          ],
-        },
-      ])
+      expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
     })
 
     test('getImageBlob > success', async () => {

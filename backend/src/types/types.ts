@@ -6,7 +6,6 @@ import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
-import { ImageRefInterface } from '../models/Release.js'
 import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
@@ -239,33 +238,19 @@ export type ModelImageTags = {
   name: string
   tags: Array<string>
 }
-export type SingleImageTagScanResult = {
-  count?: {
-    state: ArtefactScanStateCounts
-    severity: SeverityCounts
-  }
-  summary?: LayerScanSummary[]
-  fullDetail?: ScanInterface[]
+
+export type ImageTagResult = {
+  tag: string
+  state: ArtefactScanStateKeys
+  severityCounts: SeverityCounts
+  scanResults?: ScanInterface[]
 }
+
 export type ImageScanResults = {
-  count?: {
-    tag: string
-    state: ArtefactScanStateCounts
-    severity: SeverityCounts
-  }[]
-
-  summary?: {
-    tag: string
-    summary: LayerScanSummary[]
-  }[]
-
-  fullDetail?: {
-    tag: string
-    fullDetail: ScanInterface[]
-  }[]
+  scanSummaries: ImageTagResult[]
 }
-export type ImageWithOptionalScanResults = ImageRefInterface & SingleImageTagScanResult
-export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
+
+export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
 export type ArtefactScanStateCounts = Record<ArtefactScanStateKeys, number>
@@ -285,3 +270,15 @@ export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInfor
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
+
+export const isMongoDocumentMirrorInformation = (
+  value: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
+): value is MongoDocumentMirrorInformation => {
+  return !!(value as MongoDocumentMirrorInformation).newModelCards
+}
+
+export const isFileMirrorInformation = (
+  value: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
+): value is FileMirrorInformation => {
+  return !!(value as FileMirrorInformation).newPath
+}

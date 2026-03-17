@@ -290,6 +290,16 @@ data:
           },
         },
       },
+
+      stroom: {
+        logOnlyMode: '{{ .Values.stroom.logOnlyMode }}',
+        feed: '{{ .Values.stroom.feed }}',
+        url: '{{ .Values.stroom.url }}',
+        environment: '{{ .Values.stroom.environment }}',
+        interval: '{{ .Values.stroom.interval }}',
+        generator: '{{ .Values.stroom.generator }}',
+        rejectUnauthorized: '{{ .Values.stroom.rejectUnauthorized }}',
+      }
     }
 
   custom-environment-variables.cjs: |
