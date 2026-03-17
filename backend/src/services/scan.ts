@@ -108,7 +108,7 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
 
 export async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
-  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
+  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file._id.toString() }
   await runScans(scannersInfo, fileIdentifier, file)
 
   const scanResults = await ScanModel.find(fileIdentifier)
