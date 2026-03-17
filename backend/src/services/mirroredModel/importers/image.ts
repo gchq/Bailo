@@ -7,7 +7,7 @@ import { Headers } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { UserInterface } from '../../../models/User.js'
-import { getAccessToken } from '../../../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
@@ -73,14 +73,14 @@ export class ImageImporter extends BaseImporter {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
 
-        const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
+        const repositoryPullToken = await issueAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['pull'],
           },
         ])
-        const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
+        const repositoryPushPullToken = await issueAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
@@ -156,7 +156,7 @@ export class ImageImporter extends BaseImporter {
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
     if (this.manifestBody) {
-      const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
+      const repositoryPushPullToken = await issueAccessToken({ dn: this.user.dn }, [
         {
           type: 'repository',
           name: `${this.metadata.mirroredModelId}/${this.imageName}`,

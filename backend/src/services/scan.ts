@@ -12,7 +12,7 @@ import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.j
 import { ImageRefInterface } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
-import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { toBailoError } from '../types/error.js'
 import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
@@ -187,7 +187,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
   ])
   if (await isImageTagManifestList(repositoryToken, image)) {
