@@ -416,6 +416,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, `${inference.modelId}/${inference.image}:${inference.tag}`)
   }
 
+  async onViewScanners(req: Request) {
+    this.auditGenericEvent(req, 'Viewing scanners')
+  }
+
   async onViewModelImages(
     req: Request,
     modelId: string,
@@ -426,6 +430,14 @@ export class StroomAuditConnector extends BaseAuditConnector {
       images.map((image) => ({ Id: `${image.repository}/${image.name}:${image.tags}` })),
       'docker image',
     )
+  }
+
+  async onViewModelImage(req: Request, modelId: string, name: string, tag: string) {
+    this.auditGenericEvent(req, `${modelId}/${name}:${tag}`)
+  }
+
+  async onUpdateImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.auditGenericEvent(req, `${modelId}/${image.name}:${image.tag}`)
   }
 
   async onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {

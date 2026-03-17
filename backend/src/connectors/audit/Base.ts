@@ -40,6 +40,7 @@ export const ResourceKind = {
   Image: 'image',
   Inference: 'inference',
   Export: 'export',
+  ArtefactScanning: 'artefact scanning',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -292,7 +293,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.SchemaMigration,
   },
-
+  ViewScanners: {
+    typeId: 'ViewScanners',
+    description: 'Artefact scanners viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.ArtefactScanning,
+  },
   ViewModelImages: {
     typeId: 'ViewModelImages',
     description: 'Model Images Viewed',
