@@ -3,11 +3,10 @@ import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ClamAVSummary } from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys, ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
-import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -21,11 +20,10 @@ function safeParseVersion(versionStr: string): string {
   }
 }
 
-export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
+export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
   queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
-  artefactType: ArtefactTypeKeys = ArtefactType.FILE
+  artefactType: ArtefactKindKeys = ArtefactKind.FILE
   toolName = 'Clam AV'
-  version: string | undefined = undefined
   av: NodeClam | undefined = undefined
 
   constructor() {
@@ -53,12 +51,7 @@ export class ClamAvFileScanningConnector extends ArtefactBaseScanningConnector {
     try {
       const { viruses } = await this.av.scanStream(s3Stream)
       log.debug({ file, result: { viruses }, ...scannerInfo }, 'Scan complete.')
-      const summary: ClamAVSummary[] = viruses.map(
-        (virus) =>
-          ({
-            virus,
-          }) as ClamAVSummary,
-      )
+      const summary: ClamAVSummary[] = viruses.map((virus) => ({ virus }) as ClamAVSummary)
 
       return {
         ...scannerInfo,

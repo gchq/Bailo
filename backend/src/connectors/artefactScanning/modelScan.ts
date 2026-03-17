@@ -1,27 +1,23 @@
 import PQueue from 'p-queue'
 
-import { getArtefactScanInfo, scanStream } from '../../clients/artefactScan.js'
+import { getCachedArtefactScanInfo, scanFileStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ModelScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
-import { ArtefactType, ArtefactTypeKeys } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ArtefactBaseScanningConnector, ArtefactScanResult, ArtefactScanState } from './Base.js'
+import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
-export class ArtefactScanFileScanningConnector extends ArtefactBaseScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
-  artefactType: ArtefactTypeKeys = ArtefactType.FILE
+export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
+  readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
+  artefactType: ArtefactKindKeys = ArtefactKind.FILE
   toolName: string = 'ModelScan'
-  version: string | undefined = undefined
-
-  constructor() {
-    super()
-  }
 
   async init() {
-    const artefactScanInfo = await getArtefactScanInfo()
-    this.version = artefactScanInfo.modelscanVersion
+    if (!this.version) {
+      const artefactScanInfo = await getCachedArtefactScanInfo()
+      this.version = artefactScanInfo.modelscanVersion
+    }
     return this
   }
 
@@ -35,7 +31,7 @@ export class ArtefactScanFileScanningConnector extends ArtefactBaseScanningConne
     const s3Stream = await getObjectStream(file.path)
 
     try {
-      const scanResults = await scanStream(s3Stream, file.name)
+      const scanResults = await scanFileStream(s3Stream, file.name)
 
       if (scanResults.errors.length !== 0) {
         return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
@@ -45,12 +41,12 @@ export class ArtefactScanFileScanningConnector extends ArtefactBaseScanningConne
         })
       }
 
-      const summary: ModelScanSummary[] = scanResults.issues.map(
+      const summary: ArtefactScanSummary[] = scanResults.issues.map(
         (issue) =>
           ({
             severity: issue.severity.toLowerCase() as SeverityLevelKeys,
             vulnerabilityDescription: `${issue.description}. (scanner: ${issue.scanner})`,
-          }) as ModelScanSummary,
+          }) as ArtefactScanSummary,
       )
 
       log.debug({ file, result: { summary }, ...scannerInfo }, 'Scan complete.')
@@ -58,6 +54,7 @@ export class ArtefactScanFileScanningConnector extends ArtefactBaseScanningConne
         ...scannerInfo,
         state: ArtefactScanState.Complete,
         summary,
+        additionalInfo: scanResults,
         lastRunAt: new Date(),
       }
     } catch (error) {

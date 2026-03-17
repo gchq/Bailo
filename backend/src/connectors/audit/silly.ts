@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
 
 export class SillyAuditConnector extends BaseAuditConnector {
@@ -33,7 +33,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewFile(_req: Request, _file: FileInterfaceDoc) {}
   async onViewFiles(_req: Request, _modelId: string, _files: FileInterface[]) {}
   async onUpdateFile(_req: Request, _modelId: string, _fileId: string) {}
-  async onDeleteFile(_req: Request, _modelId: string, _fileId: string) {}
+  async onDeleteFile(_req: Request, _file: FileWithScanResultsInterface) {}
   async onCreateRelease(_req: Request, _release: ReleaseDoc) {}
   async onViewRelease(_req: Request, _release: ReleaseDoc) {}
   async onViewReleases(_req: Request, _releases: ReleaseDoc[]) {}
@@ -66,11 +66,9 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewInferences(_req: Request, _inferences: InferenceDoc[]) {}
   async onUpdateInference(_req: Request, _inferences: InferenceDoc) {}
   async onDeleteInference(_req: Request, _inferences: InferenceDoc) {}
-  async onViewModelImages(
-    _req: Request,
-    _modelId: string,
-    _images: { repository: string; name: string; tags: string[] }[],
-  ) {}
+  async onViewScanners(_req: Request) {}
+  async onViewModelImages(_req: Request, _modelId: string, _images: ModelImages) {}
+  async onUpdateImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   async onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   async onCreateImport(

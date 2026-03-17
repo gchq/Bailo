@@ -69,12 +69,13 @@ function createMockFns(): Record<MethodNames, MockedFunction<any>> {
   )
 }
 
-function createInstance<TDoc extends { _id?: any }>(
+function createInstance<TDoc extends { _id?: any; id: string }>(
   toObjectValue: Partial<TDoc>,
   doc: Partial<TDoc> | undefined,
   chainMocks: Record<MethodNames, MockedFunction<any>>,
 ): InstanceType<TDoc> {
   const instance: InstanceType<TDoc> = {
+    id: createId().toString(),
     _id: createId(),
     toObject: vi.fn(() => ({ ...toObjectValue, ...doc })),
   } as InstanceType<TDoc>
@@ -161,6 +162,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 export const modelMocks = {
   AccessRequestModel: createMongooseModelMock('AccessRequest'),
   FileModel: createMongooseModelMock('FileModel', {
+    id: 'mockFileId',
     _id: 'mockFileId',
     modelId: 'mockModelId',
     name: 'mockFileName',
@@ -183,6 +185,7 @@ export const modelMocks = {
   ScanModel: createMongooseModelMock('ScanModel'),
   SchemaModel: createMongooseModelMock('SchemaModel'),
   SchemaMigrationModel: createMongooseModelMock('SchemaMigrationModel'),
+  StroomEventModel: createMongooseModelMock('StroomEventModel'),
   TokenModel: createMongooseModelMock('TokenModel'),
   UserModel: createMongooseModelMock('UserModel'),
   WebhookModel: createMongooseModelMock('WebhookModel'),
@@ -211,6 +214,7 @@ vi.mock('../../src/models/Scan.ts', async (importOriginal) => {
 })
 vi.mock('../../src/models/Schema.ts', () => ({ default: modelMocks.SchemaModel }))
 vi.mock('../../src/models/SchemaMigration.ts', () => ({ default: modelMocks.SchemaMigrationModel }))
+vi.mock('../../src/models/StroomEvent.ts', () => ({ default: modelMocks.StroomEventModel }))
 vi.mock('../../src/models/Token.ts', async (importOriginal) => {
   const actual = (await importOriginal()) as any
   return { ...actual, default: modelMocks.TokenModel }

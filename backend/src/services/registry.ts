@@ -9,14 +9,24 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
+import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
+import {
+  ArtefactScanStateCounts,
+  ImageTagResult,
+  ModelImages,
+  ModelImagesWithScanResults,
+  SeverityCounts,
+} from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -80,7 +90,7 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function listModelImages(user: UserInterface, modelId: string) {
+export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
   await checkUserAuth(user, modelId, ['list'])
 
   const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
@@ -94,6 +104,100 @@ export async function listModelImages(user: UserInterface, modelId: string) {
       return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
     }),
   )
+}
+
+export async function getImageWithScanResults(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  includeFullDetail = false,
+): Promise<ImageTagResult> {
+  const scans = await getScansForImageTag(user, imageRef)
+
+  const initialState = Object.fromEntries(
+    Object.values(ArtefactScanState).map((state) => [state, 0]),
+  ) as ArtefactScanStateCounts
+
+  const stateCounts = scans.reduce<ArtefactScanStateCounts>((acc, scan) => {
+    acc[scan.state]++
+    return acc
+  }, initialState)
+
+  const statePriority = [
+    ArtefactScanState.Error,
+    ArtefactScanState.InProgress,
+    ArtefactScanState.NotScanned,
+    ArtefactScanState.Complete,
+  ]
+
+  const state = statePriority.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
+
+  return {
+    tag: imageRef.tag,
+    state,
+    severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
+
+    ...(includeFullDetail && {
+      scanResults: scans,
+    }),
+  }
+}
+
+export async function listModelImagesWithScanResults(
+  user: UserInterface,
+  modelId: string,
+): Promise<ModelImagesWithScanResults[]> {
+  const modelImages = await listModelImages(user, modelId)
+
+  return Promise.all(
+    modelImages.map(async (img) => {
+      const scanSummaries = (
+        await Promise.all(img.tags.map((tag) => getImageWithScanResults(user, { ...img, tag })))
+      ).filter((r) => r.state !== ArtefactScanState.NotScanned)
+
+      return {
+        ...img,
+        scanSummaries,
+      }
+    }),
+  )
+}
+
+function countSeverities(scanSummary: ScanSummary): SeverityCounts {
+  const initial = Object.fromEntries(Object.values(SeverityLevel).map((severity) => [severity, 0])) as SeverityCounts
+
+  return scanSummary.reduce((acc, item) => {
+    if ('severity' in item) {
+      acc[item.severity]++
+    }
+    return acc
+  }, initial)
+}
+
+async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
+  ])
+
+  let layers: Descriptors[] = []
+  try {
+    layers = await getImageLayers(repositoryToken, image)
+  } catch (err) {
+    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
+      throw err
+    }
+  }
+  const layerDigests = layers.map((l) => l.digest)
+
+  if (layerDigests.length === 0) {
+    return []
+  }
+
+  return ScanModel.find({
+    artefactKind: ArtefactKind.IMAGE,
+    layerDigest: { $in: layerDigests },
+  })
+    .lean<ScanInterface[]>()
+    .exec()
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
@@ -225,6 +329,22 @@ export async function softDeleteImage(
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
+  /**
+   * TODO: add a scheduled deletion of `ScanModel`s.
+   *
+   * Approach:
+   * - Before deleting/renaming an image, record all layer digests from its manifest.
+   * - Schedule a cleanup task to run after the registry's Garbage Collector (GC) window.
+   * - For each recorded layer digest:
+   *   - `HEAD` the blob in the registry.
+   *   - If the blob returns 404, treat the layer as orphaned and delete any
+   *     corresponding `ScanModel`s.
+   *
+   * Notes:
+   * - Blob existence does not guarantee the layer is still referenced; this is
+   *   best-effort cleanup and relies on registry GC behaviour.
+   * - Cleanup must be delayed to avoid false positives before GC has run.
+   */
 }
 
 export async function restoreSoftDeletedImage(

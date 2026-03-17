@@ -311,6 +311,15 @@ instrumentation:
   enabled: false
   debug: false
 
+stroom:
+  logOnlyMode: true
+  feed: 'feed'
+  url: 'https://url'
+  environment: 'local'
+  interval: 1000 * 50
+  generator: 'Generator'
+  rejectUnauthorized: false
+
 modelMirror:
   import:
     enabled: false
@@ -327,7 +336,6 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
-
 
 # Inferencing cluster reference
 inference:
@@ -381,6 +389,8 @@ artefactscan:
       secretName: bailo-certs
       secretKey: cert.pem
       mountPath: /certs/artefactscan-ca.pem
-  # env: # Override settings here
-  #   TRIVY_DB_HOSTNAME: ghcr.io
-  #   TRIVY_DB_INSECURE: false
+  env: # Override settings here
+    BACKEND_CLIENT_CERT: '("/certs/cert.pem", "/certs/key.pem")'
+    BACKEND_CA_CERT: /usr/local/share/ca-certificates/cert.pem
+    # TRIVY_DB_INSECURE: false
+    # TRIVY_DB_HOSTNAME: ghcr.io

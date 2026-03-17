@@ -143,6 +143,14 @@ You can test out your new deployment using the example models which can be found
 
 <br />
 
+## Stroom Integration
+
+Bailo integrated with [Stroom](https://github.com/gchq/stroom), a [GCHQ](https://github.com/gchq)-developed data
+storage, processing and analysis platform.
+
+This integration enables Bailo to create and send event logging to Stroom for ingestion and later analysis, creating an
+audit trail and ensuring health within a given Bailo deployment. The integration is optional.
+
 ## Known Issues
 
 - _Issue: Sometimes Docker struggles when you add a new dependency._ <br /> Fix: Run `docker compose down --rmi all`

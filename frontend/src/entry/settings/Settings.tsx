@@ -163,6 +163,7 @@ export default function Settings({ entry }: SettingsProps) {
             selected={selectedCategory === SettingsCategory.DELETION}
             onClick={() => handleListItemClick(SettingsCategory.DELETION)}
             icon={<Delete color={selectedCategory === SettingsCategory.DELETION ? 'secondary' : 'inherit'} />}
+            dataTest='entryDeletionMenuItem'
           >
             Deletion
           </SimpleListItemButton>
