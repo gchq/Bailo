@@ -313,7 +313,7 @@ export const AuditInfo = {
   },
   UpdateImage: {
     typeId: 'UpdateImage',
-    description: 'Image Information Updated',
+    description: 'Update Model Image',
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Image,
   },
