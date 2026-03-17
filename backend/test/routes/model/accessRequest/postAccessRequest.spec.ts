@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult } from '../../../../src/connectors/artefactScanning/Base.js'
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+import { ArtefactKind } from '../../../../src/models/Scan.js'
 import { postAccessRequestSchema } from '../../../../src/routes/v2/model/accessRequest/postAccessRequest.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
@@ -15,6 +16,7 @@ const ArtefactScanResult: ArtefactScanResult = {
   state: 'complete',
   lastRunAt: new Date(),
   toolName: 'Test',
+  artefactKind: ArtefactKind.FILE,
 }
 
 const baseScannerMock = vi.hoisted(() => ({

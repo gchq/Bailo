@@ -109,12 +109,14 @@ const config: PartialDeep<Config> = {
     clamdscan: {
       host: '127.0.0.1',
       port: 8080,
+      concurrency: 1,
     },
 
     artefactscan: {
       protocol: 'http',
       host: '127.0.0.1',
       port: 8081,
+      concurrency: 1,
     },
   },
   mongo: {

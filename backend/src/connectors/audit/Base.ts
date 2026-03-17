@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 
 export const AuditKind = {
   Create: 'Create',
@@ -40,6 +40,7 @@ export const ResourceKind = {
   Image: 'image',
   Inference: 'inference',
   Export: 'export',
+  ArtefactScanning: 'artefact scanning',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -299,6 +300,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Image,
   },
+  UpdateImage: {
+    typeId: 'UpdateImage',
+    description: 'Update Model Image',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.Image,
+  },
   DeleteImage: {
     typeId: 'DeleteImage',
     description: 'Image Information Deleted',
@@ -392,6 +399,12 @@ export const AuditInfo = {
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Response,
   },
+  ViewScanners: {
+    typeId: 'ViewScanners',
+    description: 'Artefact scanners viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.ArtefactScanning,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -453,11 +466,10 @@ export abstract class BaseAuditConnector {
   abstract onUpdateInference(req: Request, inference: InferenceDoc): Promise<void>
   abstract onDeleteInference(req: Request, inference: InferenceDoc): Promise<void>
 
-  abstract onViewModelImages(
-    req: Request,
-    modelId: string,
-    images: { repository: string; name: string; tags: string[] }[],
-  ): Promise<void>
+  abstract onViewScanners(req: Request): Promise<void>
+
+  abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
+  abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
   abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[]): Promise<void>
