@@ -133,9 +133,6 @@ export type CreateReleaseParams = Optional<
 >
 export async function createRelease(user: UserInterface, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
-  if (EntryKind.MirroredModel === model.kind) {
-    throw BadReq(`Cannot create a release from a mirrored model.`)
-  }
 
   if (releaseParams.modelCardVersion) {
     // Ensure that the requested model card version exists.
@@ -209,10 +206,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
 export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'modelCardVersion' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
-  if (EntryKind.MirroredModel === model.kind) {
-    throw BadReq(`Cannot update a release on a mirrored model.`)
-  }
-  const release = await getReleaseBySemver(user, model, semver)
+  const release = await getReleaseBySemver(user, modelId, semver)
 
   Object.assign(release, delta)
   await validateRelease(user, model, release)
@@ -242,11 +236,6 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 }
 
 export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, comment: string) {
-  const model = await getModelById(user, modelId)
-  if (EntryKind.MirroredModel === model.kind) {
-    throw BadReq(`Cannot create a new comment on a mirrored model.`)
-  }
-
   const semverObj = semverStringToObject(semver)
   const release = await ReleaseModel.findOne({ modelId, semver: semverObj })
   if (!release) {

@@ -37,9 +37,6 @@ export async function uploadFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (EntryKind.MirroredModel === model.kind) {
-    throw BadReq('Cannot upload files to a mirrored model.')
-  }
 
   const fileId = longId()
 
