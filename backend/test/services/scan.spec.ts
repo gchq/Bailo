@@ -118,7 +118,7 @@ const registryClientMocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(() => 'token'),
+  issueAccessToken: vi.fn(() => 'token'),
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
