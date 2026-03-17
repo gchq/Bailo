@@ -284,15 +284,20 @@ export default function ImageTagInformation() {
                 />
               </Stack>
             </Stack>
-            <Box width='fit-content'>
-              <CodeLine line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`} />
-            </Box>
             <Stack
-              direction={{ sm: 'row', xs: 'column' }}
-              spacing={4}
-              alignItems='center'
+              direction={{ md: 'row', sm: 'column' }}
+              spacing={{ md: 4, sm: 1 }}
+              alignItems='flex-start'
               divider={<Divider flexItem orientation='vertical' />}
             >
+              <Stack spacing={1}>
+                <Typography fontWeight='bold'>URI</Typography>
+                <Box width='fit-content'>
+                  <CodeLine
+                    line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`}
+                  />
+                </Box>
+              </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Image size</Typography>
                 <Typography>{modelImage.imageSize ? prettyBytes(modelImage.imageSize) : 'Unknown size'}</Typography>
