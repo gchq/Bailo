@@ -16,7 +16,7 @@ import Paginate from 'src/common/Paginate'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
-import { ModelImagesWithOptionalScanResults } from 'types/types'
+import { ArtefactScanState, ModelImagesWithOptionalScanResults } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ModelImageDisplayProps = {
@@ -33,12 +33,25 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     setExpanded(!expanded)
   }
 
-  const getScanResultCounts = (imageTag: string) => {
+  const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
       const tagResults = modelImage.scanSummaries.find((tagResult) => tagResult.tag === imageTag)
 
-      if (tagResults) {
-        return tagResults.severityCounts
+      if (tagResults?.state === ArtefactScanState.NotScanned) {
+        return <Typography fontStyle='italic'>No scan available</Typography>
+      }
+      if (tagResults?.state === ArtefactScanState.Error) {
+        return (
+          <Typography fontStyle='italic' color='error'>
+            Scan was not able to run
+          </Typography>
+        )
+      }
+      if (tagResults?.state === ArtefactScanState.InProgress) {
+        return <Typography fontStyle='italic'>Scan in progress...</Typography>
+      }
+      if (tagResults?.state === ArtefactScanState.Complete) {
+        return <VulnerabilityResult {...tagResults.severityCounts} onRescan={() => handleRescan(imageTag)} />
       }
     }
   }
@@ -75,7 +88,7 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
             </Button>
           </Link>
         </Stack>
-        <VulnerabilityResult {...getScanResultCounts(tag)} onRescan={() => handleRescan(tag)} />
+        {reportDisplay(tag)}
       </Stack>
     </Box>
   )

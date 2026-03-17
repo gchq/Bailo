@@ -38,6 +38,7 @@ import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import { ArtefactScanState } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface VulnerabilityResultItem {
@@ -109,6 +110,7 @@ export default function ImageTagInformation() {
     if (!modelImage) {
       return
     }
+
     if (modelImage.scanResults !== undefined) {
       for (const results of modelImage.scanResults) {
         if (
@@ -297,14 +299,27 @@ export default function ImageTagInformation() {
               </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Vulnerabilities</Typography>
-                <VulnerabilityResult
-                  low={lowResults}
-                  medium={mediumResults}
-                  high={highResults}
-                  critical={criticalResults}
-                  unknown={unknownResults}
-                  onRescan={handleRescan}
-                />
+                {modelImage.state === ArtefactScanState.InProgress && (
+                  <Typography fontStyle='italic'>Scan in progress...</Typography>
+                )}
+                {modelImage.state === ArtefactScanState.Error && (
+                  <Typography fontStyle='italic' color='error'>
+                    Scan was not able to run
+                  </Typography>
+                )}
+                {modelImage.state === ArtefactScanState.NotScanned && (
+                  <Typography fontStyle='italic'>No scan available</Typography>
+                )}
+                {modelImage.state === ArtefactScanState.Complete && (
+                  <VulnerabilityResult
+                    low={lowResults}
+                    medium={mediumResults}
+                    high={highResults}
+                    critical={criticalResults}
+                    unknown={unknownResults}
+                    onRescan={handleRescan}
+                  />
+                )}
               </Stack>
             </Stack>
             <Accordion defaultExpanded>
