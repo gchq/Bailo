@@ -1,4 +1,4 @@
-import { ExpandMore } from '@mui/icons-material'
+import { Clear, ExpandMore } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import {
   Accordion,
@@ -245,6 +245,10 @@ export default function ImageTagInformation() {
     }
   }, [modelId, mutateImages, name, sendNotification, tag])
 
+  const handleClearFiltersButton = useCallback(() => {
+    setFilterList([])
+  }, [])
+
   if (isImageError) {
     return <MessageAlert message={isImageError.info.message} severity='error' />
   }
@@ -362,6 +366,11 @@ export default function ImageTagInformation() {
                         onClick={() => handleFilterListChipOnClick('UNKNOWN')}
                         label='Unknown'
                       />
+                      {filterList.length > 0 && (
+                        <Button size='small' startIcon={<Clear />} onClick={handleClearFiltersButton}>
+                          Clear
+                        </Button>
+                      )}
                     </Stack>
                     <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
                       <Table sx={{ minWidth: 650 }} size='small'>
