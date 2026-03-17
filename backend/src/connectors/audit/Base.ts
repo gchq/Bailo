@@ -40,6 +40,7 @@ export const ResourceKind = {
   Image: 'image',
   Inference: 'inference',
   Export: 'export',
+  ArtefactScanning: 'artefact scanning',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -299,6 +300,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Image,
   },
+  UpdateImage: {
+    typeId: 'UpdateImage',
+    description: 'Update Model Image',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.Image,
+  },
   DeleteImage: {
     typeId: 'DeleteImage',
     description: 'Image Information Deleted',
@@ -391,6 +398,12 @@ export const AuditInfo = {
     description: 'Delete a list of review roles',
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Response,
+  },
+  ViewScanners: {
+    typeId: 'ViewScanners',
+    description: 'Artefact scanners viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.ArtefactScanning,
   },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
