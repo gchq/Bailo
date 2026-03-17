@@ -266,17 +266,14 @@ export const getDockerRegistryAuth = [
 
     const scopes = Array.isArray(scope) ? scope : typeof scope === 'string' ? scope.split(' ') : null
 
-    if (!scopes) {
+    if (!scopes || scopes.some((s) => typeof s !== 'string')) {
       throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
     const requestedAccesses = scopes.map((s) => {
-      if (typeof s !== 'string') {
-        throw Forbidden({ scope: s }, 'Invalid scope value', rlog)
-      }
-
       try {
-        return parseScope(s)
+        // force type as above filters out non-strings
+        return parseScope(s as string)
       } catch {
         throw Forbidden({ scope: s }, 'Invalid scope format', rlog)
       }
