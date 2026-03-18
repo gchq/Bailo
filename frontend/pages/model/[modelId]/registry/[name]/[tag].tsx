@@ -46,7 +46,6 @@ interface VulnerabilityResultItem {
   description: string
   packageList: string[]
   severity: string
-  toolName?: string
 }
 
 export default function ImageTagInformation() {
@@ -69,6 +68,7 @@ export default function ImageTagInformation() {
   const [modelContent, setModalContent] = useState('')
   const [modalTitle, setModalTitle] = useState('')
   const [filterList, setFilterList] = useState<string[]>([])
+  const [toolName, setToolName] = useState('')
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -91,6 +91,10 @@ export default function ImageTagInformation() {
     [filterList],
   )
 
+  const updateToolName = useEffectEvent((resultToolName: string) => {
+    setToolName(resultToolName)
+  })
+
   const chipFilters = useMemo(() => {
     return ['Critical', 'High', 'Medium', 'Low', 'Unknown'].map((filter) => (
       <Chip
@@ -111,6 +115,7 @@ export default function ImageTagInformation() {
 
     if (modelImage.scanResults !== undefined) {
       for (const results of modelImage.scanResults) {
+        updateToolName(results.toolName)
         if (
           results.additionalInfo !== undefined &&
           'Results' in results.additionalInfo &&
@@ -259,6 +264,14 @@ export default function ImageTagInformation() {
                 />
               </Stack>
             </Stack>
+            <Stack spacing={1}>
+              <Typography fontWeight='bold'>URI</Typography>
+              <Box width='fit-content'>
+                <CodeLine
+                  line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`}
+                />
+              </Box>
+            </Stack>
             <Stack
               direction={{ md: 'row', sm: 'column' }}
               spacing={{ md: 4, sm: 1 }}
@@ -266,20 +279,16 @@ export default function ImageTagInformation() {
               divider={<Divider flexItem orientation='vertical' />}
             >
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>URI</Typography>
-                <Box width='fit-content'>
-                  <CodeLine
-                    line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`}
-                  />
-                </Box>
-              </Stack>
-              <Stack spacing={1}>
                 <Typography fontWeight='bold'>Compressed image size</Typography>
                 <Typography>{prettyBytes(modelImage.imageSize)}</Typography>
               </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Vulnerabilities</Typography>
                 <VulnerabilityResult results={modelImage} onRescan={handleRescan} />
+              </Stack>
+              <Stack spacing={1}>
+                <Typography fontWeight='bold'>Scanning tool</Typography>
+                <Typography>{toolName}</Typography>
               </Stack>
             </Stack>
             <Accordion defaultExpanded>
