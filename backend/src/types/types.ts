@@ -237,7 +237,6 @@ export type ModelImageTags = {
   repository: string
   name: string
   tags: Array<string>
-  imageSize?: number
 }
 
 export type ImageTagResult = {
@@ -245,7 +244,7 @@ export type ImageTagResult = {
   state: ArtefactScanStateKeys
   severityCounts: SeverityCounts
   scanResults?: ScanInterface[]
-  imageSize?: number
+  imageSize: number
 }
 
 export type ImageScanResults = {

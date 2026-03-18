@@ -27,7 +27,7 @@ import { rerunImageArtefactScan, useGetImageScanResults } from 'actions/artefact
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -38,8 +38,8 @@ import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { ArtefactScanState } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { plural } from 'utils/stringUtils'
 
 interface VulnerabilityResultItem {
   cve: string
@@ -63,11 +63,6 @@ export default function ImageTagInformation() {
   const sendNotification = useNotification()
 
   const [formattedData, setFormattedData] = useState<VulnerabilityResultItem[]>([])
-  const [lowResults, setLowResults] = useState(0)
-  const [mediumResults, setMediumResults] = useState(0)
-  const [highResults, setHighResults] = useState(0)
-  const [criticalResults, setCriticalResults] = useState(0)
-  const [unknownResults, setUnknownResults] = useState(0)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [open, setOpen] = useState(false)
@@ -80,32 +75,35 @@ export default function ImageTagInformation() {
 
   const theme = useTheme()
 
-  const setFormattedDataEvent = useEffectEvent(
-    (
-      data: VulnerabilityResultItem[],
-      criticalResultsFound: number,
-      highResultsFound: number,
-      mediumResultsFound: number,
-      lowResultsFound: number,
-      unknownResultsFound: number,
-    ) => {
-      setFormattedData(data)
-      setCriticalResults(criticalResultsFound)
-      setHighResults(highResultsFound)
-      setMediumResults(mediumResultsFound)
-      setLowResults(lowResultsFound)
-      setUnknownResults(unknownResultsFound)
-      setPage(0)
+  const setFormattedDataEvent = useEffectEvent((data: VulnerabilityResultItem[]) => {
+    setFormattedData(data)
+    setPage(0)
+  })
+
+  const handleFilterListChipOnClick = useCallback(
+    (filter: string) => {
+      if (filterList.includes(filter)) {
+        setFilterList((list) => list.filter((item) => item !== filter))
+      } else {
+        setFilterList([...filterList, filter])
+      }
     },
+    [filterList],
   )
+
+  const chipFilters = useMemo(() => {
+    return ['Critical', 'High', 'Medium', 'Low', 'Unknown'].map((filter) => (
+      <Chip
+        key={filter}
+        color={filterList.includes(filter.toUpperCase()) ? 'secondary' : 'default'}
+        onClick={() => handleFilterListChipOnClick(filter.toUpperCase())}
+        label={filter}
+      />
+    ))
+  }, [filterList, handleFilterListChipOnClick])
 
   useEffect(() => {
     let resultList: VulnerabilityResultItem[] = []
-    let criticalResults = 0
-    let highResults = 0
-    let mediumResults = 0
-    let lowResults = 0
-    let unknownResults = 0
 
     if (!modelImage) {
       return
@@ -127,22 +125,6 @@ export default function ImageTagInformation() {
                 if (existingItem) {
                   existingItem.packageList.push(vulnerability.PkgID)
                 } else {
-                  switch (vulnerability.Severity) {
-                    case 'CRITICAL':
-                      criticalResults++
-                      break
-                    case 'HIGH':
-                      highResults++
-                      break
-                    case 'MEDIUM':
-                      mediumResults++
-                      break
-                    case 'LOW':
-                      lowResults++
-                      break
-                    case 'UNKNOWN':
-                      unknownResults++
-                  }
                   resultList.push({
                     cve: vulnerability.VulnerabilityID,
                     description: vulnerability.Description,
@@ -159,7 +141,7 @@ export default function ImageTagInformation() {
     if (filterList.length > 0) {
       resultList = resultList.filter((resultListItem) => filterList.includes(resultListItem.severity))
     }
-    setFormattedDataEvent(resultList, criticalResults, highResults, mediumResults, lowResults, unknownResults)
+    setFormattedDataEvent(resultList)
   }, [filterList, name, modelImage, tag, modelId])
 
   const handleModalOpen = useCallback((cve: string, description: string) => {
@@ -216,23 +198,12 @@ export default function ImageTagInformation() {
     setPage(0)
   }
 
-  const handleFilterListChipOnClick = useCallback(
-    (filter: string) => {
-      if (filterList.includes(filter)) {
-        setFilterList((list) => list.filter((item) => item !== filter))
-      } else {
-        setFilterList([...filterList, filter])
-      }
-    },
-    [filterList],
-  )
-
   const handleRescan = useCallback(async () => {
     const response = await rerunImageArtefactScan(modelId as string, name as string, tag as string)
     if (response.status === 200) {
       sendNotification({
         variant: 'success',
-        msg: `Starting manual re-scan of ${name}:${tag}`,
+        msg: `${name}:${tag} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateImages()
@@ -303,32 +274,12 @@ export default function ImageTagInformation() {
                 </Box>
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Image size</Typography>
-                <Typography>{modelImage.imageSize ? prettyBytes(modelImage.imageSize) : 'Unknown size'}</Typography>
+                <Typography fontWeight='bold'>Compressed image size</Typography>
+                <Typography>{prettyBytes(modelImage.imageSize)}</Typography>
               </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Vulnerabilities</Typography>
-                {modelImage.state === ArtefactScanState.InProgress && (
-                  <Typography fontStyle='italic'>Scan in progress...</Typography>
-                )}
-                {modelImage.state === ArtefactScanState.Error && (
-                  <Typography fontStyle='italic' color='error'>
-                    Scan was not able to run
-                  </Typography>
-                )}
-                {modelImage.state === ArtefactScanState.NotScanned && (
-                  <Typography fontStyle='italic'>No scan available</Typography>
-                )}
-                {modelImage.state === ArtefactScanState.Complete && (
-                  <VulnerabilityResult
-                    low={lowResults}
-                    medium={mediumResults}
-                    high={highResults}
-                    critical={criticalResults}
-                    unknown={unknownResults}
-                    onRescan={handleRescan}
-                  />
-                )}
+                <VulnerabilityResult results={modelImage} onRescan={handleRescan} />
               </Stack>
             </Stack>
             <Accordion defaultExpanded>
@@ -336,66 +287,49 @@ export default function ImageTagInformation() {
                 <Typography fontWeight='bold'>Vulnerability report</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                {formattedData.length === 0 && <EmptyBlob text='No vulnerabilities found' />}
-                {formattedData.length > 0 && (
-                  <Stack spacing={2}>
-                    <Stack direction='row' spacing={1} alignItems='center'>
-                      <Typography>Filters:</Typography>
-                      <Chip
-                        color={filterList.includes('CRITICAL') ? 'secondary' : 'default'}
-                        onClick={() => handleFilterListChipOnClick('CRITICAL')}
-                        label='Critical'
-                      />
-                      <Chip
-                        color={filterList.includes('HIGH') ? 'secondary' : 'default'}
-                        onClick={() => handleFilterListChipOnClick('HIGH')}
-                        label='High'
-                      />
-                      <Chip
-                        color={filterList.includes('MEDIUM') ? 'secondary' : 'default'}
-                        onClick={() => handleFilterListChipOnClick('MEDIUM')}
-                        label='Medium'
-                      />
-                      <Chip
-                        color={filterList.includes('LOW') ? 'secondary' : 'default'}
-                        onClick={() => handleFilterListChipOnClick('LOW')}
-                        label='Low'
-                      />
-                      <Chip
-                        color={filterList.includes('UNKNOWN') ? 'secondary' : 'default'}
-                        onClick={() => handleFilterListChipOnClick('UNKNOWN')}
-                        label='Unknown'
-                      />
-                      {filterList.length > 0 && (
-                        <Button size='small' startIcon={<Clear />} onClick={handleClearFiltersButton}>
-                          Clear
-                        </Button>
-                      )}
-                    </Stack>
-                    <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-                      <Table sx={{ minWidth: 650 }} size='small'>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>CVE name</TableCell>
-                            <TableCell>Severity</TableCell>
-                            <TableCell>Package list</TableCell>
-                            <TableCell>Description</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>{tableRows()}</TableBody>
-                      </Table>
-                    </Box>
-                    <TablePagination
-                      rowsPerPageOptions={[10]}
-                      component='div'
-                      count={formattedData.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
+                <Stack spacing={2}>
+                  <Stack direction='row' spacing={1} alignItems='center'>
+                    <Typography>Filters:</Typography>
+                    {chipFilters}
+                    {filterList.length > 0 && (
+                      <Button
+                        startIcon={<Clear />}
+                        onClick={handleClearFiltersButton}
+                        aria-label='Clear vulnerability table filters'
+                      >
+                        Clear
+                      </Button>
+                    )}
+                    <Typography>{`(Showing ${plural(formattedData.length, 'result')})`}</Typography>
                   </Stack>
-                )}
+                  {formattedData.length === 0 && <EmptyBlob text='No vulnerabilities found' />}
+                  {formattedData.length > 0 && (
+                    <>
+                      <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
+                        <Table sx={{ minWidth: 650 }} size='small'>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>CVE name</TableCell>
+                              <TableCell>Severity</TableCell>
+                              <TableCell>Package list</TableCell>
+                              <TableCell>Description</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>{tableRows()}</TableBody>
+                        </Table>
+                      </Box>
+                      <TablePagination
+                        rowsPerPageOptions={[10]}
+                        component='div'
+                        count={formattedData.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                      />
+                    </>
+                  )}
+                </Stack>
               </AccordionDetails>
             </Accordion>
           </Stack>

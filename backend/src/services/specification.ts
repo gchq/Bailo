@@ -233,6 +233,7 @@ export const imageWithScanResultsSchema = z.object({
         tag: z.string().openapi('v1-cpu'),
         severity: SeverityCountsSchema,
       }),
+      imageSize: z.number(),
     }),
   ),
 })

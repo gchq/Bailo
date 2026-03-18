@@ -122,16 +122,13 @@ export function useGetEntryRoles(entryId?: string) {
 
 const emptyImageList = []
 
-export function useGetModelImages(modelId?: string, includeCount?: boolean) {
-  const queryParams = {
-    ...(includeCount && { includeCount }),
-  }
+export function useGetModelImages(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
     ErrorInfo
-  >(modelId ? `/api/v2/model/${modelId}/images?${qs.stringify(queryParams)}` : null, fetcher)
+  >(modelId ? `/api/v2/model/${modelId}/images` : null, fetcher)
 
   return {
     mutateModelImages: mutate,

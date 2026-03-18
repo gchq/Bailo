@@ -145,7 +145,7 @@ export async function getImageWithScanResults(
   }
 }
 
-async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface) {
+async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface): Promise<Descriptors[]> {
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])

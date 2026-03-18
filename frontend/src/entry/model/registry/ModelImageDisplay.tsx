@@ -1,4 +1,4 @@
-import { ExpandLess, ExpandMore, LocalOffer } from '@mui/icons-material'
+import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import {
   Accordion,
   AccordionDetails,
@@ -11,12 +11,16 @@ import {
   Typography,
 } from '@mui/material'
 import { rerunImageArtefactScan } from 'actions/artefactScanning'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
+import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
-import { ArtefactScanState, ModelImagesWithOptionalScanResults } from 'types/types'
+import MessageAlert from 'src/MessageAlert'
+import { ModelImagesWithOptionalScanResults } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ModelImageDisplayProps = {
@@ -26,6 +30,7 @@ type ModelImageDisplayProps = {
 
 export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisplayProps) {
   const [expanded, setExpanded] = useState(false)
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const sendNotification = useNotification()
 
@@ -37,22 +42,7 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     if (modelImage && modelImage.scanSummaries) {
       const tagResults = modelImage.scanSummaries.find((tagResult) => tagResult.tag === imageTag)
 
-      if (tagResults?.state === ArtefactScanState.NotScanned) {
-        return <Typography fontStyle='italic'>No scan available</Typography>
-      }
-      if (tagResults?.state === ArtefactScanState.Error) {
-        return (
-          <Typography fontStyle='italic' color='error'>
-            Scan was not able to run
-          </Typography>
-        )
-      }
-      if (tagResults?.state === ArtefactScanState.InProgress) {
-        return <Typography fontStyle='italic'>Scan in progress...</Typography>
-      }
-      if (tagResults?.state === ArtefactScanState.Complete) {
-        return <VulnerabilityResult {...tagResults.severityCounts} onRescan={() => handleRescan(imageTag)} />
-      }
+      return <VulnerabilityResult results={tagResults} onRescan={() => handleRescan(imageTag)} warningOnly />
     }
   }
 
@@ -62,7 +52,7 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
       if (response.status === 200) {
         sendNotification({
           variant: 'success',
-          msg: `Starting manual re-scan of ${name}:${tag}`,
+          msg: `${name}:${tag} is being rescanned`,
           anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
         })
         mutate()
@@ -80,20 +70,30 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
   const modelImageTag = (tag: string) => (
     <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${tag}`} sx={{ py: 0.5 }}>
       <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />}>
-        <Stack direction='row' alignItems='center' justifyContent='left' spacing={2}>
-          <LocalOffer color='primary' />
-          <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${tag}`}>
-            <Button size='large' color='primary'>
-              {tag}
-            </Button>
-          </Link>
-        </Stack>
+        <Link href={`/model/${modelImage.repository}/registry/${modelImage.name}/${tag}`}>
+          <Button size='large' color='primary' variant='outlined'>
+            {tag}
+          </Button>
+        </Link>
+        <Box width='fit-content'>
+          <CodeLine
+            line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
+          />
+        </Box>
         {reportDisplay(tag)}
       </Stack>
     </Box>
   )
 
   const modelImageTagRow = ({ data }) => modelImageTag(data.tag)
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
 
   return (
     <>

@@ -40,14 +40,14 @@ export function rerunImageArtefactScan(modelId: string, name: string, tag: strin
 export function useGetImageScanResults(modelId: string, name: string, tag: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      image: ImageTagResult
+      imageBreakdown: ImageTagResult
     },
     ErrorInfo
   >(`/api/v2/model/${modelId}/image/${name}/${tag}`, fetcher)
 
   return {
     mutateImages: mutate,
-    image: data?.image,
+    image: data?.imageBreakdown,
     isImageLoading: isLoading,
     isImageError: error,
   }

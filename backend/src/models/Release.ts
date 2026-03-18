@@ -29,7 +29,6 @@ export interface ReleaseInterface {
 export interface RepoRefInterface {
   repository: string
   name: string
-  imageSize?: number
 }
 export interface ImageRefInterface extends RepoRefInterface {
   tag: string

@@ -897,16 +897,14 @@ export type ModelImageTags = {
   repository: string
   name: string
   tags: Array<string>
-  imageSize?: number
 }
 
 export type ImageTagResult = {
   tag: string
   state: ArtefactScanStateKeys
-  lastRunAt?: Date
   severityCounts: SeverityCounts
   scanResults?: ScanInterface[]
-  imageSize?: number
+  imageSize: number
 }
 
 export type ImageScanResults = {

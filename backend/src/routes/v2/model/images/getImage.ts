@@ -26,7 +26,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/model/{modelId}/image/{name}/{tag}',
   tags: ['image'],
-  description: 'Get information associated with a specific tagged image for a model, optionally with scan results.',
+  description: 'Get information associated with a specific tagged image for a model.',
   schema: getImageSchema,
   responses: {
     200: {
@@ -43,7 +43,7 @@ registerPath({
 })
 
 interface GetImagesResponse {
-  image: ImageTagResult
+  imageBreakdown: ImageTagResult
 }
 
 export const getImage = [
@@ -53,11 +53,11 @@ export const getImage = [
       params: { modelId, name, tag },
     } = parse(req, getImageSchema)
 
-    const image = await getImageWithScanResults(req.user, { repository: modelId, name, tag }, true)
+    const imageBreakdown = await getImageWithScanResults(req.user, { repository: modelId, name, tag }, true)
     await audit.onViewModelImage(req, modelId, name, tag)
 
     res.json({
-      image,
+      imageBreakdown,
     })
   },
 ]

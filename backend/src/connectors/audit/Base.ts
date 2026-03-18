@@ -293,12 +293,6 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.SchemaMigration,
   },
-  ViewScanners: {
-    typeId: 'ViewScanners',
-    description: 'Artefact scanners viewed',
-    auditKind: AuditKind.View,
-    resourceKind: ResourceKind.ArtefactScanning,
-  },
   ViewModelImages: {
     typeId: 'ViewModelImages',
     description: 'Model Images Viewed',
@@ -409,6 +403,12 @@ export const AuditInfo = {
     description: 'Delete a list of review roles',
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Response,
+  },
+  ViewScanners: {
+    typeId: 'ViewScanners',
+    description: 'Artefact scanners viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.ArtefactScanning,
   },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
