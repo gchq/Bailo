@@ -6,6 +6,7 @@ import {
   checkAccess,
   getAdminToken,
   getDockerRegistryAuth,
+  parseResourceScope,
   softDeletePrefix,
 } from '../../../src/routes/v1/registryAuth.js'
 
@@ -113,6 +114,117 @@ async function invokeWithErrorHandling(req: any, res: any) {
 }
 
 describe('registryAuth', () => {
+  describe('parseResourceScope', () => {
+    const cases: Array<{
+      name: string
+      input: string
+      expected: any
+      throws?: boolean
+    }> = [
+      {
+        name: 'single scope, single action',
+        input: 'repo:myrepo:pull',
+        expected: [{ type: 'repo', name: 'myrepo', actions: ['pull'] }],
+      },
+      {
+        name: 'single scope, multiple actions',
+        input: 'repo:myrepo:pull,push,delete',
+        expected: [{ type: 'repo', name: 'myrepo', actions: ['pull', 'push', 'delete'] }],
+      },
+      {
+        name: 'multiple scopes',
+        input: 'repo:myrepo:pull image:myimage:push',
+        expected: [
+          { type: 'repo', name: 'myrepo', actions: ['pull'] },
+          { type: 'image', name: 'myimage', actions: ['push'] },
+        ],
+      },
+      {
+        name: 'wildcard action',
+        input: 'repo:myrepo:*',
+        expected: [{ type: 'repo', name: 'myrepo', actions: ['*'] }],
+      },
+      {
+        name: 'resource type with subtype',
+        input: 'repo(docker):library/nginx:pull,push',
+        expected: [{ type: 'repo(docker)', name: 'library/nginx', actions: ['pull', 'push'] }],
+      },
+      {
+        name: 'hostname in resource name',
+        input: 'repo:registry.example.com/library/nginx:pull',
+        expected: [{ type: 'repo', name: 'registry.example.com/library/nginx', actions: ['pull'] }],
+      },
+      {
+        name: 'hostname with port',
+        input: 'repo:registry.example.com:5000/library/nginx:pull',
+        expected: [
+          {
+            type: 'repo',
+            name: 'registry.example.com:5000/library/nginx',
+            actions: ['pull'],
+          },
+        ],
+      },
+      {
+        name: 'path components with separators',
+        input: 'repo:my_org/my.repo__name-v1:pull',
+        expected: [{ type: 'repo', name: 'my_org/my.repo__name-v1', actions: ['pull'] }],
+      },
+      {
+        name: 'list action',
+        input: 'repo:myrepo:list',
+        expected: [{ type: 'repo', name: 'myrepo', actions: ['list'] }],
+      },
+      {
+        name: 'empty action allowed by grammar',
+        input: 'repo:myrepo:',
+        expected: [{ type: 'repo', name: 'myrepo', actions: [] }],
+      },
+      {
+        name: 'complex mixed example',
+        input: 'repo(docker):registry.io/team/app_v2:pull,push image(oci):busybox:*',
+        expected: [
+          {
+            type: 'repo(docker)',
+            name: 'registry.io/team/app_v2',
+            actions: ['pull', 'push'],
+          },
+          {
+            type: 'image(oci)',
+            name: 'busybox',
+            actions: ['*'],
+          },
+        ],
+      },
+      {
+        name: 'invalid scope is rejected',
+        input: 'repo:myrepo:pull *',
+        expected: null,
+        throws: true,
+      },
+      {
+        name: 'missing resourcetype is rejected',
+        input: ':myrepo:pull',
+        expected: null,
+        throws: true,
+      },
+      {
+        name: 'missing resourcename is rejected',
+        input: 'repo::pull',
+        expected: null,
+        throws: true,
+      },
+    ]
+
+    test.each(cases)('$name', ({ input, expected, throws }) => {
+      if (throws) {
+        expect(() => parseResourceScope(input)).toThrow()
+      } else {
+        expect(parseResourceScope(input)).toEqual(expected)
+      }
+    })
+  })
+
   describe('getAdminToken', () => {
     test('success > deterministic UUID-like token', async () => {
       const token = await getAdminToken()

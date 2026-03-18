@@ -20,10 +20,10 @@ import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
 
-const JWT_ALGORITHM = 'RS256'
+const JWT_ALGORITHM: jwt.Algorithm = 'RS256'
 const ACCESS_TOKEN_TTL: StringValue = '1 hour'
 const REFRESH_TOKEN_TTL: StringValue = '30 days'
-const cryptoCache = new NodeCache({ stdTTL: 0, useClones: false })
+const cryptoCache = new NodeCache({ useClones: false })
 
 const READ_ONLY_ACTIONS = ['pull', 'list'] as const
 
@@ -32,7 +32,7 @@ export const softDeletePrefix = 'soft_deleted/'
 
 export async function getAdminToken(): Promise<string> {
   const cached = cryptoCache.get<string>('adminToken')
-  if (cached) {
+  if (cached !== undefined) {
     return cached
   }
 
@@ -49,7 +49,7 @@ export async function getAdminToken(): Promise<string> {
 
 async function getPrivateKey(): Promise<string> {
   const cached = cryptoCache.get<string>('privateKey')
-  if (cached) {
+  if (cached !== undefined) {
     return cached
   }
 
@@ -61,7 +61,7 @@ async function getPrivateKey(): Promise<string> {
 
 async function getCertificate(): Promise<X509Certificate> {
   const cached = cryptoCache.get<X509Certificate>('certificate')
-  if (cached) {
+  if (cached !== undefined) {
     return cached
   }
 
@@ -73,7 +73,7 @@ async function getCertificate(): Promise<X509Certificate> {
 
 async function getKeyId(): Promise<string> {
   const cached = cryptoCache.get<string>('kid')
-  if (cached) {
+  if (cached !== undefined) {
     return cached
   }
   const kid = await getKid(await getCertificate())
@@ -145,20 +145,88 @@ export function issueAccessToken(user: UserInterface, access: Array<Access>): Pr
   )
 }
 
-function parseScope(scope: string): Access {
-  const parts = scope.split(':')
-  if (parts.length !== 3) {
-    throw new Error('Invalid scope format')
+// See https://distribution.github.io/distribution/spec/auth/scope/#resource-scope-grammar
+export function parseResourceScope(input: string): Access[] {
+  const accesses: Access[] = []
+
+  // Split on spaces for multiple `resourcescope` entries
+  const scopeParts = input.trim().split(/\s+/)
+
+  /**
+   * Full `resourcescope` regex
+   *
+   * Grammar mapping:
+   *   resourcescope := resourcetype ":" resourcename ":" action [ "," action ]*
+   */
+  const re = new RegExp(
+    '^' +
+      // resourcetype
+      //   resourcetype := resourcetypevalue [ "(" resourcetypevalue ")" ]
+      //   resourcetypevalue := /[a-z0-9]+/
+      '(?<type>[a-z0-9]+(?:\\([a-z0-9]+\\))?)' +
+      ':' +
+      // resourcename
+      //   resourcename := [ hostname "/" ] component [ "/" component ]*
+      '(?<name>' +
+      // Optional hostname + "/"
+      //   hostname := hostcomponent ("." hostcomponent)* [ ":" port-number ]
+      '(?:' +
+      '(?:' +
+      // hostcomponent
+      '(?:[a-zA-Z0-9]|' +
+      '[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]' +
+      ')' +
+      ')' +
+      '(?:\\.' +
+      '(?:[a-zA-Z0-9]|' +
+      '[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]' +
+      ')' +
+      ')*' +
+      '(?::[0-9]+)?' +
+      '/' +
+      ')?' +
+      // component
+      //   component := alpha-numeric ( separator alpha-numeric )*
+      //   alpha-numeric := /[a-z0-9]+/
+      '[a-z0-9]+' +
+      '(?:' +
+      '(?:[_.]|__|-*)' +
+      '[a-z0-9]+' +
+      ')*' +
+      // Additional "/component" segments
+      '(?:/' +
+      '[a-z0-9]+' +
+      '(?:' +
+      '(?:[_.]|__|-*)' +
+      '[a-z0-9]+' +
+      ')*' +
+      ')*' +
+      ')' +
+      ':' +
+      // actions
+      //   action := /[a-z]*/
+      //   Multiple actions are comma-separated
+      '(?<actions>(?:\\*|[a-z]*)(?:,(?:\\*|[a-z]*))*)' +
+      '$',
+  )
+
+  for (const part of scopeParts) {
+    const match = re.exec(part)
+    if (!match?.groups) {
+      throw new Error(`Invalid resource scope: ${part}`)
+    }
+
+    // Split comma-separated actions
+    const actions = match.groups.actions.split(',').filter((a) => a.length > 0) as Action[]
+
+    accesses.push({
+      type: match.groups.type,
+      name: match.groups.name,
+      actions,
+    })
   }
 
-  const [type, name, actionString] = parts
-  const actions = actionString.split(',') as Action[]
-
-  if (!type || !name || actions.length === 0) {
-    throw new Error('Invalid scope content')
-  }
-
-  return { type, name, actions }
+  return accesses
 }
 
 export async function checkAccess(access: Access, user: UserInterface, admin?: boolean): Promise<AuthResponse> {
@@ -270,10 +338,12 @@ export const getDockerRegistryAuth = [
       throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
-    const requestedAccesses = scopes.map((s) => {
+    const requestedAccesses: Access[] = []
+    scopes.forEach((s) => {
       try {
         // force type as above filters out non-strings
-        return parseScope(s as string)
+        const parsed = parseResourceScope(s as string)
+        requestedAccesses.push(...parsed)
       } catch {
         throw Forbidden({ scope: s }, 'Invalid scope format', rlog)
       }
