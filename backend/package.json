@@ -79,7 +79,7 @@
     "undici": "^7.24.1",
     "utility-types": "^3.11.0",
     "uuid": "^13.0.0",
-    "xmlbuilder2": "^3.1.1",
+    "xmlbuilder2": "^4.0.3",
     "yargs": "^18.0.0",
     "zod": "^3.25.67",
     "zod-error": "^1.5.0"
