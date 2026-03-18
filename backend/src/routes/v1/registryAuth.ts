@@ -188,18 +188,11 @@ export function parseResourceScope(input: string): Access[] {
       // component
       //   component := alpha-numeric ( separator alpha-numeric )*
       //   alpha-numeric := /[a-z0-9]+/
-      '[a-z0-9]+' +
-      '(?:' +
-      '(?:[_.]|__|-*)' +
-      '[a-z0-9]+' +
-      ')*' +
+      // Simplified to a single character class to avoid nested ambiguous quantifiers
+      '[a-z0-9._-]+' +
       // Additional "/component" segments
       '(?:/' +
-      '[a-z0-9]+' +
-      '(?:' +
-      '(?:[_.]|__|-*)' +
-      '[a-z0-9]+' +
-      ')*' +
+      '[a-z0-9._-]+' +
       ')*' +
       ')' +
       ':' +
