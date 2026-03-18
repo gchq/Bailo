@@ -34,6 +34,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Using a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
   { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
+  { title: 'Deletion', slug: 'users/deletion', header: true },
+  { title: 'Deleting a Model', slug: 'users/deletion/soft-delete' },
+
   { title: 'Model Mirroring', slug: 'users/model-mirroring', header: true },
   { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },
   { title: 'Editing a Mirrored Model Card', slug: 'users/model-mirroring/editing-a-mirrored-model-card' },

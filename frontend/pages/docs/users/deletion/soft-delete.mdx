@@ -1,0 +1,64 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import bailoDeleteModel from 'public/docs/bailo_delete_model.png'
+import bailoDeleteConfirm from 'public/docs/bailo_delete_model_confirm.png'
+
+# Deleting a model
+
+Models can be permanently deleted from Bailo by users with the appropriate permissions. **Deletion is irreversible** and
+removes the model and all associated data.
+
+## Who can delete a model
+
+You must have **Delete** permission on the model. If you do not have permission, the delete action will be blocked.
+
+## What happens when a model is deleted
+
+Deleting a model removes **all associated resources**, including:
+
+- Model card revisions
+- Reviews and responses
+- Releases (all versions)
+- Docker images and tags
+- Files and scans
+- Inference records
+- Access requests
+- Webhooks
+- Tokens referencing the model
+
+The deletion is performed as a transactional operation to ensure consistency.
+
+## How to delete a model
+
+1. Open the model.
+2. Navigate to **Settings**.
+3. Scroll to the **Deletion** section.
+4. Click **Delete Model**.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='model settings deletion section' src={bailoDeleteModel} />
+</Box>
+
+## Confirming deletion
+
+To prevent accidental deletion, you must confirm the action:
+
+1. A confirmation dialog will appear.
+2. Type the **exact model name** into the confirmation field.
+3. Click **Delete** or press **Enter** once the name matches.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='delete model confirmation dialog' src={bailoDeleteConfirm} />
+</Box>
+
+If the name does not match exactly, the delete button remains disabled.
+
+## After deletion
+
+- The model is immediately removed.
+- You are redirected to the Bailo home page.
+- The action cannot be undone.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
