@@ -2,7 +2,7 @@
 
 exports[`routes > images > getImage > 200 > ok 1`] = `
 {
-  "image": [
+  "imageBreakdown": [
     {
       "_id": "test",
     },
