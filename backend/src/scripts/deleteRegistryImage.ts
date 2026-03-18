@@ -19,6 +19,24 @@ async function main() {
     const token = await getAccessToken(user, [
       { type: 'repository', name: `${image}`, actions: ['push', 'pull', 'delete'] },
     ])
+    /**
+     * The invalid push was of the form:
+     *   <registryHost>/<modelId>:<tag>
+     *
+     * i.e. no image name under the model. In registry terms this maps to:
+     *   /v2/<modelId>/manifests/<tag>
+     *
+     * The registry client expects an ImageRefInterface of the form:
+     *   { repository, name, tag }
+     *
+     * To produce /v2/<modelId>/manifests/<tag>, we set:
+     *   repository = ''
+     *   name        = <modelId>
+     *
+     * The URL resolves to <registry>/v2//<image>/manifests/<tag> but HTTP URL
+     * parsing treats multiple consecutive `/` characters in the path as
+     * equivalent in most servers and proxies, so the extra `/` is ignored.
+     */
     const imageRefByTag = {
       repository: '',
       name: image,
