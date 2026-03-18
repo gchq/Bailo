@@ -17,7 +17,7 @@ async function main() {
   try {
     const user = { dn: 'admin' }
     const token = await getAccessToken(user, [
-      { type: 'repository', name: `${image}`, actions: ['push', 'pull', 'delete'] },
+      { type: 'repository', name: image, actions: ['push', 'pull', 'delete'] },
     ])
     /**
      * The invalid push was of the form:
