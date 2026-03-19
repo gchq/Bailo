@@ -39,7 +39,10 @@ export const patchModelSchema = z.object({
     collaborators: z
       .array(
         z.object({
-          entity: z.string().openapi({ example: 'user:user' }),
+          entity: z
+            .string()
+            .regex(/^(?!.*%20).*/, { message: 'Please remove space (URL encoding is %20)' })
+            .openapi({ example: 'user:user' }),
           roles: z.array(z.string()).openapi({ example: ['owner', 'contributor'] }),
         }),
       )
