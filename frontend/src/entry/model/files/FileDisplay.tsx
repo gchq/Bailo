@@ -187,7 +187,7 @@ export default function FileDisplay({
       file.scanResults !== undefined &&
       file.scanResults.some((scan) => scan.state === ScanState.Error)
     ) {
-      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Warning /> })
+      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Error /> })
       return
     } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
       setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
@@ -258,7 +258,6 @@ export default function FileDisplay({
           <Chip
             color={chipDisplay.colour}
             icon={chipDisplay.icon}
-            size='small'
             onClick={(e) => setAnchorElScan(e.currentTarget)}
             label={chipDisplay.label}
           />
