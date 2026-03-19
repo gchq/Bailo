@@ -46,6 +46,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -259,6 +260,66 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
 ]
 `;
 
+exports[`services > file > removeFiles > success hard delete 1`] = `
+[
+  [
+    {
+      "fileId": {
+        "$eq": "73859F8D26679D2E52597326",
+      },
+    },
+    undefined,
+  ],
+  [
+    {
+      "fileId": {
+        "$eq": "62379525E2D97662D8F95837",
+      },
+    },
+    undefined,
+  ],
+]
+`;
+
+exports[`services > file > removeFiles > success hard delete 2`] = `
+[
+  {
+    "_id": {
+      "toString": [MockFunction] {
+        "calls": [
+          [],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": "73859F8D26679D2E52597326",
+          },
+        ],
+      },
+    },
+    "id": "73859F8D26679D2E52597326",
+    "modelId": "testModel",
+  },
+  {
+    "_id": {
+      "toString": [MockFunction] {
+        "calls": [
+          [],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": "62379525E2D97662D8F95837",
+          },
+        ],
+      },
+    },
+    "id": "62379525E2D97662D8F95837",
+    "modelId": "testModel2",
+  },
+]
+`;
+
 exports[`services > file > startUploadMultipartFile > success 1`] = `
 {
   "chunks": [
@@ -288,6 +349,7 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
     "findOneAndDelete": [MockFunction],
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
+    "id": "mock-id",
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],
@@ -385,6 +447,7 @@ exports[`services > file > uploadFile > success 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -427,6 +490,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],

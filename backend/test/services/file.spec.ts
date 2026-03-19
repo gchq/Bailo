@@ -5,6 +5,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { ArtefactKind } from '../../src/models/Scan.js'
 import {
   downloadFile,
   finishUploadMultipartFile,
@@ -28,6 +29,7 @@ const FileModelMock = getTypedModelMock('FileModel')
 const ScanModelMock = getTypedModelMock('ScanModel')
 
 const logMock = vi.hoisted(() => ({
+  debug: vi.fn(),
   info: vi.fn(),
   warn: vi.fn(),
 }))
@@ -52,11 +54,26 @@ const configMock = vi.hoisted(
         },
       },
       connectors: {
+        authentication: {
+          kind: 'silly',
+        },
+        audit: {
+          kind: 'silly',
+        },
+        authorisation: {
+          kind: 'basic',
+        },
         artefactScanners: {
           kinds: ['clamAV'],
           retryDelayInMinutes: 5,
           maxInitRetries: 5,
           initRetryDelay: 5000,
+        },
+      },
+      registry: {
+        connection: {
+          internal: 'https://localhost:5000',
+          insecure: true,
         },
       },
     }) as any,
@@ -75,10 +92,11 @@ const fileScanResult: ArtefactScanResult = {
   state: 'complete',
   toolName: 'Test',
   lastRunAt: new Date(),
+  artefactKind: ArtefactKind.FILE,
 }
 
 const fileScanningMock = vi.hoisted(() => ({
-  scannersInfo: vi.fn(() => ({ scannerNames: [] })),
+  scannersInfo: vi.fn(() => []),
   startScans: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
@@ -87,6 +105,7 @@ const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => ({ pipe: vi.fn(), on: vi.fn() })),
   completeMultipartUpload: vi.fn(),
+  deleteObject: vi.fn(),
   headObject: vi.fn(() => ({ ContentLength: 100 })),
   startMultipartUpload: vi.fn(() => ({ uploadId: 'uploadId' })),
 }))
@@ -326,6 +345,25 @@ describe('services > file', () => {
     expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
     expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
+    expect(s3Mocks.deleteObject).not.toBeCalled()
+    expect(result).toMatchSnapshot()
+  })
+
+  test('removeFiles > success hard delete', async () => {
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+
+    vi.mocked(FileModelMock.aggregate)
+      .mockResolvedValueOnce([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModel2', _id: { toString: vi.fn(() => testFileIdReversed) } }])
+
+    const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], undefined, true)
+
+    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
+    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
+    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
+    expect(s3Mocks.deleteObject).toBeCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
 

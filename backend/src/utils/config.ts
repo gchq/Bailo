@@ -334,6 +334,16 @@ export interface Config {
     debug: boolean
   }
 
+  stroom: {
+    logOnlyMode: boolean
+    feed: string
+    url: string
+    environment: string
+    interval: number
+    generator: string
+    rejectUnauthorized: boolean
+  }
+
   /** ### Artefact Scanning
    *
    * Scanning for files and images within models, including AV and CVEs.

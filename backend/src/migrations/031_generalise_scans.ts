@@ -1,4 +1,4 @@
-import ScanModel, { ModelScanSummary, ScanSummary, SeverityLevelKeys } from '../models/Scan.js'
+import ScanModel, { ArtefactScanSummary, ScanSummary, SeverityLevelKeys } from '../models/Scan.js'
 
 export async function up() {
   await ScanModel.updateMany({ summary: { $exists: false }, viruses: { $exists: true } }, [
@@ -28,7 +28,10 @@ export async function up() {
           }
           const severityPart = summaryBefore.slice(0, colonIndex).trim().toLowerCase() as SeverityLevelKeys
           const vulnerabilityPart = summaryBefore.slice(colonIndex + 1).trim()
-          newSummary.push({ severity: severityPart, vulnerabilityDescription: vulnerabilityPart } as ModelScanSummary)
+          newSummary.push({
+            severity: severityPart,
+            vulnerabilityDescription: vulnerabilityPart,
+          } as ArtefactScanSummary)
         }
       }
       scan.set('summary', newSummary)

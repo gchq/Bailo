@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > artefactscanning > putFileScan > 200 > ok 1`] = `{}`;
+
+exports[`routes > artefactscanning > putFileScan > audit > expected call 1`] = `"expedita"`;
+
+exports[`routes > artefactscanning > putFileScan > audit > expected call 2`] = `"expedita"`;

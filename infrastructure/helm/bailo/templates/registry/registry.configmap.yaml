@@ -40,3 +40,14 @@ data:
       relativeurls: true
       headers:
         X-Content-Type-Options: [nosniff]
+    {{- if .Values.artefactscan.trivy.ca.enabled }}
+    notifications:
+      endpoints:
+        - name: artefactscan-webhook
+          url: http://{{ include "bailo.fullname" . }}-artefactscan:{{ .Values.artefactscan.port }}/registry/events
+          timeout: 5s
+          threshold: 5
+          backoff: 1s
+          events:
+            - push
+    {{- end }}

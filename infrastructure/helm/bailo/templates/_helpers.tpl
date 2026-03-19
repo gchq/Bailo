@@ -263,4 +263,12 @@ modelMirror:
         region: {{ .Values.modelMirror.export.kmsSignature.KMSClient.region }}
       enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }}
       keyId: {{ .Values.modelMirror.export.kmsSignature.keyId }}
+stroom:
+  logOnlyMode: '{{ .Values.stroom.logOnlyMode }}',
+  feed: '{{ .Values.stroom.feed }}',
+  url: '{{ .Values.stroom.url }}',
+  environment: '{{ .Values.stroom.environment }}',
+  interval: '{{ .Values.stroom.interval }}',
+  generator: '{{ .Values.stroom.generator }}',
+  rejectUnauthorized: '{{ .Values.stroom.rejectUnauthorized }}',
 {{- end -}}

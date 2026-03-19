@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
@@ -12,7 +12,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation } from '../../types/types.js'
+import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
@@ -108,9 +108,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteFile(req: Request, modelId: string, fileId: string) {
+  async onDeleteFile(req: Request, file: FileWithScanResultsInterface) {
     this.checkEventType(AuditInfo.DeleteFile, req)
-    const event = this.generateEvent(req, { modelId, fileId })
+    const event = this.generateEvent(req, file)
     req.log.info(event, req.audit.description)
   }
 
@@ -342,16 +342,24 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onViewModelImages(
-    req: Request,
-    modelId: string,
-    images: { repository: string; name: string; tags: string[] }[],
-  ) {
+  async onViewScanners(req: Request) {
+    this.checkEventType(AuditInfo.ViewScanners, req)
+    const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewModelImages(req: Request, modelId: string, images: ModelImages) {
     this.checkEventType(AuditInfo.ViewModelImages, req)
     const event = this.generateEvent(req, {
       modelId,
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.checkEventType(AuditInfo.UpdateImage, req)
+    const event = this.generateEvent(req, { modelId, image })
     req.log.info(event, req.audit.description)
   }
 

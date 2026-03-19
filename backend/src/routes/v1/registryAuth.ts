@@ -126,6 +126,16 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
     }
   }
 
+  if (!access.name.includes('/')) {
+    const info = `ModelId not found.`
+    log.warn({ userDn: user.dn, access }, info)
+    return {
+      id: access.name,
+      success: false,
+      info,
+    }
+  }
+
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {

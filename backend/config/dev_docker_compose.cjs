@@ -85,7 +85,7 @@ module.exports = {
 
   connectors: {
     artefactScanners: {
-      kinds: ['clamAV', 'artefactScan'],
+      kinds: ['clamAV', 'modelScan', 'trivy'],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,

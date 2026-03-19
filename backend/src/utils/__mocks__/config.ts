@@ -66,6 +66,13 @@ const config: PartialDeep<Config> = {
   instrumentation: {
     enabled: false,
   },
+  stroom: {
+    logOnlyMode: true,
+    feed: 'feed',
+    url: 'https://url',
+    environment: 'local',
+    interval: 1000 * 50,
+  },
   session: {
     secret: '',
   },
@@ -102,12 +109,14 @@ const config: PartialDeep<Config> = {
     clamdscan: {
       host: '127.0.0.1',
       port: 8080,
+      concurrency: 1,
     },
 
     artefactscan: {
       protocol: 'http',
       host: '127.0.0.1',
       port: 8081,
+      concurrency: 1,
     },
   },
   mongo: {

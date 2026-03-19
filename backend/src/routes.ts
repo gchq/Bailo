@@ -10,6 +10,7 @@ import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
 import { putFileScan } from './routes/v2/artefactScanning/putFileScan.js'
+import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
@@ -244,6 +245,7 @@ server.get('/api/v2/specification', ...getSpecification)
 
 server.get('/api/v2/filescanning/info', ...getArtefactScanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
+server.put('/api/v2/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
