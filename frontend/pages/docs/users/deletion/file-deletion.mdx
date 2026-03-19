@@ -1,0 +1,58 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import bailoFileMenu from 'public/docs/bailo_file_menu.png'
+import bailoDeleteFileConfirm from 'public/docs/bailo_delete_file_confirm.png'
+
+# Deleting a file
+
+Files uploaded to a model can be permanently deleted by authorised users. **File deletion is irreversible** and may
+impact existing releases.
+
+## Who can delete a file
+
+You must have permission to **edit the model**. If you lack authorisation, the delete option will not be available.
+
+## What happens when a file is deleted
+
+Deleting a file will:
+
+- Permanently remove the file from the model
+- Remove the file from all associated releases
+- Remove related scan and artefact metadata
+
+Releases remain, but will no longer reference the deleted file.
+
+## How to delete a file
+
+1. Open the model.
+2. Navigate to the **Files** tab.
+3. Locate the file you want to delete.
+4. Open the file actions menu (⋮).
+5. Select **Delete File**.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='file actions menu with delete option' src={bailoFileMenu} />
+</Box>
+
+## Confirming deletion
+
+A confirmation dialog is shown before deletion:
+
+- If the file is used by releases, those releases are listed
+- You must explicitly confirm to proceed
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='delete file confirmation dialog showing affected releases' src={bailoDeleteFileConfirm} />
+</Box>
+
+If an error occurs (for example, insufficient permissions), an error message is displayed and the file is not deleted.
+
+## After deletion
+
+- The file is immediately removed from the model
+- Associated releases are updated automatically
+- The files list refreshes to reflect the change
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
