@@ -208,7 +208,7 @@ export default function ImageTagInformation() {
     if (response.status === 200) {
       sendNotification({
         variant: 'success',
-        msg: `${name}:${tag} is being rescanned`,
+        msg: `The image ${name}:${tag} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateImages()
@@ -242,7 +242,7 @@ export default function ImageTagInformation() {
       <Title text={name && tag ? `${name}:${tag}` : 'Loading...'} />
       <Container maxWidth='xl' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper sx={{ p: 4 }}>
-          <Stack spacing={6}>
+          <Stack spacing={4}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
               spacing={2}
@@ -279,21 +279,29 @@ export default function ImageTagInformation() {
               divider={<Divider flexItem orientation='vertical' />}
             >
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Compressed image size</Typography>
+                <Typography variant='h6' fontWeight='bold'>
+                  Compressed image size
+                </Typography>
                 <Typography>{prettyBytes(modelImage.imageSize)}</Typography>
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Vulnerabilities</Typography>
+                <Typography variant='h6' fontWeight='bold'>
+                  Vulnerabilities
+                </Typography>
                 <VulnerabilityResult results={modelImage} onRescan={handleRescan} />
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Scanning tool</Typography>
+                <Typography variant='h6' fontWeight='bold'>
+                  Scanning tool
+                </Typography>
                 <Typography>{toolName}</Typography>
               </Stack>
             </Stack>
             <Accordion defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                <Typography fontWeight='bold'>Vulnerability report</Typography>
+                <Typography variant='h6' fontWeight='bold'>
+                  Vulnerability report
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={2}>
