@@ -7,8 +7,8 @@ import bailoDeleteConfirm from 'public/docs/bailo_delete_model_confirm.png'
 
 # Deleting a model
 
-Models can be permanently deleted from Bailo by users with the appropriate permissions. **Deletion is irreversible** and
-removes the model and all associated data.
+Models can be deleted from Bailo by users with the appropriate permissions. Deleting a model removes it from use and
+visibility across the platform.
 
 ## Who can delete a model
 
@@ -28,14 +28,22 @@ Deleting a model removes **all associated resources**, including:
 - Webhooks
 - Tokens referencing the model
 
-The deletion is performed as a transactional operation to ensure consistency.
+When you delete a model:
+
+- The model is removed from the Marketplace and search results
+- All releases associated with the model are removed
+- Files can no longer be downloaded
+- Docker images can no longer be pulled or used
+- Reviews, access requests, and other related activity are no longer accessible
+
+From a user perspective, the model is gone and cannot be used.
 
 ## How to delete a model
 
-1. Open the model.
-2. Navigate to **Settings**.
-3. Scroll to the **Deletion** section.
-4. Click **Delete Model**.
+1. Open the model
+2. Navigate to **Settings**
+3. Scroll to the **Deletion** section
+4. Click **Delete Model**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='model settings deletion section' src={bailoDeleteModel} />
@@ -45,9 +53,9 @@ The deletion is performed as a transactional operation to ensure consistency.
 
 To prevent accidental deletion, you must confirm the action:
 
-1. A confirmation dialog will appear.
-2. Type the **exact model name** into the confirmation field.
-3. Click **Delete** or press **Enter** once the name matches.
+1. A confirmation dialog will appear
+2. Type the **exact model name** into the confirmation field
+3. Click **Delete** or press **Enter** once the name matches
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='delete model confirmation dialog' src={bailoDeleteConfirm} />
@@ -57,8 +65,19 @@ If the name does not match exactly, the delete button remains disabled.
 
 ## After deletion
 
-- The model is immediately removed.
-- You are redirected to the Bailo home page.
-- The action cannot be undone.
+- The model is immediately made inaccessible to all users
+- You are redirected to the Bailo home page
+- The action should be treated as permanent
+
+## About recovery
+
+Model deletion is designed to be **final**.
+
+In rare and exceptional circumstances, platform administrators may be able to restore a deleted model. This is **not a
+standard service** and users should only request recovery if absolutely required.
+
+Before deleting a model, ensure it is no longer needed.
+
+See [Soft Deletion](./soft-deletion) for more detail.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

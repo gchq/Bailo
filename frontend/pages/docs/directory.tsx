@@ -37,6 +37,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Deletion', slug: 'users/deletion', header: true },
   { title: 'Deleting a File', slug: 'users/deletion/file-deletion' },
   { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
+  { title: 'Soft Deletion', slug: 'users/deletion/soft-deletion' },
 
   { title: 'Model Mirroring', slug: 'users/model-mirroring', header: true },
   { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },

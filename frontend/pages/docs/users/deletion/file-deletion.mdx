@@ -7,8 +7,8 @@ import bailoDeleteFileConfirm from 'public/docs/bailo_delete_file_confirm.png'
 
 # Deleting a file
 
-Files uploaded to a model can be permanently deleted by authorised users. **File deletion is irreversible** and may
-impact existing releases.
+Files uploaded to a model can be deleted by authorised users. Deleting a file removes it from use across the model,
+including any associated Releases.
 
 ## Who can delete a file
 
@@ -18,7 +18,7 @@ You must have permission to **edit the model**. If you lack authorisation, the d
 
 Deleting a file will:
 
-- Permanently remove the file from the model
+- Remove the file from the model, so it can no longer be downloaded
 - Remove the file from all associated releases
 - Remove related scan and artefact metadata
 
@@ -26,11 +26,11 @@ Releases remain, but will no longer reference the deleted file.
 
 ## How to delete a file
 
-1. Open the model.
-2. Navigate to the **Files** tab.
-3. Locate the file you want to delete.
-4. Open the file actions menu (⋮).
-5. Select **Delete File**.
+1. Open the model
+2. Navigate to the **Files** tab
+3. Locate the file you want to delete
+4. Open the file actions menu (⋮)
+5. Select **Delete File**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='file actions menu with delete option' src={bailoFileMenu} />
@@ -47,12 +47,24 @@ A confirmation dialog is shown before deletion:
   <Image alt='delete file confirmation dialog showing affected releases' src={bailoDeleteFileConfirm} />
 </Box>
 
-If an error occurs (for example, insufficient permissions), an error message will be displayed and the file will not deleted.
+If an error occurs (for example, insufficient permissions), an error message will be displayed and the file will not be
+deleted.
 
 ## After deletion
 
 - The file is immediately removed from the model
 - Associated releases are updated automatically
 - The files list refreshes to reflect the change
+
+## About recovery
+
+File deletion is intended to be **final**.
+
+In rare and exceptional circumstances, platform administrators may be able to restore a deleted file. This is **not a
+standard service** and users should only request recovery if absolutely required.
+
+Before deleting a file, ensure it is no longer required by any releases or users.
+
+See [Soft Deletion](./soft-deletion) for more detail.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
