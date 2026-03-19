@@ -38,12 +38,15 @@ export function rerunImageArtefactScan(modelId: string, name: string, tag: strin
 }
 
 export function useGetImageScanResults(modelId: string, name: string, tag: string) {
+  const encodedModelId = encodeURIComponent(modelId)
+  const encodedName = encodeURIComponent(name)
+  const encodedTag = encodeURIComponent(tag)
   const { data, isLoading, error, mutate } = useSWR<
     {
       imageBreakdown: ImageTagResult
     },
     ErrorInfo
-  >(`/api/v2/model/${modelId}/image/${name}/${tag}`, fetcher)
+  >(`/api/v2/model/${encodedModelId}/image/${encodedName}/${encodedTag}`, fetcher)
 
   return {
     mutateImages: mutate,

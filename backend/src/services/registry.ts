@@ -111,7 +111,8 @@ export async function getImageWithScanResults(
   imageRef: ImageRefInterface,
   includeFullDetail = false,
 ): Promise<ImageTagResult> {
-  const scans = await getScansForImageTag(user, imageRef)
+  const layers = await getLayersForImageTag(user, imageRef)
+  const scans = await getScansForImageTag(user, layers)
 
   const initialState = Object.fromEntries(
     Object.values(ArtefactScanState).map((state) => [state, 0]),
@@ -130,7 +131,6 @@ export async function getImageWithScanResults(
   ]
 
   const state = statePriority.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
-  const layers = await getLayersForImageTag(user, imageRef)
 
   return {
     tag: imageRef.tag,
@@ -191,9 +191,7 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
   }, initial)
 }
 
-async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
-  const layers = await getLayersForImageTag(user, image)
-
+async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): Promise<ScanInterface[]> {
   const layerDigests = layers.map((l) => l.digest)
 
   if (layerDigests.length === 0) {
