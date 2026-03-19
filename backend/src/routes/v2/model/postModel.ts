@@ -27,7 +27,10 @@ export const postModelSchema = z.object({
     collaborators: z
       .array(
         z.object({
-          entity: z.string().openapi({ example: 'user:user' }),
+          entity: z
+            .string()
+            .regex(/^(?!.*%[0-9A-F]{2}).*/, { message: 'Please remove URL Encoding from collaborator entity string' })
+            .openapi({ example: 'user:user' }),
           roles: z.array(z.string()).openapi({ example: ['owner', 'contributor'] }),
         }),
       )
