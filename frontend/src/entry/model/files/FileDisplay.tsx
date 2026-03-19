@@ -242,7 +242,7 @@ export default function FileDisplay({
           <ListItemIcon>
             <Refresh color='primary' fontSize='small' />
           </ListItemIcon>
-          <ListItemText>Rerun File Scan</ListItemText>
+          <ListItemText>Rerun file scan</ListItemText>
         </MenuItem>
       )
     )
@@ -425,7 +425,7 @@ export default function FileDisplay({
                           <ListItemIcon>
                             <Info color='primary' fontSize='small' />
                           </ListItemIcon>
-                          <ListItemText>Associated Releases</ListItemText>
+                          <ListItemText>Associated releases</ListItemText>
                         </MenuItem>
                       )}
                       {showMenuItems.deleteFile && (
@@ -438,7 +438,7 @@ export default function FileDisplay({
                           <ListItemIcon>
                             <Delete color='primary' fontSize='small' />
                           </ListItemIcon>
-                          <ListItemText>Delete File</ListItemText>
+                          <ListItemText>Delete file</ListItemText>
                         </MenuItem>
                       )}
                       {showMenuItems.rescanFile && rerunFileScanButton}

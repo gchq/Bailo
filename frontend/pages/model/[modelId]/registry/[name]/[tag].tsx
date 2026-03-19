@@ -1,4 +1,4 @@
-import { Clear, ExpandMore } from '@mui/icons-material'
+import { Clear, ExpandMore, Refresh } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import {
   Accordion,
@@ -9,6 +9,7 @@ import {
   Chip,
   Container,
   Divider,
+  IconButton,
   List,
   ListItem,
   Modal,
@@ -20,6 +21,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -288,7 +290,14 @@ export default function ImageTagInformation() {
                 <Typography variant='h6' fontWeight='bold'>
                   Vulnerabilities
                 </Typography>
-                <VulnerabilityResult results={modelImage} onRescan={handleRescan} />
+                <Stack direction='row'>
+                  <VulnerabilityResult results={modelImage} />
+                  <Tooltip title='Rerun image scan'>
+                    <IconButton size='small' onClick={handleRescan} sx={{ mx: 1 }}>
+                      <Refresh color='primary' />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
               </Stack>
               <Stack spacing={1}>
                 <Typography variant='h6' fontWeight='bold'>
