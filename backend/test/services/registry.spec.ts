@@ -603,7 +603,7 @@ describe('services > registry', () => {
       )
 
       expect(result).toEqual({
-        imageSize: 42134,
+        imageSize: 0,
         lastRunAt: undefined,
         state: 'notScanned',
         severityCounts: {
