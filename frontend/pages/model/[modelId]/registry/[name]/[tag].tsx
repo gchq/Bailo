@@ -8,11 +8,14 @@ import {
   Button,
   Chip,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   IconButton,
   List,
   ListItem,
-  Modal,
   Paper,
   Stack,
   Table,
@@ -158,11 +161,13 @@ export default function ImageTagInformation() {
   }, [])
 
   const displayDescriptionSummary = (description: string) => {
-    if (description.includes('Issue summary') && description.includes('Impact summary')) {
+    if (description.includes('Issue summary') || description.includes('Impact summary')) {
       return description.substring(
         description.indexOf('Issue summary: ') + 15,
         description.lastIndexOf('Impact summary'),
       )
+    } else if (description.length > 250) {
+      return description.substring(0, 250) + '...'
     } else {
       return description
     }
@@ -186,8 +191,8 @@ export default function ImageTagInformation() {
         </TableCell>
         <TableCell>
           <Stack spacing={2}>
-            <Typography>{displayDescriptionSummary(row.description)}</Typography>
-            {row.description.startsWith('Issue summary') && (
+            <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
+            {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
               <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
             )}
           </Stack>
@@ -361,25 +366,19 @@ export default function ImageTagInformation() {
           </Stack>
         </Paper>
       </Container>
-      <Modal open={open} onClose={handleClose} aria-label='full-cve-description-modal'>
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            bgcolor: 'background.paper',
-            border: '2px solid #000',
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Typography variant='h6' component='h2'>
-            {modalTitle}
-          </Typography>
+      <Dialog open={open} onClose={handleClose} aria-label='full-cve-description-dialog' maxWidth='lg'>
+        <DialogTitle variant='h6' component='h2'>
+          {modalTitle}
+        </DialogTitle>
+        <DialogContent>
           <MarkdownDisplay>{modelContent}</MarkdownDisplay>
-        </Box>
-      </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button aria-label='Close dialog button' variant='contained' onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
