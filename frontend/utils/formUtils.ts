@@ -377,6 +377,28 @@ export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?:
   }
 }
 
+export function normaliseFormData(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map(normaliseFormData)
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    const cleaned: any = {}
+
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === 'string' && value.trim() === '') {
+        cleaned[key] = undefined
+      } else {
+        cleaned[key] = normaliseFormData(value)
+      }
+    }
+
+    return cleaned
+  }
+
+  return data
+}
+
 /**
  * Recursively iterate over an object to set all non array/object properties to undefined. This means that we retain the structure of the JSON with empty fields.
  *

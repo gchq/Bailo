@@ -20,6 +20,7 @@ import { SplitSchemaNoRender } from 'types/types'
 import {
   getFormStats,
   getOverallCompletionStats,
+  normaliseFormData,
   setFormDataPropertiesToUndefined,
   setStepState,
   widgets,
@@ -102,9 +103,11 @@ export default function JsonSchemaForm({
   }
 
   const onFormChange = debounce((form: RJSFSchema) => {
-    if (form.schema.title === currentStep.schema.title) {
-      setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
+    if (form.schema.title !== currentStep.schema.title) {
+      return
     }
+    const cleanedFormData = normaliseFormData(form.formData)
+    setStepState(splitSchema, setSplitSchema, currentStep, cleanedFormData)
   }, 100)
 
   function handleListItemClick(index: number) {
@@ -194,7 +197,7 @@ export default function JsonSchemaForm({
             validator={validator}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
-            liveValidate
+            liveValidate={false}
             omitExtraData
             disabled={!canEdit}
             liveOmit
