@@ -237,7 +237,7 @@ async def registry_events(
     backend_settings: Annotated[BackendSettings, Depends(get_backend_settings)],
 ) -> Response:
     payload = await request.json()
-    logger.debug(f"Received {payload=}")
+    logger.debug("Received %r", payload)
 
     async with httpx.AsyncClient(
         timeout=10.0,
@@ -250,6 +250,12 @@ async def registry_events(
 
             target = event.get("target", {})
             repository = target.get("repository")
+            if not repository or "/" not in repository:
+                logger.warning(
+                    "Ignoring registry push for invalid repository name: %r",
+                    repository,
+                )
+                continue
             [model_id, name] = repository.split("/", 1)
             tag = target.get("tag")
 
