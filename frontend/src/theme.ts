@@ -162,15 +162,19 @@ export const lightTheme = createTheme({
     },
     vulnerabilityCritical: {
       main: red.A700,
+      dark: '#a20202',
     },
     vulnerabilityHigh: {
       main: '#e65100',
+      dark: '#bf4300',
     },
     vulnerabilityMedium: {
       main: '#e65100',
+      dark: '#bf4300',
     },
     vulnerabilityLow: {
       main: '#ff9800',
+      dark: '#ce7b00',
     },
   },
 })
