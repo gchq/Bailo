@@ -250,6 +250,9 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
+// Internal routes
+server.put('/internal/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
+
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

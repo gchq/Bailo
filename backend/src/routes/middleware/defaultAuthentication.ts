@@ -22,7 +22,7 @@ export async function getTokenFromAuthHeader(req: Request, _res: Response, next:
   return next()
 }
 
-export function checkAuthentication(req, res, next) {
+export function checkAuthentication(req: Request, _res: Response, next: NextFunction) {
   if (!req.user) {
     throw Unauthorized('No valid authentication provided.')
   }

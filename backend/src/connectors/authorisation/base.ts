@@ -42,6 +42,10 @@ import {
 export type Response = { id: string; success: true } | { id: string; success: false; info: string }
 
 export class BasicAuthorisationConnector {
+  private isInternalUser(user: UserInterface): user is UserInterface & { internal: true } {
+    return user.internal === true
+  }
+
   async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
     if (model.visibility === EntryVisibility.Public) {
       return true
@@ -386,6 +390,14 @@ export class BasicAuthorisationConnector {
     accesses: Array<Access>,
     admin: boolean = false,
   ): Promise<Array<Response>> {
+    // internal service calls bypass authorisation
+    if (this.isInternalUser(user)) {
+      return accesses.map((access) => ({
+        id: access.name,
+        success: true,
+      }))
+    }
+
     // Does the user have a valid access request for this model?
     const hasAccessRequest = await this.hasApprovedAccessRequest(user, model)
 

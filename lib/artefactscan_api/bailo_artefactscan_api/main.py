@@ -256,7 +256,7 @@ async def registry_events(
             if not model_id or not name or not tag:
                 continue
 
-            url = f"{backend_settings.base_url}/api/v2/filescanning/model/{model_id}/image/{name}/{tag}/scan"
+            url = f"{backend_settings.base_url}/internal/filescanning/model/{model_id}/image/{name}/{tag}/scan"
 
             await client.put(url)
 

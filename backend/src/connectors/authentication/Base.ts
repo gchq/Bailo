@@ -2,6 +2,7 @@ import { RequestHandler } from 'express'
 
 import { UserInterface } from '../../models/User.js'
 import { checkAuthentication, getTokenFromAuthHeader } from '../../routes/middleware/defaultAuthentication.js'
+import { internalServiceAuth } from '../../routes/middleware/internalAuthentication.js'
 import { RoleKeys, UserInformation } from './constants.js'
 
 export abstract class BaseAuthenticationConnector {
@@ -19,6 +20,10 @@ export abstract class BaseAuthenticationConnector {
 
   authenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
     return [
+      {
+        path: '/internal',
+        middleware: [internalServiceAuth],
+      },
       {
         path: '/api/v2/token',
         middleware: [getTokenFromAuthHeader],
