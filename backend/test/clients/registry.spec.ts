@@ -205,6 +205,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: false,
       headers: new Headers({}),
+      text: vi.fn(),
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 

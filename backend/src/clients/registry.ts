@@ -10,6 +10,7 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
+  AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBody,
   BaseApiCheckResponseHeaders,
@@ -21,6 +22,7 @@ import {
   DeleteManifestResponseHeaders,
   ImageManifestV2,
   ManifestListMediaType,
+  ManifestListV2,
   ManifestMediaType,
   ManifestResponseHeaders,
   RegistryErrorResponseBody,
@@ -265,6 +267,7 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
           tags: [...(acc.tags || []), ...(next.tags || [])],
         }),
       },
+      extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
     })
 
     return result.body?.tags || []
@@ -305,6 +308,25 @@ export async function isImageTagManifestList(token: string, imageRef: ImageRefIn
     imageRef,
     contentType,
   })
+}
+
+export async function getImageTagManfiestList(token: string, imageRef: ImageRefInterface) {
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+    bodySchema: ManifestListV2,
+    headersSchema: ManifestResponseHeaders,
+    extraHeaders: {
+      Accept: AcceptManifestListMediaTypeHeaderValue,
+    },
+  })
+
+  return (
+    result.body?.manifests
+      .filter((manifest) => manifest.platform?.architecture !== 'unknown' || manifest.platform?.os !== 'unknown')
+      .map((manifest) => ({
+        digest: manifest.digest,
+        platform: `${manifest.platform?.architecture}/${manifest.platform?.os}`,
+      })) || []
+  )
 }
 
 export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {

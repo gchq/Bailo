@@ -1,4 +1,4 @@
-import { isImageTagManifestList } from '../clients/registry.js'
+import { getImageTagManfiestList, isImageTagManifestList } from '../clients/registry.js'
 import {
   ArtefactInterface,
   ArtefactScanningConnectorInfo,
@@ -16,7 +16,8 @@ import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { toBailoError } from '../types/error.js'
 import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { Descriptors } from '../utils/registryResponses.js'
 import { plural } from '../utils/string.js'
 import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
@@ -190,11 +191,22 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
   ])
+  let imageLayers: Descriptors[]
   if (await isImageTagManifestList(repositoryToken, image)) {
-    // TODO: add support for manifest lists/fat manifests
-    throw InternalError('Bailo backend does not currently support scanning images with manifest lists.', { image })
+    const imageArchitectures = await getImageTagManfiestList(repositoryToken, image)
+    const layerResults = await Promise.all(
+      imageArchitectures.map((architecture) =>
+        getImageLayers(repositoryToken, {
+          repository: image.repository,
+          name: image.name,
+          tag: architecture.digest,
+        }),
+      ),
+    )
+    imageLayers = dedupe(layerResults.flat())
+  } else {
+    imageLayers = dedupe(await getImageLayers(repositoryToken, image))
   }
-  const imageLayers = dedupe(await getImageLayers(repositoryToken, image))
   const imageName = `${image.repository}/${image.name}:${image.tag}`
 
   // Only check timing for the config (which is effectively unique per manifest)

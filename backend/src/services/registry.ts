@@ -2,8 +2,10 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
+  getImageTagManfiestList,
   getImageTagManifest,
   getRegistryLayerStream,
+  isImageTagManifestList,
   listImageTags,
   listModelRepos,
   mountBlob,
@@ -105,11 +107,33 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
     }),
   )
 }
+export async function getMultiplatformImageWithScanResults(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  includeFullDetail: boolean = false,
+): Promise<ImageTagResult[]> {
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
+  ])
+  const manifests = await getImageTagManfiestList(repositoryToken, imageRef)
+  const imageScans = await Promise.all(
+    manifests.map((architecture) =>
+      getImageWithScanResults(
+        user,
+        { ...imageRef, tag: architecture.digest },
+        includeFullDetail,
+        architecture.platform,
+      ),
+    ),
+  )
+  return imageScans.map((scan) => ({ ...scan, tag: imageRef.tag })).flat()
+}
 
 export async function getImageWithScanResults(
   user: UserInterface,
   imageRef: ImageRefInterface,
-  includeFullDetail = false,
+  includeFullDetail: boolean = false,
+  architecture: string | undefined = undefined,
 ): Promise<ImageTagResult> {
   const scans = await getScansForImageTag(user, imageRef)
 
@@ -134,6 +158,7 @@ export async function getImageWithScanResults(
   return {
     tag: imageRef.tag,
     state,
+    architecture,
     severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
 
     ...(includeFullDetail && {
@@ -150,9 +175,22 @@ export async function listModelImagesWithScanResults(
 
   return Promise.all(
     modelImages.map(async (img) => {
+      const repositoryToken = await getAccessToken({ dn: user.dn }, [
+        { type: 'repository', name: `${img.repository}/${img.name}`, actions: ['pull'] },
+      ])
       const scanSummaries = (
-        await Promise.all(img.tags.map((tag) => getImageWithScanResults(user, { ...img, tag })))
-      ).filter((r) => r.state !== ArtefactScanState.NotScanned)
+        await Promise.all(
+          img.tags.map(async (tag) => {
+            if (await isImageTagManifestList(repositoryToken, { ...img, tag })) {
+              return getMultiplatformImageWithScanResults(user, { ...img, tag })
+            } else {
+              return getImageWithScanResults(user, { ...img, tag })
+            }
+          }),
+        )
+      )
+        .flat()
+        .filter((r) => r.state !== ArtefactScanState.NotScanned)
 
       return {
         ...img,

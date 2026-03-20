@@ -243,6 +243,7 @@ export type ImageTagResult = {
   tag: string
   state: ArtefactScanStateKeys
   severityCounts: SeverityCounts
+  architecture?: string
   scanResults?: ScanInterface[]
 }
 
