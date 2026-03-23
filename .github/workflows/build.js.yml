@@ -436,7 +436,7 @@ jobs:
         if: matrix.job_name == 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
-          wait-on-timeout: 120000
+          wait-on-timeout: 120
           working-directory: ./frontend
           install: false
           spec: cypress/e2e/bailo/**/*
@@ -473,12 +473,13 @@ jobs:
         if: matrix.job_name == 'integration_python'
         run: docker run -d --name mlflow_server -p 5050:5000 ghcr.io/mlflow/mlflow:v${{ steps.mlflow_version.outputs.version }} mlflow server --host 0.0.0.0 --port 5000
 
-      - name: Wait for MLFlow
+      - name: Wait for MLFlow & backend
         if: matrix.job_name == 'integration_python'
-        env:
-          MLFLOW_URL: http://localhost:5050/ajax-api/2.0/mlflow/experiments/search?max_results=1
-        run: |
-          for c in {1..10}; do test $(curl -s -o /dev/null -w "%{http_code}" ${MLFLOW_URL}) -eq 200 && break || sleep 3; done
+        uses: jtalk/url-health-check-action@v5
+        with:
+          url: http://localhost:5050/ajax-api/2.0/mlflow/experiments/search?max_results=1|http://localhost:8080/api/v2/config/ui
+          retry-delay: 10s
+          max-attempts: 12
 
       - name: Test with pytest
         if: matrix.job_name == 'integration_python'
