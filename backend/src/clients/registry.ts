@@ -250,7 +250,7 @@ export async function listModelRepos(token: string, modelId: string): Promise<st
   })
 
   const repositories = result.body?.repositories ?? []
-  return repositories.filter((repo) => repo.startsWith(modelId))
+  return repositories.filter((repo) => repo.startsWith(`${modelId}/`))
 }
 
 export async function listImageTags(token: string, repoRef: RepoRefInterface) {
