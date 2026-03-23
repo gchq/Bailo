@@ -261,8 +261,8 @@ server.use('/api/v2', expressErrorHandler)
 // Internal only server
 export const internalServer = express()
 
-internalServer.use('/api/v2', bodyParser.json())
-internalServer.use('/api/v2', httpLog)
+internalServer.use('/internal', bodyParser.json())
+internalServer.use('/internal', httpLog)
 
 const internalMiddlewareConfigs = authentication.internalAuthenticationMiddleware()
 for (const middlewareConf of internalMiddlewareConfigs) {
@@ -272,4 +272,4 @@ for (const middlewareConf of internalMiddlewareConfigs) {
 // Internal routes
 internalServer.put('/internal/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
 
-internalServer.use('/api/v2', expressErrorHandler)
+internalServer.use('/internal', expressErrorHandler)
