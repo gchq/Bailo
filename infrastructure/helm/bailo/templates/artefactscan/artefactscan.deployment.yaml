@@ -33,8 +33,6 @@ spec:
           - name: {{ $variable }}
             value: {{ $value | quote }}
           {{- end }}
-          - name: BACKEND_BASE_URL
-            value: http://{{ include "bailo.fullname" . }}-backend:{{ .Values.service.backendPort }}
         resources:
           requests:
             memory: "100Mi"

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import authentication from './connectors/authentication/index.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
 import { escalateUser } from './routes/middleware/userEscalation.js'
+import { handleRegistryEvents } from './routes/registry/events.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
 import { putFileScan } from './routes/v2/artefactScanning/putFileScan.js'
@@ -99,8 +100,8 @@ import config from './utils/config.js'
 
 export const server = express()
 
-server.use('/api/v2', bodyParser.json())
-server.use('/api/v2', httpLog)
+server.use(['/api/v2', '/registry/events'], bodyParser.json())
+server.use(['/api/v2', '/registry/events'], httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -255,4 +256,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
-server.use('/api/v2', expressErrorHandler)
+// Internal endpoints
+server.post('/registry/events', handleRegistryEvents)
+
+server.use(['/api/v2', '/registry/events'], expressErrorHandler)

@@ -184,12 +184,17 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  const scannersInfo = scanners.scannersInfo()
-  throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
-
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
   ])
+
+  return await rerunImageScanNoAuth(image, repositoryToken)
+}
+
+export async function rerunImageScanNoAuth(image: ImageRefInterface, repositoryToken: string) {
+  const scannersInfo = scanners.scannersInfo()
+  throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
+
   if (await isImageTagManifestList(repositoryToken, image)) {
     // TODO: add support for manifest lists/fat manifests
     throw InternalError('Bailo backend does not currently support scanning images with manifest lists.', { image })

@@ -32,13 +32,3 @@ class Settings(BaseSettings):
 
     # Load in a dotenv file to set/overwrite any properties with potentially sensitive values
     model_config = SettingsConfigDict(env_file=".env")
-
-
-class BackendSettings(BaseSettings):
-    """Authentication settings for the backend service."""
-
-    model_config = SettingsConfigDict(env_prefix="BACKEND_")
-
-    base_url: str = "http://backend:3001"
-    client_cert: CertTypes | None = ("/certs/cert.pem", "/certs/key.pem")
-    ca_cert: SSLContext | str | bool = False
