@@ -6,6 +6,7 @@ import {
   deleteManifest,
   doesLayerExist,
   getApiVersion,
+  getImageTagManfiestList,
   getImageTagManifest,
   getRegistryLayerStream,
   initialiseUpload,
@@ -89,6 +90,51 @@ describe('clients > registry', () => {
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
   })
+
+  test('getImageTagManfiestList > success', async () => {
+    const mockManifestList = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.index.v1+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          size: 1,
+          digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+          platform: {
+            architecture: 'amd64',
+            os: 'linux',
+          },
+        },
+        {
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          size: 1,
+          digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+          platform: {
+            architecture: 'unknown',
+            os: 'unknown',
+          },
+        },
+      ],
+    }
+
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => mockManifestList),
+      headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
+    })
+
+    const response = await getImageTagManfiestList('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual([
+      {
+        digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        platform: 'amd64/linux',
+      },
+    ])
+  })
+
+  test('getImageTagManfiestList > single manifest', async () => {})
 
   test('getImageTagManifest > success Docker spec', async () => {
     const mockManifest = {

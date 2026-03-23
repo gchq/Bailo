@@ -114,6 +114,7 @@ vi.mock('../../src/services/images/getImageLayers.js', () => imageMocks)
 
 const registryClientMocks = vi.hoisted(() => ({
   isImageTagManifestList: vi.fn(() => false),
+  getImageTagManfiestList: vi.fn(),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
@@ -353,6 +354,24 @@ describe('services > scan', () => {
       await expect(
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
       ).rejects.toThrowError('No image scanners are enabled.')
+    })
+
+    test('multiplatform results', async () => {
+      const mockBody = [
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+      ]
+      ScanModelMock.find.mockResolvedValueOnce([])
+      registryClientMocks.isImageTagManifestList.mockResolvedValue(true)
+      registryClientMocks.getImageTagManfiestList.mockResolvedValue(mockBody)
+      const result = await rerunImageScan({} as any, 'model123', {
+        repository: 'repo',
+        name: 'image',
+        tag: 'latest',
+      } as any)
+
+      expect(result).toBe('Image scan started for repo/image:latest')
+      expect(fileScanningMock.startScans).not.toHaveBeenCalled()
     })
   })
 })

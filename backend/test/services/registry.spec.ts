@@ -45,6 +45,7 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
+  getImageTagManfiestList: vi.fn(),
   getRegistryLayerStream: vi.fn(),
   listImageTags: vi.fn(() => [] as string[]),
   listModelRepos: vi.fn(),
@@ -642,6 +643,30 @@ describe('services > registry', () => {
 
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
+      expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
+    })
+
+    test('listModelImagesWithScanResults > multiplatform', async () => {
+      const mockBody = [
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+      ]
+      const scanResult = {
+        summary: [{ severity: 'medium' }],
+        additionalInfo: [{ Results: [] }],
+        state: ArtefactScanState.Error,
+      }
+
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
+      registryClientMocks.isImageTagManifestList.mockResolvedValueOnce(true)
+      registryClientMocks.getImageTagManfiestList.mockResolvedValueOnce(mockBody)
+
+      ScanModelMock.find.mockReturnValue({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
       expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
     })
 

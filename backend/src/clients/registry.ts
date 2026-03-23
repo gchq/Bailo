@@ -324,7 +324,7 @@ export async function getImageTagManfiestList(token: string, imageRef: ImageRefI
       .filter((manifest) => manifest.platform?.architecture !== 'unknown' || manifest.platform?.os !== 'unknown')
       .map((manifest) => ({
         digest: manifest.digest,
-        platform: `${manifest.platform?.architecture}/${manifest.platform?.os}`,
+        platform: [manifest.platform?.architecture, manifest.platform?.os, manifest.platform?.variant].join('/'),
       })) || []
   )
 }
