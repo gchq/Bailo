@@ -22,7 +22,6 @@ import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
-import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { ModelImagesWithOptionalScanResults } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -62,11 +61,6 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${tag}`} sx={{ py: 0.5 }}>
       <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-between' alignItems='center' spacing={2}>
         <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
-          <Link target='_blank' href={`/model/${modelImage.repository}/registry/${modelImage.name}/${tag}`}>
-            <Typography textOverflow='ellipsis' overflow='hidden'>
-              {tag}
-            </Typography>
-          </Link>
           <Box width='fit-content'>
             <CodeLine
               line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
