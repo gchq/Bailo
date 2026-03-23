@@ -94,6 +94,26 @@ Registry host definition
 {{- end -}}
 {{- end -}}
 
+{{- define "environment-config" -}}
+inference:
+  authorisationToken: INFERENCING_WRITE_TOKEN
+instrumentation:
+  authenticationToken: OTEL_EXPORTER_TOKEN
+modelMirror:
+  export:
+    kmsSignature:
+      KMSClient:
+        credentials:
+          accessKeyId: KMS_ACCESS_KEY
+          secretAccessKey: KMS_ACCESS_KEY
+mongo:
+  pass: MONGO_PASSWORD
+s3:
+  credentials:
+    accessKeyId: MINIO_ACCESS_KEY
+    secretAccessKey: MINIO_SECRET_KEY
+{{- end -}}
+
 {{- define "production-config" -}}
 api:
   port: {{ .Values.service.backendPort }}
