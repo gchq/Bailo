@@ -1,5 +1,7 @@
 import './instrumentation.js'
 
+import fs from 'fs'
+import https from 'https'
 import shelljs from 'shelljs'
 
 import { ensureBucketExists } from './clients/s3.js'
@@ -40,5 +42,26 @@ const httpServer = server.listen(config.api.port, () => {
 })
 // Set header timeout to 24H
 httpServer.headersTimeout = 86400000
+
+const internalServer = https.createServer(
+  {
+    key: fs.readFileSync(config.app.privateKey),
+    cert: fs.readFileSync(config.app.publicKey),
+    ca: fs.readFileSync(config.app.publicKey),
+    requestCert: true,
+    rejectUnauthorized: true,
+    minVersion: 'TLSv1.2',
+  },
+  server,
+)
+
+internalServer.listen(config.api.internalPort, () => {
+  log.info(config.api.internalPort, 'Internal HTTPS (mTLS) listening on port')
+})
+
+internalServer.headersTimeout = 86_400_000
+
+registerSigTerminate(httpServer)
+registerSigTerminate(internalServer)
 
 registerSigTerminate(httpServer)

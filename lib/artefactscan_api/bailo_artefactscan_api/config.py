@@ -39,6 +39,6 @@ class BackendSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="BACKEND_")
 
-    base_url: str = "https://nginx:8443"
+    base_url: str = "https://backend:3443"
     client_cert: CertTypes | None = ("/certs/cert.pem", "/certs/key.pem")
     ca_cert: SSLContext | str | bool = False

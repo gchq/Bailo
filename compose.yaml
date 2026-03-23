@@ -78,7 +78,6 @@ services:
       internal:
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./backend/certs:/certs:ro
     ports:
       - ${EXTERNAL_PORT}:8080
     depends_on:

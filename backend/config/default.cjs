@@ -8,6 +8,7 @@ module.exports = {
 
     // Port to listen on
     port: 3001,
+    internalPort: 3443,
   },
 
   app: {
