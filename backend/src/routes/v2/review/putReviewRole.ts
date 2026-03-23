@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
@@ -54,7 +53,6 @@ interface PutReviewRoleResponse {
 }
 
 export const putReviewRole = [
-  bodyParser.json(),
   async (req: Request, res: Response<PutReviewRoleResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateReviewRole
     const { body, params } = parse(req, putReviewRoleSchema)
