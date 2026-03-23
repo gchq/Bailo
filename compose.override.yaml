@@ -47,10 +47,6 @@ services:
       MINIO_SERVER_URL: http://minio:9000
       MINIO_SKIP_CLIENT: yes
 
-  nginx:
-    ports:
-      - 8443:8443
-
 networks:
   debug:
     name: ${INSTANCE_NAME}_debug

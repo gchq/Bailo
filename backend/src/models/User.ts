@@ -13,7 +13,7 @@ export interface UserInterface {
   // complete.  If a token does not exist, full access is assumed.
   token?: TokenDoc
 
-  //True if this request originates from an internal service authenticated via mTLS
+  // True if this request originates from an internal service authenticated via mTLS
   internal?: boolean
   // Client certificate subject DN (internal services only)
   certSubject?: string
