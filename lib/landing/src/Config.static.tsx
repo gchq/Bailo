@@ -1,4 +1,4 @@
-import ConfigProperty from '../src/docs/ConfigProperty'
+import ConfigProperty from '../src/ConfigProperty'
 
 import configDocs from '../public/config/config-docs.json'
 import React from 'react'

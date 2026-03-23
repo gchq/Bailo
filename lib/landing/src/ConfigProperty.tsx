@@ -1,7 +1,7 @@
 import { Box, Link, Paper, Typography } from '@mui/material'
 import { useMemo } from 'react'
 
-import MarkdownDisplay from '../common/MarkdownDisplay'
+import MarkdownDisplay from '../src/common/MarkdownDisplay'
 
 export default function ConfigProperty({ name, type, doc, children, level = 0, nameStack = '' }) {
   const newNameStack = nameStack ? `${nameStack}-${name}` : name

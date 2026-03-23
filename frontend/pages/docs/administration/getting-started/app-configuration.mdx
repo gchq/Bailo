@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-// Note that this gets overwritten to be `import Config from './Config.static'` by `lib/landing/scripts/generate.js`
-import Config from '../../../../src/common/Config'
+import Config from 'src/Config.static'
 
 # App Configuration
 
@@ -25,8 +24,8 @@ The full order of configuration inheritance can be found
 
 Please Refer to the following specification for details on setup and modification.
 
-These are automatically updated with type documentation in our config at build time.
+These are automatically updated with type documentation from our main branch on Github.
 
-<Config />
+See here: https://gchq.github.io/Bailo/docs/administration/getting-started/app-configuration
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
