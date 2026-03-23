@@ -480,6 +480,8 @@ jobs:
           url: http://localhost:5050/health|http://localhost:8080/api/v2/config/ui
           retry-delay: 10s
           max-attempts: 12
+          # needed due to 56 (Recv failure: Connection reset by peer) while MLFlow is still starting up
+          retry-all: true
 
       - name: Test with pytest
         if: matrix.job_name == 'integration_python'
