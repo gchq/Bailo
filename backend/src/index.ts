@@ -54,7 +54,7 @@ const httpsServer = https.createServer(
   },
   internalServer,
 )
-httpsServer.listen(config.api.internalPort, () => {
+httpsServer.listen(config.api.internalPort, '127.0.0.1', () => {
   log.info(config.api.internalPort, 'Internal HTTPS (mTLS) listening on port')
 })
 httpsServer.headersTimeout = 86_400_000
