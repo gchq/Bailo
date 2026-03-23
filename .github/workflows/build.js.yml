@@ -477,7 +477,7 @@ jobs:
         if: matrix.job_name == 'integration_python'
         uses: jtalk/url-health-check-action@v5
         with:
-          url: http://localhost:5050/ajax-api/2.0/mlflow/experiments/search?max_results=1|http://localhost:8080/api/v2/config/ui
+          url: http://localhost:5050/health|http://localhost:8080/api/v2/config/ui
           retry-delay: 10s
           max-attempts: 12
 
