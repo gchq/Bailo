@@ -25,6 +25,7 @@ module.exports = {
     internalAuth: {
       // CNs of certificates allowed to act as internal services
       allowedClientCNs: ['Registry Auth CA'],
+      caCert: './certs/cert.pem',
     },
   },
 

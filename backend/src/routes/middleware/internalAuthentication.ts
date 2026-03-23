@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { TLSSocket } from 'tls'
 
 import { UserInterface } from '../../models/User.js'
+import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { Unauthorized } from '../../utils/error.js'
 
@@ -30,5 +31,6 @@ export function internalServiceAuth(req: Request, _res: Response, next: NextFunc
     certSubject: JSON.stringify(cert.subject),
   } as UserInterface
 
+  log.trace({ cn }, 'Authenticated internal service request')
   return next()
 }

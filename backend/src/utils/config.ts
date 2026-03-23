@@ -35,6 +35,7 @@ export interface Config {
 
     internalAuth: {
       allowedClientCNs: string[]
+      caCert: string
     }
   }
 

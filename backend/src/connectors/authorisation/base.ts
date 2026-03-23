@@ -390,14 +390,6 @@ export class BasicAuthorisationConnector {
     accesses: Array<Access>,
     admin: boolean = false,
   ): Promise<Array<Response>> {
-    // internal service calls bypass authorisation
-    if (this.isInternalUser(user)) {
-      return accesses.map((access) => ({
-        id: access.name,
-        success: true,
-      }))
-    }
-
     // Does the user have a valid access request for this model?
     const hasAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
@@ -433,6 +425,14 @@ export class BasicAuthorisationConnector {
             success: false,
             info: String(err),
             id: access.name,
+          }
+        }
+
+        // internal service calls bypass authorisation
+        if (this.isInternalUser(user)) {
+          return {
+            id: access.name,
+            success: true,
           }
         }
 

@@ -47,7 +47,7 @@ const httpsServer = https.createServer(
   {
     key: fs.readFileSync(config.app.privateKey),
     cert: fs.readFileSync(config.app.publicKey),
-    ca: fs.readFileSync(config.app.publicKey),
+    ca: fs.readFileSync(config.app.internalAuth.caCert),
     requestCert: true,
     rejectUnauthorized: true,
     minVersion: 'TLSv1.2',
