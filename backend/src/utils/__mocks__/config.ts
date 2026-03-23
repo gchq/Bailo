@@ -7,6 +7,7 @@ const config: PartialDeep<Config> = {
     host: '',
     port: 3000,
     privateKey: 'privateKey',
+    internalAuth: { allowedClientCNs: ['test CN'] },
   },
   federation: {
     state: 'disabled',
