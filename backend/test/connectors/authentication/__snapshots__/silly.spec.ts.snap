@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`connectors > authentication > silly > authenticationMiddleware 1`] = `
+exports[`connectors > authentication > silly > publicAuthenticationMiddleware 1`] = `
 [
   {
     "middleware": [

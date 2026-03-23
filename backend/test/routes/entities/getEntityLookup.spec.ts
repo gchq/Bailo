@@ -3,7 +3,8 @@ import { describe, expect, test, vi } from 'vitest'
 import { testGet } from '../../testUtils/routes.js'
 
 const authenticationMocks = vi.hoisted(() => ({
-  authenticationMiddleware: vi.fn(() => []),
+  publicAuthenticationMiddleware: vi.fn(() => []),
+  internalAuthenticationMiddleware: vi.fn(() => []),
   getUserInformation: vi.fn(() => ({
     email: `jb@example.com`,
     name: 'Joe Bloggs',

@@ -97,12 +97,13 @@ import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
 
+// Public facing server
 export const server = express()
 
 server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', httpLog)
-const middlewareConfigs = authentication.authenticationMiddleware()
-for (const middlewareConf of middlewareConfigs) {
+const publicMiddlewareConfigs = authentication.publicAuthenticationMiddleware()
+for (const middlewareConf of publicMiddlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
 
@@ -250,12 +251,25 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-// Internal routes
-server.put('/internal/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
-
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+
+// Internal only server
+export const internalServer = express()
+
+internalServer.use('/api/v2', bodyParser.json())
+internalServer.use('/api/v2', httpLog)
+
+const internalMiddlewareConfigs = authentication.internalAuthenticationMiddleware()
+for (const middlewareConf of internalMiddlewareConfigs) {
+  internalServer.use(middlewareConf?.path || '/', middlewareConf.middleware)
+}
+
+// Internal routes
+internalServer.put('/internal/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
+
+internalServer.use('/api/v2', expressErrorHandler)

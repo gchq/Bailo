@@ -18,12 +18,8 @@ export abstract class BaseAuthenticationConnector {
     return Promise.all(entities.map((member) => this.getUserInformation(member)))
   }
 
-  authenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
+  publicAuthenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
     return [
-      {
-        path: '/internal',
-        middleware: [internalServiceAuth],
-      },
       {
         path: '/api/v2/token',
         middleware: [getTokenFromAuthHeader],
@@ -31,6 +27,15 @@ export abstract class BaseAuthenticationConnector {
       {
         path: '/api/v2',
         middleware: [getTokenFromAuthHeader, checkAuthentication],
+      },
+    ]
+  }
+
+  internalAuthenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
+    return [
+      {
+        path: '/internal',
+        middleware: [internalServiceAuth],
       },
     ]
   }

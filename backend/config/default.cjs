@@ -21,6 +21,11 @@ module.exports = {
     privateKey: './certs/key.pem',
     publicKey: './certs/cert.pem',
     jwks: './certs/jwks.json',
+
+    internalAuth: {
+      // CNs of certificates allowed to act as internal services
+      allowedClientCNs: ['Registry Auth CA'],
+    },
   },
 
   httpClient: {

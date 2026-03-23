@@ -8,13 +8,14 @@ C = XX
 CN = Registry Auth CA
 
 [v3_req]
-keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment
-extendedKeyUsage = serverAuth, clientAuth
+keyUsage = critical, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 
 [v3_ca]
-subjectAltName = @alt_names
-keyUsage = digitalSignature, keyEncipherment
+basicConstraints = critical, CA:true
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
 
 [alt_names]
 IP.1 = 127.0.0.1

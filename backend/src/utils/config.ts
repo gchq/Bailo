@@ -32,6 +32,10 @@ export interface Config {
     privateKey: string
     publicKey: string
     jwks: string
+
+    internalAuth: {
+      allowedClientCNs: string[]
+    }
   }
 
   httpClient: {

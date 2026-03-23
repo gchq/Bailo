@@ -8,9 +8,9 @@ vi.mock('../../../src/routes/middleware/defaultAuthentication.js', () => ({
 }))
 
 describe('connectors > authentication > silly', () => {
-  test('authenticationMiddleware', async () => {
+  test('publicAuthenticationMiddleware', async () => {
     const connector = new SillyAuthenticationConnector()
-    const middleware = await connector.authenticationMiddleware()
+    const middleware = await connector.publicAuthenticationMiddleware()
 
     expect(middleware).toMatchSnapshot()
   })

@@ -24,9 +24,9 @@ vi.mock('body-parser', () => ({ default: { urlencoded: vi.fn(() => 'body parser 
 vi.mock('grant', () => ({ default: { default: { express: vi.fn(() => 'grant middleware') } } }))
 
 describe('connectors > authentication > oauth', () => {
-  test('authenticationMiddleware > returns expected middleware', async () => {
+  test('publicAuthenticationMiddleware > returns expected middleware', async () => {
     const connector = new OauthAuthenticationConnector()
-    const middleware = await connector.authenticationMiddleware()
+    const middleware = await connector.publicAuthenticationMiddleware()
 
     expect(middleware).toMatchSnapshot()
   })

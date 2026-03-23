@@ -36,14 +36,14 @@ await addDefaultSchemas()
 // Start the scheduler
 await startScheduler([])
 
-const { server } = await import('./routes.js')
+const { server, internalServer } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
   log.info(config.api.port, 'Listening on port')
 })
 // Set header timeout to 24H
 httpServer.headersTimeout = 86400000
 
-const internalServer = https.createServer(
+const httpsServer = https.createServer(
   {
     key: fs.readFileSync(config.app.privateKey),
     cert: fs.readFileSync(config.app.publicKey),
@@ -52,16 +52,12 @@ const internalServer = https.createServer(
     rejectUnauthorized: true,
     minVersion: 'TLSv1.2',
   },
-  server,
+  internalServer,
 )
-
-internalServer.listen(config.api.internalPort, () => {
+httpsServer.listen(config.api.internalPort, () => {
   log.info(config.api.internalPort, 'Internal HTTPS (mTLS) listening on port')
 })
-
-internalServer.headersTimeout = 86_400_000
-
-registerSigTerminate(httpServer)
-registerSigTerminate(internalServer)
+httpsServer.headersTimeout = 86_400_000
 
 registerSigTerminate(httpServer)
+registerSigTerminate(httpsServer)

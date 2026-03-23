@@ -22,7 +22,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     super()
   }
 
-  authenticationMiddleware() {
+  publicAuthenticationMiddleware() {
     return [
       {
         middleware: [
@@ -43,7 +43,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
         path: '/api/v2',
         middleware: [this.getUser],
       },
-      ...super.authenticationMiddleware(),
+      ...super.publicAuthenticationMiddleware(),
     ]
   }
 

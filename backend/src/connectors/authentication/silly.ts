@@ -13,7 +13,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     super()
   }
 
-  authenticationMiddleware() {
+  publicAuthenticationMiddleware() {
     return [
       {
         path: '/api/v2',
@@ -24,7 +24,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
           },
         ],
       },
-      ...super.authenticationMiddleware(),
+      ...super.publicAuthenticationMiddleware(),
     ]
   }
 
