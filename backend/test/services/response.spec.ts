@@ -114,7 +114,7 @@ describe('services > response', () => {
   })
 
   test('getResponsesByParentIds > response not found', async () => {
-    ResponseModelMock.find.mockResolvedValueOnce([])
+    ResponseModelMock.find.mockResolvedValueOnce(undefined)
 
     await expect(getResponsesByParentIds(['507f1f77bcf86cd799439011'])).rejects.toThrowError(
       'The requested response was not found.',
