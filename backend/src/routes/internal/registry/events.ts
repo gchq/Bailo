@@ -74,7 +74,6 @@ registerPath({
 export const handleRegistryEvents = [
   bodyParser.json({ type: ['application/vnd.docker.distribution.events.v2+json'] }),
   async (req: Request, res: Response<void>): Promise<void> => {
-    log.debug(req)
     const {
       body: { events },
     } = parse(req, registryEventsSchema)
