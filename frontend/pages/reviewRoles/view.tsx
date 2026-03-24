@@ -16,7 +16,7 @@ import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { CollaboratorEntry, ReviewRoleInterface } from 'types/types'
+import { ReviewRoleInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getRoleDisplayName } from 'utils/roles'
 import { plural } from 'utils/stringUtils'
@@ -40,12 +40,6 @@ export default function ReviewRoles() {
     shortName: '',
     systemRole: '',
   })
-
-  const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
-    formData.defaultEntities
-      ? formData.defaultEntities.map((defaultEntity) => ({ entity: defaultEntity, roles: [] }))
-      : [],
-  )
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -127,7 +121,6 @@ export default function ReviewRoles() {
 
       const res = await putReviewRole({
         ...formData,
-        defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
       } as UpdateReviewRolesParams)
 
       if (!res.ok) {
@@ -139,7 +132,7 @@ export default function ReviewRoles() {
 
       setLoading(false)
     },
-    [defaultEntitiesEntry, formData, mutateReviewRoles],
+    [formData, mutateReviewRoles],
   )
 
   const displayReviewRoleDefaultEntities = useMemo(() => {
@@ -226,8 +219,6 @@ export default function ReviewRoles() {
                   handleSubmit={handleSubmit}
                   loading={loading}
                   errorMessage={errorMessage}
-                  defaultEntitiesEntry={defaultEntitiesEntry}
-                  setDefaultEntities={setDefaultEntitiesEntry}
                 />
               ) : (
                 <Loading />
@@ -259,7 +250,6 @@ export default function ReviewRoles() {
       handleSubmit,
       loading,
       errorMessage,
-      defaultEntitiesEntry,
       confirmationOpen,
       schemasLength,
       handleDeleteReviewRole,

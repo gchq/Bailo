@@ -11,32 +11,36 @@ import {
 } from '@mui/material'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
-import { SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
 import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, SystemRole } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
-  value: CollaboratorEntry[]
-  onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
-  collaboratorsValue?: CollaboratorEntry[]
-  entryRoles?: SystemRole[]
 } & (
   | {
-      isReadOnly: boolean
-      requiredRolesText: string
+      value: CollaboratorEntry[]
+      onChange: (value: CollaboratorEntry[]) => void
+      entryRoles: SystemRole[]
     }
   | {
-      isReadOnly?: never
-      requiredRolesText?: never
+      value: string[]
+      onChange: (value: string[]) => void
+      entryRoles?: never
     }
 )
 
 export default function EntryAccessInput({ value, onChange, entryKind, entryRoles }: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)
-  const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(value)
+  const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(() => {
+    if (entryRoles) {
+      return value
+    } else {
+      return value.map((entity) => ({ entity, roles: [] }))
+    }
+  })
   const [userListQuery, setUserListQuery] = useState('')
   const [manualEntityInputErrorMessage, setManualEntityInputErrorMessage] = useState('')
 
@@ -44,33 +48,26 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
 
   const collaboratorList = useMemo(
     () =>
-      entryRoles &&
       collaborators.map((entity) => (
         <EntityItem
           key={entity.entity}
           entity={entity}
           collaborators={collaborators}
           onCollaboratorsChange={setCollaborators}
-          entryRoles={entryRoles}
+          entryRoles={[]}
           entryKind={entryKind}
         />
       )),
-    [collaborators, entryKind, entryRoles],
+    [collaborators, entryKind],
   )
 
-  const onCollaboratorsChange = useEffectEvent((value: CollaboratorEntry[]) => {
-    setCollaborators(value)
-  })
-
   useEffect(() => {
-    if (value) {
-      onCollaboratorsChange(value)
+    if (entryRoles) {
+      onChange(collaborators)
+    } else {
+      onChange(collaborators.map((collaborator) => collaborator.entity))
     }
-  }, [value])
-
-  useEffect(() => {
-    onChange(collaborators)
-  }, [collaborators, onChange])
+  }, [collaborators, entryRoles, onChange])
 
   const onUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
@@ -145,18 +142,16 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
         )}
       />
       <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
-      {entryRoles && (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Entity</TableCell>
-              <TableCell>Roles</TableCell>
-              <TableCell align='right'>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>{collaboratorList}</TableBody>
-        </Table>
-      )}
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Entity</TableCell>
+            {entryRoles && <TableCell>Roles</TableCell>}
+            <TableCell align='right'>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>{collaboratorList}</TableBody>
+      </Table>
     </Stack>
   )
 }
