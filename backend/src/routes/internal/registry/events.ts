@@ -53,18 +53,15 @@ registerPath({
   method: 'post',
   path: '/internal/registry/events',
   tags: ['artefact-scanning'],
-  description: 'Handle Registry Events to request a scan for a pushed image',
+  description:
+    'Handle Registry Events to request a scan for a pushed image. This endpoint is not public facing and may only be called by internal services.',
   schema: registryEventsSchema,
   responses: {
     200: {
       description: ``,
       content: {
         'application/json': {
-          schema: z.object({
-            status: z.string().openapi({
-              example: 'Image scan started for example-model-abc123/alpine:latest',
-            }),
-          }),
+          schema: z.object({}),
         },
       },
     },
@@ -89,7 +86,7 @@ export const handleRegistryEvents = [
 
       const target = event.target
       if (!target) {
-        log.info({ event }, 'Ignoring registry push without target property')
+        log.warn({ event }, 'Ignoring registry push without target property')
         continue
       }
       const repository = target?.repository
@@ -108,7 +105,7 @@ export const handleRegistryEvents = [
 
       const tag = target?.tag
       if (!tag) {
-        log.info({ event }, 'Ignoring registry push without tag property')
+        log.warn({ event }, 'Ignoring registry push without tag property')
         continue
       }
 

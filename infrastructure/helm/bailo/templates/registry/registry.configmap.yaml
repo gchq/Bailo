@@ -44,7 +44,7 @@ data:
     notifications:
       endpoints:
         - name: pushed-image-trigger-artefactscan-webhook
-          url: http://{{ include "bailo.fullname" . }}-backend:{{ .Values.config.app.port }}/internal/registry/events
+          url: http://{{ include "bailo.fullname" . }}-backend:{{ .Values.service.backendPort }}/internal/registry/events
           timeout: 5s
           threshold: 5
           backoff: 1s
