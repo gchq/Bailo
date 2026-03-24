@@ -8,6 +8,6 @@ import { handleRegistryEvents } from './registry/events.js'
 const router = Router()
 router.use(bodyParser.json(), httpLog, expressErrorHandler)
 
-router.post('/internal/registry/events', handleRegistryEvents)
+router.post('/registry/events', handleRegistryEvents)
 
 export default router

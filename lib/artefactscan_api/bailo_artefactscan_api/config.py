@@ -25,7 +25,7 @@ class Settings(BaseSettings):
         "\n"
         "Clients can upload files or image layers and retrieve structured scan results via a REST interface."
     )
-    app_version: str = "4.0.0"
+    app_version: str = "4.0.1"
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB
