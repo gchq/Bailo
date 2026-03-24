@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
-import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useCallback, useMemo } from 'react'
+import { ChangeEvent, Dispatch, ReactElement, SetStateAction, useCallback, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
@@ -37,8 +37,7 @@ type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
   setFormData: Dispatch<SetStateAction<T>>
   setIsEdit?: (state: boolean) => void
   headingComponent: ReactElement
-  //TODO replace
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
+  handleSubmit: (event: ChangeEvent) => void
   loading: boolean
   errorMessage: string
 }
