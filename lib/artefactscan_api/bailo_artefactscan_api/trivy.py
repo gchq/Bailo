@@ -256,7 +256,14 @@ def get_next_update() -> datetime.datetime | None:
             metadata = json.load(f)
     except FileNotFoundError:
         return None
-    return datetime.datetime.fromisoformat(metadata.get("NextUpdate"))
+    ts = metadata.get("NextUpdate")
+    if not ts:
+        return None
+    dt = datetime.datetime.fromisoformat(ts)
+    # Normalise to UTC (timezone-aware)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=datetime.timezone.utc)
+    return dt
 
 
 def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size: int = 1024) -> Any:

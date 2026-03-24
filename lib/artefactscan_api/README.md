@@ -90,8 +90,8 @@ To run the integration tests (does not require any externally running services):
 pytest -m integration
 ```
 
-> **Note:** the integration tests use safe but technically "malicious" file(s) to check ArtefactScan's performance. Please
-refer to [test_integration](./tests/test_integration/README.md) for details.
+> **Note:** the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
+refer to [test_modelscan_integration](./tests/test_modelscan_integration/README.md) for details.
 
 ## Docker Build Stages
 
