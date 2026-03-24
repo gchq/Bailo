@@ -32,9 +32,7 @@ export default function EntityItem({
   }
 
   function removeEntity() {
-    const updatedAccessList = _.cloneDeep(collaborators)
-    const again = updatedAccessList.filter((access) => access.entity !== entity.entity)
-    onCollaboratorsChange(again)
+    onCollaboratorsChange(collaborators.filter((access) => access.entity !== entity.entity))
   }
 
   return (
