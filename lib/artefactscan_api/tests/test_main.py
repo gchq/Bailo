@@ -41,7 +41,7 @@ def test_info():
         "modelscanScannerName": "modelscan",
         "modelscanVersion": modelscan.__version__,
         "trivyScannerName": "trivy",
-        "trivyVersion": "unknown",
+        "trivyVersion": "0.0.0-test",
     }
 
 
