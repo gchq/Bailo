@@ -43,8 +43,8 @@ data:
     {{- if .Values.artefactscan.trivy.ca.enabled }}
     notifications:
       endpoints:
-        - name: artefactscan-webhook
-          url: http://{{ include "bailo.fullname" . }}-artefactscan:{{ .Values.artefactscan.port }}/registry/events
+        - name: pushed-image-trigger-artefactscan-webhook
+          url: http://{{ include "bailo.fullname" . }}-backend:{{ .Values.config.app.port }}/internal/registry/events
           timeout: 5s
           threshold: 5
           backoff: 1s

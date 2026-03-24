@@ -191,6 +191,12 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   return await rerunImageScanNoAuth(image, repositoryToken)
 }
 
+/**
+ * Rerun an image scan without doing any auth checks.
+ *
+ * @remarks
+ * _Only_ use this function when an auth check would break expected functionality, otherwise use `rerunImageScan`.
+ */
 export async function rerunImageScanNoAuth(image: ImageRefInterface, repositoryToken: string) {
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)

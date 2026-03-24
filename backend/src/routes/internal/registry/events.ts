@@ -1,15 +1,14 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
-import { AuditInfo } from '../../connectors/audit/Base.js'
-import { z } from '../../lib/zod.js'
-import log from '../../services/log.js'
-import { getModelByIdNoAuth } from '../../services/model.js'
-import { rerunImageScanNoAuth } from '../../services/scan.js'
-import { registerPath } from '../../services/specification.js'
-import config from '../../utils/config.js'
-import { parse } from '../../utils/validate.js'
-import { getAccessToken } from '../v1/registryAuth.js'
+import { z } from '../../../lib/zod.js'
+import log from '../../../services/log.js'
+import { getModelByIdNoAuth } from '../../../services/model.js'
+import { rerunImageScanNoAuth } from '../../../services/scan.js'
+import { registerPath } from '../../../services/specification.js'
+import config from '../../../utils/config.js'
+import { parse } from '../../../utils/validate.js'
+import { getAccessToken } from '../../v1/registryAuth.js'
 
 export const registryEventsSchema = z.object({
   body: z.object({
@@ -52,7 +51,7 @@ export const registryEventsSchema = z.object({
 
 registerPath({
   method: 'post',
-  path: '/registry/events',
+  path: '/internal/registry/events',
   tags: ['artefact-scanning'],
   description: 'Handle Registry Events to request a scan for a pushed image',
   schema: registryEventsSchema,
@@ -75,7 +74,6 @@ registerPath({
 export const handleRegistryEvents = [
   bodyParser.json({ type: ['application/vnd.docker.distribution.events.v2+json'] }),
   async (req: Request, res: Response<void>): Promise<void> => {
-    req.audit = AuditInfo.UpdateImage
     log.debug(req)
     const {
       body: { events },
@@ -105,7 +103,7 @@ export const handleRegistryEvents = [
       const name = rest.join('/')
       const model = getModelByIdNoAuth(modelId)
       if (!model) {
-        log.info({ event }, 'Ignoring registry push to non-existent model')
+        log.warn({ event }, 'Ignoring registry push to non-existent model')
         continue
       }
 
