@@ -6,9 +6,7 @@ import { expressErrorHandler } from '../middleware/expressErrorHandler.js'
 import { handleRegistryEvents } from './registry/events.js'
 
 const router = Router()
-router.use(bodyParser.json())
-router.use(httpLog)
-router.use(expressErrorHandler)
+router.use(bodyParser.json(), httpLog, expressErrorHandler)
 
 router.post('/internal/registry/events', handleRegistryEvents)
 
