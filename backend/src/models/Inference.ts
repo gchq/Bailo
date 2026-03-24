@@ -9,6 +9,7 @@ export interface InferenceSetting {
 }
 
 export interface InferenceInterface {
+  id: string
   modelId: string
   image: string
   tag: string
