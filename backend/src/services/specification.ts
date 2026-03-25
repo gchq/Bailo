@@ -233,8 +233,31 @@ export const imageWithScanResultsSchema = z.object({
         tag: z.string().openapi('v1-cpu'),
         severity: SeverityCountsSchema,
       }),
+      imageSize: z.number(),
     }),
   ),
+})
+
+export const imageTagWithScanResultsSchema = z.object({
+  state: z.nativeEnum(ArtefactScanState),
+  tag: z.string().openapi({ example: 'v1-cpu' }),
+  scanResults: z
+    .array(
+      scanInterfaceSchema.pick({
+        artefactKind: true,
+        fileId: true,
+        toolName: true,
+        scannerVersion: true,
+        state: true,
+        summary: true,
+        lastRunAt: true,
+        _id: true,
+        id: true,
+      }),
+    )
+    .optional(),
+  severityCounts: SeverityCountsSchema,
+  imageSize: z.number(),
 })
 
 export const releaseInterfaceSchema = z.object({

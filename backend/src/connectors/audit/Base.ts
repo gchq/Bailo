@@ -293,10 +293,15 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.SchemaMigration,
   },
-
   ViewModelImages: {
     typeId: 'ViewModelImages',
     description: 'Model Images Viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Image,
+  },
+  ViewModelImage: {
+    typeId: 'ViewModelImage',
+    description: 'Model Image Viewed',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Image,
   },
@@ -469,6 +474,7 @@ export abstract class BaseAuditConnector {
   abstract onViewScanners(req: Request): Promise<void>
 
   abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
+  abstract onViewModelImage(req: Request, modelId: string, name: string, tag: string): Promise<void>
   abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
   abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
 
