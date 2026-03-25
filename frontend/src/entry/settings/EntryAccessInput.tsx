@@ -14,7 +14,7 @@ import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
-import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, SystemRole } from 'types/types'
+import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, EntryRole } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -23,7 +23,7 @@ type EntryAccessInputProps = {
   | {
       value: CollaboratorEntry[]
       onChange: (value: CollaboratorEntry[]) => void
-      entryRoles: SystemRole[]
+      entryRoles: EntryRole[]
     }
   | {
       value: string[]

@@ -5,14 +5,14 @@ import router from 'next/router'
 import { ChangeEvent, useState } from 'react'
 import Title from 'src/common/Title'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { ReviewRolesFormData, RoleKind } from 'types/types'
+import { ReviewRolesFormData, RoleKind, SystemRole } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {
   const [formData, setFormData] = useState<ReviewRolesFormData>({
     name: '',
     shortName: '',
-    systemRole: '',
+    systemRole: SystemRole.None,
     kind: RoleKind.REVIEW,
     description: '',
     defaultEntities: [],

@@ -26,7 +26,7 @@ import { EntryKind, SystemRoleKeys } from 'types/types'
 type ReviewRoleFormMinimal = {
   shortName: string
   name: string
-  systemRole: SystemRoleKeys
+  systemRole?: SystemRoleKeys
   defaultEntities?: Array<string>
   description?: string
 }
