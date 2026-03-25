@@ -22,7 +22,7 @@ const GetModelRolesResponseSchema = z.object({
       kind: z.nativeEnum(RoleKind),
       shortName: z.string(),
       description: z.string().optional(),
-      SystemRole: z.nativeEnum(SystemRoles).optional(),
+      systemRole: z.nativeEnum(SystemRoles).optional(),
     }) satisfies z.ZodType<Role>,
   ),
 })
@@ -44,8 +44,6 @@ registerPath({
     },
   },
 })
-
-export type ModelScanResponseSchema = z.infer<typeof GetModelRolesResponseSchema>
 
 export const getModelRoles = [
   async (req: Request, res: Response<z.infer<typeof GetModelRolesResponseSchema>>) => {
