@@ -249,9 +249,9 @@ describe('clients > registry', () => {
 
   test('getImageTagManifest > invalid headers response', async () => {
     fetchMock.mockReturnValueOnce({
-      ok: false,
+      ok: true,
       headers: new Headers({}),
-      text: vi.fn(),
+      text: vi.fn().mockResolvedValue('{}'),
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 

@@ -245,6 +245,7 @@ export type ImageTagResult = {
   severityCounts: SeverityCounts
   architecture?: string
   scanResults?: ScanInterface[]
+  imageSize: number
 }
 
 export type ImageScanResults = {

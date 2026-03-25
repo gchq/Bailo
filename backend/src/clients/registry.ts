@@ -146,18 +146,6 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    // headers
-    const rawHeaders = normaliseHeaders(res.headers)
-    const parsedHeaders = headersSchema.safeParse(rawHeaders)
-    if (!parsedHeaders.success) {
-      controller.abort()
-      throw InternalError('Registry returned invalid headers.', {
-        issues: parsedHeaders.error.format(),
-      })
-    }
-    headers = parsedHeaders.data
-    log.trace({ headers }, 'Headers received from the registry.')
-
     const { body: rawBody, stream } = await readBody(res, expectStream)
     const context = {
       url: res.url,
@@ -177,6 +165,18 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
         body: rawBody,
       })
     }
+
+    // headers
+    const rawHeaders = normaliseHeaders(res.headers)
+    const parsedHeaders = headersSchema.safeParse(rawHeaders)
+    if (!parsedHeaders.success) {
+      controller.abort()
+      throw InternalError('Registry returned invalid headers.', {
+        issues: parsedHeaders.error.format(),
+      })
+    }
+    headers = parsedHeaders.data
+    log.trace({ headers }, 'Headers received from the registry.')
 
     // streamed response
     if (expectStream) {
@@ -252,7 +252,7 @@ export async function listModelRepos(token: string, modelId: string): Promise<st
   })
 
   const repositories = result.body?.repositories ?? []
-  return repositories.filter((repo) => repo.startsWith(modelId))
+  return repositories.filter((repo) => repo.startsWith(`${modelId}/`))
 }
 
 export async function listImageTags(token: string, repoRef: RepoRefInterface) {
