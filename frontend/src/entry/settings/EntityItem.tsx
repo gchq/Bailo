@@ -42,8 +42,8 @@ export default function EntityItem({
           <EntityNameDisplay entryCollaborator={entity} />
         </Stack>
       </TableCell>
-      <TableCell>
-        {entryRoles.length > 0 && (
+      {entryRoles.length > 0 && (
+        <TableCell>
           <Autocomplete
             multiple
             size='small'
@@ -54,14 +54,14 @@ export default function EntityItem({
             getOptionLabel={(role) => getRoleDisplayName(role, entryRoles)}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
-            renderTags={(value, getTagProps) =>
+            renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip label={getRoleDisplayName(option, entryRoles)} {...getTagProps({ index })} key={option} />
               ))
             }
           />
-        )}
-      </TableCell>
+        </TableCell>
+      )}
       <TableCell align='right'>
         <Tooltip title='Remove user'>
           <IconButton

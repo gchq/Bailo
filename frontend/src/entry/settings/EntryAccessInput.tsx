@@ -54,11 +54,11 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
           entity={entity}
           collaborators={collaborators}
           onCollaboratorsChange={setCollaborators}
-          entryRoles={[]}
+          entryRoles={entryRoles ? entryRoles : []}
           entryKind={entryKind}
         />
       )),
-    [collaborators, entryKind],
+    [collaborators, entryKind, entryRoles],
   )
 
   useEffect(() => {
@@ -116,6 +116,7 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
         </Typography>
       )}
       <Autocomplete
+        key={collaborators.toString()}
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}

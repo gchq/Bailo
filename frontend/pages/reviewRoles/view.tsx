@@ -5,7 +5,7 @@ import { useGetEntryRoles } from 'actions/entry'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { FormEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { ChangeEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -114,7 +114,7 @@ export default function ReviewRoles() {
   )
 
   const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    async (event: ChangeEvent) => {
       event.preventDefault()
       setErrorMessage('')
       setLoading(true)
@@ -144,6 +144,18 @@ export default function ReviewRoles() {
         ))
       : 'No entities assigned'
   }, [formData])
+
+  const editReviewRoleHeading = useMemo(
+    () => (
+      <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+        <Typography variant='h6' component='h1'>
+          Update Existing Role
+        </Typography>
+        <Edit color='primary' fontSize='large' />
+      </Stack>
+    ),
+    [],
+  )
 
   const listRoleDescriptions = useMemo(
     () =>
@@ -208,14 +220,7 @@ export default function ReviewRoles() {
                   setFormData={setFormData}
                   setIsEdit={setIsEdit}
                   providedData={true}
-                  headingComponent={
-                    <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
-                      <Typography variant='h6' component='h1'>
-                        Update Existing Role
-                      </Typography>
-                      <Edit color='primary' fontSize='large' />
-                    </Stack>
-                  }
+                  headingComponent={editReviewRoleHeading}
                   handleSubmit={handleSubmit}
                   loading={loading}
                   errorMessage={errorMessage}
@@ -247,6 +252,7 @@ export default function ReviewRoles() {
       entryRoles,
       displayReviewRoleDefaultEntities,
       handleOpenDeleteConfirmation,
+      editReviewRoleHeading,
       handleSubmit,
       loading,
       errorMessage,
