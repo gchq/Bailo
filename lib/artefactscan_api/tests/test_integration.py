@@ -49,6 +49,8 @@ OCTET_STREAM_TYPE = "application/octet-stream"
 @pytest.fixture()
 def trivy_env(monkeypatch):
     with TemporaryDirectory() as tmp:
+        original_settings = trivy.get_settings()
+
         fake_bin = Path(__file__).parent / "test_trivy_integration" / "fake_trivy.py"
         db_dir = Path(tmp) / "db"
         db_dir.mkdir()
@@ -59,8 +61,12 @@ def trivy_env(monkeypatch):
         monkeypatch.setenv("TRIVY_CACHE_DIR", tmp)
         monkeypatch.setenv("TRIVY_DB_DIR", str(db_dir))
         trivy.get_settings.cache_clear()
-
         yield
+
+        monkeypatch.setenv("TRIVY_BINARY", original_settings.BINARY)
+        monkeypatch.setenv("TRIVY_CACHE_DIR", original_settings.CACHE_DIR)
+        monkeypatch.setenv("TRIVY_DB_DIR", original_settings.DB_DIR)
+        trivy.get_settings.cache_clear()
 
 
 @pytest.mark.integration
