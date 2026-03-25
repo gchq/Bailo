@@ -23,7 +23,7 @@ spec:
       containers:
       - name: {{ include "bailo.fullname" . }}-artefactscan
         ports:
-          - name: artefactscanport
+          - name: http
             containerPort: {{ .Values.artefactscan.port }}
             protocol: TCP
         image: "{{ .Values.image.artefactscanRepository }}:{{ .Values.image.artefactscanTag }}"
