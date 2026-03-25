@@ -35,7 +35,7 @@ registerPath({
   schema: getModelRolesSchema,
   responses: {
     200: {
-      description: 'An array of roles..',
+      description: 'An array of roles.',
       content: {
         'application/json': {
           schema: GetModelRolesResponseSchema,
