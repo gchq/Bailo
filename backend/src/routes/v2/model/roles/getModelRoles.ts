@@ -6,7 +6,7 @@ import { z } from '../../../../lib/zod.js'
 import { SystemRoles } from '../../../../models/Model.js'
 import { getAllEntryRoles } from '../../../../services/roles.js'
 import { registerPath } from '../../../../services/specification.js'
-import { RoleKind } from '../../../../types/types.js'
+import { Role, RoleKind } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getModelRolesSchema = z.object({
@@ -23,7 +23,7 @@ const GetModelRolesResponseSchema = z.object({
       shortName: z.string(),
       description: z.string().optional(),
       SystemRole: z.nativeEnum(SystemRoles).optional(),
-    }),
+    }) satisfies z.ZodType<Role>,
   ),
 })
 
