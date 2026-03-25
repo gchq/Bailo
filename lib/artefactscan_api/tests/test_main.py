@@ -38,6 +38,7 @@ STREAM_MIME_TYPE = "application/octet-stream"
 
 def test_lifespan_downloads_db_on_start(mocker):
     download = mocker.patch("bailo_artefactscan_api.trivy.download_database")
+    mocker.patch("shutil.rmtree")
 
     with TestClient(app):
         pass
