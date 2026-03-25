@@ -432,6 +432,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
+  async onViewModelImage(req: Request, modelId: string, name: string, tag: string) {
+    this.auditGenericEvent(req, `${modelId}/${name}:${tag}`)
+  }
+
   async onUpdateImage(req: Request, modelId: string, image: { repository: string; name: string; tag: string }) {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
