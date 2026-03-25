@@ -36,15 +36,13 @@ TXT_MIME_TYPE = "text/plain"
 STREAM_MIME_TYPE = "application/octet-stream"
 
 
-def test_lifespan_does_not_redownload_when_db_exists(mocker, tmp_path: Path):
-    mocker.patch("bailo_artefactscan_api.trivy.get_settings").return_value.DB_DIR = str(tmp_path)
-    (tmp_path / "metadata.json").write_text("{}")
+def test_lifespan_downloads_db_on_start(mocker):
     download = mocker.patch("bailo_artefactscan_api.trivy.download_database")
 
     with TestClient(app):
         pass
 
-    download.assert_not_called()
+    download.assert_called()
 
 
 def test_shutdown_waits_for_db_lock(mocker):

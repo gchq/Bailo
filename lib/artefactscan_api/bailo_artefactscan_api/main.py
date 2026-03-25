@@ -47,8 +47,7 @@ class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not Path(trivy.get_settings().DB_DIR).exists():
-        trivy.download_database()
+    trivy.download_database()
     yield
 
     with trivy._DB_LOCK:
