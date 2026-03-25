@@ -40,7 +40,7 @@ data:
       relativeurls: true
       headers:
         X-Content-Type-Options: [nosniff]
-    {{- if .Values.artefactscan.trivy.ca.enabled }}
+    {{- if .Values.artefactscan.enabled }}
     notifications:
       endpoints:
         - name: pushed-image-trigger-artefactscan-webhook

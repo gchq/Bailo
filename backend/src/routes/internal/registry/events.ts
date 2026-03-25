@@ -5,7 +5,6 @@ import { z } from '../../../lib/zod.js'
 import log from '../../../services/log.js'
 import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
-import { registerPath } from '../../../services/specification.js'
 import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
 import { getAccessToken } from '../../v1/registryAuth.js'
@@ -47,25 +46,6 @@ export const registryEventsSchema = z.object({
       }),
     ),
   }),
-})
-
-registerPath({
-  method: 'post',
-  path: '/internal/registry/events',
-  tags: ['artefact-scanning'],
-  description:
-    'Handle Registry Events to request a scan for a pushed image. This endpoint is not public facing and may only be called by internal services.',
-  schema: registryEventsSchema,
-  responses: {
-    200: {
-      description: ``,
-      content: {
-        'application/json': {
-          schema: z.object({}),
-        },
-      },
-    },
-  },
 })
 
 export const handleRegistryEvents = [
@@ -113,9 +93,15 @@ export const handleRegistryEvents = [
       const repositoryToken = await getAccessToken({ dn: config.registry.service }, [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
-      const status = await rerunImageScanNoAuth(imageRef, repositoryToken)
 
-      log.debug({ event }, status)
+      try {
+        const status = await rerunImageScanNoAuth(imageRef, repositoryToken)
+        log.debug({ event }, status)
+      } catch (err) {
+        // Likely triggered by 'No image scanners are enabled.'
+        // Only log as `res` has already been returned
+        log.error({ event, err }, 'Failed to automatically scan image from the registry')
+      }
     }
   },
 ]
