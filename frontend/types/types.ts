@@ -528,6 +528,7 @@ export interface ModelImage {
   repository: string
   name: string
   tags: Array<string>
+  scanResults: ScanResultInterface[]
 }
 
 export interface FlattenedModelImage {
@@ -737,3 +738,183 @@ export interface ModelFormStats extends FormStats {
   pagesCompleted: number
   percentagePagesComplete: number
 }
+
+export type SeverityCounts = Record<SeverityLevelKeys, number>
+
+export type ScanInterface = {
+  toolName: string
+  scannerVersion?: string
+  state: ArtefactScanStateKeys
+  summary?: ScanSummary
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
+
+  lastRunAt: string
+
+  createdAt: string
+  updatedAt: string
+} & (
+  | {
+      artefactKind: typeof ArtefactKind.FILE
+      fileId: string
+    }
+  | {
+      artefactKind: typeof ArtefactKind.IMAGE
+      layerDigest: string
+    }
+)
+
+export type ScanInfoInterface = {
+  toolName: string
+  scannerVersion: string
+  artefactKind: ArtefactKindKeys
+}
+
+export const ArtefactScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
+
+export type ModelScanResponse = {
+  summary: {
+    total_issues: number
+    total_issues_by_severity: {
+      LOW: number
+      MEDIUM: number
+      HIGH: number
+      CRITICAL: number
+    }
+    input_path: string
+    absolute_path: string
+    modelscan_version: string
+    timestamp: string
+    scanned: {
+      total_scanned: number
+      scanned_files: string[]
+    }
+    skipped: {
+      total_skipped: number
+      skipped_files: [
+        {
+          category: string
+          description: string
+          source: string
+        },
+      ]
+    }
+    issues: [
+      {
+        description: string
+        operator: string
+        module: string
+        source: string
+        scanner: string
+        severity: string
+      },
+    ]
+    errors: [
+      {
+        category: string
+        description: string
+        source: string
+      },
+    ]
+  }
+}
+
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+
+export type ArtefactScanSummary = {
+  severity: SeverityLevelKeys
+  vulnerabilityDescription: string
+}
+
+export type ClamAVSummary = {
+  virus: string
+}
+
+export type TrivyScanResultResponse = {
+  SchemaVersion: string
+  CreatedAt: string
+  ArtifactName: string
+  ArtifactType: string
+  Metadata: {
+    OS: {
+      Family: string
+      Name: string
+    }
+    ImageID: string
+    DiffIDs: string[]
+    RepoTags: string[]
+    RepoDigests: string[]
+  }
+  Results: Results[]
+}
+
+export type Results = {
+  Target: string
+  Class: string
+  Type: string
+  Vulnerabilities: Vulnerabilities[]
+  Misconfigurations: unknown[]
+  Secrets: unknown[]
+  Licenses: unknown[]
+}
+
+export type Vulnerabilities = {
+  VulnerabilityID: string
+  PkgID: string
+  PkgName: string
+  PkgIdentifier: {
+    PURL: string
+    UID: string
+  }
+  InstalledVersion: string
+  FixedVersion: string
+  Status: string
+  Layer: {
+    DiffID: string
+  }
+  PrimaryURL: string
+  DataSource: {
+    ID: string
+    Name: string
+    URL: string
+  }
+  Title: string
+  Description: string
+  Severity: string
+  CweIDs: string[]
+  VendorSeverity: {
+    key: string
+    level: number
+  }
+
+  References: string[]
+  PublishedDate: string
+  LastModifiedDate: string
+}
+
+export type ModelImagesWithOptionalScanResults = ModelImageTags & ImageScanResults
+
+export type ModelImageTags = {
+  repository: string
+  name: string
+  tags: Array<string>
+}
+
+export type ImageTagResult = {
+  tag: string
+  state: ArtefactScanStateKeys
+  severityCounts: SeverityCounts
+  scanResults?: ScanInterface[]
+  imageSize: number
+}
+
+export type ImageScanResults = {
+  scanSummaries: ImageTagResult[]
+}
+
+export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
