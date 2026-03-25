@@ -25,20 +25,10 @@ class Settings(BaseSettings):
         "\n"
         "Clients can upload files or image layers and retrieve structured scan results via a REST interface."
     )
-    app_version: str = "4.0.0"
+    app_version: str = "4.0.1"
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB
 
     # Load in a dotenv file to set/overwrite any properties with potentially sensitive values
     model_config = SettingsConfigDict(env_file=".env")
-
-
-class BackendSettings(BaseSettings):
-    """Authentication settings for the backend service."""
-
-    model_config = SettingsConfigDict(env_prefix="BACKEND_")
-
-    base_url: str = "http://backend:3001"
-    client_cert: CertTypes | None = ("/certs/cert.pem", "/certs/key.pem")
-    ca_cert: SSLContext | str | bool = False

@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
-import { rerunFileScan, rerunImageScan, scanFile } from '../../src/services/scan.js'
+import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
@@ -307,7 +307,8 @@ describe('services > scan', () => {
       } as any)
 
       expect(result).toBe('Image scan started for repo/image:latest')
-      expect(fileScanningMock.startScans).not.toHaveBeenCalled()
+      // Note that `runScans` is not awaited so this line may not complete if execution order changes
+      expect(fileScanningMock.startScans).toHaveBeenCalled()
     })
 
     test('fail on manifest list', async () => {
@@ -362,6 +363,27 @@ describe('services > scan', () => {
       await expect(
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
       ).rejects.toThrowError('No image scanners are enabled.')
+    })
+  })
+
+  describe('rerunImageScanNoAuth', () => {
+    test('success no auth', async () => {
+      ScanModelMock.find.mockResolvedValueOnce([])
+
+      const result = await rerunImageScanNoAuth(
+        {
+          repository: 'repo',
+          name: 'image',
+          tag: 'latest',
+        } as any,
+        'token',
+      )
+
+      expect(result).toBe('Image scan started for repo/image:latest')
+      expect(modelMocks.getModelById).not.toHaveBeenCalled()
+      expect(authMocks.default.image).not.toHaveBeenCalled()
+      expect(authMocks.default.model).not.toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).not.toHaveBeenCalled()
     })
   })
 })
