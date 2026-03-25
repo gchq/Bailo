@@ -130,6 +130,18 @@ The [Dockerfile](./Dockerfile) has two build targets:
 - `dev` - mounts source code for live changes
 - `prod` - optimised for deployment (default target)
 
+## ArtefactScan vs ModelScan API
+
+The **ArtefactScan API** replaces the previous standalone **ModelScan API**.
+
+- The earlier ModelScan API only supported file scanning via ProtectAI ModelScan.
+- ArtefactScan expands this scope to support multiple scanner types behind a single service.
+- Trivy integration for container image layer scanning and SBOM generation is only available via ArtefactScan.
+- ModelScan remains supported as a scanner, but is no longer exposed as a standalone API.
+- The [old GHCR `bailo_modelscan` image repository](https://github.com/gchq/Bailo/pkgs/container/bailo_modelscan) still exists for reference but **will not receive further updates**.
+
+Consumers should migrate to ArtefactScan for all artefact scanning use cases.
+
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
