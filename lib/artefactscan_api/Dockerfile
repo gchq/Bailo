@@ -2,7 +2,7 @@
 
 ARG PYTHONPATH=/venv/lib/python3.12/site-packages
 
-FROM python:3.12.13-slim-bookworm AS build
+FROM library/python:3.12.13-slim-bookworm AS build
 ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip /venv/bin/pip install -r /requirements.txt
 
-FROM ubuntu:24.04 AS base
+FROM library/ubuntu:24.04 AS base
 ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

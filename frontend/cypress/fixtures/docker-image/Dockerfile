@@ -1,2 +1,2 @@
-FROM ubuntu:18.04
+FROM library/ubuntu:18.04
 RUN  echo "Hello world"

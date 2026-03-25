@@ -26,3 +26,9 @@ infrastructure/helm/bailo/local.yaml
 # MLFlow
 mlartifacts/
 mlruns/
+
+# Dockerfile and compose overrides from `generate-registry-prefix.sh`
+compose.*.yaml
+compose.*.yaml.tmp
+Dockerfile.*
+!Dockerfile

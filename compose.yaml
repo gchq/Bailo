@@ -87,7 +87,7 @@ services:
       - backend
 
   registry:
-    image: registry:3.0.0
+    image: library/registry:3.0.0
     networks:
       internal:
     environment:
