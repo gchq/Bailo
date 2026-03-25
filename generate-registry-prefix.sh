@@ -4,6 +4,7 @@ set -euo pipefail
 # Args:
 #   $1 = registry prefix (e.g. local mirror or pull‑through cache)
 #   $2 = label for the new compose file (used for compose.<label>.yaml and Dockerfile.<label>)
+# See https://gchq.github.io/Bailo/docs/administration/helm/isolated-environments or `frontend/pages/docs/administration/helm/isolated-environments.mdx` for further detail
 USAGE_MESSAGE="Usage: $0 <registry-prefix> <label>}"
 REGISTRY_PREFIX="${1:?$USAGE_MESSAGE}"
 LABEL="${2:?$USAGE_MESSAGE}"

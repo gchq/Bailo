@@ -14,18 +14,43 @@ We rely on the following [Bitnami charts](https://charts.bitnami.com/):
 
 ## Docker Images
 
-We rely on the following images:
+We rely on the several images, including:
 
-- mongodb/mongodb-community-server:8.2.2-ubi9
+- mongodb/mongodb-community-server:8.2.6-ubi9
 - bitnami/minio:2025.7.23
-- marlonb/mailcrab:v1.6.2
+- marlonb/mailcrab:v1.6.5
+- tarampampam/webhook-tester:2.2.6
 - nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
 - registry:3.0.0
-- node:24.11.1-alpine
+- node:24.14.0
+- python:3.12.13-slim-bookworm
+- python:3.14.2-bookworm
+- ubuntu:24.04
+- aquasec/trivy:0.69.3
+- clamav/clamav:1.4.3_base
 
-These are regularly updated. To retrieve the latest versions used, check `./compose.yaml` and `./backend/Dockerfile`.
-These versions can be configured using the `tag` attribute for each image in `values.yaml` to override the defaults. In
-general, keeping to the same major version will maintain compatibility with Bailo.
+The versions are regularly updated in Open Source using dependabot. To retrieve the latest versions used, check
+`./compose.yaml`, `./compose.override.yaml`, `./backend/Dockerfile`, `./frontend/Dockerfile` and
+`./lib/artefactscan_api/Dockerfile`. These versions can be configured using the `tag` attribute for each image in
+`values.yaml` to override the defaults. In general, keeping to the same major version will maintain compatibility with
+Bailo.
+
+### Registry‑prefixed Compose & Dockerfiles
+
+`./gen-compose-registry-prefix.sh` generates **local/CI‑only** variants of Docker Compose files and Dockerfiles that
+route image pulls via an alternative registry (e.g. a pull‑through cache).
+
+Source files remain unchanged so tools like Dependabot continue to work, and generated files are gitignored.
+
+```bash
+./gen-compose-registry-prefix.sh <registry-prefix> <label>
+docker compose -f compose.<label>.yaml up
+```
+
+Running the script generates:
+
+- `compose.<label>.yaml` - external images prefixed; local `bailo_*` images use `Dockerfile.<label>`
+- `Dockerfile.<label>` - only external `FROM` images rewritten (multi‑stage safe)
 
 ## NPM
 
