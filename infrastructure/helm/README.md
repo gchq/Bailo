@@ -321,8 +321,8 @@ The following tables describe selected configuration options available in `value
 | `image.frontendTag` | Frontend image tag | `null` |
 | `image.backendRepository` | Backend image location | `null` |
 | `image.backendTag` | Backend image tag | `null` |
-| `image.artefactscanRepository` | Artefactscan image location | `null` |
-| `image.artefactscanTag` | Artefactscan image tag | `null` |
+| `image.artefactscanRepository` | ArtefactScan image location | `null` |
+| `image.artefactscanTag` | ArtefactScan image tag | `null` |
 | `image.pullPolicy` | <https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy> | `IfNotPresent` |
 
 ### Pod Parameters

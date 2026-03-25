@@ -3,35 +3,76 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 # Artefact Scanners
 
 Within Bailo, it is possible to optionally deploy artefact scanners which are designed to help manage any potential risk
-of artefacts being uploaded with potentially malicious contents. We provide two artefact scanners by default:
+of artefacts being uploaded with potentially malicious contents.
 
-[ClamAV](https://www.clamav.net/) and [ModelScan](https://github.com/protectai/modelscan).
+The scanners currently supported by Bailo are:
+
+- [ClamAV](https://www.clamav.net/) - traditional antivirus scanning for uploaded files
+- [ArtefactScan](https://github.com/gchq/Bailo/tree/main/lib/artefactscan_api) - Bailo scanning service that
+  orchestrates multiple scanners
+  - [ModelScan](https://github.com/protectai/modelscan) - malicious or unsafe content detection in model artefacts
+  - [Trivy](https://github.com/aquasecurity/trivy) - vulnerability scanning and SBOM generation for container image
+    layers
 
 ## ClamAV
 
-We use the [docker image](https://hub.docker.com/r/clamav/clamav) with a
-[custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/artefactScanning/clamAv.ts) to
-communicate with ClamAV using [clamscan](https://www.npmjs.com/package/clamscan).
+ClamAV is used for traditional malware detection on uploaded files.
+
+- Uses the official [ClamAV Docker image](https://hub.docker.com/r/clamav/clamav)
+- Integrated via a
+  [custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/artefactScanning/clamAv.ts)
+- Communicates using [`clamscan`](https://www.npmjs.com/package/clamscan)
 
 > ClamAV® is an open-source antivirus engine for detecting trojans, viruses, malware & other malicious threats.
 
-## ModelScan
+## ArtefactScan (Service)
 
-We have a [dockerised REST API](https://github.com/gchq/Bailo/tree/main/lib/artefactscan_api) to programmatically
-interact with ModelScan via a
-[custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/fileScanning/artefactScan.ts).
+ArtefactScan is an umbrella scanning service within Bailo.
+
+- Provides a single REST API for scanning
+- Routes artefacts to the appropriate scanner based on artefact type
+- Keeps scanner implementations explicit and interchangeable
+- Normalises scan orchestration (not scan results)
+
+Scanners exposed via ArtefactScan:
+
+- **ModelScan** (`/scan/file`)
+- **Trivy** (`/scan/image`)
+
+### ModelScan
+
+ModelScan is used to analyse uploaded model artefacts for unsafe or malicious content.
+
+- Provided via the [ArtefactScan REST API](https://github.com/gchq/Bailo/pkgs/container/bailo_artefactscan)
+- Integrated using a
+  [custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/artefactScanning/modelScan.ts)
+- Scans files such as Pickle, H5, and SavedModel formats
 
 > ModelScan is an open source project from Protect AI that scans models to determine if they contain unsafe code. It is
 > the first model scanning tool to support multiple model formats. ModelScan currently supports: H5, Pickle, and
 > SavedModel formats. This protects you when using PyTorch, TensorFlow, Keras, Sklearn, XGBoost, with more on the way.
 
+### Trivy
+
+Trivy is used to analyse container image layers for known vulnerabilities and to generate SBOMs.
+
+- Provided via the [ArtefactScan REST API](https://github.com/gchq/Bailo/pkgs/container/bailo_artefactscan)
+- Integrated using a
+  [custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/artefactScanning/trivy.ts)
+- Scans uploaded image layer tarballs (overlay filesystems)
+- Uses a locally cached Trivy vulnerability database
+
+> Trivy is an open‑source vulnerability scanner from Aqua Security for containers and other artefacts.
+
 ## Minimal Configuration
 
-| Name                                              | Description                                                                           | Value  |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
-| `connectors.artefactScanners.kinds`               | A list of the file scanner names to enable                                            | `[]`   |
-| `connectors.artefactScanners.retryDelayInMinutes` | Number of minutes between scans on a given file                                       | `60`   |
-| `connectors.artefactScanners.maxInitRetries`      | Number of times the microservice is attempted to be reached before failing at startup | `5`    |
-| `connectors.artefactScanners.initRetryDelay`      | Delay between successive microservice pings in milliseconds                           | `5000` |
+| Name                                              | Description                                           | Value  |
+| ------------------------------------------------- | ----------------------------------------------------- | ------ |
+| `connectors.artefactScanners.kinds`               | List of enabled artefact scanner kinds                | `[]`   |
+| `connectors.artefactScanners.retryDelayInMinutes` | Minutes between repeated scans of the same artefact   | `60`   |
+| `connectors.artefactScanners.maxInitRetries`      | Number of startup connection attempts before failing  | `5`    |
+| `connectors.artefactScanners.initRetryDelay`      | Delay between successive startup pings (milliseconds) | `5000` |
+
+Enabling or disabling specific scanners is handled via connector configuration and deployed microservices.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
