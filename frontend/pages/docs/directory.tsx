@@ -66,7 +66,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   /// Microservices
   { title: 'Microservices', slug: 'administration/microservices', header: true },
-  { title: 'File Scanners', slug: 'administration/microservices/file-scanners' },
+  { title: 'Artefact Scanners', slug: 'administration/microservices/artefact-scanners' },
 
   /// Helm
   { title: 'Helm', slug: 'administration/helm', header: true },

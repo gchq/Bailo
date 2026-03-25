@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from typing import Any
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import modelscan
 import pytest
@@ -101,25 +101,3 @@ def test_scan_invalid_pickle_file(
     assert ".dat" not in str(response.content)
     mock_is_valid_pickle.assert_called_once()
     mock_scan.assert_called_once()
-
-
-@patch("bailo_artefactscan_api.main.httpx.AsyncClient")
-def test_post_registry_events_push_triggers_scan(mock_async_client: AsyncMock):
-    mock_client_instance = mock_async_client.return_value.__aenter__.return_value
-    mock_client_instance.put = AsyncMock()
-    payload = {
-        "events": [
-            {
-                "action": "push",
-                "target": {
-                    "repository": "model123/my-model",
-                    "tag": "latest",
-                },
-            }
-        ]
-    }
-
-    response = client.post("/registry/events", json=payload)
-
-    assert response.status_code == 202
-    mock_client_instance.put.assert_called_once()

@@ -111,7 +111,8 @@ export async function getImageWithScanResults(
   imageRef: ImageRefInterface,
   includeFullDetail = false,
 ): Promise<ImageTagResult> {
-  const scans = await getScansForImageTag(user, imageRef)
+  const layers = await getLayersForImageTag(user, imageRef)
+  const scans = await getScansForImageTag(user, layers)
 
   const initialState = Object.fromEntries(
     Object.values(ArtefactScanState).map((state) => [state, 0]),
@@ -139,7 +140,24 @@ export async function getImageWithScanResults(
     ...(includeFullDetail && {
       scanResults: scans,
     }),
+
+    imageSize: layers.reduce((acc, obj) => acc + obj.size, 0),
   }
+}
+
+async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface): Promise<Descriptors[]> {
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
+  ])
+  let layers: Descriptors[] = []
+  try {
+    layers = await getImageLayers(repositoryToken, imageRef)
+  } catch (err) {
+    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
+      throw err
+    }
+  }
+  return layers
 }
 
 export async function listModelImagesWithScanResults(
@@ -173,19 +191,7 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
   }, initial)
 }
 
-async function getScansForImageTag(user: UserInterface, image: ImageRefInterface): Promise<ScanInterface[]> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
-  ])
-
-  let layers: Descriptors[] = []
-  try {
-    layers = await getImageLayers(repositoryToken, image)
-  } catch (err) {
-    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
-      throw err
-    }
-  }
+async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): Promise<ScanInterface[]> {
   const layerDigests = layers.map((l) => l.digest)
 
   if (layerDigests.length === 0) {

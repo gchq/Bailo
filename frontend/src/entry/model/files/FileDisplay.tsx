@@ -42,6 +42,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
 import {
+  ArtefactKind,
   ClamAVScanSummary,
   FileInterface,
   isFileInterface,
@@ -187,7 +188,7 @@ export default function FileDisplay({
       file.scanResults !== undefined &&
       file.scanResults.some((scan) => scan.state === ScanState.Error)
     ) {
-      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Warning /> })
+      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Error /> })
       return
     } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
       setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
@@ -242,7 +243,7 @@ export default function FileDisplay({
           <ListItemIcon>
             <Refresh color='primary' fontSize='small' />
           </ListItemIcon>
-          <ListItemText>Rerun File Scan</ListItemText>
+          <ListItemText>Rerun file scan</ListItemText>
         </MenuItem>
       )
     )
@@ -258,7 +259,6 @@ export default function FileDisplay({
           <Chip
             color={chipDisplay.colour}
             icon={chipDisplay.icon}
-            size='small'
             onClick={(e) => setAnchorElScan(e.currentTarget)}
             label={chipDisplay.label}
           />
@@ -404,7 +404,7 @@ export default function FileDisplay({
               </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
-              {scanners.length > 0 && (
+              {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
                 <Stack direction='row' spacing={1} alignItems='center'>
                   {scanResultChip}
                 </Stack>
@@ -426,7 +426,7 @@ export default function FileDisplay({
                           <ListItemIcon>
                             <Info color='primary' fontSize='small' />
                           </ListItemIcon>
-                          <ListItemText>Associated Releases</ListItemText>
+                          <ListItemText>Associated releases</ListItemText>
                         </MenuItem>
                       )}
                       {showMenuItems.deleteFile && (
@@ -439,7 +439,7 @@ export default function FileDisplay({
                           <ListItemIcon>
                             <Delete color='primary' fontSize='small' />
                           </ListItemIcon>
-                          <ListItemText>Delete File</ListItemText>
+                          <ListItemText>Delete file</ListItemText>
                         </MenuItem>
                       )}
                       {showMenuItems.rescanFile && rerunFileScanButton}
