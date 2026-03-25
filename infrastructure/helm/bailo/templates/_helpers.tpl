@@ -105,7 +105,7 @@ modelMirror:
       KMSClient:
         credentials:
           accessKeyId: KMS_ACCESS_KEY
-          secretAccessKey: KMS_ACCESS_KEY
+          secretAccessKey: KMS_SECRET_KEY
 mongo:
   pass: MONGO_PASSWORD
 s3:
