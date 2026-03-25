@@ -41,7 +41,18 @@ export const patchModelSchema = z.object({
         z.object({
           entity: z
             .string()
-            .regex(/^(?!.*%[0-9A-F]{2}).*/, { message: 'Please remove URL Encoding from collaborator entity string' })
+            .refine(
+              (value) => {
+                try {
+                  return decodeURIComponent(value) === value
+                } catch {
+                  return false
+                }
+              },
+              {
+                message: 'Please remove URL Encoding from collaborator entity string',
+              },
+            )
             .openapi({ example: 'user:user' }),
           roles: z.array(z.string()).openapi({ example: ['owner', 'contributor'] }),
         }),
