@@ -42,6 +42,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
 import {
+  ArtefactKind,
   ClamAVScanSummary,
   FileInterface,
   isFileInterface,
@@ -403,7 +404,7 @@ export default function FileDisplay({
               </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
-              {scanners.length > 0 && (
+              {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
                 <Stack direction='row' spacing={1} alignItems='center'>
                   {scanResultChip}
                 </Stack>

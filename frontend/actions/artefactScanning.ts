@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { ImageTagResult } from 'types/types'
+import { ImageTagResult, ScanInfoInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyList = []
@@ -7,7 +7,7 @@ const emptyList = []
 export function useGetArtefactScannerInfo() {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      scanners: string[]
+      scanners: ScanInfoInterface[]
     },
     ErrorInfo
   >('/api/v2/filescanning/info', fetcher)

@@ -763,6 +763,12 @@ export type ScanInterface = {
     }
 )
 
+export type ScanInfoInterface = {
+  toolName: string
+  scannerVersion: string
+  artefactKind: ArtefactKindKeys
+}
+
 export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',

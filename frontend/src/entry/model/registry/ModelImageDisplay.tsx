@@ -14,7 +14,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { rerunImageArtefactScan } from 'actions/artefactScanning'
+import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -23,7 +23,7 @@ import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { ModelImagesWithOptionalScanResults } from 'types/types'
+import { ArtefactKind, ModelImagesWithOptionalScanResults } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ModelImageDisplayProps = {
@@ -34,7 +34,7 @@ type ModelImageDisplayProps = {
 export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisplayProps) {
   const [expanded, setExpanded] = useState(false)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
+  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
 
   const sendNotification = useNotification()
@@ -67,20 +67,25 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
             />
           </Box>
         </Stack>
-        <Stack direction='row' spacing={2} alignItems='center'>
-          {reportDisplay(tag)}
-          <IconButton aria-label='toggle image options menu' onClick={(event) => setAnchorElMore(event.currentTarget)}>
-            <MoreVert color='primary' />
-          </IconButton>
-          <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => setAnchorElMore(null)}>
-            <MenuItem onClick={() => handleRescan(tag)}>
-              <ListItemIcon>
-                <Refresh color='primary' fontSize='small' />
-              </ListItemIcon>
-              <ListItemText>Rerun image scan</ListItemText>
-            </MenuItem>
-          </Menu>
-        </Stack>
+        {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
+          <Stack direction='row' spacing={2} alignItems='center'>
+            {reportDisplay(tag)}
+            <IconButton
+              aria-label='toggle image options menu'
+              onClick={(event) => setAnchorElMore(event.currentTarget)}
+            >
+              <MoreVert color='primary' />
+            </IconButton>
+            <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => setAnchorElMore(null)}>
+              <MenuItem onClick={() => handleRescan(tag)}>
+                <ListItemIcon>
+                  <Refresh color='primary' fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Rerun image scan</ListItemText>
+              </MenuItem>
+            </Menu>
+          </Stack>
+        )}
       </Stack>
     </Box>
   )
@@ -112,7 +117,10 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
-  if (isUiConfigLoading) {
+  if (isScannersError) {
+    return <MessageAlert message={isScannersError.info.message} severity='error' />
+  }
+  if (isUiConfigLoading || isScannersLoading) {
     return <Loading />
   }
 
