@@ -13,6 +13,7 @@ exports[`clients > registry > deleteManifest > success 1`] = `
       "method": "DELETE",
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -32,6 +33,7 @@ exports[`clients > registry > doesLayerExist > success false 1`] = `
       "method": "HEAD",
       "signal": {
         "aborted": true,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -51,6 +53,7 @@ exports[`clients > registry > doesLayerExist > success true 1`] = `
       "method": "HEAD",
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -69,6 +72,7 @@ exports[`clients > registry > getApiVersion > bad version 1`] = `
       },
       "signal": {
         "aborted": true,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -87,6 +91,7 @@ exports[`clients > registry > getApiVersion > success 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -106,6 +111,7 @@ exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -125,6 +131,7 @@ exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -144,6 +151,7 @@ exports[`clients > registry > getImageTagManifest > success OCI spec 2`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -163,6 +171,7 @@ exports[`clients > registry > getRegistryLayerStream > success 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -182,6 +191,7 @@ exports[`clients > registry > initialiseUpload > success 1`] = `
       "method": "POST",
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -200,6 +210,7 @@ exports[`clients > registry > listImageTags > success 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -218,6 +229,7 @@ exports[`clients > registry > listImageTags > success multiple pages 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -231,6 +243,7 @@ exports[`clients > registry > listImageTags > success multiple pages 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -249,6 +262,7 @@ exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -269,6 +283,7 @@ exports[`clients > registry > mountBlob > success 1`] = `
       "method": "POST",
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -292,6 +307,7 @@ exports[`clients > registry > putManifest > success 1`] = `
       "method": "PUT",
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
     },
@@ -316,6 +332,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
       "redirect": "error",
       "signal": {
         "aborted": false,
+        "addEventListener": [MockFunction],
         "onabort": null,
       },
       "window": null,
