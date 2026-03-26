@@ -16,10 +16,13 @@ from typing import Any
 
 import oras.client
 from fastapi import BackgroundTasks, HTTPException, UploadFile
+from filelock import FileLock
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn.error")
+
+_DB_LOCK = FileLock("/tmp/trivy-db.lock", timeout=600)
 
 
 @lru_cache
@@ -228,42 +231,44 @@ def download_database():
 
     https://trivy.dev/docs/latest/guide/advanced/self-hosting/#__tabbed_1_1
     """
-    settings = get_settings()
-    logger.info("Pulling trivy database via Oras API (image=%s)", settings.DB_IMAGE)
-    client = oras.client.OrasClient(settings.DB_HOSTNAME, settings.DB_INSECURE, settings.DB_TLS_VERIFY)
-    if settings.DB_USERNAME and settings.DB_PASSWORD:
-        client.login(
-            username=settings.DB_USERNAME,
-            password=settings.DB_PASSWORD.get_secret_value(),
-            tls_verify=settings.DB_TLS_VERIFY != False,  # Verify TLS unless pulling from an insecure registry
-            hostname=settings.DB_HOSTNAME,
-        )
-    dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)
-    for path in dbpaths:
-        logger.info("Extracting file %s into %s", path, settings.DB_DIR)
-        with tarfile.open(path) as tarf:
-            safe_extract(tarf, settings.DB_DIR)
-        try:
-            os.remove(path)
-        except OSError:
-            logger.warning("Was unable to remove %s", path)
+    with _DB_LOCK:
+        settings = get_settings()
+        logger.info("Pulling trivy database via Oras API (image=%s)", settings.DB_IMAGE)
+        client = oras.client.OrasClient(settings.DB_HOSTNAME, settings.DB_INSECURE, settings.DB_TLS_VERIFY)
+        if settings.DB_USERNAME and settings.DB_PASSWORD:
+            client.login(
+                username=settings.DB_USERNAME,
+                password=settings.DB_PASSWORD.get_secret_value(),
+                tls_verify=settings.DB_TLS_VERIFY != False,  # Verify TLS unless pulling from an insecure registry
+                hostname=settings.DB_HOSTNAME,
+            )
+        dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)
+        for path in dbpaths:
+            logger.info("Extracting file %s into %s", path, settings.DB_DIR)
+            with tarfile.open(path) as tarf:
+                safe_extract(tarf, settings.DB_DIR)
+            try:
+                os.remove(path)
+            except OSError:
+                logger.warning("Was unable to remove %s", path)
 
 
 def get_next_update() -> datetime.datetime | None:
     """Updates the next update time according to `metadata.json` in trivy"""
-    try:
-        with open(os.path.join(get_settings().DB_DIR, "metadata.json"), encoding="utf-8") as f:
-            metadata = json.load(f)
-    except FileNotFoundError:
-        return None
-    ts = metadata.get("NextUpdate")
-    if not ts:
-        return None
-    dt = datetime.datetime.fromisoformat(ts)
-    # Normalise to UTC (timezone-aware)
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
-    return dt
+    with _DB_LOCK:
+        try:
+            with open(os.path.join(get_settings().DB_DIR, "metadata.json"), encoding="utf-8") as f:
+                metadata = json.load(f)
+        except FileNotFoundError:
+            return None
+        ts = metadata.get("NextUpdate")
+        if not ts:
+            return None
+        dt = datetime.datetime.fromisoformat(ts)
+        # Normalise to UTC (timezone-aware)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        return dt
 
 
 def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size: int = 1024) -> Any:
@@ -318,9 +323,10 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
         )
 
     # Download database if update available.
-    next_update = get_next_update()
-    if next_update is not None and next_update < datetime.datetime.now(datetime.timezone.utc):
-        background_tasks.add_task(download_database)
-    sbom = scan_sbom(blob_digest)
+    with _DB_LOCK:
+        next_update = get_next_update()
+        if next_update is not None and next_update < datetime.datetime.now(datetime.timezone.utc):
+            background_tasks.add_task(download_database)
+        sbom = scan_sbom(blob_digest)
 
-    return sbom
+        return sbom
