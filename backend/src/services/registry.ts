@@ -107,24 +107,46 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
     }),
   )
 }
+
+export async function getMultiplatformImageWithScanResult(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  includeFullDetail: boolean = false,
+  architecture: string | undefined = undefined,
+): Promise<ImageTagResult> {
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
+  ])
+  const manifests = await getImageTagManfiestList(repositoryToken, imageRef)
+  const arch = manifests.find((arch) => arch.platform == architecture)
+  if (!arch) {
+    throw NotFound('The provided architecture could not be found.', { manifests })
+  }
+  const imageScan = await getImageWithScanResults(
+    user,
+    { ...imageRef, tag: arch?.digest },
+    includeFullDetail,
+    arch?.platform,
+  )
+  return { ...imageScan, tag: imageRef.tag }
+}
+
 export async function getMultiplatformImageWithScanResults(
   user: UserInterface,
   imageRef: ImageRefInterface,
   includeFullDetail: boolean = false,
+  architecture: string | undefined = undefined,
 ): Promise<ImageTagResult[]> {
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
   const manifests = await getImageTagManfiestList(repositoryToken, imageRef)
   const imageScans = await Promise.all(
-    manifests.map((architecture) =>
-      getImageWithScanResults(
-        user,
-        { ...imageRef, tag: architecture.digest },
-        includeFullDetail,
-        architecture.platform,
+    manifests
+      .filter((arch) => arch.platform == architecture)
+      .map((arch) =>
+        getImageWithScanResults(user, { ...imageRef, tag: arch.digest }, includeFullDetail, arch.platform),
       ),
-    ),
   )
   return imageScans.map((scan) => ({ ...scan, tag: imageRef.tag })).flat()
 }
