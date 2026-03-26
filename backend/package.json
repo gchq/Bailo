@@ -68,7 +68,7 @@
     "pino-http": "^11.0.0",
     "pino-opentelemetry-transport": "^3.0.0",
     "pretty-bytes": "^7.1.0",
-    "proxy-agent": "^6.5.0",
+    "proxy-agent": "^7.0.0",
     "qs": "^6.15.0",
     "semver": "^7.7.4",
     "shelljs": "^0.10.0",
