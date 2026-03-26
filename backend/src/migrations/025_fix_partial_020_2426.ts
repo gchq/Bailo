@@ -1,16 +1,16 @@
 import ReleaseModel from '../models/Release.js'
-import Review, { ReviewDoc } from '../models/Review.js'
+import Review, { ReviewHydrated } from '../models/Review.js'
 import { removeResponses } from '../services/response.js'
 
 // Fix for 020_2426_remove_orphaned_reviews_responses.ts failing part way through
 export async function up() {
   // Find all releases have already been marked as deleted
   const deletedReleases = await ReleaseModel.find({ deleted: true })
-  const deletedReviews: ReviewDoc[] = []
+  const deletedReviews: ReviewHydrated[] = []
 
   // For each deleted release, find the already deleted reviews (from 020_2426_remove_orphaned_reviews_responses.ts) associated with it
   for (const { modelId, semver } of deletedReleases) {
-    const reviews: ReviewDoc[] = await Review.find({
+    const reviews: ReviewHydrated[] = await Review.find({
       modelId,
       semver,
       deleted: true,
@@ -19,7 +19,7 @@ export async function up() {
   }
 
   // Rest of script as in 020_2426_remove_orphaned_reviews_responses.ts
-  const reviewIds = deletedReviews.map((r) => r._id.toString())
+  const reviewIds = deletedReviews.map((r) => r.id)
   // For each deleted review, delete the responses associated with it
   const deletedResponses = await removeResponses(reviewIds)
 

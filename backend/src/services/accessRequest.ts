@@ -106,13 +106,7 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
 
     await accessRequest.delete(session)
     await removeAccessRequestReviews(accessRequestId, session)
-    await removeResponsesByParentIds(
-      [
-        ...reviewsForAccessRequest.map((review) => review['_id']).toString(),
-        accessRequest['_id'].toString(),
-      ] as string[],
-      session,
-    )
+    await removeResponsesByParentIds([...reviewsForAccessRequest.map((review) => review.id), accessRequest.id], session)
   }
 
   return { accessRequestIds }

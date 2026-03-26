@@ -14,7 +14,7 @@ import {
 } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import FileModel, { FileHydrated, FileInterface, FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
@@ -45,7 +45,7 @@ export async function uploadFile(
 
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true })
+  const file: FileHydrated = new FileModel({ modelId, name, mime, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
@@ -89,7 +89,7 @@ export async function startUploadMultipartFile(
   const fileId = longId()
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: false })
+  const file: FileHydrated = new FileModel({ modelId, name, mime, path, complete: false })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {

@@ -107,7 +107,7 @@ const TokenSchema = new Schema<TokenDoc>(
   },
 )
 
-TokenSchema.pre('save', async function userPreSave() {
+TokenSchema.pre('save', function userPreSave() {
   if (!this.isModified('secretKey') || !this.secretKey) {
     return
   }

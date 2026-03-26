@@ -6,7 +6,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
-import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
+import ReviewModel, { ReviewDoc, ReviewHydrated, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
@@ -160,29 +160,18 @@ export async function removeReleaseReviews(
   modelId: string,
   semver: string,
   session?: ClientSession,
-): Promise<ReviewDoc[]> {
-  // finding and then calling potentially multiple deletes is inefficient but our soft delete
-  // plugin doesn't cover bulkDelete
-  const reviews: ReviewDoc[] = await ReviewModel.find({
-    modelId,
-    semver,
-  })
+): Promise<ReviewHydrated[]> {
+  const reviews = await ReviewModel.find({ modelId, semver }, undefined, { session })
 
-  const reviewDeletions: ReviewDoc[] = []
+  await ReviewModel.deleteMany(
+    {
+      modelId,
+      semver,
+    },
+    session,
+  )
 
-  for (const review of reviews) {
-    try {
-      reviewDeletions.push(await review.delete(session))
-    } catch (error) {
-      throw InternalError('The requested release review could not be deleted.', {
-        modelId,
-        semver,
-        error,
-      })
-    }
-  }
-
-  return reviewDeletions
+  return reviews
 }
 
 export async function findReviewForResponse(
@@ -191,7 +180,7 @@ export async function findReviewForResponse(
   role: string,
   kind: ReviewKindKeys,
   reviewId: string,
-): Promise<ReviewDoc> {
+): Promise<ReviewHydrated> {
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access:
@@ -207,7 +196,7 @@ export async function findReviewForResponse(
   // Authorisation check to make sure the user can access a model
   await getModelById(user, modelId)
 
-  const review: ReviewDoc = (
+  const review: ReviewHydrated = (
     await ReviewModel.aggregate()
       .match({
         modelId,

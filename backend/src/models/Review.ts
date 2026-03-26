@@ -1,4 +1,4 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -24,6 +24,7 @@ export interface ReviewInterface {
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type ReviewDoc = ReviewInterface & SoftDeleteDocument
+export type ReviewHydrated = HydratedDocument<ReviewDoc>
 
 const ReviewSchema = new Schema<ReviewDoc>(
   {

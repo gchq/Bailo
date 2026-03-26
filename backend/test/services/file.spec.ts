@@ -18,7 +18,7 @@ import {
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
-import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
+import { isFileHydrated } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -596,7 +596,7 @@ describe('services > file', () => {
   })
 
   test('isFileInterfaceDoc > success', async () => {
-    const result = isFileInterfaceDoc({
+    const result = isFileHydrated({
       modelId: '',
       name: '',
       size: 1,
@@ -614,7 +614,7 @@ describe('services > file', () => {
   })
 
   test('isFileInterfaceDoc > missing property', async () => {
-    const result = isFileInterfaceDoc({
+    const result = isFileHydrated({
       modelId: '',
       name: '',
       mime: '',
@@ -630,7 +630,7 @@ describe('services > file', () => {
   })
 
   test('isFileInterfaceDoc > wrong type', async () => {
-    const result = isFileInterfaceDoc(null)
+    const result = isFileHydrated(null)
 
     expect(result).toBe(false)
   })

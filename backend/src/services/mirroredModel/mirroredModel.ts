@@ -7,7 +7,7 @@ import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
 import { EntryKind, ModelInterface } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ReleaseHydrated } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
@@ -55,7 +55,7 @@ export async function exportModel(
   }
 
   const mirroredModelId = model.settings.mirror.destinationModelId
-  const releases: ReleaseDoc[] = []
+  const releases: ReleaseHydrated[] = []
   if (semvers && semvers.length > 0) {
     releases.push(...(await getReleasesForExport(user, modelId, semvers)))
   }

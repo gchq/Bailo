@@ -4,11 +4,12 @@ import ResponseModel, {
   Decision,
   ReactionKindKeys,
   ResponseDoc,
+  ResponseHydrated,
   ResponseInterface,
   ResponseKind,
   ResponseReaction,
 } from '../models/Response.js'
-import { ReviewDoc } from '../models/Review.js'
+import { ReviewHydrated } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
@@ -43,7 +44,7 @@ export async function getResponsesByParentIds(parentIds: string[]) {
 
   const responses = await ResponseModel.find(filter)
 
-  if (!responses) {
+  if (!responses || responses.length === 0) {
     throw NotFound(`The requested response was not found.`, { parentIds })
   }
 
@@ -78,13 +79,13 @@ export async function updateResponse(user: UserInterface, responseId: string, co
 
 export async function removeResponses(parentIds: string[]) {
   const responses = await getResponsesByParentIds(parentIds)
-  const responseDeletions: ResponseDoc[] = []
+  const responseDeletions: ResponseHydrated[] = []
   for (const response of responses) {
     try {
       responseDeletions.push(await response.delete())
     } catch (error) {
       throw InternalError('The requested response could not be deleted.', {
-        responseId: response._id.toString(),
+        responseId: response.id,
         error,
       })
     }
@@ -152,7 +153,7 @@ export async function respondToReview(
 }
 
 async function sendReviewResponseNotification(
-  review: ReviewDoc,
+  review: ReviewHydrated,
   reviewResponse: ResponseInterface,
   user: UserInterface,
 ) {
@@ -183,7 +184,7 @@ async function sendReviewResponseNotification(
     }
     default:
       throw InternalError('Review Kind not recognised', {
-        reviewId: review._id.toString(),
+        reviewId: review.id,
         modelId: review.modelId,
         kind: review.kind,
       })

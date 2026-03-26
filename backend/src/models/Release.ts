@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -40,6 +40,7 @@ export interface ImageRefInterface extends RepoRefInterface {
 export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
   images: Array<ImageRefInterface & { _id: Schema.Types.ObjectId }>
 } & SoftDeleteDocument
+export type ReleaseHydrated = HydratedDocument<ReleaseDoc>
 
 export interface SemverObject {
   major: number

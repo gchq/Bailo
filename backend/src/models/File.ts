@@ -1,4 +1,4 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 import { ScanInterface } from './Scan.js'
@@ -28,8 +28,9 @@ export interface FileInterface {
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
+export type FileHydrated = HydratedDocument<FileInterfaceDoc>
 // `id` is used by the python API so we need to keep this to prevent a breaking change
-export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanInterface[]; id: string }
+export type FileWithScanResultsInterface = FileHydrated & { scanResults: ScanInterface[] }
 
 const FileSchema = new Schema<FileInterfaceDoc>(
   {

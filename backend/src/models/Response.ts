@@ -1,4 +1,4 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -47,6 +47,7 @@ export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type ResponseDoc = ResponseInterface & SoftDeleteDocument
+export type ResponseHydrated = HydratedDocument<ResponseDoc>
 
 const ResponseSchema = new Schema<ResponseDoc>(
   {
