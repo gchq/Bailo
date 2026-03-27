@@ -43,7 +43,7 @@ export async function getResponsesByParentIds(parentIds: string[]) {
 
   const responses = await ResponseModel.find(filter)
 
-  if (!responses || responses.length === 0) {
+  if (!responses) {
     throw NotFound(`The requested response was not found.`, { parentIds })
   }
 
