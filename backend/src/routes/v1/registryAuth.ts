@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
-import jwt, { SignOptions } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import type { StringValue } from 'ms'
 import NodeCache from 'node-cache'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
@@ -84,7 +84,9 @@ async function getKeyId(): Promise<string> {
 
 async function signJwt<T extends object>(payload: T, expiresIn: StringValue): Promise<string> {
   try {
-    const [privateKey, cert, kid] = await Promise.all([getPrivateKey(), getCertificate(), getKeyId()])
+    const privateKey = await getPrivateKey()
+    const cert = await getCertificate()
+    const kid = await getKeyId()
 
     return jwt.sign(
       {
@@ -105,7 +107,7 @@ async function signJwt<T extends object>(payload: T, expiresIn: StringValue): Pr
           // The registry >=3.0.0-beta.1 image requires the (typically optional) x5c header
           x5c: [cert.raw.toString('base64')],
         },
-      } as SignOptions,
+      },
     )
   } catch (err) {
     log.error({ err }, 'JWT signing failed')
@@ -146,11 +148,11 @@ export function issueAccessToken(user: UserInterface, access: Array<Access>): Pr
 }
 
 // See https://distribution.github.io/distribution/spec/auth/scope/#resource-scope-grammar
-export function parseResourceScope(input: string): Access[] {
+export function parseResourceScope(rawScopes: string): Access[] {
   const accesses: Access[] = []
 
   // Split on spaces for multiple `resourcescope` entries
-  const scopeParts = input.trim().split(/\s+/)
+  const scopeParts = rawScopes.trim().split(/\s+/)
 
   /**
    * Full `resourcescope` regex
