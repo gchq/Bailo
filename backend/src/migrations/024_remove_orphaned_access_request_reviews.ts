@@ -7,10 +7,11 @@ export async function up() {
   const deletedAccessRequests = await AccessRequestModel.find({ deleted: true })
 
   for (const accessRequest of deletedAccessRequests) {
-    const reviewsForAccessRequest = await ReviewModel.find({ accessRequestId: accessRequest.id })
+    const reviewsForAccessRequest = await ReviewModel.find({ accessRequestId: accessRequest._id.toString() })
     await useTransaction([
-      (session) => AccessRequestModel.updateOne({ _id: accessRequest._id }, { deleted: true }, { session }),
-      (session) => ReviewModel.updateMany({ accessRequestId: accessRequest.id }, { deleted: true }, { session }),
+      (session) => AccessRequestModel.updateOne({ id: accessRequest._id.toString() }, { deleted: true }, { session }),
+      (session) =>
+        ReviewModel.updateMany({ accessRequestId: accessRequest._id.toString() }, { deleted: true }, { session }),
       (session) =>
         ResponseModel.updateMany(
           { parentId: [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest._id] },
