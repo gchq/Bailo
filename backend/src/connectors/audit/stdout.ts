@@ -149,7 +149,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateCommentResponse(req: Request, response: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateResponse, req)
-    const event = this.generateEvent(req, { id: response['_id'] })
+    const event = this.generateEvent(req, { id: response._id })
     req.log.info(event, req.audit.description)
   }
 
