@@ -8,7 +8,7 @@ import {
 import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileHydrated, FileWithScanResultsInterface } from '../models/File.js'
+import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ImageRefInterface } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
@@ -106,7 +106,7 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
   return Math.round(minutesBeforeRetrying / 60000)
 }
 
-export async function scanFile(file: FileHydrated) {
+export async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
   const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
   await runScans(scannersInfo, fileIdentifier, file)

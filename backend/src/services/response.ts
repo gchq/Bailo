@@ -4,12 +4,11 @@ import ResponseModel, {
   Decision,
   ReactionKindKeys,
   ResponseDoc,
-  ResponseHydrated,
   ResponseInterface,
   ResponseKind,
   ResponseReaction,
 } from '../models/Response.js'
-import { ReviewHydrated } from '../models/Review.js'
+import { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
@@ -79,7 +78,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
 
 export async function removeResponses(parentIds: string[]) {
   const responses = await getResponsesByParentIds(parentIds)
-  const responseDeletions: ResponseHydrated[] = []
+  const responseDeletions: ResponseDoc[] = []
   for (const response of responses) {
     try {
       responseDeletions.push(await response.delete())
@@ -153,7 +152,7 @@ export async function respondToReview(
 }
 
 async function sendReviewResponseNotification(
-  review: ReviewHydrated,
+  review: ReviewDoc,
   reviewResponse: ResponseInterface,
   user: UserInterface,
 ) {

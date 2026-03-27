@@ -14,7 +14,7 @@ import {
 } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import FileModel, { FileHydrated, FileInterface, FileWithScanResultsInterface } from '../models/File.js'
+import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
@@ -45,11 +45,11 @@ export async function uploadFile(
 
   const path = createFilePath(modelId, fileId)
 
-  const file: FileHydrated = new FileModel({ modelId, name, mime, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file.id })
   }
 
   const { fileSize } = await putObjectStream(path, stream)
@@ -89,11 +89,11 @@ export async function startUploadMultipartFile(
   const fileId = longId()
   const path = createFilePath(modelId, fileId)
 
-  const file: FileHydrated = new FileModel({ modelId, name, mime, path, complete: false })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: false })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file.id })
   }
 
   const { uploadId } = await startMultipartUpload(path, mime)
@@ -257,7 +257,7 @@ export async function getFileById(
   if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
-  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id.toString() }
+  const file: FileWithScanResultsInterface = { ...files[0], id: files[0].id }
 
   if (!model) {
     model = await getModelById(user, file.modelId)
@@ -312,7 +312,7 @@ export async function getFilesByIds(
   ])
 
   if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file._id.toString() === id))
+    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file.id === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 

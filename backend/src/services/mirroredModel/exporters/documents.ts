@@ -4,7 +4,7 @@ import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
-import { ReleaseHydrated } from '../../../models/Release.js'
+import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
 import config from '../../../utils/config.js'
@@ -17,10 +17,10 @@ import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter, checkAuths, requiresInit, withStreams } from './base.js'
 
 export class DocumentsExporter extends BaseExporter {
-  protected readonly releases: ReleaseHydrated[]
+  protected readonly releases: ReleaseDoc[]
   protected files: FileWithScanResultsInterface[] | undefined
 
-  constructor(user: UserInterface, model: ModelDoc, releases: ReleaseHydrated[], logData: MirrorExportLogData) {
+  constructor(user: UserInterface, model: ModelDoc, releases: ReleaseDoc[], logData: MirrorExportLogData) {
     super(user, model, logData)
     this.releases = releases
   }
@@ -174,7 +174,7 @@ export class DocumentsExporter extends BaseExporter {
   @requiresInit
   @checkAuths
   @withStreams
-  protected async addReleaseToTarball(release: ReleaseHydrated) {
+  protected async addReleaseToTarball(release: ReleaseDoc) {
     log.debug({ semver: release.semver, ...this.logData }, 'Adding release to tarball file of releases.')
     const files: FileWithScanResultsInterface[] = await getFilesByIds(this.user, release.modelId, release.fileIds)
 
@@ -209,7 +209,7 @@ export class DocumentsExporter extends BaseExporter {
         const fileJson = JSON.stringify(file)
         await addEntryToTarGzUpload(
           this.tarStream!,
-          { type: 'text', filename: `files/${file._id.toString()}.json`, content: fileJson },
+          { type: 'text', filename: `files/${file.id}.json`, content: fileJson },
           { modelId: this.model.id, ...this.logData },
         )
       } catch (error: unknown) {

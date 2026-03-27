@@ -6,7 +6,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
-import ReviewModel, { ReviewDoc, ReviewHydrated, ReviewInterface } from '../models/Review.js'
+import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
@@ -160,7 +160,7 @@ export async function removeReleaseReviews(
   modelId: string,
   semver: string,
   session?: ClientSession,
-): Promise<ReviewHydrated[]> {
+): Promise<ReviewDoc[]> {
   const reviews = await ReviewModel.find({ modelId, semver }, undefined, { session })
 
   await ReviewModel.deleteMany(
@@ -180,7 +180,7 @@ export async function findReviewForResponse(
   role: string,
   kind: ReviewKindKeys,
   reviewId: string,
-): Promise<ReviewHydrated> {
+): Promise<ReviewDoc> {
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access:
@@ -196,7 +196,7 @@ export async function findReviewForResponse(
   // Authorisation check to make sure the user can access a model
   await getModelById(user, modelId)
 
-  const review: ReviewHydrated = (
+  const review: ReviewDoc = (
     await ReviewModel.aggregate()
       .match({
         modelId,

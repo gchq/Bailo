@@ -1,12 +1,12 @@
 import ReleaseModel from '../models/Release.js'
-import { ReviewHydrated } from '../models/Review.js'
+import { ReviewDoc } from '../models/Review.js'
 import { removeResponses } from '../services/response.js'
 import { removeReleaseReviews } from '../services/review.js'
 
 export async function up() {
   // Find all releases have already been marked as deleted
   const deletedReleases = await ReleaseModel.find({ deleted: true })
-  const deletedReviews: ReviewHydrated[] = []
+  const deletedReviews: ReviewDoc[] = []
 
   // For each deleted release, deleted the reviews associated with it
   for (const { modelId, semver } of deletedReleases) {

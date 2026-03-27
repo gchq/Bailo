@@ -11,7 +11,7 @@ export async function saveEvent(event: StroomEventObject): Promise<string> {
 
   const savedEvent = await stroomEvent.save()
 
-  return savedEvent._id.toString()
+  return savedEvent.id
 }
 
 export async function processBatch() {
