@@ -152,7 +152,7 @@ export function parseResourceScope(rawScopes: string): Access[] {
   const accesses: Access[] = []
 
   // Split on spaces for multiple `resourcescope` entries
-  const scopeParts = rawScopes.trim().split(/\s+/)
+  const resourcescopes = rawScopes.trim().split(/\s+/)
 
   /**
    * Full `resourcescope` regex
@@ -205,10 +205,10 @@ export function parseResourceScope(rawScopes: string): Access[] {
       '$',
   )
 
-  for (const part of scopeParts) {
-    const match = re.exec(part)
+  for (const resourcescope of resourcescopes) {
+    const match = re.exec(resourcescope)
     if (!match?.groups) {
-      throw new Error(`Invalid resource scope: ${part}`)
+      throw new Error(`Invalid resource scope: ${resourcescope}`)
     }
 
     // Split comma-separated actions
