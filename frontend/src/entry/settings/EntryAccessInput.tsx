@@ -9,12 +9,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useListUsers } from 'actions/user'
+import { useListEntities } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
 import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, EntryRole } from 'types/types'
+import { fromEntity } from 'utils/entityUtils'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -44,7 +45,7 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
   const [userListQuery, setUserListQuery] = useState('')
   const [manualEntityInputErrorMessage, setManualEntityInputErrorMessage] = useState('')
 
-  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
+  const { users, isUsersLoading, isUsersError } = useListEntities(userListQuery)
 
   const collaboratorList = useMemo(
     () =>
@@ -69,17 +70,11 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
     }
   }, [collaborators, entryRoles, onChange])
 
-  const onUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
-      if (newValue && !collaborators.find(({ entity }) => entity === `${newValue.kind}:${newValue.id}`)) {
-        const updatedCollaborators = [...collaborators]
-        const newCollaborator = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
-        updatedCollaborators.push(newCollaborator)
-        setCollaborators(updatedCollaborators)
-      }
-    },
-    [collaborators],
-  )
+  const onUserChange = useCallback((_event: SyntheticEvent<Element, Event>, newValues: EntityObject[] | null) => {
+    if (newValues) {
+      setCollaborators(newValues.map((newValue) => ({ entity: `${newValue.kind}:${newValue.id}`, roles: [] })))
+    }
+  }, [])
 
   const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
     setUserListQuery(value)
@@ -116,13 +111,15 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
         </Typography>
       )}
       <Autocomplete
-        key={collaborators.toString()}
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         size='small'
         noOptionsText={noOptionsText}
         onInputChange={debounceOnInputChange}
+        defaultValue={collaborators.map((collaborator) => fromEntity(collaborator.entity))}
+        multiple
+        renderValue={() => null}
         groupBy={(option) => option.kind.toUpperCase()}
         getOptionLabel={(option) => option.id}
         isOptionEqualToValue={(option, value) => option.id === value.id}
