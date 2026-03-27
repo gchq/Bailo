@@ -23,8 +23,7 @@ export interface ReviewInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReviewDoc = ReviewInterface & SoftDeleteDocument
-export type ReviewHydrated = HydratedDocument<ReviewDoc>
+export type ReviewDoc = HydratedDocument<ReviewInterface> & SoftDeleteDocument
 
 const ReviewSchema = new Schema<ReviewDoc>(
   {

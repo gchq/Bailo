@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { EventDetail } from '../connectors/audit/stroom.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -36,7 +36,7 @@ export interface StroomEventInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides. If a function takes in an
 // object from Mongoose it should use this interface
-export type StroomEventInterfaceDoc = StroomEventInterface & SoftDeleteDocument
+export type StroomEventInterfaceDoc = HydratedDocument<StroomEventInterface> & SoftDeleteDocument
 
 const StroomEventSchema = new Schema<StroomEventInterface>(
   {

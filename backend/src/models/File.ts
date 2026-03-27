@@ -27,10 +27,9 @@ export interface FileInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
-export type FileHydrated = HydratedDocument<FileInterfaceDoc>
+export type FileInterfaceDoc = HydratedDocument<FileInterface> & SoftDeleteDocument
 // `id` is used by the python API so we need to keep this to prevent a breaking change
-export type FileWithScanResultsInterface = FileHydrated & { scanResults: ScanInterface[] }
+export type FileWithScanResultsInterface = FileInterfaceDoc & { scanResults: ScanInterface[] }
 
 const FileSchema = new Schema<FileInterfaceDoc>(
   {

@@ -46,8 +46,7 @@ export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ResponseDoc = ResponseInterface & SoftDeleteDocument
-export type ResponseHydrated = HydratedDocument<ResponseDoc>
+export type ResponseDoc = HydratedDocument<ResponseInterface> & SoftDeleteDocument
 
 const ResponseSchema = new Schema<ResponseDoc>(
   {

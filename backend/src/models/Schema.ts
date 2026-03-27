@@ -1,5 +1,5 @@
 import { Schema as JsonSchema } from 'jsonschema'
-import { Document, model, Schema } from 'mongoose'
+import { Document, HydratedDocument, model, Schema } from 'mongoose'
 
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
 
@@ -26,7 +26,7 @@ export interface SchemaInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type SchemaDoc = SchemaInterface & Document<any, any, SchemaInterface>
+export type SchemaDoc = HydratedDocument<SchemaInterface> & Document<any, any, SchemaInterface>
 
 const SchemaSchema = new Schema<SchemaInterface>(
   {

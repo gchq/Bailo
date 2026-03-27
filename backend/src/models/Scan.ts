@@ -1,4 +1,4 @@
-import { model, type ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, type ObjectId, Schema } from 'mongoose'
 
 import type { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
@@ -54,7 +54,7 @@ export const ArtefactKind = {
 } as const
 export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
-export type ScanInterfaceDoc = ScanInterface & SoftDeleteDocument
+export type ScanInterfaceDoc = HydratedDocument<ScanInterface> & SoftDeleteDocument
 
 const ScanSchema = new Schema<ScanInterfaceDoc>(
   {

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
-import { model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
 import { BadReq } from '../utils/error.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -86,7 +86,7 @@ export interface TokenInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type TokenDoc = TokenInterface & SoftDeleteDocument
+export type TokenDoc = HydratedDocument<TokenInterface> & SoftDeleteDocument
 
 const TokenSchema = new Schema<TokenDoc>(
   {

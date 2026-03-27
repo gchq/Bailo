@@ -37,10 +37,12 @@ export interface ImageRefInterface extends RepoRefInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
-  images: Array<ImageRefInterface & { _id: Schema.Types.ObjectId }>
-} & SoftDeleteDocument
-export type ReleaseHydrated = HydratedDocument<ReleaseDoc>
+export type ReleaseDoc = HydratedDocument<
+  Omit<ReleaseInterface, 'images'> & {
+    images: Array<HydratedDocument<ImageRefInterface>>
+  }
+> &
+  SoftDeleteDocument
 
 export interface SemverObject {
   major: number
