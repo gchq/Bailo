@@ -21,24 +21,24 @@ type EntryAccessInputProps = {
   entryKind: EntryKindKeys
 } & (
   | {
-      value: CollaboratorEntry[]
-      onChange: (value: CollaboratorEntry[]) => void
+      initialUsers: CollaboratorEntry[]
+      onChange: (users: CollaboratorEntry[]) => void
       entryRoles: EntryRole[]
     }
   | {
-      value: string[]
-      onChange: (value: string[]) => void
+      initialUsers: string[]
+      onChange: (users: string[]) => void
       entryRoles?: never
     }
 )
 
-export default function EntryAccessInput({ value, onChange, entryKind, entryRoles }: EntryAccessInputProps) {
+export default function EntryAccessInput({ initialUsers, onChange, entryKind, entryRoles }: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(() => {
     if (entryRoles) {
-      return value
+      return initialUsers
     } else {
-      return value.map((entity) => ({ entity, roles: [] }))
+      return initialUsers.map((entity) => ({ entity, roles: [] }))
     }
   })
   const [userListQuery, setUserListQuery] = useState('')
@@ -54,7 +54,7 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
           entity={entity}
           collaborators={collaborators}
           onCollaboratorsChange={setCollaborators}
-          entryRoles={entryRoles ? entryRoles : []}
+          entryRoles={entryRoles ?? []}
           entryKind={entryKind}
         />
       )),

@@ -262,7 +262,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         <Loading />
                       ) : (
                         <EntryAccessInput
-                          value={collaborators}
+                          initialUsers={collaborators}
                           onChange={handleCollaboratorsChange}
                           entryKind={createEntryKind}
                           entryRoles={entryRoles}

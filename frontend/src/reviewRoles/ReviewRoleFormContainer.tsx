@@ -89,7 +89,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   const displayEntryAccessInput = useMemo(() => {
     return (
       <EntryAccessInput
-        value={formData.defaultEntities ? formData.defaultEntities : []}
+        initialUsers={formData.defaultEntities ?? []}
         onChange={handleCollaboratorsChange}
         entryKind={EntryKind.MODEL}
       />

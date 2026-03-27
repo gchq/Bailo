@@ -21,6 +21,15 @@ import { getErrorMessage } from 'utils/fetcher'
 import { getRoleDisplayName } from 'utils/roles'
 import { plural } from 'utils/stringUtils'
 
+const editReviewRoleHeading = (
+  <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+    <Typography variant='h6' component='h1'>
+      Update Existing Role
+    </Typography>
+    <Edit color='primary' fontSize='large' />
+  </Stack>
+)
+
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
@@ -119,9 +128,7 @@ export default function ReviewRoles() {
       setErrorMessage('')
       setLoading(true)
 
-      const res = await putReviewRole({
-        ...formData,
-      } as UpdateReviewRolesParams)
+      const res = await putReviewRole(formData)
 
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
@@ -144,18 +151,6 @@ export default function ReviewRoles() {
         ))
       : 'No entities assigned'
   }, [formData])
-
-  const editReviewRoleHeading = useMemo(
-    () => (
-      <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
-        <Typography variant='h6' component='h1'>
-          Update Existing Role
-        </Typography>
-        <Edit color='primary' fontSize='large' />
-      </Stack>
-    ),
-    [],
-  )
 
   const listRoleDescriptions = useMemo(
     () =>
@@ -252,7 +247,6 @@ export default function ReviewRoles() {
       entryRoles,
       displayReviewRoleDefaultEntities,
       handleOpenDeleteConfirmation,
-      editReviewRoleHeading,
       handleSubmit,
       loading,
       errorMessage,
