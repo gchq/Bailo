@@ -7,7 +7,7 @@ import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
 import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
-import { getAccessToken } from '../../v1/registryAuth.js'
+import { getAccessToken, softDeletePrefix } from '../../v1/registryAuth.js'
 
 export const registryEventsSchema = z.object({
   body: z.object({
@@ -77,9 +77,14 @@ export const handleRegistryEvents = [
 
       const [modelId, ...rest] = repository.split('/')
       const name = rest.join('/')
-      const model = getModelByIdNoAuth(modelId)
-      if (!model) {
-        log.warn({ event }, 'Ignoring registry push to non-existent model')
+      if (modelId === softDeletePrefix) {
+        log.warn({ event }, 'Ignoring registry push to soft-deleted model')
+        continue
+      }
+      try {
+        await getModelByIdNoAuth(modelId)
+      } catch (err) {
+        log.warn({ event, err }, 'Ignoring registry push to non-existent model')
         continue
       }
 

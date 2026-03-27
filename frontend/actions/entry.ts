@@ -177,6 +177,13 @@ export function deleteEntryFile(modelId: string, fileId: string) {
   })
 }
 
+export function deleteEntryImage(modelId: string, name: string, tag: string) {
+  return fetch(`/api/v2/model/${modelId}/image/${name}/${tag}`, {
+    method: `delete`,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export async function postEntry(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',

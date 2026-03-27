@@ -1,4 +1,4 @@
-import { ExpandLess, ExpandMore, MoreVert, Refresh } from '@mui/icons-material'
+import { Delete, ExpandLess, ExpandMore, MoreVert, Refresh } from '@mui/icons-material'
 import {
   Accordion,
   AccordionDetails,
@@ -15,8 +15,10 @@ import {
   Typography,
 } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
+import { deleteEntryImage } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
@@ -36,6 +38,9 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
+  const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
 
   const sendNotification = useNotification()
 
@@ -72,11 +77,25 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
             {reportDisplay(tag)}
             <IconButton
               aria-label='toggle image options menu'
-              onClick={(event) => setAnchorElMore(event.currentTarget)}
+              onClick={(event) => {
+                setAnchorElMore(event.currentTarget)
+                setActiveTag(tag)
+              }}
             >
               <MoreVert color='primary' />
             </IconButton>
             <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => setAnchorElMore(null)}>
+              <MenuItem
+                onClick={() => {
+                  setAnchorElMore(null)
+                  setDeleteOpen(true)
+                }}
+              >
+                <ListItemIcon>
+                  <Delete color='primary' fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Delete image</ListItemText>
+              </MenuItem>
               <MenuItem onClick={() => handleRescan(tag)}>
                 <ListItemIcon>
                   <Refresh color='primary' fontSize='small' />
@@ -84,6 +103,14 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
                 <ListItemText>Rerun image scan</ListItemText>
               </MenuItem>
             </Menu>
+            <ConfirmationDialogue
+              open={deleteOpen}
+              title='Delete Image'
+              onConfirm={handleDeleteConfirm}
+              onCancel={() => setDeleteOpen(false)}
+              errorMessage={deleteErrorMessage}
+              dialogMessage={`Deleting ${modelImage.name}:${activeTag} cannot be undone.`}
+            />
           </Stack>
         )}
       </Stack>
@@ -110,6 +137,24 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
     },
     [modelImage.name, modelImage.repository, mutate, sendNotification],
   )
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!activeTag) {
+      return
+    }
+    const response = await deleteEntryImage(modelImage.repository, modelImage.name, activeTag)
+    if (!response.ok) {
+      setDeleteErrorMessage(await getErrorMessage(response))
+      return
+    }
+    sendNotification({
+      variant: 'success',
+      msg: `Image ${modelImage.name}:${activeTag} deleted`,
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+    setDeleteOpen(false)
+    mutate()
+  }, [activeTag, modelImage.name, modelImage.repository, mutate, sendNotification])
 
   const modelImageTagRow = ({ data }) => modelImageTag(data.tag)
 
