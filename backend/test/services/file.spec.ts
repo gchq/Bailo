@@ -18,7 +18,6 @@ import {
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
-import { isFileHydrated } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -319,9 +318,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
 
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
-    ])
+    FileModelMock.aggregate.mockResolvedValueOnce([{ modelId: 'testModel', id: testFileId }])
 
     const result = await removeFile(user, modelId, testFileId)
 
@@ -593,46 +590,6 @@ describe('services > file', () => {
     const size = await getTotalFileSize(['1', '2', '3'])
 
     expect(size).toBe(42)
-  })
-
-  test('isFileInterfaceDoc > success', async () => {
-    const result = isFileHydrated({
-      modelId: '',
-      name: '',
-      size: 1,
-      mime: '',
-      bucket: '',
-      path: '',
-      complete: true,
-      deleted: false,
-      createdAt: '',
-      updatedAt: '',
-      _id: '',
-    })
-
-    expect(result).toBe(true)
-  })
-
-  test('isFileInterfaceDoc > missing property', async () => {
-    const result = isFileHydrated({
-      modelId: '',
-      name: '',
-      mime: '',
-      path: '',
-      complete: true,
-      deleted: false,
-      createdAt: '',
-      updatedAt: '',
-      _id: '',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isFileInterfaceDoc > wrong type', async () => {
-    const result = isFileHydrated(null)
-
-    expect(result).toBe(false)
   })
 
   test('updateFile > success', async () => {

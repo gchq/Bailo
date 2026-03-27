@@ -9,7 +9,6 @@ exports[`routes > model > file > postStartMultipartUpload > 200 > ok 1`] = `
       "startByte": 0,
     },
   ],
-  "fileId": "test",
   "uploadId": "test",
 }
 `;
