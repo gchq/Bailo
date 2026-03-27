@@ -1,4 +1,4 @@
-import { Delete, ExpandLess, ExpandMore, MoreVert, Refresh } from '@mui/icons-material'
+import { Delete, ExpandLess, ExpandMore, Info, MoreVert, Refresh } from '@mui/icons-material'
 import {
   Accordion,
   AccordionDetails,
@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { deleteEntryImage } from 'actions/entry'
+import { useGetReleasesForModelId } from 'actions/release'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -23,6 +24,8 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import AssociatedImageReleasesDialog from 'src/entry/model/releases/AssociatedImageReleasesDialog'
+import AssociatedImageReleasesList from 'src/entry/model/releases/AssociatedImageReleasesList'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { ArtefactKind, ModelImagesWithOptionalScanResults } from 'types/types'
@@ -39,6 +42,7 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
   const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
 
@@ -47,6 +51,16 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
   function toggleExpand() {
     setExpanded(!expanded)
   }
+
+  const { releases } = useGetReleasesForModelId(modelImage.repository)
+  const latestRelease = releases.length > 0 ? releases[0].semver : ''
+
+  const associatedReleasesForTag = (tag: string) =>
+    releases.filter((release) =>
+      release.images.some(
+        (image) => image.repository === modelImage.repository && image.name === modelImage.name && image.tag === tag,
+      ),
+    )
 
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
@@ -88,6 +102,17 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
               <MenuItem
                 onClick={() => {
                   setAnchorElMore(null)
+                  setAssociatedReleasesOpen(true)
+                }}
+              >
+                <ListItemIcon>
+                  <Info color='primary' fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Associated releases</ListItemText>
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAnchorElMore(null)
                   setDeleteOpen(true)
                 }}
               >
@@ -109,7 +134,26 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
               onConfirm={handleDeleteConfirm}
               onCancel={() => setDeleteOpen(false)}
               errorMessage={deleteErrorMessage}
-              dialogMessage={`Deleting ${modelImage.name}:${activeTag} cannot be undone.`}
+              dialogMessage={
+                associatedReleasesForTag(activeTag ?? '').length > 0
+                  ? 'Deleting this image will affect the following releases:'
+                  : 'Deleting this image will not affect any existing releases'
+              }
+            >
+              <Box sx={{ pt: 2 }}>
+                <AssociatedImageReleasesList
+                  modelId={modelImage.repository}
+                  latestRelease={latestRelease}
+                  releases={associatedReleasesForTag(activeTag ?? '')}
+                />
+              </Box>
+            </ConfirmationDialogue>
+            <AssociatedImageReleasesDialog
+              open={associatedReleasesOpen}
+              onClose={() => setAssociatedReleasesOpen(false)}
+              modelId={modelImage.repository}
+              latestRelease={latestRelease}
+              releases={associatedReleasesForTag(activeTag ?? '')}
             />
           </Stack>
         )}
