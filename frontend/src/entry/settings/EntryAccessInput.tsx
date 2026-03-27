@@ -76,6 +76,11 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
     }
   }, [])
 
+  const collaboratorEntityObjects = useMemo(
+    () => collaborators.map((collaborator) => fromEntity(collaborator.entity)),
+    [collaborators],
+  )
+
   const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
     setUserListQuery(value)
   }, [])
@@ -118,7 +123,7 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
         size='small'
         noOptionsText={noOptionsText}
         onInputChange={debounceOnInputChange}
-        defaultValue={collaborators.map((collaborator) => fromEntity(collaborator.entity))}
+        value={collaboratorEntityObjects}
         renderValue={() => null}
         groupBy={(option) => option.kind.toUpperCase()}
         getOptionLabel={(option) => option.id}
