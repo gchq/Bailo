@@ -111,6 +111,7 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
         </Typography>
       )}
       <Autocomplete
+        multiple
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
@@ -118,7 +119,6 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
         noOptionsText={noOptionsText}
         onInputChange={debounceOnInputChange}
         defaultValue={collaborators.map((collaborator) => fromEntity(collaborator.entity))}
-        multiple
         renderValue={() => null}
         groupBy={(option) => option.kind.toUpperCase()}
         getOptionLabel={(option) => option.id}
