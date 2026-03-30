@@ -10,7 +10,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
@@ -53,8 +52,8 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   const [draftFormData, setDraftFormData] = useState<T>(formData)
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDraftFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))
+  const handleChange = <K extends keyof T>(field: K, value: T[K]) => {
+    setDraftFormData((prevFormData: T) => ({ ...prevFormData, [field]: value }))
   }
 
   const handleCollaboratorsChange = useCallback(
@@ -63,27 +62,6 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
     },
     [setDraftFormData],
   )
-
-  const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDraftFormData((prevFormData: T) => ({
-      ...prevFormData,
-      shortName: event.target.value as string,
-    }))
-  }
-
-  const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDraftFormData((prevFormData: T) => ({
-      ...prevFormData,
-      description: event.target.value as string,
-    }))
-  }
-
-  const handleSystemRoleChange = (event: SelectChangeEvent) => {
-    setDraftFormData((prevFormData: T) => ({
-      ...prevFormData,
-      systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
-    }))
-  }
 
   const displayEntryAccessInput = useMemo(() => {
     return (
@@ -114,7 +92,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                 <TextField
                   required
                   value={draftFormData.name}
-                  onChange={handleNameChange}
+                  onChange={(e) => handleChange('name', e.target.value)}
                   size='small'
                   fullWidth
                   autoFocus
@@ -127,7 +105,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   disabled={providedData}
                   fullWidth
                   value={draftFormData.shortName}
-                  onChange={handleShortNameChange}
+                  onChange={(e) => handleChange('shortName', e.target.value)}
                   size='small'
                   id='role-shortname-input'
                 />
@@ -137,14 +115,14 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
               <TextField
                 fullWidth
                 value={draftFormData.description}
-                onChange={handleDescriptionChange}
+                onChange={(e) => handleChange('description', e.target.value)}
                 size='small'
                 id='role-description-input'
               />
             </LabelledInput>
             <FormControl size='small'>
-              <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={draftFormData.systemRole} onChange={handleSystemRoleChange}>
+              <LabelledInput fullWidth label='System Role' htmlFor='role-system-input'>
+                <Select value={draftFormData.systemRole} onChange={(e) => handleChange('systemRole', e.target.value)}>
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
