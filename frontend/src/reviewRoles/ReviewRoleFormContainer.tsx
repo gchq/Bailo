@@ -15,32 +15,27 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
+import { UpdateReviewRolesParams } from 'actions/reviewRoles'
 import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind, SystemRoleKeys } from 'types/types'
+import { EntryKind, ReviewRolesFormData } from 'types/types'
 
-type ReviewRoleFormMinimal = {
-  shortName: string
-  name: string
-  systemRole?: SystemRoleKeys
-  defaultEntities?: Array<string>
-  description?: string
-}
-
-type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
+type ReviewRoleFormContainerProps<ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData> = {
   providedData: boolean
-  formData: T
+  formData: ReviewRoleFormData
   handleCancel: () => void
   headingComponent: ReactElement
-  handleSubmit: (event: ChangeEvent, form: T) => void
+  handleSubmit: (event: ChangeEvent, form: ReviewRoleFormData) => void
   loading: boolean
   errorMessage: string
 }
 
-export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>({
+export default function ReviewRoleFormContainer<
+  ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData,
+>({
   providedData = false,
   formData,
   handleCancel,
@@ -48,12 +43,15 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   handleSubmit,
   loading = false,
   errorMessage = '',
-}: ReviewRoleFormContainerProps<T>) {
-  const [draftFormData, setDraftFormData] = useState<T>(formData)
+}: ReviewRoleFormContainerProps<ReviewRoleFormData>) {
+  const [draftFormData, setDraftFormData] = useState<ReviewRoleFormData>(formData)
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
-  const handleChange = <K extends keyof T>(field: K, value: T[K]) => {
-    setDraftFormData((prevFormData: T) => ({ ...prevFormData, [field]: value }))
+  const handleChange = <ReviewRoleFormProp extends keyof ReviewRoleFormData>(
+    field: ReviewRoleFormProp,
+    value: ReviewRoleFormData[ReviewRoleFormProp],
+  ) => {
+    setDraftFormData((prevFormData: ReviewRoleFormData) => ({ ...prevFormData, [field]: value }))
   }
 
   const handleCollaboratorsChange = useCallback(
