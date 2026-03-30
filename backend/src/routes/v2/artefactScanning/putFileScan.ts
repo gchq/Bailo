@@ -5,6 +5,7 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { rerunFileScan } from '../../../services/scan.js'
 import { registerPath } from '../../../services/specification.js'
+import { useTransaction } from '../../../utils/transactions.js'
 import { parse } from '../../../utils/validate.js'
 
 export const putFileScanSchema = z.object({
@@ -46,7 +47,7 @@ export const putFileScan = [
       params: { modelId, fileId },
     } = parse(req, putFileScanSchema)
 
-    const status = await rerunFileScan(req.user, modelId, fileId)
+    const status = await useTransaction([(session) => rerunFileScan(req.user, modelId, fileId, session)])[0]
 
     await audit.onUpdateFile(req, modelId, fileId)
 

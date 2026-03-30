@@ -6,6 +6,7 @@ import { z } from '../../../../lib/zod.js'
 import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { uploadFile } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { useTransaction } from '../../../../utils/transactions.js'
 import { coerceArray, parse } from '../../../../utils/validate.js'
 
 export const postSimpleUploadSchema = z.object({
@@ -52,7 +53,7 @@ export const postSimpleUpload = [
       query: { name, mime, tags },
     } = parse(req, postSimpleUploadSchema)
 
-    const file = await uploadFile(req.user, modelId, name, mime, req, tags)
+    const file = await useTransaction([(session) => uploadFile(req.user, modelId, name, mime, req, tags, session)])[0]
     await audit.onCreateFile(req, file)
 
     res.json({

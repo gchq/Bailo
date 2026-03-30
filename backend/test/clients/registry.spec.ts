@@ -15,6 +15,7 @@ import {
   mountBlob,
   putManifest,
   uploadLayerMonolithic,
+  waitForImageTagManifest,
 } from '../../src/clients/registry.js'
 import { DockerManifestMediaType, OCIEmptyMediaType, OCIManifestMediaType } from '../../src/utils/registryResponses.js'
 
@@ -756,5 +757,56 @@ describe('clients > registry', () => {
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('waitForImageTagManifest > success', async () => {
+    fetchMock
+      .mockReturnValueOnce({
+        text: vi.fn(),
+        ok: false,
+        json: vi.fn(() => ({
+          errors: [
+            {
+              code: 'MANIFEST_UNKNOWN',
+              message: 'Manifest for modelId/image/manifests/tag not found',
+              detail: [Object],
+            },
+          ],
+        })),
+        headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
+      })
+      .mockReturnValueOnce({
+        text: vi.fn(),
+        ok: true,
+        headers: new Headers({ 'docker-content-digest': 'digest' }),
+      })
+
+    await waitForImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' })
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+  })
+
+  test('waitForImageTagManifest > timeout', async () => {
+    fetchMock.mockReturnValueOnce({
+      text: vi.fn(),
+      ok: false,
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'MANIFEST_UNKNOWN',
+            message: 'Manifest for modelId/image/manifests/tag not found',
+            detail: [Object],
+          },
+        ],
+      })),
+      headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
+    })
+
+    const promise = waitForImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' }, 0)
+
+    await expect(promise).rejects.toThrowError(/^Error response received from registry./)
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
   })
 })

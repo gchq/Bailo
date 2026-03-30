@@ -453,3 +453,35 @@ export async function deleteManifest(token: string, imageRef: ImageRefInterface)
 
   return result.headers
 }
+
+export async function waitForImageTagManifest(
+  token: string,
+  imageRef: ImageRefInterface,
+  retries: number = 5,
+  delayMs: number = 1000,
+): Promise<void> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+        headersSchema: ManifestResponseHeaders,
+        extraHeaders: {
+          Accept: AcceptManifestMediaTypeHeaderValue,
+        },
+      })
+      return
+    } catch (err) {
+      if (
+        isRegistryError(err) &&
+        err.errors.length === 1 &&
+        err.errors[0]?.code === 'MANIFEST_UNKNOWN' &&
+        attempt < retries
+      ) {
+        log.debug({ imageRef, attempt, retries, delayMs }, 'Waiting for manifest to become readable')
+        await new Promise((r) => setTimeout(r, delayMs))
+        continue
+      }
+      log.debug({ imageRef, attempt, retries, delayMs }, 'Manifest did not become readable')
+      throw err
+    }
+  }
+}

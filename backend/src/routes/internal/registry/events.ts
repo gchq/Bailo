@@ -6,6 +6,7 @@ import log from '../../../services/log.js'
 import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
 import config from '../../../utils/config.js'
+import { useTransaction } from '../../../utils/transactions.js'
 import { parse } from '../../../utils/validate.js'
 import { getAccessToken } from '../../v1/registryAuth.js'
 
@@ -58,6 +59,11 @@ export const handleRegistryEvents = [
     // registry only stops sending events when we return, so return early and only log errors
     res.json()
 
+    /**
+     * Note for developers: registry webhooks are able to trigger before the resource is necessarily available.
+     * Take care to handle for this possibility, and consider polling registry items for their availability.
+     */
+
     for (const event of events) {
       if (event?.action !== 'push') {
         log.info({ event }, 'Ignoring registry event for non-push action')
@@ -95,7 +101,7 @@ export const handleRegistryEvents = [
       ])
 
       try {
-        const status = await rerunImageScanNoAuth(imageRef, repositoryToken)
+        const status = await useTransaction([(session) => rerunImageScanNoAuth(imageRef, repositoryToken, session)])[0]
         log.debug({ event }, status)
       } catch (err) {
         // Likely triggered by 'No image scanners are enabled.'

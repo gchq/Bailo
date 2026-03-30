@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
@@ -41,6 +41,7 @@ const configMock = vi.hoisted(
           retryDelayInMinutes: 5,
           maxInitRetries: 5,
           initRetryDelay: 5000,
+          inProgressScanExpiryMinutes: 10,
         },
       },
       registry: {
@@ -114,6 +115,7 @@ vi.mock('../../src/services/images/getImageLayers.js', () => imageMocks)
 
 const registryClientMocks = vi.hoisted(() => ({
   isImageTagManifestList: vi.fn(() => false),
+  waitForImageTagManifest: vi.fn(),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
@@ -125,6 +127,10 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const testFileId = '73859F8D26679D2E52597326'
 
 describe('services > scan', () => {
+  beforeEach(() => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
+  })
+
   describe('scanFile', () => {
     test('successfully scans a file and returns scan results', async () => {
       const scanResult = {
@@ -307,8 +313,6 @@ describe('services > scan', () => {
       } as any)
 
       expect(result).toBe('Image scan started for repo/image:latest')
-      // Note that `runScans` is not awaited so this line may not complete if execution order changes
-      expect(fileScanningMock.startScans).toHaveBeenCalled()
     })
 
     test('fail on manifest list', async () => {

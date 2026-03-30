@@ -5,6 +5,7 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { rerunImageScan } from '../../../services/scan.js'
 import { registerPath } from '../../../services/specification.js'
+import { useTransaction } from '../../../utils/transactions.js'
 import { parse } from '../../../utils/validate.js'
 
 export const putImageScanSchema = z.object({
@@ -50,7 +51,7 @@ export const putImageScan = [
     } = parse(req, putImageScanSchema)
     const imageRef = { repository: modelId, name, tag }
 
-    const status = await rerunImageScan(req.user, modelId, imageRef)
+    const status = await useTransaction([(session) => rerunImageScan(req.user, modelId, imageRef, session)])[0]
 
     await audit.onUpdateImage(req, modelId, imageRef)
 

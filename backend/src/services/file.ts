@@ -35,6 +35,7 @@ export async function uploadFile(
   mime: string,
   stream: Readable,
   tags?: string[],
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind) {
@@ -45,7 +46,7 @@ export async function uploadFile(
 
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true }, { session })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
@@ -62,9 +63,9 @@ export async function uploadFile(
     file.tags = tags
   }
 
-  await file.save()
+  await file.save({ session })
 
-  return await scanFile(file)
+  return await scanFile(file, session)
 }
 
 export async function saveImportedFile(file: FileInterface) {
