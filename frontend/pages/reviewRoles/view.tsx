@@ -213,7 +213,7 @@ export default function ReviewRoles() {
               ) : formData ? (
                 <ReviewRoleFormContainer
                   formData={formData}
-                  setIsEdit={setIsEdit}
+                  handleCancel={() => setIsEdit(false)}
                   providedData={true}
                   headingComponent={editReviewRoleHeading}
                   handleSubmit={handleSubmit}

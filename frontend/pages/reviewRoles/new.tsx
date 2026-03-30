@@ -57,6 +57,9 @@ export default function ReviewRolesForm() {
         loading={loading}
         errorMessage={errorMessage}
         handleSubmit={handleSubmit}
+        handleCancel={() => {
+          window.history.back()
+        }}
       />
     </>
   )

@@ -34,7 +34,7 @@ type ReviewRoleFormMinimal = {
 type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
   providedData: boolean
   formData: T
-  setIsEdit?: (state: boolean) => void
+  handleCancel: () => void
   headingComponent: ReactElement
   handleSubmit: (event: ChangeEvent, form: T) => void
   loading: boolean
@@ -44,7 +44,7 @@ type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
 export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>({
   providedData = false,
   formData,
-  setIsEdit = () => {},
+  handleCancel,
   headingComponent,
   handleSubmit,
   loading = false,
@@ -168,13 +168,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
           <Box display='flex'>
             <Box ml='auto'>
               <Stack direction='row' spacing={2}>
-                <Button
-                  loading={loading}
-                  type='button'
-                  variant='outlined'
-                  color='primary'
-                  onClick={() => setIsEdit(false)}
-                >
+                <Button loading={loading} type='button' variant='outlined' color='primary' onClick={handleCancel}>
                   Cancel
                 </Button>
                 <Button
