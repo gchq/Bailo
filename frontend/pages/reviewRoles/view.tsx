@@ -123,7 +123,6 @@ export default function ReviewRoles() {
   )
 
   const handleSubmit = useCallback(
-    //can this be done using the event param
     async (event: ChangeEvent, newFormData: UpdateReviewRolesParams) => {
       event.preventDefault()
       setErrorMessage('')
