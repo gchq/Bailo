@@ -24,8 +24,8 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
-import AssociatedImageReleasesDialog from 'src/entry/model/releases/AssociatedImageReleasesDialog'
-import AssociatedImageReleasesList from 'src/entry/model/releases/AssociatedImageReleasesList'
+import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
+import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { ArtefactKind, ModelImagesWithOptionalScanResults } from 'types/types'
@@ -141,19 +141,19 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
               }
             >
               <Box sx={{ pt: 2 }}>
-                <AssociatedImageReleasesList
+                <AssociatedReleasesList
                   modelId={modelImage.repository}
                   latestRelease={latestRelease}
                   releases={associatedReleasesForTag(activeTag ?? '')}
                 />
               </Box>
             </ConfirmationDialogue>
-            <AssociatedImageReleasesDialog
+            <AssociatedReleasesDialog
               open={associatedReleasesOpen}
               onClose={() => setAssociatedReleasesOpen(false)}
               modelId={modelImage.repository}
               latestRelease={latestRelease}
-              releases={associatedReleasesForTag(activeTag ?? '')}
+              sortedAssociatedReleases={associatedReleasesForTag(activeTag ?? '')}
             />
           </Stack>
         )}

@@ -495,7 +495,6 @@ export default function FileDisplay({
         modelId={modelId}
         open={associatedReleasesOpen}
         onClose={() => setAssociatedReleasesOpen(false)}
-        file={file}
         latestRelease={latestRelease}
         sortedAssociatedReleases={sortedAssociatedReleases}
       />
@@ -512,12 +511,7 @@ export default function FileDisplay({
         }
       >
         <Box sx={{ pt: 2 }}>
-          <AssociatedReleasesList
-            modelId={modelId}
-            file={file}
-            latestRelease={latestRelease}
-            releases={sortedAssociatedReleases}
-          />
+          <AssociatedReleasesList modelId={modelId} latestRelease={latestRelease} releases={sortedAssociatedReleases} />
         </Box>
       </ConfirmationDialogue>
     </Box>

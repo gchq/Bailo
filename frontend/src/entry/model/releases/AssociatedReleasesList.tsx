@@ -2,25 +2,19 @@ import { List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/m
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Link from 'src/Link'
-import { FileInterface, isFileInterface, ReleaseInterface } from 'types/types'
+import { ReleaseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 interface AssociatedReleasesListProps {
   releases: ReleaseInterface[]
   modelId: string
   latestRelease: string
-  file: FileInterface | File
 }
 
-export default function AssociatedReleasesList({
-  releases,
-  modelId,
-  latestRelease,
-  file,
-}: AssociatedReleasesListProps) {
+export default function AssociatedReleasesList({ releases, modelId, latestRelease }: AssociatedReleasesListProps) {
   const releaseList = useMemo(
     () =>
-      isFileInterface(file) && releases.length > 0 ? (
+      releases.length > 0 ? (
         <List disablePadding>
           {releases.map((associatedRelease) => (
             <ListItem disablePadding key={associatedRelease._id}>
@@ -42,7 +36,7 @@ export default function AssociatedReleasesList({
                         )}
                       </>
                     }
-                    secondary={formatDateString(file.createdAt.toString())}
+                    secondary={formatDateString(formatDateString(associatedRelease.createdAt))}
                   />
                 </ListItemButton>
               </Link>
@@ -52,7 +46,7 @@ export default function AssociatedReleasesList({
       ) : (
         <EmptyBlob text='No Associated Releases' />
       ),
-    [file, latestRelease, modelId, releases],
+    [latestRelease, modelId, releases],
   )
 
   return <>{releaseList}</>
