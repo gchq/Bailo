@@ -101,7 +101,9 @@ export const handleRegistryEvents = [
       ])
 
       try {
-        const status = await useTransaction([(session) => rerunImageScanNoAuth(imageRef, repositoryToken, session)])[0]
+        const status = (
+          await useTransaction([(session) => rerunImageScanNoAuth(imageRef, repositoryToken, session)])
+        )[0]
         log.debug({ event }, status)
       } catch (err) {
         // Likely triggered by 'No image scanners are enabled.'

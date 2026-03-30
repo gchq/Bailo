@@ -53,7 +53,7 @@ export const postSimpleUpload = [
       query: { name, mime, tags },
     } = parse(req, postSimpleUploadSchema)
 
-    const file = await useTransaction([(session) => uploadFile(req.user, modelId, name, mime, req, tags, session)])[0]
+    const file = (await useTransaction([(session) => uploadFile(req.user, modelId, name, mime, req, tags, session)]))[0]
     await audit.onCreateFile(req, file)
 
     res.json({

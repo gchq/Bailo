@@ -152,6 +152,7 @@ vi.mock('clamscan', () => ({
 
 describe('services > file', () => {
   test('uploadFile > success', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
     const name = 'testFile'
@@ -166,6 +167,7 @@ describe('services > file', () => {
   })
 
   test('uploadFile > virus scan initialised', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
     vi.spyOn(configMock, 'artefactScanning', 'get').mockReturnValue({ clamdscan: 'test' })
     vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
       artefactScanners: {
@@ -269,6 +271,7 @@ describe('services > file', () => {
   })
 
   test('finishUploadMultipartFile > success', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
     const fileId = 'testFile'

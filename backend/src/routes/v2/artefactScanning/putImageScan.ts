@@ -51,7 +51,7 @@ export const putImageScan = [
     } = parse(req, putImageScanSchema)
     const imageRef = { repository: modelId, name, tag }
 
-    const status = await useTransaction([(session) => rerunImageScan(req.user, modelId, imageRef, session)])[0]
+    const status = (await useTransaction([(session) => rerunImageScan(req.user, modelId, imageRef, session)]))[0]
 
     await audit.onUpdateImage(req, modelId, imageRef)
 
