@@ -9,7 +9,7 @@ import { ReviewRolesFormData, RoleKind, SystemRole } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {
-  const [formData, setFormData] = useState<ReviewRolesFormData>({
+  const [formData] = useState<ReviewRolesFormData>({
     name: '',
     shortName: '',
     systemRole: SystemRole.None,
@@ -31,12 +31,12 @@ export default function ReviewRolesForm() {
     </Stack>
   )
 
-  const handleSubmit = async (event: ChangeEvent) => {
+  const handleSubmit = async (event: ChangeEvent, newFormData: ReviewRolesFormData) => {
     event.preventDefault()
     setErrorMessage('')
     setLoading(true)
 
-    const res = await postReviewRole(formData)
+    const res = await postReviewRole(newFormData)
 
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
@@ -53,7 +53,6 @@ export default function ReviewRolesForm() {
       <ReviewRoleFormContainer
         providedData={false}
         formData={formData}
-        setFormData={setFormData}
         headingComponent={newReviewRoleHeading}
         loading={loading}
         errorMessage={errorMessage}

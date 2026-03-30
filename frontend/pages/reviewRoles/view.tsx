@@ -123,12 +123,13 @@ export default function ReviewRoles() {
   )
 
   const handleSubmit = useCallback(
-    async (event: ChangeEvent) => {
+    //can this be done using the event param
+    async (event: ChangeEvent, newFormData: UpdateReviewRolesParams) => {
       event.preventDefault()
       setErrorMessage('')
       setLoading(true)
 
-      const res = await putReviewRole(formData)
+      const res = await putReviewRole(newFormData)
 
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
@@ -139,7 +140,7 @@ export default function ReviewRoles() {
 
       setLoading(false)
     },
-    [formData, mutateReviewRoles],
+    [mutateReviewRoles],
   )
 
   const displayReviewRoleDefaultEntities = useMemo(() => {
@@ -212,7 +213,6 @@ export default function ReviewRoles() {
               ) : formData ? (
                 <ReviewRoleFormContainer
                   formData={formData}
-                  setFormData={setFormData}
                   setIsEdit={setIsEdit}
                   providedData={true}
                   headingComponent={editReviewRoleHeading}

@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
-import { ChangeEvent, Dispatch, ReactElement, SetStateAction, useCallback, useMemo } from 'react'
+import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
@@ -34,10 +34,9 @@ type ReviewRoleFormMinimal = {
 type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
   providedData: boolean
   formData: T
-  setFormData: Dispatch<SetStateAction<T>>
   setIsEdit?: (state: boolean) => void
   headingComponent: ReactElement
-  handleSubmit: (event: ChangeEvent) => void
+  handleSubmit: (event: ChangeEvent, form: T) => void
   loading: boolean
   errorMessage: string
 }
@@ -45,42 +44,42 @@ type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
 export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>({
   providedData = false,
   formData,
-  setFormData,
   setIsEdit = () => {},
   headingComponent,
   handleSubmit,
   loading = false,
   errorMessage = '',
 }: ReviewRoleFormContainerProps<T>) {
+  const [draftFormData, setDraftFormData] = useState<T>(formData)
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))
+    setDraftFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))
   }
 
   const handleCollaboratorsChange = useCallback(
     (updatedCollaborators: string[]) => {
-      setFormData((prevFormData) => ({ ...prevFormData, defaultEntities: updatedCollaborators }))
+      setDraftFormData((prevFormData) => ({ ...prevFormData, defaultEntities: updatedCollaborators }))
     },
-    [setFormData],
+    [setDraftFormData],
   )
 
   const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: T) => ({
+    setDraftFormData((prevFormData: T) => ({
       ...prevFormData,
       shortName: event.target.value as string,
     }))
   }
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: T) => ({
+    setDraftFormData((prevFormData: T) => ({
       ...prevFormData,
       description: event.target.value as string,
     }))
   }
 
   const handleSystemRoleChange = (event: SelectChangeEvent) => {
-    setFormData((prevFormData: T) => ({
+    setDraftFormData((prevFormData: T) => ({
       ...prevFormData,
       systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
     }))
@@ -89,12 +88,12 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   const displayEntryAccessInput = useMemo(() => {
     return (
       <EntryAccessInput
-        initialUsers={formData.defaultEntities ?? []}
+        initialUsers={draftFormData.defaultEntities ?? []}
         onChange={handleCollaboratorsChange}
         entryKind={EntryKind.MODEL}
       />
     )
-  }, [formData.defaultEntities, handleCollaboratorsChange])
+  }, [draftFormData.defaultEntities, handleCollaboratorsChange])
 
   if (isEntryRolesError) {
     return <MessageAlert message={isEntryRolesError.info.message} />
@@ -107,14 +106,14 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   return (
     <Container>
       <Paper sx={{ p: 4, mb: 4 }}>
-        <Box component='form' onSubmit={handleSubmit}>
+        <Box component='form' onSubmit={(e) => handleSubmit(e, draftFormData)}>
           {headingComponent}
           <Stack spacing={2}>
             <Stack spacing={2} direction='row'>
               <LabelledInput required fullWidth label='Name' htmlFor='role-name-input'>
                 <TextField
                   required
-                  value={formData.name}
+                  value={draftFormData.name}
                   onChange={handleNameChange}
                   size='small'
                   fullWidth
@@ -127,7 +126,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   required
                   disabled={providedData}
                   fullWidth
-                  value={formData.shortName}
+                  value={draftFormData.shortName}
                   onChange={handleShortNameChange}
                   size='small'
                   id='role-shortname-input'
@@ -137,7 +136,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
             <LabelledInput fullWidth label='Description' htmlFor='role-description-input'>
               <TextField
                 fullWidth
-                value={formData.description}
+                value={draftFormData.description}
                 onChange={handleDescriptionChange}
                 size='small'
                 id='role-description-input'
@@ -145,7 +144,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
             </LabelledInput>
             <FormControl size='small'>
               <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={formData.systemRole} onChange={handleSystemRoleChange}>
+                <Select value={draftFormData.systemRole} onChange={handleSystemRoleChange}>
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
@@ -183,7 +182,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.shortName)}
+                  disabled={!(draftFormData.name && draftFormData.shortName)}
                 >
                   Submit
                 </Button>
