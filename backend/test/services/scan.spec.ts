@@ -235,7 +235,7 @@ describe('services > scan', () => {
               state: ArtefactScanState.Error,
             }),
           },
-          upsert: true,
+          upsert: false,
         },
       })
     })

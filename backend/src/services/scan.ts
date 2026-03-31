@@ -34,43 +34,36 @@ type ArtefactScanIdentifier =
       layerDigest: string
     }
 
-async function acquireScanLock(scanIdentifier: ArtefactScanIdentifier, session?: ClientSession) {
-  try {
-    const now = new Date()
-
-    const doc = await ScanModel.findOneAndUpdate(
-      { ...scanIdentifier, state: { $ne: ArtefactScanState.InProgress } },
-      { $set: { ...scanIdentifier, state: ArtefactScanState.InProgress, lastRunAt: now } },
-      { upsert: true, new: true, session },
-    )
-
-    if (!doc) {
-      throw Conflict('Scan already in progress', { scanIdentifier })
-    }
-
-    return doc
-  } catch (err: any) {
-    // Covers duplicate key error from unique partial index
-    if (err.code === 11000) {
-      throw Conflict('Scan already in progress', { scanIdentifier })
-    }
-    throw err
-  }
-}
-
 async function updateArtefactScanWithResults(
   scanIdentifier: ArtefactScanIdentifier,
   results: ArtefactScanResult[],
   session?: ClientSession,
 ) {
-  const bulkOps = results.map((result) => ({
-    updateOne: {
-      filter: { ...scanIdentifier, toolName: result.toolName },
-      update: { $set: result },
-      upsert: true,
-    },
-  }))
-  await ScanModel.bulkWrite(bulkOps, { session })
+  const bulkOps = results.map((result) => {
+    // Only insert new (in progress) scans, otherwise only allow updating results
+    // This prevents a race condition between multiple simultaneously triggered scans
+    const isInProgress = result.state === ArtefactScanState.InProgress
+    return {
+      updateOne: {
+        filter: {
+          ...scanIdentifier,
+          toolName: result.toolName,
+          ...(isInProgress ? { state: { $ne: ArtefactScanState.InProgress } } : {}),
+        },
+        update: { $set: { ...result } },
+        upsert: isInProgress,
+      },
+    }
+  })
+
+  try {
+    return await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
+  } catch (err: any) {
+    if (err.code === 11000) {
+      throw Conflict('Scan already in progress', { scanIdentifier })
+    }
+    throw err
+  }
 }
 
 async function runScans(
@@ -94,20 +87,14 @@ async function runScans(
     }
 
     if (scannersInfo && scannersInfo.length > 0) {
-      // Prevent race-condition
-      await acquireScanLock(scanIdentifier, session)
+      const activeScanners = scannersInfo.filter((s) => s.artefactKind === scanIdentifier.artefactKind)
 
       try {
-        const resultsInprogress: ArtefactScanResult[] = scannersInfo.reduce((res, scannerInfo) => {
-          if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
-            res.push({
-              ...scannerInfo,
-              state: ArtefactScanState.InProgress,
-              lastRunAt: new Date(),
-            })
-          }
-          return res
-        }, [] as ArtefactScanResult[])
+        const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
+          ...scannerInfo,
+          state: ArtefactScanState.InProgress,
+          lastRunAt: new Date(),
+        }))
 
         await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, session)
 
@@ -116,20 +103,19 @@ async function runScans(
         await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
       } catch (error) {
         log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
-        const failedResults = scannersInfo.reduce((res, scannerInfo) => {
-          if (scannerInfo.artefactKind === scanIdentifier.artefactKind) {
-            res.push({
-              ...scannerInfo,
-              state: ArtefactScanState.Error,
-              lastRunAt: new Date(),
-            })
-          }
-          return res
-        }, [] as ArtefactScanResult[])
+        const failedResults = activeScanners.map((scannerInfo) => ({
+          ...scannerInfo,
+          state: ArtefactScanState.Error,
+          lastRunAt: new Date(),
+        }))
 
         // This will always release the lock by setting results to no longer be in progress
         await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
       }
+    }
+
+    if (ownedSession) {
+      await ownedSession.commitTransaction()
     }
   } catch (err) {
     if (ownedSession) {
