@@ -181,7 +181,6 @@ describe('services > scan', () => {
 
     test('sets scan state to InProgress before completing', async () => {
       ScanModelMock.find.mockResolvedValueOnce([])
-      ScanModelMock.updateOne.mockResolvedValue(undefined)
       const file = {
         id: 'file123',
         _id: 'file123',
@@ -190,13 +189,23 @@ describe('services > scan', () => {
 
       await scanFile(file)
 
-      expect(ScanModelMock.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({ artefactKind: ArtefactKind.FILE }),
-        expect.objectContaining({
-          $set: expect.objectContaining({ state: ArtefactScanState.InProgress }),
-        }),
-        expect.objectContaining({ upsert: true }),
-      )
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0]) // extract ops array(s)
+      const inProgressOp = bulkOps.find((op: any) => op.updateOne?.update?.$set?.state === ArtefactScanState.InProgress)
+      expect(inProgressOp).toBeDefined()
+      expect(inProgressOp).toMatchObject({
+        updateOne: {
+          filter: expect.objectContaining({
+            artefactKind: ArtefactKind.FILE,
+          }),
+          update: {
+            $set: expect.objectContaining({
+              state: ArtefactScanState.InProgress,
+            }),
+          },
+          upsert: true,
+        },
+      })
     })
 
     test('sets scan state to Error when scanner throws', async () => {
@@ -212,13 +221,23 @@ describe('services > scan', () => {
       } as any
       await scanFile(file)
 
-      expect(ScanModelMock.updateOne).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          $set: expect.objectContaining({ state: ArtefactScanState.Error }),
-        }),
-        expect.anything(),
-      )
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
+      const errorOp = bulkOps.find((op: any) => op.updateOne?.update?.$set?.state === ArtefactScanState.Error)
+      expect(errorOp).toBeDefined()
+      expect(errorOp).toMatchObject({
+        updateOne: {
+          filter: expect.objectContaining({
+            artefactKind: ArtefactKind.FILE,
+          }),
+          update: {
+            $set: expect.objectContaining({
+              state: ArtefactScanState.Error,
+            }),
+          },
+          upsert: true,
+        },
+      })
     })
   })
 
