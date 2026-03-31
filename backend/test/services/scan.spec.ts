@@ -41,7 +41,6 @@ const configMock = vi.hoisted(
           retryDelayInMinutes: 5,
           maxInitRetries: 5,
           initRetryDelay: 5000,
-          inProgressScanExpiryMinutes: 10,
         },
       },
       registry: {
