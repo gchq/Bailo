@@ -61,8 +61,8 @@ export const handleRegistryEvents = [
     res.json()
 
     /**
-     * Note for developers: registry webhooks are able to trigger before the resource is necessarily available.
-     * Take care to handle for this possibility, and consider polling registry items for their availability.
+     * Note for developers: registry webhooks are able to trigger before all parts of the resource (e.g. tags)
+     * are necessarily finalised/available. Take care to handle this possibility.
      */
 
     for (const event of events) {
@@ -92,6 +92,9 @@ export const handleRegistryEvents = [
 
       let imageRef: ImageRef | undefined
       if (target?.tag && target?.digest) {
+        // Identify by digest as the digest is always available, but tag may not yet be finalised.
+        // Still check for tag as we only want to scan the image when the tag is available as the tag
+        // is only present when the manifest is pushed (and not when each individual layer is pushed).
         imageRef = { repository: modelId, name, digest: target.digest }
       } else {
         log.warn({ event }, 'Ignoring registry push without tag or digest property')
