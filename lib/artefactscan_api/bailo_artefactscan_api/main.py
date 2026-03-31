@@ -50,8 +50,9 @@ async def lifespan(app: FastAPI):
     trivy.download_database()
     yield
 
-    logger.info("Cleaning up database")
-    shutil.rmtree(trivy.get_settings().DB_DIR)
+    with trivy._DB_LOCK:
+        logger.info("Cleaning up database")
+        shutil.rmtree(trivy.get_settings().DB_DIR)
 
 
 # Instantiate FastAPI app with various dependencies.

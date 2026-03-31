@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import threading
+import time
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
@@ -27,8 +30,31 @@ app.dependency_overrides[get_settings] = get_settings_override
 
 
 EMPTY_CONTENTS = rb""
+EMPTY_FILE_HASH = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 H5_MIME_TYPE = "application/x-hdf5"
 TXT_MIME_TYPE = "text/plain"
+STREAM_MIME_TYPE = "application/octet-stream"
+
+
+def test_lifespan_downloads_db_on_start(mocker):
+    download = mocker.patch("bailo_artefactscan_api.trivy.download_database")
+    mocker.patch("shutil.rmtree")
+
+    with TestClient(app):
+        pass
+
+    download.assert_called()
+
+
+def test_shutdown_waits_for_db_lock(mocker):
+    lock = mocker.patch("bailo_artefactscan_api.trivy._DB_LOCK")
+    rm = mocker.patch("shutil.rmtree")
+
+    with TestClient(app):
+        pass
+
+    lock.__enter__.assert_called()
+    rm.assert_called()
 
 
 def test_info():
@@ -101,3 +127,28 @@ def test_scan_invalid_pickle_file(
     assert ".dat" not in str(response.content)
     mock_is_valid_pickle.assert_called_once()
     mock_scan.assert_called_once()
+
+
+def test_update_blocks_until_scan_finishes(mocker):
+    enter = threading.Event()
+    exit = threading.Event()
+
+    class FakeLock:
+        def __enter__(self):
+            enter.set()
+            time.sleep(0.2)
+
+        def __exit__(self, *a):
+            exit.set()
+
+    mocker.patch("bailo_artefactscan_api.trivy._DB_LOCK", FakeLock())
+    mocker.patch("bailo_artefactscan_api.trivy.create_sbom")
+    mocker.patch("bailo_artefactscan_api.trivy.scan_sbom", return_value={})
+    mocker.patch("bailo_artefactscan_api.trivy.get_next_update", return_value=None)
+    mocker.patch("tarfile.is_tarfile", return_value=False)
+
+    files = {"in_file": (EMPTY_FILE_HASH, EMPTY_CONTENTS, STREAM_MIME_TYPE)}
+    client.post("/scan/image", files=files)
+
+    assert enter.is_set()
+    assert exit.is_set()
