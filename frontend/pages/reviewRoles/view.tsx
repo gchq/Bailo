@@ -300,7 +300,7 @@ export default function ReviewRoles() {
         <Paper sx={{ p: 4, my: 4 }}>
           {reviewRoles.length > 0 ? (
             <Stack direction={{ xs: 'column', sm: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
-              <List>{listRoles}</List>
+              <List sx={{ width: '280px' }}>{listRoles}</List>
               <Container sx={{ m: 2 }}>{listRoleDescriptions}</Container>
             </Stack>
           ) : (
