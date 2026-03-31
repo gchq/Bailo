@@ -58,7 +58,7 @@ export default function ReviewRolesForm() {
         errorMessage={errorMessage}
         handleSubmit={handleSubmit}
         handleCancel={() => {
-          window.history.back()
+          window.location.assign('/reviewRoles/view')
         }}
       />
     </>
