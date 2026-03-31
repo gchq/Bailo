@@ -116,7 +116,7 @@ export default function ReviewRoles() {
         setErrorMessage('There was a problem deleting this role.')
       } else {
         mutateReviewRoles()
-        setConfirmationOpen(false)
+        selectedRole(0)
       }
     },
     [setErrorMessage, setConfirmationOpen, mutateReviewRoles],
