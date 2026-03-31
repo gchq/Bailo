@@ -48,7 +48,14 @@ async function updateArtefactScanWithResults(
         filter: {
           ...scanIdentifier,
           toolName: result.toolName,
-          ...(isInProgress ? { state: { $ne: ArtefactScanState.InProgress } } : {}),
+          ...(isInProgress
+            ? {
+                $or: [
+                  { state: { $ne: ArtefactScanState.InProgress } },
+                  { lastRunAt: { $lt: new Date(Date.now() - 30 * 60 * 1000) } }, // age off old results (in case of crash or SIGKILL)
+                ],
+              }
+            : {}),
         },
         update: { $set: { ...result } },
         upsert: isInProgress,
