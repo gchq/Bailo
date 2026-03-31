@@ -1,9 +1,31 @@
 import ClearIcon from '@mui/icons-material/Clear'
-import { Checkbox, FormControlLabel, Grid, IconButton, Tooltip, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { memoize } from 'lodash-es'
+import { useCallback, useMemo, useState } from 'react'
+import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
-import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
+import MirrorInfo from 'src/common/MirrorInfo'
+import Paginate from 'src/common/Paginate'
+import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
+import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
+import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
@@ -12,7 +34,6 @@ type ReleaseSelectorProps = {
   selectedReleases: ReleaseInterface[]
   onUpdateSelectedReleases: (values: ReleaseInterface[]) => void
   isReadOnly: boolean
-  requiredRolesText: string
 }
 
 export default function ReleaseSelector({
@@ -20,40 +41,88 @@ export default function ReleaseSelector({
   selectedReleases,
   onUpdateSelectedReleases,
   isReadOnly,
-  requiredRolesText,
 }: ReleaseSelectorProps) {
-  const [checked, setChecked] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [checkedReleases, setCheckedReleases] = useState<ReleaseInterface[]>([])
+
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const handleRemoveRelease = useCallback(
-    (removedRelease: ReleaseInterface) => {
-      setChecked(false)
-      onUpdateSelectedReleases(selectedReleases.filter((release) => release.semver !== removedRelease.semver))
-    },
-    [selectedReleases, onUpdateSelectedReleases],
+  const selectedSemvers = useMemo(
+    () => new Set(selectedReleases.map((selectedRelease) => selectedRelease.semver)),
+    [selectedReleases],
   )
 
-  const selectedReleasesDisplay = useMemo(() => {
-    return selectedReleases.map((release) => (
-      <>
-        <Grid size={{ xs: 10 }}>
-          <ReleaseDisplay key={release.semver} model={model} release={release} hideReviewBanner />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
-          <Tooltip title={'Remove'}>
-            <IconButton onClick={() => handleRemoveRelease(release)}>
-              <ClearIcon color={'error'} />
-            </IconButton>
-          </Tooltip>
-        </Grid>
-      </>
-    ))
-  }, [selectedReleases, model, handleRemoveRelease])
+  const handleToggle = useCallback(
+    (release: ReleaseInterface) => () => {
+      const exists = checkedReleases.find((selectedRelease) => selectedRelease.semver === release.semver)
+      if (exists) {
+        setCheckedReleases(checkedReleases.filter((selectedRelease) => selectedRelease.semver !== release.semver))
+      } else {
+        setCheckedReleases([...checkedReleases, release])
+      }
+    },
+    [checkedReleases],
+  )
 
-  const handleChecked = async (event: ChangeEvent<HTMLInputElement>) => {
-    onUpdateSelectedReleases(event.target.checked ? releases : [])
-    setChecked(event.target.checked)
+  const handleAddReleases = () => {
+    if (checkedReleases.length === 0) {
+      setIsDialogOpen(false)
+      return
+    }
+
+    const merged = [
+      ...selectedReleases,
+      ...checkedReleases.filter((checkedRelease) => !selectedSemvers.has(checkedRelease.semver)),
+    ]
+
+    onUpdateSelectedReleases(merged)
+    setCheckedReleases([])
+    setIsDialogOpen(false)
   }
+
+  const handleRemoveSelected = (semver: string) => {
+    onUpdateSelectedReleases(selectedReleases.filter((selectedRelease) => selectedRelease.semver !== semver))
+  }
+
+  const ReleaseRow = memoize(({ data: release }: { data: ReleaseInterface }) => {
+    const isAlreadySelected = selectedSemvers.has(release.semver)
+    const isChecked = checkedReleases.some((checkedRelease) => checkedRelease.semver === release.semver)
+
+    return (
+      <ListItem key={release.semver} disablePadding>
+        <Stack width='100%'>
+          <ListItemButton dense disabled={isAlreadySelected} onClick={handleToggle(release)}>
+            <ListItemIcon>
+              <Checkbox edge='start' checked={isAlreadySelected || isChecked} tabIndex={-1} disableRipple />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Stack spacing={0.5}>
+                  <ReleaseAssetsMainText
+                    model={model}
+                    release={release}
+                    hideCopySemver
+                    hideDescription
+                    includeLinks={false}
+                  />
+                  {isAlreadySelected && (
+                    <Typography variant='caption' color='error'>
+                      This release has already been selected
+                    </Typography>
+                  )}
+                </Stack>
+              }
+            />
+          </ListItemButton>
+          <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider variant='middle' />}</Box>
+          <Stack spacing={1} padding={2}>
+            <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
+            <ReleaseAssetsResponses model={model} release={release} includeResponses={false} />
+          </Stack>
+        </Stack>
+      </ListItem>
+    )
+  })
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
@@ -64,17 +133,53 @@ export default function ReleaseSelector({
   }
 
   return (
-    <>
-      <Typography fontWeight='bold'>Select Releases</Typography>
-      <Tooltip title={requiredRolesText}>
-        <FormControlLabel
-          control={<Checkbox checked={checked} disabled={isReadOnly} onChange={handleChecked} />}
-          label='Select all'
-        />
-      </Tooltip>
-      <Grid container spacing={2} alignItems='center'>
-        {selectedReleasesDisplay}
-      </Grid>
-    </>
+    <Stack spacing={2} width='100%'>
+      <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
+        <Typography fontWeight='bold'>Releases to export</Typography>
+        <HelpDialog title='Mirror Export Info' content={<MirrorInfo />} />
+      </Stack>
+      <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
+        Select releases
+      </Button>
+      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} maxWidth='md' fullWidth>
+        <DialogTitle>Select releases for {model.name}</DialogTitle>
+        <DialogContent sx={{ p: 1 }}>
+          <Paginate
+            list={releases}
+            emptyListText='No releases found'
+            defaultSortProperty='createdAt'
+            searchFilterProperty='semver'
+            searchPlaceholderText='Search by semver'
+            sortingProperties={[
+              { value: 'semver', title: 'Version', iconKind: 'text' },
+              { value: 'createdAt', title: 'Created', iconKind: 'date' },
+            ]}
+          >
+            {ReleaseRow}
+          </Paginate>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+          <Button onClick={handleAddReleases} disabled={checkedReleases.length === 0} variant='contained'>
+            Add releases
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {selectedReleases.length > 0 && (
+        <Stack spacing={1}>
+          <Typography variant='subtitle2'>Selected releases</Typography>
+          <Stack direction='row' spacing={1} flexWrap='wrap'>
+            {selectedReleases.map((release) => (
+              <Chip
+                key={release.semver}
+                label={release.semver}
+                onDelete={isReadOnly ? undefined : () => handleRemoveSelected(release.semver)}
+                deleteIcon={<ClearIcon />}
+              />
+            ))}
+          </Stack>
+        </Stack>
+      )}
+    </Stack>
   )
 }

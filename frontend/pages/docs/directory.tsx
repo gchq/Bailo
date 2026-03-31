@@ -34,6 +34,15 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Using a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
   { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
+  { title: 'Deletion', slug: 'users/deletion', header: true },
+  { title: 'Deleting a File', slug: 'users/deletion/file-deletion' },
+  { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
+  { title: 'Soft Deletion', slug: 'users/deletion/soft-deletion' },
+
+  { title: 'Model Mirroring', slug: 'users/model-mirroring', header: true },
+  { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },
+  { title: 'Editing a Mirrored Model Card', slug: 'users/model-mirroring/editing-a-mirrored-model-card' },
+
   { title: 'Reviews', slug: 'users/reviews', header: true },
   { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
   { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
@@ -48,11 +57,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
   { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
 
-  /// Accessibility
-  { title: 'Accessiblility', slug: 'users/accessibility', header: true },
-  { title: 'Accessibility Statement', slug: 'users/accessibility/accessibility-statement' },
-  { title: 'Accessiblility Report', slug: 'users/accessibility/accessibility-report' },
-
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
@@ -62,7 +66,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   /// Microservices
   { title: 'Microservices', slug: 'administration/microservices', header: true },
-  { title: 'File Scanners', slug: 'administration/microservices/file-scanners' },
+  { title: 'Artefact Scanners', slug: 'administration/microservices/artefact-scanners' },
 
   /// Helm
   { title: 'Helm', slug: 'administration/helm', header: true },
@@ -112,7 +116,9 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
       let child = leaf.children?.find((node) => node.slug === currentId)
 
       if (!child) {
-        if (!leaf.children) leaf.children = []
+        if (!leaf.children) {
+          leaf.children = []
+        }
 
         leaf.children.push({
           slug: currentId,

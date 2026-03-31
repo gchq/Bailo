@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { z } from '../../../../lib/zod.js'
 import { popularTagsForEntries } from '../../../../services/model.js'
 import { registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'

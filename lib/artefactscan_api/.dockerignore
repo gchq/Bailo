@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Byte-compiled / optimized / DLL files
+**__pycache__/
+**.py[cod]
+**$py.class
+
+# Python venv
+artefactscanvenv/
+
+# Test files
+.pytest_cache/
+tests/
+
+# Misc
+README.md
+.pre-commit-config.yaml
+requirements-dev.txt
+pytest.ini

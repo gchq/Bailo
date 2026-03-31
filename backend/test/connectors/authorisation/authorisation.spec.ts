@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { ArtefactScanResult } from '../../../src/connectors/artefactScanning/Base.js'
 import { getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
-import { FileScanResult } from '../../../src/connectors/fileScanning/Base.js'
+import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/model.js', () => ({
   default: {
@@ -11,18 +12,18 @@ vi.mock('../../../src/services/model.js', () => ({
 
 vi.mock('../../../src/connectors/authentication/index.js', () => ({}))
 
-const fileScanResult: FileScanResult = {
+const artefactScanResult: ArtefactScanResult = {
   state: 'complete',
   lastRunAt: new Date(),
-  isInfected: false,
   toolName: 'Test',
+  artefactKind: ArtefactKind.FILE,
 }
 
 const fileScanningMock = vi.hoisted(() => ({
   info: vi.fn(() => []),
-  scan: vi.fn(() => new Promise(() => [fileScanResult])),
+  scan: vi.fn(() => new Promise(() => [artefactScanResult])),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
+vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const configMock = vi.hoisted(() => ({
   app: {
@@ -54,7 +55,7 @@ const configMock = vi.hoisted(() => ({
     audit: {
       kind: 'silly',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },

@@ -8,14 +8,16 @@ import bailoUploadFile from 'public/docs/bailo_file_upload.png'
 
 # Uploading files
 
-A file can be anything to do with the model data. This can be model binaries or other information that allows users of
-Bailo to build and use your prepared models.
+Files represent any artefacts related to a model, such as binaries, configuration files, or supporting documentation.
+These files allow others to build, evaluate, and use your model.
 
-## Adding a file
+## Adding files to a model
 
-Files are primarily uploaded using the ADD NEW FILES button located in a model's File Management tab. By pressing the
-SELECT FILES button you are given the ability to choose files to upload. You can also adjust each file's associated
-tags.
+Files are uploaded from the **File Management** tab of a model.
+
+1. Click **Add New Files**
+2. Select files to upload
+3. Optionally assign tags to each file
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view of files being uploaded' src={bailoUploadFile} />
@@ -23,7 +25,7 @@ tags.
 
 ## Adding files to a new release
 
-When creating a new release, you can also attach new and pre-existing files.
+When creating a new release, you can attach both newly uploaded files and files that already exist on the model.
 
 <br />
 
@@ -33,7 +35,7 @@ When creating a new release, you can also attach new and pre-existing files.
 
 ## Adding files to an existing release
 
-Similarly, you can upload and delete a file on an existing release by editing it.
+Existing releases can be edited to add or remove files.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view of existing release with edit release button' src={bailoUploadedFileRelease} />
@@ -41,7 +43,7 @@ Similarly, you can upload and delete a file on an existing release by editing it
 
 ## Uploading files programmatically
 
-If you intend to download and use this in a notebook or other Python project you can use Bailo's Python Client. You can
-find out how to do this [here](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html).
+To upload or download files programmatically, use the Bailo Python Client. Examples are available
+[here](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html).
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

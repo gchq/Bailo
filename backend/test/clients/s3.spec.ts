@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   completeMultipartUpload,
+  deleteObject,
   ensureBucketExists,
   getObjectStream,
   headObject,
@@ -22,6 +23,9 @@ const s3Mocks = vi.hoisted(() => {
       return {}
     }),
     HeadObjectCommand: vi.fn(function () {
+      return {}
+    }),
+    DeleteObjectCommand: vi.fn(function () {
       return {}
     }),
     HeadBucketCommand: vi.fn(function () {
@@ -129,6 +133,7 @@ describe('clients > s3', () => {
   })
 
   test('getObjectStream > success', async () => {
+    s3Mocks.send.mockResolvedValueOnce({ Body: 'response' } as any)
     const bucket = 'test-bucket'
     const key = 'test-key'
     const range = { start: 0, end: 100 }
@@ -220,6 +225,35 @@ describe('clients > s3', () => {
     })
 
     const response = completeMultipartUpload(key, uploadId, parts, bucket)
+
+    await expect(response).rejects.toThrowError()
+  })
+
+  test('deleteObject > success', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+
+    const response = await deleteObject(key, bucket)
+
+    expect(s3Mocks.DeleteObjectCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
+    expect(response).toEqual('response')
+  })
+
+  test('deleteObject > error', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+    s3Mocks.send.mockRejectedValueOnce({
+      name: '',
+      message: '',
+      $fault: {},
+      $metadata: { httpStatusCode: 404 },
+    })
+
+    const response = deleteObject(key, bucket)
 
     await expect(response).rejects.toThrowError()
   })

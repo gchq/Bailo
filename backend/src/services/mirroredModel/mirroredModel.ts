@@ -1,20 +1,21 @@
 import { createHash } from 'node:crypto'
 import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
 
 import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
-import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
+import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { BadReq, InternalError, NotFound } from '../../utils/error.js'
+import { BadReq, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
-import { getModelById } from '../model.js'
+import { getModelById, getModelByIdNoAuth } from '../model.js'
 import { getImageBlob, getImageManifest, splitDistributionPackageName } from '../registry.js'
 import { getReleasesForExport } from '../release.js'
 import { BaseExporter } from './exporters/base.js'
@@ -44,6 +45,15 @@ export async function exportModel(
 
   const exportId = shortId()
   const model = await getModelById(user, modelId, EntryKind.Model)
+
+  if (!model.card) {
+    throw BadReq('Cannot export a model that does have a valid model card.', { modelId: model.id })
+  }
+
+  if (model.card.version === 1) {
+    throw BadReq('You must make changes to your model card before requesting an export.', { modelId: model.id })
+  }
+
   const mirroredModelId = model.settings.mirror.destinationModelId
   const releases: ReleaseDoc[] = []
   if (semvers && semvers.length > 0) {
@@ -168,14 +178,7 @@ export async function importModel(
   const importResult = await extractTarGzStream(responseBody, user, { importId })
   log.debug({ importId, importResult }, 'Completed extracting archive.')
 
-  // similar to `getModelById` but without the auth check to allow getting a private model
-  const mirroredModel = await ModelModel.findOne({
-    id: importResult.metadata.mirroredModelId,
-  })
-
-  if (!mirroredModel) {
-    throw NotFound('The requested Mirrored Model was not found.', { modelId: importResult.metadata.mirroredModelId })
-  }
+  const mirroredModel = await getModelByIdNoAuth(importResult.metadata.mirroredModelId)
 
   return {
     mirroredModel,
@@ -215,7 +218,7 @@ export async function addCompressedRegistryImageComponents(
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
-  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body
+  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body!
   log.debug(
     {
       modelId,
@@ -302,25 +305,12 @@ export async function addAndFinaliseExporters(exporters: BaseExporter[], logData
 }
 
 export async function generateDigest(file: Readable) {
-  let messageDigest: string
   try {
     const hash = createHash('sha256')
-    hash.setEncoding('hex')
-    file.pipe(hash)
-    messageDigest = await new Promise((resolve, reject) => {
-      file.on('error', (err) => {
-        file.destroy?.()
-        hash.destroy?.()
-        reject(InternalError('Error generating SHA256 digest for stream.', { error: err }))
-      })
-      file.on('end', () => {
-        hash.end()
-        resolve(hash.read())
-      })
-    })
-    return messageDigest
-  } catch (error: unknown) {
-    file.destroy?.()
+    await pipeline(file, hash)
+
+    return hash.digest('hex')
+  } catch (error) {
     throw InternalError('Error generating SHA256 digest for stream.', { error })
   }
 }

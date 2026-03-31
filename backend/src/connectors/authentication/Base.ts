@@ -2,17 +2,7 @@ import { RequestHandler } from 'express'
 
 import { UserInterface } from '../../models/User.js'
 import { checkAuthentication, getTokenFromAuthHeader } from '../../routes/middleware/defaultAuthentication.js'
-
-export const Roles = {
-  Admin: 'admin',
-} as const
-export type RoleKeys = (typeof Roles)[keyof typeof Roles]
-
-export interface UserInformation {
-  name?: string
-  organisation?: string
-  email?: string
-}
+import { RoleKeys, UserInformation } from './constants.js'
 
 export abstract class BaseAuthenticationConnector {
   abstract hasRole(user: UserInterface, role: RoleKeys): Promise<boolean>

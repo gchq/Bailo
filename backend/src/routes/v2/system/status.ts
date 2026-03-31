@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { z } from '../../../lib/zod.js'
 import { registerPath, systemStatusSchema } from '../../../services/specification.js'
 import { SystemStatus } from '../../../types/types.js'
 import config from '../../../utils/config.js'

@@ -1,4 +1,4 @@
-import { RegistryWidgetsType } from '@rjsf/utils'
+import { Registry, RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
@@ -14,7 +14,7 @@ import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
 
-import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
+import { FormStats, ModelFormStats, SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
 import { createUiSchema } from './uiSchemaUtils'
 
 export const widgets: RegistryWidgetsType = {
@@ -35,6 +35,7 @@ export function createStep({
   schema,
   uiSchema,
   state,
+  mirroredState,
   type,
   section,
   index,
@@ -44,6 +45,7 @@ export function createStep({
   schema: any
   uiSchema?: any
   state: unknown
+  mirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -54,6 +56,7 @@ export function createStep({
     schema,
     uiSchema,
     state,
+    mirroredState,
     type,
     index,
 
@@ -112,6 +115,7 @@ export function getStepsFromSchema(
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
   state: any = {},
+  mirroredState: any = {},
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -134,6 +138,7 @@ export function getStepsFromSchema(
       },
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
+      mirroredState: mirroredState ? mirroredState[prop] || {} : {},
       type: 'Form',
       index,
       schemaRef: schema.reference,
@@ -141,7 +146,6 @@ export function getStepsFromSchema(
       section: prop,
       isComplete: validateForm,
     })
-
     steps.push(createdStep)
   })
 
@@ -152,7 +156,9 @@ export function getStepsData(splitSchema: SplitSchemaNoRender, includeAll = fals
   const data: any = {}
 
   splitSchema.steps.forEach((step) => {
-    if (!includeAll && step.type !== 'Form') return
+    if (!includeAll && step.type !== 'Form') {
+      return
+    }
 
     data[step.section] = step.state
   })
@@ -167,8 +173,12 @@ export function setStepsData(
   data: any,
 ) {
   const newSteps = splitSchema.steps.map((step) => {
-    if (!data[step.section]) return { ...step }
-    if (step.type !== 'Form') return { ...step }
+    if (!data[step.section]) {
+      return { ...step }
+    }
+    if (step.type !== 'Form') {
+      return { ...step }
+    }
 
     return {
       ...step,
@@ -188,4 +198,217 @@ export function validateForm(step: StepNoRender) {
   const sectionErrors = validator.validate(step.state, step.schema)
 
   return sectionErrors.errors.length === 0
+}
+
+export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
+}
+
+export const getState = (id: string, formContext: Registry['formContext']) => {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.state)
+}
+
+function isMetricsKey(key: string): boolean {
+  return key.toLowerCase().includes('metrics')
+}
+
+function isAnswered(value: any): boolean {
+  if (value === null || value === undefined) {
+    return false
+  }
+  if (typeof value === 'string') {
+    return value.trim().length > 0
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0
+  }
+  return true
+}
+
+function isRequiredArray(schema: any): boolean {
+  return schema?.type === 'array' && typeof schema.minItems === 'number' && schema.minItems >= 1
+}
+
+function roundToOneDecimal(value: number): number {
+  return Math.round(value * 10) / 10
+}
+
+function isPrimitiveSchema(schema: any): boolean {
+  if (!schema || typeof schema !== 'object') {
+    return false
+  }
+  if ('$ref' in schema) {
+    return true
+  }
+  return ['string', 'number', 'boolean'].includes(schema.type)
+}
+
+function countQuestionsFromSchema(schema: any): number {
+  if (!schema || typeof schema !== 'object') {
+    return 0
+  }
+
+  if (isPrimitiveSchema(schema)) {
+    return 1
+  }
+
+  // If array - Only count if needed
+  if (schema.type === 'array' && schema.items) {
+    if (!isRequiredArray(schema)) {
+      return 0
+    }
+    return countQuestionsFromSchema(schema.items)
+  }
+
+  if (schema.type === 'object' && schema.properties) {
+    let total = 0
+    for (const [key, prop] of Object.entries(schema.properties)) {
+      if (isMetricsKey(key)) {
+        continue
+      }
+      total += countQuestionsFromSchema(prop)
+    }
+    return total
+  }
+
+  return 0
+}
+
+function countAnswersFromSchemaAndState(schema: any, state: any): number {
+  if (!schema || typeof schema !== 'object') {
+    return 0
+  }
+
+  if (isPrimitiveSchema(schema)) {
+    return isAnswered(state) ? 1 : 0
+  }
+
+  // If Array - Check first item
+  if (schema.type === 'array' && schema.items) {
+    if (!Array.isArray(state) || state.length === 0) {
+      return 0
+    }
+    return countAnswersFromSchemaAndState(schema.items, state[0])
+  }
+
+  if (schema.type === 'object' && schema.properties) {
+    let total = 0
+    for (const [key, prop] of Object.entries(schema.properties)) {
+      if (isMetricsKey(key)) {
+        continue
+      }
+      total += countAnswersFromSchemaAndState(prop, state?.[key])
+    }
+    return total
+  }
+
+  return 0
+}
+
+/**
+ * Calculates completion statistics for a single form step.
+ *
+ * Determines the total number of questions and answered questions based on
+ * the provided uiSchema and form state, and returns a percentage completion
+ * rounded to one decimal place.
+ *
+ * If no step is provided, all numeric values are returned as -1 and the form
+ * is marked as incomplete.
+ */
+export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): FormStats {
+  if (!step) {
+    return {
+      totalQuestions: -1,
+      totalAnswers: -1,
+      percentageQuestionsComplete: -1,
+      formCompleted: false,
+    }
+  }
+
+  const totalQuestions = countQuestionsFromSchema(step.schema)
+  const totalAnswers = countAnswersFromSchemaAndState(step.schema, mirroredModel ? step.mirroredState : step.state)
+
+  // If more answers given than required answers then return 100% otherwise calulate percentage
+  const percentageQuestionsComplete =
+    totalQuestions === 0 ? 0 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
+
+  return {
+    totalQuestions,
+    totalAnswers,
+    percentageQuestionsComplete,
+    formCompleted: totalAnswers >= totalQuestions,
+  }
+}
+
+export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?: boolean): ModelFormStats {
+  let totalQuestions = 0
+  let totalAnswers = 0
+  let totalPages = 0
+  let pagesCompleted = 0
+
+  steps.forEach((step) => {
+    const stepStats = getFormStats(step, mirroredModel)
+    totalQuestions += stepStats.totalQuestions
+    totalAnswers += stepStats.totalAnswers
+    totalPages += 1
+    if (stepStats.formCompleted) {
+      pagesCompleted += 1
+    }
+  })
+
+  return {
+    totalQuestions,
+    totalAnswers,
+    percentageQuestionsComplete: (totalAnswers / totalQuestions) * 100,
+    percentagePagesComplete: (pagesCompleted / totalPages) * 100,
+    formCompleted: totalAnswers >= totalQuestions,
+    totalPages,
+    pagesCompleted,
+  }
+}
+
+/**
+ * Recursively iterate over an object to set all non array/object properties to undefined. This means that we retain the structure of the JSON with empty fields.
+ *
+ * @param source
+ */
+export const setFormDataPropertiesToUndefined = (source) => {
+  iterateAndResetProperties(source)
+  return source
+}
+
+const iterateAndResetProperties = (object: any) => {
+  // Each item in an array should be of the same type, so we only need the first item in order to render the input correctly on the form
+  if (Array.isArray(object)) {
+    object.splice(1)
+  }
+  Object.keys(object).forEach((key) => {
+    if (typeof object[key] !== 'object') {
+      switch (typeof object[key]) {
+        case 'number':
+          object[key] = 0
+          break
+        case 'string':
+          object[key] = undefined
+          break
+        default:
+          object[key] = undefined
+          break
+      }
+    }
+
+    if ((Array.isArray(object[key]) || typeof object[key] === 'object') && object[key] !== null) {
+      setFormDataPropertiesToUndefined(object[key])
+    }
+  })
 }

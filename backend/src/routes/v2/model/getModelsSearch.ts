@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
 import { EntryKind } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
@@ -66,11 +66,7 @@ export const getModelsSearch = [
 
     const opts: { query: EntrySearchOptionsParams } = parse(req, getModelsSearchSchema)
 
-    let results: EntrySearchResultWithErrors = {
-      models: [],
-    }
-
-    results = await searchModels(req.user, opts.query)
+    const results = await searchModels(req.user, opts.query)
 
     await audit.onSearchModel(req, results.models)
 

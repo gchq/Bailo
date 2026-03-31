@@ -55,7 +55,9 @@ export function useGetUserInformation(dn: string) {
     fetcher,
     {
       onErrorRetry: (error) => {
-        if (error.status === 404) return
+        if (error.status === 404) {
+          return
+        }
       },
     },
   )

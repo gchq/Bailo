@@ -22,7 +22,9 @@ export default function EntryCardVersion({ entryCard, schema, entryId, entryKind
   })
 
   useEffect(() => {
-    if (!entryCard || !schema) return
+    if (!entryCard || !schema) {
+      return
+    }
     const metadata = entryCard.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
 

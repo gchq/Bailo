@@ -1,5 +1,5 @@
 import { Grid, Stack } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetEntryRoles } from 'actions/entry'
 import { Fragment, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
@@ -12,7 +12,7 @@ type EntryRoleListProps = {
 }
 
 export default function EntryRoleList({ entry }: EntryRoleListProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(entry.id)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
   const rows = useMemo(
     () =>
       entry.collaborators.map((collaborator) => (
@@ -23,19 +23,19 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
             </Stack>
           </Grid>
           <Grid size={{ xs: 6 }}>
-            <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={modelRoles} />
+            <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={entryRoles} />
           </Grid>
         </Fragment>
       )),
-    [entry.collaborators, modelRoles],
+    [entry.collaborators, entryRoles],
   )
 
-  if (isModelRolesLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   return (

@@ -67,7 +67,7 @@ export async function dropModelIdFromTokens(
   user: UserInterface,
   modelId: string,
   tokens: TokenDoc[],
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   for (const token of tokens) {
     if (token.user !== user.dn) {

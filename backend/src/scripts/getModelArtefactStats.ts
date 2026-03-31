@@ -22,6 +22,7 @@ import log from '../services/log.js'
 import { joinDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
 
 function calculateAverages(values: number[]) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length
@@ -65,12 +66,12 @@ async function script() {
   const modelsWithReleases = await ReleaseModel.distinct('modelId')
   const numModelsWithReleases = modelsWithReleases.length
   const numModelsWithoutReleases = totalModels - numModelsWithReleases
-  log.info('Model stats', { totalModels, numModelsWithReleases, numModelsWithoutReleases })
+  log.info({ totalModels, numModelsWithReleases, numModelsWithoutReleases }, 'Model stats')
   // Releases with any/no Files
   const numReleasesWithFiles = await ReleaseModel.countDocuments({ fileIds: { $exists: true, $ne: [] } })
   const totalReleases = await ReleaseModel.countDocuments()
   const numReleasesWithoutFiles = totalReleases - numReleasesWithFiles
-  log.info('File Release stats', { totalReleases, numReleasesWithFiles, numReleasesWithoutFiles })
+  log.info({ totalReleases, numReleasesWithFiles, numReleasesWithoutFiles }, 'File Release stats')
   // File size statistics
   const fileSizes = await FileModel.find({}, { size: 1, _id: 0 }).lean()
   const fileSizesArray = fileSizes.map((f) => f.size || 0)
@@ -90,7 +91,7 @@ async function script() {
       stdDev: prettyBytes(fileZ.stdDev),
       variance: `${prettyBytes(fileZ.variance)}^2`,
     }
-    log.info('File size stats', fileStats)
+    log.info(fileStats, 'File size stats')
   } else {
     log.warn('No File size data collected from mongodb')
   }
@@ -116,7 +117,7 @@ async function script() {
       stdDev: fileCountZ.stdDev,
       variance: fileCountZ.variance,
     }
-    log.info('Files per release stats', fileCountStats)
+    log.info(fileCountStats, 'Files per release stats')
   }
   // total File size per Release
   if (fileSizesArray.length > 0) {
@@ -152,7 +153,7 @@ async function script() {
       stdDev: prettyBytes(totalSizeZ.stdDev),
       variance: `${prettyBytes(totalSizeZ.variance)}^2`,
     }
-    log.info('Total file size per release stats', totalSizeStats)
+    log.info(totalSizeStats, 'Total file size per release stats')
   }
 
   // Releases with any/no Images
@@ -161,11 +162,14 @@ async function script() {
   })
   const numReleasesWithoutImages = totalReleases - numReleasesWithImages
 
-  log.info('Image release stats', {
-    totalReleases,
-    numReleasesWithImages,
-    numReleasesWithoutImages,
-  })
+  log.info(
+    {
+      totalReleases,
+      numReleasesWithImages,
+      numReleasesWithoutImages,
+    },
+    'Image release stats',
+  )
 
   const releasesWithImages = await ReleaseModel.find(
     { images: { $exists: true, $ne: [] } },
@@ -204,7 +208,9 @@ async function script() {
         dispatcher: agent,
       }).then((res) => res.json())) as { name: string; tags: string[] }
 
-      if (!tagsList.tags) return // no tags = skip
+      if (!tagsList.tags) {
+        return
+      } // no tags = skip
 
       // 5️⃣ Process each tag
       await Promise.all(
@@ -213,12 +219,14 @@ async function script() {
           const manifest = (await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
             headers: {
               Authorization: repositoryAuthorisation,
-              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+              Accept: AcceptManifestMediaTypeHeaderValue,
             },
             dispatcher: agent,
           }).then((res) => res.json())) as { layers?: { size: number }[] }
 
-          if (!manifest.layers) return
+          if (!manifest.layers) {
+            return
+          }
 
           // Calculate total image size for this image (sum of layer sizes)
           const totalImageSize = manifest.layers.reduce((sum, layer) => sum + (layer.size || 0), 0)
@@ -256,7 +264,7 @@ async function script() {
       stdDev: prettyBytes(imgZ.stdDev),
       variance: `${prettyBytes(imgZ.variance)}^2`,
     }
-    log.info('Image size stats (all images)', imageStats)
+    log.info(imageStats, 'Image size stats (all images)')
   } else {
     log.warn('No image size data collected from registry')
   }
@@ -278,7 +286,7 @@ async function script() {
       stdDev: imgCountZ.stdDev,
       variance: imgCountZ.variance,
     }
-    log.info('Images per release stats', imageCountStats)
+    log.info(imageCountStats, 'Images per release stats')
   }
 
   // total Image size per Release
@@ -299,7 +307,7 @@ async function script() {
       stdDev: prettyBytes(totalImgSizeZ.stdDev),
       variance: `${prettyBytes(totalImgSizeZ.variance)}^2`,
     }
-    log.info('Total image size per release stats', totalImageSizeStats)
+    log.info(totalImageSizeStats, 'Total image size per release stats')
   }
 
   // cleanup

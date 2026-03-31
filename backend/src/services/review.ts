@@ -137,7 +137,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export async function removeAccessRequestReviews(accessRequestId: string, session?: ClientSession | undefined) {
+export async function removeAccessRequestReviews(accessRequestId: string, session?: ClientSession) {
   // This can be improved with a bulk delete function from the soft delete plugin
   const accessRequestReviews = await findReviewsForAccessRequests([accessRequestId])
 

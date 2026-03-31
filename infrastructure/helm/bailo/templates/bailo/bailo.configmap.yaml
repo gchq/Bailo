@@ -86,18 +86,18 @@ data:
         {{ end }}
       },
 
-      avScanning: {
+      artefactScanning: {
         clamdscan: {
           concurrency: {{ .Values.clamav.concurrency }},
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
         },
 
-        modelscan: {
-          concurrency: {{ .Values.modelscan.concurrency }},
-          host: '{{ include "bailo.fullname" . }}-modelscan',
-          port: {{ .Values.modelscan.port }},
-          protocol: '{{ .Values.modelscan.protocol }}',
+        artefactscan: {
+          concurrency: {{ .Values.artefactscan.concurrency }},
+          host: '{{ include "bailo.fullname" . }}-artefactscan',
+          port: {{ .Values.artefactscan.port }},
+          protocol: '{{ .Values.artefactscan.protocol }}',
         },
       },
 
@@ -207,6 +207,8 @@ data:
         modelMirror: {
           import: {
             enabled: {{ .Values.modelMirror.import.enabled }},
+            additionalInfoHeading: '{{ .Values.modelMirror.import.additionalInfoHeading }}',
+            originalAnswerHeading: '{{ .Values.modelMirror.import.originalAnswerHeading }}',
           },
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
@@ -243,11 +245,11 @@ data:
           kind: '{{ .Values.connectors.audit.kind }}',
         },
 
-        fileScanners: {
-          kinds: {{ toJson .Values.connectors.fileScanners.kinds }},
-          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }},
-          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
-          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
+        artefactScanners: {
+          kinds: {{ toJson .Values.connectors.artefactScanners.kinds }},
+          retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }},
+          maxInitRetries: {{ .Values.connectors.artefactScanners.maxInitRetries }},
+          initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }},
         },
       },
 
@@ -266,6 +268,7 @@ data:
         endpoint: '{{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}',
         region: '{{ .Values.minio.region }}',
         forcePathStyle: true,
+        responseChecksumValidation: '{{ .Values.aws.s3.responseChecksumValidation }}',
 
         // Names of buckets that Bailo uses
         buckets: {
@@ -287,6 +290,16 @@ data:
           },
         },
       },
+
+      stroom: {
+        logOnlyMode: '{{ .Values.stroom.logOnlyMode }}',
+        feed: '{{ .Values.stroom.feed }}',
+        url: '{{ .Values.stroom.url }}',
+        environment: '{{ .Values.stroom.environment }}',
+        interval: '{{ .Values.stroom.interval }}',
+        generator: '{{ .Values.stroom.generator }}',
+        rejectUnauthorized: '{{ .Values.stroom.rejectUnauthorized }}',
+      }
     }
 
   custom-environment-variables.cjs: |

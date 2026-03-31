@@ -21,7 +21,9 @@ export default function Help() {
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <Container maxWidth='xl' sx={{ pb: 2 }}>
@@ -29,8 +31,8 @@ export default function Help() {
       {isUiConfigLoading && <Loading />}
       {uiConfig && (
         <Paper sx={{ py: 5, px: 5 }}>
-          <Box sx={{ mb: 5, textAlign: 'center' }}>
-            <Typography variant='h2' component='h1' color='primary'>
+          <Box sx={{ mb: 5 }}>
+            <Typography variant='h6' component='h1' color='primary' textAlign='center'>
               Contact us
             </Typography>
           </Box>

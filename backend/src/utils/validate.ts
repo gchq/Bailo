@@ -1,7 +1,8 @@
 import { Request } from 'express'
-import z, { ZodError, ZodSchema } from 'zod'
+import type { ZodError, ZodSchema } from 'zod'
 import { ErrorMessageOptions, generateErrorMessage } from 'zod-error'
 
+import { z } from '../lib/zod.js'
 import { BadReq } from './error.js'
 
 export function parse<T extends ZodSchema>(req: Request, schema: T): z.infer<T> {
@@ -23,7 +24,9 @@ export function parse<T extends ZodSchema>(req: Request, schema: T): z.infer<T> 
 
 export function coerceArray(object: z.ZodTypeAny) {
   return z.preprocess((val) => {
-    if (val === '' || val === undefined) return undefined
+    if (val === '' || val === undefined) {
+      return undefined
+    }
     return Array.isArray(val) ? val : [val]
   }, object)
 }

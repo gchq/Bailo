@@ -1,8 +1,8 @@
 import { Callback, CallbackWithoutResultAndOptionalError, ClientSession, Document, Schema, Types } from 'mongoose'
 
 export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'restore'>, SoftDeleteInterface {
-  delete(session?: ClientSession | undefined, fn?: Callback<this>): Promise<this>
-  restore(session?: ClientSession | undefined, fn?: Callback<this>): Promise<this>
+  delete(session?: ClientSession, fn?: Callback<this>): Promise<this>
+  restore(session?: ClientSession, fn?: Callback<this>): Promise<this>
 }
 
 export interface SoftDeleteInterface {
@@ -16,7 +16,7 @@ export function softDeletionPlugin(schema: Schema) {
   schema.add({ deletedBy: { type: String, default: '' } })
   schema.add({ deletedAt: { type: String, default: '' } })
 
-  schema.methods.delete = async function (session?: ClientSession | undefined, user?: string) {
+  schema.methods.delete = async function (session?: ClientSession, user?: string) {
     this.deleted = true
     this.deletedAt = new Date().toISOString()
     if (user) {
@@ -25,11 +25,7 @@ export function softDeletionPlugin(schema: Schema) {
     return await this.save({ session })
   }
 
-  schema.statics.deleteOne = async function (
-    filter: Record<string, any>,
-    session?: ClientSession | undefined,
-    user?: string,
-  ) {
+  schema.statics.deleteOne = async function (filter: Record<string, any>, session?: ClientSession, user?: string) {
     const update: Record<string, any> = {
       deleted: true,
       deletedAt: new Date().toISOString(),
@@ -41,11 +37,7 @@ export function softDeletionPlugin(schema: Schema) {
     return this.updateOne(filter, update, { session })
   }
 
-  schema.statics.deleteMany = async function (
-    filter: Record<string, any>,
-    session?: ClientSession | undefined,
-    user?: string,
-  ) {
+  schema.statics.deleteMany = async function (filter: Record<string, any>, session?: ClientSession, user?: string) {
     const update: Record<string, any> = {
       deleted: true,
       deletedAt: new Date().toISOString(),
@@ -59,7 +51,7 @@ export function softDeletionPlugin(schema: Schema) {
 
   schema.statics.findByIdAndDelete = async function (
     id: Types.ObjectId | string,
-    session?: ClientSession | undefined,
+    session?: ClientSession,
     user?: string,
   ) {
     const update: Record<string, any> = {
@@ -80,7 +72,7 @@ export function softDeletionPlugin(schema: Schema) {
 
   schema.statics.findOneAndDelete = async function (
     filter: Record<string, any>,
-    session?: ClientSession | undefined,
+    session?: ClientSession,
     user?: string,
   ) {
     const update: Record<string, any> = {

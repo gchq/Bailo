@@ -1,4 +1,4 @@
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import qs from 'querystring'
 import useSWR from 'swr'
 import { camelCasetoKebabCase } from 'utils/stringUtils'

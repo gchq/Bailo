@@ -5,15 +5,16 @@ import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
+import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
-import { expressLogger } from './routes/middleware/expressLogger.js'
-import { requestId } from './routes/middleware/requestId.js'
+import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
+import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
+import { putFileScan } from './routes/v2/artefactScanning/putFileScan.js'
+import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
-import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
-import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -35,6 +36,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { deleteImage } from './routes/v2/model/images/deleteImage.js'
+import { getImage } from './routes/v2/model/images/getImage.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -58,6 +60,8 @@ import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
 import { putWebhook } from './routes/v2/model/webhook/putWebhook.js'
+import { getModelTransfer } from './routes/v2/modelTransfer/getModelTransfer.js'
+import { getModelTransfers } from './routes/v2/modelTransfer/getModelTransfers.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -91,18 +95,21 @@ import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
 
 export const server = express()
 
-server.use('/api/v2', requestId)
 server.use('/api/v2', bodyParser.json())
-server.use('/api/v2', expressLogger)
+server.use('/api/v2', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
+
+// Needs to be applied after authentication middleware as it requires the user details
+server.use('/api/v2/models', escalateUser)
 
 server.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
 
@@ -171,6 +178,7 @@ server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
 server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
+server.get('/api/v2/model/:modelId/image/:name/:tag', ...getImage)
 server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -221,6 +229,9 @@ server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
+server.get('/api/v2/transfer/:transferId', ...getModelTransfer)
+server.get('/api/v2/model/:modelId/transfers', ...getModelTransfers)
+
 server.get('/api/v2/config/ui', ...getUiConfig)
 
 server.post('/api/v2/user/tokens', ...postUserToken)
@@ -231,8 +242,9 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
 
-server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+server.get('/api/v2/filescanning/info', ...getArtefactScanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
+server.put('/api/v2/filescanning/model/:modelId/image/:name/:tag/scan', ...putImageScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
@@ -247,3 +259,5 @@ const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+
+server.use('/internal', internalRouter)

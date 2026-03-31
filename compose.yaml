@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.2.2-ubi9
+    image: mongodb/mongodb-community-server:8.2.6-ubi9
     networks:
       internal:
     environment:
@@ -78,7 +78,7 @@ services:
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
     volumes:
       - ./backend/config/registry.conf:/etc/distribution/config.yml
-      - ./backend/certs:/certs
+      - ./backend/certs:/certs:ro
 
   frontend:
     networks:
@@ -98,8 +98,8 @@ services:
       additional_contexts:
         python: ./lib/python
     volumes:
-      - ./backend/certs:/certs
-      - ./backend/certs:/usr/local/share/ca-certificates
+      - ./backend/certs:/certs:ro
+      - ./backend/certs:/usr/local/share/ca-certificates:ro
       - ./backend/config:/app/config
     depends_on:
       registry:

@@ -25,6 +25,23 @@ services:
       timeout: 10s
       retries: 5
 
+  artefactscan:
+    ports:
+      - 3311:3311
+    networks:
+      internal:
+    image: bailo_artefactscan:${INSTANCE_NAME}
+    build:
+      context: ./lib/artefactscan_api
+    volumes:
+      - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
+      - ./backend/certs:/certs:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   mailcrab:
     networks:
       default:
@@ -32,13 +49,13 @@ services:
     ports:
       - 1080:1080
       - 1025:1025
-    image: marlonb/mailcrab:v1.6.2
+    image: marlonb/mailcrab:v1.6.5
 
   webhook-tester:
     networks:
       default:
       internal:
-    image: tarampampam/webhook-tester:2.2.5
+    image: tarampampam/webhook-tester:2.2.6
     command: serve --auto-create-sessions
     ports:
       - 8082:8080
@@ -55,3 +72,10 @@ services:
         condition: service_started
       mongo:
         condition: service_started
+      artefactscan:
+        condition: service_healthy
+
+  registry:
+    depends_on:
+      artefactscan:
+        condition: service_healthy

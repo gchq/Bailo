@@ -1,6 +1,6 @@
-import { Lock, LockOpen } from '@mui/icons-material'
+import { Lock, LockOpen, Save } from '@mui/icons-material'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
-import { patchModel, useGetModel } from 'actions/model'
+import { patchEntry, useGetEntry } from 'actions/entry'
 import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
@@ -10,7 +10,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKindLabel, UpdateEntryForm } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryDetailsProps = {
   entry: EntryInterface
@@ -26,7 +26,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
-  const { mutateModel } = useGetModel(entry.id, entry.kind)
+  const { mutateEntry: mutateEntry } = useGetEntry(entry.id, entry.kind)
 
   const isFormValid = useMemo(() => name && description, [name, description])
 
@@ -49,7 +49,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       organisation: organisation || '',
       state: state || '',
     }
-    const response = await patchModel(entry.id, formData)
+    const response = await patchEntry(entry.id, formData)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -59,7 +59,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      mutateModel()
+      mutateEntry()
     }
     setIsLoading(false)
   }
@@ -93,12 +93,13 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   }
 
   return (
-    <Box component='form' onSubmit={onSubmit}>
+    <Box component='form' onSubmit={onSubmit} sx={{ mt: 2 }}>
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
         <>
-          <Typography variant='h6' component='h2'>
-            {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
+          <Typography variant='h6' component='h2' color='primary'>
+            {`${toSentenceCase(EntryKindLabel[entry.kind])} details`}
           </Typography>
+          <Divider />
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
@@ -128,11 +129,16 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
             />
           </RadioGroup>
         </>
-        <Divider />
         <div>
           <Tooltip title={saveButtonTooltip}>
             <span>
-              <Button variant='contained' loading={isLoading} disabled={!isFormValid} type='submit'>
+              <Button
+                variant='contained'
+                loading={isLoading}
+                disabled={!isFormValid}
+                type='submit'
+                startIcon={<Save />}
+              >
                 Save
               </Button>
             </span>

@@ -1,9 +1,12 @@
 import { ProxyAgentOptions } from 'proxy-agent'
 import { Optional } from 'utility-types'
-import z, { ZodSchema, ZodTypeDef } from 'zod'
+import type { ZodSchema, ZodTypeDef } from 'zod'
 
+import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
+import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
+import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,
@@ -91,6 +94,8 @@ export interface RemoteFederationConfig {
   extra?: {
     [key: string]: any
   }
+  // the list of system users allowed to perform escalation
+  allowedSystemUserIds?: string[]
 }
 
 export type FederationStatus = {
@@ -129,6 +134,8 @@ export interface UiConfig {
   modelMirror: {
     import: {
       enabled: boolean
+      additionalInfoHeading: string
+      originalAnswerHeading: string
     }
     export: {
       enabled: boolean
@@ -221,6 +228,34 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
 
+export type ModelImages = ModelImageTags[]
+export type LayerScanSummary = Pick<
+  ScanInterface,
+  'toolName' | 'scannerVersion' | 'state' | 'summary' | 'lastRunAt'
+> & { layerDigest: string }
+export type ModelImageTags = {
+  repository: string
+  name: string
+  tags: Array<string>
+}
+
+export type ImageTagResult = {
+  tag: string
+  state: ArtefactScanStateKeys
+  severityCounts: SeverityCounts
+  scanResults?: ScanInterface[]
+  imageSize: number
+}
+
+export type ImageScanResults = {
+  scanSummaries: ImageTagResult[]
+}
+
+export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
+
+export type SeverityCounts = Record<SeverityLevelKeys, number>
+export type ArtefactScanStateCounts = Record<ArtefactScanStateKeys, number>
+
 export const MirrorKind = {
   Documents: 'documents',
   File: 'file',
@@ -236,3 +271,15 @@ export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInfor
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
+
+export const isMongoDocumentMirrorInformation = (
+  value: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
+): value is MongoDocumentMirrorInformation => {
+  return !!(value as MongoDocumentMirrorInformation).newModelCards
+}
+
+export const isFileMirrorInformation = (
+  value: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
+): value is FileMirrorInformation => {
+  return !!(value as FileMirrorInformation).newPath
+}

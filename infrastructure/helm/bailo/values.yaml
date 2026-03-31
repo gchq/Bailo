@@ -8,8 +8,8 @@ image:
   frontendTag: imageTag
   backendRepository: "backend-image-registry.location"
   backendTag: imageTag
-  modelscanRepository: "modelscan-image-registry.location"
-  modelscanTag: imageTag
+  artefactscanRepository: "artefactscan-image-registry.location"
+  artefactscanTag: imageTag
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 
@@ -30,13 +30,6 @@ autoscaling:
 podSecurityContext:
   {}
   # fsGroup: 2000
-securityContext:
-  # capabilities:
-  #   drop:
-  #     - ALL
-  readOnlyRootFilesystem: false
-  runAsNonRoot: true
-  # runAsUser: 1002380001
 
 # Networking
 # Ingress/route implementation. Also, see appPublicRoute below.
@@ -96,6 +89,9 @@ aws:
   ses:
     endpoint: ""
     region: ""
+  s3:
+    # Potentially requires setting to avoid OOM/memory leak as per https://github.com/aws/aws-sdk-js-v3/issues/7657
+    responseChecksumValidation: ""
 
 # Pod resource
 resources:
@@ -242,7 +238,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.2
+  image: marlonb/mailcrab:v1.6.5
 
 # Openshift specific configuration
 openshift:
@@ -305,7 +301,7 @@ connectors:
   audit:
     kind: 'silly'
 
-  fileScanners:
+  artefactScanners:
     kinds: []
     retryDelayInMinutes: 60
     maxInitRetries: 5
@@ -315,9 +311,20 @@ instrumentation:
   enabled: false
   debug: false
 
+stroom:
+  logOnlyMode: true
+  feed: 'feed'
+  url: 'https://url'
+  environment: 'local'
+  interval: 1000 * 50
+  generator: 'Generator'
+  rejectUnauthorized: false
+
 modelMirror:
   import:
     enabled: false
+    additionalInfoHeading: 'Additional information'
+    originalAnswerHeading: 'Original answer'
   export:
     concurrency: 5
     enabled: false
@@ -341,6 +348,22 @@ inference:
 
 backend:
   serviceAccount: ''
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  securityContext:
+    readOnlyRootFilesystem: false
+    # capabilities:
+    #   drop:
+    #     - ALL
+    # runAsUser: 1002380001
+
+frontend:
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  securityContext:
+    readOnlyRootFilesystem: false
 
 clamav:
   enabled: false
@@ -352,11 +375,20 @@ clamav:
     - ReadWriteOnce
   size: 10G
 
-modelscan:
+artefactscan:
   enabled: false
   concurrency: 2
   protocol: http
   port: 3311
   accessModes:
     - ReadWriteOnce
-  size: 20G  # modelscan saves each incoming file to the disk so needs plenty of storage
+  size: 20G  # artefactscan saves each incoming file to the disk so needs plenty of storage
+  trivy:
+    ca:
+      enabled: false
+      secretName: bailo-certs
+      secretKey: cert.pem
+      mountPath: /certs/artefactscan-ca.pem
+  env: # Override settings here
+    # TRIVY_DB_INSECURE: false
+    # TRIVY_DB_HOSTNAME: ghcr.io

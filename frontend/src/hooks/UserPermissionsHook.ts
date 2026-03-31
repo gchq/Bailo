@@ -1,5 +1,5 @@
 import { useGetCurrentUserPermissionsForAccessRequest } from 'actions/accessRequest'
-import { useGetCurrentUserPermissionsForEntry } from 'actions/model'
+import { useGetCurrentUserPermissionsForEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { AccessRequestUserPermissions, EntryUserPermissions, PermissionDetail, UserPermissions } from 'types/types'

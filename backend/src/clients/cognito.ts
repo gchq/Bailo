@@ -6,7 +6,7 @@ import {
   ListUsersInGroupCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { UserInformation } from '../connectors/authentication/Base.js'
+import { UserInformation } from '../connectors/authentication/constants.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 

@@ -62,7 +62,9 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
       get: function (semver: SemverObject | string) {
         if (typeof semver === 'string') {
           return semver
-        } else return semverObjectToString(semver)
+        } else {
+          return semverObjectToString(semver)
+        }
       },
     },
 

@@ -1,5 +1,6 @@
-import { Button, Stack, Typography } from '@mui/material'
-import { patchModel, useGetCurrentUserPermissionsForEntry, useGetModel, useGetModelRoles } from 'actions/model'
+import { Save } from '@mui/icons-material'
+import { Button, Divider, Stack, Typography } from '@mui/material'
+import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
 import { useCallback, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -9,7 +10,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessTabProps = {
   entry: EntryInterface
@@ -20,12 +21,8 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
 
-  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id)
-  const {
-    modelRoles: entryRoles,
-    isModelRolesLoading: isEntryRolesLoading,
-    isModelRolesError: isEntryRolesError,
-  } = useGetModelRoles(entry.id)
+  const { isEntryError, mutateEntry } = useGetEntry(entry.id)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
 
   const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
   const sendNotification = useNotification()
@@ -37,13 +34,13 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
 
   async function updateCollaborators() {
     setLoading(true)
-    const res = await patchModel(entry.id, { collaborators })
+    const res = await patchEntry(entry.id, { collaborators })
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
       sendNotification({
         variant: 'success',
-        msg: `${toTitleCase(entry.kind)} access list updated`,
+        msg: `${toSentenceCase(entry.kind)} access list updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()
@@ -61,21 +58,29 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ mt: 2 }}>
       {isEntryRolesLoading && <Loading />}
       <Stack spacing={1} direction='row' alignItems='center'>
-        <Typography variant='h6' component='h2'>
+        <Typography variant='h6' component='h2' color='primary'>
           {`Manage ${toSentenceCase(entry.kind)} access`}
         </Typography>
         <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
       </Stack>
+      <Divider />
       <EntryAccessInput
         value={entry.collaborators}
         onChange={handleCollaboratorsChange}
         entryKind={entry.kind}
         entryRoles={entryRoles}
       />
-      <Button variant='contained' aria-label='Save access list' onClick={updateCollaborators} loading={loading}>
+      <Button
+        variant='contained'
+        aria-label='Save access list'
+        onClick={updateCollaborators}
+        loading={loading}
+        startIcon={<Save />}
+        sx={{ maxWidth: 'fit-content' }}
+      >
         Save
       </Button>
       <MessageAlert message={errorMessage} severity='error' />

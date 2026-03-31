@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { EntryKind } from '../../src/models/Model.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createSchemaMigrationPlan,
@@ -139,7 +140,7 @@ describe('services > schemaMigration', () => {
     expect(testModelForMigration.set).toBeCalledTimes(4)
   })
 
-  test('update migration > suceess', async () => {
+  test('update migration > success', async () => {
     await updateSchemaMigrationPlan(testUser, '1241', {
       name: 'my migration plan',
       description: 'This is a test migration plan',
@@ -176,5 +177,27 @@ describe('services > schemaMigration', () => {
         draft: true,
       }),
     ).rejects.toThrowError('Cannot find specified schema migration plan.')
+  })
+
+  test('cannot run schema migration plan where mirrored model schema ID matches that of the source', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce({
+      _id: '1241',
+      id: 'test-model',
+      toObject: vi.fn(function () {
+        return {
+          _id: 'test',
+          kind: EntryKind.MirroredModel,
+          card: { testProperty: 'test', schemaId: 'example-model-schema-1' },
+          mirroredCard: { testProperty: 'test', schemaId: 'example-model-schema-1' },
+        }
+      }),
+      set: vi.fn(),
+      save: vi.fn(),
+    })
+    SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
+    SchemaModelMock.findOne.mockResolvedValueOnce(undefined)
+    await expect(() => runModelSchemaMigration({} as any, 'test-model', 'example-model-schema-1')).rejects.toThrowError(
+      /^This mirrored model cannot be migrated as the schema matches that of the source model. Please migrate the source model first./,
+    )
   })
 })

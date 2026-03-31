@@ -1,5 +1,6 @@
+import { Save } from '@mui/icons-material'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchEntry } from 'actions/entry'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -26,7 +27,7 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
       },
     }
 
-    const response = await patchModel(model.id, updatedModelSettings)
+    const response = await patchEntry(model.id, updatedModelSettings)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -41,10 +42,11 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
   }
 
   return (
-    <Stack spacing={2}>
-      <Typography variant='h6' component='h2'>
+    <Stack spacing={2} sx={{ mt: 2 }}>
+      <Typography variant='h6' component='h2' color='primary'>
         Manage access requests
       </Typography>
+      <Divider />
       <FormControlLabel
         label='Allow users to make ungoverned access requests'
         control={
@@ -55,9 +57,14 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
           />
         }
       />
-      <Divider />
       <div>
-        <Button variant='contained' aria-label='Save ungoverned access requests' onClick={handleSave} loading={loading}>
+        <Button
+          variant='contained'
+          aria-label='Save ungoverned access requests'
+          onClick={handleSave}
+          loading={loading}
+          startIcon={<Save />}
+        >
           Save
         </Button>
         <MessageAlert message={errorMessage} severity='error' />

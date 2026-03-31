@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { ReviewRequestInterface } from 'types/types'
 
-import { useGetModelRoles } from '../../actions/model'
+import { useGetEntryRoles } from '../../actions/entry'
 import { getRoleDisplayName } from '../../utils/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
@@ -13,11 +13,11 @@ type ReviewRoleDisplayProps = {
 }
 
 export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(review.model.id)
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   if (isResponsesError) {
@@ -28,7 +28,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
     return <></>
   }
 
-  if (isModelRolesLoading || isResponsesLoading) {
+  if (isEntryRolesLoading || isResponsesLoading) {
     return <Loading />
   }
 
@@ -37,7 +37,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
       <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
         <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
         <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }} component='p'>
-          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, modelRoles)}.`}
+          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, entryRoles)}.`}
         </Typography>
       </Stack>
     </>

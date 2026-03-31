@@ -1,6 +1,4 @@
 import eslint from '@eslint/js'
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import pluginCypress from 'eslint-plugin-cypress'
@@ -22,15 +20,9 @@ export default defineConfig([
   ...nextVitals,
   {
     plugins: {
-      '@typescript-eslint': typescriptEslint,
       prettier,
       'simple-import-sort': simpleImportSort,
     },
-
-    languageOptions: {
-      parser: tsParser,
-    },
-
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -54,6 +46,7 @@ export default defineConfig([
       'simple-import-sort/exports': 'error',
       'no-duplicate-imports': 'warn',
       'no-console': 'warn',
+      curly: ['error', 'all'],
     },
   },
   {

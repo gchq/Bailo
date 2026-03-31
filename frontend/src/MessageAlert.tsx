@@ -1,6 +1,6 @@
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Button, Collapse, Typography } from '@mui/material'
+import { Button, Collapse, CSSProperties, Typography } from '@mui/material'
 import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import { useEffect, useRef, useState } from 'react'
@@ -29,24 +29,28 @@ type PartialButtonMessageAlertProps =
 
 type MessageAlertProps = {
   message?: string
+  subHeading?: string
   id?: string
   code?: number
   status?: number
   severity?: AlertProps['severity']
   'data-test'?: string
   slimView?: boolean
+  style?: CSSProperties
   disableScrollToView?: boolean
 } & PartialLinkMessageAlertProps &
   PartialButtonMessageAlertProps
 
 export default function MessageAlert({
   message = '',
+  subHeading = '',
   id = '',
   code = -1,
   status = -1,
   severity,
   linkText,
   href,
+  style,
   buttonText,
   buttonAction,
   'data-test': dataTest,
@@ -78,15 +82,18 @@ export default function MessageAlert({
 
   const displayButton = buttonText && buttonAction
 
-  if (!message) return null
+  if (!message) {
+    return null
+  }
 
   return (
     <Alert
-      severity={'info'}
+      severity={severity ? severity : 'info'}
       sx={{
         my: 2,
         maxHeight: slimView ? '70px' : 'none',
         maxWidth: slimView ? '250px' : 'none',
+        ...style,
       }}
       ref={alertRef}
       data-test={dataTest}
@@ -100,9 +107,14 @@ export default function MessageAlert({
     >
       <Stack spacing={1}>
         <Stack direction='row' spacing={1} alignItems='center'>
-          {id && <Typography fontWeight={'bold'}>{id}</Typography>}
-          {statusCode > 0 && <Typography fontWeight={'bold'}>{statusCode}</Typography>}
-          <Typography>{message}</Typography>
+          {id && <Typography fontWeight='bold'>{id}</Typography>}
+          {statusCode > 0 && <Typography fontWeight='bold'>{statusCode}</Typography>}
+          <Stack>
+            <Typography>{message}</Typography>
+            <Typography fontWeight='bold' variant='caption'>
+              {subHeading}
+            </Typography>
+          </Stack>
           {severity === 'error' && (
             <CopyToClipboardButton
               textToCopy={message}

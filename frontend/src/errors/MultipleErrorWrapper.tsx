@@ -9,7 +9,7 @@ export default function MultipleErrorWrapper(generic: string, errors: any, Error
 
     if (error) {
       if (error.status === 403) {
-        return <Forbidden errorMessage='If you think this is in error please contact the model owners.' />
+        return <Forbidden errorMessage='If you think this is in error please contact the entry owners.' />
       }
 
       const message = error?.message || error?.info?.message || generic

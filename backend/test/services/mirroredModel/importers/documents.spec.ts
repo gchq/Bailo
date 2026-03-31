@@ -32,7 +32,7 @@ const entityParsersMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/mirroredModel/entityParsers.js', () => entityParsersMocks)
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(),
+  getModelByIdNoAuth: vi.fn(),
   saveImportedModelCard: vi.fn(),
   setLatestImportedModelCard: vi.fn(),
 }))
@@ -105,7 +105,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
       semver: '1.0.0',
       images: [{ repository: 'repo', name: 'path', tag: 'tag' }],
     })
-    modelMocks.getModelById.mockResolvedValue({ id: mockMetadata.mirroredModelId })
+    modelMocks.getModelByIdNoAuth.mockResolvedValue({ id: mockMetadata.mirroredModelId })
     releaseMocks.saveImportedRelease.mockResolvedValue({ saved: true })
     authMocks.default.releases.mockResolvedValue([{ success: true }])
 
@@ -126,7 +126,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
   test('processEntry > error auth failure', async () => {
     entityParsersMocks.parseRelease.mockReturnValue({ semver: '2.0.0', images: [] })
-    modelMocks.getModelById.mockResolvedValue({})
+    modelMocks.getModelByIdNoAuth.mockResolvedValue({})
     authMocks.default.releases.mockResolvedValue([{ success: false }])
 
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
@@ -202,7 +202,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    await importer.finishListener(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
     expect(modelMocks.setLatestImportedModelCard).toHaveBeenCalledWith(mockMetadata.mirroredModelId)
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

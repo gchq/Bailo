@@ -1,10 +1,11 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { listModelImages } from '../../../../services/registry.js'
-import { registerPath } from '../../../../services/specification.js'
+import { z } from '../../../../lib/zod.js'
+import { listModelImagesWithScanResults } from '../../../../services/registry.js'
+import { imageWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
+import { ModelImagesWithScanResults } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
@@ -19,7 +20,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/model/{modelId}/images',
   tags: ['image'],
-  description: 'Get all of the images associated with a model.',
+  description: 'Get all of the images associated with a model, optionally with scan results.',
   schema: getImagesSchema,
   responses: {
     200: {
@@ -27,13 +28,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            images: z.array(
-              z.object({
-                namespace: z.string().openapi({ example: 'yolo-v4-abcdef' }),
-                model: z.string().openapi({ example: 'yolo' }),
-                versions: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
-              }),
-            ),
+            images: z.array(imageWithScanResultsSchema),
           }),
         },
       },
@@ -42,11 +37,7 @@ registerPath({
 })
 
 interface GetImagesResponse {
-  images: Array<{
-    repository: string
-    name: string
-    tags: Array<string>
-  }>
+  images: ModelImagesWithScanResults[]
 }
 
 export const getImages = [
@@ -56,7 +47,7 @@ export const getImages = [
       params: { modelId },
     } = parse(req, getImagesSchema)
 
-    const images = await listModelImages(req.user, modelId)
+    const images = await listModelImagesWithScanResults(req.user, modelId)
     await audit.onViewModelImages(req, modelId, images)
 
     res.json({

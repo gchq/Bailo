@@ -2,16 +2,43 @@
 
 exports[`services > file > downloadFile > success 1`] = `
 {
-  "Body": {
-    "pipe": [MockFunction],
+  "on": [MockFunction] {
+    "calls": [
+      [
+        "data",
+        [Function],
+      ],
+      [
+        "close",
+        [Function],
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": undefined,
+      },
+      {
+        "type": "return",
+        "value": undefined,
+      },
+    ],
   },
+  "pipe": [MockFunction],
 }
 `;
 
 exports[`services > file > finishUploadMultipartFile > success 1`] = `
 {
   "_id": "mockFileId",
-  "avScan": {
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mock-id",
+  "mime": "mock/mime",
+  "modelId": "mockModelId",
+  "name": "mockFileName",
+  "path": "/mock/path",
+  "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "filter": [MockFunction],
@@ -19,6 +46,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -37,13 +65,6 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
     "sort": [MockFunction],
     "unwind": [MockFunction],
   },
-  "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
-  "id": "mock-id",
-  "mime": "mock/mime",
-  "modelId": "mockModelId",
-  "name": "mockFileName",
-  "path": "/mock/path",
   "size": 100,
   "tags": [],
   "updatedAt": 2024-01-02T00:00:00.000Z,
@@ -56,8 +77,8 @@ exports[`services > file > getFilesByIds > success 1`] = `
     "_id": {
       "toString": [MockFunction],
     },
-    "avScan": [],
     "example": "file",
+    "scanResults": [],
   },
 ]
 `;
@@ -66,7 +87,8 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
 [
   {
     "_id": "123",
-    "avScan": [
+    "example": "file",
+    "scanResults": [
       {
         "fileId": "123",
       },
@@ -74,16 +96,15 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
         "fileId": "123",
       },
     ],
-    "example": "file",
   },
   {
     "_id": "321",
-    "avScan": [
+    "example": "file",
+    "scanResults": [
       {
         "fileId": "321",
       },
     ],
-    "example": "file",
   },
 ]
 `;
@@ -239,6 +260,66 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
 ]
 `;
 
+exports[`services > file > removeFiles > success hard delete 1`] = `
+[
+  [
+    {
+      "fileId": {
+        "$eq": "73859F8D26679D2E52597326",
+      },
+    },
+    undefined,
+  ],
+  [
+    {
+      "fileId": {
+        "$eq": "62379525E2D97662D8F95837",
+      },
+    },
+    undefined,
+  ],
+]
+`;
+
+exports[`services > file > removeFiles > success hard delete 2`] = `
+[
+  {
+    "_id": {
+      "toString": [MockFunction] {
+        "calls": [
+          [],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": "73859F8D26679D2E52597326",
+          },
+        ],
+      },
+    },
+    "id": "73859F8D26679D2E52597326",
+    "modelId": "testModel",
+  },
+  {
+    "_id": {
+      "toString": [MockFunction] {
+        "calls": [
+          [],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": "62379525E2D97662D8F95837",
+          },
+        ],
+      },
+    },
+    "id": "62379525E2D97662D8F95837",
+    "modelId": "testModel2",
+  },
+]
+`;
+
 exports[`services > file > startUploadMultipartFile > success 1`] = `
 {
   "chunks": [
@@ -268,7 +349,9 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
     "findOneAndDelete": [MockFunction],
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
+    "id": "mock-id",
     "lookup": [MockFunction],
+    "markModified": [MockFunction],
     "match": [MockFunction],
     "mime": "text/plain",
     "modelId": "testModelId",
@@ -349,7 +432,14 @@ exports[`services > file > updateFile > success multiple params 1`] = `
 exports[`services > file > uploadFile > success 1`] = `
 {
   "_id": "mockFileId",
-  "avScan": {
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mock-id",
+  "mime": "text/plain",
+  "modelId": "testModelId",
+  "name": "testFile",
+  "path": "beta/model/testModelId/files/mock-long-id",
+  "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "filter": [MockFunction],
@@ -357,6 +447,7 @@ exports[`services > file > uploadFile > success 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -375,13 +466,6 @@ exports[`services > file > uploadFile > success 1`] = `
     "sort": [MockFunction],
     "unwind": [MockFunction],
   },
-  "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
-  "id": "mock-id",
-  "mime": "text/plain",
-  "modelId": "testModelId",
-  "name": "testFile",
-  "path": "beta/model/testModelId/files/mock-long-id",
   "size": 100,
   "tags": [],
   "updatedAt": 2024-01-02T00:00:00.000Z,
@@ -391,7 +475,14 @@ exports[`services > file > uploadFile > success 1`] = `
 exports[`services > file > uploadFile > virus scan initialised 1`] = `
 {
   "_id": "mockFileId",
-  "avScan": {
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mock-id",
+  "mime": "text/plain",
+  "modelId": "testModelId",
+  "name": "testFile",
+  "path": "beta/model/testModelId/files/mock-long-id",
+  "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "filter": [MockFunction],
@@ -399,6 +490,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       "calls": [
         [
           {
+            "artefactKind": "file",
             "fileId": "mock-id",
           },
         ],
@@ -417,13 +509,6 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
     "sort": [MockFunction],
     "unwind": [MockFunction],
   },
-  "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
-  "id": "mock-id",
-  "mime": "text/plain",
-  "modelId": "testModelId",
-  "name": "testFile",
-  "path": "beta/model/testModelId/files/mock-long-id",
   "size": 100,
   "tags": [],
   "updatedAt": 2024-01-02T00:00:00.000Z,

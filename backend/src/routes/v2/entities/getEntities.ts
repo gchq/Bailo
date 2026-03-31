@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import authentication from '../../../connectors/authentication/index.js'
+import { z } from '../../../lib/zod.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getEntitiesSchema = z.object({

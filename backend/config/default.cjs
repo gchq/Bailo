@@ -185,14 +185,14 @@ module.exports = {
     },
   },
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       concurrency: 2,
       host: '127.0.0.1',
       port: 3310,
     },
 
-    modelscan: {
+    artefactscan: {
       concurrency: 2,
       protocol: 'http',
       host: '127.0.0.1',
@@ -233,6 +233,8 @@ module.exports = {
     modelMirror: {
       import: {
         enabled: false,
+        additionalInfoHeading: 'Additional information',
+        originalAnswerHeading: 'Original answer',
       },
       export: {
         enabled: false,
@@ -275,7 +277,7 @@ module.exports = {
       kind: 'silly',
     },
 
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
@@ -310,6 +312,16 @@ module.exports = {
     endpoint: '',
     authenticationToken: '',
     debug: false,
+  },
+
+  stroom: {
+    logOnlyMode: true,
+    feed: 'feed',
+    url: 'https://url',
+    environment: 'local',
+    interval: 1000 * 50,
+    generator: 'Generator',
+    rejectUnauthorized: false,
   },
 
   modelMirror: {

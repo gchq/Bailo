@@ -1,9 +1,8 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { z } from '../../../../lib/zod.js'
 import { startUploadMultipartFile } from '../../../../services/file.js'
 import { registerPath } from '../../../../services/specification.js'
 import { coerceArray, parse } from '../../../../utils/validate.js'
@@ -54,7 +53,6 @@ interface PostStartMultipartUpload {
 }
 
 export const postStartMultipartUpload = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostStartMultipartUpload>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
     const {

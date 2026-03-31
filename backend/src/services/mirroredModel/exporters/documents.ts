@@ -1,7 +1,7 @@
 import prettyBytes from 'pretty-bytes'
 
-import { ScanState } from '../../../connectors/fileScanning/Base.js'
-import scanners from '../../../connectors/fileScanning/index.js'
+import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
+import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
@@ -61,18 +61,18 @@ export class DocumentsExporter extends BaseExporter {
         }
       }
 
-      if (scanners.info()) {
+      if (scanners.scannersInfo()) {
         const scanErrors: {
           missingScan: Array<{ name: string; id: string }>
           incompleteScan: Array<{ name: string; id: string }>
           failedScan: Array<{ name: string; id: string }>
         } = { missingScan: [], incompleteScan: [], failedScan: [] }
         for (const file of this.files) {
-          if (!file.avScan || file.avScan.length === 0) {
+          if (!file.scanResults || file.scanResults.length === 0) {
             scanErrors.missingScan.push({ name: file.name, id: file.id })
-          } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
+          } else if (file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
             scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-          } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
+          } else if (file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary?.length > 0)) {
             scanErrors.failedScan.push({ name: file.name, id: file.id })
           }
         }
@@ -81,7 +81,7 @@ export class DocumentsExporter extends BaseExporter {
           scanErrors.incompleteScan.length > 0 ||
           scanErrors.failedScan.length > 0
         ) {
-          throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+          throw BadReq('The releases contain file(s) that do not have a clean scan.', { scanErrors })
         }
       }
     }

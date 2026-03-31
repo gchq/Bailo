@@ -139,7 +139,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.finishListener(resolve, reject)
+    importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

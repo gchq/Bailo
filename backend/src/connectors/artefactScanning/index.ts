@@ -1,0 +1,59 @@
+import config from '../../utils/config.js'
+import { ConfigurationError } from '../../utils/error.js'
+import { BaseArtefactScanningConnector } from './Base.js'
+import { ClamAvFileScanningConnector } from './clamAv.js'
+import { ModelScanFileScanningConnector } from './modelScan.js'
+import { TrivyImageScanningConnector } from './trivy.js'
+import { ArtefactScanningWrapper } from './wrapper.js'
+
+export const ArtefactScanKind = {
+  ClamAv: 'clamAV',
+  ModelScan: 'modelScan',
+  Trivy: 'trivy',
+} as const
+export type ArtefactScanKindKeys = (typeof ArtefactScanKind)[keyof typeof ArtefactScanKind]
+
+const artefactScanConnectors: Set<BaseArtefactScanningConnector> = new Set<BaseArtefactScanningConnector>()
+let scannerWrapper: undefined | ArtefactScanningWrapper = undefined
+
+function initScanner<T extends BaseArtefactScanningConnector>(
+  Scanner: new () => T,
+  artefactScanner: ArtefactScanKindKeys,
+) {
+  try {
+    const scanner = new Scanner()
+    artefactScanConnectors.add(scanner)
+  } catch (error) {
+    throw ConfigurationError(`Could not configure or initialise scanner ${artefactScanner}`, { error })
+  }
+}
+
+async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrapper> {
+  if (scannerWrapper && cache) {
+    return scannerWrapper
+  }
+  artefactScanConnectors.clear()
+  for (const artefactScanner of config.connectors.artefactScanners.kinds) {
+    switch (artefactScanner) {
+      case ArtefactScanKind.ClamAv:
+        initScanner(ClamAvFileScanningConnector, artefactScanner)
+        break
+      case ArtefactScanKind.ModelScan:
+        initScanner(ModelScanFileScanningConnector, artefactScanner)
+        break
+      case ArtefactScanKind.Trivy:
+        initScanner(TrivyImageScanningConnector, artefactScanner)
+        break
+      default:
+        throw ConfigurationError(`'${artefactScanner}' is not a valid scanning kind.`, {
+          validKinds: Object.values(ArtefactScanKind),
+        })
+    }
+  }
+
+  scannerWrapper = new ArtefactScanningWrapper(artefactScanConnectors)
+  await scannerWrapper.initialiseScanners()
+  return scannerWrapper
+}
+
+export default await addArtefactScanners()

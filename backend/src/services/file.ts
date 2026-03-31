@@ -1,32 +1,32 @@
 import { Readable } from 'node:stream'
 
-import { ClientSession, Schema, Types } from 'mongoose'
+import { ClientSession, Types } from 'mongoose'
+import prettyBytes from 'pretty-bytes'
 
 import {
   completeMultipartUpload,
+  deleteObject,
   getObjectStream,
   headObject,
   putObjectPartStream,
   putObjectStream,
   startMultipartUpload,
 } from '../clients/s3.js'
-import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
+import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
-import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
-import { ModelDoc } from '../models/Model.js'
-import ScanModel, { ArtefactKind } from '../models/Scan.js'
+import { EntryKind, ModelDoc } from '../models/Model.js'
+import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { createFilePath } from '../utils/fileUtils.js'
 import { longId } from '../utils/id.js'
-import { plural } from '../utils/string.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
+import { scanFile } from './scan.js'
 
 export async function uploadFile(
   user: UserInterface,
@@ -37,7 +37,7 @@ export async function uploadFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -67,26 +67,10 @@ export async function uploadFile(
   return await scanFile(file)
 }
 
-async function scanFile(file: FileInterfaceDoc) {
-  const scannersInfo = scanners.info()
-  if (scannersInfo && scannersInfo.scannerNames && file.size > 0) {
-    const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
-      toolName: scannerName,
-      state: ScanState.InProgress,
-      lastRunAt: new Date(),
-    }))
-    await updateFileWithResults(file._id, resultsInprogress)
-    scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
-  }
-
-  const avScan = await ScanModel.find({ fileId: file._id.toString() })
-  const ret: FileWithScanResultsInterface = {
-    ...file.toObject(),
-    avScan,
-    id: file._id.toString(),
-  }
-
-  return ret
+export async function saveImportedFile(file: FileInterface) {
+  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
+    upsert: true,
+  })
 }
 
 export async function startUploadMultipartFile(
@@ -98,7 +82,7 @@ export async function startUploadMultipartFile(
   tags?: string[],
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings?.mirror?.sourceModelId) {
+  if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
   }
 
@@ -193,34 +177,62 @@ export async function finishUploadMultipartFile(
   return await scanFile(file)
 }
 
-async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
-  for (const result of results) {
-    const updateExistingResult = await ScanModel.updateOne(
-      { fileId: _id.toString(), toolName: result.toolName },
-      {
-        $set: { ...result },
-      },
-    )
-    if (updateExistingResult.modifiedCount === 0) {
-      await ScanModel.create({
-        artefactKind: ArtefactKind.File,
-        fileId: _id.toString(),
-        ...result,
-      })
-    }
-  }
-}
-
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {
   const file = await getFileById(user, fileId)
   const model = await getModelById(user, file.modelId)
 
   const auth = await authorisation.file(user, model, file, FileAction.Download)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
   }
 
-  return getObjectStream(file.path, undefined, range)
+  const stream = await getObjectStream(file.path, undefined, range)
+
+  const totalBytes = file.size
+  const totalPretty = prettyBytes(totalBytes)
+  let progress = 0
+  let lastLoggedAt = 0
+  stream.on('data', function (chunk) {
+    // Advance your progress by chunk.length
+    progress += chunk.length
+
+    const now = Date.now()
+    // Only log every 0.5 seconds to avoid spamming logs excessively
+    if (now - lastLoggedAt < 500) {
+      return
+    }
+
+    lastLoggedAt = now
+    log.debug(
+      {
+        loaded: prettyBytes(progress),
+        loadedBytes: progress,
+        total: totalPretty,
+        totalBytes,
+        fileId,
+        modelId: model.id,
+      },
+      'Object download is in progress',
+    )
+  })
+
+  stream.on('close', () => {
+    log.debug(
+      {
+        loaded: prettyBytes(progress),
+        loadedBytes: progress,
+        total: prettyBytes(file.size),
+        totalBytes: file.size,
+        fileId,
+        modelId: model.id,
+      },
+      progress === file.size
+        ? 'Object download stream closed with no data remaining'
+        : 'Object download stream closed with data remaining',
+    )
+  })
+
+  return stream
 }
 
 export async function getFileById(
@@ -237,7 +249,7 @@ export async function getFileById(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResults',
       },
     },
   ])
@@ -252,7 +264,7 @@ export async function getFileById(
   }
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
   }
 
   return file
@@ -268,7 +280,7 @@ export async function getFilesByModel(user: UserInterface, modelId: string) {
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResults',
       },
     },
   ])
@@ -294,7 +306,7 @@ export async function getFilesByIds(
         from: 'v2_scans',
         localField: 'id',
         foreignField: 'fileId',
-        as: 'avScan',
+        as: 'scanResults',
       },
     },
   ])
@@ -313,10 +325,11 @@ export async function removeFiles(
   modelId: string,
   fileIds: string[],
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  hardDelete: boolean = false,
+  session?: ClientSession,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
+  if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot remove file from a mirrored model.')
   }
   const allFiles: FileWithScanResultsInterface[] = []
@@ -329,13 +342,19 @@ export async function removeFiles(
       throw Forbidden(auth.info, { userDn: user.dn })
     }
 
-    await removeFileFromReleases(user, model, fileId)
+    await removeFileFromReleases(user, model, fileId, deleteMirroredModel, session)
 
     await ScanModel.deleteMany({ fileId: { $eq: file.id } }, session)
 
-    // We don't actually remove the file from storage, we only hide all
+    // Unless specified, we don't actually remove the file from storage, we only hide all
     // references to it.  This makes the file not visible to the user.
     await FileModel.findOneAndDelete({ _id: file._id }, session)
+    // We cannot use the mongo session with aws-sdk so send the aws-sdk API call last as if
+    // aws-sdk fails then the mongo session will roll back
+    if (hardDelete) {
+      log.debug({ file }, 'Permanently deleting file from object store.')
+      deleteObject(file.path)
+    }
   }
 
   return allFiles
@@ -346,9 +365,10 @@ export async function removeFile(
   modelId: string,
   fileId: string,
   deleteMirroredModel: boolean = false,
-  session?: ClientSession | undefined,
+  hardDelete: boolean = false,
+  session?: ClientSession,
 ) {
-  return (await removeFiles(user, modelId, [fileId], deleteMirroredModel, session))[0]
+  return (await removeFiles(user, modelId, [fileId], deleteMirroredModel, hardDelete, session))[0]
 }
 
 export async function getTotalFileSize(fileIds: string[]) {
@@ -372,67 +392,6 @@ export async function markFileAsCompleteAfterImport(path: string) {
   if (!file) {
     log.debug({ path }, 'No file document yet exists for this imported file.')
   }
-}
-
-async function fileScanDelay(file: FileInterface): Promise<number> {
-  const delay = config.connectors.fileScanners.retryDelayInMinutes
-  if (delay === undefined) {
-    return 0
-  }
-  let minutesBeforeRetrying = 0
-  const fileAvScans = await ScanModel.find({ fileId: file._id.toString() })
-  for (const scanResult of fileAvScans) {
-    const delayInMilliseconds = delay * 60000
-    const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
-    if (scanTimeAtLimit > new Date().getTime()) {
-      minutesBeforeRetrying = scanTimeAtLimit - new Date().getTime()
-      break
-    }
-  }
-  return Math.round(minutesBeforeRetrying / 60000)
-}
-
-export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string) {
-  const model = await getModelById(user, modelId)
-  if (!model) {
-    throw BadReq('Cannot find requested model', { modelId: modelId })
-  }
-  const file = await getFileById(user, fileId)
-  if (!file) {
-    throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
-  }
-  const rerunFileScanAuth = await authorisation.file(user, model, file, FileAction.Update)
-  if (!rerunFileScanAuth.success) {
-    throw Forbidden(rerunFileScanAuth.info, { userDn: user.dn, modelId, file })
-  }
-  if (!file.size || file.size === 0) {
-    throw BadReq('Cannot run scan on an empty file')
-  }
-  const minutesBeforeRescanning = await fileScanDelay(file)
-  if (minutesBeforeRescanning > 0) {
-    throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
-  }
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn })
-  }
-  const scannersInfo = await scanners.info()
-  if (scannersInfo && scannersInfo.scannerNames) {
-    const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
-      toolName: scannerName,
-      state: ScanState.InProgress,
-      lastRunAt: new Date(),
-    }))
-    await updateFileWithResults(file._id, resultsInprogress)
-    scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
-  }
-  return `Scan started for ${file.name}`
-}
-
-export async function saveImportedFile(file: FileInterface) {
-  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
-    upsert: true,
-  })
 }
 
 export async function updateFile(

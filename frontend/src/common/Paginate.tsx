@@ -277,13 +277,7 @@ export default function Paginate<T>({
             {orderByButtonTitle}
           </Stack>
         </Button>
-        <Menu
-          open={menuOpen}
-          slotProps={{ list: { dense: true } }}
-          anchorEl={anchorEl}
-          onClose={handleMenuButtonClose}
-          sx={{ minWidth: '200px' }}
-        >
+        <Menu open={menuOpen} anchorEl={anchorEl} onClose={handleMenuButtonClose} sx={{ minWidth: '200px' }}>
           {sortingPropertyMenuItems}
           <Divider />
           {ascOrDescMenuListItems(SortingDirection.ASC)}

@@ -42,4 +42,14 @@ describe('routes > model > patchModel', () => {
     expect(res.statusCode).toEqual(400)
     expect(res.body).matchSnapshot()
   })
+
+  test('400 > URL encoding in collaborator entity', async () => {
+    const fixture = createFixture(patchModelSchema)
+    fixture.body.collaborators = [{ entity: 'name:test%20name', roles: ['owner'] }]
+    const res = await testPatch(`/api/v2/model/${fixture.params.modelId}`, fixture)
+    expect(res.statusCode).toEqual(400)
+    expect(res.body.error.message).toEqual(
+      'Path: body.collaborators[0].entity - Message: Please remove URL Encoding from collaborator entity string',
+    )
+  })
 })

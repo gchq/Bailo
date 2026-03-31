@@ -1,4 +1,5 @@
-import { PassThrough, Readable } from 'node:stream'
+import { createHash } from 'node:crypto'
+import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -12,9 +13,6 @@ import {
 } from '../../../src/services/mirroredModel/mirroredModel.js'
 import { MirrorKind } from '../../../src/types/types.js'
 import { BadReq, InternalError } from '../../../src/utils/error.js'
-import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
-
-const ModelModelMock = getTypedModelMock('ModelModel')
 
 const configMock = vi.hoisted(() => ({
   ui: {
@@ -33,7 +31,7 @@ const configMock = vi.hoisted(() => ({
     authorisation: {
       kind: 'basic',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },
@@ -65,11 +63,22 @@ const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
     return {
       id: 'modelId',
+      card: {
+        schemaId: 'minimal-general-v10',
+        version: 2,
+        mirrored: false,
+        metadata: {
+          overview: 'test',
+        },
+      },
       settings: { mirror: { destinationModelId: 'dest123' } },
     }
   }),
 )
-vi.mock('../../../src/services/model.js', () => ({ getModelById: getModelByIdMock }))
+vi.mock('../../../src/services/model.js', () => ({
+  getModelById: getModelByIdMock,
+  getModelByIdNoAuth: getModelByIdMock,
+}))
 
 const fetchMock = vi.hoisted(() =>
   vi.fn(function () {
@@ -116,6 +125,14 @@ const DocumentsExporterMock = vi.hoisted(() => {
       getModel: vi.fn(function () {
         return {
           id: 'modelId',
+          card: {
+            schemaId: 'minimal-general-v10',
+            version: 2,
+            mirrored: false,
+            metadata: {
+              overview: 'test',
+            },
+          },
           settings: { mirror: { destinationModelId: 'dest123' } },
         }
       }),
@@ -333,23 +350,12 @@ describe('services > mirroredModel', () => {
       await expect(importModel({} as any, 'url')).rejects.toThrow(/Unable to get the file/)
     })
 
-    test('missing mirrored model', async () => {
-      ModelModelMock.findOne.mockResolvedValueOnce(undefined)
-
-      const promise = importModel({} as any, 'url')
-
-      await expect(promise).rejects.toThrowError(/^The requested Mirrored Model was not found./)
-      expect(fetchMock).toHaveBeenCalled()
-      expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
-      expect(ModelModelMock.findOne).toHaveBeenCalledWith({ id: 'dest123' })
-    })
-
     test('success with Readable', async () => {
       const res = await importModel({} as any, 'url')
 
       expect(fetchMock).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
-      expect(ModelModelMock.findOne).toHaveBeenCalledWith({ id: 'dest123' })
+      expect(getModelByIdMock).toHaveBeenCalledWith('dest123')
       expect(res).toHaveProperty('mirroredModel')
     })
 
@@ -370,7 +376,7 @@ describe('services > mirroredModel', () => {
       expect(fetchMock).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream.mock.calls.at(0)?.at(0)).toBeInstanceOf(Readable)
-      expect(ModelModelMock.findOne).toHaveBeenCalledWith({ id: 'dest123' })
+      expect(getModelByIdMock).toHaveBeenCalledWith('dest123')
       expect(res).toHaveProperty('mirroredModel')
     })
   })
@@ -488,29 +494,21 @@ describe('services > mirroredModel', () => {
 
   describe('generateDigest', () => {
     test('success from stream', async () => {
-      const stream = new PassThrough()
-      setImmediate(() => {
-        stream.write('abc')
-        stream.end()
-      })
-      const digest = await generateDigest(stream)
-      expect(digest).toMatch(/^[a-f0-9]{64}$/)
+      const input = 'A file with words in.'
+      const file = Readable.from(input)
+
+      const expectedDigest = createHash('sha256').update(input).digest('hex')
+      const digest = await generateDigest(file)
+      expect(digest).toBe(expectedDigest)
     })
-    test('pipe throws', async () => {
-      await expect(
-        generateDigest({
-          pipe: () => {
-            throw new Error('fail')
-          },
-        } as any),
-      ).rejects.toThrow(/Error generating SHA256/)
-    })
-    test('error event', async () => {
-      const stream = new PassThrough()
-      setImmediate(() => {
-        stream.emit('error', new Error('err'))
+    test('pipeline throws', async () => {
+      const unreadableFile = new Readable({
+        read() {
+          this.destroy(new Error())
+        },
       })
-      await expect(generateDigest(stream)).rejects.toThrow(/Error generating SHA256/)
+
+      await expect(generateDigest(unreadableFile)).rejects.toThrow('Error generating SHA256 digest for stream.')
     })
   })
 })

@@ -1,4 +1,4 @@
-import { EntrySearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/entry'
 import { PeerConfigStatus, RemoteFederationConfig } from 'types/types'
 
 /**

@@ -15,7 +15,9 @@ export default function InferenceSettings() {
   const error = MultipleErrorWrapper(`Unable to load inference settings page`, {
     isInferenceError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

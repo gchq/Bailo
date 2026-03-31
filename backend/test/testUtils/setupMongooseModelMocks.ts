@@ -20,6 +20,7 @@ const CHAINABLE_METHODS = [
   'update',
   'updateMany',
   'updateOne',
+  'markModified',
 ] as const
 
 const QUERY_LIKE_METHODS = [
@@ -49,6 +50,7 @@ type ModelMock<TDoc extends { _id?: any }> = MockInstance & {
     findOne: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
     findOneAndDelete: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
     findOneAndUpdate: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
+    save: MockedFunction<() => Promise<TDoc & InstanceType<TDoc>>>
     countDocuments: MockedFunction<(filter?: any) => Promise<number>>
     reset(): void
   }
@@ -67,12 +69,13 @@ function createMockFns(): Record<MethodNames, MockedFunction<any>> {
   )
 }
 
-function createInstance<TDoc extends { _id?: any }>(
+function createInstance<TDoc extends { _id?: any; id: string }>(
   toObjectValue: Partial<TDoc>,
   doc: Partial<TDoc> | undefined,
   chainMocks: Record<MethodNames, MockedFunction<any>>,
 ): InstanceType<TDoc> {
   const instance: InstanceType<TDoc> = {
+    id: createId().toString(),
     _id: createId(),
     toObject: vi.fn(() => ({ ...toObjectValue, ...doc })),
   } as InstanceType<TDoc>
@@ -159,6 +162,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 export const modelMocks = {
   AccessRequestModel: createMongooseModelMock('AccessRequest'),
   FileModel: createMongooseModelMock('FileModel', {
+    id: 'mockFileId',
     _id: 'mockFileId',
     modelId: 'mockModelId',
     name: 'mockFileName',
@@ -181,9 +185,11 @@ export const modelMocks = {
   ScanModel: createMongooseModelMock('ScanModel'),
   SchemaModel: createMongooseModelMock('SchemaModel'),
   SchemaMigrationModel: createMongooseModelMock('SchemaMigrationModel'),
+  StroomEventModel: createMongooseModelMock('StroomEventModel'),
   TokenModel: createMongooseModelMock('TokenModel'),
   UserModel: createMongooseModelMock('UserModel'),
   WebhookModel: createMongooseModelMock('WebhookModel'),
+  ModelTransferModel: createMongooseModelMock('ModelTransferModel'),
 }
 
 vi.mock('../../src/models/AccessRequest.ts', () => ({ default: modelMocks.AccessRequestModel }))
@@ -208,6 +214,7 @@ vi.mock('../../src/models/Scan.ts', async (importOriginal) => {
 })
 vi.mock('../../src/models/Schema.ts', () => ({ default: modelMocks.SchemaModel }))
 vi.mock('../../src/models/SchemaMigration.ts', () => ({ default: modelMocks.SchemaMigrationModel }))
+vi.mock('../../src/models/StroomEvent.ts', () => ({ default: modelMocks.StroomEventModel }))
 vi.mock('../../src/models/Token.ts', async (importOriginal) => {
   const actual = (await importOriginal()) as any
   return { ...actual, default: modelMocks.TokenModel }
@@ -216,6 +223,13 @@ vi.mock('../../src/models/User.ts', () => ({ default: modelMocks.UserModel }))
 vi.mock('../../src/models/Webhook.ts', async (importOriginal) => {
   const actual = (await importOriginal()) as any
   return { ...actual, default: modelMocks.WebhookModel }
+})
+vi.mock('../../src/models/ModelTransfer.ts', async (importOriginal) => {
+  const actual = (await importOriginal()) as any
+  return {
+    ...actual,
+    default: modelMocks.ModelTransferModel,
+  }
 })
 
 // Automatically reset all model mocks before each test

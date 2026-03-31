@@ -1,7 +1,7 @@
 import { Validator } from 'jsonschema'
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
-import { Roles } from '../connectors/authentication/Base.js'
+import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -83,11 +83,7 @@ export async function createAccessRequest(
   return accessRequest
 }
 
-export async function removeAccessRequests(
-  user: UserInterface,
-  accessRequestIds: string[],
-  session?: ClientSession | undefined,
-) {
+export async function removeAccessRequests(user: UserInterface, accessRequestIds: string[], session?: ClientSession) {
   // Model cache
   const models: Record<string, ModelDoc> = {}
 
@@ -119,11 +115,7 @@ export async function removeAccessRequests(
   return { accessRequestIds }
 }
 
-export async function removeAccessRequest(
-  user: UserInterface,
-  accessRequestId: string,
-  session?: ClientSession | undefined,
-) {
+export async function removeAccessRequest(user: UserInterface, accessRequestId: string, session?: ClientSession) {
   await removeAccessRequests(user, [accessRequestId], session)
 
   return { accessRequestId }

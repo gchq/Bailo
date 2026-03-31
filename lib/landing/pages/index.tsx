@@ -61,6 +61,11 @@ export default function Home() {
                 Documentation
               </Button>
             </Link>
+            <Link href='/accessibility/statement'>
+              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
+                Accessibility
+              </Button>
+            </Link>
           </Stack>
         </Stack>
       </Box>

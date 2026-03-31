@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { z } from '../../../../lib/zod.js'
 import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { uploadFile } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'

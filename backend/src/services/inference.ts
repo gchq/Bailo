@@ -139,21 +139,14 @@ export async function updateInference(
   return updatedInference
 }
 
-export async function removeInferences(
-  user: UserInterface,
-  inferenceIds: InferenceId[],
-  session?: ClientSession | undefined,
-) {
+export async function removeInferences(user: UserInterface, inferenceIds: InferenceId[], session?: ClientSession) {
   const inferences: InferenceDoc[] = []
   // Model cache
   const models: Record<string, ModelDoc> = {}
 
   for (const inferenceId of inferenceIds) {
-    let model: ModelDoc
-    if (inferenceId.modelId in models) {
-      model = models[inferenceId.modelId]
-    } else {
-      model = await getModelById(user, inferenceId.modelId)
+    if (!(inferenceId.modelId in models)) {
+      const model = await getModelById(user, inferenceId.modelId)
       models[inferenceId.modelId] = model
 
       // Only check auth for a newly found model
@@ -184,7 +177,7 @@ export async function removeInference(
   modelId: string,
   image: string,
   tag: string,
-  session?: ClientSession | undefined,
+  session?: ClientSession,
 ) {
   return (await removeInferences(user, [{ modelId, image, tag }], session))[0]
 }

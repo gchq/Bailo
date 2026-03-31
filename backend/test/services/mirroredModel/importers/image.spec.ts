@@ -4,6 +4,7 @@ import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
+import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -43,11 +44,6 @@ const typeguardMocks = vi.hoisted(() => ({
   hasKeysOfType: vi.fn(),
 }))
 vi.mock('../../../../src/utils/typeguards.js', () => typeguardMocks)
-
-const streamConsumersMocks = vi.hoisted(() => ({
-  json: vi.fn(),
-}))
-vi.mock('node:stream/consumers', () => streamConsumersMocks)
 
 vi.mock('stream/promises', () => ({
   finished: vi.fn(() => Promise.resolve()),
@@ -93,12 +89,28 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   test('processEntry > success extract manifest.json', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = { name: 'content-dir/manifest.json', type: 'file' } as Headers
+    const mockManifest = {
+      schemaVersion: 2,
+      mediaType: DockerManifestMediaType,
+      config: {
+        mediaType: 'application/vnd.docker.container.image.v1+json',
+        size: 1,
+        digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.docker.container.image.v1+json',
+          size: 1,
+          digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        },
+      ],
+    }
     const stream = new PassThrough()
-    streamConsumersMocks.json.mockResolvedValue({ manifest: true })
+    stream.push(JSON.stringify(mockManifest))
+    stream.push(null)
 
     await importer.processEntry(entry, stream)
 
-    expect(streamConsumersMocks.json).toHaveBeenCalledWith(stream)
     expect(importer).toMatchSnapshot()
   })
 
@@ -188,7 +200,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    await importer.finishListener(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
       undefined,
@@ -209,7 +221,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    await importer.finishListener(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).not.toHaveBeenCalled()
     expect(reject).toHaveBeenCalledWith(

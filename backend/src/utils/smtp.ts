@@ -12,5 +12,6 @@ export function sanitiseEmail(email: Mail.Options): Mail.Options {
     subject: email.subject,
     text: email.text,
     html: typeof email.html === 'string' ? email.html : undefined,
+    attachments: email.attachments,
   }
 }

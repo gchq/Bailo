@@ -2,12 +2,14 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry } from '@rjsf/utils'
-import { EntrySearchResult, useListModels } from 'actions/model'
+import { Registry, RJSFSchema } from '@rjsf/utils'
+import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntryKind } from 'types/types'
+import { getMirroredState } from 'utils/formUtils'
 
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
@@ -21,6 +23,7 @@ interface DataCardSelectorProps {
   registry?: Registry
   rawErrors?: string[]
   InputProps?: any
+  schema: RJSFSchema
 }
 
 export default function DataCardSelector({
@@ -32,16 +35,17 @@ export default function DataCardSelector({
   registry,
   rawErrors,
   InputProps,
+  schema,
 }: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 
   const {
-    models: dataCards,
-    isModelsLoading: isDataCardsLoading,
-    isModelsError: isDataCardsError,
-  } = useListModels(EntryKind.DATA_CARD)
+    entries: dataCards,
+    isEntriesLoading: isDataCardsLoading,
+    isEntriesError: isDataCardsError,
+  } = useListEntries(EntryKind.DATA_CARD)
 
   const theme = useTheme()
   const router = useRouter()
@@ -85,21 +89,22 @@ export default function DataCardSelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, registry.formContext)
+
   return (
-    <>
+    <AdditionalInformation
+      editMode={registry.formContext.editMode}
+      mirroredState={mirroredState}
+      display={registry.formContext.mirroredModel && currentValue.length > 0}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={registry.formContext.mirroredModel}
+      description={schema.description}
+    >
       {isDataCardsLoading && <Loading />}
       {registry.formContext && registry.formContext.editMode && (
         <>
-          <Typography
-            id={`${id}-label`}
-            fontWeight='bold'
-            aria-label={`label for ${label}`}
-            component='label'
-            htmlFor={id}
-          >
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Autocomplete<EntrySearchResult, true, true>
             multiple
             data-test='dataCardSelector'
@@ -153,10 +158,6 @@ export default function DataCardSelector({
       )}
       {registry.formContext && !registry.formContext.editMode && (
         <>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           {currentValue.length === 0 && (
             <Typography
               sx={{
@@ -167,23 +168,25 @@ export default function DataCardSelector({
               Unanswered
             </Typography>
           )}
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((currentDataCardId) => (
-                <Chip
-                  label={
-                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                    'Unable to find data card name'
-                  }
-                  key={currentDataCardId}
-                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                  sx={{ width: 'fit-content' }}
-                />
-              ))}
-            </Stack>
-          </Box>
+          {currentValue.length > 0 && (
+            <Box sx={{ overflowX: 'auto', p: 1 }}>
+              <Stack spacing={1} direction='row'>
+                {currentValue.map((currentDataCardId) => (
+                  <Chip
+                    label={
+                      dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                      'Unable to find data card name'
+                    }
+                    key={currentDataCardId}
+                    onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                    sx={{ width: 'fit-content' }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          )}
         </>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

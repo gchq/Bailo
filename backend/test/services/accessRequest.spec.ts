@@ -8,8 +8,10 @@ import {
   getAccessRequestsByModel,
   getCurrentUserPermissionsByAccessRequest,
   getModelAccessRequestsForUser,
+  newAccessRequestComment,
   removeAccessRequest,
   removeAccessRequests,
+  updateAccessRequest,
 } from '../../src/services/accessRequest.js'
 import { AccessRequestUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -52,6 +54,18 @@ const mockWebhookService = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
+const validationMocks = vi.hoisted(() => ({
+  isValidatorResultError: vi.fn(),
+}))
+vi.mock('../../src/types/ValidatorResultError.js', () => validationMocks)
+
+const validator = vi.hoisted(() => ({ validate: vi.fn() }))
+vi.mock('jsonschema', () => ({
+  Validator: vi.fn(function () {
+    return validator
+  }),
+}))
+
 const accessRequest = {
   metadata: {
     overview: {
@@ -85,6 +99,26 @@ describe('services > accessRequest', () => {
 
     await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
       /^You do not have permission/,
+    )
+  })
+
+  test('createAccessRequest > update hidden schema', async () => {
+    schemaMocks.getSchemaById.mockResolvedValue({ hidden: true })
+
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+      /^Cannot create new Access Request using a hidden schema./,
+    )
+  })
+
+  test('createAccessRequest > validation error', async () => {
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    validationMocks.isValidatorResultError.mockReturnValue(true)
+    validator.validate.mockImplementationOnce(() => {
+      throw Error()
+    })
+
+    await expect(() => createAccessRequest({} as any, 'test', {} as any)).rejects.toThrowError(
+      /^Access Request Metadata could not be validated against the schema./,
     )
   })
 
@@ -264,5 +298,63 @@ describe('services > accessRequest', () => {
 
     expect(AccessRequestModelMock.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
+  })
+
+  test('updateAccessRequest > success', async () => {
+    const user = { dn: 'testUser' } as any
+
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+
+    await updateAccessRequest(user, 'test', {})
+
+    expect(AccessRequestModelMock.save).toHaveBeenCalledOnce()
+  })
+
+  test('updateAccessRequest > with metadata', async () => {
+    const user = { dn: 'testUser' } as any
+
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    await updateAccessRequest(user, 'test', { metadata: { overview: { name: 'test', entities: user } } })
+
+    expect(AccessRequestModelMock.markModified).toHaveBeenCalledOnce()
+  })
+
+  test('updateAccessRequest > no permission', async () => {
+    const errorMessage = 'You cannot change an access request you do not own.'
+
+    vi.mocked(authorisation.accessRequest).mockResolvedValue({
+      info: errorMessage,
+      success: false,
+      id: '',
+    })
+
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrowError(errorMessage)
+  })
+
+  test('updateAccessRequest > validation error', async () => {
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    validationMocks.isValidatorResultError.mockReturnValue(true)
+    validator.validate.mockImplementationOnce(() => {
+      throw Error()
+    })
+
+    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrowError(
+      /^Access Request Metadata could not be validated against the schema./,
+    )
+  })
+
+  test('newAccessRequestComment > success', async () => {
+    await newAccessRequestComment({} as any, 'test', 'message')
+
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
+  })
+
+  test('newAccessRequestComment > not found', async () => {
+    AccessRequestModelMock.findOne.mockResolvedValue(undefined)
+
+    await expect(() => newAccessRequestComment({} as any, 'test', 'message')).rejects.toThrowError(
+      /^The requested access request was not found./,
+    )
   })
 })

@@ -1,5 +1,6 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import MenuIcon from '@mui/icons-material/Menu'
 import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
@@ -82,6 +83,7 @@ export default function SchemaListItem({
           aria-expanded={open ? 'true' : undefined}
           endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           onClick={(event) => onOpenMenuClick(event, schema.id)}
+          startIcon={<MenuIcon />}
         >
           Actions
         </Button>

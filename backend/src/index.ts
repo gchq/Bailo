@@ -1,22 +1,17 @@
 import './instrumentation.js'
 
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import shelljs from 'shelljs'
-import { z } from 'zod'
 
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
 import { addDefaultReviewRoles } from './services/review.js'
+import { startScheduler } from './services/schedule/scheduler.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
 import { registerSigTerminate } from './utils/signals.js'
-
 // Update certificates based on mount
 shelljs.exec('update-ca-certificates', { fatal: false, async: false })
-
-// Let Zod types have OpenAPI attributes
-extendZodWithOpenApi(z)
 
 // technically, we do need to wait for this, but it's so quick
 // that nobody should notice unless they want to upload an image
@@ -35,6 +30,9 @@ await addDefaultReviewRoles()
 
 // lazily add default schemas
 await addDefaultSchemas()
+
+// Start the scheduler
+await startScheduler([])
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {

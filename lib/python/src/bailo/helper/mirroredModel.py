@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import warnings
+from typing import Any
 
 from semantic_version import Version
 
@@ -26,7 +28,7 @@ class MirroredModel(Entry):
     :param organisation: Organisation responsible for the mirrored model, defaults to None
     :param state: Development readiness of the mirrored model, defaults to None
     :param tags: Tags to assign to the mirrored model, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
+    :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
     :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -58,6 +60,9 @@ class MirroredModel(Entry):
         self.sourceModelId = sourceModelId
         self.model_id = model_id
 
+        self._mirrored_card = None
+        self._mirrored_card_version = None
+
     @classmethod
     def create(
         cls,
@@ -80,7 +85,7 @@ class MirroredModel(Entry):
         :param organisation: Organisation responsible for the mirrored model, defaults to None
         :param state: Development readiness of the mirrored model, defaults to None
         :param tags: Tags to assign to the mirrored model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -156,17 +161,50 @@ class MirroredModel(Entry):
         libraries: list[str] | None = None,
         filters: list[str] | None = None,
         search: str = "",
+        organisations: list[str] | None = None,
+        states: list[str] | None = None,
+        allow_templating: bool | None = None,
+        schema_id: str | None = None,
+        admin_access: bool | None = None,
+        peers: list[str] | None = None,
+        title_only: bool | None = None,
     ) -> list[MirroredModel]:
         """Return a list of mirrored model objects from Bailo, based on search parameters.
 
         :param client: A client object used to interact with Bailo
         :param task: Mirrored model task (e.g. image classification), defaults to None
-        :param libraries: Mirrored m library (e.g. TensorFlow), defaults to None
-        :param filters: Custom filters, defaults to None
-        :param search: String to be located in model cards, defaults to ""
-        :return: List of Mirrored model objects
+        :param libraries: Mirrored model library (e.g. TensorFlow), defaults to None
+        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
+            models where the current user is a collaborator. Otherwise, values are treated as collaborator
+            roles, defaults to None
+        :param search: Free-text search string. Always performs a partial, case-insensitive match against
+            the mirrored model name. If `title_only` is False, a full-text search across mirrored model
+            content is also performed, defaults to ""
+        :param organisations: List of organisation identifiers to restrict results, defaults to None
+        :param states: List of mirrored model lifecycle states to restrict results, defaults to None
+        :param allow_templating: If True, restricts results to models with templating enabled, defaults to None
+        :param schema_id: Schema ID to restrict results to models using that schema, defaults to None
+        :param admin_access: If True, returns models requiring admin access. The caller must
+            have the Admin role or the request will be rejected by the backend, defaults to None
+        :param peers: List of peer identifiers to include remote search results from, defaults to None
+        :param title_only: If True, limits searching to mirrored model titles only and disables
+            full-text search, defaults to None
+        :return: List of mirrored model objects
         """
-        res = client.get_models(task=task, libraries=libraries, filters=filters, search=search)
+        res = client.get_models(
+            task=task,
+            libraries=libraries,
+            filters=filters,
+            search=search,
+            kind=EntryKind.MIRRORED_MODEL,
+            organisations=organisations,
+            states=states,
+            allow_templating=allow_templating,
+            schema_id=schema_id,
+            admin_access=admin_access,
+            peers=peers,
+            title_only=title_only,
+        )
         models = []
 
         for model in res["models"]:
@@ -247,13 +285,46 @@ class MirroredModel(Entry):
         """
         raise NotImplementedError
 
+    def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
+        """Upload and retrieve any changes to the editable mirrored model card on Bailo.
+
+        :param model_card: Model card dictionary, defaults to None
+
+        ..note:: If a model card is not provided, the current model card attribute value is used
+        """
+        self._update_card(card=model_card)
+
+    def get_card_latest(self) -> None:
+        """Get the latest card from Bailo."""
+        res = self.client.get_model(model_id=self.id)
+        if "card" in res["model"]:
+            self._unpack_card(res["model"]["card"])
+            logger.info("Latest card for ID %s successfully retrieved.", self.id)
+        else:
+            warnings.warn(f"ID {self.id} does not have any associated model card.")
+        if "mirroredCard" in res["model"]:
+            self._unpack_card(res["model"]["mirroredCard"], True)
+        else:
+            warnings.warn(f"ID {self.id} does not have any associated additional information.")
+
+    def _unpack_card(self, res, mirrored=False) -> None:
+        if mirrored:
+            super()._unpack_card(res)
+        else:
+            self._mirrored_card_version = res["version"]
+
+            try:
+                self._mirrored_card = res["metadata"]
+            except KeyError:
+                self._mirrored_card = None
+
     @property
     def model_card(self):
         """Get the data of the model card.
 
         :return: Model card data.
         """
-        return self._card
+        return {"card": self._card, "additional_information": self._mirrored_card}
 
     @property
     def model_card_version(self):
@@ -261,7 +332,10 @@ class MirroredModel(Entry):
 
         :return: Model card version.
         """
-        return self._card_version
+        return {
+            "card": self._card_version,
+            "additional_information": self._mirrored_card_version,
+        }
 
     @property
     def model_card_schema(self):

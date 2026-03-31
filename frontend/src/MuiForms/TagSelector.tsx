@@ -1,8 +1,10 @@
 import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry } from '@rjsf/utils'
+import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import { getMirroredState } from 'utils/formUtils'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -11,9 +13,10 @@ interface TagSelectorProps {
   formContext?: Registry['formContext']
   required?: boolean
   id: string
+  schema?: RJSFSchema
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required, id }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required, id, schema }: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
@@ -46,14 +49,21 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const mirroredState = getMirroredState(id, formContext)
+
   return (
-    <>
+    <AdditionalInformation
+      editMode={formContext.editMode}
+      mirroredState={mirroredState}
+      display={formContext.mirroredModel && value}
+      label={label}
+      id={id}
+      required={required}
+      mirroredModel={formContext.mirroredModel}
+      description={schema ? schema.description : ''}
+    >
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
-            {label}
-            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-          </Typography>
           <Stack
             direction={{ md: 'row', sm: 'column' }}
             spacing={2}
@@ -109,6 +119,6 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Typography>
         </Stack>
       )}
-    </>
+    </AdditionalInformation>
   )
 }

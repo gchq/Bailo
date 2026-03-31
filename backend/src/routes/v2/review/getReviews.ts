@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
 import { ReviewInterface } from '../../../models/Review.js'
 import { findReviews } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'

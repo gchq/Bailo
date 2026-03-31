@@ -29,11 +29,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ include "bailo.fullname" . }}-backend
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
           image: "{{ .Values.image.backendRepository }}:{{ .Values.image.backendTag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
@@ -173,11 +173,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ include "bailo.fullname" . }}-frontend
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml .Values.frontend.securityContext | nindent 12 }}
           image: "{{ .Values.image.frontendRepository }}:{{ .Values.image.frontendTag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.instrumentation.enabled }}

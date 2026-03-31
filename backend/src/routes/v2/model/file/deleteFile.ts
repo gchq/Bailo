@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { z } from '../../../../lib/zod.js'
 import { removeFile } from '../../../../services/file.js'
 import { registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
@@ -45,9 +45,9 @@ export const deleteFile = [
       params: { modelId, fileId },
     } = parse(req, deleteFileSchema)
 
-    await removeFile(req.user, modelId, fileId)
+    const file = await removeFile(req.user, modelId, fileId)
 
-    await audit.onDeleteFile(req, modelId, fileId)
+    await audit.onDeleteFile(req, file)
 
     res.json({
       message: 'Successfully removed file.',

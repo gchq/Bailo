@@ -1,8 +1,9 @@
 import { PassThrough } from 'node:stream'
 
+import { SeverityLevel } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ScanState } from '../../../../src/connectors/fileScanning/Base.js'
+import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
 import { BadReq, InternalError } from '../../../../src/utils/error.js'
 
@@ -34,9 +35,9 @@ const logMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/log.js', () => logMocks)
 
 const scannersMocks = vi.hoisted(() => ({
-  default: { info: vi.fn() },
+  default: { scannersInfo: vi.fn() },
 }))
-vi.mock('../../../../src/connectors/fileScanning/index.js', () => scannersMocks)
+vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
 
 const configMocks = vi.hoisted(() => ({
   default: { modelMirror: { export: { maxSize: 1000 } } },
@@ -72,7 +73,7 @@ const mockFile = {
   id: 'fileId',
   _id: { toString: () => 'fileId' },
   name: 'f',
-  avScan: [{ state: ScanState.Complete, isInfected: false }],
+  scanResults: [{ state: ArtefactScanState.Complete }],
 } as any
 
 const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'DocumentsExporter' }
@@ -90,7 +91,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     fileServiceMocks.getTotalFileSize.mockResolvedValue(500)
     modelServiceMocks.getModelCardRevisions.mockResolvedValue([{ version: 'v1', toJSON: () => ({}) }])
     releaseServiceMocks.getAllFileIds.mockResolvedValue(['fileId'])
-    scannersMocks.default.info.mockReturnValue(false)
+    scannersMocks.default.scannersInfo.mockReturnValue(false)
     authMocks.default.model.mockResolvedValue({ success: true })
   })
 
@@ -138,13 +139,13 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  test('_init throws BadReq if AV scan issues (missing scan)', async () => {
-    scannersMocks.default.info.mockReturnValue(true)
-    const badFile = { id: 'f', name: 'name', avScan: [] }
+  test('_init throws BadReq if scan issues (missing scan)', async () => {
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
+    const badFile = { id: 'f', name: 'name', scanResults: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
-      'The releases contain file(s) that do not have a clean AV scan.\nMethod `DocumentsExporter._init` failure.',
+      'The releases contain file(s) that do not have a clean scan.\nMethod `DocumentsExporter._init` failure.',
       { scanErrors: expect.any(Object) },
     )
 
@@ -152,13 +153,17 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  test('_init throws BadReq if AV scan incomplete', async () => {
-    scannersMocks.default.info.mockReturnValue(true)
-    const incompleteFile = { id: 'f', name: 'name', avScan: [{ state: ScanState.InProgress, isInfected: false }] }
+  test('_init throws BadReq if scan incomplete', async () => {
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
+    const incompleteFile = {
+      id: 'f',
+      name: 'name',
+      scanResults: [{ state: ArtefactScanState.InProgress }],
+    }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([incompleteFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
-      'The releases contain file(s) that do not have a clean AV scan.\nMethod `DocumentsExporter._init` failure.',
+      'The releases contain file(s) that do not have a clean scan.\nMethod `DocumentsExporter._init` failure.',
       { scanErrors: expect.any(Object) },
     )
 
@@ -166,13 +171,22 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  test('_init throws BadReq if AV scan failed', async () => {
-    scannersMocks.default.info.mockReturnValue(true)
-    const infectedFile = { id: 'f', name: 'name', avScan: [{ state: ScanState.Complete, isInfected: true }] }
+  test('_init throws BadReq if scan failed', async () => {
+    scannersMocks.default.scannersInfo.mockReturnValue(true)
+    const infectedFile = {
+      id: 'f',
+      name: 'name',
+      scanResults: [
+        {
+          state: ArtefactScanState.Complete,
+          summary: [{ severity: SeverityLevel.CRITICAL, vulnerabilityDescription: 'There is a virus aboard' }],
+        },
+      ],
+    }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([infectedFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
-      'The releases contain file(s) that do not have a clean AV scan.\nMethod `DocumentsExporter._init` failure.',
+      'The releases contain file(s) that do not have a clean scan.\nMethod `DocumentsExporter._init` failure.',
       { scanErrors: expect.any(Object) },
     )
 

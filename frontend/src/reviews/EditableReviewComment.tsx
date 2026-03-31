@@ -1,3 +1,4 @@
+import { Close, Save } from '@mui/icons-material'
 import { Button, Stack, Typography } from '@mui/material'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
@@ -43,8 +44,10 @@ export default function EditableReviewComment({
         <>
           <RichTextEditor value={comment} onChange={onCommentChange} />
           <Stack sx={{ textAlign: 'right', pt: 2 }} direction='row' spacing={1} justifyContent='right'>
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button variant='contained' onClick={onSave}>
+            <Button onClick={onCancel} startIcon={<Close />}>
+              Cancel
+            </Button>
+            <Button variant='contained' onClick={onSave} startIcon={<Save />}>
               Save
             </Button>
           </Stack>

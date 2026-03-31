@@ -102,8 +102,12 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
   }, 500)
 
   const noOptionsText = useMemo(() => {
-    if (userListQuery.length < 3) return 'Please enter at least three characters'
-    if (isUsersError?.status === 413) return 'Too many results, please refine your search'
+    if (userListQuery.length < 3) {
+      return 'Please enter at least three characters'
+    }
+    if (isUsersError?.status === 413) {
+      return 'Too many results, please refine your search'
+    }
     return 'No options'
   }, [userListQuery, isUsersError])
 

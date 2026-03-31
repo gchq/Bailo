@@ -1,0 +1,24 @@
+name: PR Labeler
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    # Don't run on PRs from forks as we lack permissions
+    if: ${{ github.event.pull_request.head.repo.id == 336277921 }} # ID is for github.com/gchq/bailo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply labels
+        uses: actions/labeler@v6
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: ".github/labeler.yml"

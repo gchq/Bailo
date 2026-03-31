@@ -1,5 +1,8 @@
 #!/bin/sh
 
+
+# ---- Typescript Linting ----
+
 # Run lint-staged for TypeScript frontend + backend
 echo "Running TypeScript/JavaScript lint-staged checks..."
 npx lint-staged || exit 1
@@ -15,6 +18,8 @@ for venv_dir in $(find . -maxdepth 3 -type d \( -name 'venv' -o -name '.venv' -o
     fi
 done
 
+
+# ---- Python Linting ----
 # Determine Python command from current environment (venv or system)
 PYTHON_CMD=$(command -v python3 || command -v python)
 
@@ -36,3 +41,167 @@ if [ -n "$PYTHON_CMD" ]; then
 else
   echo "Python not found. Skipping Python linting."
 fi
+
+
+# ---- Check Husky Config for Additional Checks ----
+
+# Load local Husky config
+HUSKY_CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/husky-config.conf"
+
+if [ -f "$HUSKY_CONFIG_FILE" ]; then
+  . "$HUSKY_CONFIG_FILE"
+else
+  echo "$HUSKY_CONFIG_FILE not found. Skipping additional checks."
+  exit 0
+fi
+
+# Will use these staged files for both checks
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+
+# ---- Optional: Keyword Check - if enabled ----
+
+RUN_KEYWORD_CHECK="${RUN_KEYWORD_CHECK:-false}"
+
+if [ "$RUN_KEYWORD_CHECK" = "true" ]; then
+
+  echo "Keyword check enabled, running check..."
+
+  # Default USE_S3 to false if not set
+  USE_S3="${USE_S3:-false}"
+
+  TMP_KEYWORDS_FILE=""
+
+  if [ "$USE_S3" = "true" ]; then
+
+    # --- S3 mode ---
+
+    # Check if AWS cli is installed
+    command -v aws >/dev/null 2>&1 || {
+      echo "ERROR: 'aws' CLI is required when USE_S3=true."
+      exit 1
+    }
+
+    # Validate KEYWORDS_S3_URI is set
+    if [ -z "${KEYWORDS_S3_URI:-}" ]; then
+      echo "ERROR: KEYWORDS_S3_URI is not set in husky-config.conf"
+      exit 1
+    fi
+
+    TMP_KEYWORDS_FILE="$(mktemp)"
+
+    echo "Fetching keywords from S3..."
+    echo "$KEYWORDS_S3_URI"
+
+    if ! aws s3 cp "$KEYWORDS_S3_URI" "$TMP_KEYWORDS_FILE" --quiet; then
+      echo "ERROR: Failed to fetch keywords file from S3. Ensure you have pasted in your AWS login command."
+      rm -f "$TMP_KEYWORDS_FILE"
+      exit 1
+    fi
+
+  else
+    # --- Local file mode ---
+
+    if [ -z "${KEYWORDS_FILEPATH:-}" ]; then
+      echo "ERROR: KEYWORDS_FILEPATH is not set in husky-config.conf"
+      exit 1
+    fi
+
+    # Resolve relative paths from repo root
+    REPO_ROOT="$(git rev-parse --show-toplevel)"
+    TMP_KEYWORDS_FILE="$REPO_ROOT/$KEYWORDS_FILEPATH"
+
+    if [ ! -f "$TMP_KEYWORDS_FILE" ]; then
+      echo "ERROR: Local keywords file not found: $TMP_KEYWORDS_FILE"
+      exit 1
+    fi
+
+    echo "Using local keywords file:"
+    echo "$TMP_KEYWORDS_FILE"
+  fi
+
+  echo "Scanning staged files for keywords..."
+
+  # If nothing is staged, skip (cheap pre-check)
+  if [ -z "$STAGED_FILES" ]; then
+    echo "No staged files to scan."
+    [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
+    exit 0
+  fi
+
+  # Run grep only on staged files
+  if git grep -n -F -f "$TMP_KEYWORDS_FILE" --cached -- $STAGED_FILES
+  then
+    echo ""
+    echo "ERROR: Keywords detected in staged files."
+    [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
+    exit 1
+  fi
+
+  # Cleanup (only for S3 temp file)
+  [ "$USE_S3" = "true" ] && rm -f "$TMP_KEYWORDS_FILE"
+
+  echo "Pre-commit check passed."
+
+fi
+
+
+
+
+# ---- Optional: Trufflehog Check - if enabled ----
+
+RUN_TRUFFLE_HOGGING="${RUN_TRUFFLE_HOGGING:-false}"
+
+# Check if we need to run
+if [ "$RUN_TRUFFLE_HOGGING" = "true" ]; then
+
+  echo "Truffle Hog check enabled, running check..."
+
+  # Check if trufflehog is installed
+  command -v trufflehog >/dev/null 2>&1 || {
+    echo "ERROR: 'trufflehog' is not installed or not on PATH."
+    exit 1
+  }
+
+  # Check if jq is installed (required to parse trufflehog JSON)
+  command -v jq >/dev/null 2>&1 || {
+    echo "ERROR: 'jq' is required to parse TruffleHog output."
+    echo "Install jq and try again."
+    exit 1
+  }
+
+  echo "Running Trufflehog..."
+
+  # Exit early if nothing to scan
+  [ -z "$STAGED_FILES" ] && exit 0
+
+  # Create a temp directory
+  TMP_DIR=$(mktemp -d)
+
+  # Copy staged files to temp dir (preserves content exactly as committed)
+  for file in $STAGED_FILES; do
+    mkdir -p "$TMP_DIR/$(dirname "$file")"
+    git show ":$file" > "$TMP_DIR/$file" 2>/dev/null || true
+  done
+
+  # Run Trufflehog
+  RESULT=$(trufflehog filesystem "$TMP_DIR" \
+    --no-update \
+    --json)
+
+  # Clean up
+  rm -rf "$TMP_DIR"
+
+  # Check for findings
+  if echo "$RESULT" | grep -q '"Verified":true'; then
+    echo "Verified secret detected. Commit blocked."
+    echo
+    echo "$RESULT" | jq -r '.DetectorName + " in " + .SourceMetadata.Data.File'
+    exit 1
+  fi
+
+  echo "No verified secrets found."
+  exit 0
+
+fi
+

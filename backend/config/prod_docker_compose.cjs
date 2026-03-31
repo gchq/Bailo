@@ -67,19 +67,19 @@ module.exports = {
     region: 'ignored',
   },
 
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       host: 'clamd',
     },
 
-    modelscan: {
-      host: 'modelscan',
+    artefactscan: {
+      host: 'artefactscan',
     },
   },
 
   connectors: {
-    fileScanners: {
-      kinds: ['clamAV', 'modelScan'],
+    artefactScanners: {
+      kinds: ['clamAV', 'modelScan', 'trivy'],
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,

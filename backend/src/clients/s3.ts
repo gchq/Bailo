@@ -5,6 +5,7 @@ import {
   CreateBucketCommand,
   CreateBucketRequest,
   CreateMultipartUploadCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   GetObjectRequest,
   HeadBucketCommand,
@@ -35,6 +36,7 @@ function getS3Client() {
     requestHandler: new NodeHttpHandler({
       httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
     }),
+    ...(config.s3.responseChecksumValidation && { responseChecksumValidation: config.s3.responseChecksumValidation }),
   })
 }
 
@@ -143,7 +145,14 @@ export async function getObjectStream(
   try {
     const command = new GetObjectCommand(input)
     const response = await client.send(command)
-    return response
+
+    if (!response.Body) {
+      throw InternalError('Stream for object unavailable from the S3 service.', {
+        internal: { bucket, key, range },
+      })
+    }
+    // The AWS library doesn't seem to properly type 'Body' as being pipeable?
+    return response.Body as Readable
   } catch (error) {
     throw InternalError('Unable to retrieve the object from the S3 service.', {
       internal: { error, bucket, key, range },
@@ -181,6 +190,15 @@ export async function completeMultipartUpload(
     Key: key,
     UploadId: uploadId,
     MultipartUpload: { Parts: parts },
+  })
+  return client.send(command)
+}
+
+export async function deleteObject(key: string, bucket: string = config.s3.buckets.uploads) {
+  const client = await getS3Client()
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
   })
   return client.send(command)
 }

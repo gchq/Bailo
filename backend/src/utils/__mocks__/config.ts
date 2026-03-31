@@ -6,6 +6,7 @@ const config: PartialDeep<Config> = {
     protocol: '',
     host: '',
     port: 3000,
+    privateKey: 'privateKey',
   },
   federation: {
     state: 'disabled',
@@ -36,7 +37,7 @@ const config: PartialDeep<Config> = {
     authorisation: {
       kind: 'basic',
     },
-    fileScanners: {
+    artefactScanners: {
       kinds: [],
     },
   },
@@ -64,6 +65,13 @@ const config: PartialDeep<Config> = {
   },
   instrumentation: {
     enabled: false,
+  },
+  stroom: {
+    logOnlyMode: true,
+    feed: 'feed',
+    url: 'https://url',
+    environment: 'local',
+    interval: 1000 * 50,
   },
   session: {
     secret: '',
@@ -97,16 +105,18 @@ const config: PartialDeep<Config> = {
       userIdAttribute: '',
     },
   },
-  avScanning: {
+  artefactScanning: {
     clamdscan: {
       host: '127.0.0.1',
       port: 8080,
+      concurrency: 1,
     },
 
-    modelscan: {
+    artefactscan: {
       protocol: 'http',
       host: '127.0.0.1',
       port: 8081,
+      concurrency: 1,
     },
   },
   mongo: {

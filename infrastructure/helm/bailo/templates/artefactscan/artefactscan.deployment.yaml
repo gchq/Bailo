@@ -1,0 +1,81 @@
+{{- if .Values.artefactscan.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bailo.fullname" . }}-artefactscan
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: artefactscan
+  template:
+    metadata:
+      labels:
+        name: artefactscan
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ include "bailo.fullname" . }}-artefactscan
+        ports:
+          - name: http
+            containerPort: {{ .Values.artefactscan.port }}
+            protocol: TCP
+        image: "{{ .Values.image.artefactscanRepository }}:{{ .Values.image.artefactscanTag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          {{- range $variable, $value := .Values.artefactscan.env }}
+          - name: {{ $variable }}
+            value: {{ $value | quote }}
+          {{- end }}
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: certs
+          mountPath: /app/certs/cert.pem
+          subPath: cert.pem
+        - name: certs
+          mountPath: /app/certs/key.pem
+          subPath: key.pem
+        - name: certs
+          mountPath: /usr/local/share/ca-certificates/cert.pem
+          subPath: cert.pem
+        {{- if .Values.artefactscan.trivy.ca.enabled }}
+        - name: artefactscan-ca
+          mountPath: {{ .Values.artefactscan.trivy.ca.mountPath }}
+          subPath: {{ .Values.artefactscan.trivy.ca.secretKey }}
+          readOnly: true
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: artefactscan-log
+          emptyDir: {}
+        - name: certs
+          secret:
+            secretName: {{ include "bailo.fullname" . }}-certs
+            items:
+              - key: cert.pem
+                path: cert.pem
+              - key: key.pem
+                path: key.pem
+        {{- if .Values.artefactscan.trivy.ca.enabled }}
+        - name: artefactscan-ca
+          secret:
+            secretName: {{ .Values.artefactscan.trivy.ca.secretName }}
+        {{- end }}
+{{- end }}

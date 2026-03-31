@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
 import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { updateModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
@@ -39,7 +39,21 @@ export const patchModelSchema = z.object({
     collaborators: z
       .array(
         z.object({
-          entity: z.string().openapi({ example: 'user:user' }),
+          entity: z
+            .string()
+            .refine(
+              (value) => {
+                try {
+                  return decodeURIComponent(value) === value
+                } catch {
+                  return false
+                }
+              },
+              {
+                message: 'Please remove URL Encoding from collaborator entity string',
+              },
+            )
+            .openapi({ example: 'user:user' }),
           roles: z.array(z.string()).openapi({ example: ['owner', 'contributor'] }),
         }),
       )

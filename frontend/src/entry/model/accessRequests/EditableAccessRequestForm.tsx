@@ -1,3 +1,4 @@
+import { Close, Save } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import {
   deleteAccessRequest,
@@ -178,10 +179,10 @@ export default function EditableAccessRequestForm({
         />
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={handleCancel}>
+            <Button variant='outlined' onClick={handleCancel} startIcon={<Close />}>
               Cancel
             </Button>
-            <Button variant='contained' loading={isLoading} onClick={handleSubmit}>
+            <Button variant='contained' loading={isLoading} onClick={handleSubmit} startIcon={<Save />}>
               Save
             </Button>
           </Stack>

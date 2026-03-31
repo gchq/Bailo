@@ -1,11 +1,11 @@
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
-import Overview from 'src/entry/overview/Overview'
+import Overview from 'src/entry/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryKind } from 'types/types'
@@ -14,11 +14,11 @@ export default function DataCard() {
   const router = useRouter()
   const { dataCardId }: { dataCardId?: string } = router.query
   const {
-    model: dataCard,
-    isModelLoading: isDataCardLoading,
-    isModelError: isDataCardError,
-    mutateModel,
-  } = useGetModel(dataCardId, EntryKind.DATA_CARD)
+    entry: dataCard,
+    isEntryLoading: isDataCardLoading,
+    isEntryError: isDataCardError,
+    mutateEntry: mutateEntry,
+  } = useGetEntry(dataCardId, EntryKind.DATA_CARD)
 
   const { userPermissions } = useContext(UserPermissionsContext)
 
@@ -31,7 +31,7 @@ export default function DataCard() {
             {
               title: 'Overview',
               path: 'overview',
-              view: <Overview entry={dataCard} mutateEntry={mutateModel} />,
+              view: <Overview entry={dataCard} mutateEntry={mutateEntry} />,
             },
             {
               title: 'Settings',
@@ -42,13 +42,15 @@ export default function DataCard() {
             },
           ]
         : [],
-    [dataCard, mutateModel, settingsPermission.hasPermission, settingsPermission.info],
+    [dataCard, mutateEntry, settingsPermission.hasPermission, settingsPermission.info],
   )
 
   const error = MultipleErrorWrapper(`Unable to load data card page`, {
     isDataCardError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   return (
     <>

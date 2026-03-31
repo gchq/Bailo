@@ -12,7 +12,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useGetModel } from 'actions/model'
+import { useGetEntry } from 'actions/entry'
 import { useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -41,7 +41,11 @@ export default function ReleaseReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    entry: model,
+    isEntryLoading: isModelLoading,
+    isEntryError: isModelError,
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)
@@ -120,7 +124,9 @@ export default function ReleaseReview() {
     isModelError,
     isUiConfigError,
   })
-  if (error) return error
+  if (error) {
+    return error
+  }
 
   if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
     return <Loading />

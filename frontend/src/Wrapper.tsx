@@ -96,13 +96,14 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   return (
     <>
       <Banner />
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && (
+        {currentUser && uiConfig && (
           <>
             <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
               page={page}
+              bannerVisible={uiConfig.banner.enabled}
               currentUser={currentUser}
               drawerOpen={open}
               pageTopStyling={pageTopStyling}
@@ -118,15 +119,13 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),
           })}
         >
           <Toolbar />
-          <Box sx={contentTopStyling}>
+          <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
             {isDocsPage ? (
               children
             ) : (
@@ -138,7 +137,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
                 <Box paddingTop={4}>
                   <MessageAlert message={errorMessage} severity='error' />
                   {children}
-                  <Copyright sx={{ m: 2 }} />
+                  <Copyright sx={{ p: 2 }} />
                 </Box>
               </>
             )}

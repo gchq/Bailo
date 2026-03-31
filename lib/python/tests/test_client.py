@@ -50,17 +50,85 @@ def test_post_model(requests_mock):
 
 
 @pytest.mark.parametrize(
-    ("libraries", "filters"),
-    [(None, []), (None, [])],
+    (
+        "task",
+        "libraries",
+        "filters",
+        "search",
+        "organisations",
+        "states",
+        "allow_templating",
+        "schema_id",
+        "admin_access",
+        "peers",
+        "title_only",
+    ),
+    [
+        ("image_classification", None, None, None, None, None, None, None, None, None, None),
+        (
+            None,
+            ["library"],
+            ["filter"],
+            "hello",
+            ["ExampleOrganisation"],
+            ["prod"],
+            True,
+            "schema-id",
+            True,
+            ["peer1"],
+            True,
+        ),
+    ],
 )
-def test_get_models(libraries, filters, requests_mock):
+def test_get_models(
+    task,
+    libraries,
+    filters,
+    search,
+    organisations,
+    states,
+    allow_templating,
+    schema_id,
+    admin_access,
+    peers,
+    title_only,
+    requests_mock,
+):
+    base_url = "https://example.com/api/v2/models/search"
+
+    params = {
+        "libraries": "".join(libraries) if libraries is not None else None,
+        "organisations": "".join(organisations) if organisations is not None else None,
+        "states": "".join(states) if states is not None else None,
+        "filters": "".join(filters) if filters is not None else None,
+        "search": search,
+        "allowTemplating": allow_templating,
+        "schemaId": schema_id,
+        "adminAccess": admin_access,
+        "peers": "".join(peers) if peers is not None else None,
+        "titleOnly": title_only,
+    }
+
+    query = "&".join(f"{k}={v}" for k, v in params.items() if v is not None)
     requests_mock.get(
-        "https://example.com/api/v2/models/search?task=image_classification",
+        f"{base_url}?{query}",
         json={"success": True},
     )
 
     client = Client("https://example.com")
-    result = client.get_models(task="image_classification", libraries=libraries, filters=filters)
+    result = client.get_models(
+        task=task,
+        libraries=libraries,
+        filters=filters,
+        search=search,
+        organisations=organisations,
+        states=states,
+        allow_templating=allow_templating,
+        schema_id=schema_id,
+        admin_access=admin_access,
+        peers=peers,
+        title_only=title_only,
+    )
 
     assert result == {"success": True}
 
@@ -389,5 +457,17 @@ def test_put_file_scan(requests_mock):
 
     client = Client("https://example.com")
     result = client.put_file_scan(model_id="test_model_id", file_id="test_file_id")
+
+    assert result == {"status": "Scan started"}
+
+
+def test_put_image_scan(requests_mock):
+    requests_mock.put(
+        "https://example.com/api/v2/filescanning/model/test_model_id/image/test_image_name/test_image_tag/scan",
+        json={"status": "Scan started"},
+    )
+
+    client = Client("https://example.com")
+    result = client.put_image_scan(model_id="test_model_id", image_name="test_image_name", image_tag="test_image_tag")
 
     assert result == {"status": "Scan started"}

@@ -1,3 +1,4 @@
+import { Save } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
@@ -5,14 +6,12 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
-  Container,
   Divider,
   Stack,
   TextField,
   Typography,
 } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchEntry } from 'actions/entry'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'
@@ -32,9 +31,6 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(destinationModelId === undefined || destinationModelId === '')
 
-  // TODO - Add the ability to filter releases needed for export (This functionality is not available on the backend)
-  // const [selectedReleases, setSelectedReleases] = useState<ReleaseInterface[]>([])
-
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     setLoading(true)
     event.preventDefault()
@@ -46,7 +42,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         },
       },
     }
-    const response = await patchModel(model.id, updatedSettings)
+    const response = await patchEntry(model.id, updatedSettings)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -67,57 +63,45 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
 
   return (
     <>
-      <Container maxWidth='md'>
-        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-          <Box component='form' onSubmit={handleSave}>
-            <Stack spacing={3} divider={<Divider flexItem />}>
-              <Accordion
-                expanded={isSettingsOpen}
-                onChange={() => setIsSettingsOpen(isSettingsOpen ? false : true)}
-                slotProps={{ heading: { component: 'h3' } }}
-              >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
-                  <Typography sx={{ width: '100%' }} color='primary' variant='h6' component='div'>
-                    Model Export Settings
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Stack spacing={2}>
-                    <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
-                      <TextField
-                        id='destination-model-id'
-                        value={destinationModelId}
-                        onChange={handleDestinationModelId}
-                        size='small'
-                      />
-                    </LabelledInput>
-                    {/*TODO - Add the ability to filter releases needed for export (This functionality is not available on the backend)
-              <ReleaseSelector
-                model={model}
-                selectedReleases={selectedReleases}
-                onUpdateSelectedReleases={handleUpdateSelectedReleases}
-                isReadOnly={isReadOnly}
-                requiredRolesText={requiredRolesText}
-              />
-               */}
-                    <Button
-                      sx={{ width: 'fit-content' }}
-                      variant='contained'
-                      data-test='createAccessRequestButton'
-                      loading={loading}
-                      type='submit'
-                    >
-                      Save
-                    </Button>
-                    <MessageAlert message={errorMessage} severity='error' />
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
-              <ExportModelAgreement modelId={model.id} />
-            </Stack>
-          </Box>
-        </Card>
-      </Container>
+      <Box component='form' onSubmit={handleSave}>
+        <Stack spacing={2} divider={<Divider flexItem />}>
+          <Accordion
+            expanded={isSettingsOpen}
+            onChange={() => setIsSettingsOpen(!isSettingsOpen)}
+            slotProps={{ heading: { component: 'h3' } }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
+              <Typography sx={{ width: '100%' }} color='primary' variant='h6'>
+                Model export settings
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
+                  <TextField
+                    id='destination-model-id'
+                    value={destinationModelId}
+                    onChange={handleDestinationModelId}
+                    size='small'
+                  />
+                </LabelledInput>
+                <Button
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  data-test='createAccessRequestButton'
+                  loading={loading}
+                  type='submit'
+                  startIcon={<Save />}
+                >
+                  Save
+                </Button>
+                <MessageAlert message={errorMessage} severity='error' />
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+          <ExportModelAgreement model={model} />
+        </Stack>
+      </Box>
     </>
   )
 }
