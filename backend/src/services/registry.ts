@@ -331,7 +331,7 @@ export async function softDeleteImage(
 
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
-  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
@@ -365,6 +365,6 @@ export async function restoreSoftDeletedImage(
 
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
-  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
   await renameImage(user, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag }, imageRef)
 }
