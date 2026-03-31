@@ -18,7 +18,7 @@ import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { toBailoError } from '../types/error.js'
 import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Conflict, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
@@ -58,7 +58,7 @@ async function runScans(
   // cover an edge case where scans are allowed with no delay (from config) causing a race condition
   const existingScanInProgress = await ScanModel.findOne({ ...scanIdentifier, state: ArtefactScanState.InProgress })
   if (existingScanInProgress) {
-    throw InternalError('Cannot rescan an artefact while an existing scan is in progress', {
+    throw Conflict('Cannot rescan an artefact while an existing scan is in progress', {
       scanIdentifier,
       existingScanInProgress,
     })
