@@ -7,7 +7,6 @@ import log from '../../../services/log.js'
 import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
 import config from '../../../utils/config.js'
-import { useTransaction } from '../../../utils/transactions.js'
 import { parse } from '../../../utils/validate.js'
 import { getAccessToken, softDeletePrefix } from '../../v1/registryAuth.js'
 
@@ -111,9 +110,7 @@ export const handleRegistryEvents = [
       ])
 
       try {
-        const status = (
-          await useTransaction([(session) => rerunImageScanNoAuth(imageRef, repositoryToken, session)])
-        )[0]
+        const status = await rerunImageScanNoAuth(imageRef, repositoryToken, true)
         log.debug({ event }, status)
       } catch (err) {
         // Likely triggered by 'No image scanners are enabled.'
