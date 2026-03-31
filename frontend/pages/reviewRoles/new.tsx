@@ -58,7 +58,7 @@ export default function ReviewRolesForm() {
         errorMessage={errorMessage}
         handleSubmit={handleSubmit}
         handleCancel={() => {
-          window.location.assign('/reviewRoles/view')
+          router.push('/reviewRoles/view')
         }}
       />
     </>
