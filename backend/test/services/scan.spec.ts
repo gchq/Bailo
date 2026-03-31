@@ -115,7 +115,6 @@ vi.mock('../../src/services/images/getImageLayers.js', () => imageMocks)
 
 const registryClientMocks = vi.hoisted(() => ({
   isImageTagManifestList: vi.fn(() => false),
-  waitForImageTagManifest: vi.fn(),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
