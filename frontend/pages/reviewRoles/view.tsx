@@ -116,10 +116,11 @@ export default function ReviewRoles() {
         setErrorMessage('There was a problem deleting this role.')
       } else {
         mutateReviewRoles()
-        selectedRole(0)
+        setConfirmationOpen(false)
+        setSelectedRole(0)
       }
     },
-    [setErrorMessage, setConfirmationOpen, mutateReviewRoles],
+    [mutateReviewRoles],
   )
 
   const handleSubmit = useCallback(
