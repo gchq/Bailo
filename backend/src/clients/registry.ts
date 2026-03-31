@@ -276,28 +276,15 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
   }
 }
 
-export async function resolveToImageManifests(
-  token: string,
-  imageRef: ImageRefInterface,
-  platform?: string,
-): Promise<ImageManifestV2[]> {
+export async function resolveToImageManifests(token: string, imageRef: ImageRefInterface): Promise<ImageManifestV2[]> {
   const { body } = await getImageTagManifests(token, imageRef)
   if (!body) {
     throw InternalError('Missing manifest body.', { imageRef })
   }
 
   if ('manifests' in body) {
-    const filteredManfests = platform
-      ? body.manifests.filter(
-          (manifest) =>
-            platform ==
-            [manifest.platform?.os, manifest.platform?.architecture, manifest.platform?.variant]
-              .filter(Boolean)
-              .join('/'),
-        )
-      : body.manifests
     return Promise.all(
-      filteredManfests.map(async (manifest) => {
+      body.manifests.map(async (manifest) => {
         const ref = { ...imageRef, tag: manifest.digest }
         const child = await getImageTagManifests(token, ref)
         if (!child.body || 'manifests' in child.body) {

@@ -153,16 +153,19 @@ const OCIImageManifestV2 = z.discriminatedUnion('mediaType', [
 export const ImageManifestV2 = z.union([DockerImageManifestV2, OCIImageManifestV2])
 export type ImageManifestV2 = z.infer<typeof ImageManifestV2>
 
+export const ManifestPlatform = z
+  .object({
+    architecture: z.string(),
+    os: z.string(),
+    osVersion: z.string().optional(),
+    osFeatures: z.array(z.string()).optional(),
+    variant: z.string().optional(),
+  })
+  .optional()
+export type ManifestPlatform = z.infer<typeof ManifestPlatform>
+
 const ManifestListDescriptor = BaseDescriptor.extend({
-  platform: z
-    .object({
-      architecture: z.string(),
-      os: z.string(),
-      osVersion: z.string().optional(),
-      osFeatures: z.array(z.string()).optional(),
-      variant: z.string().optional(),
-    })
-    .optional(),
+  platform: ManifestPlatform,
 })
 
 export const ManifestListV2 = z.object({

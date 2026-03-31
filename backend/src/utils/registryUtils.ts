@@ -2,6 +2,7 @@ import { createHash, X509Certificate } from 'crypto'
 import { readFile } from 'fs/promises'
 
 import config from './config.js'
+import { ManifestPlatform } from './registryResponses.js'
 
 export async function getKid(cert?: X509Certificate) {
   if (!cert) {
@@ -46,4 +47,8 @@ export function getBit(buffer: Buffer, index: number) {
   const bit = index % 8
   const idByte = buffer[byte]
   return Number((idByte & (2 ** (7 - bit))) !== 0)
+}
+
+export function platformToString(platform: ManifestPlatform): string {
+  return [platform?.os, platform?.architecture, platform?.variant].filter(Boolean).join('/')
 }
