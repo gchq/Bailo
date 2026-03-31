@@ -2,6 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
+import { ImageRef } from '../../../models/Release.js'
 import log from '../../../services/log.js'
 import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
@@ -89,13 +90,14 @@ export const handleRegistryEvents = [
         continue
       }
 
-      const tag = target?.tag
-      if (!tag) {
-        log.warn({ event }, 'Ignoring registry push without tag property')
+      let imageRef: ImageRef | undefined
+      if (target?.tag && target?.digest) {
+        imageRef = { repository: modelId, name, digest: target.digest }
+      } else {
+        log.warn({ event }, 'Ignoring registry push without tag or digest property')
         continue
       }
 
-      const imageRef = { repository: modelId, name, tag }
       const repositoryToken = await getAccessToken({ dn: config.registry.service }, [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])

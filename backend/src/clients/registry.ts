@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 import type { ZodSchema } from 'zod'
 
-import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import { ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -253,7 +253,7 @@ export async function listModelRepos(token: string, modelId: string): Promise<st
   return repositories.filter((repo) => repo.startsWith(`${modelId}/`))
 }
 
-export async function listImageTags(token: string, repoRef: RepoRefInterface) {
+export async function listImageTags(token: string, repoRef: ImageNameRef) {
   try {
     const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/tags/list`, {
       bodySchema: TagsListResponseBody,
@@ -276,14 +276,18 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
   }
 }
 
-export async function isImageTagManifestList(token: string, imageRef: ImageRefInterface): Promise<boolean> {
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    // do not validate the body here as we only care about Content-Type
-    headersSchema: ManifestResponseHeaders,
-    extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+export async function isImageTagManifestList(token: string, imageRef: ImageRef): Promise<boolean> {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${'tag' in imageRef ? imageRef.tag : imageRef.digest}`,
+    {
+      // do not validate the body here as we only care about Content-Type
+      headersSchema: ManifestResponseHeaders,
+      extraHeaders: {
+        Accept: AcceptManifestMediaTypeHeaderValue,
+      },
     },
-  })
+  )
 
   const rawContentType = result.headers['content-type']
   const contentType = rawContentType?.split(';')[0]?.trim()
@@ -307,22 +311,26 @@ export async function isImageTagManifestList(token: string, imageRef: ImageRefIn
   })
 }
 
-export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
+export async function getImageTagManifest(token: string, imageRef: ImageRef) {
   // TODO: handle multi-platform images
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    bodySchema: ImageManifestV2,
-    headersSchema: ManifestResponseHeaders,
-    extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${'tag' in imageRef ? imageRef.tag : imageRef.digest}`,
+    {
+      bodySchema: ImageManifestV2,
+      headersSchema: ManifestResponseHeaders,
+      extraHeaders: {
+        Accept: AcceptManifestMediaTypeHeaderValue,
+      },
     },
-  })
+  )
 
   return { body: result.body, headers: result.headers }
 }
 
 export async function getRegistryLayerStream(
   token: string,
-  repoRef: RepoRefInterface,
+  repoRef: ImageNameRef,
   layerDigest: string,
 ): Promise<{ stream: Readable; abort: () => void }> {
   const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${layerDigest}`, {
@@ -345,7 +353,7 @@ export async function getRegistryLayerStream(
   return { stream: result.stream, abort: result.abort }
 }
 
-export async function doesLayerExist(token: string, repoRef: RepoRefInterface, digest: string) {
+export async function doesLayerExist(token: string, repoRef: ImageNameRef, digest: string) {
   try {
     await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
       expectStream: true,
@@ -364,7 +372,7 @@ export async function doesLayerExist(token: string, repoRef: RepoRefInterface, d
   }
 }
 
-export async function initialiseUpload(token: string, repoRef: RepoRefInterface) {
+export async function initialiseUpload(token: string, repoRef: ImageNameRef) {
   const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/uploads/`, {
     headersSchema: BlobUploadResponseHeaders,
     expectStream: true,
@@ -376,7 +384,7 @@ export async function initialiseUpload(token: string, repoRef: RepoRefInterface)
   return result.headers
 }
 
-export async function putManifest(token: string, imageRef: ImageRefInterface, manifest: BodyInit, contentType: string) {
+export async function putManifest(token: string, imageRef: ImageTagRef, manifest: BodyInit, contentType: string) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
     headersSchema: ManifestResponseHeaders,
     expectStream: true,
@@ -422,8 +430,8 @@ export async function uploadLayerMonolithic(
 
 export async function mountBlob(
   token: string,
-  sourceRepoRef: RepoRefInterface,
-  destinationRepoRef: RepoRefInterface,
+  sourceRepoRef: ImageNameRef,
+  destinationRepoRef: ImageNameRef,
   blobDigest: string,
 ) {
   const result = await registryRequest(
@@ -441,7 +449,7 @@ export async function mountBlob(
   return result.headers
 }
 
-export async function deleteManifest(token: string, imageRef: ImageRefInterface) {
+export async function deleteManifest(token: string, imageRef: ImageTagRef) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
     headersSchema: DeleteManifestResponseHeaders,
     expectStream: true,
@@ -452,36 +460,4 @@ export async function deleteManifest(token: string, imageRef: ImageRefInterface)
   })
 
   return result.headers
-}
-
-export async function waitForImageTagManifest(
-  token: string,
-  imageRef: ImageRefInterface,
-  retries: number = 5,
-  delayMs: number = 1000,
-): Promise<void> {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-        headersSchema: ManifestResponseHeaders,
-        extraHeaders: {
-          Accept: AcceptManifestMediaTypeHeaderValue,
-        },
-      })
-      return
-    } catch (err) {
-      if (
-        isRegistryError(err) &&
-        err.errors.length === 1 &&
-        err.errors[0]?.code === 'MANIFEST_UNKNOWN' &&
-        attempt < retries
-      ) {
-        log.debug({ imageRef, attempt, retries, delayMs }, 'Waiting for manifest to become readable')
-        await new Promise((r) => setTimeout(r, delayMs))
-        continue
-      }
-      log.debug({ imageRef, attempt, retries, delayMs }, 'Manifest did not become readable')
-      throw err
-    }
-  }
 }

@@ -1,6 +1,6 @@
 import { ClientSession } from 'mongoose'
 
-import { isImageTagManifestList, waitForImageTagManifest } from '../clients/registry.js'
+import { isImageTagManifestList } from '../clients/registry.js'
 import {
   ArtefactInterface,
   ArtefactScanningConnectorInfo,
@@ -11,7 +11,7 @@ import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
-import { ImageRefInterface } from '../models/Release.js'
+import { ImageRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
@@ -181,12 +181,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   return `File scan started for ${file.name}`
 }
 
-export async function rerunImageScan(
-  user: UserInterface,
-  modelId: string,
-  image: ImageRefInterface,
-  session?: ClientSession,
-) {
+export async function rerunImageScan(user: UserInterface, modelId: string, image: ImageRef, session?: ClientSession) {
   const model = await getModelById(user, modelId)
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
@@ -218,19 +213,16 @@ export async function rerunImageScan(
  * @remarks
  * _Only_ use this function when an auth check would break expected functionality, otherwise use `rerunImageScan`.
  */
-export async function rerunImageScanNoAuth(image: ImageRefInterface, repositoryToken: string, session?: ClientSession) {
+export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: string, session?: ClientSession) {
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
-
-  // Poll manifest as the registry may not have yet resolved a new tag
-  await waitForImageTagManifest(repositoryToken, image)
 
   if (await isImageTagManifestList(repositoryToken, image)) {
     // TODO: add support for manifest lists/fat manifests
     throw InternalError('Bailo backend does not currently support scanning images with manifest lists.', { image })
   }
   const imageLayers = dedupe(await getImageLayers(repositoryToken, image))
-  const imageName = `${image.repository}/${image.name}:${image.tag}`
+  const imageName = `${image.repository}/${image.name}${'tag' in image ? ':' + image.tag : '@' + image.digest}`
 
   // Only check timing for the config (which is effectively unique per manifest)
   // config is always the first item in `imageLayers`
