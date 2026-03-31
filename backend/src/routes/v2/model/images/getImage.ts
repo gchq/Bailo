@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { getImageWithScanResults, getMultiplatformImageWithScanResult } from '../../../../services/registry.js'
+import { getImageWithScanResults } from '../../../../services/registry.js'
 import { imageTagWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
 import { ImageTagResult } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
@@ -21,7 +21,7 @@ export const getImageSchema = z.object({
     }),
   }),
   query: z.object({
-    architecture: z.string().optional(),
+    platform: z.string().optional(),
   }),
 })
 
@@ -54,16 +54,9 @@ export const getImage = [
     req.audit = AuditInfo.ViewModelImage
     const {
       params: { modelId, name, tag },
-      query: { architecture },
+      query: { platform },
     } = parse(req, getImageSchema)
-    const imageBreakdown = architecture
-      ? await getMultiplatformImageWithScanResult(
-          req.user,
-          { repository: modelId, name, tag },
-          true,
-          decodeURIComponent(architecture),
-        )
-      : await getImageWithScanResults(req.user, { repository: modelId, name, tag }, true)
+    const imageBreakdown = await getImageWithScanResults(req.user, { repository: modelId, name, tag }, true, platform)
     await audit.onViewModelImage(req, modelId, name, tag)
 
     res.json({

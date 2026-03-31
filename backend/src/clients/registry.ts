@@ -10,7 +10,6 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
-  AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBody,
   BaseApiCheckResponseHeaders,
@@ -21,9 +20,7 @@ import {
   CommonRegistryHeaders,
   DeleteManifestResponseHeaders,
   ImageManifestV2,
-  ManifestListMediaType,
-  ManifestListV2,
-  ManifestMediaType,
+  ManifestResponseBody,
   ManifestResponseHeaders,
   RegistryErrorResponseBody,
   TagsListResponseBody,
@@ -279,62 +276,60 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
   }
 }
 
-export async function isImageTagManifestList(token: string, imageRef: ImageRefInterface): Promise<boolean> {
+export async function resolveToImageManifests(
+  token: string,
+  imageRef: ImageRefInterface,
+  platform?: string,
+): Promise<ImageManifestV2[]> {
+  const { body } = await getImageTagManifests(token, imageRef)
+  if (!body) {
+    throw InternalError('Missing manifest body.', { imageRef })
+  }
+
+  if ('manifests' in body) {
+    const filteredManfests = platform
+      ? body.manifests.filter(
+          (manifest) =>
+            platform ==
+            [manifest.platform?.os, manifest.platform?.architecture, manifest.platform?.variant]
+              .filter(Boolean)
+              .join('/'),
+        )
+      : body.manifests
+    return Promise.all(
+      filteredManfests.map(async (manifest) => {
+        const ref = { ...imageRef, tag: manifest.digest }
+        const child = await getImageTagManifests(token, ref)
+        if (!child.body || 'manifests' in child.body) {
+          throw InternalError('Nested manifest list not supported.', { ref })
+        }
+        return child.body
+      }),
+    )
+  }
+
+  return [body as ImageManifestV2]
+}
+
+/**
+ * @deprecated
+ */
+export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
+  // TODO: handle multi-platform images
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    // do not validate the body here as we only care about Content-Type
+    bodySchema: ImageManifestV2,
     headersSchema: ManifestResponseHeaders,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,
     },
   })
 
-  const rawContentType = result.headers['content-type']
-  const contentType = rawContentType?.split(';')[0]?.trim()
-
-  if (!contentType) {
-    throw InternalError('Registry response missing Content-Type header.', {
-      imageRef,
-    })
-  }
-
-  if ((ManifestListMediaType.options as string[]).includes(contentType)) {
-    return true
-  }
-  if ((ManifestMediaType.options as string[]).includes(contentType)) {
-    return false
-  }
-
-  throw InternalError('Unrecognised manifest media type.', {
-    imageRef,
-    contentType,
-  })
+  return { body: result.body, headers: result.headers }
 }
 
-export async function getImageTagManfiestList(token: string, imageRef: ImageRefInterface) {
+export async function getImageTagManifests(token: string, imageRef: ImageRefInterface) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    bodySchema: ManifestListV2,
-    headersSchema: ManifestResponseHeaders,
-    extraHeaders: {
-      Accept: AcceptManifestListMediaTypeHeaderValue,
-    },
-  })
-
-  return (
-    result.body?.manifests
-      .filter((manifest) => manifest.platform?.architecture !== 'unknown' || manifest.platform?.os !== 'unknown')
-      .map((manifest) => ({
-        digest: manifest.digest,
-        platform: [manifest.platform?.architecture, manifest.platform?.os, manifest.platform?.variant]
-          .filter((s) => s !== undefined)
-          .join('/'),
-      })) || []
-  )
-}
-
-export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
-  // TODO: handle multi-platform images
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    bodySchema: ImageManifestV2,
+    bodySchema: ManifestResponseBody,
     headersSchema: ManifestResponseHeaders,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,

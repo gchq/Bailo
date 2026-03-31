@@ -1,7 +1,8 @@
-import { getImageTagManifest, isImageTagManifestList } from '../../clients/registry.js'
+import { resolveToImageManifests } from '../../clients/registry.js'
 import { ImageRefInterface } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
-import { InternalError, NotFound } from '../../utils/error.js'
+import { dedupe } from '../../utils/array.js'
+import { NotFound } from '../../utils/error.js'
 import { Descriptors } from '../../utils/registryResponses.js'
 
 /**
@@ -9,20 +10,15 @@ import { Descriptors } from '../../utils/registryResponses.js'
  * @remarks
  * This does _not_ do an auth check on the user
  */
-export async function getImageLayers(repositoryToken: string, image: ImageRefInterface): Promise<Descriptors[]> {
+export async function getImageLayers(
+  repositoryToken: string,
+  image: ImageRefInterface,
+  platform?: string,
+): Promise<Descriptors[]> {
   try {
-    if (await isImageTagManifestList(repositoryToken, image)) {
-      // TODO: add support for manifest lists/fat manifests
-      throw InternalError('Bailo backend does not currently support manifest lists.', { image })
-    }
+    const manifests = await resolveToImageManifests(repositoryToken, image, platform)
 
-    const res = await getImageTagManifest(repositoryToken, image)
-
-    if (!res.body) {
-      throw InternalError('Registry manifest body missing.', { image })
-    }
-
-    return [res.body.config, ...res.body.layers]
+    return dedupe(manifests.flatMap((manifest) => [manifest.config, ...manifest.layers]))
   } catch (error) {
     if (isRegistryError(error) && error.context?.status === 404) {
       throw NotFound('Image does not exist', { image })

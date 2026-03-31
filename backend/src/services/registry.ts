@@ -2,10 +2,9 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
-  getImageTagManfiestList,
   getImageTagManifest,
+  getImageTagManifests,
   getRegistryLayerStream,
-  isImageTagManifestList,
   listImageTags,
   listModelRepos,
   mountBlob,
@@ -108,56 +107,13 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
   )
 }
 
-export async function getMultiplatformImageWithScanResult(
-  user: UserInterface,
-  imageRef: ImageRefInterface,
-  includeFullDetail: boolean = false,
-  architecture: string | undefined = undefined,
-): Promise<ImageTagResult> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
-  ])
-  const manifests = await getImageTagManfiestList(repositoryToken, imageRef)
-  const arch = manifests.find((arch) => arch.platform == architecture)
-  if (!arch) {
-    throw NotFound('The provided architecture could not be found.', { manifests })
-  }
-  const imageScan = await getImageWithScanResults(
-    user,
-    { ...imageRef, tag: arch?.digest },
-    includeFullDetail,
-    arch?.platform,
-  )
-  return { ...imageScan, tag: imageRef.tag }
-}
-
-export async function getMultiplatformImageWithScanResults(
-  user: UserInterface,
-  imageRef: ImageRefInterface,
-  includeFullDetail: boolean = false,
-  architecture: string | undefined = undefined,
-): Promise<ImageTagResult[]> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
-  ])
-  const manifests = await getImageTagManfiestList(repositoryToken, imageRef)
-  const imageScans = await Promise.all(
-    manifests
-      .filter((arch) => arch.platform == architecture)
-      .map((arch) =>
-        getImageWithScanResults(user, { ...imageRef, tag: arch.digest }, includeFullDetail, arch.platform),
-      ),
-  )
-  return imageScans.map((scan) => ({ ...scan, tag: imageRef.tag })).flat()
-}
-
 export async function getImageWithScanResults(
   user: UserInterface,
   imageRef: ImageRefInterface,
   includeFullDetail: boolean = false,
-  architecture: string | undefined = undefined,
+  platform?: string,
 ): Promise<ImageTagResult> {
-  const layers = await getLayersForImageTag(user, imageRef)
+  const layers = await getLayersForImageTag(user, imageRef, platform)
   const scans = await getScansForImageTag(user, layers)
 
   const initialState = Object.fromEntries(
@@ -181,8 +137,8 @@ export async function getImageWithScanResults(
   return {
     tag: imageRef.tag,
     state,
-    architecture,
     severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
+    platform,
 
     ...(includeFullDetail && {
       scanResults: scans,
@@ -192,13 +148,17 @@ export async function getImageWithScanResults(
   }
 }
 
-async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface): Promise<Descriptors[]> {
+async function getLayersForImageTag(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  platform?: string,
+): Promise<Descriptors[]> {
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
   let layers: Descriptors[] = []
   try {
-    layers = await getImageLayers(repositoryToken, imageRef)
+    layers = await getImageLayers(repositoryToken, imageRef, platform)
   } catch (err) {
     if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
       throw err
@@ -216,16 +176,43 @@ export async function listModelImagesWithScanResults(
   return Promise.all(
     modelImages.map(async (img) => {
       const repositoryToken = await getAccessToken({ dn: user.dn }, [
-        { type: 'repository', name: `${img.repository}/${img.name}`, actions: ['pull'] },
+        {
+          type: 'repository',
+          name: `${img.repository}/${img.name}`,
+          actions: ['pull'],
+        },
       ])
+
       const scanSummaries = (
         await Promise.all(
           img.tags.map(async (tag) => {
-            if (await isImageTagManifestList(repositoryToken, { ...img, tag })) {
-              return getMultiplatformImageWithScanResults(user, { ...img, tag })
-            } else {
-              return getImageWithScanResults(user, { ...img, tag })
+            const manifestResponse = await getImageTagManifests(repositoryToken, { ...img, tag })
+
+            if (!manifestResponse.body) {
+              return []
             }
+
+            if ('manifests' in manifestResponse.body) {
+              return Promise.all(
+                manifestResponse.body.manifests.map(async (manifest) => {
+                  const scan = await getImageWithScanResults(
+                    user,
+                    { ...img, tag: manifest.digest },
+                    false,
+                    [manifest.platform?.os, manifest.platform?.architecture, manifest.platform?.variant]
+                      .filter(Boolean)
+                      .join('/'),
+                  )
+
+                  return {
+                    ...scan,
+                    tag,
+                  }
+                }),
+              )
+            }
+
+            return [await getImageWithScanResults(user, { ...img, tag })]
           }),
         )
       )
