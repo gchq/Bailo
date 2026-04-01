@@ -426,7 +426,6 @@ export async function initialiseUpload(token: string, repoRef: ImageNameRef) {
 }
 
 export async function putManifest(token: string, imageRef: ImageRef, manifest: BodyInit, contentType: string) {
-  log.debug({ imageRef, manifest, contentType }, 'putManifest()')
   const result = await registryRequest(
     token,
     `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
