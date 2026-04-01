@@ -36,7 +36,7 @@ export default function AssociatedReleasesList({ releases, modelId, latestReleas
                         )}
                       </>
                     }
-                    secondary={formatDateString(formatDateString(associatedRelease.createdAt))}
+                    secondary={formatDateString(associatedRelease.createdAt)}
                   />
                 </ListItemButton>
               </Link>
