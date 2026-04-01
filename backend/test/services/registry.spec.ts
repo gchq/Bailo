@@ -50,6 +50,7 @@ const registryClientMocks = vi.hoisted(() => ({
   listModelRepos: vi.fn(),
   mountBlob: vi.fn(),
   putManifest: vi.fn(),
+  isImageTagManifestList: vi.fn(() => false),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 

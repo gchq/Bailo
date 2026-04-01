@@ -439,7 +439,6 @@ export async function putManifest(token: string, imageRef: ImageRef, manifest: B
       },
       extraHeaders: {
         'Content-Type': contentType,
-        Accept: contentType,
         name: `${imageRef.repository}/${imageRef.name}`,
         reference: getImageRefId(imageRef),
       },
