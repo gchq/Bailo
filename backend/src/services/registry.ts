@@ -2,8 +2,11 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
+  fetchRawManifest,
   getImageTagManifest,
+  getImageTagManifestList,
   getRegistryLayerStream,
+  isImageTagManifestList,
   listImageTags,
   listModelRepos,
   mountBlob,
@@ -12,7 +15,7 @@ import {
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
-import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import { ImageDigestRef, ImageNameRef, ImageTagRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
@@ -108,7 +111,7 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
 
 export async function getImageWithScanResults(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   includeFullDetail = false,
 ): Promise<ImageTagResult> {
   const layers = await getLayersForImageTag(user, imageRef)
@@ -145,7 +148,7 @@ export async function getImageWithScanResults(
   }
 }
 
-async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface): Promise<Descriptors[]> {
+async function getLayersForImageTag(user: UserInterface, imageRef: ImageTagRef): Promise<Descriptors[]> {
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
@@ -206,7 +209,7 @@ async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): 
     .exec()
 }
 
-export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
+export async function getImageManifest(user: UserInterface, imageRef: ImageTagRef) {
   await checkUserAuth(user, imageRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
@@ -217,7 +220,7 @@ export async function getImageManifest(user: UserInterface, imageRef: ImageRefIn
   return await getImageTagManifest(repositoryToken, imageRef)
 }
 
-export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterface, digest: string) {
+export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {
   await checkUserAuth(user, repoRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
@@ -233,94 +236,238 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * @remarks
  * This does _not_ also update any mongo data, and does _not_ do any auth checks on the source or destination.
  */
-export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
-  let manifest: Awaited<ReturnType<typeof getImageManifest>>
-  try {
-    const repositoryToken = await getAccessToken({ dn: user.dn }, [
-      { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['pull'] },
-    ])
-    manifest = await getImageTagManifest(repositoryToken, source)
-  } catch (err) {
-    // special case for 404 not found
-    if (err && isBailoError(err) && err?.context?.status === 404) {
-      throw NotFound('The requested image was not found.', { ...source })
-    }
-    throw err
-  }
-  if (!manifest.body) {
-    throw InternalError('The registry returned a response but the body was missing.', { ...source, manifest })
-  }
-
-  const allLayers = [manifest.body.config, ...manifest.body.layers]
+export async function renameImage(user: UserInterface, source: ImageTagRef, destination: ImageTagRef) {
   const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
-    { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
+    { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull', 'delete'] },
   ])
 
-  // cross-mount layers from original to new image
-  for (const layer of allLayers) {
-    const layerDigest = layer['digest']
-    if (!layerDigest || layerDigest.length === 0) {
-      throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
+  // TODO: refactor this to handle both single manifest and manifest lists without the `if/else`
+  const isManifestList = await isImageTagManifestList(multiRepositoryToken, source)
+
+  if (isManifestList) {
+    const { body: rootManifest, headers: rootHeaders } = await getImageTagManifestList(multiRepositoryToken, source)
+    if (!rootManifest) {
+      throw InternalError('Manifest list body missing.', { source })
     }
-    log.trace(
-      {
-        layerDigest,
-        source: { repository: source.repository, name: source.name },
-        destination: { repository: destination.repository, name: destination.name },
-      },
-      'CrossMounting registry layer to new repository.',
-    )
+    const sourceDigest = rootHeaders['docker-content-digest']
+    if (!sourceDigest) {
+      throw InternalError('Manifest list required headers missing.', { source })
+    }
 
-    await mountBlob(
-      multiRepositoryToken,
-      { repository: source.repository, name: source.name },
-      { repository: destination.repository, name: destination.name },
-      layerDigest,
-    )
-  }
+    const tmpTags: string[] = []
 
-  log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
-  const mediaType = manifest.body.mediaType == OCIEmptyMediaType ? manifest.body.artifactType : manifest.body.mediaType
-  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), mediaType)
-  log.trace({ source }, 'Deleting the original manifest.')
-  await deleteManifest(multiRepositoryToken, source)
+    for (const manifest of rootManifest.manifests) {
+      const digestRef: ImageDigestRef = {
+        repository: source.repository,
+        name: source.name,
+        digest: manifest.digest,
+      }
 
-  let isOrphaned = true
-  try {
-    const remainingImages = await listImageTags(multiRepositoryToken, {
-      repository: source.repository,
-      name: source.name,
-    })
-    for (const tag of remainingImages) {
-      const tagHeaders = (await getImageManifest(user, { repository: source.repository, name: source.name, tag: tag }))
-        .headers
-      if (manifest.headers['docker-content-digest'] === tagHeaders['docker-content-digest']) {
-        isOrphaned = false
-        log.trace({ source }, "Found another tag matching digest. Won't delete digest.")
-        break
+      const { body: childManifest } = await getImageTagManifest(multiRepositoryToken, digestRef)
+      if (!childManifest) {
+        throw InternalError('Platform manifest missing.', { digestRef })
+      }
+
+      const layers = [childManifest.config, ...childManifest.layers]
+
+      for (const layer of layers) {
+        await mountBlob(
+          multiRepositoryToken,
+          { repository: source.repository, name: source.name },
+          { repository: destination.repository, name: destination.name },
+          layer.digest,
+        )
+      }
+
+      // A temp tag is required because PUT-by-digest fails (the JSON is re-serialised, changing its canonical bytes)
+      // so we create the digest via a tag and then delete the tag (leaving the new digest)
+      const tmpTag = `__tmp_copy_${crypto.randomUUID()}__`
+      tmpTags.push(tmpTag)
+      const childPutManifestRes = await putManifest(
+        multiRepositoryToken,
+        { repository: destination.repository, name: destination.name, tag: tmpTag },
+        JSON.stringify(childManifest),
+        childManifest.mediaType === OCIEmptyMediaType ? childManifest.artifactType! : childManifest.mediaType!,
+      )
+
+      const newDigest = childPutManifestRes['docker-content-digest']
+      if (!newDigest) {
+        throw InternalError('Child manifest digest missing after PUT', { tmpTag })
+      }
+
+      let platformIsOrphaned = true
+      try {
+        const remainingTags = await listImageTags(multiRepositoryToken, {
+          repository: source.repository,
+          name: source.name,
+        })
+
+        for (const tag of remainingTags) {
+          const tagHeaders = (
+            await fetchRawManifest(multiRepositoryToken, {
+              repository: source.repository,
+              name: source.name,
+              tag,
+            })
+          ).headers
+
+          if (tagHeaders['docker-content-digest'] === manifest.digest) {
+            platformIsOrphaned = false
+            break
+          }
+        }
+      } catch (err) {
+        if (!isBailoError(err) || err?.context?.status !== 404) {
+          throw err
+        }
+      }
+
+      if (platformIsOrphaned) {
+        await deleteManifest(multiRepositoryToken, {
+          repository: source.repository,
+          name: source.name,
+          digest: manifest.digest,
+        })
+      }
+
+      // overwrite digest to point to new child manifest
+      manifest.digest = newDigest
+    }
+
+    let listIsOrphaned = true
+    try {
+      const remainingTags = await listImageTags(multiRepositoryToken, {
+        repository: source.repository,
+        name: source.name,
+      })
+
+      for (const tag of remainingTags) {
+        const tagHeaders = (
+          await fetchRawManifest(multiRepositoryToken, {
+            repository: source.repository,
+            name: source.name,
+            tag,
+          })
+        ).headers
+
+        if (tagHeaders['docker-content-digest'] === sourceDigest) {
+          listIsOrphaned = false
+          break
+        }
+      }
+    } catch (err) {
+      if (!isBailoError(err) || err?.context?.status !== 404) {
+        throw err
       }
     }
-  } catch (err) {
-    // error 404 is thrown by listImageTags when no tags remain but the digest still exists
-    if (!err || !isBailoError(err) || err?.context?.status !== 404) {
+
+    await putManifest(multiRepositoryToken, destination, JSON.stringify(rootManifest), rootManifest.mediaType!)
+
+    // cleanup temp tags
+    for (const tmpTag of tmpTags) {
+      // remove temp tag, leaving digest in place
+      await deleteManifest(multiRepositoryToken, {
+        repository: destination.repository,
+        name: destination.name,
+        tag: tmpTag,
+      })
+    }
+
+    await deleteManifest(multiRepositoryToken, source)
+    if (listIsOrphaned) {
+      log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
+      await deleteManifest(multiRepositoryToken, {
+        repository: source.repository,
+        name: source.name,
+        tag: rootHeaders['docker-content-digest'] as string,
+      })
+    }
+  } else {
+    // single manifest
+    let manifest: Awaited<ReturnType<typeof getImageManifest>>
+    try {
+      manifest = await getImageTagManifest(multiRepositoryToken, source)
+    } catch (err) {
+      if (isBailoError(err) && err?.context?.status === 404) {
+        throw NotFound('The requested image was not found.', { ...source })
+      }
       throw err
     }
-  }
 
-  if (isOrphaned) {
-    log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
-    await deleteManifest(multiRepositoryToken, {
-      repository: source.repository,
-      name: source.name,
-      tag: manifest.headers['docker-content-digest'] as string,
-    })
+    if (!manifest.body) {
+      throw InternalError('The registry returned a response but the body was missing.', { source })
+    }
+
+    const allLayers = [manifest.body.config, ...manifest.body.layers]
+
+    // cross-mount layers from original to new image
+    for (const layer of allLayers) {
+      const layerDigest = layer['digest']
+      if (!layerDigest || layerDigest.length === 0) {
+        throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
+      }
+      log.trace(
+        {
+          layerDigest,
+          source: { repository: source.repository, name: source.name },
+          destination: { repository: destination.repository, name: destination.name },
+        },
+        'CrossMounting registry layer to new repository.',
+      )
+
+      await mountBlob(
+        multiRepositoryToken,
+        { repository: source.repository, name: source.name },
+        { repository: destination.repository, name: destination.name },
+        layerDigest,
+      )
+    }
+
+    log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
+    const mediaType =
+      manifest.body.mediaType == OCIEmptyMediaType ? manifest.body.artifactType : manifest.body.mediaType
+    await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), mediaType)
+    log.trace({ source }, 'Deleting the original manifest.')
+    await deleteManifest(multiRepositoryToken, source)
+
+    let isOrphaned = true
+    try {
+      const remainingImages = await listImageTags(multiRepositoryToken, {
+        repository: source.repository,
+        name: source.name,
+      })
+      for (const tag of remainingImages) {
+        const tagHeaders = (
+          await getImageManifest(user, { repository: source.repository, name: source.name, tag: tag })
+        ).headers
+        if (manifest.headers['docker-content-digest'] === tagHeaders['docker-content-digest']) {
+          isOrphaned = false
+          log.trace({ source }, "Found another tag matching digest. Won't delete digest.")
+          break
+        }
+      }
+    } catch (err) {
+      // error 404 is thrown by listImageTags when no tags remain but the digest still exists
+      if (!err || !isBailoError(err) || err?.context?.status !== 404) {
+        throw err
+      }
+    }
+
+    if (isOrphaned) {
+      log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
+      await deleteManifest(multiRepositoryToken, {
+        repository: source.repository,
+        name: source.name,
+        tag: manifest.headers['docker-content-digest'] as string,
+      })
+    }
   }
 }
 
 export async function softDeleteImage(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   deleteMirroredModel: boolean = false,
   session?: ClientSession,
 ) {
@@ -355,7 +502,7 @@ export async function softDeleteImage(
 
 export async function restoreSoftDeletedImage(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   restoreMirroredModel: boolean = false,
 ) {
   const model = await getModelById(user, imageRef.repository)

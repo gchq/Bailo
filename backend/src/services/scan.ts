@@ -9,7 +9,7 @@ import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
-import { ImageRefInterface } from '../models/Release.js'
+import { ImageTagRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
@@ -165,7 +165,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   return `File scan started for ${file.name}`
 }
 
-export async function rerunImageScan(user: UserInterface, modelId: string, image: ImageRefInterface) {
+export async function rerunImageScan(user: UserInterface, modelId: string, image: ImageTagRef) {
   const model = await getModelById(user, modelId)
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
@@ -197,7 +197,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
  * @remarks
  * _Only_ use this function when an auth check would break expected functionality, otherwise use `rerunImageScan`.
  */
-export async function rerunImageScanNoAuth(image: ImageRefInterface, repositoryToken: string) {
+export async function rerunImageScanNoAuth(image: ImageTagRef, repositoryToken: string) {
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
 

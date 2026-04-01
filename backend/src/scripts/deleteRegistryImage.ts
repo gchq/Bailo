@@ -24,7 +24,7 @@ async function main() {
      * i.e. no image name under the model. In registry terms this maps to:
      *   /v2/<modelId>/manifests/<tag>
      *
-     * The registry client expects an ImageRefInterface of the form:
+     * The registry client expects an ImageTagRef of the form:
      *   { repository, name, tag }
      *
      * To produce /v2/<modelId>/manifests/<tag>, we set:

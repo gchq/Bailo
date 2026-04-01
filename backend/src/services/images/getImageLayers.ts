@@ -1,5 +1,5 @@
 import { getImageTagManifest, isImageTagManifestList } from '../../clients/registry.js'
-import { ImageRefInterface } from '../../models/Release.js'
+import { ImageTagRef } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { Descriptors } from '../../utils/registryResponses.js'
@@ -9,7 +9,7 @@ import { Descriptors } from '../../utils/registryResponses.js'
  * @remarks
  * This does _not_ do an auth check on the user
  */
-export async function getImageLayers(repositoryToken: string, image: ImageRefInterface): Promise<Descriptors[]> {
+export async function getImageLayers(repositoryToken: string, image: ImageTagRef): Promise<Descriptors[]> {
   try {
     if (await isImageTagManifestList(repositoryToken, image)) {
       // TODO: add support for manifest lists/fat manifests
