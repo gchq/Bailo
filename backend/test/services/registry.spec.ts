@@ -429,7 +429,11 @@ describe('services > registry', () => {
         'mediaType',
       )
       expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
+      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'digest',
+      })
     })
 
     test('renameImage > success no orphan found', async () => {
@@ -475,7 +479,11 @@ describe('services > registry', () => {
         'mediaType',
       )
       expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
+      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'digest',
+      })
     })
 
     test('renameImage > rethrow error', async () => {
