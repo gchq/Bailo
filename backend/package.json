@@ -113,7 +113,6 @@
     "prettier": "^3.8.1",
     "supertest": "^7.2.2",
     "typescript": "^5.9.3",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.14"
   },
   "overrides": {
