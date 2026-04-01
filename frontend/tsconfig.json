@@ -16,7 +16,8 @@
     "jsxImportSource": "@emotion/react",
     "incremental": true,
     "baseUrl": ".",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "experimentalDecorators": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "vitest.config.mts"],
   "exclude": ["node_modules"]
