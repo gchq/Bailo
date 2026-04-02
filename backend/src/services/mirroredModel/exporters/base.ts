@@ -271,6 +271,7 @@ export abstract class BaseExporter {
    * Called automatically by `@withStreams` if streams are missing.
    * Initialises tar/gzip/upload streams for the export process.
    */
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
   protected async setupStreams() {
     log.trace(this.logData, `Setting up streams for ${this.constructor.name}.`)
@@ -292,8 +293,11 @@ export abstract class BaseExporter {
    * @decorator `@checkAuths` Ensures authorisation checks pass.
    * @decorator `@withStreams` Ensures streams are configured.
    */
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
+  // @ts-expect-error Ignore the decorator typing warning
   @withStreams
   async addData() {
     // wrap to enforce extra checks
@@ -311,8 +315,11 @@ export abstract class BaseExporter {
    * @decorator `@checkAuths`
    * @decorator `@withStreams`
    */
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
+  // @ts-expect-error Ignore the decorator typing warning
   @withStreams
   async finalise() {
     log.trace(this.logData, `Finalising ${this.constructor.name}.`)

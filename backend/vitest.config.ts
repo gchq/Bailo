@@ -6,6 +6,10 @@ export default defineConfig({
   },
   test: {
     restoreMocks: true,
+    typecheck: {
+      enabled: true,
+      tsconfig: 'backend/test/tsconfig.json',
+    },
     setupFiles: [
       './test/testUtils/zod.ts',
       './test/testUtils/setupTestConfig.ts',

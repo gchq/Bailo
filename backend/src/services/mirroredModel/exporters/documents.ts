@@ -109,7 +109,9 @@ export class DocumentsExporter extends BaseExporter {
     ]
   }
 
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
   protected async _addData() {
     try {
@@ -130,8 +132,11 @@ export class DocumentsExporter extends BaseExporter {
     }
   }
 
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
+  // @ts-expect-error Ignore the decorator typing warning
   @withStreams
   protected async addModelCardRevisionsToTarball() {
     log.debug(
@@ -153,8 +158,11 @@ export class DocumentsExporter extends BaseExporter {
     )
   }
 
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
+  // @ts-expect-error Ignore the decorator typing warning
   @withStreams
   protected async addReleasesToTarball() {
     log.debug({ ...this.logData }, 'Adding model releases to Tarball file.')
@@ -171,8 +179,11 @@ export class DocumentsExporter extends BaseExporter {
     )
   }
 
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
+  // @ts-expect-error Ignore the decorator typing warning
   @withStreams
   protected async addReleaseToTarball(release: ReleaseDoc) {
     log.debug({ semver: release.semver, ...this.logData }, 'Adding release to tarball file of releases.')
@@ -200,8 +211,11 @@ export class DocumentsExporter extends BaseExporter {
     }
   }
 
+  // @ts-expect-error Ignore the decorator typing warning
   @requiresInit
+  // @ts-expect-error Ignore the decorator typing warning
   @checkAuths
+  // @ts-expect-error Ignore the decorator typing warning
   @withStreams
   protected async addFilesToTarball(files: FileWithScanResultsInterface[]) {
     for (const file of files) {
