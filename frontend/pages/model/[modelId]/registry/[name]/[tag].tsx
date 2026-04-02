@@ -16,7 +16,9 @@ import {
   IconButton,
   List,
   ListItem,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -35,6 +37,7 @@ import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import EmptyBlob from 'src/common/EmptyBlob'
+import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
@@ -56,13 +59,13 @@ interface VulnerabilityResultItem {
 export default function ImageTagInformation() {
   const router = useRouter()
   const { modelId, name, tag }: { modelId?: string; name?: string; tag?: string } = router.query
-
+  const fakePlatforms = ['linux/amd64', 'linux/arm64', 'linux/x86_64']
   const {
     image: modelImage,
     isImageLoading,
     isImageError,
     mutateImages,
-  } = useGetImageScanResults(modelId as string, name as string, tag as string)
+  } = useGetImageScanResults(modelId as string, name as string, tag as string, 'ubuntu/x86_64' as string)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
 
@@ -74,6 +77,8 @@ export default function ImageTagInformation() {
   const [modalTitle, setModalTitle] = useState('')
   const [filterList, setFilterList] = useState<string[]>([])
   const [toolName, setToolName] = useState('')
+
+  const [selectedPlatform, setSelectedPlatform] = useState(fakePlatforms[0])
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -272,12 +277,34 @@ export default function ImageTagInformation() {
               </Stack>
             </Stack>
             <Stack spacing={1}>
-              <Typography fontWeight='bold'>URI</Typography>
-              <Box width='fit-content'>
-                <CodeLine
-                  line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`}
-                />
-              </Box>
+              <Stack direction={'row'} spacing={4}>
+                <Stack direction={'column'}>
+                  <Typography fontWeight='bold'>URI</Typography>
+                  <Box width='fit-content'>
+                    <CodeLine
+                      line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`}
+                    />
+                  </Box>
+                </Stack>
+                <Stack direction={'column'}>
+                  <Typography fontWeight='bold'>OS/Arch</Typography>
+                  <LabelledInput fullWidth label='' htmlFor={''}>
+                    <Select
+                      required
+                      fullWidth
+                      value={selectedPlatform}
+                      size='small'
+                      onChange={(event) => setSelectedPlatform(event.target.value)}
+                    >
+                      {fakePlatforms.map((platform) => (
+                        <MenuItem value={platform} key={platform}>
+                          {platform}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </LabelledInput>
+                </Stack>
+              </Stack>
             </Stack>
             <Stack
               direction={{ md: 'row', sm: 'column' }}
