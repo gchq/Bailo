@@ -1,5 +1,5 @@
 content-size-limit-asgi==0.1.5
-fastapi[standard-no-fastapi-cloud-cli]==0.135.2
+fastapi[standard-no-fastapi-cloud-cli]==0.135.3
 filelock==3.25.2
 modelscan[tensorflow,h5py]==0.8.8
 oras==0.2.42
