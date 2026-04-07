@@ -60,7 +60,7 @@ services:
       - backend
 
   registry:
-    image: registry:3.0.0
+    image: registry:3.1.0
     networks:
       internal:
     environment:
