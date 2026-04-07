@@ -14,11 +14,12 @@ import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { PathConfig, registerPath } from '../../../../services/specification.js'
 import { HttpHeader } from '../../../../types/enums.js'
 import { BailoError } from '../../../../types/error.js'
+import config from '../../../../utils/config.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
 // Default cache response header
-const cacheControl = 'public, max-age=604800, immutable'
+const cacheControl = `public, max-age=${config.fileDownload.cacheControlMaxAge}, immutable`
 
 const responseHeaders = z.object({
   [HttpHeader.CONTENT_DISPOSITION]: z

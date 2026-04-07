@@ -349,6 +349,9 @@ inference:
   authorizationTokenName: 'inferencing-token'
   authorisationToken: ''
 
+fileDownload:
+  cacheControlMaxAge: 604800
+
 backend:
   serviceAccount: ''
   podSecurityContext:

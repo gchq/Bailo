@@ -302,6 +302,10 @@ data:
         xmlns: '{{ .Values.stroom.xmlns }}',
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
+      },
+
+      fileDownload: {
+        cacheControlMaxAge: {{ .Values.fileDownload.cacheControlMaxAge }},
       }
     }
 
