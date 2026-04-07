@@ -2,6 +2,7 @@ import { create } from 'xmlbuilder2'
 
 import { sendEvents } from '../clients/stroom.js'
 import StroomEvent, { StroomEventObject } from '../models/StroomEvent.js'
+import config from '../utils/config.js'
 import { longId } from '../utils/id.js'
 import log from './log.js'
 
@@ -33,12 +34,12 @@ export async function processBatch() {
     const batchEvents = events.map((stroomEvent) => stroomEvent.event)
     const xml = create({
       Events: {
-        '@xmlns': 'file://xml/schema/accounting/events',
+        '@xmlns': config.stroom.xmlns,
         '@xmlns:stroom': 'stroom',
         '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        '@xsi:schemaLocation': 'file://xml/schema/accounting/events file://events-v3.5.0.xsd',
-        '@Version': '3.5.0',
-        Events: batchEvents,
+        '@xsi:schemaLocation': config.stroom.schemaLocation,
+        '@Version': config.stroom.version,
+        Event: batchEvents,
       },
     }).end()
     await sendEvents(xml)
