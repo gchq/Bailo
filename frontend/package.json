@@ -72,7 +72,7 @@
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.51.0",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.0.1",
     "axe-core": "^4.11.2",
     "cypress": "^15.13.0",
     "cypress-axe": "^1.7.0",
