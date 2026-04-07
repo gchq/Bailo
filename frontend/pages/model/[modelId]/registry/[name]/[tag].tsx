@@ -65,7 +65,7 @@ export default function ImageTagInformation() {
     isImageLoading,
     isImageError,
     mutateImages,
-  } = useGetImageScanResults(modelId as string, name as string, tag as string, 'ubuntu/x86_64' as string)
+  } = useGetImageScanResults(modelId as string, name as string, tag as string, '' as string)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
 
