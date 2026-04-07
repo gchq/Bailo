@@ -26,7 +26,7 @@ import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 
-async function getS3Client() {
+function getS3Client() {
   return new S3Client({
     ...(config.s3.credentials.accessKeyId &&
       config.s3.credentials.secretAccessKey && { credentials: { ...config.s3.credentials } }),
@@ -48,7 +48,7 @@ export async function putObjectStream(
 ) {
   try {
     const upload = new Upload({
-      client: await getS3Client(),
+      client: getS3Client(),
       params: { Bucket: bucket, Key: key, Body: body, ...(metadata && { Metadata: metadata }) },
       queueSize: 4,
       leavePartsOnError: false,
@@ -98,7 +98,7 @@ export async function putObjectPartStream(
   bucket: string = config.s3.buckets.uploads,
 ) {
   try {
-    const client = await getS3Client()
+    const client = getS3Client()
     const command = new UploadPartCommand({
       Bucket: bucket,
       Key: key,
@@ -131,7 +131,7 @@ export async function getObjectStream(
   bucket: string = config.s3.buckets.uploads,
   range?: { start: number; end: number },
 ) {
-  const client = await getS3Client()
+  const client = getS3Client()
 
   const input: GetObjectRequest = {
     Bucket: bucket,
@@ -165,7 +165,7 @@ export async function startMultipartUpload(
   contentType: string,
   bucket: string = config.s3.buckets.uploads,
 ) {
-  const client = await getS3Client()
+  const client = getS3Client()
   const command = new CreateMultipartUploadCommand({
     Bucket: bucket,
     Key: key,
@@ -184,7 +184,7 @@ export async function completeMultipartUpload(
   parts: Array<{ ETag: string; PartNumber: number }>,
   bucket: string = config.s3.buckets.uploads,
 ) {
-  const client = await getS3Client()
+  const client = getS3Client()
   const command = new CompleteMultipartUploadCommand({
     Bucket: bucket,
     Key: key,
@@ -230,14 +230,14 @@ export async function ensureBucketExists(bucket: string) {
       error.context.error.$metadata.httpStatusCode === 404
     ) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
-      return createBucket(bucket)
+      return await createBucket(bucket)
     }
     throw InternalError('There was a problem ensuring this bucket exists.', { internal: { error } })
   }
 }
 
 export async function headObject(key: string, bucket: string = config.s3.buckets.uploads) {
-  const client = await getS3Client()
+  const client = getS3Client()
 
   const input: HeadObjectRequest = {
     Bucket: bucket,
@@ -250,7 +250,7 @@ export async function headObject(key: string, bucket: string = config.s3.buckets
 }
 
 async function headBucket(bucket: string) {
-  const client = await getS3Client()
+  const client = getS3Client()
 
   const input: HeadBucketRequest = {
     Bucket: bucket,
@@ -266,7 +266,7 @@ async function headBucket(bucket: string) {
 }
 
 async function createBucket(bucket: string) {
-  const client = await getS3Client()
+  const client = getS3Client()
 
   const input: CreateBucketRequest = {
     Bucket: bucket,
