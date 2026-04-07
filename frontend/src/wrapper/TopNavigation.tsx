@@ -1,5 +1,3 @@
-import '@fontsource/pacifico'
-
 import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
