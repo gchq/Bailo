@@ -70,11 +70,21 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
     }
   }, [collaborators, entryRoles, onChange])
 
-  const onUserChange = useCallback((_event: SyntheticEvent<Element, Event>, newValues: EntityObject[] | null) => {
-    if (newValues) {
-      setCollaborators(newValues.map((newValue) => ({ entity: `${newValue.kind}:${newValue.id}`, roles: [] })))
-    }
-  }, [])
+  const onUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, updatedMutiselectList: EntityObject[] | null) => {
+      if (updatedMutiselectList) {
+        const newValues = updatedMutiselectList.filter(
+          (newValue) => !collaborators.find(({ entity }) => entity === `${newValue.kind}:${newValue.id}`),
+        )
+        const updatedCollaborators = [
+          ...collaborators,
+          ...newValues.map((newValue) => ({ entity: `${newValue.kind}:${newValue.id}`, roles: [] })),
+        ]
+        setCollaborators(updatedCollaborators)
+      }
+    },
+    [collaborators],
+  )
 
   const collaboratorEntityObjects = useMemo(
     () => collaborators.map((collaborator) => fromEntity(collaborator.entity)),
