@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "ESNext.Error"],
-    "target": "esnext",
+    "lib": ["es2023", "ESNext.Error"],
+    "target": "es2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
