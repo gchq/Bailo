@@ -446,6 +446,9 @@ The following tables describe selected configuration options available in `value
 | `stroom.interval` | Interval (in ms) on how frequently events should be sent to stroom | 1000 * 50 |
 | `stroom.generator` | Stroom generator | `Generator` |
 | `stroom.rejectUnauthorized` | TLS option | false |
+| `stroom.xmlns` | XML Namespace | default-namespace |
+| `stroom.schemaLocation` | XML Schema Location | default-namespace file://schema-location.xsd |
+| `stroom.version` | XML Schema Version | 1.0.0 |
 | `modelMirror.import.enabled` | Enable creation of mirrored models | `false` |
 | `modelMirror.export.enabled` | Enable the exporting of models to S3 | `false` |
 | `modelMirror.export.disclaimer` | Disclaimer shown to the user in the UI prior to exporting a model | `## Example Agreement \n I agree that this model is suitable for exporting` |
