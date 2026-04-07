@@ -20,6 +20,7 @@ import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryA
 import { isBailoError } from '../types/error.js'
 import {
   ArtefactScanStateCounts,
+  ImageScanResult,
   ImageTagResult,
   ModelImages,
   ModelImagesWithScanResults,
@@ -92,34 +93,50 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function getLayersForImagePlatform(
+export async function getLayersByPlatform(
   user: UserInterface,
   imageRef: ImageRefInterface,
-  platform: string,
-): Promise<Descriptors[]> {
+): Promise<Record<string, Descriptors[]>> {
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
+    {
+      type: 'repository',
+      name: `${imageRef.repository}/${imageRef.name}`,
+      actions: ['pull'],
+    },
   ])
 
   const { body } = await getImageTagManifests(repositoryToken, imageRef)
 
-  if (!body) {
-    throw InternalError('Missing manifest body.', { imageRef })
+  if (!body || !('manifests' in body)) {
+    throw InternalError('Missing manifest list body.', { imageRef })
   }
 
-  if ('manifests' in body) {
-    body.manifests.forEach(async (manifest) => {
+  const target = {}
+
+  for (const manifest of body.manifests) {
+    const platform = platformToString(manifest.platform)
+    if (platform !== 'unknown/unknown') {
+      target[platform] = manifest
+    }
+  }
+
+  return new Proxy(target, {
+    async get(obj, prop: string) {
+      const manifest = obj[prop]
+      if (!manifest) {
+        return undefined
+      }
+
       const ref = { ...imageRef, tag: manifest.digest }
       const child = await getImageTagManifests(repositoryToken, ref)
+
       if (!child.body || 'manifests' in child.body) {
         throw InternalError('Nested manifest list not supported.', { ref })
       }
-      if (platformToString(manifest.platform) === platform) {
-        return [child.body.config, ...child.body.layers]
-      }
-    })
-  }
-  throw BadReq('This platform could not be found on this image.', { imageRef, platform })
+
+      return [child.body.config, ...child.body.layers]
+    },
+  })
 }
 
 export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
@@ -138,16 +155,18 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
   )
 }
 
-export async function getImageWithScanResults(
-  user: UserInterface,
-  imageRef: ImageRefInterface,
+export async function getScansFromLayers(
+  layers: Descriptors[],
   includeFullDetail: boolean = false,
-  platform?: string,
-): Promise<ImageTagResult> {
-  const layers = platform
-    ? await getLayersForImagePlatform(user, imageRef, platform)
-    : await getLayersForImageTag(user, imageRef)
-  const scans = await getScansForImageTag(user, layers)
+): Promise<ImageScanResult> {
+  const layerDigests = layers.map((l) => l.digest)
+
+  const scans = await ScanModel.find({
+    artefactKind: ArtefactKind.IMAGE,
+    layerDigest: { $in: layerDigests },
+  })
+    .lean<ScanInterface[]>()
+    .exec()
 
   const initialState = Object.fromEntries(
     Object.values(ArtefactScanState).map((state) => [state, 0]),
@@ -168,10 +187,8 @@ export async function getImageWithScanResults(
   const state = statePriority.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
 
   return {
-    tag: imageRef.tag,
     state,
     severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
-    platform,
 
     ...(includeFullDetail && {
       scanResults: scans,
@@ -194,6 +211,24 @@ async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInter
     }
   }
   return layers
+}
+
+export async function getModelImageWithScanResults(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  platform?: string,
+): Promise<ImageTagResult> {
+  const layers = platform
+    ? (await getLayersByPlatform(user, imageRef))[platform]
+    : await getLayersForImageTag(user, imageRef)
+
+  if (layers === undefined) {
+    throw InternalError('Platform cannot be found for this image', { imageRef, platform })
+  }
+
+  const scanResults = await getScansFromLayers(await layers, true)
+
+  return { tag: imageRef.tag, platform, ...scanResults }
 }
 
 export async function listModelImagesWithScanResults(
@@ -222,26 +257,26 @@ export async function listModelImagesWithScanResults(
             }
 
             if ('manifests' in manifestResponse.body) {
+              const layersByPlatform = await getLayersByPlatform(user, { ...img, tag })
+
               return Promise.all(
-                manifestResponse.body.manifests.map(async (manifest) => {
-                  const scan = await getImageWithScanResults(
-                    user,
-                    { ...img, tag: manifest.digest },
-                    false,
-                    [manifest.platform?.os, manifest.platform?.architecture, manifest.platform?.variant]
-                      .filter(Boolean)
-                      .join('/'),
-                  )
+                Object.entries(layersByPlatform).map(async ([platform, layers]) => {
+                  const scan = await getScansFromLayers(await layers)
 
                   return {
                     ...scan,
+                    platform,
                     tag,
                   }
                 }),
               )
             }
 
-            return [await getImageWithScanResults(user, { ...img, tag })]
+            const layers = await getLayersForImageTag(user, { ...img, tag })
+
+            const scan = await getScansFromLayers(layers)
+
+            return [{ ...scan, tag }]
           }),
         )
       )
@@ -265,21 +300,6 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
     }
     return acc
   }, initial)
-}
-
-async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): Promise<ScanInterface[]> {
-  const layerDigests = layers.map((l) => l.digest)
-
-  if (layerDigests.length === 0) {
-    return []
-  }
-
-  return ScanModel.find({
-    artefactKind: ArtefactKind.IMAGE,
-    layerDigest: { $in: layerDigests },
-  })
-    .lean<ScanInterface[]>()
-    .exec()
 }
 
 export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {

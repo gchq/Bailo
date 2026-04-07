@@ -168,6 +168,8 @@ const ManifestListDescriptor = BaseDescriptor.extend({
   platform: ManifestPlatform,
 })
 
+export type ManifestListDescriptor = z.infer<typeof ManifestListDescriptor>
+
 export const ManifestListV2 = z.object({
   schemaVersion: z.literal(2),
   mediaType: ManifestListMediaType.optional(),
