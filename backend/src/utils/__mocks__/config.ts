@@ -125,9 +125,6 @@ const config: PartialDeep<Config> = {
     pass: undefined,
     transactions: false,
   },
-  fileDownload: {
-    cacheControlMaxAge: 604800,
-  },
   ui: {
     inference: {
       enabled: true,

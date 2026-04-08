@@ -351,8 +351,4 @@ module.exports = {
   inference: {
     authorisationToken: '',
   },
-
-  fileDownload: {
-    cacheControlMaxAge: 604800,
-  },
 }

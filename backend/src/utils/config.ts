@@ -222,10 +222,6 @@ export interface Config {
   inference: {
     authorisationToken: string
   }
-
-  fileDownload: {
-    cacheControlMaxAge: number
-  }
 }
 
 const config = _config.util.toObject(_config)
