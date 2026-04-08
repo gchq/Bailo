@@ -17,11 +17,18 @@ import { BailoError } from '../../../../types/error.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
+// Default cache response header
+const cacheControl = 'no-store'
+
 const responseHeaders = z.object({
   [HttpHeader.CONTENT_DISPOSITION]: z
     .string()
     .describe('Content disposition header, ensures correct filename and attachment download')
     .openapi({ example: 'attachment; filename="myfile.txt"' }),
+  [HttpHeader.CACHE_CONTROL]: z
+    .string()
+    .describe(`Cache policy for downloads. Set to "${cacheControl}".`)
+    .openapi({ example: cacheControl }),
   [HttpHeader.CONTENT_TYPE]: z
     .string()
     .describe('The type of the returned content')
@@ -123,6 +130,7 @@ export const getDownloadFile = [
 
     res.set(HttpHeader.ETAG, etag)
     res.set(HttpHeader.ACCEPT_RANGES, 'bytes')
+    res.set(HttpHeader.CACHE_CONTROL, cacheControl)
 
     // 304 support
     const clientEtag = req.header(HttpHeader.IF_NONE_MATCH)
