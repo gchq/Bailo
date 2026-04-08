@@ -313,18 +313,15 @@ export async function isImageTagManifestList(token: string, imageRef: ImageRef):
 }
 
 export async function getImageTagManifest(token: string, imageRef: ImageRef) {
+  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
   // TODO: handle multi-platform images
-  const result = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${'tag' in imageRef ? imageRef.tag : imageRef.digest}`,
-    {
-      bodySchema: ImageManifestV2Schema,
-      headersSchema: ManifestResponseHeadersSchema,
-      extraHeaders: {
-        Accept: AcceptManifestMediaTypeHeaderValue,
-      },
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
+    bodySchema: ImageManifestV2Schema,
+    headersSchema: ManifestResponseHeadersSchema,
+    extraHeaders: {
+      Accept: AcceptManifestMediaTypeHeaderValue,
     },
-  )
+  })
 
   return { body: result.body, headers: result.headers }
 }
