@@ -21,8 +21,6 @@ import {
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
   ImageManifestV2Schema,
-  ManifestListMediaTypeSchema,
-  ManifestMediaTypeSchema,
   ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
@@ -279,36 +277,10 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
   }
 }
 
-export async function resolveToImageManifests(
-  token: string,
-  imageRef: ImageRefInterface,
-): Promise<ImageManifestV2Schema[]> {
-  const { body } = await getImageTagManifests(token, imageRef)
-  if (!body) {
-    throw InternalError('Missing manifest body.', { imageRef })
-  }
-
-  if ('manifests' in body) {
-    return Promise.all(
-      body.manifests.map(async (manifest) => {
-        const ref = { ...imageRef, tag: manifest.digest }
-        const child = await getImageTagManifests(token, ref)
-        if (!child.body || 'manifests' in child.body) {
-          throw InternalError('Nested manifest list not supported.', { ref })
-        }
-        return child.body
-      }),
-    )
-  }
-
-  return [body as ImageManifestV2Schema]
-}
-
 /**
- * @deprecated
+ * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
  */
 export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
-  // TODO: handle multi-platform images
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
     bodySchema: ImageManifestV2Schema,
     headersSchema: ManifestResponseHeadersSchema,
@@ -317,26 +289,7 @@ export async function getImageTagManifest(token: string, imageRef: ImageRefInter
     },
   })
 
-  const rawContentType = result.headers['content-type']
-  const contentType = rawContentType?.split(';')[0]?.trim()
-
-  if (!contentType) {
-    throw InternalError('Registry response missing Content-Type header.', {
-      imageRef,
-    })
-  }
-
-  if ((ManifestListMediaTypeSchema.options as string[]).includes(contentType)) {
-    return true
-  }
-  if ((ManifestMediaTypeSchema.options as string[]).includes(contentType)) {
-    return false
-  }
-
-  throw InternalError('Unrecognised manifest media type.', {
-    imageRef,
-    contentType,
-  })
+  return { body: result.body, headers: result.headers }
 }
 
 export async function getImageTagManifests(token: string, imageRef: ImageRefInterface) {

@@ -28,8 +28,7 @@ import {
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
-import { platformToString } from '../utils/registryUtils.js'
-import { getImageLayers } from './images/getImageLayers.js'
+import { getLayersByPlatform, getLayersForImageTag } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -93,52 +92,6 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function getLayersByPlatform(
-  user: UserInterface,
-  imageRef: ImageRefInterface,
-): Promise<Record<string, Descriptors[]>> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    {
-      type: 'repository',
-      name: `${imageRef.repository}/${imageRef.name}`,
-      actions: ['pull'],
-    },
-  ])
-
-  const { body } = await getImageTagManifests(repositoryToken, imageRef)
-
-  if (!body || !('manifests' in body)) {
-    throw InternalError('Missing manifest list body.', { imageRef })
-  }
-
-  const target = {}
-
-  for (const manifest of body.manifests) {
-    const platform = platformToString(manifest.platform)
-    if (platform !== 'unknown/unknown') {
-      target[platform] = manifest
-    }
-  }
-
-  return new Proxy(target, {
-    async get(obj, prop: string) {
-      const manifest = obj[prop]
-      if (!manifest) {
-        return undefined
-      }
-
-      const ref = { ...imageRef, tag: manifest.digest }
-      const child = await getImageTagManifests(repositoryToken, ref)
-
-      if (!child.body || 'manifests' in child.body) {
-        throw InternalError('Nested manifest list not supported.', { ref })
-      }
-
-      return [child.body.config, ...child.body.layers]
-    },
-  })
-}
-
 export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
   await checkUserAuth(user, modelId, ['list'])
 
@@ -198,29 +151,21 @@ export async function getScansFromLayers(
   }
 }
 
-async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface): Promise<Descriptors[]> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
-  ])
-  let layers: Descriptors[] = []
-  try {
-    layers = await getImageLayers(repositoryToken, imageRef)
-  } catch (err) {
-    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
-      throw err
-    }
-  }
-  return layers
-}
-
 export async function getModelImageWithScanResults(
   user: UserInterface,
   imageRef: ImageRefInterface,
   platform?: string,
 ): Promise<ImageTagResult> {
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    {
+      type: 'repository',
+      name: `${imageRef.repository}/${imageRef.name}`,
+      actions: ['pull'],
+    },
+  ])
   const layers = platform
-    ? (await getLayersByPlatform(user, imageRef))[platform]
-    : await getLayersForImageTag(user, imageRef)
+    ? (await getLayersByPlatform(repositoryToken, imageRef))[platform]
+    : await getLayersForImageTag(repositoryToken, imageRef)
 
   if (layers === undefined) {
     throw InternalError('Platform cannot be found for this image', { imageRef, platform })
@@ -257,7 +202,7 @@ export async function listModelImagesWithScanResults(
             }
 
             if ('manifests' in manifestResponse.body) {
-              const layersByPlatform = await getLayersByPlatform(user, { ...img, tag })
+              const layersByPlatform = await getLayersByPlatform(repositoryToken, { ...img, tag })
 
               return Promise.all(
                 Object.entries(layersByPlatform).map(async ([platform, layers]) => {
@@ -272,7 +217,7 @@ export async function listModelImagesWithScanResults(
               )
             }
 
-            const layers = await getLayersForImageTag(user, { ...img, tag })
+            const layers = await getLayersForImageTag(repositoryToken, { ...img, tag })
 
             const scan = await getScansFromLayers(layers)
 

@@ -5,7 +5,7 @@ import {
   checkUserAuth,
   getImageBlob,
   getImageManifest,
-  getImageWithScanResults,
+  getModelImageWithScanResults,
   joinDistributionPackageName,
   listModelImages,
   listModelImagesWithScanResults,
@@ -45,6 +45,7 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
+  getImageTagManifests: vi.fn(),
   getImageTagManfiestList: vi.fn(),
   getRegistryLayerStream: vi.fn(),
   listImageTags: vi.fn(() => [] as string[]),
@@ -57,6 +58,8 @@ vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersForImageTag: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersByPlatform: vi.fn(),
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
 
@@ -573,7 +576,7 @@ describe('services > registry', () => {
       ])
     })
 
-    test('getImageWithScanResults > includeFullDetail', async () => {
+    test('getModelImageWithScanResults > includeFullDetail', async () => {
       const scanResult = {
         summary: undefined,
         state: ArtefactScanState.Complete,
@@ -583,51 +586,15 @@ describe('services > registry', () => {
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        true,
-      )
+      const result = await getModelImageWithScanResults({ dn: 'user' }, {
+        repository: 'repo',
+        name: 'img',
+        tag: 'v1',
+      } as any)
 
       expect(result.scanResults).toEqual([
         { scanResults: [{ Results: [] }], summary: undefined, state: ArtefactScanState.Complete },
       ])
-    })
-
-    test('getImageWithScanResults > ignores manifest list not supported error', async () => {
-      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(
-        InternalError('Bailo backend does not currently support manifest lists.'),
-      )
-
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-      )
-
-      expect(result).toEqual({
-        imageSize: 0,
-        lastRunAt: undefined,
-        state: 'notScanned',
-        severityCounts: {
-          critical: 0,
-          high: 0,
-          low: 0,
-          medium: 0,
-          unknown: 0,
-        },
-        tag: 'v1',
-      })
-    })
-
-    test('getImageWithScanResults > rethrows unexpected getImageLayers error', async () => {
-      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(InternalError('Some other error'))
-
-      const promise = getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-      )
-
-      await expect(promise).rejects.toThrowError('Some other error')
     })
 
     test('listModelImagesWithScanResults > includeCount', async () => {
@@ -642,6 +609,8 @@ describe('services > registry', () => {
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
+
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {} })
 
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
@@ -661,8 +630,10 @@ describe('services > registry', () => {
 
       registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
       registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
-      registryClientMocks.isImageTagManifestList.mockResolvedValueOnce(true)
-      registryClientMocks.getImageTagManfiestList.mockResolvedValueOnce(mockBody)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: { manifests: mockBody } })
+      getImageLayersMocks.getLayersByPlatform.mockResolvedValue({
+        'linux/amd64': Promise.resolve([{ digest: 'sha256:layer1', size: 42134 }]),
+      })
 
       ScanModelMock.find.mockReturnValue({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),

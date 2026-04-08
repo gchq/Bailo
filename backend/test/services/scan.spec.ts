@@ -356,24 +356,6 @@ describe('services > scan', () => {
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
       ).rejects.toThrowError('No image scanners are enabled.')
     })
-
-    test('multiplatform results', async () => {
-      const mockBody = [
-        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
-        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
-      ]
-      ScanModelMock.find.mockResolvedValueOnce([])
-      registryClientMocks.isImageTagManifestList.mockResolvedValue(true)
-      registryClientMocks.getImageTagManfiestList.mockResolvedValue(mockBody)
-      const result = await rerunImageScan({} as any, 'model123', {
-        repository: 'repo',
-        name: 'image',
-        tag: 'latest',
-      } as any)
-
-      expect(result).toBe('Image scan started for repo/image:latest')
-      expect(fileScanningMock.startScans).not.toHaveBeenCalled()
-    })
   })
 
   describe('rerunImageScanNoAuth', () => {
