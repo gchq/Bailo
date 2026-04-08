@@ -36,18 +36,16 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
       />
     </>
   ) : (
-    <Container maxWidth='xl'>
-      <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
-        <Box sx={{ pt: 2 }}>
-          <EntryOverviewDetails entry={entry} />
-        </Box>
-        <Box width='100%'>
-          <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
-            {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-            {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
-          </Container>
-        </Box>
-      </Stack>
-    </Container>
+    <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
+      <Box sx={{ pt: 2, width: '25%' }}>
+        <EntryOverviewDetails entry={entry} />
+      </Box>
+      <Box width='100%'>
+        <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
+          {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
+          {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
+        </Container>
+      </Box>
+    </Stack>
   )
 }
