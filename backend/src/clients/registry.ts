@@ -11,20 +11,23 @@ import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
   AcceptManifestMediaTypeHeaderValue,
-  BaseApiCheckResponseBody,
-  BaseApiCheckResponseHeaders,
-  BlobResponseHeaders,
-  BlobUploadResponseHeaders,
-  CatalogBodyResponse,
-  CatalogResponseHeaders,
+  BaseApiCheckResponseBodySchema,
+  BaseApiCheckResponseHeadersSchema,
+  BlobResponseHeadersSchema,
+  BlobUploadResponseHeadersSchema,
+  CatalogBodyResponseSchema,
+  CatalogResponseHeadersSchema,
   CommonRegistryHeaders,
-  DeleteManifestResponseHeaders,
-  ImageManifestV2,
-  ManifestResponseBody,
-  ManifestResponseHeaders,
-  RegistryErrorResponseBody,
-  TagsListResponseBody,
-  TagsListResponseHeaders,
+  CommonRegistryHeadersSchema,
+  DeleteManifestResponseHeadersSchema,
+  ImageManifestV2Schema,
+  ManifestListMediaTypeSchema,
+  ManifestMediaTypeSchema,
+  ManifestResponseBodySchema,
+  ManifestResponseHeadersSchema,
+  RegistryErrorResponseBodySchema,
+  TagsListResponseBodySchema,
+  TagsListResponseHeadersSchema,
 } from '../utils/registryResponses.js'
 
 const registry = config.registry.connection.internal
@@ -102,7 +105,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
   endpoint: string,
   {
     bodySchema,
-    headersSchema = CommonRegistryHeaders as unknown as ZodSchema<THeaders>,
+    headersSchema = CommonRegistryHeadersSchema as unknown as ZodSchema<THeaders>,
     expectStream = false,
     extraFetchOptions = {},
     extraHeaders = {},
@@ -153,8 +156,8 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
     // check response
     if (!res.ok) {
       controller.abort()
-      if (rawBody && RegistryErrorResponseBody.safeParse(rawBody).success) {
-        throw RegistryError(RegistryErrorResponseBody.parse(rawBody), context)
+      if (rawBody && RegistryErrorResponseBodySchema.safeParse(rawBody).success) {
+        throw RegistryError(RegistryErrorResponseBodySchema.parse(rawBody), context)
       }
 
       throw InternalError('Unrecognised registry error response.', {
@@ -229,8 +232,8 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
 
 export async function getApiVersion(token: string) {
   const result = await registryRequest(token, '', {
-    bodySchema: BaseApiCheckResponseBody,
-    headersSchema: BaseApiCheckResponseHeaders,
+    bodySchema: BaseApiCheckResponseBodySchema,
+    headersSchema: BaseApiCheckResponseHeadersSchema,
   })
 
   return result.headers['docker-distribution-api-version']
@@ -238,8 +241,8 @@ export async function getApiVersion(token: string) {
 
 export async function listModelRepos(token: string, modelId: string): Promise<string[]> {
   const result = await registryRequest(token, '_catalog?n=100', {
-    bodySchema: CatalogBodyResponse,
-    headersSchema: CatalogResponseHeaders,
+    bodySchema: CatalogBodyResponseSchema,
+    headersSchema: CatalogResponseHeadersSchema,
     pagination: {
       enabled: true,
       aggregate: (acc, next) => ({
@@ -255,8 +258,8 @@ export async function listModelRepos(token: string, modelId: string): Promise<st
 export async function listImageTags(token: string, repoRef: RepoRefInterface) {
   try {
     const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/tags/list`, {
-      bodySchema: TagsListResponseBody,
-      headersSchema: TagsListResponseHeaders,
+      bodySchema: TagsListResponseBodySchema,
+      headersSchema: TagsListResponseHeadersSchema,
       pagination: {
         enabled: true,
         aggregate: (acc, next) => ({
@@ -276,7 +279,10 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
   }
 }
 
-export async function resolveToImageManifests(token: string, imageRef: ImageRefInterface): Promise<ImageManifestV2[]> {
+export async function resolveToImageManifests(
+  token: string,
+  imageRef: ImageRefInterface,
+): Promise<ImageManifestV2Schema[]> {
   const { body } = await getImageTagManifests(token, imageRef)
   if (!body) {
     throw InternalError('Missing manifest body.', { imageRef })
@@ -295,7 +301,7 @@ export async function resolveToImageManifests(token: string, imageRef: ImageRefI
     )
   }
 
-  return [body as ImageManifestV2]
+  return [body as ImageManifestV2Schema]
 }
 
 /**
@@ -304,20 +310,39 @@ export async function resolveToImageManifests(token: string, imageRef: ImageRefI
 export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
   // TODO: handle multi-platform images
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    bodySchema: ImageManifestV2,
-    headersSchema: ManifestResponseHeaders,
+    bodySchema: ImageManifestV2Schema,
+    headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,
     },
   })
 
-  return { body: result.body, headers: result.headers }
+  const rawContentType = result.headers['content-type']
+  const contentType = rawContentType?.split(';')[0]?.trim()
+
+  if (!contentType) {
+    throw InternalError('Registry response missing Content-Type header.', {
+      imageRef,
+    })
+  }
+
+  if ((ManifestListMediaTypeSchema.options as string[]).includes(contentType)) {
+    return true
+  }
+  if ((ManifestMediaTypeSchema.options as string[]).includes(contentType)) {
+    return false
+  }
+
+  throw InternalError('Unrecognised manifest media type.', {
+    imageRef,
+    contentType,
+  })
 }
 
 export async function getImageTagManifests(token: string, imageRef: ImageRefInterface) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    bodySchema: ManifestResponseBody,
-    headersSchema: ManifestResponseHeaders,
+    bodySchema: ManifestResponseBodySchema,
+    headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,
     },
@@ -332,7 +357,7 @@ export async function getRegistryLayerStream(
   layerDigest: string,
 ): Promise<{ stream: Readable; abort: () => void }> {
   const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${layerDigest}`, {
-    headersSchema: BlobResponseHeaders,
+    headersSchema: BlobResponseHeadersSchema,
     expectStream: true,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,
@@ -372,7 +397,7 @@ export async function doesLayerExist(token: string, repoRef: RepoRefInterface, d
 
 export async function initialiseUpload(token: string, repoRef: RepoRefInterface) {
   const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/uploads/`, {
-    headersSchema: BlobUploadResponseHeaders,
+    headersSchema: BlobUploadResponseHeadersSchema,
     expectStream: true,
     extraFetchOptions: {
       method: 'POST',
@@ -384,7 +409,7 @@ export async function initialiseUpload(token: string, repoRef: RepoRefInterface)
 
 export async function putManifest(token: string, imageRef: ImageRefInterface, manifest: BodyInit, contentType: string) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    headersSchema: ManifestResponseHeaders,
+    headersSchema: ManifestResponseHeadersSchema,
     expectStream: true,
     extraFetchOptions: {
       method: 'PUT',
@@ -408,7 +433,7 @@ export async function uploadLayerMonolithic(
   size: string,
 ) {
   const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
-    headersSchema: BlobUploadResponseHeaders,
+    headersSchema: BlobUploadResponseHeadersSchema,
     expectStream: true,
     extraFetchOptions: {
       method: 'PUT',
@@ -436,7 +461,7 @@ export async function mountBlob(
     token,
     `${destinationRepoRef.repository}/${destinationRepoRef.name}/blobs/uploads/?from=${sourceRepoRef.repository}/${sourceRepoRef.name}&mount=${blobDigest}`,
     {
-      headersSchema: BlobUploadResponseHeaders,
+      headersSchema: BlobUploadResponseHeadersSchema,
       extraFetchOptions: {
         method: 'POST',
       },
@@ -449,7 +474,7 @@ export async function mountBlob(
 
 export async function deleteManifest(token: string, imageRef: ImageRefInterface) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    headersSchema: DeleteManifestResponseHeaders,
+    headersSchema: DeleteManifestResponseHeadersSchema,
     expectStream: true,
     extraFetchOptions: {
       method: 'DELETE',

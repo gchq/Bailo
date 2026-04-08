@@ -11,3 +11,5 @@ exports[`routes > artefactscanning > putImageScan > audit > expected call 2`] = 
   "tag": "expedita",
 }
 `;
+
+exports[`routes > internal > registry > events > 200 > ok 1`] = `""`;

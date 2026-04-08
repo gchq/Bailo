@@ -62,7 +62,7 @@ export const ModelScanResponseSchema = z.object({
     }),
   ),
 })
-export type ModelScanResponseSchema = z.infer<typeof ModelScanResponseSchema>
+export type ModelScanResponse = z.infer<typeof ModelScanResponseSchema>
 
 // There's no formal definition of the JSON schema so this must be permissive
 const ImageHistorySchema = z
@@ -189,7 +189,7 @@ export const TrivyScanResultResponseSchema = z
     Results: z.array(ResultSchema).optional(),
   })
   .passthrough()
-export type TrivyScanResultResponseSchema = z.infer<typeof TrivyScanResultResponseSchema>
+export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponseSchema>
 
 async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
@@ -239,14 +239,11 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
   return await res.json()
 }
 
-export async function scanFileStream(stream: Readable, fileName: string): Promise<ModelScanResponseSchema> {
+export async function scanFileStream(stream: Readable, fileName: string): Promise<ModelScanResponse> {
   return ModelScanResponseSchema.parse(await scanStream(stream, fileName, 'file'))
 }
 
-export async function scanImageBlobStream(
-  stream: Readable,
-  blobDigest: string,
-): Promise<TrivyScanResultResponseSchema> {
+export async function scanImageBlobStream(stream: Readable, blobDigest: string): Promise<TrivyScanResultResponse> {
   return TrivyScanResultResponseSchema.parse(await scanStream(stream, blobDigest, 'image'))
 }
 

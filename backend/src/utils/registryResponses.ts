@@ -8,28 +8,28 @@ import { InternalError } from './error.js'
  * so definitions must also be lower case.
  */
 
-const HeaderValue = z.string()
+const HeaderValueSchema = z.string()
 // Common headers
-export const CommonRegistryHeaders = z
+export const CommonRegistryHeadersSchema = z
   .object({
-    'docker-distribution-api-version': HeaderValue.optional(),
-    'content-type': HeaderValue.optional(),
-    'content-length': HeaderValue.optional(),
-    date: HeaderValue.optional(),
+    'docker-distribution-api-version': HeaderValueSchema.optional(),
+    'content-type': HeaderValueSchema.optional(),
+    'content-length': HeaderValueSchema.optional(),
+    date: HeaderValueSchema.optional(),
   })
   .passthrough()
-export type CommonRegistryHeaders = z.infer<typeof CommonRegistryHeaders>
+export type CommonRegistryHeaders = z.infer<typeof CommonRegistryHeadersSchema>
 
 // Error response
-const RegistryErrorDetail = z.object({
+const RegistryErrorDetailSchema = z.object({
   code: z.string(),
   message: z.string(),
   detail: z.unknown().optional(),
 })
-export const RegistryErrorResponseBody = z.object({
-  errors: z.array(RegistryErrorDetail),
+export const RegistryErrorResponseBodySchema = z.object({
+  errors: z.array(RegistryErrorDetailSchema),
 })
-export type RegistryErrorResponseBody = z.infer<typeof RegistryErrorResponseBody>
+export type RegistryErrorResponseBody = z.infer<typeof RegistryErrorResponseBodySchema>
 
 export function parseRegistryResponse<T>(
   schema: ZodSchema<T>,
@@ -42,7 +42,7 @@ export function parseRegistryResponse<T>(
   }
 
   // fallback on error
-  const error = RegistryErrorResponseBody.safeParse(body)
+  const error = RegistryErrorResponseBodySchema.safeParse(body)
   if (error.success) {
     return { ok: false, error: error.data }
   }
@@ -52,106 +52,106 @@ export function parseRegistryResponse<T>(
 }
 
 // GET /v2/
-export const BaseApiCheckResponseHeaders = CommonRegistryHeaders.extend({
+export const BaseApiCheckResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
   'docker-distribution-api-version': z
     .string()
     .regex(/^registry\/2\.0$/)
     .optional(),
 })
-export const BaseApiCheckResponseBody = z.record(z.never())
+export const BaseApiCheckResponseBodySchema = z.record(z.never())
 
 // GET /v2/<name>/tags/list
-export const TagsListResponseBody = z.object({
+export const TagsListResponseBodySchema = z.object({
   name: z.string(),
   tags: z.array(z.string()).nullable(),
 })
-export const TagsListResponseHeaders = CommonRegistryHeaders.extend({
-  link: HeaderValue.optional(), // pagination
+export const TagsListResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
+  link: HeaderValueSchema.optional(), // pagination
 })
 
 // GET /v2/_catalog
-export const CatalogBodyResponse = z.object({
+export const CatalogBodyResponseSchema = z.object({
   repositories: z.array(z.string()),
 })
-export const CatalogResponseHeaders = TagsListResponseHeaders
+export const CatalogResponseHeadersSchema = TagsListResponseHeadersSchema
 
 // GET /v2/<name>/blobs/<digest>
-export const BlobResponseHeaders = CommonRegistryHeaders.extend({
-  'docker-content-digest': HeaderValue,
-  etag: HeaderValue.optional(),
+export const BlobResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
+  'docker-content-digest': HeaderValueSchema,
+  etag: HeaderValueSchema.optional(),
 })
 
 // POST/PATCH/PUT blob upload
-export const BlobUploadResponseHeaders = CommonRegistryHeaders.extend({
-  location: HeaderValue.optional(),
-  range: HeaderValue.optional(),
-  'docker-upload-uuid': HeaderValue.optional(),
+export const BlobUploadResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
+  location: HeaderValueSchema.optional(),
+  range: HeaderValueSchema.optional(),
+  'docker-upload-uuid': HeaderValueSchema.optional(),
 })
 
 // DELETE /v2/<name>/manifests/<reference>
-export const DeleteManifestResponseHeaders = CommonRegistryHeaders.extend({
-  'docker-content-digest': HeaderValue.optional(),
+export const DeleteManifestResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
+  'docker-content-digest': HeaderValueSchema.optional(),
 })
 
 // GET /v2/<name>/manifests/<reference>
 export const DockerManifestMediaType = 'application/vnd.docker.distribution.manifest.v2+json'
 export const OCIManifestMediaType = 'application/vnd.oci.image.manifest.v1+json'
 export const OCIEmptyMediaType = 'application/vnd.oci.empty.v1+json'
-export const ManifestMediaType = z.enum([DockerManifestMediaType, OCIManifestMediaType])
-export const AcceptManifestMediaTypeHeaderValue = ManifestMediaType.options.join(',')
-export const ManifestListMediaType = z.enum([
+export const ManifestMediaTypeSchema = z.enum([DockerManifestMediaType, OCIManifestMediaType])
+export const AcceptManifestMediaTypeHeaderValue = ManifestMediaTypeSchema.options.join(',')
+export const ManifestListMediaTypeSchema = z.enum([
   'application/vnd.docker.distribution.manifest.list.v2+json',
   'application/vnd.oci.image.index.v1+json',
 ])
-export const AcceptManifestListMediaTypeHeaderValue = ManifestListMediaType.options.join(',')
+export const AcceptManifestListMediaTypeHeaderValue = ManifestListMediaTypeSchema.options.join(',')
 
-const BaseDescriptor = z.object({
+const BaseDescriptorSchema = z.object({
   mediaType: z.string(),
   size: z.number().int().nonnegative(),
   digest: z.string(),
 })
-const DockerDescriptor = BaseDescriptor.extend({
+const DockerDescriptorSchema = BaseDescriptorSchema.extend({
   urls: z.array(z.string()).optional(),
 })
-const OCIAnnotations = z.record(z.string(), z.string())
-const OCIDescriptor = BaseDescriptor.extend({
+const OCIAnnotationsSchema = z.record(z.string(), z.string())
+const OCIDescriptorSchema = BaseDescriptorSchema.extend({
   urls: z.array(z.string()).optional(),
-  annotations: OCIAnnotations.optional(),
+  annotations: OCIAnnotationsSchema.optional(),
   data: z.string().optional(),
   artifactType: z.string().optional(),
 })
-export const Descriptors = z.union([BaseDescriptor, DockerDescriptor, OCIDescriptor])
-export type Descriptors = z.infer<typeof Descriptors>
+export const DescriptorsSchema = z.union([BaseDescriptorSchema, DockerDescriptorSchema, OCIDescriptorSchema])
+export type Descriptors = z.infer<typeof DescriptorsSchema>
 
-const DockerImageManifestV2 = z.object({
+const DockerImageManifestV2Schema = z.object({
   schemaVersion: z.literal(2),
   mediaType: z.literal(DockerManifestMediaType),
-  config: BaseDescriptor,
-  layers: z.array(DockerDescriptor),
+  config: BaseDescriptorSchema,
+  layers: z.array(DockerDescriptorSchema),
 })
 
 // helper for conditional setting
-const OCIImageBaseManifestV2 = z.object({
+const OCIImageBaseManifestV2Schema = z.object({
   schemaVersion: z.literal(2),
   mediaType: z.literal(OCIManifestMediaType).optional(),
   artifactType: z.string().optional(),
-  config: OCIDescriptor,
-  layers: z.array(OCIDescriptor),
-  subject: OCIDescriptor.optional(),
-  annotations: OCIAnnotations.optional(),
+  config: OCIDescriptorSchema,
+  layers: z.array(OCIDescriptorSchema),
+  subject: OCIDescriptorSchema.optional(),
+  annotations: OCIAnnotationsSchema.optional(),
 })
-const OCIImageManifestV2 = z.discriminatedUnion('mediaType', [
-  OCIImageBaseManifestV2.extend({
+const OCIImageManifestV2Schema = z.discriminatedUnion('mediaType', [
+  OCIImageBaseManifestV2Schema.extend({
     mediaType: z.literal(OCIManifestMediaType),
   }),
-  OCIImageBaseManifestV2.extend({
+  OCIImageBaseManifestV2Schema.extend({
     mediaType: z.literal(OCIEmptyMediaType),
     artifactType: z.string(),
   }),
 ])
 
-export const ImageManifestV2 = z.union([DockerImageManifestV2, OCIImageManifestV2])
-export type ImageManifestV2 = z.infer<typeof ImageManifestV2>
+export const ImageManifestV2Schema = z.union([DockerImageManifestV2Schema, OCIImageManifestV2Schema])
+export type ImageManifestV2Schema = z.infer<typeof ImageManifestV2Schema>
 
 export const ManifestPlatform = z
   .object({
@@ -164,21 +164,21 @@ export const ManifestPlatform = z
   .optional()
 export type ManifestPlatform = z.infer<typeof ManifestPlatform>
 
-const ManifestListDescriptor = BaseDescriptor.extend({
+const ManifestListDescriptorSchema = BaseDescriptorSchema.extend({
   platform: ManifestPlatform,
 })
 
-export type ManifestListDescriptor = z.infer<typeof ManifestListDescriptor>
+export type ManifestListDescriptor = z.infer<typeof ManifestListDescriptorSchema>
 
-export const ManifestListV2 = z.object({
+export const ManifestListV2Schema = z.object({
   schemaVersion: z.literal(2),
-  mediaType: ManifestListMediaType.optional(),
-  manifests: z.array(ManifestListDescriptor),
+  mediaType: ManifestListMediaTypeSchema.optional(),
+  manifests: z.array(ManifestListDescriptorSchema),
 })
 // TODO: handle multi-platform images
-export const ManifestResponseBody = z.union([ImageManifestV2, ManifestListV2])
+export const ManifestResponseBodySchema = z.union([ImageManifestV2Schema, ManifestListV2Schema])
 
-export const ManifestResponseHeaders = CommonRegistryHeaders.extend({
-  'docker-content-digest': HeaderValue,
-  etag: HeaderValue.optional(),
+export const ManifestResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
+  'docker-content-digest': HeaderValueSchema,
+  etag: HeaderValueSchema.optional(),
 })

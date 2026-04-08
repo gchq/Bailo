@@ -299,6 +299,9 @@ data:
         interval: '{{ .Values.stroom.interval }}',
         generator: '{{ .Values.stroom.generator }}',
         rejectUnauthorized: '{{ .Values.stroom.rejectUnauthorized }}',
+        xmlns: '{{ .Values.stroom.xmlns }}',
+        schemaLocation: '{{ .Values.stroom.schemaLocation }}',
+        version: '{{ .Values.stroom.version }}',
       }
     }
 
