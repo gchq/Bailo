@@ -46,7 +46,7 @@ export const putFileScan = [
       params: { modelId, fileId },
     } = parse(req, putFileScanSchema)
 
-    const status = await rerunFileScan(req.user, modelId, fileId, true)
+    const status = await rerunFileScan(req.user, modelId, fileId)
 
     await audit.onUpdateFile(req, modelId, fileId)
 

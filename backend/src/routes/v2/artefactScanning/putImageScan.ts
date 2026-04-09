@@ -50,7 +50,7 @@ export const putImageScan = [
     } = parse(req, putImageScanSchema)
     const imageRef = { repository: modelId, name, tag }
 
-    const status = await rerunImageScan(req.user, modelId, imageRef, true)
+    const status = await rerunImageScan(req.user, modelId, imageRef)
 
     await audit.onUpdateImage(req, modelId, imageRef)
 

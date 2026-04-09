@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from 'mongoose'
+import { ClientSession } from 'mongoose'
 
 import { isImageTagManifestList } from '../clients/registry.js'
 import {
@@ -19,6 +19,7 @@ import { dedupe } from '../utils/array.js'
 import config from '../utils/config.js'
 import { BadReq, Conflict, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { plural } from '../utils/string.js'
+import { useTransaction } from '../utils/transactions.js'
 import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -77,65 +78,37 @@ async function runScans(
   scannersInfo: ArtefactScanningConnectorInfo[],
   scanIdentifier: ArtefactScanIdentifier,
   artefact: ArtefactInterface,
-  session?: ClientSession,
-  newSession: boolean = false,
 ) {
-  if (newSession && session) {
-    throw InternalError('Cannot use an existing session with a new session', { scannersInfo, scanIdentifier })
-  }
-  let ownedSession: ClientSession | undefined
+  await useTransaction([
+    async (session) => {
+      if (scannersInfo && scannersInfo.length > 0) {
+        const activeScanners = scannersInfo.filter((s) => s.artefactKind === scanIdentifier.artefactKind)
 
-  try {
-    if (newSession) {
-      // Create a new session (useful for fire-and-forget approach)
-      ownedSession = await mongoose.startSession()
-      session = ownedSession
-      session.startTransaction()
-    }
+        try {
+          const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
+            ...scannerInfo,
+            state: ArtefactScanState.InProgress,
+            lastRunAt: new Date(),
+          }))
 
-    if (scannersInfo && scannersInfo.length > 0) {
-      const activeScanners = scannersInfo.filter((s) => s.artefactKind === scanIdentifier.artefactKind)
+          await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, session)
 
-      try {
-        const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
-          ...scannerInfo,
-          state: ArtefactScanState.InProgress,
-          lastRunAt: new Date(),
-        }))
+          const resultsArray = await scanners.startScans(artefact)
+          await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
+        } catch (error) {
+          log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
+          const failedResults = activeScanners.map((scannerInfo) => ({
+            ...scannerInfo,
+            state: ArtefactScanState.Error,
+            lastRunAt: new Date(),
+          }))
 
-        await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, session)
-
-        const resultsArray = await scanners.startScans(artefact)
-        // This will always release the lock by setting results to no longer be in progress
-        await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
-      } catch (error) {
-        log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
-        const failedResults = activeScanners.map((scannerInfo) => ({
-          ...scannerInfo,
-          state: ArtefactScanState.Error,
-          lastRunAt: new Date(),
-        }))
-
-        // This will always release the lock by setting results to no longer be in progress
-        await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
+          // This will always release the lock by setting results to no longer be in progress
+          await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
+        }
       }
-    }
-
-    if (ownedSession) {
-      await ownedSession.commitTransaction()
-    }
-  } catch (err) {
-    if (ownedSession) {
-      // Only abort if we own the transaction
-      await ownedSession.abortTransaction()
-    }
-    throw err
-  } finally {
-    if (ownedSession) {
-      // Only clean up if we own the transaction
-      ownedSession.endSession()
-    }
-  }
+    },
+  ])
 }
 
 async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promise<number> {
@@ -157,10 +130,10 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
   return Math.round(minutesBeforeRetrying / 60000)
 }
 
-export async function scanFile(file: FileInterfaceDoc, session?: ClientSession) {
+export async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
   const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
-  await runScans(scannersInfo, fileIdentifier, file, session)
+  await runScans(scannersInfo, fileIdentifier, file)
 
   const scanResults = await ScanModel.find(fileIdentifier)
   const ret: FileWithScanResultsInterface = {
@@ -172,7 +145,7 @@ export async function scanFile(file: FileInterfaceDoc, session?: ClientSession) 
   return ret
 }
 
-export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string, newSession: boolean = false) {
+export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
@@ -207,7 +180,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   throwIfNoScanners(scannersInfo, ArtefactKind.FILE)
 
   // Do not await so that the endpoint can return early (fire-and-forget)
-  runScans(scannersInfo, fileIdentifier, file, undefined, newSession).catch((error) => {
+  runScans(scannersInfo, fileIdentifier, file).catch((error) => {
     log.error(
       { scannersInfo, scanIdentifier: fileIdentifier, file, error },
       'Unable to set failure state after failing to run file scans. Safely aborted.',
@@ -216,12 +189,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   return `File scan started for ${file.name}`
 }
 
-export async function rerunImageScan(
-  user: UserInterface,
-  modelId: string,
-  image: ImageRef,
-  newSession: boolean = false,
-) {
+export async function rerunImageScan(user: UserInterface, modelId: string, image: ImageRef) {
   const model = await getModelById(user, modelId)
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
@@ -244,7 +212,7 @@ export async function rerunImageScan(
     { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
   ])
 
-  return await rerunImageScanNoAuth(image, repositoryToken, newSession)
+  return await rerunImageScanNoAuth(image, repositoryToken)
 }
 
 /**
@@ -253,7 +221,7 @@ export async function rerunImageScan(
  * @remarks
  * _Only_ use this function when an auth check would break expected functionality, otherwise use `rerunImageScan`.
  */
-export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: string, newSession: boolean = false) {
+export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: string) {
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
 
@@ -275,14 +243,12 @@ export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: str
   for (const imageLayer of imageLayers) {
     const layerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayer.digest }
     // Do not await so that the endpoint can return early (fire-and-forget)
-    runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }, undefined, newSession).catch(
-      (error) => {
-        log.error(
-          { scannersInfo, scanIdentifier: layerIdentifier, image, imageName, error },
-          'Unable to set failure state after failing to run image scans. Safely aborted.',
-        )
-      },
-    )
+    runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }).catch((error) => {
+      log.error(
+        { scannersInfo, scanIdentifier: layerIdentifier, image, imageName, error },
+        'Unable to set failure state after failing to run image scans. Safely aborted.',
+      )
+    })
   }
   return `Image scan started for ${imageName}`
 }

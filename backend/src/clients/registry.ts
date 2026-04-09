@@ -278,17 +278,14 @@ export async function listImageTags(token: string, repoRef: ImageNameRef) {
 }
 
 export async function isImageTagManifestList(token: string, imageRef: ImageRef): Promise<boolean> {
-  const result = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${'tag' in imageRef ? imageRef.tag : imageRef.digest}`,
-    {
-      // do not validate the body here as we only care about Content-Type
-      headersSchema: ManifestResponseHeadersSchema,
-      extraHeaders: {
-        Accept: AcceptManifestMediaTypeHeaderValue,
-      },
+  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
+    // do not validate the body here as we only care about Content-Type
+    headersSchema: ManifestResponseHeadersSchema,
+    extraHeaders: {
+      Accept: AcceptManifestMediaTypeHeaderValue,
     },
-  )
+  })
 
   const rawContentType = result.headers['content-type']
   const contentType = rawContentType?.split(';')[0]?.trim()

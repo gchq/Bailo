@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
@@ -6,6 +6,7 @@ import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '.
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
+vi.mock('../../src/utils/transactions.js')
 vi.mock('pretty-bytes')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
@@ -125,10 +126,6 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const testFileId = '73859F8D26679D2E52597326'
 
 describe('services > scan', () => {
-  beforeEach(() => {
-    ScanModelMock.findOne.mockResolvedValueOnce(null)
-  })
-
   describe('scanFile', () => {
     test('successfully scans a file and returns scan results', async () => {
       const scanResult = {
