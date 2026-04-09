@@ -6,7 +6,7 @@ import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
 import { InferenceDoc } from '../../../src/models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/models/Model.js'
-import { ImageRefInterface, ReleaseDoc } from '../../../src/models/Release.js'
+import { ImageTagRef, ReleaseDoc } from '../../../src/models/Release.js'
 import { ResponseInterface } from '../../../src/models/Response.js'
 import { ReviewInterface } from '../../../src/models/Review.js'
 import { ReviewRoleInterface } from '../../../src/models/ReviewRole.js'
@@ -397,7 +397,7 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onDeleteImage > save expected event', async () => {
-    await connector.onDeleteImage(deleteEventRequest, 'modelId', { tag: 'string' } as ImageRefInterface)
+    await connector.onDeleteImage(deleteEventRequest, 'modelId', { tag: 'string' } as ImageTagRef)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
