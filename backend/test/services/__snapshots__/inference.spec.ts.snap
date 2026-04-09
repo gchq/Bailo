@@ -21,6 +21,7 @@ exports[`services > inference > removeInferences > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
         [
@@ -46,6 +47,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
                 [
@@ -89,6 +91,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
                 [
@@ -152,6 +155,7 @@ exports[`services > inference > removeInferences > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
         [
@@ -173,6 +177,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
                 [
@@ -220,6 +225,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
                 [
@@ -283,6 +289,7 @@ exports[`services > inference > removeInferences > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
         [
@@ -304,6 +311,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
                 [
@@ -347,6 +355,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
                 [

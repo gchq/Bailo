@@ -157,7 +157,7 @@ describe('connectors > artefactScanning > wrapper', () => {
   test('startScans() throws InternalError on incompatible artefact type', async () => {
     const scanner = new TestFileScanner()
     const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-    const artefact = { tag: undefined, _id: undefined } as any
+    const artefact = {} as any
 
     await expect(wrapper.startScans(artefact)).rejects.toBeInstanceOf(TypeError)
   })

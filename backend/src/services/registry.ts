@@ -12,7 +12,7 @@ import {
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
-import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import { ImageNameRef, ImageTagRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
@@ -108,7 +108,7 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
 
 export async function getImageWithScanResults(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   includeFullDetail = false,
 ): Promise<ImageTagResult> {
   const layers = await getLayersForImageTag(user, imageRef)
@@ -145,7 +145,7 @@ export async function getImageWithScanResults(
   }
 }
 
-async function getLayersForImageTag(user: UserInterface, imageRef: ImageRefInterface): Promise<Descriptors[]> {
+async function getLayersForImageTag(user: UserInterface, imageRef: ImageTagRef): Promise<Descriptors[]> {
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
@@ -206,7 +206,7 @@ async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): 
     .exec()
 }
 
-export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
+export async function getImageManifest(user: UserInterface, imageRef: ImageTagRef) {
   await checkUserAuth(user, imageRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
@@ -217,7 +217,7 @@ export async function getImageManifest(user: UserInterface, imageRef: ImageRefIn
   return await getImageTagManifest(repositoryToken, imageRef)
 }
 
-export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterface, digest: string) {
+export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {
   await checkUserAuth(user, repoRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
@@ -233,7 +233,7 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * @remarks
  * This does _not_ also update any mongo data, and does _not_ do any auth checks on the source or destination.
  */
-export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
+export async function renameImage(user: UserInterface, source: ImageTagRef, destination: ImageTagRef) {
   let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
     const repositoryToken = await getAccessToken({ dn: user.dn }, [
@@ -320,7 +320,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
 
 export async function softDeleteImage(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   deleteMirroredModel: boolean = false,
   session?: ClientSession,
 ) {
@@ -331,7 +331,7 @@ export async function softDeleteImage(
 
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
-  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
@@ -355,7 +355,7 @@ export async function softDeleteImage(
 
 export async function restoreSoftDeletedImage(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   restoreMirroredModel: boolean = false,
 ) {
   const model = await getModelById(user, imageRef.repository)
@@ -365,6 +365,6 @@ export async function restoreSoftDeletedImage(
 
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
-  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
   await renameImage(user, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag }, imageRef)
 }

@@ -55,7 +55,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build ${{ matrix.component.name }} image
         uses: docker/build-push-action@v7
@@ -188,7 +188,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # jq is required so that `npm ci` is not needed to generate certs
       - name: Install jq
@@ -355,7 +355,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Get Bailo Docker images
       - name: Download artifact
