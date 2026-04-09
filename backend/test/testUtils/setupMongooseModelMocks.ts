@@ -3,6 +3,7 @@ import { beforeEach, type MockedFunction, MockInstance, vi } from 'vitest'
 const CHAINABLE_METHODS = [
   'aggregate',
   'append',
+  'bulkWrite',
   'delete',
   'deleteMany',
   'deleteOne',
@@ -25,6 +26,7 @@ const CHAINABLE_METHODS = [
 
 const QUERY_LIKE_METHODS = [
   'aggregate',
+  'bulkWrite',
   'find',
   'append',
   'filter',

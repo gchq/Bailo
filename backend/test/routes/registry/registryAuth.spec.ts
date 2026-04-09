@@ -242,7 +242,7 @@ describe('registryAuth', () => {
 
   describe('checkAccess', () => {
     test('failure > soft deleted', async () => {
-      const name = `${softDeletePrefix}model/image`
+      const name = `${softDeletePrefix}/model/image`
 
       const auth = await checkAccess({ name } as any, user)
 

@@ -6,7 +6,7 @@ import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
-import ReleaseModel, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import Review, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -56,7 +56,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
   if (release.images && release.images.length > 0) {
     const registryImages = await listModelImages(user, release.modelId)
 
-    const initialValue: ImageRefInterface[] = []
+    const initialValue: ImageTagRef[] = []
     const missingImages = release.images.reduce((acc, releaseImage) => {
       if (
         !registryImages.some(
@@ -659,7 +659,7 @@ export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
 export async function findAndDeleteImageFromReleases(
   user: UserInterface,
   modelId: string,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   session?: ClientSession,
 ) {
   // Handles auth

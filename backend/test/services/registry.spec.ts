@@ -38,7 +38,7 @@ vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
   issueAccessToken: vi.fn(() => 'token'),
-  softDeletePrefix: 'soft_deleted/',
+  softDeletePrefix: 'soft_deleted',
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 

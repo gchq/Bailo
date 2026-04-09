@@ -28,7 +28,7 @@ const cryptoCache = new NodeCache({ useClones: false })
 const READ_ONLY_ACTIONS = ['pull', 'list'] as const
 
 // Similar to the MongoDB soft-delete plugin, specify the prefix for any deleted image names
-export const softDeletePrefix = 'soft_deleted/'
+export const softDeletePrefix = 'soft_deleted'
 
 export async function getAdminToken(): Promise<string> {
   const cached = cryptoCache.get<string>('adminToken')
@@ -225,7 +225,7 @@ export function parseResourceScope(rawScopes: string): Access[] {
 }
 
 export async function checkAccess(access: Access, user: UserInterface, admin?: boolean): Promise<AuthResponse> {
-  if (access.name.startsWith(softDeletePrefix)) {
+  if (access.name.startsWith(`${softDeletePrefix}/`)) {
     const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
     log.warn({ userDn: user.dn, access }, info)
     return {
