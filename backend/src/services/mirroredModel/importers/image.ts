@@ -11,7 +11,7 @@ import { getAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
-import { ImageManifestV2, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
+import { ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
@@ -31,7 +31,7 @@ export class ImageImporter extends BaseImporter {
   protected readonly user: UserInterface
   protected readonly imageName: string
   protected readonly imageTag: string
-  protected manifestBody: ImageManifestV2 | null = null
+  protected manifestBody: ImageManifestV2Schema | null = null
 
   static readonly manifestRegex = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,
@@ -68,7 +68,7 @@ export class ImageImporter extends BaseImporter {
       if (ImageImporter.manifestRegex.test(entry.name)) {
         // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
         log.debug({ ...this.logData }, 'Extracting un-tarred manifest.')
-        this.manifestBody = ImageManifestV2.parse(await json(stream))
+        this.manifestBody = ImageManifestV2Schema.parse(await json(stream))
       } else if (ImageImporter.blobRegex.test(entry.name)) {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`

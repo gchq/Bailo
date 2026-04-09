@@ -7,7 +7,7 @@ import { createFixture, testGet } from '../../../testUtils/routes.js'
 vi.mock('../../../../src/connectors/audit/index.js')
 
 vi.mock('../../../../src/services/registry.js', () => ({
-  getImageWithScanResults: vi.fn(() => [{ _id: 'test' }]),
+  getModelImageWithScanResults: vi.fn(() => [{ _id: 'test' }]),
 }))
 
 describe('routes > images > getImage', () => {

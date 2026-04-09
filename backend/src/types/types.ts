@@ -239,14 +239,17 @@ export type ModelImageTags = {
   tags: Array<string>
 }
 
-export type ImageTagResult = {
-  tag: string
+export type ImageScanResult = {
   state: ArtefactScanStateKeys
   severityCounts: SeverityCounts
-  platform?: string
   scanResults?: ScanInterface[]
   imageSize: number
 }
+
+export type ImageTagResult = {
+  tag: string
+  platform?: string
+} & ImageScanResult
 
 export type ImageScanResults = {
   scanSummaries: ImageTagResult[]

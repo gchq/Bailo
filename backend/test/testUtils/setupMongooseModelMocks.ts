@@ -25,10 +25,12 @@ const CHAINABLE_METHODS = [
 
 const QUERY_LIKE_METHODS = [
   'aggregate',
+  'exec',
   'find',
   'append',
   'filter',
   'group',
+  'lean',
   'lookup',
   'map',
   'match',

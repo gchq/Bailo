@@ -1,24 +1,6 @@
 name: bailo-dev
 
 services:
-  webhook-tester:
-    networks:
-      default:
-      internal:
-    image: tarampampam/webhook-tester:2.2.6
-    command: serve --auto-create-sessions
-    ports:
-      - 8082:8080
-
-  mailcrab:
-    networks:
-      default:
-      internal:
-    ports:
-      - 1080:1080
-      - 1025:1025
-    image: marlonb/mailcrab:v1.6.5
-
   backend:
     ports:
       - 9229:9229
@@ -30,14 +12,6 @@ services:
   frontend:
     volumes:
       - ./frontend:/app
-    build:
-      target: dev
-
-  artefactscan:
-    ports:
-      - 3311:3311
-    volumes:
-      - ./lib/artefactscan_api/bailo_artefactscan_api:/app/bailo_artefactscan_api
     build:
       target: dev
 
