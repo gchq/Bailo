@@ -22,6 +22,7 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/artefactScanning/index.js')
+vi.mock('../../src/utils/transactions.js')
 vi.mock('pretty-bytes')
 
 const FileModelMock = getTypedModelMock('FileModel')
@@ -151,6 +152,7 @@ vi.mock('clamscan', () => ({
 
 describe('services > file', () => {
   test('uploadFile > success', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
     const name = 'testFile'
@@ -165,6 +167,7 @@ describe('services > file', () => {
   })
 
   test('uploadFile > virus scan initialised', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
     vi.spyOn(configMock, 'artefactScanning', 'get').mockReturnValue({ clamdscan: 'test' })
     vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
       artefactScanners: {
@@ -268,6 +271,7 @@ describe('services > file', () => {
   })
 
   test('finishUploadMultipartFile > success', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
     const fileId = 'testFile'

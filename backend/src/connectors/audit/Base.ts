@@ -4,7 +4,7 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
+import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
@@ -475,8 +475,8 @@ export abstract class BaseAuditConnector {
 
   abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
   abstract onViewModelImage(req: Request, modelId: string, name: string, tag: string): Promise<void>
-  abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
-  abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
+  abstract onUpdateImage(req: Request, modelId: string, image: ImageTagRef): Promise<void>
+  abstract onDeleteImage(req: Request, modelId: string, image: ImageTagRef): Promise<void>
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[]): Promise<void>
   abstract onCreateImport(

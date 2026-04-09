@@ -4,7 +4,7 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
+import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
@@ -366,13 +366,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onUpdateImage(req: Request, modelId: string, image: ImageRefInterface) {
+  async onUpdateImage(req: Request, modelId: string, image: ImageTagRef) {
     this.checkEventType(AuditInfo.UpdateImage, req)
     const event = this.generateEvent(req, { modelId, image })
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
+  async onDeleteImage(req: Request, modelId: string, image: ImageTagRef) {
     this.checkEventType(AuditInfo.DeleteImage, req)
     const event = this.generateEvent(req, { modelId, image })
     req.log.info(event, req.audit.description)

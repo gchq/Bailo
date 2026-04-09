@@ -24,6 +24,7 @@ exports[`services > model > removeModel > success empty 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
         [
@@ -107,6 +108,7 @@ exports[`services > model > removeModel > success entries 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
         [

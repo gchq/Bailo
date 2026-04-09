@@ -17,7 +17,7 @@ export interface ReleaseInterface {
   draft: boolean
 
   fileIds: Array<string>
-  images: Array<ImageRefInterface>
+  images: Array<ImageTagRef>
 
   deleted: boolean
 
@@ -26,20 +26,24 @@ export interface ReleaseInterface {
   updatedAt: Date
 }
 
-export interface RepoRefInterface {
+export interface ImageNameRef {
   repository: string
   name: string
 }
-export interface ImageRefInterface extends RepoRefInterface {
+export interface ImageTagRef extends ImageNameRef {
   tag: string
 }
+export interface ImageDigestRef extends ImageNameRef {
+  digest: string
+}
+export type ImageRef = ImageTagRef | ImageDigestRef
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type ReleaseDoc = HydratedDocument<
   Omit<ReleaseInterface, 'images'> & {
-    images: Array<HydratedDocument<ImageRefInterface>>
+    images: Array<HydratedDocument<ImageTagRef>>
   }
 > &
   SoftDeleteDocument

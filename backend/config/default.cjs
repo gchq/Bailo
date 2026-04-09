@@ -69,7 +69,7 @@ module.exports = {
 
   smtp: {
     // Enable / disable all email sending
-    enabled: true,
+    enabled: false,
     transporter: 'smtp',
 
     // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
@@ -322,6 +322,9 @@ module.exports = {
     interval: 1000 * 50,
     generator: 'Generator',
     rejectUnauthorized: false,
+    xmlns: 'default-namespace',
+    schemaLocation: 'default-namespace file://schema-location.xsd',
+    version: '1.0.0',
   },
 
   modelMirror: {

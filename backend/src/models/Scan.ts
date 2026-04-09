@@ -1,6 +1,6 @@
 import { HydratedDocument, model, type ObjectId, Schema } from 'mongoose'
 
-import type { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
+import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -11,7 +11,7 @@ export type ScanInterface = {
   scannerVersion?: string
   state: ArtefactScanStateKeys
   summary?: ScanSummary
-  additionalInfo?: TrivyScanResultResponseSchema | ModelScanResponseSchema
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
 
   lastRunAt: Date
 
@@ -81,9 +81,15 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
 )
 
 ScanSchema.plugin(softDeletionPlugin)
+// Image index
 ScanSchema.index(
-  { artefactKind: 1, layerDigest: 1, toolName: 1 },
-  { unique: true, partialFilterExpression: { artefactKind: 'image' } },
+  { artefactKind: 1, layerDigest: 1, toolName: 1, state: 1 },
+  { unique: true, partialFilterExpression: { artefactKind: 'image', state: 'InProgress' } },
+)
+// File index
+ScanSchema.index(
+  { artefactKind: 1, fileId: 1, toolName: 1, state: 1 },
+  { unique: true, partialFilterExpression: { artefactKind: 'file', state: 'InProgress' } },
 )
 
 const ScanModel = model<ScanInterfaceDoc>('v2_Scan', ScanSchema)
