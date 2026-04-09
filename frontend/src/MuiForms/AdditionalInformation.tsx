@@ -1,7 +1,7 @@
-import { Box, Button, Collapse, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { SxProps, useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -34,17 +34,6 @@ export default function AdditionalInformation({
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
-  const descriptionBoxRef = useRef<HTMLDivElement>(null)
-  const [isOverflowing, setIsOverflowing] = useState(false)
-
-  useEffect(() => {
-    const descriptionBox = descriptionBoxRef.current
-    if (!descriptionBox || !description) {
-      return
-    }
-
-    setIsOverflowing(descriptionBox.scrollHeight > 40)
-  }, [description, editMode])
 
   if (children === undefined || (Array.isArray(children) && children.length === 0)) {
     return <></>
@@ -72,21 +61,15 @@ export default function AdditionalInformation({
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
         {description && editMode && (
-          <Box sx={{ mb: 3 }}>
-            {description && (
+          <Box sx={{ mb: 1 }}>
+            {description.length > 100 && (
               <Box sx={{ mb: 1 }}>
-                <Collapse in={expanded} collapsedSize={40}>
-                  <Box ref={descriptionBoxRef}>
-                    <Typography variant='caption' color='textSecondary' fontWeight='bold'>
-                      {description}
-                    </Typography>
-                  </Box>
-                </Collapse>
-                {isOverflowing && (
-                  <Button size='small' onClick={() => setExpanded(!expanded)}>
-                    {expanded ? 'Show less' : 'Show more'}
-                  </Button>
-                )}
+                <Typography variant='caption' color='textSecondary' fontWeight='bold'>
+                  {expanded ? description : `${description.slice(0, 100)}...`}
+                </Typography>
+                <Button size='small' onClick={() => setExpanded(!expanded)}>
+                  {expanded ? 'Show less' : 'Show more'}
+                </Button>
               </Box>
             )}
           </Box>
