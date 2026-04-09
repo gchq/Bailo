@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
-import { BadReq, InternalError } from '../../../../src/utils/error.js'
+import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({
   initialiseTarGzUpload: vi.fn(),
@@ -45,7 +45,10 @@ const configMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/utils/config.js', () => configMocks)
 
 const authMocks = vi.hoisted(() => ({
-  default: { model: vi.fn() },
+  default: {
+    model: vi.fn(),
+    release: vi.fn(),
+  },
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
@@ -93,6 +96,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     releaseServiceMocks.getAllFileIds.mockResolvedValue(['fileId'])
     scannersMocks.default.scannersInfo.mockReturnValue(false)
     authMocks.default.model.mockResolvedValue({ success: true })
+    authMocks.default.release.mockResolvedValue({ success: true })
   })
 
   test('constructor sets releases array', () => {
@@ -192,6 +196,20 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
 
     // @ts-expect-error calling protected method
     await expect(exporter._init()).rejects.toEqual(expectedErr)
+  })
+
+  test('_checkAuths throws Forbidden if release fails', async () => {
+    authMocks.default.release.mockResolvedValueOnce({ success: false, info: 'no release access' })
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
+    const expectedErr = Forbidden('no release access\nMethod `DocumentsExporter._checkAuths` failure.', {
+      userDn: mockUser.dn,
+      modelId: mockModel.id,
+      semver: mockRelease.semver,
+      ...mockLogData,
+    })
+
+    // @ts-expect-error calling protected method
+    await expect(exporter._checkAuths()).rejects.toEqual(expectedErr)
   })
 
   test('getInitialiseTarGzUploadParams returns correct params', () => {

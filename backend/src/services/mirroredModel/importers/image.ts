@@ -32,6 +32,7 @@ export class ImageImporter extends BaseImporter {
   protected readonly imageName: string
   protected readonly imageTag: string
   protected manifestBody: ImageManifestV2 | null = null
+  protected repositoryAccessToken: string | null = null
 
   static readonly manifestRegex = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,
@@ -62,6 +63,19 @@ export class ImageImporter extends BaseImporter {
     ;({ path: this.imageName, tag: this.imageTag } = distributionPackageNameObject)
   }
 
+  protected async getRepositoryAccessToken(): Promise<string> {
+    if (!this.repositoryAccessToken) {
+      this.repositoryAccessToken = await getAccessToken({ dn: this.user.dn }, [
+        {
+          type: 'repository',
+          name: `${this.metadata.mirroredModelId}/${this.imageName}`,
+          actions: ['push', 'pull'],
+        },
+      ])
+    }
+    return this.repositoryAccessToken
+  }
+
   async processEntry(entry: Headers, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
@@ -73,25 +87,10 @@ export class ImageImporter extends BaseImporter {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
 
-        const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
-          {
-            type: 'repository',
-            name: `${this.metadata.mirroredModelId}/${this.imageName}`,
-            actions: ['pull'],
-          },
-        ])
-        const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
-          {
-            type: 'repository',
-            name: `${this.metadata.mirroredModelId}/${this.imageName}`,
-            actions: ['push', 'pull'],
-          },
-        ])
-
         try {
           if (
             await doesLayerExist(
-              repositoryPullToken,
+              await this.getRepositoryAccessToken(),
               { repository: this.metadata.mirroredModelId, name: this.imageName },
               layerDigest,
             )
@@ -116,7 +115,7 @@ export class ImageImporter extends BaseImporter {
               },
               'Initiating un-tarred blob upload.',
             )
-            const res = await initialiseUpload(repositoryPushPullToken, {
+            const res = await initialiseUpload(await this.getRepositoryAccessToken(), {
               repository: this.metadata.mirroredModelId,
               name: this.imageName,
             })
@@ -129,7 +128,13 @@ export class ImageImporter extends BaseImporter {
               },
               'Putting image blob.',
             )
-            await uploadLayerMonolithic(repositoryPushPullToken, res.location!, layerDigest, stream, String(entry.size))
+            await uploadLayerMonolithic(
+              await this.getRepositoryAccessToken(),
+              res.location!,
+              layerDigest,
+              stream,
+              String(entry.size),
+            )
             await finished(stream)
           }
         } catch (err) {
@@ -156,18 +161,10 @@ export class ImageImporter extends BaseImporter {
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
     if (this.manifestBody) {
-      const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
-        {
-          type: 'repository',
-          name: `${this.metadata.mirroredModelId}/${this.imageName}`,
-          actions: ['push', 'pull'],
-        },
-      ])
-
       const mediaType =
         this.manifestBody.mediaType == OCIEmptyMediaType ? this.manifestBody.artifactType : this.manifestBody.mediaType
       await putManifest(
-        repositoryPushPullToken,
+        await this.getRepositoryAccessToken(),
         { repository: this.metadata.mirroredModelId, name: this.imageName, tag: this.imageTag },
         JSON.stringify(this.manifestBody),
         mediaType,

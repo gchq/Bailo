@@ -2,13 +2,15 @@ import prettyBytes from 'pretty-bytes'
 
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
+import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
+import authorisation from '../../../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
 import config from '../../../utils/config.js'
-import { BadReq, InternalError } from '../../../utils/error.js'
+import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import { getFilesByIds, getTotalFileSize } from '../../file.js'
 import log from '../../log.js'
 import { getModelCardRevisions } from '../../model.js'
@@ -87,7 +89,19 @@ export class DocumentsExporter extends BaseExporter {
     }
   }
 
-  protected _checkAuths() {}
+  protected async _checkAuths() {
+    for (const release of this.releases) {
+      const auth = await authorisation.release(this.user, this.model, ReleaseAction.View, release)
+      if (!auth.success) {
+        throw Forbidden(auth.info, {
+          userDn: this.user.dn,
+          modelId: this.model.id,
+          semver: release.semver,
+          ...this.logData,
+        })
+      }
+    }
+  }
 
   protected getInitialiseTarGzUploadParams(): Parameters<typeof initialiseTarGzUpload> {
     if (!this.model) {

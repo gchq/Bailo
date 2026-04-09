@@ -137,6 +137,7 @@ export async function extractTarGzStream(
 
       ungzipStream.destroy()
       untarStream.destroy()
+      tarGzStream.destroy()
 
       reject(toBailoError(err))
     }

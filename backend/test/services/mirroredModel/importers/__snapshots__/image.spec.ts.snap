@@ -15,6 +15,7 @@ ImageImporter {
     "importKind": "image",
     "mirroredModelId": "model1",
   },
+  "repositoryAccessToken": null,
   "user": {
     "dn": "user",
   },
@@ -51,6 +52,7 @@ ImageImporter {
     "importKind": "image",
     "mirroredModelId": "model1",
   },
+  "repositoryAccessToken": null,
   "user": {
     "dn": "user",
   },
