@@ -3,7 +3,7 @@ import { PassThrough } from 'node:stream'
 import { SeverityLevel } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
+import { ArtefactScanState } from '../../../../src/models/Scan.js'
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 

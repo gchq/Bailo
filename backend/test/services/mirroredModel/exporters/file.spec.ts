@@ -2,8 +2,8 @@ import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../../../src/connectors/authorisation/actions.js'
+import { ArtefactScanState } from '../../../../src/models/Scan.js'
 import { FileExporter } from '../../../../src/services/mirroredModel/exporters/file.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 

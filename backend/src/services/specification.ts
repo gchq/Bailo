@@ -2,12 +2,11 @@ import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolution
 import type { AnyZodObject } from 'zod'
 
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
-import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
-import { ArtefactKind, SeverityLevel, SeverityLevelKeys } from '../models/Scan.js'
+import { ArtefactKind, ArtefactScanState, SeverityLevel, SeverityLevelKeys } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'

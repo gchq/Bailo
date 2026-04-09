@@ -2,11 +2,10 @@ import { ProxyAgentOptions } from 'proxy-agent'
 import { Optional } from 'utility-types'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
-import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
-import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
+import { ArtefactScanStateKeys, ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
   MongoDocumentMirrorInformation,

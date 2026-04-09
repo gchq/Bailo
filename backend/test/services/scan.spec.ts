@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
-import { ArtefactKind } from '../../src/models/Scan.js'
+import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
+import { ArtefactKind, ArtefactScanState } from '../../src/models/Scan.js'
 import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 

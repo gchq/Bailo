@@ -3,10 +3,10 @@ import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys, ClamAVSummary } from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys, ArtefactScanState, ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
+import { ArtefactScanResult, BaseArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {

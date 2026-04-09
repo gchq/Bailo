@@ -9,11 +9,16 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
-import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
 import { ImageNameRef, ImageTagRef } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
+import ScanModel, {
+  ArtefactKind,
+  ArtefactScanState,
+  ScanInterface,
+  ScanSummary,
+  SeverityLevel,
+} from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'

@@ -5,14 +5,13 @@ import {
   ArtefactInterface,
   ArtefactScanningConnectorInfo,
   ArtefactScanResult,
-  ArtefactScanState,
 } from '../connectors/artefactScanning/Base.js'
 import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ImageRef } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
+import ScanModel, { ArtefactKind, ArtefactKindKeys, ArtefactScanState } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { dedupe } from '../utils/array.js'

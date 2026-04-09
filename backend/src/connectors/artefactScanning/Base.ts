@@ -2,7 +2,13 @@ import PQueue from 'p-queue'
 
 import { FileInterface } from '../../models/File.js'
 import { ImageRef } from '../../models/Release.js'
-import { ArtefactKindKeys, ScanInterface } from '../../models/Scan.js'
+import {
+  ArtefactKindKeys,
+  ArtefactScanState,
+  ScanInterface,
+  SeverityLevel,
+  SeverityLevelKeys,
+} from '../../models/Scan.js'
 import log from '../../services/log.js'
 
 export type ArtefactScanResult = Pick<
@@ -13,15 +19,20 @@ export type ArtefactScanResult = Pick<
 export type LayerRefInterface = ImageRef & { layerDigest: string }
 export type ArtefactInterface = FileInterface | LayerRefInterface
 
-export const ArtefactScanState = {
-  NotScanned: 'notScanned',
-  InProgress: 'inProgress',
-  Complete: 'complete',
-  Error: 'error',
-} as const
-export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
-
 export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' | 'scannerVersion' | 'artefactKind'>
+
+function isSeverityLevel(value: string): value is SeverityLevelKeys {
+  return (Object.values(SeverityLevel) as string[]).includes(value)
+}
+
+export function normaliseSeverity(severity: string): SeverityLevelKeys {
+  const normalised = severity.toLowerCase()
+
+  if (isSeverityLevel(normalised)) {
+    return normalised
+  }
+  return SeverityLevel.UNKNOWN
+}
 
 export abstract class BaseArtefactScanningConnector {
   abstract readonly toolName: string

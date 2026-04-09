@@ -5,14 +5,14 @@ import { getRegistryLayerStream } from '../../clients/registry.js'
 import {
   ArtefactKind,
   ArtefactKindKeys,
+  ArtefactScanState,
   ArtefactScanSummary,
   SeverityLevel,
-  SeverityLevelKeys,
 } from '../../models/Scan.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
+import { ArtefactScanResult, BaseArtefactScanningConnector, LayerRefInterface, normaliseSeverity } from './Base.js'
 
 export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
@@ -61,11 +61,11 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
           for (const vulnerability of result.Vulnerabilities) {
             const key = vulnerability.VulnerabilityID
             const title = vulnerability.Title ?? ''
-            const severity = vulnerability.Severity ?? SeverityLevel.UNKNOWN
+            const severity = normaliseSeverity(vulnerability.Severity ?? SeverityLevel.UNKNOWN)
 
             if (!summaries.get(key)) {
               summaries.set(key, {
-                severity: severity.toLowerCase() as SeverityLevelKeys,
+                severity,
                 vulnerabilityDescription: `${key}: ${title}`,
               })
             }

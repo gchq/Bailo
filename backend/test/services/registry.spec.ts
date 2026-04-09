@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
+import { ArtefactScanState } from '../../src/models/Scan.js'
 import {
   checkUserAuth,
   getImageBlob,

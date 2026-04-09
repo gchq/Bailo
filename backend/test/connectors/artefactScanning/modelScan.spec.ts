@@ -2,9 +2,8 @@ import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
 import { ModelScanFileScanningConnector } from '../../../src/connectors/artefactScanning/modelScan.js'
-import { ArtefactKind } from '../../../src/models/Scan.js'
+import { ArtefactKind, ArtefactScanState } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/clients/artefactScan.js')
 vi.mock('../../../src/clients/s3.js')

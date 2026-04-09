@@ -3,10 +3,10 @@ import PQueue from 'p-queue'
 import { getCachedArtefactScanInfo, scanFileStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys, ArtefactScanState, ArtefactScanSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
+import { ArtefactScanResult, BaseArtefactScanningConnector, normaliseSeverity } from './Base.js'
 
 export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
@@ -44,7 +44,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       const summary: ArtefactScanSummary[] = scanResults.issues.map(
         (issue) =>
           ({
-            severity: issue.severity.toLowerCase() as SeverityLevelKeys,
+            severity: normaliseSeverity(issue.severity),
             vulnerabilityDescription: `${issue.description}. (scanner: ${issue.scanner})`,
           }) as ArtefactScanSummary,
       )

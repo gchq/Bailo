@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
+import { BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScanning/wrapper.js'
-import { ArtefactKind } from '../../../src/models/Scan.js'
+import { ArtefactKind, ArtefactScanState } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/log.js')
 

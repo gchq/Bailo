@@ -1,8 +1,15 @@
 import { model, type ObjectId, Schema } from 'mongoose'
 
 import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
-import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+
+export const ArtefactScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type ScanInterface = {
   _id: ObjectId
