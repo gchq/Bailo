@@ -47,7 +47,7 @@ vi.mock('../../../../src/utils/config.js', () => configMocks)
 const authMocks = vi.hoisted(() => ({
   default: {
     model: vi.fn(),
-    release: vi.fn(),
+    releases: vi.fn(),
   },
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
@@ -96,7 +96,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     releaseServiceMocks.getAllFileIds.mockResolvedValue(['fileId'])
     scannersMocks.default.scannersInfo.mockReturnValue(false)
     authMocks.default.model.mockResolvedValue({ success: true })
-    authMocks.default.release.mockResolvedValue({ success: true })
+    authMocks.default.releases.mockResolvedValue([{ success: true }])
   })
 
   test('constructor sets releases array', () => {
@@ -199,14 +199,17 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_checkAuths throws Forbidden if release fails', async () => {
-    authMocks.default.release.mockResolvedValueOnce({ success: false, info: 'no release access' })
+    authMocks.default.releases.mockResolvedValueOnce([{ success: false, info: 'no release access' }])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
-    const expectedErr = Forbidden('no release access\nMethod `DocumentsExporter._checkAuths` failure.', {
-      userDn: mockUser.dn,
-      modelId: mockModel.id,
-      semver: mockRelease.semver,
-      ...mockLogData,
-    })
+    const expectedErr = Forbidden(
+      'You do not have the necessary permissions to export these releases.\nMethod `DocumentsExporter._checkAuths` failure.',
+      {
+        user: mockUser,
+        modelId: mockModel.id,
+        releases: ['1.0.0'],
+        ...mockLogData,
+      },
+    )
 
     // @ts-expect-error calling protected method
     await expect(exporter._checkAuths()).rejects.toEqual(expectedErr)

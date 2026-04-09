@@ -90,16 +90,15 @@ export class DocumentsExporter extends BaseExporter {
   }
 
   protected async _checkAuths() {
-    for (const release of this.releases) {
-      const auth = await authorisation.release(this.user, this.model, ReleaseAction.View, release)
-      if (!auth.success) {
-        throw Forbidden(auth.info, {
-          userDn: this.user.dn,
-          modelId: this.model.id,
-          semver: release.semver,
-          ...this.logData,
-        })
-      }
+    const authResponses = await authorisation.releases(this.user, this.model, this.releases, ReleaseAction.View)
+    const failedReleases = this.releases.filter((_, i) => !authResponses[i].success)
+    if (failedReleases.length > 0) {
+      throw Forbidden('You do not have the necessary permissions to export these releases.', {
+        modelId: this.model.id,
+        releases: failedReleases.map((release) => release.semver),
+        user: this.user,
+        ...this.logData,
+      })
     }
   }
 
