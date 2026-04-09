@@ -58,7 +58,7 @@ describe('routes > files > getDownloadFile', () => {
       expect(res.headers['content-disposition']).toContain('test-file.txt')
       expect(res.headers['content-type']).toBe('text/plain; charset=utf-8')
       expect(res.headers['accept-ranges']).toBe('bytes')
-      expect(res.headers['cache-control']).toBe('public, max-age=604800, immutable')
+      expect(res.headers['cache-control']).toBe('no-store')
       expect(res.headers.etag).toBe('f8a7130e2a7facf456c258e5e5f7b6b2fa02431de15fdf47b5ce0079d275aa54')
     })
 
