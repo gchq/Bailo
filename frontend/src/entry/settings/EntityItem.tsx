@@ -3,7 +3,7 @@ import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, 
 import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
-import { CollaboratorEntry, SystemRole, SystemRoleKeys } from 'types/types'
+import { CollaboratorEntry, EntryRole, SystemRoleKeys } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -12,7 +12,7 @@ type EntityItemProps = {
   collaborators: CollaboratorEntry[]
   onCollaboratorsChange: (value: CollaboratorEntry[]) => void
   entryKind: string
-  entryRoles: SystemRole[]
+  entryRoles: EntryRole[]
 }
 
 export default function EntityItem({
@@ -42,8 +42,8 @@ export default function EntityItem({
           <EntityNameDisplay entryCollaborator={entity} />
         </Stack>
       </TableCell>
-      <TableCell>
-        {entryRoles.length > 0 && (
+      {entryRoles.length > 0 && (
+        <TableCell>
           <Autocomplete
             multiple
             size='small'
@@ -54,14 +54,14 @@ export default function EntityItem({
             getOptionLabel={(role) => getRoleDisplayName(role, entryRoles)}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
-            renderTags={(value, getTagProps) =>
+            renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip label={getRoleDisplayName(option, entryRoles)} {...getTagProps({ index })} key={option} />
               ))
             }
           />
-        )}
-      </TableCell>
+        </TableCell>
+      )}
       <TableCell align='right'>
         <Tooltip title='Remove user'>
           <IconButton
