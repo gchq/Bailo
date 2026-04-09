@@ -1,7 +1,7 @@
 import PQueue from 'p-queue'
 
 import { FileInterface } from '../../models/File.js'
-import { ImageRefInterface } from '../../models/Release.js'
+import { ImageRef } from '../../models/Release.js'
 import { ArtefactKindKeys, ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
 
@@ -10,7 +10,7 @@ export type ArtefactScanResult = Pick<
   'toolName' | 'scannerVersion' | 'state' | 'summary' | 'additionalInfo' | 'lastRunAt' | 'artefactKind'
 >
 
-export type LayerRefInterface = ImageRefInterface & { layerDigest: string }
+export type LayerRefInterface = ImageRef & { layerDigest: string }
 export type ArtefactInterface = FileInterface | LayerRefInterface
 
 export const ArtefactScanState = {
