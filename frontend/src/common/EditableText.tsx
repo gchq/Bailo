@@ -53,9 +53,9 @@ export default function EditableText({
   }, [handleCancelOnClick, submitButtonText])
 
   if (isEditMode) {
-    if (richText) {
-      return (
-        <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+    return (
+      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+        {richText ? (
           <Stack>
             <RichTextEditor
               value={newValue || ''}
@@ -64,11 +64,7 @@ export default function EditableText({
             />
             {submitButtons}
           </Stack>
-        </Box>
-      )
-    } else {
-      return (
-        <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+        ) : (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
             <TextField
               sx={{ width: '100%' }}
@@ -79,36 +75,25 @@ export default function EditableText({
             />
             {submitButtons}
           </Stack>
-        </Box>
-      )
-    }
+        )}
+      </Box>
+    )
   } else {
-    if (richText) {
-      return (
-        <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <Tooltip title={tooltipText}>
-              <IconButton onClick={() => setIsEditMode(true)}>
-                {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
-              </IconButton>
-            </Tooltip>
-            {value && <MarkdownDisplay>{value}</MarkdownDisplay>}
-          </Stack>
-        </Box>
-      )
-    } else {
-      return (
-        <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <Tooltip title={tooltipText}>
-              <IconButton onClick={() => setIsEditMode(true)}>
-                {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
-              </IconButton>
-            </Tooltip>
+    return (
+      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+        <Stack direction='row' spacing={1} alignItems='center'>
+          <Tooltip title={tooltipText}>
+            <IconButton onClick={() => setIsEditMode(true)}>
+              {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
+            </IconButton>
+          </Tooltip>
+          {richText ? (
+            value && <MarkdownDisplay>{value}</MarkdownDisplay>
+          ) : (
             <Typography fontStyle={!value ? 'italic' : 'normal'}>{value || 'Empty'}</Typography>
-          </Stack>
-        </Box>
-      )
-    }
+          )}
+        </Stack>
+      </Box>
+    )
   }
 }
