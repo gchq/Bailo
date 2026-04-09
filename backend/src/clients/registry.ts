@@ -358,7 +358,7 @@ export async function doesLayerExist(token: string, repoRef: ImageNameRef, diges
     })
     return true
   } catch (error) {
-    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
+    if (isRegistryError(error) && error.context?.status === 404) {
       // 404 response indicates that the layer does not exist
       return false
     } else {

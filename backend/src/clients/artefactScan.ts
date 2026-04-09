@@ -227,8 +227,12 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
       body: formData,
     })
   } catch (err) {
-    stream.destroy()
     throw InternalError('Unable to communicate with the ArtefactScan service.', { err })
+  } finally {
+    // always cleanup the stream in case it is not fully consumed
+    if (!stream.destroyed) {
+      stream.destroy()
+    }
   }
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the ArtefactScan service.', {
