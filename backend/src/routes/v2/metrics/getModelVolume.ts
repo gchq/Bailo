@@ -7,6 +7,7 @@ import authentication from '../../../connectors/authentication/index.js'
 import { z } from '../../../lib/zod.js'
 import { calculateModelVolume, ModelVolumePeriodEnum } from '../../../services/metrics.js'
 import { registerPath } from '../../../services/specification.js'
+import { Forbidden } from '../../../utils/error.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getModelVolumeSchema = z.object({
@@ -76,7 +77,13 @@ export const getModelVolume = [
       query: { period, startDate: start_date, endDate: end_date, timezone, organisation },
     } = parse(req, getModelVolumeSchema)
 
-    await authentication.hasRole(req.user, Roles.Admin)
+    if (!(await authentication.hasRole(req.user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: req.user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
+
     const modelVolume = await calculateModelVolume(period, start_date, end_date, timezone, organisation)
 
     await audit.onViewMetric(req)

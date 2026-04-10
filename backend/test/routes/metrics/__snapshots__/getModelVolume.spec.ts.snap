@@ -9,4 +9,17 @@ exports[`routes > metrics > getModelVolume > 200 > ok 1`] = `
 }
 `;
 
+exports[`routes > metrics > getModelVolume > 403 > admin required 1`] = `
+{
+  "error": {
+    "context": {
+      "requiredRole": "admin",
+      "userDn": "testUser",
+    },
+    "message": "You do not have the required role.",
+    "name": "Bailo Error",
+  },
+}
+`;
+
 exports[`routes > metrics > getModelVolume > audit > expected call 1`] = `undefined`;
