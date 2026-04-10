@@ -1,7 +1,8 @@
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import { SxProps, useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
+import ExpandableTypography from 'src/common/ExpandableTypography'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -33,7 +34,6 @@ export default function AdditionalInformation({
 }: AdditionalInformationProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const theme = useTheme()
-  const [expanded, setExpanded] = useState(false)
 
   if (children === undefined || (Array.isArray(children) && children.length === 0)) {
     return <></>
@@ -62,16 +62,7 @@ export default function AdditionalInformation({
         </Typography>
         {description && editMode && (
           <Box sx={{ mb: 1 }}>
-            {description.length > 100 && (
-              <Box sx={{ mb: 1 }}>
-                <Typography variant='caption' color='textSecondary' fontWeight='bold'>
-                  {expanded ? description : `${description.slice(0, 100)}...`}
-                </Typography>
-                <Button size='small' onClick={() => setExpanded(!expanded)}>
-                  {expanded ? 'Show less' : 'Show more'}
-                </Button>
-              </Box>
-            )}
+            <ExpandableTypography>{description}</ExpandableTypography>
           </Box>
         )}
         {children}
