@@ -47,8 +47,8 @@ export async function calculateModelVolume(
     {
       $project: {
         _id: 0,
-        period_start: '$_id',
-        period_end: {
+        periodStart: '$_id',
+        periodEnd: {
           $dateAdd: {
             startDate: '$_id',
             unit: period,

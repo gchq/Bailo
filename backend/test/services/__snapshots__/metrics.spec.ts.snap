@@ -35,7 +35,7 @@ exports[`services > metrics > calculateModelVolume > basic aggregation 1`] = `
         "$project": {
           "_id": 0,
           "count": 1,
-          "period_end": {
+          "periodEnd": {
             "$dateAdd": {
               "amount": 1,
               "startDate": "$_id",
@@ -43,7 +43,7 @@ exports[`services > metrics > calculateModelVolume > basic aggregation 1`] = `
               "unit": "day",
             },
           },
-          "period_start": "$_id",
+          "periodStart": "$_id",
         },
       },
     ],
@@ -87,7 +87,7 @@ exports[`services > metrics > calculateModelVolume > with organisation filter 1`
         "$project": {
           "_id": 0,
           "count": 1,
-          "period_end": {
+          "periodEnd": {
             "$dateAdd": {
               "amount": 1,
               "startDate": "$_id",
@@ -95,7 +95,7 @@ exports[`services > metrics > calculateModelVolume > with organisation filter 1`
               "unit": "week",
             },
           },
-          "period_start": "$_id",
+          "periodStart": "$_id",
         },
       },
     ],
