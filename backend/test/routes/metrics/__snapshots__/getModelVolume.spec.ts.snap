@@ -1,0 +1,12 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > metrics > getModelVolume > 200 > ok 1`] = `
+{
+  "data": {},
+  "endDate": "1969-12-31",
+  "period": "quarter",
+  "startDate": "1969-12-31",
+}
+`;
+
+exports[`routes > metrics > getModelVolume > audit > expected call 1`] = `undefined`;
