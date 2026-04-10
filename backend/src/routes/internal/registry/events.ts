@@ -8,7 +8,7 @@ import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
 import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
-import { getAccessToken, softDeletePrefix } from '../../v1/registryAuth.js'
+import { issueAccessToken, softDeletePrefix } from '../../v1/registryAuth.js'
 
 export const registryEventsSchema = z.object({
   body: z.object({
@@ -105,7 +105,7 @@ export const handleRegistryEvents = [
         continue
       }
 
-      const repositoryToken = await getAccessToken({ dn: config.registry.service }, [
+      const repositoryToken = await issueAccessToken({ dn: config.registry.service }, [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
 

@@ -1,5 +1,5 @@
 import { deleteManifest, getImageTagManifest } from '../clients/registry.js'
-import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
 
 async function main() {
@@ -16,7 +16,9 @@ async function main() {
 
   try {
     const user = { dn: 'admin' }
-    const token = await getAccessToken(user, [{ type: 'repository', name: image, actions: ['push', 'pull', 'delete'] }])
+    const token = await issueAccessToken(user, [
+      { type: 'repository', name: image, actions: ['push', 'pull', 'delete'] },
+    ])
     /**
      * The invalid push was of the form:
      *   <registryHost>/<modelId>:<tag>

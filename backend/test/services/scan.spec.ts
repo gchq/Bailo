@@ -119,7 +119,7 @@ const registryClientMocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(() => 'token'),
+  issueAccessToken: vi.fn(() => 'token'),
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
@@ -401,7 +401,7 @@ describe('services > scan', () => {
       expect(modelMocks.getModelById).not.toHaveBeenCalled()
       expect(authMocks.default.image).not.toHaveBeenCalled()
       expect(authMocks.default.model).not.toHaveBeenCalled()
-      expect(registryAuthMocks.getAccessToken).not.toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).not.toHaveBeenCalled()
     })
   })
 })
