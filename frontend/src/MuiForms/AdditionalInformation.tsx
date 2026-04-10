@@ -47,7 +47,7 @@ export default function AdditionalInformation({
     return <Loading />
   }
 
-  if (!mirroredModel) {
+  const editModeDescriptionDisplay = () => {
     return (
       <Stack spacing={1}>
         <Typography
@@ -68,6 +68,10 @@ export default function AdditionalInformation({
         {children}
       </Stack>
     )
+  }
+
+  if (!mirroredModel) {
+    return editModeDescriptionDisplay()
   }
 
   const mirroredStateDisplay = () => {
@@ -142,7 +146,7 @@ export default function AdditionalInformation({
                 {label}
                 {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
               </Typography>
-              {description && <Typography variant='caption'>{description}</Typography>}
+              {description && <ExpandableTypography variant='caption'>{description}</ExpandableTypography>}
             </Stack>
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
