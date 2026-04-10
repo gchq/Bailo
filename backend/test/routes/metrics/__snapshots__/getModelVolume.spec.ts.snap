@@ -2,7 +2,7 @@
 
 exports[`routes > metrics > getModelVolume > 200 > ok 1`] = `
 {
-  "data": {},
+  "data": [],
   "endDate": "1969-12-31",
   "period": "quarter",
   "startDate": "1969-12-31",

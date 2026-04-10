@@ -24,13 +24,13 @@ vi.mock('../../../src/connectors/authentication/index.js', async () => ({
 }))
 
 const mockReviewService = vi.hoisted(() => ({
-  calculateModelVolume: vi.fn(() => ({})),
+  calculateModelVolume: vi.fn(() => []),
 }))
 vi.mock('../../../src/services/metrics.js', async (importOriginal) => {
   const actual = (await importOriginal()) as any
   return {
     ...actual,
-    default: mockReviewService,
+    ...mockReviewService,
   }
 })
 
