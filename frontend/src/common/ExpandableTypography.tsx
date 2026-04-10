@@ -9,8 +9,8 @@ interface ExpandableTypographyProps extends Omit<TypographyProps, 'children'> {
 export default function ExpandableTypography({ children: text, maxLength = 100, ...props }: ExpandableTypographyProps) {
   const [expanded, setExpanded] = useState(false)
 
-  return (
-    text.length > maxLength && (
+  if (text.length > maxLength) {
+    return (
       <Box sx={{ mb: 1 }}>
         <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength)}...`}</Typography>
         <Button size='small' onClick={() => setExpanded(!expanded)}>
@@ -18,5 +18,7 @@ export default function ExpandableTypography({ children: text, maxLength = 100, 
         </Button>
       </Box>
     )
-  )
+  } else {
+    return <Typography {...props}>{text}</Typography>
+  }
 }
