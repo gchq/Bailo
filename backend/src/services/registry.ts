@@ -165,11 +165,12 @@ export async function getModelImageWithScanResults(
     },
   ])
 
-  const { body } = await getImageTagManifests(repositoryToken, imageRef)
+  const { body, headers } = await getImageTagManifests(repositoryToken, imageRef)
 
   if (!body) {
     throw InternalError('Missing manifest list body.', { imageRef })
   }
+
   let tag: string | undefined = imageRef.tag
   if ('manifests' in body) {
     tag = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
@@ -183,7 +184,7 @@ export async function getModelImageWithScanResults(
 
   const scanResults = await getScansFromLayers(layers, true)
 
-  return { tag: imageRef.tag, platform, ...scanResults }
+  return { tag: imageRef.tag, digest: headers['docker-content-digest'], platform, ...scanResults }
 }
 
 export async function listModelImagesWithScanResults(
@@ -218,9 +219,10 @@ export async function listModelImagesWithScanResults(
                   const scan = await getScansFromLayers(layers)
 
                   return {
-                    ...scan,
-                    platform: platformToString(manifest.platform),
                     tag,
+                    digest: manifest.digest,
+                    platform: platformToString(manifest.platform),
+                    ...scan,
                   }
                 }),
               )
@@ -230,7 +232,7 @@ export async function listModelImagesWithScanResults(
 
             const scan = await getScansFromLayers(layers)
 
-            return [{ ...scan, tag }]
+            return [{ tag, digest: manifestResponse.headers['docker-content-digest'], ...scan }]
           }),
         )
       )

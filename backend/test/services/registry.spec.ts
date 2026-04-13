@@ -585,7 +585,7 @@ describe('services > registry', () => {
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
-      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {} })
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
       const result = await getModelImageWithScanResults({ dn: 'user' }, {
         repository: 'repo',
@@ -611,7 +611,7 @@ describe('services > registry', () => {
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
-      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {} })
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
