@@ -62,7 +62,7 @@ export class ArtefactScanningWrapper {
   ): { matching: boolean; artefactType: ArtefactKindKeys } {
     let artefactType: ArtefactKindKeys | undefined = undefined
     switch (true) {
-      case !!(artefact as LayerRefInterface).tag:
+      case typeof artefact === 'object' && artefact !== null && ('tag' in artefact || 'digest' in artefact):
         artefactType = ArtefactKind.IMAGE
         break
       case !!(artefact as FileInterface)._id:

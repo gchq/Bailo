@@ -1,4 +1,4 @@
-import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
@@ -9,7 +9,7 @@ async function script() {
   await connectToMongoose()
 
   const registry = config.registry.connection.internal
-  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
+  const token = await issueAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const authorisation = `Bearer ${token}`
   const agent = getHttpsUndiciAgent({
     connect: { rejectUnauthorized: !config.registry.connection.insecure },
@@ -24,7 +24,7 @@ async function script() {
 
   await Promise.all(
     catalog['repositories'].map(async (repositoryName) => {
-      const repositoryToken = await getAccessToken({ dn: 'user' }, [
+      const repositoryToken = await issueAccessToken({ dn: 'user' }, [
         { type: 'repository', name: repositoryName, actions: ['*'] },
       ])
       const repositoryAuthorisation = `Bearer ${repositoryToken}`
