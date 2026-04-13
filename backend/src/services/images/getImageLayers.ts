@@ -3,7 +3,6 @@ import { ImageRefInterface } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { Descriptors } from '../../utils/registryResponses.js'
-import { platformToString } from '../../utils/registryUtils.js'
 
 /**
  * @remarks
@@ -18,9 +17,13 @@ export async function getImageLayers(repositoryToken: string, image: ImageRefInt
     }
 
     if ('manifests' in manifestResponse.body) {
-      const layersByPlatform = await getLayersByPlatform(repositoryToken, image)
-
-      return (await Promise.all(Object.values(layersByPlatform))).flat()
+      return (
+        await Promise.all(
+          manifestResponse.body.manifests.map(async (manifest) =>
+            getLayersForImageTag(repositoryToken, { ...image, tag: manifest.digest }),
+          ),
+        )
+      ).flat()
     }
 
     return [manifestResponse.body.config, ...manifestResponse.body.layers]
@@ -43,42 +46,4 @@ export async function getLayersForImageTag(
   }
 
   return [manifest.body.config, ...manifest.body.layers]
-}
-
-export async function getLayersByPlatform(
-  token: string,
-  imageRef: ImageRefInterface,
-): Promise<Record<string, Promise<Descriptors[]>>> {
-  const { body } = await getImageTagManifests(token, imageRef)
-
-  if (!body || !('manifests' in body)) {
-    throw InternalError('Missing manifest list body.', { imageRef })
-  }
-
-  const target = {}
-
-  for (const manifest of body.manifests) {
-    const platform = platformToString(manifest.platform)
-    if (platform !== 'unknown/unknown') {
-      target[platform] = manifest
-    }
-  }
-
-  return new Proxy(target, {
-    async get(obj, prop: string) {
-      const manifest = obj[prop]
-      if (!manifest) {
-        return undefined
-      }
-
-      const ref = { ...imageRef, tag: manifest.digest }
-      const child = await getImageTagManifests(token, ref)
-
-      if (!child.body || 'manifests' in child.body) {
-        throw InternalError('Nested manifest list not supported.', { ref })
-      }
-
-      return [child.body.config, ...child.body.layers]
-    },
-  })
 }

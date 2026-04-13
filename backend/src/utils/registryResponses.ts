@@ -103,7 +103,9 @@ export const ManifestListMediaTypeSchema = z.enum([
   'application/vnd.docker.distribution.manifest.list.v2+json',
   'application/vnd.oci.image.index.v1+json',
 ])
-export const AcceptManifestListMediaTypeHeaderValue = ManifestListMediaTypeSchema.options.join(',')
+export const AcceptManifestListMediaTypeHeaderValue = z
+  .union([ManifestListMediaTypeSchema, ManifestMediaTypeSchema])
+  .options.join(',')
 
 const BaseDescriptorSchema = z.object({
   mediaType: z.string(),

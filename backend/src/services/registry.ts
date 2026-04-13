@@ -28,7 +28,8 @@ import {
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
-import { getLayersByPlatform, getLayersForImageTag } from './images/getImageLayers.js'
+import { platformToString } from '../utils/registryUtils.js'
+import { getLayersForImageTag } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -163,15 +164,22 @@ export async function getModelImageWithScanResults(
       actions: ['pull'],
     },
   ])
-  const layers = platform
-    ? (await getLayersByPlatform(repositoryToken, imageRef))[platform]
-    : await getLayersForImageTag(repositoryToken, imageRef)
 
-  if (layers === undefined) {
+  const { body } = await getImageTagManifests(repositoryToken, imageRef)
+
+  if (!body || !('manifests' in body)) {
+    throw InternalError('Missing manifest list body.', { imageRef })
+  }
+
+  const digest = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
+
+  if (digest === undefined) {
     throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
   }
 
-  const scanResults = await getScansFromLayers(await layers, true)
+  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: digest })
+
+  const scanResults = await getScansFromLayers(layers, true)
 
   return { tag: imageRef.tag, platform, ...scanResults }
 }
@@ -202,15 +210,14 @@ export async function listModelImagesWithScanResults(
             }
 
             if ('manifests' in manifestResponse.body) {
-              const layersByPlatform = await getLayersByPlatform(repositoryToken, { ...img, tag })
-
               return Promise.all(
-                Object.entries(layersByPlatform).map(async ([platform, layers]) => {
-                  const scan = await getScansFromLayers(await layers)
+                manifestResponse.body.manifests.map(async (manifest) => {
+                  const layers = await getLayersForImageTag(repositoryToken, { ...img, tag: manifest.digest })
+                  const scan = await getScansFromLayers(layers)
 
                   return {
                     ...scan,
-                    platform,
+                    platform: platformToString(manifest.platform),
                     tag,
                   }
                 }),
