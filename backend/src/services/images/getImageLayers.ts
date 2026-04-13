@@ -1,5 +1,5 @@
 import { getImageTagManifest, getImageTagManifests } from '../../clients/registry.js'
-import { ImageRefInterface } from '../../models/Release.js'
+import { ImageRef } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { Descriptors } from '../../utils/registryResponses.js'
@@ -8,7 +8,7 @@ import { Descriptors } from '../../utils/registryResponses.js'
  * @remarks
  * This does _not_ do an auth check on the user
  */
-export async function getImageLayers(repositoryToken: string, image: ImageRefInterface): Promise<Descriptors[]> {
+export async function getImageLayers(repositoryToken: string, image: ImageRef): Promise<Descriptors[]> {
   try {
     const manifestResponse = await getImageTagManifests(repositoryToken, image)
 
@@ -35,10 +35,7 @@ export async function getImageLayers(repositoryToken: string, image: ImageRefInt
   }
 }
 
-export async function getLayersForImageTag(
-  repositoryToken: string,
-  imageRef: ImageRefInterface,
-): Promise<Descriptors[]> {
+export async function getLayersForImageTag(repositoryToken: string, imageRef: ImageRef): Promise<Descriptors[]> {
   const manifest = await getImageTagManifest(repositoryToken, imageRef)
 
   if (!manifest.body || 'manifests' in manifest.body) {

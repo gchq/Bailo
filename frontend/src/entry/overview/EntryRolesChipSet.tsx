@@ -1,11 +1,11 @@
 import { Chip } from '@mui/material'
 import { useMemo } from 'react'
-import { CollaboratorEntry, SystemRole } from 'types/types'
+import { CollaboratorEntry, EntryRole } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
 
 type EntryRolesChipSetProps = {
   entryCollaborator: CollaboratorEntry
-  modelRoles: SystemRole[]
+  modelRoles: EntryRole[]
 }
 
 export default function EntryRolesChipSet({ entryCollaborator, modelRoles }: EntryRolesChipSetProps) {

@@ -10,7 +10,7 @@ import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntityObject } from 'types/types'
 import { getMirroredState } from 'utils/formUtils'
 
-import { useGetCurrentUser, useListUsers } from '../../actions/user'
+import { useGetCurrentUser, useListEntities } from '../../actions/user'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
@@ -39,7 +39,7 @@ export default function EntitySelector({
   const [userListQuery, setUserListQuery] = useState('')
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
+  const { users, isUsersLoading, isUsersError } = useListEntities(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()

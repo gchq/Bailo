@@ -2,12 +2,13 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
+import { ImageRef } from '../../../models/Release.js'
 import log from '../../../services/log.js'
 import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'
 import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
-import { getAccessToken } from '../../v1/registryAuth.js'
+import { issueAccessToken, softDeletePrefix } from '../../v1/registryAuth.js'
 
 export const registryEventsSchema = z.object({
   body: z.object({
@@ -58,6 +59,11 @@ export const handleRegistryEvents = [
     // registry only stops sending events when we return, so return early and only log errors
     res.json()
 
+    /**
+     * Note for developers: registry webhooks are able to trigger before all parts of the resource (e.g. tags)
+     * are necessarily finalised/available. Take care to handle this possibility.
+     */
+
     for (const event of events) {
       if (event?.action !== 'push') {
         log.info({ event }, 'Ignoring registry event for non-push action')
@@ -77,20 +83,29 @@ export const handleRegistryEvents = [
 
       const [modelId, ...rest] = repository.split('/')
       const name = rest.join('/')
-      const model = getModelByIdNoAuth(modelId)
-      if (!model) {
-        log.warn({ event }, 'Ignoring registry push to non-existent model')
+      if (modelId === softDeletePrefix) {
+        log.warn({ event }, 'Ignoring registry push to soft-deleted model')
+        continue
+      }
+      try {
+        await getModelByIdNoAuth(modelId)
+      } catch (err) {
+        log.warn({ event, err }, 'Ignoring registry push to non-existent model')
         continue
       }
 
-      const tag = target?.tag
-      if (!tag) {
-        log.warn({ event }, 'Ignoring registry push without tag property')
+      let imageRef: ImageRef | undefined
+      if (target?.tag && target?.digest) {
+        // Identify by digest as the digest is always available, but tag may not yet be finalised.
+        // Still check for tag as we only want to scan the image when the tag is available as the tag
+        // is only present when the manifest is pushed (and not when each individual layer is pushed).
+        imageRef = { repository: modelId, name, digest: target.digest }
+      } else {
+        log.warn({ event }, 'Ignoring registry push without tag or digest property')
         continue
       }
 
-      const imageRef = { repository: modelId, name, tag }
-      const repositoryToken = await getAccessToken({ dn: config.registry.service }, [
+      const repositoryToken = await issueAccessToken({ dn: config.registry.service }, [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
 

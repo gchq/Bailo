@@ -1,5 +1,5 @@
-import { LocalOffer } from '@mui/icons-material'
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
+import { Info, LocalOffer } from '@mui/icons-material'
+import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchEntry, useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
@@ -11,6 +11,7 @@ import UserDisplay from 'src/common/UserDisplay'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import InformationDialog from 'src/schemas/InformationDialog'
 import { EntryCardKindLabel, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -23,6 +24,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
+  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { mutateEntry } = useGetEntry(entry.id)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card ? entry.card.schemaId : '')
@@ -80,6 +82,14 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                 Schema:
               </Typography>
               <Typography>{schema.name}</Typography>
+              <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                <Info color='primary' fontSize='small' />
+              </IconButton>
+              <InformationDialog
+                open={SchemaInformationOpen}
+                schema={schema}
+                onClose={() => setSchemaInformationOpen(false)}
+              />
             </Stack>
           )}
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
