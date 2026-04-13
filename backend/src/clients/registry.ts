@@ -10,6 +10,7 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
+  AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBodySchema,
   BaseApiCheckResponseHeadersSchema,
@@ -265,7 +266,6 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
           tags: [...(acc.tags || []), ...(next.tags || [])],
         }),
       },
-      extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
     })
 
     return result.body?.tags || []
@@ -297,7 +297,7 @@ export async function getImageTagManifests(token: string, imageRef: ImageRefInte
     bodySchema: ManifestResponseBodySchema,
     headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+      Accept: AcceptManifestListMediaTypeHeaderValue,
     },
   })
 

@@ -38,7 +38,7 @@ export async function getLayersForImageTag(
 ): Promise<Descriptors[]> {
   const manifest = await getImageTagManifest(repositoryToken, imageRef)
 
-  if (!manifest.body || 'manifests' in manifest) {
+  if (!manifest.body || 'manifests' in manifest.body) {
     throw InternalError('The registry returned a response but the body was missing.', { manifest })
   }
 
@@ -48,7 +48,7 @@ export async function getLayersForImageTag(
 export async function getLayersByPlatform(
   token: string,
   imageRef: ImageRefInterface,
-): Promise<Record<string, Descriptors[]>> {
+): Promise<Record<string, Promise<Descriptors[]>>> {
   const { body } = await getImageTagManifests(token, imageRef)
 
   if (!body || !('manifests' in body)) {

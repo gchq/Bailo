@@ -112,7 +112,7 @@ export async function getScansFromLayers(
   layers: Descriptors[],
   includeFullDetail: boolean = false,
 ): Promise<ImageScanResult> {
-  const layerDigests = layers.map((l) => l.digest)
+  const layerDigests = layers.map((layer) => layer.digest)
 
   const scans = await ScanModel.find({
     artefactKind: ArtefactKind.IMAGE,
@@ -168,7 +168,7 @@ export async function getModelImageWithScanResults(
     : await getLayersForImageTag(repositoryToken, imageRef)
 
   if (layers === undefined) {
-    throw InternalError('Platform cannot be found for this image', { imageRef, platform })
+    throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
   }
 
   const scanResults = await getScansFromLayers(await layers, true)
