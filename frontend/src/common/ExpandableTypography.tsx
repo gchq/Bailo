@@ -12,7 +12,7 @@ export default function ExpandableTypography({ children: text, maxLength = 100, 
   if (text.length > maxLength) {
     return (
       <Box sx={{ mb: 1 }}>
-        <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength)}...`}</Typography>
+        <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength).trimEnd()}...`}</Typography>
         <Button size='small' onClick={() => setExpanded(!expanded)}>
           {expanded ? 'Show less' : 'Show more'}
         </Button>

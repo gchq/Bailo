@@ -60,11 +60,7 @@ export default function AdditionalInformation({
           {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {description && editMode && (
-          <Box sx={{ mb: 1 }}>
-            <ExpandableTypography>{description}</ExpandableTypography>
-          </Box>
-        )}
+        {description && editMode && <ExpandableTypography>{description}</ExpandableTypography>}
         {children}
       </Stack>
     )
