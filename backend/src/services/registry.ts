@@ -18,6 +18,7 @@ import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } fr
 import { UserInterface } from '../models/User.js'
 import { Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
+import { isRegistryError } from '../types/RegistryError.js'
 import {
   ArtefactScanStateCounts,
   ImageScanResult,
@@ -527,7 +528,7 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
   try {
     manifest = await getImageTagManifests(multiRepositoryToken, source)
   } catch (err) {
-    if (isBailoError(err) && err?.context?.status === 404) {
+    if (err && isRegistryError(err) && err?.context?.status === 404) {
       throw NotFound('The requested image was not found.', { ...source })
     }
     throw err
