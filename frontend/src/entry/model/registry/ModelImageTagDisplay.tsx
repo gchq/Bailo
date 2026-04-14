@@ -1,5 +1,5 @@
 import { MoreVert, Refresh } from '@mui/icons-material'
-import { Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
@@ -47,11 +47,10 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
 
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
-      const tagResults = modelImage.scanSummaries.find((tagResult) => tagResult.tag === imageTag)
-
+      const tagResult = modelImage.scanSummaries.filter((tagResult) => tagResult.tag === imageTag)
       return (
         <VulnerabilityResult
-          results={tagResults}
+          results={tagResult}
           warningOnly
           detailedViewUrl={`/model/${modelImage.repository}/registry/${modelImage.name}/${imageTag}`}
         />
@@ -73,12 +72,13 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
   return (
     <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${tag}`} sx={{ py: 0.5 }}>
       <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-between' alignItems='center' spacing={2}>
-        <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
+        <Stack spacing={2} direction='row' alignItems='center'>
           <Box width='fit-content'>
             <CodeLine
               line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
             />
           </Box>
+          {modelImage.scanSummaries[0].platform && <Chip color='primary' label='Multi-platform' />}
         </Stack>
         {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
           <Stack direction='row' spacing={2} alignItems='center'>

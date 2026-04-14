@@ -16,9 +16,7 @@ import {
   IconButton,
   List,
   ListItem,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -37,7 +35,6 @@ import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import EmptyBlob from 'src/common/EmptyBlob'
-import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
@@ -59,7 +56,7 @@ interface VulnerabilityResultItem {
 export default function ImageTagInformation() {
   const router = useRouter()
   const { modelId, name, tag }: { modelId?: string; name?: string; tag?: string } = router.query
-  const fakePlatforms = ['linux/amd64', 'linux/arm64', 'linux/x86_64']
+
   const {
     image: modelImage,
     isImageLoading,
@@ -77,8 +74,6 @@ export default function ImageTagInformation() {
   const [modalTitle, setModalTitle] = useState('')
   const [filterList, setFilterList] = useState<string[]>([])
   const [toolName, setToolName] = useState('')
-
-  const [selectedPlatform, setSelectedPlatform] = useState(fakePlatforms[0])
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -286,24 +281,6 @@ export default function ImageTagInformation() {
                     />
                   </Box>
                 </Stack>
-                <Stack direction={'column'}>
-                  <Typography fontWeight='bold'>OS/Arch</Typography>
-                  <LabelledInput fullWidth label='' htmlFor={''}>
-                    <Select
-                      required
-                      fullWidth
-                      value={selectedPlatform}
-                      size='small'
-                      onChange={(event) => setSelectedPlatform(event.target.value)}
-                    >
-                      {fakePlatforms.map((platform) => (
-                        <MenuItem value={platform} key={platform}>
-                          {platform}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </LabelledInput>
-                </Stack>
               </Stack>
             </Stack>
             <Stack
@@ -323,7 +300,7 @@ export default function ImageTagInformation() {
                   Vulnerabilities
                 </Typography>
                 <Stack direction='row'>
-                  <VulnerabilityResult results={modelImage} />
+                  <VulnerabilityResult results={[modelImage]} />
                   <Tooltip title='Rerun image scan'>
                     <IconButton size='small' onClick={handleRescan} sx={{ mx: 1 }}>
                       <Refresh color='primary' />
