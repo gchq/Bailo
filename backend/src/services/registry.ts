@@ -298,14 +298,14 @@ async function getTagDigestMap(token: string, repository: string, name: string):
     return map
   }
 
-  for (const tag of tags) {
-    const { headers } = await getImageTagManifests(token, {
-      repository,
-      name,
-      tag,
-    })
+  const results = await Promise.all(
+    tags.map(async (tag) => {
+      const { headers } = await getImageTagManifests(token, { repository, name, tag })
+      return { tag, digest: headers['docker-content-digest'] }
+    }),
+  )
 
-    const digest = headers['docker-content-digest']
+  for (const { tag, digest } of results) {
     if (digest) {
       map.set(tag, digest)
     }
@@ -426,7 +426,11 @@ async function renameMultiManifest(
 
       // A temp tag is required because PUT-by-digest fails (the JSON is re-serialised, changing its canonical bytes)
       // so we create the digest via a tag and then delete the tag (leaving the new digest)
-      const tmpTag = `__tmp_copy_${crypto.randomUUID()}__`
+      const tmpTag = `__bailo_tmp_${Date.now()}_${crypto.randomUUID()}__`
+      log.debug(
+        { image: { repository: destination.repository, name: destination.name, tag: tmpTag } },
+        'PUT manifest with temporary tag in registry',
+      )
       tmpTags.push(tmpTag)
       const childPutManifestRes = await putManifest(
         multiRepositoryToken,
@@ -478,6 +482,10 @@ async function renameMultiManifest(
     // always cleanup temp tags
     for (const tmpTag of tmpTags) {
       try {
+        log.debug(
+          { image: { repository: destination.repository, name: destination.name, tag: tmpTag } },
+          'DELETE manifest with temporary tag in registry',
+        )
         // remove temp tag, which leaves the digest in place if still referenced by another manifest
         await deleteManifest(multiRepositoryToken, {
           repository: destination.repository,
