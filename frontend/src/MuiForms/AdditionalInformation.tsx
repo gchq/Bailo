@@ -2,6 +2,7 @@ import { Box, Divider, Stack, Typography } from '@mui/material'
 import { SxProps, useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { ReactNode } from 'react'
+import ExpandableTypography from 'src/common/ExpandableTypography'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -59,11 +60,7 @@ export default function AdditionalInformation({
           {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {description && editMode && (
-          <Typography variant='caption' color='textSecondary' fontWeight='bold'>
-            {description}
-          </Typography>
-        )}
+        {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
         {children}
       </Stack>
     )
@@ -141,7 +138,11 @@ export default function AdditionalInformation({
                 {label}
                 {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
               </Typography>
-              {description && <Typography variant='caption'>{description}</Typography>}
+              {description && (
+                <ExpandableTypography variant='caption' whiteSpace='pre-wrap'>
+                  {description}
+                </ExpandableTypography>
+              )}
             </Stack>
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
