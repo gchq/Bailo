@@ -4,9 +4,11 @@ import path from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
+import { Roles } from './connectors/authentication/constants.js'
 import authentication from './connectors/authentication/index.js'
 import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
+import { requireRole } from './routes/middleware/requireRoles.js'
 import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
@@ -254,7 +256,7 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-server.get('/api/v2/metrics/modelVolume', ...getModelVolume)
+server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

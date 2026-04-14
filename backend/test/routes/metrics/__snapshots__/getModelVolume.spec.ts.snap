@@ -3,22 +3,9 @@
 exports[`routes > metrics > getModelVolume > 200 > ok 1`] = `
 {
   "data": [],
-  "endDate": "1969-12-31",
+  "endDate": "string",
   "period": "quarter",
-  "startDate": "1969-12-31",
-}
-`;
-
-exports[`routes > metrics > getModelVolume > 403 > admin required 1`] = `
-{
-  "error": {
-    "context": {
-      "requiredRole": "admin",
-      "userDn": "testUser",
-    },
-    "message": "You do not have the required role.",
-    "name": "Bailo Error",
-  },
+  "startDate": "string",
 }
 `;
 

@@ -3,6 +3,7 @@ import { PipelineStage } from 'mongoose'
 import { z } from '../lib/zod.js'
 import ModelModel from '../models/Model.js'
 import { ModelVolumeDataPointSchema } from '../routes/v2/metrics/getModelVolume.js'
+import { BadReq } from '../utils/error.js'
 
 export const ModelVolumePeriodEnum = z.enum(['day', 'week', 'month', 'quarter', 'year'])
 type ModelVolumePeriod = z.infer<typeof ModelVolumePeriodEnum>
@@ -10,13 +11,13 @@ type ModelVolumeDataPoint = z.infer<typeof ModelVolumeDataPointSchema>
 
 export async function calculateModelVolume(
   period: ModelVolumePeriod,
-  startDate: string,
-  endDate: string,
+  startDate: string | number | Date = 0,
+  endDate?: string | number | Date,
   timezone?: string,
   organisation?: string,
-): Promise<ModelVolumeDataPoint[]> {
+): Promise<{ startDate: string; endDate: string; dataPoints: ModelVolumeDataPoint[] }> {
   const start = new Date(startDate)
-  const end = new Date(endDate)
+  const end = endDate ? new Date(endDate) : new Date()
 
   const match: Record<string, unknown> = {
     createdAt: { $gte: start, $lte: end },
@@ -35,7 +36,7 @@ export async function calculateModelVolume(
           $dateTrunc: {
             date: '$createdAt',
             unit: period,
-            timezone,
+            ...(timezone && { timezone }),
           },
         },
         count: { $sum: 1 },
@@ -53,7 +54,7 @@ export async function calculateModelVolume(
             startDate: '$_id',
             unit: period,
             amount: 1,
-            timezone,
+            ...(timezone && { timezone }),
           },
         },
         count: 1,
@@ -61,15 +62,25 @@ export async function calculateModelVolume(
     },
   ]
 
-  const results = await ModelModel.aggregate<{
-    periodStart: Date
-    periodEnd: Date
-    count: number
-  }>(pipeline)
+  try {
+    const dataPoints = await ModelModel.aggregate<{
+      periodStart: Date
+      periodEnd: Date
+      count: number
+    }>(pipeline)
 
-  return results.map((r) => ({
-    periodStart: r.periodStart.toISOString(),
-    periodEnd: r.periodEnd.toISOString(),
-    count: r.count,
-  }))
+    const formattedDataPoints = dataPoints.map((dataPoint) => ({
+      periodStart: dataPoint.periodStart.toISOString(),
+      periodEnd: dataPoint.periodEnd.toISOString(),
+      count: dataPoint.count,
+    }))
+
+    return { startDate: start.toISOString(), endDate: end.toISOString(), dataPoints: formattedDataPoints }
+  } catch (err: any) {
+    if (err?.message?.includes('timezone') || err?.message?.includes('Time zone')) {
+      throw BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.')
+    }
+
+    throw err
+  }
 }
