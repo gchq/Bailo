@@ -14,7 +14,7 @@ import {
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
-import { InternalError } from '../../src/utils/error.js'
+import { InternalError, RegistryError } from '../../src/utils/error.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const ScanModelMock = getTypedModelMock('ScanModel')
@@ -378,7 +378,7 @@ describe('services > registry', () => {
     })
 
     test('renameImage > source manifest not found', async () => {
-      registryClientMocks.getImageTagManifests.mockRejectedValueOnce(InternalError('Error', { status: 404 }))
+      registryClientMocks.getImageTagManifests.mockRejectedValueOnce(RegistryError({} as any, { status: 404 }))
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
         'The requested image was not found.',
@@ -402,6 +402,7 @@ describe('services > registry', () => {
     test('renameImage > config missing digest', async () => {
       registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: { config: {}, layers: [] },
+        headers: { 'docker-content-digest': 'digest' },
       })
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Could not extract layer digest.')
