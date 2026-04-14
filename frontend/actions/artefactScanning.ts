@@ -1,4 +1,3 @@
-import qs from 'querystring'
 import useSWR from 'swr'
 import { ImageTagResult, ScanInfoInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
@@ -38,24 +37,16 @@ export function rerunImageArtefactScan(modelId: string, name: string, tag: strin
   })
 }
 
-export function useGetImageScanResults(modelId: string, name: string, tag: string, platform?: string) {
+export function useGetImageScanResults(modelId: string, name: string, digest: string) {
   const encodedModelId = encodeURIComponent(modelId)
   const encodedName = encodeURIComponent(name)
-  const encodedTag = encodeURIComponent(tag)
-  const queryParams = {
-    ...(platform && { platform }),
-  }
+  const encodedDigest = encodeURIComponent(digest)
   const { data, isLoading, error, mutate } = useSWR<
     {
       imageBreakdown: ImageTagResult
     },
     ErrorInfo
-  >(
-    Object.entries(queryParams).length > 0
-      ? `/api/v2/model/${encodedModelId}/image/${encodedName}/${encodedTag}?${qs.stringify(queryParams)}`
-      : `/api/v2/model/${encodedModelId}/image/${encodedName}/${encodedTag}`,
-    fetcher,
-  )
+  >(`/api/v2/model/${encodedModelId}/image/${encodedName}/${encodedDigest}`, fetcher)
 
   return {
     mutateImages: mutate,

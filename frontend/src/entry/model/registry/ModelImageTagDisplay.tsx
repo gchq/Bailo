@@ -11,6 +11,14 @@ import MessageAlert from 'src/MessageAlert'
 import { ArtefactKind, ModelImagesWithOptionalScanResults } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
+function checkIfMultiPlatform(modelImage: ModelImagesWithOptionalScanResults, tag: string) {
+  const correctTag = modelImage.scanSummaries.find((scan) => scan.tag === tag)
+  if (correctTag) {
+    return !!correctTag.platform
+  }
+  return false
+}
+
 interface ModelImageTagDisplayProps {
   modelImage: ModelImagesWithOptionalScanResults
   tag: string
@@ -50,9 +58,9 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
       const tagResult = modelImage.scanSummaries.filter((tagResult) => tagResult.tag === imageTag)
       return (
         <VulnerabilityResult
-          results={tagResult}
+          scanResults={tagResult}
           warningOnly
-          detailedViewUrl={`/model/${modelImage.repository}/registry/${modelImage.name}/${imageTag}`}
+          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${modelImage.name}/`}
         />
       )
     }
@@ -78,7 +86,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
               line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
             />
           </Box>
-          {modelImage.scanSummaries[0].platform && <Chip color='primary' label='Multi-platform' />}
+          {checkIfMultiPlatform(modelImage, tag) && <Chip color='primary' label='Multi-platform' />}
         </Stack>
         {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
           <Stack direction='row' spacing={2} alignItems='center'>
