@@ -29,7 +29,7 @@ import {
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { platformToString } from '../utils/registryUtils.js'
-import { getLayersForImageTag } from './images/getImageLayers.js'
+import { getLayersForImage } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -174,16 +174,19 @@ export async function getModelImageWithScanResults(
     throw InternalError('Missing manifest list body.', { imageRef })
   }
 
-  let reference: string | undefined = imageRef.tag
+  let layerRef: ImageRef
   if ('manifests' in body) {
-    reference = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
+    const digest = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
 
-    if (reference === undefined) {
+    if (digest === undefined) {
       throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
     }
+    layerRef = { repository: imageRef.repository, name: imageRef.name, digest }
+  } else {
+    layerRef = { repository: imageRef.repository, name: imageRef.name, tag: imageRef.tag }
   }
 
-  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: reference })
+  const layers = await getLayersForImage(repositoryToken, layerRef)
 
   const scanResults = await getScansFromLayers(layers, true)
 
@@ -218,7 +221,7 @@ export async function listModelImagesWithScanResults(
             if ('manifests' in manifestResponse.body) {
               return Promise.all(
                 manifestResponse.body.manifests.map(async (manifest) => {
-                  const layers = await getLayersForImageTag(repositoryToken, { ...img, tag: manifest.digest })
+                  const layers = await getLayersForImage(repositoryToken, { ...img, digest: manifest.digest })
                   const scan = await getScansFromLayers(layers)
 
                   return {
@@ -231,7 +234,7 @@ export async function listModelImagesWithScanResults(
               )
             }
 
-            const layers = await getLayersForImageTag(repositoryToken, { ...img, tag })
+            const layers = await getLayersForImage(repositoryToken, { ...img, tag })
 
             const scan = await getScansFromLayers(layers)
 
