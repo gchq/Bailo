@@ -2,11 +2,9 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
-  fetchRawManifest,
   getImageTagManifest,
-  getImageTagManifestList,
+  getImageTagManifests,
   getRegistryLayerStream,
-  isImageTagManifestList,
   listImageTags,
   listModelRepos,
   mountBlob,
@@ -15,13 +13,14 @@ import {
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
-import { ImageDigestRef, ImageNameRef, ImageTagRef } from '../models/Release.js'
+import { ImageDigestRef, ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import {
   ArtefactScanStateCounts,
+  ImageScanResult,
   ImageTagResult,
   ModelImages,
   ModelImagesWithScanResults,
@@ -29,7 +28,8 @@ import {
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
-import { getImageLayers } from './images/getImageLayers.js'
+import { platformToString } from '../utils/registryUtils.js'
+import { getLayersForImageTag } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -98,24 +98,32 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
 
   const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
-  return await Promise.all(
-    repos.map(async (repo) => {
-      const [repository, name] = repo.split(/\/(.*)/s)
-      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-        { type: 'repository', name: repo, actions: ['pull'] },
-      ])
-      return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
-    }),
-  )
+  return (
+    await Promise.all(
+      repos.map(async (repo) => {
+        const [repository, name] = repo.split(/\/(.*)/s)
+        const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+          { type: 'repository', name: repo, actions: ['pull'] },
+        ])
+        const tags = await listImageTags(repositoryToken, { repository, name })
+        return { repository, name, tags }
+      }),
+    )
+  ).filter((v) => v.tags.length)
 }
 
-export async function getImageWithScanResults(
-  user: UserInterface,
-  imageRef: ImageTagRef,
-  includeFullDetail = false,
-): Promise<ImageTagResult> {
-  const layers = await getLayersForImageTag(user, imageRef)
-  const scans = await getScansForImageTag(user, layers)
+export async function getScansFromLayers(
+  layers: Descriptors[],
+  includeFullDetail: boolean = false,
+): Promise<ImageScanResult> {
+  const layerDigests = layers.map((layer) => layer.digest)
+
+  const scans = await ScanModel.find({
+    artefactKind: ArtefactKind.IMAGE,
+    layerDigest: { $in: layerDigests },
+  })
+    .lean<ScanInterface[]>()
+    .exec()
 
   const initialState = Object.fromEntries(
     Object.values(ArtefactScanState).map((state) => [state, 0]),
@@ -136,7 +144,6 @@ export async function getImageWithScanResults(
   const state = statePriority.find((s) => stateCounts[s] > 0) ?? ArtefactScanState.NotScanned
 
   return {
-    tag: imageRef.tag,
     state,
     severityCounts: countSeverities(scans.flatMap((s) => s.summary || [])),
 
@@ -148,19 +155,39 @@ export async function getImageWithScanResults(
   }
 }
 
-async function getLayersForImageTag(user: UserInterface, imageRef: ImageTagRef): Promise<Descriptors[]> {
+export async function getModelImageWithScanResults(
+  user: UserInterface,
+  imageRef: ImageTagRef,
+  platform?: string,
+): Promise<ImageTagResult> {
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
+    {
+      type: 'repository',
+      name: `${imageRef.repository}/${imageRef.name}`,
+      actions: ['pull'],
+    },
   ])
-  let layers: Descriptors[] = []
-  try {
-    layers = await getImageLayers(repositoryToken, imageRef)
-  } catch (err) {
-    if (!(isBailoError(err) && err.message === 'Bailo backend does not currently support manifest lists.')) {
-      throw err
+
+  const { body, headers } = await getImageTagManifests(repositoryToken, imageRef)
+
+  if (!body) {
+    throw InternalError('Missing manifest list body.', { imageRef })
+  }
+
+  let reference: string | undefined = imageRef.tag
+  if ('manifests' in body) {
+    reference = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
+
+    if (reference === undefined) {
+      throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
     }
   }
-  return layers
+
+  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: reference })
+
+  const scanResults = await getScansFromLayers(layers, true)
+
+  return { tag: imageRef.tag, digest: headers['docker-content-digest'], platform, ...scanResults }
 }
 
 export async function listModelImagesWithScanResults(
@@ -171,9 +198,49 @@ export async function listModelImagesWithScanResults(
 
   return Promise.all(
     modelImages.map(async (img) => {
+      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+        {
+          type: 'repository',
+          name: `${img.repository}/${img.name}`,
+          actions: ['pull'],
+        },
+      ])
+
       const scanSummaries = (
-        await Promise.all(img.tags.map((tag) => getImageWithScanResults(user, { ...img, tag })))
-      ).filter((r) => r.state !== ArtefactScanState.NotScanned)
+        await Promise.all(
+          img.tags.map(async (tag) => {
+            const manifestResponse = await getImageTagManifests(repositoryToken, { ...img, tag })
+
+            if (!manifestResponse.body) {
+              return []
+            }
+
+            if ('manifests' in manifestResponse.body) {
+              return Promise.all(
+                manifestResponse.body.manifests.map(async (manifest) => {
+                  const layers = await getLayersForImageTag(repositoryToken, { ...img, tag: manifest.digest })
+                  const scan = await getScansFromLayers(layers)
+
+                  return {
+                    tag,
+                    digest: manifest.digest,
+                    platform: platformToString(manifest.platform),
+                    ...scan,
+                  }
+                }),
+              )
+            }
+
+            const layers = await getLayersForImageTag(repositoryToken, { ...img, tag })
+
+            const scan = await getScansFromLayers(layers)
+
+            return [{ tag, digest: manifestResponse.headers['docker-content-digest'], ...scan }]
+          }),
+        )
+      )
+        .flat()
+        .filter((r) => r.state !== ArtefactScanState.NotScanned)
 
       return {
         ...img,
@@ -194,22 +261,7 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
   }, initial)
 }
 
-async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): Promise<ScanInterface[]> {
-  const layerDigests = layers.map((l) => l.digest)
-
-  if (layerDigests.length === 0) {
-    return []
-  }
-
-  return ScanModel.find({
-    artefactKind: ArtefactKind.IMAGE,
-    layerDigest: { $in: layerDigests },
-  })
-    .lean<ScanInterface[]>()
-    .exec()
-}
-
-export async function getImageManifest(user: UserInterface, imageRef: ImageTagRef) {
+export async function getImageManifest(user: UserInterface, imageRef: ImageRef) {
   await checkUserAuth(user, imageRef.repository, ['pull'])
 
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
@@ -244,7 +296,7 @@ async function getTagDigestMap(token: string, repository: string, name: string):
   }
 
   for (const tag of tags) {
-    const { headers } = await fetchRawManifest(token, {
+    const { headers } = await getImageTagManifests(token, {
       repository,
       name,
       tag,
@@ -271,11 +323,23 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
     { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull', 'delete'] },
   ])
 
-  // TODO: refactor this to handle both single manifest and manifest lists without the `if/else`
-  const isManifestList = await isImageTagManifestList(multiRepositoryToken, source)
+  let manifest: Awaited<ReturnType<typeof getImageTagManifests>>
+  try {
+    manifest = await getImageTagManifests(multiRepositoryToken, source)
+  } catch (err) {
+    if (isBailoError(err) && err?.context?.status === 404) {
+      throw NotFound('The requested image was not found.', { ...source })
+    }
+    throw err
+  }
 
-  if (isManifestList) {
-    const { body: rootManifest, headers: rootHeaders } = await getImageTagManifestList(multiRepositoryToken, source)
+  if (!manifest.body) {
+    throw InternalError('The registry returned a response but the body was missing.', { source })
+  }
+
+  // TODO: refactor this to handle both single manifest and manifest lists without the `if/else`
+  if ('manifests' in manifest.body) {
+    const { body: rootManifest, headers: rootHeaders } = manifest
     if (!rootManifest) {
       throw InternalError('Manifest list body missing.', { source })
     }
@@ -295,8 +359,8 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
           digest: manifest.digest,
         }
 
-        const { body: childManifest } = await getImageTagManifest(multiRepositoryToken, digestRef)
-        if (!childManifest) {
+        const { body: childManifest } = await getImageTagManifests(multiRepositoryToken, digestRef)
+        if (!childManifest || 'manifests' in childManifest) {
           throw InternalError('Platform manifest missing.', { digestRef })
         }
 
@@ -373,20 +437,6 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
     }
   } else {
     // single manifest
-    let manifest: Awaited<ReturnType<typeof getImageManifest>>
-    try {
-      manifest = await getImageTagManifest(multiRepositoryToken, source)
-    } catch (err) {
-      if (isBailoError(err) && err?.context?.status === 404) {
-        throw NotFound('The requested image was not found.', { ...source })
-      }
-      throw err
-    }
-
-    if (!manifest.body) {
-      throw InternalError('The registry returned a response but the body was missing.', { source })
-    }
-
     const allLayers = [manifest.body.config, ...manifest.body.layers]
 
     // cross-mount layers from original to new image
@@ -427,7 +477,11 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
       })
       for (const tag of remainingImages) {
         const tagHeaders = (
-          await getImageManifest(user, { repository: source.repository, name: source.name, tag: tag })
+          await getImageTagManifests(multiRepositoryToken, {
+            repository: source.repository,
+            name: source.name,
+            tag: tag,
+          })
         ).headers
         if (manifest.headers['docker-content-digest'] === tagHeaders['docker-content-digest']) {
           isOrphaned = false

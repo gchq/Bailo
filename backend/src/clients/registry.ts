@@ -3,14 +3,13 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 import type { ZodSchema } from 'zod'
 
-import { ImageNameRef, ImageRef } from '../models/Release.js'
+import { ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
-  AcceptManifestAnyMediaTypeHeaderValue,
   AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBodySchema,
@@ -23,9 +22,6 @@ import {
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
   ImageManifestV2Schema,
-  ManifestListMediaTypeSchema,
-  ManifestListV2Schema,
-  ManifestMediaTypeSchema,
   ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
@@ -285,43 +281,10 @@ export async function listImageTags(token: string, repoRef: ImageNameRef) {
   }
 }
 
-export async function isImageTagManifestList(token: string, imageRef: ImageRef): Promise<boolean> {
-  const result = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
-    {
-      // do not validate the body here as we only care about Content-Type
-      headersSchema: ManifestResponseHeadersSchema,
-      extraHeaders: {
-        Accept: AcceptManifestMediaTypeHeaderValue,
-      },
-    },
-  )
-
-  const rawContentType = result.headers['content-type']
-  const contentType = rawContentType?.split(';')[0]?.trim()
-
-  if (!contentType) {
-    throw InternalError('Registry response missing Content-Type header.', {
-      imageRef,
-    })
-  }
-
-  if ((ManifestListMediaTypeSchema.options as string[]).includes(contentType)) {
-    return true
-  }
-  if ((ManifestMediaTypeSchema.options as string[]).includes(contentType)) {
-    return false
-  }
-
-  throw InternalError('Unrecognised manifest media type.', {
-    imageRef,
-    contentType,
-  })
-}
-
+/**
+ * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
+ */
 export async function getImageTagManifest(token: string, imageRef: ImageRef) {
-  // TODO: handle multi-platform images
   const result = await registryRequest(
     token,
     `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
@@ -337,23 +300,7 @@ export async function getImageTagManifest(token: string, imageRef: ImageRef) {
   return { body: result.body, headers: result.headers }
 }
 
-export async function getImageTagManifestList(token: string, imageRef: ImageRef) {
-  const result = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
-    {
-      bodySchema: ManifestListV2Schema,
-      headersSchema: ManifestResponseHeadersSchema,
-      extraHeaders: {
-        Accept: AcceptManifestListMediaTypeHeaderValue,
-      },
-    },
-  )
-
-  return { body: result.body, headers: result.headers }
-}
-
-export async function fetchRawManifest(token: string, imageRef: ImageRef) {
+export async function getImageTagManifests(token: string, imageRef: ImageRef) {
   const result = await registryRequest(
     token,
     `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
@@ -361,7 +308,7 @@ export async function fetchRawManifest(token: string, imageRef: ImageRef) {
       bodySchema: ManifestResponseBodySchema,
       headersSchema: ManifestResponseHeadersSchema,
       extraHeaders: {
-        Accept: AcceptManifestAnyMediaTypeHeaderValue,
+        Accept: AcceptManifestListMediaTypeHeaderValue,
       },
     },
   )
@@ -425,24 +372,20 @@ export async function initialiseUpload(token: string, repoRef: ImageNameRef) {
   return result.headers
 }
 
-export async function putManifest(token: string, imageRef: ImageRef, manifest: BodyInit, contentType: string) {
-  const result = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
-    {
-      headersSchema: ManifestResponseHeadersSchema,
-      expectStream: true,
-      extraFetchOptions: {
-        method: 'PUT',
-        body: manifest,
-      },
-      extraHeaders: {
-        'Content-Type': contentType,
-        name: `${imageRef.repository}/${imageRef.name}`,
-        reference: getImageRefId(imageRef),
-      },
+export async function putManifest(token: string, imageRef: ImageTagRef, manifest: BodyInit, contentType: string) {
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+    headersSchema: ManifestResponseHeadersSchema,
+    expectStream: true,
+    extraFetchOptions: {
+      method: 'PUT',
+      body: manifest,
     },
-  )
+    extraHeaders: {
+      'Content-Type': contentType,
+      name: `${imageRef.repository}/${imageRef.name}`,
+      reference: imageRef.tag,
+    },
+  })
 
   return result.headers
 }

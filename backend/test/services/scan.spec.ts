@@ -329,15 +329,6 @@ describe('services > scan', () => {
       expect(result).toBe('Image scan started for repo/image:latest')
     })
 
-    test('fail on manifest list', async () => {
-      registryClientMocks.isImageTagManifestList.mockResolvedValueOnce(true)
-      ScanModelMock.find.mockResolvedValueOnce([])
-
-      await expect(
-        rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError(/^Bailo backend does not currently support scanning images with manifest lists./)
-    })
-
     test('throws bad request when model is not found (image scan)', async () => {
       modelMocks.getModelById.mockResolvedValueOnce(null)
 
