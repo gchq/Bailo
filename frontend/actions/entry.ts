@@ -6,12 +6,12 @@ import {
   EntryForm,
   EntryInterface,
   EntryKindKeys,
+  EntryRole,
   EntryUserPermissions,
   EntryVisibilityKeys,
   FileInterface,
   ModelImage,
   ReleaseInterface,
-  SystemRole,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -107,7 +107,7 @@ const emptyRolesList = []
 export function useGetEntryRoles(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: SystemRole[]
+      roles: EntryRole[]
     },
     ErrorInfo
   >(entryId ? `/api/v2/roles?modelId=${entryId}` : `/api/v2/roles`, fetcher)

@@ -4,6 +4,7 @@ import {
   EntryCardInterface,
   EntryInterface,
   EntryKind,
+  EntryRole,
   EntryVisibility,
   ResponseInterface,
   ResponseKind,
@@ -12,7 +13,6 @@ import {
   RoleKind,
   SchemaInterface,
   StepNoRender,
-  SystemRole,
   UiConfig,
 } from 'types/types'
 
@@ -199,10 +199,11 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
   isComplete: () => false,
 }
 
-export const testManagerRole: SystemRole = {
+export const testManagerRole: EntryRole = {
   name: 'Manager',
   shortName: 'manager',
   systemRole: 'owner',
+  kind: 'review',
 }
 
 export const testManagerRoleInterface: ReviewRoleInterface = {

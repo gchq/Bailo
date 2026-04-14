@@ -68,7 +68,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
       </Stack>
       <Divider />
       <EntryAccessInput
-        value={entry.collaborators}
+        initialUsers={entry.collaborators}
         onChange={handleCollaboratorsChange}
         entryKind={entry.kind}
         entryRoles={entryRoles}

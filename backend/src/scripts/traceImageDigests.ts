@@ -1,5 +1,5 @@
 import { getImageTagManifest, listImageTags, listModelRepos } from '../clients/registry.js'
-import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
@@ -17,7 +17,7 @@ interface AffectedImage {
 async function script() {
   await connectToMongoose()
 
-  const registryToken = await getAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
+  const registryToken = await issueAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repositories = await listModelRepos(registryToken, '')
   log.info({ amount: repositories.length }, 'Retrieved repositories')
 
@@ -27,7 +27,7 @@ async function script() {
   for (const repository of repositories) {
     const [modelId, image] = repository.split('/')
 
-    const repoToken = await getAccessToken({ dn: 'user' }, [{ type: 'repository', name: repository, actions: ['*'] }])
+    const repoToken = await issueAccessToken({ dn: 'user' }, [{ type: 'repository', name: repository, actions: ['*'] }])
 
     const tags = await listImageTags(repoToken, {
       repository,

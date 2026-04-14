@@ -49,6 +49,10 @@ export function NotFound(message: string, context?: BailoError['context'], logge
   return GenericError(404, message, context, logger)
 }
 
+export function Conflict(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(409, message, context, logger)
+}
+
 export function ContentTooLarge(message: string, context?: BailoError['context'], logger?: Logger) {
   return GenericError(413, message, context, logger)
 }
