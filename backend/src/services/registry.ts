@@ -99,17 +99,21 @@ export async function listModelImages(user: UserInterface, modelId: string): Pro
   const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
   return (
-    await Promise.all(
-      repos.map(async (repo) => {
-        const [repository, name] = repo.split(/\/(.*)/s)
-        const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-          { type: 'repository', name: repo, actions: ['pull'] },
-        ])
-        const tags = await listImageTags(repositoryToken, { repository, name })
-        return { repository, name, tags }
-      }),
+    (
+      await Promise.all(
+        repos.map(async (repo) => {
+          const [repository, name] = repo.split(/\/(.*)/s)
+          const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+            { type: 'repository', name: repo, actions: ['pull'] },
+          ])
+          const tags = await listImageTags(repositoryToken, { repository, name })
+          return { repository, name, tags }
+        }),
+      )
     )
-  ).filter((v) => v.tags.length)
+      // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
+      .filter((repo) => repo.tags && repo.tags.length > 0)
+  )
 }
 
 export async function getScansFromLayers(
@@ -397,6 +401,8 @@ async function renameMultiManifest(
   sourceDigest: string,
 ) {
   const sourceTagDigestMap = await getTagDigestMap(multiRepositoryToken, source.repository, source.name)
+  const sourceDigestSet = new Set(sourceTagDigestMap.values())
+  const listIsOrphaned = !sourceDigestSet.has(sourceDigest)
 
   const tmpTags: string[] = []
   const updatedManifestBody = structuredClone(manifestBody)
@@ -426,7 +432,9 @@ async function renameMultiManifest(
 
       // A temp tag is required because PUT-by-digest fails (the JSON is re-serialised, changing its canonical bytes)
       // so we create the digest via a tag and then delete the tag (leaving the new digest)
-      const tmpTag = `__bailo_tmp_${Date.now()}_${crypto.randomUUID()}__`
+      const tmpTag = `__bailo_tmp_${crypto.randomUUID()}__`
+      // NOTE: Temp tags may remain if process crashes before cleanup.
+      // These are safe but should be periodically garbage-collected.
       log.debug(
         { image: { repository: destination.repository, name: destination.name, tag: tmpTag } },
         'PUT manifest with temporary tag in registry',
@@ -469,7 +477,6 @@ async function renameMultiManifest(
     // delete original root manifest
     await deleteManifest(multiRepositoryToken, source)
 
-    const listIsOrphaned = !Array.from(sourceTagDigestMap.values()).some((digest) => digest === sourceDigest)
     if (listIsOrphaned) {
       log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
       await deleteManifest(multiRepositoryToken, {
@@ -478,6 +485,11 @@ async function renameMultiManifest(
         digest: sourceDigest,
       })
     }
+
+    /**
+     * Note: Docker Distribution (registry:3.x) does not auto-delete empty repositories.
+     * If this removes the last manifest, the repo namespace may remain until registry garbage collection runs.
+     */
   } finally {
     // always cleanup temp tags
     for (const tmpTag of tmpTags) {

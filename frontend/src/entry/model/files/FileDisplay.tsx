@@ -114,8 +114,11 @@ export default function FileDisplay({
   const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteFileOpen, setDeleteFileOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
+
+  const sendNotification = useNotification()
 
   const { mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
@@ -141,17 +144,34 @@ export default function FileDisplay({
   }, [releases, setLatestRelease, sortedAssociatedReleases])
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (isFileInterface(file)) {
+    if (!isFileInterface(file) || isDeleting) {
+      return
+    }
+    try {
+      setIsDeleting(true)
+      setDeleteErrorMessage('')
+
       const res = await deleteEntryFile(modelId, file._id)
       if (!res.ok) {
         setDeleteErrorMessage(await getErrorMessage(res))
-      } else {
-        mutateModelFiles()
-        setDeleteFileOpen(false)
-        router.push(`/model/${modelId}?tab=files`)
+        return
       }
+
+      sendNotification({
+        variant: 'success',
+        msg: `File ${file.name} deleted`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+
+      mutateModelFiles()
+      setDeleteFileOpen(false)
+      router.push(`/model/${modelId}?tab=files`)
+    } catch (err) {
+      setDeleteErrorMessage(`Failed to delete image.\n${err}`)
+    } finally {
+      setIsDeleting(false)
     }
-  }, [file, modelId, router, mutateModelFiles])
+  }, [file, isDeleting, modelId, router, mutateModelFiles, sendNotification])
 
   function handleFileMoreButtonClick(event: MouseEvent<HTMLButtonElement>) {
     setAnchorElMore(event.currentTarget)
@@ -209,7 +229,6 @@ export default function FileDisplay({
     updateChipDetails()
   }, [file])
 
-  const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
 
   const openMore = Boolean(anchorElMore)
@@ -434,6 +453,7 @@ export default function FileDisplay({
                           onClick={() => {
                             handleFileMoreButtonClose()
                             setDeleteFileOpen(true)
+                            setDeleteErrorMessage('')
                           }}
                         >
                           <ListItemIcon>
@@ -502,8 +522,14 @@ export default function FileDisplay({
         open={deleteFileOpen}
         title='Delete File'
         onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteFileOpen(false)}
+        onCancel={() => {
+          if (!isDeleting) {
+            setDeleteFileOpen(false)
+          }
+        }}
         errorMessage={deleteErrorMessage}
+        confirmDisabled={isDeleting}
+        confirmLoading={isDeleting}
         dialogMessage={
           sortedAssociatedReleases.length > 0
             ? 'Deleting this file will affect the following releases:'

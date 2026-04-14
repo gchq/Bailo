@@ -29,8 +29,13 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
 
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteImageOpen, setDeleteImageOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+
+  const handleImageMoreButtonClose = () => {
+    setAnchorElMore(null)
+  }
 
   const { releases } = useGetReleasesForModelId(modelImage.repository)
   const latestRelease = releases.length > 0 ? releases[0].semver : ''
@@ -64,23 +69,34 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
   )
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (!tag) {
+    if (!tag || isDeleting) {
       return
     }
-    const response = await deleteEntryImage(modelImage.repository, modelImage.name, tag)
-    if (!response.ok) {
-      setDeleteErrorMessage(await getErrorMessage(response))
-      return
+    try {
+      setIsDeleting(true)
+      setDeleteErrorMessage('')
+
+      const response = await deleteEntryImage(modelImage.repository, modelImage.name, tag)
+      if (!response.ok) {
+        setDeleteErrorMessage(await getErrorMessage(response))
+        return
+      }
+
+      sendNotification({
+        variant: 'success',
+        msg: `Image ${modelImage.name}:${tag} deleted`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+
+      setDeleteImageOpen(false)
+      handleImageMoreButtonClose()
+      mutate()
+    } catch (err) {
+      setDeleteErrorMessage(`Failed to delete image.\n${err}`)
+    } finally {
+      setIsDeleting(false)
     }
-    sendNotification({
-      variant: 'success',
-      msg: `Image ${modelImage.name}:${tag} deleted`,
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
-    setDeleteOpen(false)
-    setAnchorElMore(null)
-    mutate()
-  }, [tag, modelImage.name, modelImage.repository, mutate, sendNotification])
+  }, [tag, isDeleting, modelImage.name, modelImage.repository, mutate, sendNotification])
 
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
@@ -122,9 +138,10 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
           <IconButton aria-label='toggle image options menu' onClick={(event) => setAnchorElMore(event.currentTarget)}>
             <MoreVert color='primary' />
           </IconButton>
-          <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => setAnchorElMore(null)}>
+          <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => handleImageMoreButtonClose()}>
             <MenuItem
               onClick={() => {
+                handleImageMoreButtonClose()
                 setAssociatedReleasesOpen(true)
               }}
             >
@@ -135,7 +152,9 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setDeleteOpen(true)
+                handleImageMoreButtonClose()
+                setDeleteErrorMessage('')
+                setDeleteImageOpen(true)
               }}
             >
               <ListItemIcon>
@@ -153,11 +172,17 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
             )}
           </Menu>
           <ConfirmationDialogue
-            open={deleteOpen}
+            open={deleteImageOpen}
             title='Delete Image'
             onConfirm={handleDeleteConfirm}
-            onCancel={() => setDeleteOpen(false)}
+            onCancel={() => {
+              if (!isDeleting) {
+                setDeleteImageOpen(false)
+              }
+            }}
             errorMessage={deleteErrorMessage}
+            confirmDisabled={isDeleting}
+            confirmLoading={isDeleting}
             dialogMessage={
               associatedReleasesForTag(tag).length > 0
                 ? 'Deleting this image will affect the following releases:'
