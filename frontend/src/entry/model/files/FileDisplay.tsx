@@ -167,7 +167,7 @@ export default function FileDisplay({
       setDeleteFileOpen(false)
       router.push(`/model/${modelId}?tab=files`)
     } catch (err) {
-      setDeleteErrorMessage(`Failed to delete image.\n${err}`)
+      setDeleteErrorMessage(`Failed to delete file.\n${err}`)
     } finally {
       setIsDeleting(false)
     }
