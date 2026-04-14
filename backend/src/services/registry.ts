@@ -27,7 +27,7 @@ import {
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { platformToString } from '../utils/registryUtils.js'
 import { getLayersForImage } from './images/getImageLayers.js'
 import log from './log.js'
@@ -314,6 +314,183 @@ async function getTagDigestMap(token: string, repository: string, name: string):
   return map
 }
 
+async function renameStandardManifest(
+  source: ImageTagRef,
+  destination: ImageTagRef,
+  manifestBody: ImageManifestV2,
+  multiRepositoryToken: string,
+  sourceDigest: string,
+) {
+  const allLayers = [manifestBody.config, ...manifestBody.layers]
+
+  // cross-mount layers from original to new image
+  for (const layer of allLayers) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
+    }
+    log.trace(
+      {
+        layerDigest,
+        source: { repository: source.repository, name: source.name },
+        destination: { repository: destination.repository, name: destination.name },
+      },
+      'CrossMounting registry layer to new repository.',
+    )
+
+    await mountBlob(
+      multiRepositoryToken,
+      { repository: source.repository, name: source.name },
+      { repository: destination.repository, name: destination.name },
+      layerDigest,
+    )
+  }
+
+  log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
+  const mediaType = manifestBody.mediaType == OCIEmptyMediaType ? manifestBody.artifactType : manifestBody.mediaType
+  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifestBody), mediaType)
+  log.trace({ source }, 'Deleting the original manifest.')
+  await deleteManifest(multiRepositoryToken, source)
+
+  let isOrphaned = true
+  try {
+    const remainingImages = await listImageTags(multiRepositoryToken, {
+      repository: source.repository,
+      name: source.name,
+    })
+    for (const tag of remainingImages) {
+      const tagHeaders = (
+        await getImageTagManifests(multiRepositoryToken, {
+          repository: source.repository,
+          name: source.name,
+          tag: tag,
+        })
+      ).headers
+      if (sourceDigest === tagHeaders['docker-content-digest']) {
+        isOrphaned = false
+        log.trace({ source }, "Found another tag matching digest. Won't delete digest.")
+        break
+      }
+    }
+  } catch (err) {
+    // error 404 is thrown by listImageTags when no tags remain but the digest still exists
+    if (!err || !isBailoError(err) || err?.context?.status !== 404) {
+      throw err
+    }
+  }
+
+  if (isOrphaned) {
+    log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
+    await deleteManifest(multiRepositoryToken, {
+      repository: source.repository,
+      name: source.name,
+      digest: sourceDigest,
+    })
+  }
+}
+
+async function renameMultiManifest(
+  source: ImageTagRef,
+  destination: ImageTagRef,
+  manifestBody: ManifestListV2,
+  multiRepositoryToken: string,
+  sourceDigest: string,
+) {
+  const sourceTagDigestMap = await getTagDigestMap(multiRepositoryToken, source.repository, source.name)
+
+  const tmpTags: string[] = []
+  const updatedManifestBody = structuredClone(manifestBody)
+  try {
+    for (const manifest of updatedManifestBody.manifests) {
+      const digestRef: ImageDigestRef = {
+        repository: source.repository,
+        name: source.name,
+        digest: manifest.digest,
+      }
+
+      const { body: childManifest } = await getImageTagManifests(multiRepositoryToken, digestRef)
+      if (!childManifest || 'manifests' in childManifest) {
+        throw InternalError('Platform manifest missing.', { digestRef })
+      }
+
+      const layers = [childManifest.config, ...childManifest.layers]
+
+      for (const layer of layers) {
+        await mountBlob(
+          multiRepositoryToken,
+          { repository: source.repository, name: source.name },
+          { repository: destination.repository, name: destination.name },
+          layer.digest,
+        )
+      }
+
+      // A temp tag is required because PUT-by-digest fails (the JSON is re-serialised, changing its canonical bytes)
+      // so we create the digest via a tag and then delete the tag (leaving the new digest)
+      const tmpTag = `__tmp_copy_${crypto.randomUUID()}__`
+      tmpTags.push(tmpTag)
+      const childPutManifestRes = await putManifest(
+        multiRepositoryToken,
+        { repository: destination.repository, name: destination.name, tag: tmpTag },
+        JSON.stringify(childManifest),
+        childManifest.mediaType === OCIEmptyMediaType ? childManifest.artifactType! : childManifest.mediaType!,
+      )
+
+      const newDigest = childPutManifestRes['docker-content-digest']
+      if (!newDigest) {
+        throw InternalError('Child manifest digest missing after PUT', { tmpTag })
+      }
+
+      const platformIsOrphaned = !Array.from(sourceTagDigestMap.values()).some((digest) => digest === manifest.digest)
+
+      if (platformIsOrphaned) {
+        await deleteManifest(multiRepositoryToken, {
+          repository: source.repository,
+          name: source.name,
+          digest: manifest.digest,
+        })
+      }
+
+      // overwrite digest to point to new child manifest
+      manifest.digest = newDigest
+    }
+
+    // PUT root manifest
+    await putManifest(
+      multiRepositoryToken,
+      destination,
+      JSON.stringify(updatedManifestBody),
+      updatedManifestBody.mediaType!,
+    )
+
+    // delete original root manifest
+    await deleteManifest(multiRepositoryToken, source)
+
+    const listIsOrphaned = !Array.from(sourceTagDigestMap.values()).some((digest) => digest === sourceDigest)
+    if (listIsOrphaned) {
+      log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
+      await deleteManifest(multiRepositoryToken, {
+        repository: source.repository,
+        name: source.name,
+        digest: sourceDigest,
+      })
+    }
+  } finally {
+    // always cleanup temp tags
+    for (const tmpTag of tmpTags) {
+      try {
+        // remove temp tag, which leaves the digest in place if still referenced by another manifest
+        await deleteManifest(multiRepositoryToken, {
+          repository: destination.repository,
+          name: destination.name,
+          tag: tmpTag,
+        })
+      } catch (cleanupErr) {
+        log.warn({ tmpTag, cleanupErr }, 'Failed to cleanup temp tag')
+      }
+    }
+  }
+}
+
 /**
  * Renames an image in the registry.
  *
@@ -340,173 +517,18 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
     throw InternalError('The registry returned a response but the body was missing.', { source })
   }
 
-  // TODO: refactor this to handle both single manifest and manifest lists without the `if/else`
+  const sourceDigest = manifest.headers['docker-content-digest']
+  if (!sourceDigest) {
+    throw InternalError('The registry returned a response but the source digest header was missing.', {
+      source,
+      headers: manifest.headers,
+    })
+  }
+
   if ('manifests' in manifest.body) {
-    const { body: rootManifest, headers: rootHeaders } = manifest
-    if (!rootManifest) {
-      throw InternalError('Manifest list body missing.', { source })
-    }
-    const sourceDigest = rootHeaders['docker-content-digest']
-    if (!sourceDigest) {
-      throw InternalError('Manifest list required headers missing.', { source })
-    }
-
-    const sourceTagDigestMap = await getTagDigestMap(multiRepositoryToken, source.repository, source.name)
-
-    const tmpTags: string[] = []
-    try {
-      for (const manifest of rootManifest.manifests) {
-        const digestRef: ImageDigestRef = {
-          repository: source.repository,
-          name: source.name,
-          digest: manifest.digest,
-        }
-
-        const { body: childManifest } = await getImageTagManifests(multiRepositoryToken, digestRef)
-        if (!childManifest || 'manifests' in childManifest) {
-          throw InternalError('Platform manifest missing.', { digestRef })
-        }
-
-        const layers = [childManifest.config, ...childManifest.layers]
-
-        for (const layer of layers) {
-          await mountBlob(
-            multiRepositoryToken,
-            { repository: source.repository, name: source.name },
-            { repository: destination.repository, name: destination.name },
-            layer.digest,
-          )
-        }
-
-        // A temp tag is required because PUT-by-digest fails (the JSON is re-serialised, changing its canonical bytes)
-        // so we create the digest via a tag and then delete the tag (leaving the new digest)
-        const tmpTag = `__tmp_copy_${crypto.randomUUID()}__`
-        tmpTags.push(tmpTag)
-        const childPutManifestRes = await putManifest(
-          multiRepositoryToken,
-          { repository: destination.repository, name: destination.name, tag: tmpTag },
-          JSON.stringify(childManifest),
-          childManifest.mediaType === OCIEmptyMediaType ? childManifest.artifactType! : childManifest.mediaType!,
-        )
-
-        const newDigest = childPutManifestRes['docker-content-digest']
-        if (!newDigest) {
-          throw InternalError('Child manifest digest missing after PUT', { tmpTag })
-        }
-
-        const platformIsOrphaned = !Array.from(sourceTagDigestMap.values()).some((digest) => digest === manifest.digest)
-
-        if (platformIsOrphaned) {
-          await deleteManifest(multiRepositoryToken, {
-            repository: source.repository,
-            name: source.name,
-            digest: manifest.digest,
-          })
-        }
-
-        // overwrite digest to point to new child manifest
-        manifest.digest = newDigest
-      }
-
-      // PUT root manifest
-      await putManifest(multiRepositoryToken, destination, JSON.stringify(rootManifest), rootManifest.mediaType!)
-
-      // delete original root manifest
-      await deleteManifest(multiRepositoryToken, source)
-
-      const listIsOrphaned = !Array.from(sourceTagDigestMap.values()).some((digest) => digest === sourceDigest)
-      if (listIsOrphaned) {
-        log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
-        await deleteManifest(multiRepositoryToken, {
-          repository: source.repository,
-          name: source.name,
-          digest: rootHeaders['docker-content-digest'],
-        })
-      }
-    } finally {
-      // always cleanup temp tags
-      for (const tmpTag of tmpTags) {
-        try {
-          // remove temp tag, leaving digest in place if still referenced by rootManifest
-          await deleteManifest(multiRepositoryToken, {
-            repository: destination.repository,
-            name: destination.name,
-            tag: tmpTag,
-          })
-        } catch (cleanupErr) {
-          log.warn({ tmpTag, cleanupErr }, 'Failed to cleanup temp tag')
-        }
-      }
-    }
+    await renameMultiManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)
   } else {
-    // single manifest
-    const allLayers = [manifest.body.config, ...manifest.body.layers]
-
-    // cross-mount layers from original to new image
-    for (const layer of allLayers) {
-      const layerDigest = layer['digest']
-      if (!layerDigest || layerDigest.length === 0) {
-        throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
-      }
-      log.trace(
-        {
-          layerDigest,
-          source: { repository: source.repository, name: source.name },
-          destination: { repository: destination.repository, name: destination.name },
-        },
-        'CrossMounting registry layer to new repository.',
-      )
-
-      await mountBlob(
-        multiRepositoryToken,
-        { repository: source.repository, name: source.name },
-        { repository: destination.repository, name: destination.name },
-        layerDigest,
-      )
-    }
-
-    log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
-    const mediaType =
-      manifest.body.mediaType == OCIEmptyMediaType ? manifest.body.artifactType : manifest.body.mediaType
-    await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), mediaType)
-    log.trace({ source }, 'Deleting the original manifest.')
-    await deleteManifest(multiRepositoryToken, source)
-
-    let isOrphaned = true
-    try {
-      const remainingImages = await listImageTags(multiRepositoryToken, {
-        repository: source.repository,
-        name: source.name,
-      })
-      for (const tag of remainingImages) {
-        const tagHeaders = (
-          await getImageTagManifests(multiRepositoryToken, {
-            repository: source.repository,
-            name: source.name,
-            tag: tag,
-          })
-        ).headers
-        if (manifest.headers['docker-content-digest'] === tagHeaders['docker-content-digest']) {
-          isOrphaned = false
-          log.trace({ source }, "Found another tag matching digest. Won't delete digest.")
-          break
-        }
-      }
-    } catch (err) {
-      // error 404 is thrown by listImageTags when no tags remain but the digest still exists
-      if (!err || !isBailoError(err) || err?.context?.status !== 404) {
-        throw err
-      }
-    }
-
-    if (isOrphaned) {
-      log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
-      await deleteManifest(multiRepositoryToken, {
-        repository: source.repository,
-        name: source.name,
-        digest: manifest.headers['docker-content-digest'],
-      })
-    }
+    await renameStandardManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)
   }
 }
 
