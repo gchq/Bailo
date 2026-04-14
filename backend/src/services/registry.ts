@@ -171,16 +171,16 @@ export async function getModelImageWithScanResults(
     throw InternalError('Missing manifest list body.', { imageRef })
   }
 
-  let tag: string | undefined = imageRef.tag
+  let reference: string | undefined = imageRef.tag
   if ('manifests' in body) {
-    tag = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
+    reference = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
 
-    if (tag === undefined) {
+    if (reference === undefined) {
       throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
     }
   }
 
-  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag })
+  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: reference })
 
   const scanResults = await getScansFromLayers(layers, true)
 
