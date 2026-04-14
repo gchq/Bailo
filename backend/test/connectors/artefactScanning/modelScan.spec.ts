@@ -9,7 +9,6 @@ import { ArtefactKind } from '../../../src/models/Scan.js'
 vi.mock('../../../src/clients/artefactScan.js')
 vi.mock('../../../src/clients/s3.js')
 vi.mock('../../../src/clients/registry.js')
-vi.mock('../../../src/routes/v1/registryAuth.js')
 vi.mock('../../../src/services/log.js')
 
 const artefactScanClientMocks = vi.hoisted(() => ({
@@ -24,7 +23,7 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
 const authMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(),
+  issueAccessToken: vi.fn(),
 }))
 vi.mock('../../../src/routes/v1/registryAuth.js', () => authMocks)
 

@@ -253,15 +253,15 @@ export type SystemRoleKeys = (typeof SystemRole)[keyof typeof SystemRole]
 
 export type CollaboratorRoleType = SystemRoleKeys | string
 
-export interface SystemRole {
+export interface EntryRole {
   name: string
+  kind: RoleKindKeys
   shortName: string
-  kind?: RoleKindKeys
   description?: string
-  systemRole: SystemRoleKeys
+  systemRole?: SystemRoleKeys
 }
 
-export type ReviewRolesFormData = SystemRole & {
+export type ReviewRolesFormData = EntryRole & {
   defaultEntities?: string[]
   lockEntities: boolean
 }

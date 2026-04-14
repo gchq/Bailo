@@ -9,7 +9,7 @@ import {
   SeverityLevel,
   SeverityLevelKeys,
 } from '../../models/Scan.js'
-import { getAccessToken } from '../../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
@@ -36,7 +36,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
 
     try {
       // User does not pull the layer so attribute to the scanner
-      const repositoryToken = await getAccessToken({ dn: this.toolName }, [
+      const repositoryToken = await issueAccessToken({ dn: this.toolName }, [
         { type: 'repository', name: `${layer.repository}/${layer.name}`, actions: ['pull'] },
       ])
 

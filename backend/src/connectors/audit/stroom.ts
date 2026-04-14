@@ -7,7 +7,7 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
+import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
@@ -440,7 +440,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
 
-  async onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
+  async onDeleteImage(req: Request, modelId: string, image: ImageTagRef) {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
 

@@ -13,10 +13,10 @@ import {
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
-import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import { ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
-import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
+import { Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import {
   ArtefactScanStateCounts,
@@ -28,7 +28,8 @@ import {
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { Descriptors, OCIEmptyMediaType } from '../utils/registryResponses.js'
-import { getLayersByPlatform, getLayersForImageTag } from './images/getImageLayers.js'
+import { platformToString } from '../utils/registryUtils.js'
+import { getLayersForImageTag } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -95,12 +96,12 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
 export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
   await checkUserAuth(user, modelId, ['list'])
 
-  const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
+  const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
   return await Promise.all(
     repos.map(async (repo) => {
       const [repository, name] = repo.split(/\/(.*)/s)
-      const repositoryToken = await getAccessToken({ dn: user.dn }, [
+      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
         { type: 'repository', name: repo, actions: ['pull'] },
       ])
       return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
@@ -112,7 +113,7 @@ export async function getScansFromLayers(
   layers: Descriptors[],
   includeFullDetail: boolean = false,
 ): Promise<ImageScanResult> {
-  const layerDigests = layers.map((l) => l.digest)
+  const layerDigests = layers.map((layer) => layer.digest)
 
   const scans = await ScanModel.find({
     artefactKind: ArtefactKind.IMAGE,
@@ -153,27 +154,37 @@ export async function getScansFromLayers(
 
 export async function getModelImageWithScanResults(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   platform?: string,
 ): Promise<ImageTagResult> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     {
       type: 'repository',
       name: `${imageRef.repository}/${imageRef.name}`,
       actions: ['pull'],
     },
   ])
-  const layers = platform
-    ? (await getLayersByPlatform(repositoryToken, imageRef))[platform]
-    : await getLayersForImageTag(repositoryToken, imageRef)
 
-  if (layers === undefined) {
-    throw InternalError('Platform cannot be found for this image', { imageRef, platform })
+  const { body, headers } = await getImageTagManifests(repositoryToken, imageRef)
+
+  if (!body) {
+    throw InternalError('Missing manifest list body.', { imageRef })
   }
 
-  const scanResults = await getScansFromLayers(await layers, true)
+  let reference: string | undefined = imageRef.tag
+  if ('manifests' in body) {
+    reference = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
 
-  return { tag: imageRef.tag, platform, ...scanResults }
+    if (reference === undefined) {
+      throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
+    }
+  }
+
+  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: reference })
+
+  const scanResults = await getScansFromLayers(layers, true)
+
+  return { tag: imageRef.tag, digest: headers['docker-content-digest'], platform, ...scanResults }
 }
 
 export async function listModelImagesWithScanResults(
@@ -184,7 +195,7 @@ export async function listModelImagesWithScanResults(
 
   return Promise.all(
     modelImages.map(async (img) => {
-      const repositoryToken = await getAccessToken({ dn: user.dn }, [
+      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
         {
           type: 'repository',
           name: `${img.repository}/${img.name}`,
@@ -202,16 +213,16 @@ export async function listModelImagesWithScanResults(
             }
 
             if ('manifests' in manifestResponse.body) {
-              const layersByPlatform = await getLayersByPlatform(repositoryToken, { ...img, tag })
-
               return Promise.all(
-                Object.entries(layersByPlatform).map(async ([platform, layers]) => {
-                  const scan = await getScansFromLayers(await layers)
+                manifestResponse.body.manifests.map(async (manifest) => {
+                  const layers = await getLayersForImageTag(repositoryToken, { ...img, tag: manifest.digest })
+                  const scan = await getScansFromLayers(layers)
 
                   return {
-                    ...scan,
-                    platform,
                     tag,
+                    digest: manifest.digest,
+                    platform: platformToString(manifest.platform),
+                    ...scan,
                   }
                 }),
               )
@@ -221,7 +232,7 @@ export async function listModelImagesWithScanResults(
 
             const scan = await getScansFromLayers(layers)
 
-            return [{ ...scan, tag }]
+            return [{ tag, digest: manifestResponse.headers['docker-content-digest'], ...scan }]
           }),
         )
       )
@@ -247,10 +258,10 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
   }, initial)
 }
 
-export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
+export async function getImageManifest(user: UserInterface, imageRef: ImageRef) {
   await checkUserAuth(user, imageRef.repository, ['pull'])
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
 
@@ -258,10 +269,10 @@ export async function getImageManifest(user: UserInterface, imageRef: ImageRefIn
   return await getImageTagManifest(repositoryToken, imageRef)
 }
 
-export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterface, digest: string) {
+export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {
   await checkUserAuth(user, repoRef.repository, ['pull'])
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${repoRef.repository}/${repoRef.name}`, actions: ['pull'] },
   ])
 
@@ -274,10 +285,10 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
  * @remarks
  * This does _not_ also update any mongo data, and does _not_ do any auth checks on the source or destination.
  */
-export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
+export async function renameImage(user: UserInterface, source: ImageTagRef, destination: ImageTagRef) {
   let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
-    const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    const repositoryToken = await issueAccessToken({ dn: user.dn }, [
       { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['pull'] },
     ])
     manifest = await getImageTagManifest(repositoryToken, source)
@@ -293,7 +304,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
   }
 
   const allLayers = [manifest.body.config, ...manifest.body.layers]
-  const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
+  const multiRepositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
     { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
   ])
@@ -361,7 +372,7 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
 
 export async function softDeleteImage(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   deleteMirroredModel: boolean = false,
   session?: ClientSession,
 ) {
@@ -372,7 +383,7 @@ export async function softDeleteImage(
 
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
-  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
@@ -396,7 +407,7 @@ export async function softDeleteImage(
 
 export async function restoreSoftDeletedImage(
   user: UserInterface,
-  imageRef: ImageRefInterface,
+  imageRef: ImageTagRef,
   restoreMirroredModel: boolean = false,
 ) {
   const model = await getModelById(user, imageRef.repository)
@@ -406,6 +417,6 @@ export async function restoreSoftDeletedImage(
 
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
-  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
+  const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
   await renameImage(user, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag }, imageRef)
 }

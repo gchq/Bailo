@@ -37,8 +37,8 @@ const releaseMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(() => 'token'),
-  softDeletePrefix: 'soft_deleted/',
+  issueAccessToken: vi.fn(() => 'token'),
+  softDeletePrefix: 'soft_deleted',
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
@@ -366,7 +366,7 @@ describe('services > registry', () => {
     test('getImageManifest > success', async () => {
       await getImageManifest({} as any, {} as any)
 
-      expect(registryAuthMocks.getAccessToken).toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
       expect(registryClientMocks.getImageTagManifest).toHaveBeenCalled()
     })
 
@@ -375,7 +375,7 @@ describe('services > registry', () => {
 
       await expect(getImageManifest({} as any, {} as any)).rejects.toThrowError('Error')
 
-      expect(registryAuthMocks.getAccessToken).toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
     })
 
     test('renameImage > source manifest not found', async () => {
@@ -585,6 +585,7 @@ describe('services > registry', () => {
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
       const result = await getModelImageWithScanResults({ dn: 'user' }, {
         repository: 'repo',
@@ -610,7 +611,7 @@ describe('services > registry', () => {
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
-      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {} })
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 

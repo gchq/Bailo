@@ -248,6 +248,7 @@ export type ImageScanResult = {
 
 export type ImageTagResult = {
   tag: string
+  digest: string
   platform?: string
 } & ImageScanResult
 

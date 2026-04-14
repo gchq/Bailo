@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 import type { ZodSchema } from 'zod'
 
-import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
+import { ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -253,7 +253,7 @@ export async function listModelRepos(token: string, modelId: string): Promise<st
   return repositories.filter((repo) => repo.startsWith(`${modelId}/`))
 }
 
-export async function listImageTags(token: string, repoRef: RepoRefInterface) {
+export async function listImageTags(token: string, repoRef: ImageNameRef) {
   try {
     const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/tags/list`, {
       bodySchema: TagsListResponseBodySchema,
@@ -265,7 +265,6 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
           tags: [...(acc.tags || []), ...(next.tags || [])],
         }),
       },
-      extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
     })
 
     return result.body?.tags || []
@@ -280,8 +279,9 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
 /**
  * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
  */
-export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+export async function getImageTagManifest(token: string, imageRef: ImageRef) {
+  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
     bodySchema: ImageManifestV2Schema,
     headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
@@ -292,8 +292,9 @@ export async function getImageTagManifest(token: string, imageRef: ImageRefInter
   return { body: result.body, headers: result.headers }
 }
 
-export async function getImageTagManifests(token: string, imageRef: ImageRefInterface) {
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
+export async function getImageTagManifests(token: string, imageRef: ImageRef) {
+  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
+  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
     bodySchema: ManifestResponseBodySchema,
     headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
@@ -306,7 +307,7 @@ export async function getImageTagManifests(token: string, imageRef: ImageRefInte
 
 export async function getRegistryLayerStream(
   token: string,
-  repoRef: RepoRefInterface,
+  repoRef: ImageNameRef,
   layerDigest: string,
 ): Promise<{ stream: Readable; abort: () => void }> {
   const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${layerDigest}`, {
@@ -329,7 +330,7 @@ export async function getRegistryLayerStream(
   return { stream: result.stream, abort: result.abort }
 }
 
-export async function doesLayerExist(token: string, repoRef: RepoRefInterface, digest: string) {
+export async function doesLayerExist(token: string, repoRef: ImageNameRef, digest: string) {
   try {
     await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
       expectStream: true,
@@ -348,7 +349,7 @@ export async function doesLayerExist(token: string, repoRef: RepoRefInterface, d
   }
 }
 
-export async function initialiseUpload(token: string, repoRef: RepoRefInterface) {
+export async function initialiseUpload(token: string, repoRef: ImageNameRef) {
   const result = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/uploads/`, {
     headersSchema: BlobUploadResponseHeadersSchema,
     expectStream: true,
@@ -360,7 +361,7 @@ export async function initialiseUpload(token: string, repoRef: RepoRefInterface)
   return result.headers
 }
 
-export async function putManifest(token: string, imageRef: ImageRefInterface, manifest: BodyInit, contentType: string) {
+export async function putManifest(token: string, imageRef: ImageTagRef, manifest: BodyInit, contentType: string) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
     headersSchema: ManifestResponseHeadersSchema,
     expectStream: true,
@@ -406,8 +407,8 @@ export async function uploadLayerMonolithic(
 
 export async function mountBlob(
   token: string,
-  sourceRepoRef: RepoRefInterface,
-  destinationRepoRef: RepoRefInterface,
+  sourceRepoRef: ImageNameRef,
+  destinationRepoRef: ImageNameRef,
   blobDigest: string,
 ) {
   const result = await registryRequest(
@@ -425,7 +426,7 @@ export async function mountBlob(
   return result.headers
 }
 
-export async function deleteManifest(token: string, imageRef: ImageRefInterface) {
+export async function deleteManifest(token: string, imageRef: ImageTagRef) {
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
     headersSchema: DeleteManifestResponseHeadersSchema,
     expectStream: true,

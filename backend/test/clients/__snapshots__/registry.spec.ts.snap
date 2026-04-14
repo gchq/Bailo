@@ -196,7 +196,6 @@ exports[`clients > registry > listImageTags > success 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -215,7 +214,6 @@ exports[`clients > registry > listImageTags > success multiple pages 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -229,7 +227,6 @@ exports[`clients > registry > listImageTags > success multiple pages 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
