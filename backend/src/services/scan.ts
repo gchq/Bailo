@@ -15,7 +15,7 @@ import { ImageRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
-import { dedupe } from '../utils/array.js'
+import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
 import { BadReq, Conflict, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { plural } from '../utils/string.js'
@@ -35,7 +35,7 @@ type ArtefactScanIdentifier =
       layerDigest: string
     }
 
-async function updateArtefactScanWithResults(
+export async function updateArtefactScanWithResults(
   scanIdentifier: ArtefactScanIdentifier,
   results: ArtefactScanResult[],
   session?: ClientSession,
@@ -51,10 +51,8 @@ async function updateArtefactScanWithResults(
           toolName: result.toolName,
           ...(isInProgress
             ? {
-                $or: [
-                  { state: { $ne: ArtefactScanState.InProgress } },
-                  { lastRunAt: { $lt: new Date(Date.now() - 30 * 60 * 1000) } }, // age off old results (in case of crash or SIGKILL)
-                ],
+                state: ArtefactScanState.InProgress,
+                lastRunAt: { $lt: new Date(Date.now() - 30 * 60 * 1000) }, // age off old results (in case of crash or SIGKILL)
               }
             : {}),
         },
@@ -229,7 +227,7 @@ export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: str
     // TODO: add support for manifest lists/fat manifests
     throw InternalError('Bailo backend does not currently support scanning images with manifest lists.', { image })
   }
-  const imageLayers = dedupe(await getImageLayers(repositoryToken, image))
+  const imageLayers = dedupeByKey(await getImageLayers(repositoryToken, image), (d) => d.digest)
   const imageName = `${image.repository}/${image.name}${'tag' in image ? ':' + image.tag : '@' + image.digest}`
 
   // Only check timing for the config (which is effectively unique per manifest)

@@ -2,7 +2,13 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
-import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '../../src/services/scan.js'
+import {
+  rerunFileScan,
+  rerunImageScan,
+  rerunImageScanNoAuth,
+  scanFile,
+  updateArtefactScanWithResults,
+} from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
@@ -402,6 +408,95 @@ describe('services > scan', () => {
       expect(authMocks.default.image).not.toHaveBeenCalled()
       expect(authMocks.default.model).not.toHaveBeenCalled()
       expect(registryAuthMocks.issueAccessToken).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('updateArtefactScanWithResults', () => {
+    test('create only one inProgress scan for concurrent attempts', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+      const attempts = 20
+
+      await Promise.all(
+        Array.from({ length: attempts }).map(() =>
+          updateArtefactScanWithResults(scanIdentifier, [result]).catch(() => undefined),
+        ),
+      )
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
+      const inProgressOps: any[] = bulkOps.filter(
+        (op: any) => op.updateOne?.update?.$set?.state === ArtefactScanState.InProgress,
+      )
+      expect(inProgressOps.length).toBeGreaterThan(0)
+      for (const op of inProgressOps) {
+        expect(op.updateOne.filter).toMatchObject({
+          ...scanIdentifier,
+          toolName: 'Trivy',
+          state: ArtefactScanState.InProgress,
+        })
+      }
+    })
+
+    test('update stale inProgress scan instead of inserting a new one', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
+      const op = bulkOps.find((o: any) => o.updateOne?.update?.$set?.state === ArtefactScanState.InProgress)
+      expect(op).toMatchObject({
+        updateOne: {
+          filter: expect.objectContaining({
+            ...scanIdentifier,
+            toolName: 'Trivy',
+            state: ArtefactScanState.InProgress,
+          }),
+          upsert: true,
+        },
+      })
+    })
+
+    test('creating inProgress does not match complete scan documents', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
+      const op: any = bulkOps.find((o: any) => o.updateOne?.update?.$set?.state === ArtefactScanState.InProgress)
+      expect(op?.updateOne?.filter).not.toHaveProperty('$or')
+      expect(op?.updateOne?.filter?.state).toBe(ArtefactScanState.InProgress)
     })
   })
 })
