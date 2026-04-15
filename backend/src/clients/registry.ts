@@ -145,7 +145,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    const { body: rawBody, stream } = await readBody(res, expectStream)
+    const { body: rawBody, stream } = await readBody(res, expectStream && res.ok)
     const context = {
       url: res.url,
       status: res.status,
@@ -157,6 +157,11 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       controller.abort()
       if (rawBody && RegistryErrorResponseBodySchema.safeParse(rawBody).success) {
         throw RegistryError(RegistryErrorResponseBodySchema.parse(rawBody), context)
+      }
+
+      // allow callers to handle plain 404s without registry error body
+      if (res.status === 404) {
+        throw RegistryError({ errors: [{ code: 'NAME_UNKNOWN', message: 'Not found', detail: [] }] }, context)
       }
 
       throw InternalError('Unrecognised registry error response.', {
@@ -351,7 +356,7 @@ export async function doesLayerExist(token: string, repoRef: ImageNameRef, diges
     })
     return true
   } catch (error) {
-    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
+    if (error && isRegistryError(error) && error?.context?.status === 404) {
       // 404 response indicates that the layer does not exist
       return false
     } else {
