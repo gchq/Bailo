@@ -417,7 +417,6 @@ describe('services > scan', () => {
         artefactKind: ArtefactKind.IMAGE,
         layerDigest: 'sha256:test-layer',
       }
-
       const result: ArtefactScanResult = {
         toolName: 'Trivy',
         scannerVersion: '1',
@@ -425,10 +424,8 @@ describe('services > scan', () => {
         state: ArtefactScanState.InProgress,
         lastRunAt: new Date(),
       }
-
       // First call succeeds, subsequent calls simulate duplicate key error
       ScanModelMock.bulkWrite.mockResolvedValueOnce(undefined).mockRejectedValue({ code: 11000 })
-
       const attempts = 5
 
       await Promise.all(
