@@ -51,8 +51,10 @@ export async function updateArtefactScanWithResults(
           toolName: result.toolName,
           ...(isInProgress
             ? {
-                state: ArtefactScanState.InProgress,
-                lastRunAt: { $lt: new Date(Date.now() - 30 * 60 * 1000) }, // age off old results (in case of crash or SIGKILL)
+                $or: [
+                  { state: { $ne: ArtefactScanState.InProgress } },
+                  { lastRunAt: { $lt: new Date(Date.now() - 30 * 60 * 1000) } }, // age off old results (in case of crash or SIGKILL)
+                ],
               }
             : {}),
         },

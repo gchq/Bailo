@@ -1,12 +1,13 @@
+import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import ScanModel from '../models/Scan.js'
 import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
-const STATE_PRIORITY: Record<string, number> = {
-  complete: 0,
-  error: 1,
-  inProgress: 2,
-  notScanned: 3,
+const STATE_PRIORITY: Record<ArtefactScanStateKeys, number> = {
+  [ArtefactScanState.Complete]: 0,
+  [ArtefactScanState.Error]: 1,
+  [ArtefactScanState.InProgress]: 2,
+  [ArtefactScanState.NotScanned]: 3,
 }
 
 async function script() {
@@ -41,7 +42,16 @@ async function script() {
 
     if (remove.length > 0) {
       await ScanModel.deleteMany({ _id: { $in: remove } })
-      log.debug(`layerDigest=${dup._id.layerDigest} tool=${dup._id.toolName} kept=${keep._id} removed=${remove.length}`)
+      log.info(
+        {
+          layerDigest: dup._id.layerDigest,
+          toolName: dup._id.toolName,
+          kept: keep._id,
+          removed: remove.length,
+          removedIds: remove,
+        },
+        'Removed duplicate scans',
+      )
     }
   }
 
