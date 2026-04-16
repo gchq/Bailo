@@ -80,6 +80,11 @@ export async function exportModel(
     'Request checks complete, starting export.',
   )
 
+  const files = documentsExporter.getFiles()
+  if (!files) {
+    throw InternalError('DocumentsExporter returned no files after init()', { exportId })
+  }
+
   // Not `await`ed for fire-and-forget approach
   exportQueue
     .add(async () => {
@@ -91,8 +96,7 @@ export async function exportModel(
       if (releases && releases.length > 0) {
         addAndFinaliseExporters(
           await Promise.all(
-            // `documentsExporter.getFiles()` always returns after calling `documentsExporter.init()`
-            documentsExporter.getFiles()!.map((file) =>
+            files.map((file) =>
               new FileExporter(user, model, file, {
                 fileId: file.id,
                 fileName: file.name,
