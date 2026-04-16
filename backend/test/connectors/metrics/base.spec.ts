@@ -25,7 +25,7 @@ describe('connectors > metrics > base', () => {
   test('subclass can implement calculateOverviewMetrics()', async () => {
     const connector = new TestMetricsConnector()
 
-    const result = await connector.calculateOverviewMetrics({} as any)
+    const result = await connector.calculateOverviewMetrics()
 
     expect(result).toEqual({
       global: { users: 1, models: 2 },
