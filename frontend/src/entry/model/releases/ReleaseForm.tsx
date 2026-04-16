@@ -171,7 +171,7 @@ export default function ReleaseForm({
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
   const FileRowItem = memoize(({ data }) =>
-    isFileInterface(data) && !isScannersLoading ? (
+    isFileInterface(data) && !isScannersLoading && !isScannersError ? (
       <FileDisplay
         key={data.name}
         file={data}
@@ -192,10 +192,6 @@ export default function ReleaseForm({
 
   if (isEntryCardRevisionsError) {
     return <MessageAlert message={isEntryCardRevisionsError.info.message} severity='error' />
-  }
-
-  if (isScannersError) {
-    return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
   const error = MultipleErrorWrapper('Unable to load release form', {
