@@ -83,11 +83,13 @@ export const ActionLookup = {
   [ModelAction.Update]: TokenActions.ModelWrite.id,
   [ModelAction.Write]: TokenActions.ModelWrite.id,
   [ModelAction.Delete]: TokenActions.ModelWrite.id,
+  [ModelAction.Export]: TokenActions.ModelExport.id,
 
   [ReleaseAction.Create]: TokenActions.ReleaseWrite.id,
   [ReleaseAction.View]: TokenActions.ReleaseRead.id,
   [ReleaseAction.Delete]: TokenActions.ReleaseWrite.id,
   [ReleaseAction.Update]: TokenActions.ReleaseWrite.id,
+  [ReleaseAction.Export]: TokenActions.ReleaseExport.id,
 
   [AccessRequestAction.Create]: TokenActions.AccessRequestWrite.id,
   [AccessRequestAction.View]: TokenActions.AccessRequestRead.id,
