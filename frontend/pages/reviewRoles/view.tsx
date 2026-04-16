@@ -5,7 +5,7 @@ import { useGetEntryRoles } from 'actions/entry'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { FormEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { ChangeEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -16,10 +16,19 @@ import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { CollaboratorEntry, ReviewRoleInterface } from 'types/types'
+import { ReviewRoleInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getRoleDisplayName } from 'utils/roles'
 import { plural } from 'utils/stringUtils'
+
+const editReviewRoleHeading = (
+  <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+    <Typography variant='h6' component='h1'>
+      Update Existing Role
+    </Typography>
+    <Edit color='primary' fontSize='large' />
+  </Stack>
+)
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
@@ -40,12 +49,6 @@ export default function ReviewRoles() {
     shortName: '',
     systemRole: '',
   })
-
-  const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
-    formData.defaultEntities
-      ? formData.defaultEntities.map((defaultEntity) => ({ entity: defaultEntity, roles: [] }))
-      : [],
-  )
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -114,21 +117,19 @@ export default function ReviewRoles() {
       } else {
         mutateReviewRoles()
         setConfirmationOpen(false)
+        setSelectedRole(0)
       }
     },
-    [setErrorMessage, setConfirmationOpen, mutateReviewRoles],
+    [mutateReviewRoles],
   )
 
   const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    async (event: ChangeEvent, newFormData: UpdateReviewRolesParams) => {
       event.preventDefault()
       setErrorMessage('')
       setLoading(true)
 
-      const res = await putReviewRole({
-        ...formData,
-        defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
-      } as UpdateReviewRolesParams)
+      const res = await putReviewRole(newFormData)
 
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
@@ -139,7 +140,7 @@ export default function ReviewRoles() {
 
       setLoading(false)
     },
-    [defaultEntitiesEntry, formData, mutateReviewRoles],
+    [mutateReviewRoles],
   )
 
   const displayReviewRoleDefaultEntities = useMemo(() => {
@@ -212,22 +213,12 @@ export default function ReviewRoles() {
               ) : formData ? (
                 <ReviewRoleFormContainer
                   formData={formData}
-                  setFormData={setFormData}
-                  setIsEdit={setIsEdit}
+                  handleCancel={() => setIsEdit(false)}
                   providedData={true}
-                  headingComponent={
-                    <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
-                      <Typography variant='h6' component='h1'>
-                        Update Existing Role
-                      </Typography>
-                      <Edit color='primary' fontSize='large' />
-                    </Stack>
-                  }
+                  headingComponent={editReviewRoleHeading}
                   handleSubmit={handleSubmit}
                   loading={loading}
                   errorMessage={errorMessage}
-                  defaultEntitiesEntry={defaultEntitiesEntry}
-                  setDefaultEntities={setDefaultEntitiesEntry}
                 />
               ) : (
                 <Loading />
@@ -259,7 +250,6 @@ export default function ReviewRoles() {
       handleSubmit,
       loading,
       errorMessage,
-      defaultEntitiesEntry,
       confirmationOpen,
       schemasLength,
       handleDeleteReviewRole,
@@ -311,7 +301,7 @@ export default function ReviewRoles() {
         <Paper sx={{ p: 4, my: 4 }}>
           {reviewRoles.length > 0 ? (
             <Stack direction={{ xs: 'column', sm: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
-              <List>{listRoles}</List>
+              <List sx={{ width: '280px' }}>{listRoles}</List>
               <Container sx={{ m: 2 }}>{listRoleDescriptions}</Container>
             </Stack>
           ) : (

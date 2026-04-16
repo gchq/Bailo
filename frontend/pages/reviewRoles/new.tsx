@@ -2,27 +2,22 @@ import { PersonAdd } from '@mui/icons-material'
 import { Stack, Typography } from '@mui/material'
 import { postReviewRole } from 'actions/reviewRoles'
 import router from 'next/router'
-import { FormEvent, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import Title from 'src/common/Title'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { CollaboratorEntry, ReviewRolesFormData, RoleKind } from 'types/types'
+import { ReviewRolesFormData, RoleKind, SystemRole } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {
-  const [formData, setFormData] = useState<ReviewRolesFormData>({
+  const [formData] = useState<ReviewRolesFormData>({
     name: '',
     shortName: '',
-    systemRole: '',
+    systemRole: SystemRole.None,
     kind: RoleKind.REVIEW,
     description: '',
     defaultEntities: [],
     lockEntities: false,
   })
-  const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
-    formData.defaultEntities
-      ? formData.defaultEntities.map((defaultEntity) => ({ entity: defaultEntity, roles: [] }))
-      : [],
-  )
 
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,15 +31,12 @@ export default function ReviewRolesForm() {
     </Stack>
   )
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: ChangeEvent, newFormData: ReviewRolesFormData) => {
     event.preventDefault()
     setErrorMessage('')
     setLoading(true)
 
-    const res = await postReviewRole({
-      ...formData,
-      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
-    } as ReviewRolesFormData)
+    const res = await postReviewRole(newFormData)
 
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
@@ -61,13 +53,13 @@ export default function ReviewRolesForm() {
       <ReviewRoleFormContainer
         providedData={false}
         formData={formData}
-        setFormData={setFormData}
         headingComponent={newReviewRoleHeading}
         loading={loading}
         errorMessage={errorMessage}
-        defaultEntitiesEntry={defaultEntitiesEntry}
-        setDefaultEntities={setDefaultEntitiesEntry}
         handleSubmit={handleSubmit}
+        handleCancel={() => {
+          router.push('/reviewRoles/view')
+        }}
       />
     </>
   )

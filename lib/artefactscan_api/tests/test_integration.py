@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from functools import lru_cache
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 from unittest.mock import ANY
 
@@ -14,13 +17,16 @@ from fastapi.testclient import TestClient
 
 # isort: split
 
+import bailo_artefactscan_api.trivy as trivy
 from bailo_artefactscan_api.config import Settings
 from bailo_artefactscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
+
+MAXIMUM_FILESIZE_OVERRIDE = 20_000
 
 
 @lru_cache
 def get_settings_override():
-    return Settings(maximum_filesize=1000)
+    return Settings(maximum_filesize=MAXIMUM_FILESIZE_OVERRIDE)
 
 
 app.dependency_overrides[get_settings] = get_settings_override
@@ -34,10 +40,33 @@ app.add_middleware(
 client = TestClient(app)
 
 
-BIG_CONTENTS = b"\0" * 1001
+BIG_CONTENTS = b"\0" * (MAXIMUM_FILESIZE_OVERRIDE + 1)
 H5_MIME_TYPE = "application/x-hdf5"
 TXT_MIME_TYPE = "text/plain"
 OCTET_STREAM_TYPE = "application/octet-stream"
+
+
+@pytest.fixture()
+def trivy_env(monkeypatch):
+    with TemporaryDirectory() as tmp:
+        original_settings = trivy.get_settings()
+
+        fake_bin = Path(__file__).parent / "test_trivy_integration" / "fake_trivy.py"
+        db_dir = Path(tmp) / "db"
+        db_dir.mkdir()
+
+        (db_dir / "metadata.json").write_text(json.dumps({"NextUpdate": "2999-01-01T00:00:00"}))
+
+        monkeypatch.setenv("TRIVY_BINARY", str(fake_bin))
+        monkeypatch.setenv("TRIVY_CACHE_DIR", tmp)
+        monkeypatch.setenv("TRIVY_DB_DIR", str(db_dir))
+        trivy.get_settings.cache_clear()
+        yield
+
+        monkeypatch.setenv("TRIVY_BINARY", original_settings.BINARY)
+        monkeypatch.setenv("TRIVY_CACHE_DIR", original_settings.CACHE_DIR)
+        monkeypatch.setenv("TRIVY_DB_DIR", original_settings.DB_DIR)
+        trivy.get_settings.cache_clear()
 
 
 @pytest.mark.integration
@@ -118,7 +147,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         ),
         (
             "safe.pkl",
-            Path().cwd().joinpath("tests/test_integration/safe.pkl"),
+            Path().cwd().joinpath("tests/test_modelscan_integration/safe.pkl"),
             OCTET_STREAM_TYPE,
             {
                 "summary": {
@@ -145,7 +174,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         ),
         (
             "unsafe.pkl",
-            Path().cwd().joinpath("tests/test_integration/unsafe.pkl"),
+            Path().cwd().joinpath("tests/test_modelscan_integration/unsafe.pkl"),
             OCTET_STREAM_TYPE,
             {
                 "summary": {
@@ -181,7 +210,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         ),
         (
             "license.dat",
-            Path().cwd().joinpath("tests/test_integration/license.dat"),
+            Path().cwd().joinpath("tests/test_modelscan_integration/license.dat"),
             TXT_MIME_TYPE,
             {
                 "errors": [],
@@ -246,3 +275,24 @@ def test_scan_file_too_large(file_name: str, file_content: Any, file_mime_type: 
 
     assert response.status_code == 413
     assert response.json() == {"detail": ANY}
+
+
+@pytest.mark.integration
+def test_scan_image_offline(trivy_env):
+    client = TestClient(app)
+
+    layer = Path(__file__).parent / "test_trivy_integration" / "dummy_layer.tar"
+    blob = layer.read_bytes()
+    digest = hashlib.sha256(blob).hexdigest()
+
+    files = {
+        "in_file": (digest, blob, "application/octet-stream"),
+    }
+
+    response = client.post("/scan/image", files=files)
+
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["Results"][0]["Vulnerabilities"][0]["VulnerabilityID"] == "TEST-123"
+    assert body["Results"][0]["Vulnerabilities"][0]["Severity"] == "HIGH"

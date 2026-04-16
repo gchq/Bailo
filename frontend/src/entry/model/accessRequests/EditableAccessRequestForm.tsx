@@ -1,5 +1,5 @@
-import { Close, Save } from '@mui/icons-material'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Close, Info, Save } from '@mui/icons-material'
+import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
 import {
   deleteAccessRequest,
   patchAccessRequest,
@@ -11,12 +11,12 @@ import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useEffectEvent, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
+import InformationDialog from 'src/schemas/InformationDialog'
 import { AccessRequestInterface, SplitSchemaNoRender, StepNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
@@ -39,6 +39,7 @@ export default function EditableAccessRequestForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
   const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
@@ -143,17 +144,22 @@ export default function EditableAccessRequestForm({
       <Box sx={{ py: 1 }}>
         <EditableFormHeading
           heading={
-            <div>
-              <Typography fontWeight='bold'>Schema</Typography>
-              <Stack direction='row' alignItems='center'>
-                <Typography>{schema?.name}</Typography>
-                <CopyToClipboardButton
-                  textToCopy={schema ? schema.name : ''}
-                  notificationText='Copied schema name to clipboard'
-                  ariaLabel='copy schema name to clipboard'
-                />
-              </Stack>
-            </div>
+            schema && (
+              <div>
+                <Typography fontWeight='bold'>Schema</Typography>
+                <Stack direction='row' alignItems='center'>
+                  <Typography>{schema?.name}</Typography>
+                  <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                    <Info color='primary' fontSize='small' />
+                  </IconButton>
+                  <InformationDialog
+                    open={SchemaInformationOpen}
+                    schema={schema}
+                    onClose={() => setSchemaInformationOpen(false)}
+                  />
+                </Stack>
+              </div>
+            )
           }
           editAction='editAccessRequest'
           deleteAction='deleteAccessRequest'

@@ -7,121 +7,69 @@ import {
   Button,
   Container,
   FormControl,
-  IconButton,
   MenuItem,
   Paper,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material'
-import { ClearIcon } from '@mui/x-date-pickers'
 import { useGetEntryRoles } from 'actions/entry'
-import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useMemo } from 'react'
+import { UpdateReviewRolesParams } from 'actions/reviewRoles'
+import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
-import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntryKind, SystemRoleKeys } from 'types/types'
+import { EntryKind, ReviewRolesFormData } from 'types/types'
 
-type ReviewRoleFormMinimal = {
-  shortName: string
-  name: string
-  systemRole: SystemRoleKeys
-  defaultEntities?: Array<string>
-  description?: string
-}
-
-type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
+type ReviewRoleFormContainerProps<ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData> = {
   providedData: boolean
-  formData: T
-  setFormData: Dispatch<SetStateAction<T>>
-  setIsEdit?: (state: boolean) => void
+  formData: ReviewRoleFormData
+  handleCancel: () => void
   headingComponent: ReactElement
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
+  handleSubmit: (event: ChangeEvent, form: ReviewRoleFormData) => void
   loading: boolean
   errorMessage: string
-  defaultEntitiesEntry: Array<CollaboratorEntry>
-  setDefaultEntities: Dispatch<SetStateAction<CollaboratorEntry[]>>
 }
 
-export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>({
+export default function ReviewRoleFormContainer<
+  ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData,
+>({
   providedData = false,
   formData,
-  setFormData,
-  setIsEdit = () => {},
+  handleCancel,
   headingComponent,
   handleSubmit,
   loading = false,
   errorMessage = '',
-  defaultEntitiesEntry = [],
-  setDefaultEntities,
-}: ReviewRoleFormContainerProps<T>) {
+}: ReviewRoleFormContainerProps<ReviewRoleFormData>) {
+  const [draftFormData, setDraftFormData] = useState<ReviewRoleFormData>(formData)
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))
+  const handleChange = <ReviewRoleFormProp extends keyof ReviewRoleFormData>(
+    field: ReviewRoleFormProp,
+    value: ReviewRoleFormData[ReviewRoleFormProp],
+  ) => {
+    setDraftFormData((prevFormData: ReviewRoleFormData) => ({ ...prevFormData, [field]: value }))
   }
 
-  const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: T) => ({
-      ...prevFormData,
-      shortName: event.target.value as string,
-    }))
-  }
-
-  const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: T) => ({
-      ...prevFormData,
-      description: event.target.value as string,
-    }))
-  }
-
-  const handleSystemRoleChange = (event: SelectChangeEvent) => {
-    setFormData((prevFormData: T) => ({
-      ...prevFormData,
-      systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
-    }))
-  }
-
-  const handleDefaultEntitiesChange = useMemo(() => {
-    return (newValue: Array<CollaboratorEntry>) => {
-      setDefaultEntities(newValue)
-    }
-  }, [setDefaultEntities])
-
-  const displayDefaultEntitiesList = useMemo(() => {
-    return (
-      defaultEntitiesEntry &&
-      defaultEntitiesEntry.map((defaultEntity) => (
-        <Stack key={defaultEntity.entity} direction='row' alignItems='center' spacing={1}>
-          <EntityNameDisplay entryCollaborator={defaultEntity} />
-          <Tooltip title='Remove user'>
-            <IconButton
-              onClick={() =>
-                setDefaultEntities(defaultEntitiesEntry.filter((entity) => entity.entity !== defaultEntity.entity))
-              }
-            >
-              <ClearIcon color='secondary' fontSize='inherit' />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ))
-    )
-  }, [defaultEntitiesEntry, setDefaultEntities])
+  const handleCollaboratorsChange = useCallback(
+    (updatedCollaborators: string[]) => {
+      setDraftFormData((prevFormData) => ({ ...prevFormData, defaultEntities: updatedCollaborators }))
+    },
+    [setDraftFormData],
+  )
 
   const displayEntryAccessInput = useMemo(() => {
     return (
       <EntryAccessInput
-        value={defaultEntitiesEntry}
-        onChange={handleDefaultEntitiesChange}
+        initialUsers={draftFormData.defaultEntities ?? []}
+        onChange={handleCollaboratorsChange}
         entryKind={EntryKind.MODEL}
       />
     )
-  }, [defaultEntitiesEntry, handleDefaultEntitiesChange])
+  }, [draftFormData.defaultEntities, handleCollaboratorsChange])
 
   if (isEntryRolesError) {
     return <MessageAlert message={isEntryRolesError.info.message} />
@@ -134,15 +82,15 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
   return (
     <Container>
       <Paper sx={{ p: 4, mb: 4 }}>
-        <Box component='form' onSubmit={handleSubmit}>
+        <Box component='form' onSubmit={(e) => handleSubmit(e, draftFormData)}>
           {headingComponent}
           <Stack spacing={2}>
             <Stack spacing={2} direction='row'>
               <LabelledInput required fullWidth label='Name' htmlFor='role-name-input'>
                 <TextField
                   required
-                  value={formData.name}
-                  onChange={handleNameChange}
+                  value={draftFormData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
                   size='small'
                   fullWidth
                   autoFocus
@@ -154,8 +102,8 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   required
                   disabled={providedData}
                   fullWidth
-                  value={formData.shortName}
-                  onChange={handleShortNameChange}
+                  value={draftFormData.shortName}
+                  onChange={(e) => handleChange('shortName', e.target.value)}
                   size='small'
                   id='role-shortname-input'
                 />
@@ -164,15 +112,15 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
             <LabelledInput fullWidth label='Description' htmlFor='role-description-input'>
               <TextField
                 fullWidth
-                value={formData.description}
-                onChange={handleDescriptionChange}
+                value={draftFormData.description}
+                onChange={(e) => handleChange('description', e.target.value)}
                 size='small'
                 id='role-description-input'
               />
             </LabelledInput>
             <FormControl size='small'>
-              <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={formData.systemRole} onChange={handleSystemRoleChange}>
+              <LabelledInput fullWidth label='System Role' htmlFor='role-system-input'>
+                <Select value={draftFormData.systemRole} onChange={(e) => handleChange('systemRole', e.target.value)}>
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
@@ -189,26 +137,14 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                 <Typography fontWeight='bold'>Default collaborators</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Box sx={{ mt: 1 }}>
-                  {displayEntryAccessInput}
-                  <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} sx={{ mt: 2 }}>
-                    {formData.defaultEntities && <Typography>Default Collaborators: </Typography>}
-                    {displayDefaultEntitiesList}
-                  </Stack>
-                </Box>
+                <Box sx={{ mt: 1 }}>{displayEntryAccessInput}</Box>
               </AccordionDetails>
             </Accordion>
           </Stack>
           <Box display='flex'>
             <Box ml='auto'>
               <Stack direction='row' spacing={2}>
-                <Button
-                  loading={loading}
-                  type='button'
-                  variant='outlined'
-                  color='primary'
-                  onClick={() => setIsEdit(false)}
-                >
+                <Button loading={loading} type='button' variant='outlined' color='primary' onClick={handleCancel}>
                   Cancel
                 </Button>
                 <Button
@@ -216,7 +152,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.shortName)}
+                  disabled={!(draftFormData.name && draftFormData.shortName)}
                 >
                   Submit
                 </Button>

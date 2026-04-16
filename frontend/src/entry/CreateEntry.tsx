@@ -71,10 +71,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     [name, description, createEntryKind, sourceModelId],
   )
 
-  const handleCollaboratorsChange = useCallback(
-    (updatedCollaborators: CollaboratorEntry[]) => setCollaborators(updatedCollaborators),
-    [],
-  )
+  const handleCollaboratorsChange = useCallback((updatedCollaborators: CollaboratorEntry[]) => {
+    setCollaborators(updatedCollaborators)
+  }, [])
 
   const entryKindForRedirect = useMemo(() => {
     return createEntryKind === EntryKind.MODEL || createEntryKind === EntryKind.MIRRORED_MODEL
@@ -263,7 +262,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         <Loading />
                       ) : (
                         <EntryAccessInput
-                          value={collaborators}
+                          initialUsers={collaborators}
                           onChange={handleCollaboratorsChange}
                           entryKind={createEntryKind}
                           entryRoles={entryRoles}

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { SimpleMetricsConnector } from '../../../src/connectors/metrics/simple.js'
+import { BadReq } from '../../../src/utils/error.js'
 
 vi.mock('../../../src/models/Model.js')
 vi.mock('../../../src/models/Release.js')
@@ -73,11 +74,6 @@ describe('connectors > metrics > simple', () => {
       .mockResolvedValueOnce(['org1'])
       .mockResolvedValueOnce(['m1', 'm2'])
       .mockResolvedValueOnce(['m1', 'm2'])
-
-    // modelMocks.aggregate
-    //   .mockResolvedValueOnce([{ count: 5 }]) // users
-    //   .mockResolvedValueOnce([{ _id: 'active', count: 3 }]) // state global
-    //   .mockResolvedValueOnce([{ _id: 'active', count: 2 }]) // state org
 
     modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
       if (pipeline.some((stage) => stage.$unwind === '$collaborators')) {
@@ -308,5 +304,95 @@ describe('connectors > metrics > simple', () => {
 
     expect(west?.models).toHaveLength(1)
     expect(east?.models).toHaveLength(1)
+  })
+  test('calculateModelVolume > basic aggregation', async () => {
+    modelMocks.aggregate.mockResolvedValueOnce([
+      {
+        periodStart: new Date('2026-01-01T00:00:00.000Z'),
+        periodEnd: new Date('2026-01-02T00:00:00.000Z'),
+        count: 5,
+      },
+    ])
+
+    const connector = new SimpleMetricsConnector()
+
+    const result = await connector.calculateModelVolume('day', '2026-01-01', '2026-01-10')
+
+    expect(modelMocks.aggregate).toHaveBeenCalledOnce()
+    expect(modelMocks.aggregate.mock.calls).toMatchSnapshot()
+
+    expect(result).toEqual({
+      startDate: '2026-01-01T00:00:00.000Z',
+      endDate: '2026-01-10T00:00:00.000Z',
+      dataPoints: [
+        {
+          periodStart: '2026-01-01T00:00:00.000Z',
+          periodEnd: '2026-01-02T00:00:00.000Z',
+          count: 5,
+        },
+      ],
+    })
+  })
+
+  test('calculateModelVolume > with organisation filter', async () => {
+    modelMocks.aggregate.mockResolvedValueOnce([])
+
+    const connector = new SimpleMetricsConnector()
+
+    await connector.calculateModelVolume('week', '2026-01-01', '2026-02-01', 'UTC', 'org-1')
+
+    expect(modelMocks.aggregate).toHaveBeenCalledOnce()
+    expect(modelMocks.aggregate.mock.calls).toMatchSnapshot()
+  })
+
+  test('calculateModelVolume > multiple results mapped correctly', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-03-01T00:00:00.000Z'))
+
+    modelMocks.aggregate.mockResolvedValueOnce([
+      {
+        periodStart: new Date('2026-01-01T00:00:00.000Z'),
+        periodEnd: new Date('2026-02-01T00:00:00.000Z'),
+        count: 10,
+      },
+      {
+        periodStart: new Date('2026-02-01T00:00:00.000Z'),
+        periodEnd: new Date('2026-03-01T00:00:00.000Z'),
+        count: 7,
+      },
+    ])
+
+    const connector = new SimpleMetricsConnector()
+
+    const result = await connector.calculateModelVolume('month')
+
+    expect(result).toEqual({
+      startDate: '1970-01-01T00:00:00.000Z',
+      endDate: '2026-03-01T00:00:00.000Z',
+      dataPoints: [
+        {
+          periodStart: '2026-01-01T00:00:00.000Z',
+          periodEnd: '2026-02-01T00:00:00.000Z',
+          count: 10,
+        },
+        {
+          periodStart: '2026-02-01T00:00:00.000Z',
+          periodEnd: '2026-03-01T00:00:00.000Z',
+          count: 7,
+        },
+      ],
+    })
+
+    vi.useRealTimers()
+  })
+
+  test('calculateModelVolume > bad timezone', async () => {
+    modelMocks.aggregate.mockRejectedValueOnce(new Error('bad timezone'))
+
+    const connector = new SimpleMetricsConnector()
+
+    const result = connector.calculateModelVolume('week', '2026-01-01', '2026-02-01', 'notARealTimeZone')
+
+    await expect(result).rejects.toThrowError(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
   })
 })

@@ -261,7 +261,7 @@ let inFlight: Promise<z.infer<typeof ArtefactScanInfoResponseSchema>> | undefine
 
 export async function getCachedArtefactScanInfo() {
   const cached = artefactScanCache.get<z.infer<typeof ArtefactScanInfoResponseSchema>>(CACHE_KEY)
-  if (cached) {
+  if (cached !== undefined) {
     return cached
   }
 

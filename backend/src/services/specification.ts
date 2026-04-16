@@ -157,12 +157,11 @@ export const scanInterfaceSchema = z.object({
       z.object({
         severity: z
           .enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]])
-          .openapi(SeverityLevel.HIGH),
-        vulnerabilityDescription: z
-          .string()
-          .openapi(
+          .openapi({ example: SeverityLevel.HIGH }),
+        vulnerabilityDescription: z.string().openapi({
+          example:
             'CVE-2025-69419: openssl: OpenSSL: Arbitrary code execution due to out-of-bounds write in PKCS#12 processing',
-          ),
+        }),
       }),
     )
     .optional(),
@@ -204,8 +203,10 @@ export const fileWithScanInterfaceSchema = z.object({
 })
 
 export const SeverityCountsSchema = z.record(
-  z.enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]]).openapi(SeverityLevel.HIGH),
-  z.number().openapi('3'),
+  z
+    .enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]])
+    .openapi({ example: SeverityLevel.HIGH }),
+  z.number().openapi({ example: 3 }),
 )
 
 export const LayerScanSummary = scanInterfaceSchema
@@ -230,7 +231,7 @@ export const imageWithScanResultsSchema = z.object({
     z.object({
       state: z.nativeEnum(ArtefactScanState),
       severityCounts: z.object({
-        tag: z.string().openapi('v1-cpu'),
+        tag: z.string().openapi({ example: 'v1-cpu' }),
         severity: SeverityCountsSchema,
       }),
       imageSize: z.number(),

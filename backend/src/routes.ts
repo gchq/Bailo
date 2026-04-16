@@ -4,9 +4,11 @@ import path from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
+import { Roles } from './connectors/authentication/constants.js'
 import authentication from './connectors/authentication/index.js'
 import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
+import { requireRole } from './routes/middleware/requireRoles.js'
 import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
@@ -15,6 +17,7 @@ import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getModelVolume } from './routes/v2/metrics/getModelVolume.js'
 import { getOverviewMetrics } from './routes/v2/metrics/getOverviewMetrics.js'
 import { getPolicyMetrics } from './routes/v2/metrics/getPolicyMetrics.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
@@ -255,8 +258,9 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-server.get('/api/v2/metrics', ...getOverviewMetrics)
-server.get('/api/v2/metrics/policy', ...getPolicyMetrics)
+server.get('/api/v2/metrics', requireRole(Roles.Admin), ...getOverviewMetrics)
+server.get('/api/v2/metrics/policy', requireRole(Roles.Admin), ...getPolicyMetrics)
+server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
