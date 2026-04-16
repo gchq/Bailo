@@ -2,6 +2,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface EditableTextProps {
@@ -51,43 +52,48 @@ export default function EditableText({
     )
   }, [handleCancelOnClick, submitButtonText])
 
-  return (
-    <>
-      {!isEditMode && (
+  if (isEditMode) {
+    return (
+      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+        {richText ? (
+          <Stack>
+            <RichTextEditor
+              value={newValue || ''}
+              onChange={(input) => setNewValue(input)}
+              aria-label='Schema description'
+            />
+            {submitButtons}
+          </Stack>
+        ) : (
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
+            <TextField
+              sx={{ width: '100%' }}
+              value={newValue}
+              onChange={(event) => setNewValue(event.target.value)}
+              size='small'
+              multiline={multiline}
+            />
+            {submitButtons}
+          </Stack>
+        )}
+      </Box>
+    )
+  } else {
+    return (
+      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
         <Stack direction='row' spacing={1} alignItems='center'>
           <Tooltip title={tooltipText}>
             <IconButton onClick={() => setIsEditMode(true)}>
               {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
             </IconButton>
           </Tooltip>
-          <Typography fontStyle={!value ? 'italic' : 'normal'}>{value || 'Empty'}</Typography>
-        </Stack>
-      )}
-      {isEditMode && (
-        <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
           {richText ? (
-            <Stack>
-              <RichTextEditor
-                value={newValue || ''}
-                onChange={(input) => setNewValue(input)}
-                aria-label='Schema description'
-              />
-              {submitButtons}
-            </Stack>
+            value && <MarkdownDisplay>{value}</MarkdownDisplay>
           ) : (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
-              <TextField
-                sx={{ width: '100%' }}
-                value={newValue}
-                onChange={(event) => setNewValue(event.target.value)}
-                size='small'
-                multiline={multiline}
-              />
-              {submitButtons}
-            </Stack>
+            <Typography fontStyle={!value ? 'italic' : 'normal'}>{value || 'Empty'}</Typography>
           )}
-        </Box>
-      )}
-    </>
-  )
+        </Stack>
+      </Box>
+    )
+  }
 }

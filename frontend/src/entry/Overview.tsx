@@ -1,4 +1,4 @@
-import { Box, Container, Stack } from '@mui/material'
+import { Box, Container, Grid } from '@mui/material'
 import { useMemo } from 'react'
 import EntryOverviewDetails from 'src/entry/EntryOverviewDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
@@ -36,18 +36,20 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
       />
     </>
   ) : (
-    <Container maxWidth='xl'>
-      <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
-        <Box sx={{ pt: 2 }}>
+    <Grid container maxWidth='xl' sx={{ py: 2 }}>
+      <Grid size={{ md: 3, sm: 12 }}>
+        <Box sx={{ m: 2 }}>
           <EntryOverviewDetails entry={entry} />
         </Box>
+      </Grid>
+      <Grid size={{ md: 9, sm: 12 }}>
         <Box width='100%'>
-          <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
+          <Container sx={{ m: 'auto' }} maxWidth='xl'>
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
             {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
           </Container>
         </Box>
-      </Stack>
-    </Container>
+      </Grid>
+    </Grid>
   )
 }

@@ -15,7 +15,7 @@ import { EntryKind } from '../models/Model.js'
 import { ImageNameRef, ImageTagRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
-import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
+import { Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import {
   ArtefactScanStateCounts,
@@ -93,12 +93,12 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
 export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
   await checkUserAuth(user, modelId, ['list'])
 
-  const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
+  const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
   return await Promise.all(
     repos.map(async (repo) => {
       const [repository, name] = repo.split(/\/(.*)/s)
-      const repositoryToken = await getAccessToken({ dn: user.dn }, [
+      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
         { type: 'repository', name: repo, actions: ['pull'] },
       ])
       return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
@@ -146,7 +146,7 @@ export async function getImageWithScanResults(
 }
 
 async function getLayersForImageTag(user: UserInterface, imageRef: ImageTagRef): Promise<Descriptors[]> {
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
   let layers: Descriptors[] = []
@@ -209,7 +209,7 @@ async function getScansForImageTag(user: UserInterface, layers: Descriptors[]): 
 export async function getImageManifest(user: UserInterface, imageRef: ImageTagRef) {
   await checkUserAuth(user, imageRef.repository, ['pull'])
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
 
@@ -220,7 +220,7 @@ export async function getImageManifest(user: UserInterface, imageRef: ImageTagRe
 export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {
   await checkUserAuth(user, repoRef.repository, ['pull'])
 
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${repoRef.repository}/${repoRef.name}`, actions: ['pull'] },
   ])
 
@@ -236,7 +236,7 @@ export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, d
 export async function renameImage(user: UserInterface, source: ImageTagRef, destination: ImageTagRef) {
   let manifest: Awaited<ReturnType<typeof getImageManifest>>
   try {
-    const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    const repositoryToken = await issueAccessToken({ dn: user.dn }, [
       { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['pull'] },
     ])
     manifest = await getImageTagManifest(repositoryToken, source)
@@ -252,7 +252,7 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
   }
 
   const allLayers = [manifest.body.config, ...manifest.body.layers]
-  const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
+  const multiRepositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
     { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
   ])

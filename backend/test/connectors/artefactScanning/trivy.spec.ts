@@ -24,7 +24,7 @@ const registryMocks = vi.hoisted(() => ({
 vi.mock('../../../src/clients/registry.js', () => registryMocks)
 
 const authMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(),
+  issueAccessToken: vi.fn(),
 }))
 vi.mock('../../../src/routes/v1/registryAuth.js', () => authMocks)
 
@@ -51,7 +51,7 @@ describe('connectors > artefactScanning > trivy', () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       trivyVersion: '0.69.1',
     })
-    authMocks.getAccessToken.mockResolvedValueOnce('token')
+    authMocks.issueAccessToken.mockResolvedValueOnce('token')
     const stream = Readable.from('layer')
     registryMocks.getRegistryLayerStream.mockResolvedValueOnce({
       stream,
@@ -98,7 +98,7 @@ describe('connectors > artefactScanning > trivy', () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       trivyVersion: '0.69.1',
     })
-    authMocks.getAccessToken.mockResolvedValueOnce('token')
+    authMocks.issueAccessToken.mockResolvedValueOnce('token')
     const abort = vi.fn()
     registryMocks.getRegistryLayerStream.mockResolvedValueOnce({
       stream: Readable.from('layer'),
