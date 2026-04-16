@@ -238,7 +238,7 @@ export default function FileDisplay({
     return (
       scanners &&
       !isScannersError &&
-      scanners.length > 0 && (
+      scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
         <MenuItem hidden={!showMenuItems.rescanFile} onClick={handleRerunFileScanOnClick}>
           <ListItemIcon>
             <Refresh color='primary' fontSize='small' />
