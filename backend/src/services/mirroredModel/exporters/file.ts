@@ -32,7 +32,8 @@ export class FileExporter extends BaseExporter {
       })
     }
 
-    if (scanners.scannersInfo().length > 0) {
+    const scannersInfo = scanners.scannersInfo() ?? []
+    if (Array.isArray(scannersInfo) && scannersInfo.length > 0) {
       if (!this.file.scanResults || this.file.scanResults.length === 0) {
         throw BadReq('The file is missing vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
       } else if (this.file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {

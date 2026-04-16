@@ -61,7 +61,8 @@ export class DocumentsExporter extends BaseExporter {
         }
       }
 
-      if (scanners.scannersInfo().length > 0) {
+      const scannersInfo = scanners.scannersInfo() ?? []
+      if (Array.isArray(scannersInfo) && scannersInfo.length > 0) {
         const scanErrors: {
           missingScan: Array<{ name: string; id: string }>
           incompleteScan: Array<{ name: string; id: string }>
