@@ -60,7 +60,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
         <VulnerabilityResult
           scanResults={tagResult}
           warningOnly
-          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${modelImage.name}/`}
+          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${modelImage.name}/${tagResult[0].tag}/`}
         />
       )
     }

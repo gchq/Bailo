@@ -55,14 +55,16 @@ interface VulnerabilityResultItem {
 
 export default function ImageTagInformation() {
   const router = useRouter()
-  const { modelId, name, digest }: { modelId?: string; name?: string; digest?: string } = router.query
+  const { modelId, name, tag, digest }: { modelId?: string; name?: string; tag?: string; digest?: string } =
+    router.query
 
   const {
     image: modelImage,
     isImageLoading,
     isImageError,
-    mutateImages,
-  } = useGetImageScanResults(modelId as string, name as string, digest as string)
+    mutateImage,
+  } = useGetImageScanResults(modelId as string, name as string, tag as string, digest as string)
+
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
 
@@ -221,7 +223,7 @@ export default function ImageTagInformation() {
         msg: `The image ${name}:${modelImage.tag} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      mutateImages()
+      mutateImage()
     } else {
       sendNotification({
         variant: 'error',
@@ -229,7 +231,7 @@ export default function ImageTagInformation() {
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
-  }, [modelId, modelImage, mutateImages, name, sendNotification])
+  }, [modelId, modelImage, mutateImage, name, sendNotification])
 
   const handleClearFiltersButton = useCallback(() => {
     setFilterList([])
