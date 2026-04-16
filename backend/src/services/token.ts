@@ -2,7 +2,7 @@ import { ClientSession } from 'mongoose'
 import { customAlphabet } from 'nanoid'
 
 import { Response } from '../connectors/authorisation/base.js'
-import Token, { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
+import TokenModel, { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
 import { getModelById } from './model.js'
@@ -32,7 +32,7 @@ export async function createToken(user: UserInterface, { description, scope, mod
     }
   }
 
-  const token = new Token({
+  const token = new TokenModel({
     user: user.dn,
     description,
 
@@ -51,13 +51,13 @@ export async function createToken(user: UserInterface, { description, scope, mod
 }
 
 export async function findUserTokens(user: UserInterface) {
-  return Token.find({
+  return TokenModel.find({
     user: user.dn,
   })
 }
 
 export async function getTokensForModel(user: UserInterface, modelId: string) {
-  return Token.find({
+  return TokenModel.find({
     user: user.dn,
     modelIds: modelId,
   })
@@ -103,7 +103,7 @@ interface GetTokenOptions {
 }
 
 export async function findTokenByAccessKey(accessKey: string, opts?: GetTokenOptions) {
-  let query = Token.findOne({
+  let query = TokenModel.findOne({
     accessKey,
   })
 
