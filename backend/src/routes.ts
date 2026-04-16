@@ -15,6 +15,8 @@ import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getOverviewMetrics } from './routes/v2/metrics/getOverviewMetrics.js'
+import { getPolicyMetrics } from './routes/v2/metrics/getPolicyMetrics.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -252,6 +254,9 @@ server.post('/api/v2/review/role', ...postReviewRole)
 server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
+
+server.get('/api/v2/metrics', ...getOverviewMetrics)
+server.get('/api/v2/metrics/policy', ...getPolicyMetrics)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

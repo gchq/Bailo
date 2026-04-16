@@ -253,7 +253,7 @@ module.exports = {
     },
 
     modelDetails: {
-      organisations: ['Example Organisation'],
+      organisations: ['Example Organisation', 'WESTSIDE'],
       states: ['Development', 'Review', 'Production'],
     },
 
@@ -282,6 +282,10 @@ module.exports = {
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
+    },
+
+    metrics: {
+      kind: 'simple',
     },
   },
 
