@@ -170,7 +170,6 @@ type SchemaRoleMap = {
  * Builds a lookup structure describing which review roles apply to which schemas.
  */
 async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
-  // 1. Get all active schemas
   const schemas = await SchemaModel.find({
     active: true,
     hidden: false,
@@ -178,17 +177,13 @@ async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
     .select('id reviewRoles')
     .lean()
 
-  // 2. Get all non-deleted review roles
-  const reviewRoles = await ReviewRoleModel.find({
-    deleted: { $ne: true }, // from softDelete plugin
-  })
-    .select('shortName systemRole')
-    .lean()
+  // Fetch review roles (soft-deleted records automatically excluded)
+  const reviewRoles = await ReviewRoleModel.find().select('shortName systemRole').lean()
 
-  // 3. Determine default (system) roles
+  // Extract system roles (apply to all models)
   const defaultRoles = reviewRoles.filter((role) => !!role.systemRole).map((role) => role.shortName)
 
-  // 4. Build schemaId -> roles map
+  // Build schemaId -> roles mapping
   const schemaRoleMap: Record<string, string[]> = {}
 
   for (const schema of schemas) {
