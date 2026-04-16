@@ -166,6 +166,9 @@ type SchemaRoleMap = {
   defaultRoles: string[]
 }
 
+/**
+ * Builds a lookup structure describing which review roles apply to which schemas.
+ */
 async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
   // 1. Get all active schemas
   const schemas = await SchemaModel.find({
@@ -207,7 +210,8 @@ type PolicyMetricsResult = {
 }
 
 /**
- *
+ * Calculates which models are missing required review roles, either globally
+ * or scoped to a specific organisation.
  */
 async function calculateMissingModelRolesForOrg(
   schemaRoleMap: Record<string, string[]>,
@@ -295,6 +299,10 @@ async function calculateMissingModelRolesForOrg(
   }
 }
 
+/**
+ * Retrieves the list of distinct organisation identifiers
+ * for which models currently exist.
+ */
 async function getOrganisationIds(): Promise<string[]> {
   return await ModelModel.distinct('organisation')
 }
