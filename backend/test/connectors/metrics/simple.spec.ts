@@ -7,11 +7,14 @@ vi.mock('../../../src/models/Release.js')
 vi.mock('../../../src/models/AccessRequest.js')
 vi.mock('../../../src/services/model.js')
 vi.mock('../../../src/services/schema.js')
+vi.mock('../../../src/models/Schema.js')
+vi.mock('../../../src/models/ReviewRole.js')
 
 const modelMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
   countDocuments: vi.fn(),
   distinct: vi.fn(),
+  find: vi.fn(),
 }))
 vi.mock('../../../src/models/Model.js', () => ({
   default: modelMocks,
@@ -41,20 +44,56 @@ const schemaMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/schema.js', () => schemaMocks)
 
-describe('connectors > metrics > simple', () => {
-  const user = { dn: 'user' } as any
+const schemaModelMocks = vi.hoisted(() => ({
+  find: vi.fn(),
+}))
+vi.mock('../../../src/models/Schema.js', () => ({
+  default: schemaModelMocks,
+}))
 
+const reviewRoleMocks = vi.hoisted(() => ({
+  find: vi.fn(),
+}))
+vi.mock('../../../src/models/ReviewRole.js', () => ({
+  default: reviewRoleMocks,
+}))
+
+const mockQuery = (result: any) => ({
+  select: vi.fn().mockReturnThis(),
+  lean: vi.fn().mockResolvedValue(result),
+})
+
+describe('connectors > metrics > simple', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   test('calculateOverviewMetrics returns global metrics', async () => {
-    modelMocks.distinct.mockResolvedValueOnce(['org1'])
+    modelMocks.distinct
+      .mockResolvedValueOnce(['org1'])
+      .mockResolvedValueOnce(['m1', 'm2'])
+      .mockResolvedValueOnce(['m1', 'm2'])
 
-    modelMocks.aggregate
-      .mockResolvedValueOnce([{ count: 5 }]) // users
-      .mockResolvedValueOnce([{ _id: 'active', count: 3 }]) // state global
-      .mockResolvedValueOnce([{ _id: 'active', count: 2 }]) // state org
+    // modelMocks.aggregate
+    //   .mockResolvedValueOnce([{ count: 5 }]) // users
+    //   .mockResolvedValueOnce([{ _id: 'active', count: 3 }]) // state global
+    //   .mockResolvedValueOnce([{ _id: 'active', count: 2 }]) // state org
+
+    modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
+      if (pipeline.some((stage) => stage.$unwind === '$collaborators')) {
+        return Promise.resolve([{ count: 5 }]) // users
+      }
+
+      if (pipeline.some((stage) => stage.$group?._id === '$state')) {
+        return Promise.resolve([{ _id: 'active', count: 3 }])
+      }
+
+      if (pipeline.some((stage) => stage.$group?._id === '$schemaId')) {
+        return Promise.resolve([{ _id: 'schema1', count: 2 }])
+      }
+
+      return Promise.resolve([])
+    })
 
     modelMocks.countDocuments
       .mockResolvedValueOnce(10) // global models
@@ -72,7 +111,7 @@ describe('connectors > metrics > simple', () => {
 
     const connector = new SimpleMetricsConnector()
 
-    const result = await connector.calculateOverviewMetrics(user)
+    const result = await connector.calculateOverviewMetrics()
 
     expect(result.global.models).toBe(10)
     expect(result.global.users).toBe(5)
@@ -98,7 +137,7 @@ describe('connectors > metrics > simple', () => {
 
     const connector = new SimpleMetricsConnector()
 
-    const result = await connector.calculateOverviewMetrics(user)
+    const result = await connector.calculateOverviewMetrics()
 
     expect(result.global.models).toBe(0)
     expect(result.global.users).toBe(0)
@@ -107,26 +146,167 @@ describe('connectors > metrics > simple', () => {
     expect(result.byOrganisation).toEqual([])
   })
 
-  test('calls searchModels for each schema', async () => {
-    modelMocks.distinct.mockResolvedValueOnce([])
-
-    modelMocks.aggregate.mockResolvedValue([])
-    modelMocks.countDocuments.mockResolvedValue(0)
-
-    releaseMocks.aggregate.mockResolvedValue([])
-    accessRequestMocks.aggregate.mockResolvedValue([])
+  test('schema breakdown returns correct counts', async () => {
+    modelMocks.distinct.mockResolvedValue([])
 
     schemaMocks.searchSchemas.mockResolvedValue([
       { id: 'schema1', name: 'Schema 1' },
       { id: 'schema2', name: 'Schema 2' },
     ])
 
-    serviceMocks.searchModels.mockResolvedValue({ models: [] })
+    modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
+      if (pipeline.some((stage) => stage.$group?._id === '$schemaId')) {
+        return Promise.resolve([{ _id: 'schema1', count: 3 }])
+      }
+      return Promise.resolve([])
+    })
+
+    releaseMocks.aggregate.mockResolvedValue([])
+    accessRequestMocks.aggregate.mockResolvedValue([])
+    modelMocks.countDocuments.mockResolvedValue(0)
+
+    const connector = new SimpleMetricsConnector()
+    const result = await connector.calculateOverviewMetrics()
+
+    expect(result.global.schemaBreakdown).toEqual([
+      { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
+      { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
+    ])
+  })
+
+  test('calculatePolicyMetrics returns correct global summary and models', async () => {
+    modelMocks.distinct.mockImplementation((field: string) => {
+      if (field === 'organisation') {
+        return Promise.resolve(['west'])
+      }
+      return Promise.resolve([])
+    })
+
+    schemaModelMocks.find.mockReturnValue(
+      mockQuery([
+        {
+          id: 'schema1',
+          reviewRoles: ['md'],
+        },
+      ]),
+    )
+
+    reviewRoleMocks.find.mockReturnValue(
+      mockQuery([
+        { shortName: 'msro', systemRole: 'msro' },
+        { shortName: 'mtr', systemRole: 'mtr' },
+        { shortName: 'md', systemRole: null },
+      ]),
+    )
+
+    modelMocks.find.mockReturnValue(
+      mockQuery([
+        {
+          id: 'model-1',
+          organisation: 'west',
+          card: { schemaId: 'schema1' },
+          collaborators: [{ entity: 'user1', roles: ['mtr', 'md'] }],
+        },
+        {
+          id: 'model-2',
+          organisation: 'west',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+      ]),
+    )
 
     const connector = new SimpleMetricsConnector()
 
-    await connector.calculateOverviewMetrics(user)
+    const result = await connector.calculatePolicyMetrics()
 
-    expect(serviceMocks.searchModels).toHaveBeenCalledTimes(2)
+    expect(result.global.models).toHaveLength(2)
+
+    expect(result.global.models).toEqual(
+      expect.arrayContaining([
+        { modelId: 'model-1', missingRoles: ['msro'] },
+        { modelId: 'model-2', missingRoles: ['msro', 'mtr', 'md'] },
+      ]),
+    )
+
+    expect(result.global.summary).toEqual(
+      expect.arrayContaining([
+        { role: 'msro', count: 2 },
+        { role: 'mtr', count: 1 },
+        { role: 'md', count: 1 },
+      ]),
+    )
+  })
+  test('model without card only checks default roles', async () => {
+    modelMocks.distinct.mockResolvedValue(['west'])
+
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['md'] }]))
+
+    reviewRoleMocks.find.mockReturnValue(
+      mockQuery([
+        { shortName: 'msro', systemRole: 'msro' },
+        { shortName: 'mtr', systemRole: 'mtr' },
+        { shortName: 'md', systemRole: null },
+      ]),
+    )
+
+    modelMocks.find.mockReturnValue(
+      mockQuery([
+        {
+          id: 'model-no-card',
+          organisation: 'west',
+          card: undefined,
+          collaborators: [],
+        },
+      ]),
+    )
+
+    const connector = new SimpleMetricsConnector()
+
+    const result = await connector.calculatePolicyMetrics()
+
+    expect(result.global.models[0].missingRoles).toEqual(['msro', 'mtr'])
+    expect(result.global.summary).toEqual(expect.arrayContaining([{ role: 'md', count: 0 }]))
+  })
+  test('groups results by organisation correctly', async () => {
+    modelMocks.distinct.mockResolvedValue(['west', 'east'])
+
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
+
+    reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', systemRole: 'msro' }]))
+
+    modelMocks.find.mockImplementation((filter: any) => {
+      const allModels = [
+        {
+          id: 'model-west',
+          organisation: 'west',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+        {
+          id: 'model-east',
+          organisation: 'east',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+      ]
+
+      const filtered = filter?.organisation
+        ? allModels.filter((m) => m.organisation === filter.organisation)
+        : allModels
+
+      return mockQuery(filtered)
+    })
+
+    const connector = new SimpleMetricsConnector()
+    const result = await connector.calculatePolicyMetrics()
+
+    expect(result.byOrganisation).toHaveLength(2)
+
+    const west = result.byOrganisation.find((o) => o.organisation === 'west')
+    const east = result.byOrganisation.find((o) => o.organisation === 'east')
+
+    expect(west?.models).toHaveLength(1)
+    expect(east?.models).toHaveLength(1)
   })
 })

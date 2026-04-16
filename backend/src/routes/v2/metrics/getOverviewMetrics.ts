@@ -77,7 +77,7 @@ export const getOverviewMetrics = [
       })
     }
 
-    const metrics = await calculateOverviewMetrics(req.user)
+    const metrics = await calculateOverviewMetrics()
 
     await audit.onViewMetric(req)
 

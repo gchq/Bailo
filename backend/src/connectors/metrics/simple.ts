@@ -1,9 +1,10 @@
+import { PipelineStage } from 'mongoose'
+
 import AccessRequestModel from '../../models/AccessRequest.js'
 import ModelModel from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
-import { UserInterface } from '../../models/User.js'
 import {
   BaseMetrics,
   GetOverviewMetricsResponse,
@@ -11,7 +12,6 @@ import {
   StateInfo,
 } from '../../routes/v2/metrics/getOverviewMetrics.js'
 import { GetPolicyMetricsResponse } from '../../routes/v2/metrics/getPolicyMetrics.js'
-import { searchModels } from '../../services/model.js'
 import { searchSchemas } from '../../services/schema.js'
 import { SchemaKind } from '../../types/enums.js'
 import { BaseMetricsConnector } from './base.js'
@@ -20,113 +20,92 @@ type ModelFilter = {
   organisation?: string
 }
 
+function buildModelMatchStage(filter: ModelFilter): PipelineStage.Match {
+  const match: Record<string, unknown> = {}
+
+  if (filter.organisation) {
+    match.organisation = filter.organisation
+  }
+
+  return { $match: match }
+}
+
+/**
+ * Creates aggregation stages to join a related collection with the models
+ * collection and filter by organisation.
+ *
+ * Used when counting models referenced by other collections (e.g. releases
+ * or access requests).
+ */
+function buildOrganisationLookupStages(org: string): PipelineStage[] {
+  return [
+    {
+      $lookup: {
+        from: 'v2_models',
+        localField: 'modelId',
+        foreignField: 'id',
+        as: 'model',
+      },
+    },
+    { $unwind: '$model' },
+    { $match: { 'model.organisation': org } },
+  ]
+}
+
+/**
+ * Counts the number of unique collaborator entities across all models.
+ */
 async function calculateTotalUsers(): Promise<number> {
-  const result = await ModelModel.aggregate([
+  const pipeline: PipelineStage[] = [
     { $unwind: '$collaborators' },
     { $group: { _id: '$collaborators.entity' } },
     { $count: 'count' },
-  ])
+  ]
 
-  return result[0]?.count ?? 0
-}
-
-async function calculateTotalModels(modelFilter: ModelFilter): Promise<number> {
-  return ModelModel.countDocuments(modelFilter)
-}
-
-/**
- * Returns the number of distinct models that have at least one release.
- * If `org` is provided, limits the count to models in that organisation.
- */
-async function calculateModelsWithReleases(modelFilter: ModelFilter): Promise<number> {
-  const isFiltered = !!modelFilter.organisation
-
-  if (!isFiltered) {
-    const result = await ReleaseModel.aggregate([{ $group: { _id: '$modelId' } }, { $count: 'count' }])
-    return result[0]?.count ?? 0
-  }
-
-  const modelIds = await ModelModel.distinct('id', {
-    organisation: modelFilter.organisation,
-  })
-
-  if (modelIds.length === 0) {
-    return 0
-  }
-
-  const result = await ReleaseModel.aggregate([
-    { $match: { modelId: { $in: modelIds } } },
-    { $group: { _id: '$modelId' } },
-    { $count: 'count' },
-  ])
+  const result = await ModelModel.aggregate(pipeline)
 
   return result[0]?.count ?? 0
 }
 
 /**
- * Returns the number of distinct models that have at least one access request.
- * If filtering by organisation, only models in that organisation are counted.
+ * Counts the total number of models matching the provided filter.
  */
-async function calculateModelsWithAccessRequests(modelFilter: ModelFilter): Promise<number> {
-  const isFiltered = !!modelFilter.organisation
+async function calculateTotalModels(filter: ModelFilter): Promise<number> {
+  return ModelModel.countDocuments(filter)
+}
 
-  if (!isFiltered) {
-    const result = await AccessRequestModel.aggregate([{ $group: { _id: '$modelId' } }, { $count: 'count' }])
+/**
+ * Counts distinct models referenced in another collection
+ * (e.g. releases or access requests).
+ *
+ * If an organisation filter is provided, a lookup is performed to ensure
+ * only models belonging to that organisation are counted.
+ */
+async function countDistinctModelsWithRelation(collection: any, filter: ModelFilter): Promise<number> {
+  const pipeline: PipelineStage[] = []
 
-    return result[0]?.count ?? 0
+  if (filter.organisation) {
+    pipeline.push(...buildOrganisationLookupStages(filter.organisation))
   }
 
-  const modelIds = await ModelModel.distinct('id', {
-    organisation: modelFilter.organisation,
-  })
+  pipeline.push({ $group: { _id: '$modelId' } }, { $count: 'count' })
 
-  if (modelIds.length === 0) {
-    return 0
-  }
-
-  const result = await AccessRequestModel.aggregate([
-    { $match: { modelId: { $in: modelIds } } },
-    { $group: { _id: '$modelId' } },
-    { $count: 'count' },
-  ])
+  const result = await collection.aggregate(pipeline)
 
   return result[0]?.count ?? 0
 }
 
-async function calculateSchemaBreakdown(user: UserInterface, org?: string): Promise<SchemaInfo[]> {
-  const schemas = await searchSchemas(SchemaKind.Model, false)
-
-  const schemaCounts: SchemaInfo[] = []
-
-  for (const schema of schemas) {
-    let modelsWithSchema
-    if (org) {
-      modelsWithSchema = await searchModels(user, {
-        schemaId: schema.id,
-        organisations: [org],
-      })
-    } else {
-      modelsWithSchema = await searchModels(user, {
-        schemaId: schema.id,
-      })
-    }
-
-    schemaCounts.push({
-      schemaId: schema.id,
-      schemaName: schema.name,
-      count: modelsWithSchema.models.length,
-    })
-  }
-
-  return schemaCounts
-}
-
-async function calculateModelsByState(modelFilter: ModelFilter): Promise<StateInfo[]> {
-  const modelsByState = await ModelModel.aggregate([
-    { $match: modelFilter },
+/**
+ * Returns the number of models grouped by lifecycle state.
+ */
+async function calculateModelsByState(filter: ModelFilter): Promise<StateInfo[]> {
+  const pipeline: PipelineStage[] = [
+    buildModelMatchStage(filter),
     { $group: { _id: '$state', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
-  ])
+  ]
+
+  const modelsByState = await ModelModel.aggregate(pipeline)
 
   return modelsByState.map((row) => ({
     state: row._id && row._id.trim() !== '' ? row._id : 'none',
@@ -134,20 +113,43 @@ async function calculateModelsByState(modelFilter: ModelFilter): Promise<StateIn
   }))
 }
 
-async function calculateOverviewMetricsForOrg(user: UserInterface, org?: string): Promise<BaseMetrics> {
-  let totalUsers = -1
-  let modelFilter = {}
-  if (org) {
-    modelFilter = { organisation: org }
-  } else {
-    totalUsers = await calculateTotalUsers()
-  }
+/**
+ * Calculates how many models use each schema.
+ */
+async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo[]> {
+  const schemas = await searchSchemas(SchemaKind.Model, false)
 
-  const totalModels = await calculateTotalModels(modelFilter)
-  const stateMetrics = await calculateModelsByState(modelFilter)
-  const schemaMetrics = await calculateSchemaBreakdown(user, org)
-  const totalModelsWithReleases = await calculateModelsWithReleases(modelFilter)
-  const totalModelsWithAccessRequests = await calculateModelsWithAccessRequests(modelFilter)
+  const pipeline: PipelineStage[] = [buildModelMatchStage(filter), { $group: { _id: '$schemaId', count: { $sum: 1 } } }]
+
+  const modelCounts = await ModelModel.aggregate(pipeline)
+
+  const countMap = new Map<string, number>(modelCounts.map((r: any) => [r._id, r.count]))
+
+  return schemas.map((schema) => ({
+    schemaId: schema.id,
+    schemaName: schema.name,
+    count: countMap.get(schema.id) ?? 0,
+  }))
+}
+
+/**
+ * Calculates the full set of overview metrics either globally
+ * or scoped to a specific organisation.
+ */
+async function calculateOverviewMetricsForOrg(org?: string): Promise<BaseMetrics> {
+  const modelFilter: ModelFilter = org ? { organisation: org } : {}
+
+  const totalUsersPromise = org ? Promise.resolve(-1) : calculateTotalUsers()
+
+  const [totalUsers, totalModels, stateMetrics, schemaMetrics, totalModelsWithReleases, totalModelsWithAccessRequests] =
+    await Promise.all([
+      totalUsersPromise,
+      calculateTotalModels(modelFilter),
+      calculateModelsByState(modelFilter),
+      calculateSchemaBreakdown(modelFilter),
+      countDistinctModelsWithRelation(ReleaseModel, modelFilter),
+      countDistinctModelsWithRelation(AccessRequestModel, modelFilter),
+    ])
 
   return {
     users: totalUsers,
@@ -204,7 +206,7 @@ type PolicyMetricsResult = {
   }[]
 }
 
-async function calculatePolicyMetricsForOrg(
+async function calculateMissingModelRolesForOrg(
   schemaRoleMap: Record<string, string[]>,
   defaultRoles: string[],
   org?: string,
@@ -290,39 +292,41 @@ async function calculatePolicyMetricsForOrg(
   }
 }
 
+async function getOrganisationIds(): Promise<string[]> {
+  return await ModelModel.distinct('organisation')
+}
+
 export class SimpleMetricsConnector extends BaseMetricsConnector {
-  async calculateOverviewMetrics(user: UserInterface): Promise<GetOverviewMetricsResponse> {
-    // Get distinct organisations
-    const organisationIds: string[] = await ModelModel.distinct('organisation')
+  async calculateOverviewMetrics(): Promise<GetOverviewMetricsResponse> {
+    const organisationIds = await getOrganisationIds()
 
-    // Calculate global metrics
-    const global = await calculateOverviewMetricsForOrg(user)
+    const globalPromise = calculateOverviewMetricsForOrg()
 
-    // Calculate per-org metrics
-    const byOrganisation = await Promise.all(
+    const byOrganisationPromise = Promise.all(
       organisationIds.map(async (org) => ({
         organisation: org,
-        ...(await calculateOverviewMetricsForOrg(user, org)),
+        ...(await calculateOverviewMetricsForOrg(org)),
       })),
     )
+
+    const [global, byOrganisation] = await Promise.all([globalPromise, byOrganisationPromise])
 
     return {
       global,
       byOrganisation,
     }
   }
-
   async calculatePolicyMetrics(): Promise<GetPolicyMetricsResponse> {
     const { schemaRoleMap, defaultRoles } = await buildSchemaRoleMap()
 
-    const global = await calculatePolicyMetricsForOrg(schemaRoleMap, defaultRoles)
+    const global = await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles)
 
-    const organisationIds: string[] = await ModelModel.distinct('organisation')
+    const organisationIds = await getOrganisationIds()
 
     const byOrganisation = await Promise.all(
       organisationIds.map(async (org) => ({
         organisation: org,
-        ...(await calculatePolicyMetricsForOrg(schemaRoleMap, defaultRoles, org)),
+        ...(await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles, org)),
       })),
     )
 

@@ -1,18 +1,10 @@
 import { describe, expect, test } from 'vitest'
 
 import { BaseMetricsConnector } from '../../../src/connectors/metrics/base.js'
-import { UserInterface } from '../../../src/models/User.js'
 import { GetPolicyMetricsResponse } from '../../../src/routes/v2/metrics/getPolicyMetrics.js'
 
 class TestMetricsConnector extends BaseMetricsConnector {
-  async calculateOverviewMetrics(user: UserInterface): Promise<any> {
-    // todo remove
-    if (!user) {
-      return {
-        global: { users: 1, models: 2 },
-        byOrganisation: [],
-      }
-    }
+  async calculateOverviewMetrics(): Promise<any> {
     return {
       global: { users: 1, models: 2 },
       byOrganisation: [],
