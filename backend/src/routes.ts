@@ -178,7 +178,7 @@ server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
 server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
-server.get('/api/v2/model/:modelId/image/:name/:tag', ...getImage)
+server.get('/api/v2/model/:modelId/image/:name/:tag/:digest', ...getImage)
 server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
