@@ -39,6 +39,7 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
+  ArtefactKind,
   EntryInterface,
   FileInterface,
   FileWithMetadataAndTags,
@@ -176,7 +177,7 @@ export default function ReleaseForm({
         key={data.name}
         file={data}
         modelId={model.id}
-        showMenuItems={{ rescanFile: scanners.length > 0 }}
+        showMenuItems={{ rescanFile: scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) }}
         mutator={mutateReleases}
         style={{ padding: 1 }}
         releases={releases}
