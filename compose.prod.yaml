@@ -41,7 +41,7 @@ services:
     networks:
       default:
       internal:
-    image: tarampampam/webhook-tester:2.2.6
+    image: tarampampam/webhook-tester:2.3.0
     command: serve --auto-create-sessions
     ports:
       - 8082:8080

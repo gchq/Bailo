@@ -587,11 +587,15 @@ describe('services > registry', () => {
       } as any)
       registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
-      const result = await getModelImageWithScanResults({ dn: 'user' }, {
-        repository: 'repo',
-        name: 'img',
-        tag: 'v1',
-      } as any)
+      const result = await getModelImageWithScanResults(
+        { dn: 'user' },
+        {
+          repository: 'repo',
+          name: 'img',
+          tag: 'v1',
+        } as any,
+        'sha:123456',
+      )
 
       expect(result.scanResults).toEqual([
         { scanResults: [{ Results: [] }], summary: undefined, state: ArtefactScanState.Complete },

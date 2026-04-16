@@ -1,8 +1,8 @@
 import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
+import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useMemo, useState } from 'react'
+import ExpandableTypography from 'src/common/ExpandableTypography'
 interface AnnoucementProps {
   message: string
   onClose: () => void
@@ -10,21 +10,6 @@ interface AnnoucementProps {
 
 export default function Announcement({ message, onClose }: AnnoucementProps) {
   const theme = useTheme()
-
-  const [showFullText, setShowFullText] = useState(false)
-
-  const announcementText = useMemo(() => {
-    return message.length > 100 ? (
-      <Typography sx={{ wordBreak: 'break-word' }}>
-        {showFullText ? message : `${message.slice(0, 100)}...`}
-        <Button variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
-          {showFullText ? 'Show less' : 'Show more'}
-        </Button>
-      </Typography>
-    ) : (
-      message
-    )
-  }, [message, showFullText])
 
   return (
     <Box
@@ -43,7 +28,9 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
             Announcement
           </Typography>
           <CampaignIcon color='primary' />
-          <Box sx={{ width: '100%' }}>{announcementText}</Box>
+          <Box sx={{ width: '100%' }}>
+            <ExpandableTypography sx={{ wordBreak: 'break-word' }}>{message}</ExpandableTypography>
+          </Box>
         </Stack>
         <IconButton aria-label='close announcement pop-up' size='small' onClick={onClose}>
           <Close color='primary' />

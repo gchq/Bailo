@@ -19,15 +19,15 @@ export const getImageSchema = z.object({
     tag: z.string({
       required_error: 'Must specify image tag as param',
     }),
-  }),
-  query: z.object({
-    platform: z.string().optional(),
+    digest: z.string({
+      required_error: 'Must specify image digest as param',
+    }),
   }),
 })
 
 registerPath({
   method: 'get',
-  path: '/api/v2/model/{modelId}/image/{name}/{tag}',
+  path: '/api/v2/model/{modelId}/image/{name}/{tag}/{digest}',
   tags: ['image'],
   description: 'Get information associated with a specific tagged image for a model.',
   schema: getImageSchema,
@@ -53,10 +53,9 @@ export const getImage = [
   async (req: Request, res: Response<GetImagesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewModelImage
     const {
-      params: { modelId, name, tag },
-      query: { platform },
+      params: { modelId, name, tag, digest },
     } = parse(req, getImageSchema)
-    const imageBreakdown = await getModelImageWithScanResults(req.user, { repository: modelId, name, tag }, platform)
+    const imageBreakdown = await getModelImageWithScanResults(req.user, { repository: modelId, name, tag }, digest)
     await audit.onViewModelImage(req, modelId, name, tag)
 
     res.json({

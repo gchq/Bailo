@@ -14,7 +14,7 @@ describe('routes > images > getImage', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getImageSchema)
     const res = await testGet(
-      `/api/v2/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}`,
+      `/api/v2/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}/${fixture.params.digest}`,
     )
 
     expect(res.statusCode).toBe(200)
@@ -24,7 +24,7 @@ describe('routes > images > getImage', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(getImageSchema)
     const res = await testGet(
-      `/api/v2/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}`,
+      `/api/v2/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}/${fixture.params.digest}`,
     )
 
     expect(res.statusCode).toBe(200)
