@@ -23,6 +23,7 @@
     "@mui/icons-material": "7.3.9",
     "@mui/material": "7.3.9",
     "@mui/material-nextjs": "7.3.9",
+    "@mui/x-charts": "^9.0.1",
     "@mui/x-date-pickers": "8.27.2",
     "@next/mdx": "^16.2.2",
     "@next/swc-linux-x64-gnu": "^16.2.2",

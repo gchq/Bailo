@@ -28,4 +28,7 @@
   "isort.args": [
     "--settings-path=lib/python/pyproject.toml"
   ],
+  "cSpell.words": [
+    "Bailo"
+  ],
 }
