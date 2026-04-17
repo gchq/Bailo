@@ -18,7 +18,7 @@ import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
 // Default cache response header
-const cacheControl = 'public, max-age=604800, immutable'
+const cacheControl = 'no-store'
 
 const responseHeaders = z.object({
   [HttpHeader.CONTENT_DISPOSITION]: z

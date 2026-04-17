@@ -41,6 +41,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
   "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "filter": [MockFunction],
     "find": [MockFunction] {
       "calls": [
@@ -338,6 +339,7 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "complete": false,
     "delete": [MockFunction],
     "deleteMany": [MockFunction],
@@ -442,6 +444,7 @@ exports[`services > file > uploadFile > success 1`] = `
   "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "filter": [MockFunction],
     "find": [MockFunction] {
       "calls": [
@@ -485,6 +488,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
   "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "bulkWrite": [MockFunction],
     "filter": [MockFunction],
     "find": [MockFunction] {
       "calls": [

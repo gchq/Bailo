@@ -342,6 +342,9 @@ export interface Config {
     interval: number
     generator: string
     rejectUnauthorized: boolean
+    xmlns: string
+    schemaLocation: string
+    version: string
   }
 
   /** ### Artefact Scanning

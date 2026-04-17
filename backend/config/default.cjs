@@ -49,7 +49,8 @@ module.exports = {
   },
 
   smtp: {
-    enabled: true,
+    // Enable / disable all email sending
+    enabled: false,
     transporter: 'smtp',
 
     connection: {
@@ -292,6 +293,9 @@ module.exports = {
     interval: 1000 * 50,
     generator: 'Generator',
     rejectUnauthorized: false,
+    xmlns: 'default-namespace',
+    schemaLocation: 'default-namespace file://schema-location.xsd',
+    version: '1.0.0',
   },
 
   modelMirror: {

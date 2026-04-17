@@ -4,7 +4,7 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
+import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
@@ -68,8 +68,9 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onDeleteInference(_req: Request, _inferences: InferenceDoc) {}
   async onViewScanners(_req: Request) {}
   async onViewModelImages(_req: Request, _modelId: string, _images: ModelImages) {}
-  async onUpdateImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
-  async onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
+  async onViewModelImage(_req: Request, _modelId: string, _name: string, _tag: string) {}
+  async onUpdateImage(_req: Request, _modelId: string, _image: ImageTagRef) {}
+  async onDeleteImage(_req: Request, _modelId: string, _image: ImageTagRef) {}
   async onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   async onCreateImport(
     _req: Request,
@@ -82,5 +83,6 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewReviewRoles(_req: Request, _reviewRole: ReviewRoleInterface[]) {}
   async onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   async onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
+  async onViewMetric(_req: Request): Promise<void> {}
   async onError(_req: Request, _error: BailoError) {}
 }

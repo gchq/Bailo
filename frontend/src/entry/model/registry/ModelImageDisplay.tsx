@@ -1,47 +1,37 @@
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
+import { Accordion, AccordionDetails, AccordionSummary, Card, Stack, Typography } from '@mui/material'
+import { memoize } from 'lodash-es'
 import { useState } from 'react'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
-import CodeLine from 'src/entry/model/registry/CodeLine'
-import MessageAlert from 'src/MessageAlert'
-import { ModelImage } from 'types/types'
+import ModelImageTagDisplay from 'src/entry/model/registry/ModelImageTagDisplay'
+import { ModelImagesWithOptionalScanResults } from 'types/types'
 
 type ModelImageDisplayProps = {
-  modelImage: ModelImage
+  modelImage: ModelImagesWithOptionalScanResults
+  mutate: () => void
 }
 
-export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisplayProps) {
   const [expanded, setExpanded] = useState(false)
 
   function toggleExpand() {
     setExpanded(!expanded)
   }
 
-  const modelImageTag = ({ data }) => (
-    <Box key={`${modelImage.repository}-${modelImage.name}-${data.tag}`} sx={{ p: 1 }}>
-      <CodeLine
-        line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${data.tag}`}
-      />
-    </Box>
-  )
+  const modelImageTag = (tag: string) => <ModelImageTagDisplay modelImage={modelImage} tag={tag} mutate={mutate} />
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
+  const modelImageTagRow = memoize(({ data }) => modelImageTag(data.tag))
 
   return (
     <>
-      {isUiConfigLoading && <Loading />}
       <Card
         sx={{
           width: '100%',
           p: 2,
+          border: 'none',
         }}
       >
-        <Stack direction='column' spacing={1}>
+        <Stack direction='column'>
           <Typography
             component='h2'
             variant='h6'
@@ -74,17 +64,12 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
                   hideBorders
                   hideDividers
                 >
-                  {modelImageTag}
+                  {modelImageTagRow}
                 </Paginate>
               </AccordionDetails>
             </Accordion>
           ) : (
-            modelImage.tags.map((imageTag) => (
-              <CodeLine
-                key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}
-                line={`${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
-              />
-            ))
+            modelImage.tags.map((imageTag) => modelImageTag(imageTag))
           )}
         </Stack>
       </Card>

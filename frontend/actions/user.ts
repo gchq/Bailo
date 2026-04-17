@@ -7,7 +7,7 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyEntityList = []
 
-export function useListUsers(q: string) {
+export function useListEntities(q: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       results: EntityObject[]

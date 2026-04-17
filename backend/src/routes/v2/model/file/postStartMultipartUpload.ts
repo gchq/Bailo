@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
@@ -54,7 +53,6 @@ interface PostStartMultipartUpload {
 }
 
 export const postStartMultipartUpload = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostStartMultipartUpload>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
     const {

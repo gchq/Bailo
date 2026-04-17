@@ -12,6 +12,6 @@ export function fromEntity(entity: string) {
   const [kind, ...values] = entity.split(':')
   return {
     kind,
-    value: values.join(':'),
+    id: values.join(':'),
   }
 }

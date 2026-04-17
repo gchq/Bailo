@@ -2,8 +2,9 @@ import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
-import jwt, { SignOptions } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import type { StringValue } from 'ms'
+import NodeCache from 'node-cache'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
@@ -19,65 +20,109 @@ import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
 
-let adminToken: string | undefined
+const JWT_ALGORITHM: jwt.Algorithm = 'RS256'
+const ACCESS_TOKEN_TTL: StringValue = '1 hour'
+const REFRESH_TOKEN_TTL: StringValue = '30 days'
+const cryptoCache = new NodeCache({ useClones: false })
+
+const READ_ONLY_ACTIONS = ['pull', 'list'] as const
 
 // Similar to the MongoDB soft-delete plugin, specify the prefix for any deleted image names
-export const softDeletePrefix = 'soft_deleted/'
+export const softDeletePrefix = 'soft_deleted'
 
-export async function getAdminToken() {
-  if (!adminToken) {
-    const key = await getPrivateKey()
-    const hash = createHash('sha256').update(key).digest().slice(0, 16)
-    hash[6] = (hash[6] & 0x0f) | 0x40
-    hash[8] = (hash[8] & 0x3f) | 0x80
-
-    adminToken = uuidStringify(hash)
+export async function getAdminToken(): Promise<string> {
+  const cached = cryptoCache.get<string>('adminToken')
+  if (cached !== undefined) {
+    return cached
   }
+
+  const key = await getPrivateKey()
+  const hash = createHash('sha256').update(key).digest().slice(0, 16)
+  hash[6] = (hash[6] & 0x0f) | 0x40
+  hash[8] = (hash[8] & 0x3f) | 0x80
+
+  const adminToken = uuidStringify(hash)
+  cryptoCache.set('adminToken', adminToken)
 
   return adminToken
 }
 
-async function getPrivateKey() {
-  return readFile(config.app.privateKey, { encoding: 'utf-8' })
+async function getPrivateKey(): Promise<string> {
+  const cached = cryptoCache.get<string>('privateKey')
+  if (cached !== undefined) {
+    return cached
+  }
+
+  const key = await readFile(config.app.privateKey, { encoding: 'utf-8' })
+  cryptoCache.set('privateKey', key)
+
+  return key
 }
 
-async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {
-  const privateKey = await getPrivateKey()
+async function getCertificate(): Promise<X509Certificate> {
+  const cached = cryptoCache.get<X509Certificate>('certificate')
+  if (cached !== undefined) {
+    return cached
+  }
+
   const cert = new X509Certificate(await getPublicKey())
+  cryptoCache.set('certificate', cert)
 
-  return jwt.sign(
-    {
-      ...data,
-      jti: uuidv4(),
-    },
-    privateKey,
-    {
-      algorithm: 'RS256',
-      expiresIn,
-
-      audience: config.registry.service,
-      issuer: config.registry.issuer,
-
-      header: {
-        kid: await getKid(cert),
-        alg: 'RS256',
-        // The registry >=3.0.0-beta.1 image requires the (typically optional) x5c header
-        x5c: [cert.raw.toString('base64')],
-      },
-    } as SignOptions,
-  )
+  return cert
 }
 
-export function getRefreshToken(user: UserInterface) {
-  return encodeToken(
+async function getKeyId(): Promise<string> {
+  const cached = cryptoCache.get<string>('kid')
+  if (cached !== undefined) {
+    return cached
+  }
+  const kid = await getKid(await getCertificate())
+  cryptoCache.set('kid', kid)
+
+  return kid
+}
+
+async function signJwt<T extends object>(payload: T, expiresIn: StringValue): Promise<string> {
+  try {
+    const privateKey = await getPrivateKey()
+    const cert = await getCertificate()
+    const kid = await getKeyId()
+
+    return jwt.sign(
+      {
+        ...payload,
+        jti: uuidv4(),
+      },
+      privateKey,
+      {
+        algorithm: JWT_ALGORITHM,
+        expiresIn,
+
+        audience: config.registry.service,
+        issuer: config.registry.issuer,
+
+        header: {
+          kid,
+          alg: JWT_ALGORITHM,
+          // The registry >=3.0.0-beta.1 image requires the (typically optional) x5c header
+          x5c: [cert.raw.toString('base64')],
+        },
+      },
+    )
+  } catch (err) {
+    log.error({ err }, 'JWT signing failed')
+    throw err
+  }
+}
+
+export function issueRefreshToken(user: UserInterface): Promise<string> {
+  return signJwt(
     {
       sub: user.dn,
       user: String(user.dn),
       usage: 'refresh_token',
     },
-    {
-      expiresIn: '30 days',
-    },
+    REFRESH_TOKEN_TTL,
   )
 }
 
@@ -91,32 +136,96 @@ export interface Access {
   actions: Array<Action>
 }
 
-export function getAccessToken(user: UserInterface, access: Array<Access>) {
-  return encodeToken(
+export function issueAccessToken(user: UserInterface, access: Array<Access>): Promise<string> {
+  return signJwt(
     {
       sub: user.dn,
       user: String(user.dn),
       access,
     },
-    {
-      expiresIn: '1 hour',
-    },
+    ACCESS_TOKEN_TTL,
   )
 }
 
-function generateAccess(scope: any) {
-  const [typ, repository, actionString] = scope.split(':')
-  const actions = actionString.split(',')
+// See https://distribution.github.io/distribution/spec/auth/scope/#resource-scope-grammar
+export function parseResourceScope(rawScopes: string): Access[] {
+  const accesses: Access[] = []
 
-  return {
-    type: typ,
-    name: repository,
-    actions,
+  // Split on spaces for multiple `resourcescope` entries
+  const resourcescopes = rawScopes.trim().split(/\s+/)
+
+  /**
+   * Full `resourcescope` regex
+   *
+   * Grammar mapping:
+   *   resourcescope := resourcetype ":" resourcename ":" action [ "," action ]*
+   */
+  const re = new RegExp(
+    '^' +
+      // resourcetype
+      //   resourcetype := resourcetypevalue [ "(" resourcetypevalue ")" ]
+      //   resourcetypevalue := /[a-z0-9]+/
+      '(?<type>[a-z0-9]+(?:\\([a-z0-9]+\\))?)' +
+      ':' +
+      // resourcename
+      //   resourcename := [ hostname "/" ] component [ "/" component ]*
+      '(?<name>' +
+      // Optional hostname + "/"
+      //   hostname := hostcomponent ("." hostcomponent)* [ ":" port-number ]
+      '(?:' +
+      '(?:' +
+      // hostcomponent
+      '(?:[a-zA-Z0-9]|' +
+      '[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]' +
+      ')' +
+      ')' +
+      '(?:\\.' +
+      '(?:[a-zA-Z0-9]|' +
+      '[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]' +
+      ')' +
+      ')*' +
+      '(?::[0-9]+)?' +
+      '/' +
+      ')?' +
+      // component
+      //   component := alpha-numeric ( separator alpha-numeric )*
+      //   alpha-numeric := /[a-z0-9]+/
+      // Simplified to a single character class to avoid nested ambiguous quantifiers
+      '[a-z0-9._-]+' +
+      // Additional "/component" segments
+      '(?:/' +
+      '[a-z0-9._-]+' +
+      ')*' +
+      ')' +
+      ':' +
+      // actions
+      //   action := /[a-z]*/
+      //   Multiple actions are comma-separated
+      '(?<actions>(?:\\*|[a-z]*)(?:,(?:\\*|[a-z]*))*)' +
+      '$',
+  )
+
+  for (const resourcescope of resourcescopes) {
+    const match = re.exec(resourcescope)
+    if (!match?.groups) {
+      throw new Error(`Invalid resource scope: ${resourcescope}`)
+    }
+
+    // Split comma-separated actions
+    const actions = match.groups.actions.split(',').filter((a) => a.length > 0) as Action[]
+
+    accesses.push({
+      type: match.groups.type,
+      name: match.groups.name,
+      actions,
+    })
   }
+
+  return accesses
 }
 
 export async function checkAccess(access: Access, user: UserInterface, admin?: boolean): Promise<AuthResponse> {
-  if (access.name.startsWith(softDeletePrefix)) {
+  if (access.name.startsWith(`${softDeletePrefix}/`)) {
     const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
     log.warn({ userDn: user.dn, access }, info)
     return {
@@ -151,7 +260,7 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
   }
 
   // Further restrict mirrored model actions
-  if (model.kind == EntryKind.MirroredModel && !isReadOnlyAccessRequestActions(access.actions, true)) {
+  if (model.kind === EntryKind.MirroredModel && !isReadOnlyActions(access.actions, true)) {
     return {
       id: modelId,
       success: false,
@@ -162,12 +271,14 @@ export async function checkAccess(access: Access, user: UserInterface, admin?: b
   return await authorisation.image(user, model, access, admin)
 }
 
-function isReadOnlyAccessRequestActions(actions: Action[], includeWildCard: boolean = false) {
-  return actions.some((action) => (['pull', 'list', ...(includeWildCard ? ['*'] : [])] as Action[]).includes(action))
+function isReadOnlyActions(actions: Action[], includeWildcard: boolean = false) {
+  const allowed = includeWildcard ? [...READ_ONLY_ACTIONS, '*'] : READ_ONLY_ACTIONS
+  return actions.every((action) => allowed.includes(action as any))
 }
 
 export const getDockerRegistryAuth = [
   bodyParser.urlencoded({ extended: true }),
+
   async (req: Request, res: Response): Promise<void> => {
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query
     const isOfflineToken = offlineToken === 'true'
@@ -202,7 +313,7 @@ export const getDockerRegistryAuth = [
     }
 
     if (isOfflineToken) {
-      const refreshToken = await getRefreshToken(user)
+      const refreshToken = await issueRefreshToken(user)
       rlog.trace('Successfully generated offline token')
       res.json({ token: refreshToken })
       return
@@ -212,40 +323,45 @@ export const getDockerRegistryAuth = [
       // User requesting no scope, they're just trying to login
       // Because this token has no permissions, it is safe to
       // provide.
-      res.json({ token: await getAccessToken(user, []) })
+      res.json({ token: await issueAccessToken(user, []) })
       return
     }
 
-    let scopes: Array<string>
+    const scopes = Array.isArray(scope) ? scope : typeof scope === 'string' ? scope.split(' ') : null
 
-    if (Array.isArray(scope)) {
-      scopes = scope as Array<string>
-    } else if (typeof scope === 'string') {
-      scopes = scope.split(' ')
-    } else {
+    if (!scopes || scopes.some((s) => typeof s !== 'string')) {
       throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
-    const requestedAccesses = scopes.map(generateAccess)
+    const requestedAccesses: Access[] = []
+    scopes.forEach((s) => {
+      try {
+        // force type as above filters out non-strings
+        const parsed = parseResourceScope(s as string)
+        requestedAccesses.push(...parsed)
+      } catch {
+        throw Forbidden({ scope: s }, 'Invalid scope format', rlog)
+      }
+    })
+
+    const authResults = await Promise.all(requestedAccesses.map((a) => checkAccess(a, user, admin)))
     const grantedAccesses: Access[] = []
 
-    for (const access of requestedAccesses) {
-      const authResult = await checkAccess(access, user, admin)
-      if (!authResult.success) {
+    authResults.forEach((result, idx) => {
+      const access = requestedAccesses[idx]
+
+      if (!result.success) {
         // Ignore unauthorised read-only scopes (containerd cross-mount)
-        if (isReadOnlyAccessRequestActions(access.actions)) {
-          rlog.debug({ access }, 'Ignoring unauthorised scope.')
-          continue
+        if (isReadOnlyActions(access.actions)) {
+          rlog.debug({ access }, 'Ignoring unauthorised read-only scope')
+          return
         }
 
-        throw Forbidden({ access }, authResult.info, rlog)
+        throw Forbidden({ access }, result.info, rlog)
       }
 
-      grantedAccesses.push({
-        ...access,
-        actions: access.actions,
-      })
-    }
+      grantedAccesses.push(access)
+    })
 
     // Enforce non-empty write authorisation
     if (
@@ -260,11 +376,12 @@ export const getDockerRegistryAuth = [
       throw Forbidden({ requestedAccesses }, 'Requested image is not accessible - no authorised scopes.', rlog)
     }
 
-    const accessToken = await getAccessToken(user, grantedAccesses)
+    const accessToken = await issueAccessToken(user, grantedAccesses)
     rlog.trace('Successfully generated access token.')
 
     res.json({ token: accessToken })
   },
+
   async (err: unknown, req: Request, res: Response, _next: NextFunction): Promise<void> => {
     if (!bailoErrorGuard(err)) {
       log.error({ err }, 'No error code was found, returning generic error to user.')

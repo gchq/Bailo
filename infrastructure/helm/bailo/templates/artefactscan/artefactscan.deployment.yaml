@@ -23,7 +23,7 @@ spec:
       containers:
       - name: {{ include "bailo.fullname" . }}-artefactscan
         ports:
-          - name: artefactscanport
+          - name: http
             containerPort: {{ .Values.artefactscan.port }}
             protocol: TCP
         image: "{{ .Values.image.artefactscanRepository }}:{{ .Values.image.artefactscanTag }}"
@@ -33,8 +33,6 @@ spec:
           - name: {{ $variable }}
             value: {{ $value | quote }}
           {{- end }}
-          - name: BACKEND_BASE_URL
-            value: http://{{ include "bailo.fullname" . }}-backend:{{ .Values.service.backendPort }}
         resources:
           requests:
             memory: "100Mi"

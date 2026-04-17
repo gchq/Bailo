@@ -2,10 +2,11 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
-import { rerunFileScan, rerunImageScan, scanFile } from '../../src/services/scan.js'
+import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
+vi.mock('../../src/utils/transactions.js')
 vi.mock('pretty-bytes')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
@@ -118,7 +119,7 @@ const registryClientMocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(() => 'token'),
+  issueAccessToken: vi.fn(() => 'token'),
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
@@ -177,7 +178,6 @@ describe('services > scan', () => {
 
     test('sets scan state to InProgress before completing', async () => {
       ScanModelMock.find.mockResolvedValueOnce([])
-      ScanModelMock.updateOne.mockResolvedValue(undefined)
       const file = {
         id: 'file123',
         _id: 'file123',
@@ -186,13 +186,23 @@ describe('services > scan', () => {
 
       await scanFile(file)
 
-      expect(ScanModelMock.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({ artefactKind: ArtefactKind.FILE }),
-        expect.objectContaining({
-          $set: expect.objectContaining({ state: ArtefactScanState.InProgress }),
-        }),
-        expect.objectContaining({ upsert: true }),
-      )
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0]) // extract ops array(s)
+      const inProgressOp = bulkOps.find((op: any) => op.updateOne?.update?.$set?.state === ArtefactScanState.InProgress)
+      expect(inProgressOp).toBeDefined()
+      expect(inProgressOp).toMatchObject({
+        updateOne: {
+          filter: expect.objectContaining({
+            artefactKind: ArtefactKind.FILE,
+          }),
+          update: {
+            $set: expect.objectContaining({
+              state: ArtefactScanState.InProgress,
+            }),
+          },
+          upsert: true,
+        },
+      })
     })
 
     test('sets scan state to Error when scanner throws', async () => {
@@ -208,13 +218,23 @@ describe('services > scan', () => {
       } as any
       await scanFile(file)
 
-      expect(ScanModelMock.updateOne).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          $set: expect.objectContaining({ state: ArtefactScanState.Error }),
-        }),
-        expect.anything(),
-      )
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
+      const errorOp = bulkOps.find((op: any) => op.updateOne?.update?.$set?.state === ArtefactScanState.Error)
+      expect(errorOp).toBeDefined()
+      expect(errorOp).toMatchObject({
+        updateOne: {
+          filter: expect.objectContaining({
+            artefactKind: ArtefactKind.FILE,
+          }),
+          update: {
+            $set: expect.objectContaining({
+              state: ArtefactScanState.Error,
+            }),
+          },
+          upsert: false,
+        },
+      })
     })
   })
 
@@ -307,7 +327,6 @@ describe('services > scan', () => {
       } as any)
 
       expect(result).toBe('Image scan started for repo/image:latest')
-      expect(fileScanningMock.startScans).not.toHaveBeenCalled()
     })
 
     test('fail on manifest list', async () => {
@@ -362,6 +381,27 @@ describe('services > scan', () => {
       await expect(
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
       ).rejects.toThrowError('No image scanners are enabled.')
+    })
+  })
+
+  describe('rerunImageScanNoAuth', () => {
+    test('success no auth', async () => {
+      ScanModelMock.find.mockResolvedValueOnce([])
+
+      const result = await rerunImageScanNoAuth(
+        {
+          repository: 'repo',
+          name: 'image',
+          tag: 'latest',
+        } as any,
+        'token',
+      )
+
+      expect(result).toBe('Image scan started for repo/image:latest')
+      expect(modelMocks.getModelById).not.toHaveBeenCalled()
+      expect(authMocks.default.image).not.toHaveBeenCalled()
+      expect(authMocks.default.model).not.toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).not.toHaveBeenCalled()
     })
   })
 })

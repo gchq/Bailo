@@ -7,11 +7,11 @@ import { Headers } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { UserInterface } from '../../../models/User.js'
-import { getAccessToken } from '../../../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
-import { ImageManifestV2, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
+import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
@@ -68,19 +68,19 @@ export class ImageImporter extends BaseImporter {
       if (ImageImporter.manifestRegex.test(entry.name)) {
         // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
         log.debug({ ...this.logData }, 'Extracting un-tarred manifest.')
-        this.manifestBody = ImageManifestV2.parse(await json(stream))
+        this.manifestBody = ImageManifestV2Schema.parse(await json(stream))
       } else if (ImageImporter.blobRegex.test(entry.name)) {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
 
-        const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
+        const repositoryPullToken = await issueAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['pull'],
           },
         ])
-        const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
+        const repositoryPushPullToken = await issueAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
@@ -156,7 +156,7 @@ export class ImageImporter extends BaseImporter {
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
     if (this.manifestBody) {
-      const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
+      const repositoryPushPullToken = await issueAccessToken({ dn: this.user.dn }, [
         {
           type: 'repository',
           name: `${this.metadata.mirroredModelId}/${this.imageName}`,

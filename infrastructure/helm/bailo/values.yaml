@@ -319,6 +319,9 @@ stroom:
   interval: 1000 * 50
   generator: 'Generator'
   rejectUnauthorized: false
+  xmlns: 'default-namespace'
+  schemaLocation: 'default-namespace file://schema-location.xsd'
+  version: '1.0.0'
 
 modelMirror:
   import:
@@ -390,7 +393,5 @@ artefactscan:
       secretKey: cert.pem
       mountPath: /certs/artefactscan-ca.pem
   env: # Override settings here
-    BACKEND_CLIENT_CERT: '("/certs/cert.pem", "/certs/key.pem")'
-    BACKEND_CA_CERT: /usr/local/share/ca-certificates/cert.pem
     # TRIVY_DB_INSECURE: false
     # TRIVY_DB_HOSTNAME: ghcr.io

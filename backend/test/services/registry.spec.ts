@@ -37,8 +37,8 @@ const releaseMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
-  getAccessToken: vi.fn(() => 'token'),
-  softDeletePrefix: 'soft_deleted/',
+  issueAccessToken: vi.fn(() => 'token'),
+  softDeletePrefix: 'soft_deleted',
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
@@ -54,7 +54,7 @@ const registryClientMocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
-  getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1' }] as any),
+  getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
 
@@ -361,7 +361,7 @@ describe('services > registry', () => {
     test('getImageManifest > success', async () => {
       await getImageManifest({} as any, {} as any)
 
-      expect(registryAuthMocks.getAccessToken).toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
       expect(registryClientMocks.getImageTagManifest).toHaveBeenCalled()
     })
 
@@ -370,7 +370,7 @@ describe('services > registry', () => {
 
       await expect(getImageManifest({} as any, {} as any)).rejects.toThrowError('Error')
 
-      expect(registryAuthMocks.getAccessToken).toHaveBeenCalled()
+      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
     })
 
     test('renameImage > source manifest not found', async () => {
@@ -603,6 +603,8 @@ describe('services > registry', () => {
       )
 
       expect(result).toEqual({
+        imageSize: 0,
+        lastRunAt: undefined,
         state: 'notScanned',
         severityCounts: {
           critical: 0,

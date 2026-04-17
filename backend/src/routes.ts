@@ -4,8 +4,11 @@ import path from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
+import { Roles } from './connectors/authentication/constants.js'
 import authentication from './connectors/authentication/index.js'
+import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
+import { requireRole } from './routes/middleware/requireRoles.js'
 import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
@@ -14,6 +17,7 @@ import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getModelVolume } from './routes/v2/metrics/getModelVolume.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -35,6 +39,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { deleteImage } from './routes/v2/model/images/deleteImage.js'
+import { getImage } from './routes/v2/model/images/getImage.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -176,6 +181,7 @@ server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
 server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
+server.get('/api/v2/model/:modelId/image/:name/:tag', ...getImage)
 server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -250,9 +256,13 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
+server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
+
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+
+server.use('/internal', internalRouter)

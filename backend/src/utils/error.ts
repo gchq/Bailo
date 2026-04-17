@@ -49,6 +49,10 @@ export function NotFound(message: string, context?: BailoError['context'], logge
   return GenericError(404, message, context, logger)
 }
 
+export function Conflict(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(409, message, context, logger)
+}
+
 export function ContentTooLarge(message: string, context?: BailoError['context'], logger?: Logger) {
   return GenericError(413, message, context, logger)
 }
@@ -70,11 +74,7 @@ export function ConfigurationError(message: string, context?: BailoError['contex
 }
 
 export function RegistryError(error: RegistryErrorResponseBody, context?: BailoError['context'], logger?: Logger) {
-  const registryError = GenericError(500, `Error response received from registry.`, {
-    errors: error.errors,
-    context,
-    logger,
-  }) as RegistryError
+  const registryError = GenericError(500, `Error response received from registry.`, context, logger) as RegistryError
   registryError.name = 'Registry Error'
   registryError.errors = error.errors
 

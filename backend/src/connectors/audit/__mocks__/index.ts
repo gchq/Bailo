@@ -61,6 +61,7 @@ const audit = {
   onViewScanners: vi.fn(),
 
   onViewModelImages: vi.fn(),
+  onViewModelImage: vi.fn(),
   onUpdateImage: vi.fn(),
   onDeleteImage: vi.fn(),
 
@@ -71,6 +72,8 @@ const audit = {
   onViewReviewRoles: vi.fn(),
   onUpdateReviewRole: vi.fn(),
   onDeleteReviewRole: vi.fn(),
+
+  onViewMetric: vi.fn(),
 
   onError: vi.fn(),
 }

@@ -1,10 +1,12 @@
-import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
 
 async function main() {
   const model = 'nginx'
 
-  const token = await getAccessToken({ dn: 'admin' }, [{ type: 'repository', name: model, actions: ['push', 'pull'] }])
+  const token = await issueAccessToken({ dn: 'admin' }, [
+    { type: 'repository', name: model, actions: ['push', 'pull'] },
+  ])
 
   log.info(token)
 }

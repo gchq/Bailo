@@ -51,46 +51,12 @@ module.exports = {
     },
   },
 
-  smtp: {
-    enabled: true,
-    transporter: 'smtp',
-
-    connection: {
-      host: 'mailcrab',
-      port: 1025,
-      secure: false,
-      auth: undefined,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    },
-
-    from: '"Bailo 📝" <bailo@example.org>',
-  },
-
   ses: {
     endpoint: 'ignored',
     region: 'ignored',
   },
 
-  artefactScanning: {
-    clamdscan: {
-      host: 'clamd',
-    },
-
-    artefactscan: {
-      host: 'artefactscan',
-    },
-  },
-
-  connectors: {
-    artefactScanners: {
-      kinds: ['clamAV', 'modelScan', 'trivy'],
-      retryDelayInMinutes: 60,
-      maxInitRetries: 5,
-      initRetryDelay: 5000,
-    },
-  },
+  connectors: {},
 
   federation: {
     id: 'localBailo',

@@ -4,7 +4,7 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileWithScanResultsInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
+import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
@@ -41,6 +41,7 @@ export const ResourceKind = {
   Inference: 'inference',
   Export: 'export',
   ArtefactScanning: 'artefact scanning',
+  Metric: 'metric',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -293,10 +294,15 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.SchemaMigration,
   },
-
   ViewModelImages: {
     typeId: 'ViewModelImages',
     description: 'Model Images Viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Image,
+  },
+  ViewModelImage: {
+    typeId: 'ViewModelImage',
+    description: 'Model Image Viewed',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Image,
   },
@@ -405,6 +411,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.ArtefactScanning,
   },
+  ViewMetric: {
+    typeId: 'ViewMetric',
+    description: 'Metric Viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Metric,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -469,8 +481,9 @@ export abstract class BaseAuditConnector {
   abstract onViewScanners(req: Request): Promise<void>
 
   abstract onViewModelImages(req: Request, modelId: string, images: ModelImages): Promise<void>
-  abstract onUpdateImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
-  abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface): Promise<void>
+  abstract onViewModelImage(req: Request, modelId: string, name: string, tag: string): Promise<void>
+  abstract onUpdateImage(req: Request, modelId: string, image: ImageTagRef): Promise<void>
+  abstract onDeleteImage(req: Request, modelId: string, image: ImageTagRef): Promise<void>
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[]): Promise<void>
   abstract onCreateImport(
@@ -485,6 +498,8 @@ export abstract class BaseAuditConnector {
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
   abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
+
+  abstract onViewMetric(req: Request): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

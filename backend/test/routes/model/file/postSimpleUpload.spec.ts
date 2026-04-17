@@ -6,6 +6,7 @@ import { postSimpleUploadSchema } from '../../../../src/routes/v2/model/file/pos
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
+vi.mock('../../../../src/utils/transactions.js')
 
 vi.mock('../../../../src/services/file.js', () => ({
   uploadFile: vi.fn(() => ({ _id: 'test' })),
