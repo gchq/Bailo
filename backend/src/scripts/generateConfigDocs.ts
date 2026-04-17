@@ -6,7 +6,7 @@ interface DocumentationNode {
   name: string
   doc: string
   type?: string
-  children?: DocumentationNode[]
+  children: DocumentationNode[]
 }
 
 // If a type is an array or a mapping we should give the type of the element or key value

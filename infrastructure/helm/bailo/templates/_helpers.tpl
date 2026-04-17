@@ -146,7 +146,7 @@ registry:
 federation:
   state: {{ .Values.federation.state }}
   {{ if eq .Values.federation.state "enabled" }}
-  id: {{ .Values.federation.id }},
+  id: {{ .Values.federation.id }}
   peers:
   {{ range $v := .Values.federation.peers }}
     {{ $v.name }}:
