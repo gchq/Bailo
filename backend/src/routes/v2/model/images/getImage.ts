@@ -19,15 +19,13 @@ export const getImageSchema = z.object({
     tag: z.string({
       required_error: 'Must specify image tag as param',
     }),
-    digest: z.string({
-      required_error: 'Must specify image digest as param',
-    }),
+    digest: z.string().optional(),
   }),
 })
 
 registerPath({
   method: 'get',
-  path: '/api/v2/model/{modelId}/image/{name}/{tag}/{digest}',
+  path: '/api/v2/model/{modelId}/image/{name}/{tag}',
   tags: ['image'],
   description: 'Get information associated with a specific tagged image for a model.',
   schema: getImageSchema,

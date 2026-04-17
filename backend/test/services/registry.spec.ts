@@ -602,6 +602,85 @@ describe('services > registry', () => {
       ])
     })
 
+    test('getModelImageWithScanResults > multiplatform > success', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
+      }
+
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: { 'docker-content-digest': 'sha:123456' },
+      })
+
+      const result = await getModelImageWithScanResults(
+        { dn: 'user' },
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        'sha:123456',
+      )
+
+      expect(result.platform).toBe('linux/amd64')
+    })
+
+    test('getModelImageWithScanResults > multiplatform > no digest provided', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults({ dn: 'user' }, { repository: 'repo', name: 'img', tag: 'v1' } as any, undefined),
+      ).rejects.toThrow('Must provide digest for multiplatform image')
+    })
+
+    test('getModelImageWithScanResults > multiplatform > no platform', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults(
+          { dn: 'user' },
+          { repository: 'repo', name: 'img', tag: 'v1' } as any,
+          'sha:123456',
+        ),
+      ).rejects.toThrow('Invalid or unsupported platform for this image')
+    })
+
     test('listModelImagesWithScanResults > includeCount', async () => {
       registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
       registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
@@ -635,7 +714,7 @@ describe('services > registry', () => {
 
       registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
       registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
-      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: { manifests: mockBody } })
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: { manifests: [mockBody] } })
       getImageLayersMocks.getLayersByPlatform.mockResolvedValue({
         'linux/amd64': Promise.resolve([{ digest: 'sha256:layer1', size: 42134 }]),
       })

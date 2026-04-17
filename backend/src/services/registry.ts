@@ -155,7 +155,7 @@ export async function getScansFromLayers(
 export async function getModelImageWithScanResults(
   user: UserInterface,
   imageRef: ImageTagRef,
-  digest: string,
+  digest?: string,
 ): Promise<ImageTagResult> {
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     {
@@ -173,6 +173,9 @@ export async function getModelImageWithScanResults(
 
   let platform: string | undefined
   if ('manifests' in body) {
+    if (digest === undefined) {
+      throw BadReq('Must provide digest for multiplatform image', { imageRef })
+    }
     platform = platformToString(body.manifests.find((manifest) => manifest.digest == digest)?.platform)
 
     if (platform === undefined) {
@@ -180,7 +183,7 @@ export async function getModelImageWithScanResults(
     }
   }
 
-  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: digest })
+  const layers = await getLayersForImageTag(repositoryToken, { ...imageRef, tag: digest ?? imageRef.tag })
 
   const scanResults = await getScansFromLayers(layers, true)
 
