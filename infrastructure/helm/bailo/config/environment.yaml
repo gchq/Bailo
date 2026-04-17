@@ -1,0 +1,17 @@
+inference:
+  authorisationToken: INFERENCING_WRITE_TOKEN
+instrumentation:
+  authenticationToken: OTEL_EXPORTER_TOKEN
+modelMirror:
+  export:
+    kmsSignature:
+      KMSClient:
+        credentials:
+          accessKeyId: KMS_ACCESS_KEY
+          secretAccessKey: KMS_SECRET_KEY
+mongo:
+  pass: MONGO_PASSWORD
+s3:
+  credentials:
+    accessKeyId: MINIO_ACCESS_KEY
+    secretAccessKey: MINIO_SECRET_KEY
