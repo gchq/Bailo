@@ -172,14 +172,22 @@ export async function getModelImageWithScanResults(
   }
 
   let platform: string | undefined
+
   if ('manifests' in body) {
-    if (digest === undefined) {
+    if (!digest) {
       throw BadReq('Must provide digest for multiplatform image', { imageRef })
     }
-    platform = platformToString(body.manifests.find((manifest) => manifest.digest == digest)?.platform)
 
-    if (platform === undefined) {
-      throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
+    const manifest = body.manifests.find((manifest) => manifest.digest === digest)
+
+    if (!manifest) {
+      throw BadReq('Digest does not exist in manifest list', { imageRef, digest })
+    }
+
+    platform = platformToString(manifest.platform)
+
+    if (!platform) {
+      throw BadReq('Manifest entry missing platform metadata', { imageRef, platform, digest })
     }
   }
 

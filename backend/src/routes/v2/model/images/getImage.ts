@@ -4,7 +4,7 @@ import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { getModelImageWithScanResults } from '../../../../services/registry.js'
-import { imageTagWithScanResultsSchema, registerPath } from '../../../../services/specification.js'
+import { imageTagWithScanResultsSchema, PathConfig, registerPath } from '../../../../services/specification.js'
 import { ImageTagResult } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -23,11 +23,9 @@ export const getImageSchema = z.object({
   }),
 })
 
-registerPath({
+const pathSpec: Omit<PathConfig, 'path' | 'description'> = {
   method: 'get',
-  path: '/api/v2/model/{modelId}/image/{name}/{tag}',
   tags: ['image'],
-  description: 'Get information associated with a specific tagged image for a model.',
   schema: getImageSchema,
   responses: {
     200: {
@@ -41,6 +39,18 @@ registerPath({
       },
     },
   },
+}
+
+registerPath({
+  ...pathSpec,
+  description: 'Get information associated with a specific tagged image and digest for a model.',
+  path: '/api/v2/model/{modelId}/image/{name}/{tag}/{digest}',
+})
+
+registerPath({
+  ...pathSpec,
+  description: 'Get information associated with a specific tagged image for a model.',
+  path: '/api/v2/model/{modelId}/image/{name}/{tag}',
 })
 
 interface GetImagesResponse {

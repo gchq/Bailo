@@ -634,7 +634,7 @@ describe('services > registry', () => {
       expect(result.platform).toBe('linux/amd64')
     })
 
-    test('getModelImageWithScanResults > multiplatform > no digest provided', async () => {
+    test('getModelImageWithScanResults > multiplatform > no digest', async () => {
       const scanResult = {
         summary: undefined,
         state: ArtefactScanState.Complete,
@@ -660,6 +660,28 @@ describe('services > registry', () => {
       ).rejects.toThrow('Must provide digest for multiplatform image')
     })
 
+    test('getModelImageWithScanResults > multiplatform > wrong digest', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults(
+          { dn: 'user' },
+          { repository: 'repo', name: 'img', tag: 'v1' } as any,
+          'sha:654321',
+        ),
+      ).rejects.toThrow('Digest does not exist in manifest list')
+    })
+
     test('getModelImageWithScanResults > multiplatform > no platform', async () => {
       registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: {
@@ -678,7 +700,7 @@ describe('services > registry', () => {
           { repository: 'repo', name: 'img', tag: 'v1' } as any,
           'sha:123456',
         ),
-      ).rejects.toThrow('Invalid or unsupported platform for this image')
+      ).rejects.toThrow('Manifest entry missing platform metadata')
     })
 
     test('listModelImagesWithScanResults > includeCount', async () => {
