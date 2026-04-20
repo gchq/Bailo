@@ -253,7 +253,7 @@ module.exports = {
     },
 
     modelDetails: {
-      organisations: ['Example Organisation', 'WESTSIDE'],
+      organisations: ['Example Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
 
