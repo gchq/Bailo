@@ -1,8 +1,8 @@
 import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import OverviewMetricsCharts from 'pages/metrics/OverviewMetricsCharts'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { SettingsCategory } from 'src/entry/settings/Settings'
+import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
 
 const data = {
   global: {
@@ -105,7 +105,10 @@ export default function OverviewMetrics() {
           </MenuItem>
           {listItems}
         </Select>
-        <OverviewMetricsCharts data={filteredDataset} />
+        <OverviewMetricsCharts
+          data={filteredDataset}
+          organisationList={data.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+        />
       </Stack>
     </Container>
   )

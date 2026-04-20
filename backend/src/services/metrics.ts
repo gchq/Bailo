@@ -23,8 +23,10 @@ export async function calculateModelVolume(
     createdAt: { $gte: start, $lte: end },
   }
 
-  if (organisation) {
+  if (organisation && organisation !== 'unset') {
     match.organisation = organisation
+  } else if (organisation && organisation === 'unset') {
+    match.organisation = ''
   }
 
   const pipeline: PipelineStage[] = [

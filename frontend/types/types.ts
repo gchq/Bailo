@@ -918,3 +918,15 @@ export type ImageScanResults = {
 }
 
 export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
+
+export type ModelVolume = {
+  data: {
+    periodStart: string
+    periodEnd: string
+    count: number
+  }[]
+  period: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  startDate: string
+  endDate: string
+  organisation?: string
+}

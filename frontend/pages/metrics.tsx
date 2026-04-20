@@ -1,6 +1,6 @@
-import OverviewMetrics from 'pages/metrics/OverviewMetrics'
-import PolicyMetrics from 'pages/metrics/PolicyMetrics'
 import PageWithTabs from 'src/common/PageWithTabs'
+import OverviewMetrics from 'src/metrics/OverviewMetrics'
+import PolicyMetrics from 'src/metrics/PolicyMetrics'
 
 export default function Metrics() {
   const tabs = [

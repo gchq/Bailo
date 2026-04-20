@@ -1,8 +1,8 @@
 import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import PolicyMetricsCharts from 'pages/metrics/PolicyMetricsCharts'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { SettingsCategory } from 'src/entry/settings/Settings'
+import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
 
 const data = {
   global: {

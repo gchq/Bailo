@@ -1,8 +1,8 @@
 import { Box, List, ListItem, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import OverviewStatPanel from 'pages/metrics/OverviewStatPanel'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
+import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 
 interface PolicyMetricsChartsProps {
   data: any

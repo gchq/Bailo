@@ -52,6 +52,7 @@ const GetModelVolumeResponseSchema = z.object({
   period: ModelVolumePeriodEnum.openapi({ example: 'month' }),
   startDate: z.string().date().openapi({ example: '2026-01-01' }),
   endDate: z.string().date().openapi({ example: '2026-04-01' }),
+  organisation: z.string().optional().openapi({ example: 'Example Organisation' }),
   data: z.array(ModelVolumeDataPointSchema),
 })
 
@@ -90,6 +91,12 @@ export const getModelVolume = [
 
     await audit.onViewMetric(req)
 
-    res.json({ period, startDate: modelVolumeStartDate, endDate: modelVolumeEndDate, data: modelVolumeDataPoints })
+    res.json({
+      period,
+      startDate: modelVolumeStartDate,
+      endDate: modelVolumeEndDate,
+      data: modelVolumeDataPoints,
+      organisation: organisation,
+    })
   },
 ]
