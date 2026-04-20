@@ -33,33 +33,40 @@ registerPath({
   },
 })
 
-export interface SchemaInfo {
-  schemaId: string
-  schemaName: string
-  count: number
-}
-export interface StateInfo {
-  state: string
-  count: number
-}
+export const SchemaInfoSchema = z.object({
+  schemaId: z.string(),
+  schemaName: z.string(),
+  count: z.number(),
+})
 
-export interface BaseMetrics {
-  users: number
-  models: number
-  schemaBreakdown: SchemaInfo[]
-  modelState: StateInfo[]
-  withReleases: number
-  withAccessRequest: number
-}
+export const StateInfoSchema = z.object({
+  state: z.string(),
+  count: z.number(),
+})
 
-export interface OrganisationMetrics extends BaseMetrics {
-  organisation: string
-}
+export const BaseMetricsSchema = z.object({
+  users: z.number(),
+  models: z.number(),
+  schemaBreakdown: z.array(SchemaInfoSchema),
+  modelState: z.array(StateInfoSchema),
+  withReleases: z.number(),
+  withAccessRequest: z.number(),
+})
 
-export interface GetOverviewMetricsResponse {
-  global: BaseMetrics
-  byOrganisation: OrganisationMetrics[]
-}
+export const OrganisationMetricsSchema = BaseMetricsSchema.extend({
+  organisation: z.string(),
+})
+
+export const GetOverviewMetricsResponseSchema = z.object({
+  global: BaseMetricsSchema,
+  byOrganisation: z.array(OrganisationMetricsSchema),
+})
+
+export type SchemaInfo = z.infer<typeof SchemaInfoSchema>
+export type StateInfo = z.infer<typeof StateInfoSchema>
+export type BaseMetrics = z.infer<typeof BaseMetricsSchema>
+export type OrganisationMetrics = z.infer<typeof OrganisationMetricsSchema>
+export type GetOverviewMetricsResponse = z.infer<typeof GetOverviewMetricsResponseSchema>
 
 export const getOverviewMetrics = [
   async (req: Request, res: Response<GetOverviewMetricsResponse>): Promise<void> => {

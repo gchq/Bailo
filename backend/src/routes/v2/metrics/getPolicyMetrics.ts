@@ -33,29 +33,35 @@ registerPath({
   },
 })
 
-export interface RoleSummary {
-  role: string
-  count: number
-}
+export const RoleSummarySchema = z.object({
+  role: z.string(),
+  count: z.number(),
+})
 
-export interface ModelRoleMetrics {
-  modelId: string
-  missingRoles: string[]
-}
+export const ModelRoleMetricsSchema = z.object({
+  modelId: z.string(),
+  missingRoles: z.array(z.string()),
+})
 
-export interface BaseMetrics {
-  summary: RoleSummary[]
-  models: ModelRoleMetrics[]
-}
+export const PolicyBaseMetricsSchema = z.object({
+  summary: z.array(RoleSummarySchema),
+  models: z.array(ModelRoleMetricsSchema),
+})
 
-export interface OrganisationMetrics extends BaseMetrics {
-  organisation: string
-}
+export const PolicyOrganisationMetricsSchema = PolicyBaseMetricsSchema.extend({
+  organisation: z.string(),
+})
 
-export interface GetPolicyMetricsResponse {
-  global: BaseMetrics
-  byOrganisation: OrganisationMetrics[]
-}
+export const GetPolicyMetricsResponseSchema = z.object({
+  global: PolicyBaseMetricsSchema,
+  byOrganisation: z.array(PolicyOrganisationMetricsSchema),
+})
+
+export type RoleSummary = z.infer<typeof RoleSummarySchema>
+export type ModelRoleMetrics = z.infer<typeof ModelRoleMetricsSchema>
+export type PolicyBaseMetrics = z.infer<typeof PolicyBaseMetricsSchema>
+export type PolicyOrganisationMetrics = z.infer<typeof PolicyOrganisationMetricsSchema>
+export type GetPolicyMetricsResponse = z.infer<typeof GetPolicyMetricsResponseSchema>
 
 export const getPolicyMetrics = [
   async (req: Request, res: Response<GetPolicyMetricsResponse>): Promise<void> => {

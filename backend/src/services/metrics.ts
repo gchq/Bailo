@@ -15,7 +15,7 @@ export async function calculatePolicyMetrics(): Promise<GetPolicyMetricsResponse
 
 export async function calculateModelVolume(
   period: ModelVolumePeriod,
-  startDate: string | number | Date,
+  startDate: string | number | Date = 0,
   endDate?: string | number | Date,
   timezone?: string,
   organisation?: string,

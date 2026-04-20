@@ -23,50 +23,48 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({
 }))
 
 const mockMetricsService = vi.hoisted(() => ({
-  calculateOverviewMetrics: vi.fn(),
+  calculatePolicyMetrics: vi.fn(),
 }))
 
 vi.mock('../../../src/services/metrics.js', () => mockMetricsService)
 
-describe('routes > metrics > getOverviewMetrics', () => {
-  test('200 > returns metrics when user is Admin', async () => {
+describe('routes > metrics > getPolicyMetrics', () => {
+  test('200 > returns policy metrics when user is Admin', async () => {
     mockAuth.hasRole.mockResolvedValue(true)
 
-    mockMetricsService.calculateOverviewMetrics.mockResolvedValue({
+    mockMetricsService.calculatePolicyMetrics.mockResolvedValue({
       global: {
-        users: 1,
-        models: 2,
-        schemaBreakdown: [],
-        modelState: [],
-        withReleases: 1,
-        withAccessRequest: 0,
+        summary: [
+          { role: 'Reviewer', count: 2 },
+          { role: 'Owner', count: 1 },
+        ],
+        models: [{ modelId: 'model-1', missingRoles: ['Reviewer'] }],
       },
       byOrganisation: [],
     })
 
-    const res = await testGet('/api/v2/metrics')
+    const res = await testGet('/api/v2/metrics/policy')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
       global: {
-        users: 1,
-        models: 2,
-        schemaBreakdown: [],
-        modelState: [],
-        withReleases: 1,
-        withAccessRequest: 0,
+        summary: [
+          { role: 'Reviewer', count: 2 },
+          { role: 'Owner', count: 1 },
+        ],
+        models: [{ modelId: 'model-1', missingRoles: ['Reviewer'] }],
       },
       byOrganisation: [],
     })
 
-    expect(mockMetricsService.calculateOverviewMetrics).toHaveBeenCalled()
+    expect(mockMetricsService.calculatePolicyMetrics).toHaveBeenCalled()
     expect(audit.onViewMetric).toHaveBeenCalled()
   })
 
   test('403 > user without Admin role is rejected', async () => {
     mockAuth.hasRole.mockResolvedValue(false)
 
-    const res = await testGet('/api/v2/metrics')
+    const res = await testGet('/api/v2/metrics/policy')
 
     expect(res.statusCode).toBe(403)
   })
