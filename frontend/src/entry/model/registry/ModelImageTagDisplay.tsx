@@ -63,9 +63,6 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
-  if (isScannersError) {
-    return <MessageAlert message={isScannersError.info.message} severity='error' />
-  }
   if (isUiConfigLoading || isScannersLoading) {
     return <Loading />
   }
@@ -80,7 +77,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
             />
           </Box>
         </Stack>
-        {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
+        {scanners && !isScannersError && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
           <Stack direction='row' spacing={2} alignItems='center'>
             {reportDisplay(tag)}
             <IconButton

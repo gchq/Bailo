@@ -33,11 +33,10 @@ export default function ReleaseDisplay({
 
   const { isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const { isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
+  const { isScannersLoading } = useGetArtefactScannerInfo()
   const { isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const error = MultipleErrorWrapper('Unable to load release', {
-    isScannersError,
     isReviewsError,
     isUiConfigError,
     isReleasesError,
