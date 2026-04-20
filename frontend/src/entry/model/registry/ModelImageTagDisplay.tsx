@@ -1,5 +1,5 @@
 import { MoreVert, Refresh } from '@mui/icons-material'
-import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
@@ -60,7 +60,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
         <VulnerabilityResult
           scanResults={tagResult}
           warningOnly
-          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${modelImage.name}/${tagResult[0].tag}/`}
+          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${encodeURIComponent(tagResult[0].tag)}/`}
         />
       )
     }
@@ -86,7 +86,15 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
               line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
             />
           </Box>
-          {checkIfMultiPlatform(modelImage, tag) && <Chip color='primary' label='Multi-platform' />}
+          {checkIfMultiPlatform(modelImage, tag) && (
+            <Tooltip
+              title={
+                'A multi-platform image is a single registry entry (image:tag) that contains multiple copies of the same image, but for different OS and architecture combinations. e.g. linux/amd64, windows/amd64, linux/arm64, etc.'
+              }
+            >
+              <Chip color='primary' label='Multi-platform' />
+            </Tooltip>
+          )}
         </Stack>
         {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
           <Stack direction='row' spacing={2} alignItems='center'>
