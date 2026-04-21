@@ -103,6 +103,9 @@ export const ManifestListMediaTypeSchema = z.enum([
   'application/vnd.docker.distribution.manifest.list.v2+json',
   'application/vnd.oci.image.index.v1+json',
 ])
+export const AcceptManifestListMediaTypeHeaderValue = z
+  .union([ManifestListMediaTypeSchema, ManifestMediaTypeSchema])
+  .options.join(',')
 
 const BaseDescriptorSchema = z.object({
   mediaType: z.string(),
@@ -150,19 +153,24 @@ const OCIImageManifestV2Schema = z.discriminatedUnion('mediaType', [
 ])
 
 export const ImageManifestV2Schema = z.union([DockerImageManifestV2Schema, OCIImageManifestV2Schema])
-export type ImageManifestV2 = z.infer<typeof ImageManifestV2Schema>
+export type ImageManifestV2Schema = z.infer<typeof ImageManifestV2Schema>
+
+export const ManifestPlatformSchema = z
+  .object({
+    architecture: z.string(),
+    os: z.string(),
+    osVersion: z.string().optional(),
+    osFeatures: z.array(z.string()).optional(),
+    variant: z.string().optional(),
+  })
+  .optional()
+export type ManifestPlatform = z.infer<typeof ManifestPlatformSchema>
 
 const ManifestListDescriptorSchema = BaseDescriptorSchema.extend({
-  platform: z
-    .object({
-      architecture: z.string(),
-      os: z.string(),
-      osVersion: z.string().optional(),
-      osFeatures: z.array(z.string()).optional(),
-      variant: z.string().optional(),
-    })
-    .optional(),
+  platform: ManifestPlatformSchema,
 })
+
+export type ManifestListDescriptor = z.infer<typeof ManifestListDescriptorSchema>
 
 export const ManifestListV2Schema = z.object({
   schemaVersion: z.literal(2),

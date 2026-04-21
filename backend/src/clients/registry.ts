@@ -21,8 +21,7 @@ import {
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
   ImageManifestV2Schema,
-  ManifestListMediaTypeSchema,
-  ManifestMediaTypeSchema,
+  ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
   TagsListResponseBodySchema,
@@ -277,43 +276,26 @@ export async function listImageTags(token: string, repoRef: ImageNameRef) {
   }
 }
 
-export async function isImageTagManifestList(token: string, imageRef: ImageRef): Promise<boolean> {
+/**
+ * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
+ */
+export async function getImageTagManifest(token: string, imageRef: ImageRef) {
   const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
-    // do not validate the body here as we only care about Content-Type
+    bodySchema: ImageManifestV2Schema,
     headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,
     },
   })
 
-  const rawContentType = result.headers['content-type']
-  const contentType = rawContentType?.split(';')[0]?.trim()
-
-  if (!contentType) {
-    throw InternalError('Registry response missing Content-Type header.', {
-      imageRef,
-    })
-  }
-
-  if ((ManifestListMediaTypeSchema.options as string[]).includes(contentType)) {
-    return true
-  }
-  if ((ManifestMediaTypeSchema.options as string[]).includes(contentType)) {
-    return false
-  }
-
-  throw InternalError('Unrecognised manifest media type.', {
-    imageRef,
-    contentType,
-  })
+  return { body: result.body, headers: result.headers }
 }
 
-export async function getImageTagManifest(token: string, imageRef: ImageRef) {
+export async function getImageTagManifests(token: string, imageRef: ImageRef) {
   const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
-  // TODO: handle multi-platform images
   const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
-    bodySchema: ImageManifestV2Schema,
+    bodySchema: ManifestResponseBodySchema,
     headersSchema: ManifestResponseHeadersSchema,
     extraHeaders: {
       Accept: AcceptManifestMediaTypeHeaderValue,

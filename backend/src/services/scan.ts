@@ -1,6 +1,5 @@
 import { ClientSession } from 'mongoose'
 
-import { isImageTagManifestList } from '../clients/registry.js'
 import {
   ArtefactInterface,
   ArtefactScanningConnectorInfo,
@@ -17,7 +16,7 @@ import { UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Conflict, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getFileById } from './file.js'
@@ -225,10 +224,6 @@ export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: str
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
 
-  if (await isImageTagManifestList(repositoryToken, image)) {
-    // TODO: add support for manifest lists/fat manifests
-    throw InternalError('Bailo backend does not currently support scanning images with manifest lists.', { image })
-  }
   const imageLayers = dedupeByKey(await getImageLayers(repositoryToken, image), (d) => d.digest)
   const imageName = `${image.repository}/${image.name}${'tag' in image ? ':' + image.tag : '@' + image.digest}`
 
