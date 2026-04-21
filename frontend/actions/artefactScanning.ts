@@ -47,7 +47,7 @@ export function useGetImageScanResults(modelId: string, name: string, tag: strin
       imageBreakdown: ImageTagResult
     },
     ErrorInfo
-  >(`/api/v2/model/${encodedModelId}/image/${encodedName}/${encodedTag}/${encodedDigest}`, fetcher)
+  >(`/api/v3/model/${encodedModelId}/image/${encodedName}/${encodedTag}/${encodedDigest}`, fetcher)
 
   return {
     mutateImage: mutate,
