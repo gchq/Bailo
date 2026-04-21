@@ -163,7 +163,7 @@ export async function getScansFromLayers(
 export async function getModelImageWithScanResults(
   user: UserInterface,
   imageRef: ImageTagRef,
-  platform?: string,
+  digest?: string,
 ): Promise<ImageTagResult> {
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     {
@@ -179,12 +179,24 @@ export async function getModelImageWithScanResults(
     throw InternalError('Missing manifest list body.', { imageRef })
   }
 
+  let platform: string | undefined
+
   let layerRef: ImageRef
   if ('manifests' in body) {
-    const digest = body.manifests.find((manifest) => platformToString(manifest.platform) == platform)?.digest
+    if (!digest) {
+      throw BadReq('Must provide digest for multiplatform image', { imageRef })
+    }
 
-    if (digest === undefined) {
-      throw BadReq('Invalid or unsupported platform for this image', { imageRef, platform })
+    const manifest = body.manifests.find((manifest) => manifest.digest === digest)
+
+    if (!manifest) {
+      throw BadReq('Digest does not exist in manifest list', { imageRef, digest })
+    }
+
+    platform = platformToString(manifest.platform)
+
+    if (!platform) {
+      throw BadReq('Manifest entry missing platform metadata', { imageRef, platform, digest })
     }
     layerRef = { repository: imageRef.repository, name: imageRef.name, digest }
   } else {

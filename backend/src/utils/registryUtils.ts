@@ -49,6 +49,6 @@ export function getBit(buffer: Buffer, index: number) {
   return Number((idByte & (2 ** (7 - bit))) !== 0)
 }
 
-export function platformToString(platform: ManifestPlatform): string {
-  return [platform?.os, platform?.architecture, platform?.variant].filter(Boolean).join('/')
+export function platformToString(platform: ManifestPlatform): string | undefined {
+  return [platform?.os, platform?.architecture, platform?.variant].filter(Boolean).join('/') || undefined
 }

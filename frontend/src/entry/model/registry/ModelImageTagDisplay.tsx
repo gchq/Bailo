@@ -116,9 +116,6 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
-  if (isScannersError) {
-    return <MessageAlert message={isScannersError.info.message} severity='error' />
-  }
   if (isUiConfigLoading || isScannersLoading) {
     return <Loading />
   }
@@ -162,14 +159,16 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
               </ListItemIcon>
               <ListItemText>Delete image</ListItemText>
             </MenuItem>
-            {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
-              <MenuItem onClick={() => handleRescan(tag)}>
-                <ListItemIcon>
-                  <Refresh color='primary' fontSize='small' />
-                </ListItemIcon>
-                <ListItemText>Rerun image scan</ListItemText>
-              </MenuItem>
-            )}
+            {scanners &&
+              !isScannersError &&
+              scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
+                <MenuItem onClick={() => handleRescan(tag)}>
+                  <ListItemIcon>
+                    <Refresh color='primary' fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Rerun image scan</ListItemText>
+                </MenuItem>
+              )}
           </Menu>
           <ConfirmationDialogue
             open={deleteImageOpen}

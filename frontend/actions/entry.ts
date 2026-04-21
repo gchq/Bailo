@@ -178,7 +178,9 @@ export function deleteEntryFile(modelId: string, fileId: string) {
 }
 
 export function deleteEntryImage(modelId: string, name: string, tag: string) {
-  return fetch(`/api/v2/model/${modelId}/image/${name}/${tag}`, {
+  const encodedName = encodeURIComponent(name)
+  const encodedTag = encodeURIComponent(tag)
+  return fetch(`/api/v2/model/${modelId}/image/${encodedName}/${encodedTag}`, {
     method: `delete`,
     headers: { 'Content-Type': 'application/json' },
   })

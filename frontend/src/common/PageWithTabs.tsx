@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
 import { ReactElement, SyntheticEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
+import ExpandableTypography from 'src/common/ExpandableTypography'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -51,7 +52,6 @@ export default function PageWithTabs({
 
   const [currentTab, setCurrentTab] = useState('')
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
-  const [showFullText, setShowFullText] = useState(false)
   const theme = useTheme()
 
   const currentTabChanged = useEffectEvent((newTab: string) => {
@@ -106,22 +106,6 @@ export default function PageWithTabs({
       )),
     [currentTab, tabs],
   )
-
-  const announcementText = useMemo(() => {
-    if (!additionalInfo) {
-      return
-    }
-    return additionalInfo.length > 100 ? (
-      <Typography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
-        {showFullText ? additionalInfo : `${additionalInfo.slice(0, 100)}...`}
-        <Button sx={{ ml: 1 }} variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
-          {showFullText ? 'Show less' : 'Show more'}
-        </Button>
-      </Typography>
-    ) : (
-      additionalInfo
-    )
-  }, [additionalInfo, showFullText])
 
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
@@ -205,7 +189,11 @@ export default function PageWithTabs({
           maxWidth: '900px',
         }}
       >
-        {announcementText}
+        {additionalInfo && (
+          <ExpandableTypography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+            {additionalInfo}
+          </ExpandableTypography>
+        )}
       </Box>
       <Tabs
         value={currentTab || false}
