@@ -24,6 +24,15 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
           },
         ],
       },
+      {
+        path: '/api/v3',
+        middleware: [
+          function (req, res, next) {
+            req.user = { dn: 'user' }
+            return next()
+          },
+        ],
+      },
       ...super.authenticationMiddleware(),
     ]
   }
