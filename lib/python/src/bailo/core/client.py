@@ -15,14 +15,14 @@ class Client:
     :param agent: An agent object to handle requests
     """
 
-    def __init__(self, url: str, agent: Agent = Agent()):
+    def __init__(self, url: str, agent: Agent | None = None):
         """Initialise a Client.
 
         :param url: URL of the Bailo instance website.
         :param agent: An agent object to handle requests, defaults to Agent().
         """
         self.url = url.rstrip("/") + "/api"
-        self.agent = agent
+        self.agent = agent or Agent()
 
     def post_model(
         self,
