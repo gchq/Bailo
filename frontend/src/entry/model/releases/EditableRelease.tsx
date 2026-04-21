@@ -132,6 +132,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   }
 
   const handleCancel = () => {
+    setFailedFileUploads([])
     setErrorMessage('')
     resetForm()
     onIsEditChange(false)
