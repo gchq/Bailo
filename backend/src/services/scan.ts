@@ -14,7 +14,7 @@ import { ImageRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
-import { dedupe } from '../utils/array.js'
+import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
 import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { plural } from '../utils/string.js'
@@ -34,7 +34,7 @@ type ArtefactScanIdentifier =
       layerDigest: string
     }
 
-async function updateArtefactScanWithResults(
+export async function updateArtefactScanWithResults(
   scanIdentifier: ArtefactScanIdentifier,
   results: ArtefactScanResult[],
   session?: ClientSession,
@@ -224,7 +224,7 @@ export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: str
   const scannersInfo = scanners.scannersInfo()
   throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
 
-  const imageLayers = dedupe(await getImageLayers(repositoryToken, image))
+  const imageLayers = dedupeByKey(await getImageLayers(repositoryToken, image), (d) => d.digest)
   const imageName = `${image.repository}/${image.name}${'tag' in image ? ':' + image.tag : '@' + image.digest}`
 
   // Only check timing for the config (which is effectively unique per manifest)
