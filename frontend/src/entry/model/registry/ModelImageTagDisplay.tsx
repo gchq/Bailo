@@ -55,12 +55,20 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
 
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
-      const tagResult = modelImage.scanSummaries.filter((tagResult) => tagResult.tag === imageTag)
+      const tagResults = modelImage.scanSummaries.filter((tagResult) => tagResult.tag === imageTag)
+      if (tagResults.length === 0) {
+        return
+      }
+      const platforms =
+        tagResults && tagResults[0].platform
+          ? tagResults.map((result) => result.platform).filter((platform) => platform && platform !== 'unknown/unknown')
+          : undefined
       return (
         <VulnerabilityResult
-          scanResults={tagResult}
+          scanResults={tagResults}
+          platforms={platforms}
           warningOnly
-          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${encodeURIComponent(tagResult[0].tag)}/`}
+          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${tagResults[0].tag}/`}
         />
       )
     }
