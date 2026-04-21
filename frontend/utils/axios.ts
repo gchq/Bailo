@@ -5,7 +5,15 @@ export function handleAxiosError(error: AxiosError | unknown) {
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      return { status: error.response.status, data: `${error.response.status}: ${error.response.statusText}` }
+      const serverMessage =
+        typeof error.response.data === 'string'
+          ? error.response.data
+          : error.response.data?.error?.message || JSON.stringify(error.response.data)
+
+      return {
+        status: error.response.status,
+        data: `${error.response.statusText}: ${serverMessage}`,
+      }
     } else if (error.request) {
       // The request was made but no response was received
       return { status: 503, data: 'No response received from server' }
