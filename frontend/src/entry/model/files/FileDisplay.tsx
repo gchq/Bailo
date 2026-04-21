@@ -39,7 +39,6 @@ import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedRelease
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import useNotification from 'src/hooks/useNotification'
-import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
 import {
   ArtefactKind,
@@ -238,7 +237,8 @@ export default function FileDisplay({
   const rerunFileScanButton = useMemo(() => {
     return (
       scanners &&
-      scanners.length > 0 && (
+      !isScannersError &&
+      scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
         <MenuItem hidden={!showMenuItems.rescanFile} onClick={handleRerunFileScanOnClick}>
           <ListItemIcon>
             <Refresh color='primary' fontSize='small' />
@@ -247,7 +247,7 @@ export default function FileDisplay({
         </MenuItem>
       )
     )
-  }, [handleRerunFileScanOnClick, scanners, showMenuItems.rescanFile])
+  }, [handleRerunFileScanOnClick, scanners, isScannersError, showMenuItems.rescanFile])
 
   const scanResultChip = useMemo(() => {
     if (!chipDisplay) {
@@ -363,10 +363,6 @@ export default function FileDisplay({
 
   const showMenu = () => {
     return Object.keys(showMenuItems).length > 0 && Object.values(showMenuItems).some((item) => item === true)
-  }
-
-  if (isScannersError) {
-    return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
   if (isScannersLoading) {
