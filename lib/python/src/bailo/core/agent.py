@@ -79,13 +79,6 @@ class Agent:
         """
         return self.__request("PATCH", *args, **kwargs)
 
-    def push(self, *args, **kwargs):
-        """Make a PUSH request. See :func:`__request for parameters.
-
-        :return: Response object.
-        """
-        return self.__request("PUSH", *args, **kwargs)
-
     def delete(self, *args, **kwargs):
         """Make a DELETE request. See :func:`__request` for parameters.
 
