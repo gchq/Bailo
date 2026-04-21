@@ -82,6 +82,7 @@ export async function exportModel(
 
   const files = documentsExporter.getFiles()
   if (!files) {
+    // TS type narrowing - this should never be thrown as `files` will always be a list (even if only an empty list) after calling `.init()`
     throw InternalError('DocumentsExporter returned no files after init()', { exportId })
   }
 
