@@ -32,6 +32,8 @@ class Agent:
         :param verify: Path to certificate authority file, or bool for SSL verification.
         """
         self.verify = verify
+        # reuse session for performance improvement
+        self.session = requests.Session()
 
     def __request(self, method, *args, **kwargs):
         """Private method. Make an HTTP request with error handling.
@@ -45,7 +47,7 @@ class Agent:
         """
         kwargs["verify"] = self.verify
 
-        res = requests.request(method, *args, **kwargs)
+        res = self.session.request(method, *args, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
