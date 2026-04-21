@@ -55,7 +55,7 @@ async function main() {
     const imageRefByDigest = {
       repository: '',
       name: image,
-      tag: digest,
+      digest,
     }
 
     log.info({ imageRefByDigest }, 'Deleting manifest by digest')
