@@ -226,7 +226,7 @@ class Client:
         :return: JSON response object
         """
         return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={mirrored: mirrored}
+            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={"mirrored": mirrored}
         ).json()
 
     def put_model_card(
