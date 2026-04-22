@@ -2,7 +2,20 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.7.0 - dd/mm/2026
+## 3.7.1 - dd/mm/2026
+
+### Changes
+
+- Remove non-existent HTTP `push` method.
+- Optimise `Agent` to reuse `session`.
+- Optimise `Model.search` to reduce number of `GET` calls.
+- Safer error message check.
+- Fix Mutable Default Argument in `Client.__init__`.
+- Add missing speech marks to `get_model_card` `dict` key.
+- Remove possible infinite loop in `Release.__ne__`.
+- Update package dependencies.
+
+## 3.7.0 - 17/03/2026
 
 ### Changes
 
@@ -10,13 +23,13 @@ All dates are formatted dd/mm/yyyy.
 
 ## 3.6.0 - 19/02/2026
 
-### Changes
-
-- `MirroredModel.update_model_card` helper method will patch additional information to the model card.
-
 ### Breaking Changes
 
 - `MirroredModel.model_card` and `MirroredModel.model_card_version` implement 'card' and 'additional_information' keys.
+
+### Changes
+
+- `MirroredModel.update_model_card` helper method will patch additional information to the model card.
 
 ## 3.5.0 - 03/02/2026
 
