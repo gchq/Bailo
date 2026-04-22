@@ -1,4 +1,5 @@
 import PageWithTabs from 'src/common/PageWithTabs'
+import Title from 'src/common/Title'
 import OverviewMetrics from 'src/metrics/OverviewMetrics'
 import PolicyMetrics from 'src/metrics/PolicyMetrics'
 
@@ -14,7 +15,8 @@ export default function Metrics() {
 
   return (
     <>
-      <PageWithTabs title='Bailo Metrics' tabs={tabs} />
+      <Title text='Metrics' />
+      <PageWithTabs title='Metrics' tabs={tabs} />
     </>
   )
 }

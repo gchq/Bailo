@@ -1,6 +1,12 @@
 import qs from 'querystring'
-import useSWR from 'swr'
-import { ModelVolume } from 'types/types'
+import useSWR, { mutate } from 'swr'
+import {
+  ModelVolume,
+  OrganisationOverviewMetrics,
+  OrganisationPolicyMetrics,
+  OverviewBaseMetrics,
+  PolicyBaseMetrics,
+} from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetModelVolumeMetrics(
@@ -35,6 +41,105 @@ function multiFetcher<T>(urls: string[]): Promise<T[]> {
   return Promise.all(urls.map((url) => fetcher<false>(url)))
 }
 
+const mockedTimelineData = [
+  {
+    increment: '01/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '02/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '03/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '04/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '05/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '06/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '07/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '08/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '09/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '10/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '11/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+  {
+    increment: '12/2026',
+    count: 3,
+    organisations: [
+      { organisation: 'Example Organisation', count: 2 },
+      { organisation: 'unset', count: 1 },
+    ],
+  },
+]
+
 export function useVolumeForModel(
   organisations: string[],
   period: string = 'month',
@@ -60,8 +165,42 @@ export function useVolumeForModel(
 
   return {
     mutateModelVolume: mutate,
-    modelVolume: data ? data : [],
+    modelVolume: data ? mockedTimelineData : [],
     isModelVolumeLoading: isLoading,
     isModelVolumeError: error,
+  }
+}
+
+export function useGetGetOverviewMetrics() {
+  const { data, isLoading, error } = useSWR<
+    {
+      global: OverviewBaseMetrics
+      byOrganisation: OrganisationOverviewMetrics[]
+    },
+    ErrorInfo
+  >('/api/v2/metrics', fetcher)
+
+  return {
+    mutateOverviewMetrics: mutate,
+    overviewMetrics: data ? data : undefined,
+    isOverviewMetricsLoading: isLoading,
+    isOverviewMetricsError: error,
+  }
+}
+
+export function useGetPolicyMetrics() {
+  const { data, isLoading, error } = useSWR<
+    {
+      global: PolicyBaseMetrics
+      byOrganisation: OrganisationPolicyMetrics[]
+    },
+    ErrorInfo
+  >('/api/v2/metrics/policy', fetcher)
+
+  return {
+    mutateOverviewMetrics: mutate,
+    policyMetrics: data ? data : undefined,
+    isPolicyMetricsLoading: isLoading,
+    isPolicyMetricsError: error,
   }
 }

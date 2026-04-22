@@ -2,8 +2,9 @@ import { Request, Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { ModelVolumeDataPointSchema, ModelVolumePeriodEnum } from '../../../connectors/metrics/base.js'
 import { z } from '../../../lib/zod.js'
-import { calculateModelVolume, ModelVolumePeriodEnum } from '../../../services/metrics.js'
+import { calculateModelVolume } from '../../../services/metrics.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -40,12 +41,6 @@ export const getModelVolumeSchema = z.object({
         path: ['endDate'],
       },
     ),
-})
-
-export const ModelVolumeDataPointSchema = z.object({
-  periodStart: z.string().datetime().openapi({ example: '2026-01-01' }),
-  periodEnd: z.string().datetime().openapi({ example: '2026-01-31' }),
-  count: z.number().int().nonnegative().openapi({ example: 7 }),
 })
 
 const GetModelVolumeResponseSchema = z.object({

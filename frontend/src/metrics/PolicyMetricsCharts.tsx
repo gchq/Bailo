@@ -3,9 +3,10 @@ import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
+import { PolicyBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
-  data: any
+  data: PolicyBaseMetrics
 }
 
 export default function PolicywMetricsCharts({ data }: PolicyMetricsChartsProps) {
@@ -17,12 +18,11 @@ export default function PolicywMetricsCharts({ data }: PolicyMetricsChartsProps)
         <TableCell component='th' scope='row'>
           {row.modelId}
         </TableCell>
-        <TableCell>{row.name}</TableCell>
         <TableCell>
           <List dense>
             {row.missingRoles.map((missingRole) => (
               <ListItem key={missingRole} sx={{ pl: 0 }}>
-                {missingRole}
+                {missingRole.toUpperCase()}
               </ListItem>
             ))}
           </List>
@@ -65,9 +65,7 @@ export default function PolicywMetricsCharts({ data }: PolicyMetricsChartsProps)
             <TableHead>
               <TableRow>
                 <TableCell>Model ID</TableCell>
-                <TableCell>Model name</TableCell>
                 <TableCell>Missing roles</TableCell>
-                <TableCell>Created</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{tableRows}</TableBody>

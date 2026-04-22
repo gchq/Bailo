@@ -1,5 +1,6 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, JSX, SetStateAction } from 'react'
+import OverviewMetrics from 'src/metrics/OverviewMetrics'
 
 export interface BailoError extends Error {
   id?: string
@@ -929,4 +930,57 @@ export type ModelVolume = {
   startDate: string
   endDate: string
   organisation?: string
+}
+
+export interface SchemaBreakDownMetrics {
+  schemaId: string
+  schemaName: string
+  count: number
+}
+
+export interface ModelStateMetrics {
+  state: string
+  count: number
+}
+
+export interface OverviewBaseMetrics {
+  users: number
+  models: number
+  schemaBreakdown: SchemaBreakDownMetrics[]
+  modelState: ModelStateMetrics[]
+  withReleases: number
+  withAccessRequest: number
+}
+
+export interface OrganisationOverviewMetrics extends OverviewBaseMetrics {
+  organisation: string
+}
+
+export interface OverviewMetrics {
+  global: OverviewBaseMetrics
+  byOrganisation: OrganisationOverviewMetrics[]
+}
+
+export interface PolicySummaryMetrics {
+  role: string
+  count: number
+}
+
+export interface PolicyModelMetrics {
+  modelId: string
+  missingRoles: string[]
+}
+
+export interface PolicyBaseMetrics {
+  summary: PolicySummaryMetrics[]
+  models: PolicyModelMetrics[]
+}
+
+export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
+  organisation: string
+}
+
+export interface PolicyMetrics {
+  global: PolicyBaseMetrics
+  byOrganisation: OrganisationPolicyMetrics
 }

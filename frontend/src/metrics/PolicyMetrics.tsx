@@ -1,60 +1,22 @@
 import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
+import { useGetPolicyMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
+import MessageAlert from 'src/MessageAlert'
 import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
-
-const data = {
-  global: {
-    summary: [
-      { role: 'msro', count: 2 },
-      { role: 'mtr', count: 1 },
-      { role: 'owner', count: 0 },
-    ],
-    models: [
-      {
-        modelId: 'model-1',
-        name: 'Model 1',
-        missingRoles: ['msro', 'mtr'],
-      },
-      {
-        modelId: 'model-2',
-        name: 'Model 2',
-        missingRoles: ['msro'],
-      },
-    ],
-  },
-  byOrganisation: [
-    {
-      organisation: 'west',
-      summary: [
-        { role: 'msro', count: 2 },
-        { role: 'mtr', count: 1 },
-        { role: 'owner', count: 0 },
-      ],
-      models: [
-        {
-          modelId: 'model-1',
-          name: 'Model 1',
-          missingRoles: ['msro', 'mtr'],
-        },
-        {
-          modelId: 'model-2',
-          name: 'Model 2',
-          missingRoles: ['msro'],
-        },
-      ],
-    },
-  ],
-}
+import { PolicyBaseMetrics } from 'types/types'
 
 export default function PolicyMetrics() {
   const router = useRouter()
 
   const { organisationFromRouter } = router.query
 
+  const { policyMetrics, isPolicyMetricsLoading, isPolicyMetricsError } = useGetPolicyMetrics()
+
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
-  const [filteredDataset, setFilteredDataset] = useState(data.global)
+  const [filteredDataset, setFilteredDataset] = useState<PolicyBaseMetrics | undefined>(undefined)
 
   const setSelectedOrganisationEffectEvent = useEffectEvent((newOrganisation: string) => {
     setSelectedOrganisation(newOrganisation)
@@ -74,32 +36,48 @@ export default function PolicyMetrics() {
   })
 
   useEffect(() => {
+    if (!policyMetrics) {
+      return
+    }
     if (selectedOrganisation === 'All') {
-      setFilteredDatasetEffectEvent(data.global)
+      setFilteredDatasetEffectEvent(policyMetrics.global)
     } else {
-      const dataSubset = data.byOrganisation.find((subset: any) => subset.organisation === selectedOrganisation)
+      const dataSubset = policyMetrics.byOrganisation.find(
+        (subset: any) => subset.organisation === selectedOrganisation,
+      )
       if (dataSubset) {
         setFilteredDatasetEffectEvent(dataSubset)
       } else {
         setFilteredDatasetEffectEvent(undefined)
       }
     }
-  }, [selectedOrganisation])
+  }, [policyMetrics, selectedOrganisation])
 
   const handleOrganisationSelectOnChange = useCallback((event: SelectChangeEvent) => {
     setSelectedOrganisation(event.target.value)
   }, [])
 
   const listItems = useMemo(() => {
-    return data.byOrganisation.map((organisationSubset) => (
+    if (!policyMetrics) {
+      return []
+    }
+    return policyMetrics.byOrganisation.map((organisationSubset) => (
       <MenuItem key={organisationSubset.organisation} value={organisationSubset.organisation}>
-        {organisationSubset.organisation}
+        {organisationSubset.organisation === 'unset' ? <em>No organisation</em> : organisationSubset.organisation}
       </MenuItem>
     ))
-  }, [])
+  }, [policyMetrics])
+
+  if (isPolicyMetricsError) {
+    return <MessageAlert message={isPolicyMetricsError.info.message} />
+  }
+
+  if (isPolicyMetricsLoading) {
+    return <Loading />
+  }
 
   return (
-    <Container maxWidth='xl'>
+    <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
         <Select
           sx={{ maxWidth: '300px' }}
@@ -111,7 +89,7 @@ export default function PolicyMetrics() {
           </MenuItem>
           {listItems}
         </Select>
-        <PolicyMetricsCharts data={filteredDataset} />
+        {filteredDataset && <PolicyMetricsCharts data={filteredDataset} />}
       </Stack>
     </Container>
   )

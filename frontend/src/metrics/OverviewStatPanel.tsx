@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles'
 
 interface OverviewStatPanelProps {
   label: string
-  value: string
+  value: number
 }
 
 export default function OverviewStatPanel({ label, value }: OverviewStatPanelProps) {

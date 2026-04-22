@@ -1,0 +1,83 @@
+import { Request, Response } from 'express'
+
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
+import { calculateOverviewMetrics } from '../../../services/metrics.js'
+import { registerPath } from '../../../services/specification.js'
+import { parse } from '../../../utils/validate.js'
+
+export const getOverviewMetricsSchema = z.object({
+  query: z.object({}).strict(),
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/metrics',
+  tags: ['metrics'],
+  description: 'Retrieve current point-in-time system and usage metrics.',
+  schema: getOverviewMetricsSchema,
+  responses: {
+    200: {
+      description: 'Current snapshot of system metrics.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            usersTotal: z.number(),
+            activeUsers: z.number(),
+            storageUsedGb: z.number(),
+          }),
+        },
+      },
+    },
+  },
+})
+
+export const SchemaInfoSchema = z.object({
+  schemaId: z.string(),
+  schemaName: z.string(),
+  count: z.number(),
+})
+
+export const StateInfoSchema = z.object({
+  state: z.string(),
+  count: z.number(),
+})
+
+export const BaseMetricsSchema = z.object({
+  users: z.number(),
+  models: z.number(),
+  schemaBreakdown: z.array(SchemaInfoSchema),
+  modelState: z.array(StateInfoSchema),
+  withReleases: z.number(),
+  withAccessRequest: z.number(),
+})
+
+export const OrganisationMetricsSchema = BaseMetricsSchema.extend({
+  organisation: z.string(),
+})
+
+export const GetOverviewMetricsResponseSchema = z.object({
+  global: BaseMetricsSchema,
+  byOrganisation: z.array(OrganisationMetricsSchema),
+})
+
+export type SchemaInfo = z.infer<typeof SchemaInfoSchema>
+export type StateInfo = z.infer<typeof StateInfoSchema>
+export type BaseMetrics = z.infer<typeof BaseMetricsSchema>
+export type OrganisationMetrics = z.infer<typeof OrganisationMetricsSchema>
+export type GetOverviewMetricsResponse = z.infer<typeof GetOverviewMetricsResponseSchema>
+
+export const getOverviewMetrics = [
+  async (req: Request, res: Response<GetOverviewMetricsResponse>): Promise<void> => {
+    req.audit = AuditInfo.ViewMetric
+
+    parse(req, getOverviewMetricsSchema)
+
+    const metrics = await calculateOverviewMetrics()
+
+    await audit.onViewMetric(req)
+
+    res.json(metrics)
+  },
+]

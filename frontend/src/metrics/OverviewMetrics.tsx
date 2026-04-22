@@ -1,54 +1,22 @@
 import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
+import { useGetGetOverviewMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
+import MessageAlert from 'src/MessageAlert'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-
-const data = {
-  global: {
-    users: 100,
-    models: 200,
-    schemaBreakdown: [
-      { schemaId: 'v1', schemaName: 'V1 Model Upload', count: 200 },
-      { schemaId: 'v2', schemaName: 'V2 Model Upload', count: 5 },
-    ],
-    modelState: {
-      live: 10,
-      inDevelopment: 20,
-      retired: 5,
-      none: 30,
-    },
-    withReleases: 34,
-    withAccessRequest: 32,
-  },
-  byOrganisation: [
-    {
-      organisation: 'Example Organisation',
-      users: 30,
-      models: 180,
-      schemaBreakdown: [
-        { schemaId: 'v1', schemaName: 'V1 Model Upload', count: 200 },
-        { schemaId: 'v2', schemaName: 'V2 Model Upload', count: 5 },
-      ],
-      modelState: {
-        live: 10,
-        inDevelopment: 20,
-        retired: 5,
-        none: 30,
-      },
-      withReleases: 22,
-      withAccessRequest: 21,
-    },
-  ],
-}
+import { OverviewBaseMetrics } from 'types/types'
 
 export default function OverviewMetrics() {
   const router = useRouter()
 
   const { organisationFromRouter } = router.query
 
+  const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetGetOverviewMetrics()
+
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
-  const [filteredDataset, setFilteredDataset] = useState(data.global)
+  const [filteredDataset, setFilteredDataset] = useState<OverviewBaseMetrics | undefined>(undefined)
 
   const setSelectedOrganisationEffectEvent = useEffectEvent((newOrganisation: string) => {
     setSelectedOrganisation(newOrganisation)
@@ -68,32 +36,48 @@ export default function OverviewMetrics() {
   })
 
   useEffect(() => {
+    if (!overviewMetrics) {
+      return
+    }
     if (selectedOrganisation === 'All') {
-      setFilteredDatasetEffectEvent(data.global)
+      setFilteredDatasetEffectEvent(overviewMetrics.global)
     } else {
-      const dataSubset = data.byOrganisation.find((subset: any) => subset.organisation === selectedOrganisation)
+      const dataSubset = overviewMetrics.byOrganisation.find(
+        (subset: any) => subset.organisation === selectedOrganisation,
+      )
       if (dataSubset) {
         setFilteredDatasetEffectEvent(dataSubset)
       } else {
         setFilteredDatasetEffectEvent(undefined)
       }
     }
-  }, [selectedOrganisation])
+  }, [overviewMetrics, selectedOrganisation])
 
   const handleOrganisationSelectOnChange = useCallback((event: SelectChangeEvent) => {
     setSelectedOrganisation(event.target.value)
   }, [])
 
   const listItems = useMemo(() => {
-    return data.byOrganisation.map((organisationSubset) => (
+    if (!overviewMetrics) {
+      return
+    }
+    return overviewMetrics.byOrganisation.map((organisationSubset) => (
       <MenuItem key={organisationSubset.organisation} value={organisationSubset.organisation}>
-        {organisationSubset.organisation}
+        {organisationSubset.organisation === 'unset' ? <em>No organisation</em> : organisationSubset.organisation}
       </MenuItem>
     ))
-  }, [])
+  }, [overviewMetrics])
+
+  if (isOverviewMetricsError) {
+    return <MessageAlert message={isOverviewMetricsError.info.message} />
+  }
+
+  if (isOverviewMetricsLoading) {
+    return <Loading />
+  }
 
   return (
-    <Container maxWidth='xl'>
+    <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
         <Select
           sx={{ maxWidth: '300px' }}
@@ -105,10 +89,14 @@ export default function OverviewMetrics() {
           </MenuItem>
           {listItems}
         </Select>
-        <OverviewMetricsCharts
-          data={filteredDataset}
-          organisationList={data.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
-        />
+        {filteredDataset && overviewMetrics && (
+          <OverviewMetricsCharts
+            data={filteredDataset}
+            organisationList={overviewMetrics.byOrganisation.map(
+              (organisationSubset) => organisationSubset.organisation,
+            )}
+          />
+        )}
       </Stack>
     </Container>
   )
