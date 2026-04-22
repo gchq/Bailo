@@ -7,16 +7,11 @@ import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind } from 'types/types'
 
 export default function InferenceApp() {
   const router = useRouter()
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [isSpinningUp, setIsSpinningUp] = useState(true)

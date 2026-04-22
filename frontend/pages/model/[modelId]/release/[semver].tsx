@@ -15,7 +15,6 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { EntryKind } from 'types/types'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function Release() {
@@ -25,11 +24,7 @@ export default function Release() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,

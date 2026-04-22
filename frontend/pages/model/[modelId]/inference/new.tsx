@@ -10,7 +10,7 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import InferenceForm from 'src/entry/model/inferencing/InferenceForm'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind, FlattenedModelImage } from 'types/types'
+import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidPortNumber } from 'utils/stringUtils'
 
@@ -29,11 +29,7 @@ export default function NewInference() {
 
   const [image, setImage] = useState<FlattenedModelImage | undefined>()
 
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
