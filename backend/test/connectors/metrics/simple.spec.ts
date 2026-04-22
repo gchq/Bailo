@@ -174,7 +174,7 @@ describe('connectors > metrics > simple', () => {
   test('calculatePolicyMetrics returns correct global summary and models', async () => {
     modelMocks.distinct.mockImplementation((field: string) => {
       if (field === 'organisation') {
-        return Promise.resolve(['west'])
+        return Promise.resolve(['a-corp'])
       }
       return Promise.resolve([])
     })
@@ -200,13 +200,13 @@ describe('connectors > metrics > simple', () => {
       mockQuery([
         {
           id: 'model-1',
-          organisation: 'west',
+          organisation: 'a-corp',
           card: { schemaId: 'schema1' },
           collaborators: [{ entity: 'user1', roles: ['mtr', 'md'] }],
         },
         {
           id: 'model-2',
-          organisation: 'west',
+          organisation: 'a-corp',
           card: { schemaId: 'schema1' },
           collaborators: [],
         },
@@ -245,7 +245,7 @@ describe('connectors > metrics > simple', () => {
     )
   })
   test('model without card only checks default roles', async () => {
-    modelMocks.distinct.mockResolvedValue(['west'])
+    modelMocks.distinct.mockResolvedValue(['a-corp'])
 
     schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['md'] }]))
 
@@ -261,7 +261,7 @@ describe('connectors > metrics > simple', () => {
       mockQuery([
         {
           id: 'model-no-card',
-          organisation: 'west',
+          organisation: 'a-corp',
           card: undefined,
           collaborators: [],
         },
@@ -282,7 +282,7 @@ describe('connectors > metrics > simple', () => {
     )
   })
   test('groups results by organisation correctly', async () => {
-    modelMocks.distinct.mockResolvedValue(['west', 'east'])
+    modelMocks.distinct.mockResolvedValue(['a-corp', 'b-corp'])
 
     schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
 
@@ -291,14 +291,14 @@ describe('connectors > metrics > simple', () => {
     modelMocks.find.mockImplementation((filter: any) => {
       const allModels = [
         {
-          id: 'model-west',
-          organisation: 'west',
+          id: 'model-a-corp',
+          organisation: 'a-corp',
           card: { schemaId: 'schema1' },
           collaborators: [],
         },
         {
-          id: 'model-east',
-          organisation: 'east',
+          id: 'model-b-corp',
+          organisation: 'b-corp',
           card: { schemaId: 'schema1' },
           collaborators: [],
         },
@@ -316,11 +316,11 @@ describe('connectors > metrics > simple', () => {
 
     expect(result.byOrganisation).toHaveLength(2)
 
-    const west = result.byOrganisation.find((o) => o.organisation === 'west')
-    const east = result.byOrganisation.find((o) => o.organisation === 'east')
+    const a-corp = result.byOrganisation.find((o) => o.organisation === 'a-corp')
+    const b-corp = result.byOrganisation.find((o) => o.organisation === 'b-corp')
 
-    expect(west?.models).toHaveLength(1)
-    expect(east?.models).toHaveLength(1)
+    expect(a-corp?.models).toHaveLength(1)
+    expect(b-corp?.models).toHaveLength(1)
   })
   test('calculateModelVolume > basic aggregation', async () => {
     modelMocks.aggregate.mockResolvedValueOnce([
