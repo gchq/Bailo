@@ -11,28 +11,6 @@ export const getOverviewMetricsSchema = z.object({
   query: z.object({}).strict(),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v2/metrics',
-  tags: ['metrics'],
-  description: 'Retrieve current point-in-time system and usage metrics.',
-  schema: getOverviewMetricsSchema,
-  responses: {
-    200: {
-      description: 'Current snapshot of system metrics.',
-      content: {
-        'application/json': {
-          schema: z.object({
-            usersTotal: z.number(),
-            activeUsers: z.number(),
-            storageUsedGb: z.number(),
-          }),
-        },
-      },
-    },
-  },
-})
-
 export const SchemaInfoSchema = z.object({
   schemaId: z.string(),
   schemaName: z.string(),
@@ -45,7 +23,7 @@ export const StateInfoSchema = z.object({
 })
 
 export const BaseMetricsSchema = z.object({
-  users: z.number(),
+  users: z.number().optional(),
   models: z.number(),
   schemaBreakdown: z.array(SchemaInfoSchema),
   modelState: z.array(StateInfoSchema),
@@ -60,6 +38,24 @@ export const OrganisationMetricsSchema = BaseMetricsSchema.extend({
 export const GetOverviewMetricsResponseSchema = z.object({
   global: BaseMetricsSchema,
   byOrganisation: z.array(OrganisationMetricsSchema),
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/metrics',
+  tags: ['metrics'],
+  description: 'Retrieve current point-in-time system and usage metrics.',
+  schema: getOverviewMetricsSchema,
+  responses: {
+    200: {
+      description: 'Current snapshot of system metrics.',
+      content: {
+        'application/json': {
+          schema: GetOverviewMetricsResponseSchema,
+        },
+      },
+    },
+  },
 })
 
 export type SchemaInfo = z.infer<typeof SchemaInfoSchema>
