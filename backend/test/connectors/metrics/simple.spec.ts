@@ -316,11 +316,11 @@ describe('connectors > metrics > simple', () => {
 
     expect(result.byOrganisation).toHaveLength(2)
 
-    const a-corp = result.byOrganisation.find((o) => o.organisation === 'a-corp')
-    const b-corp = result.byOrganisation.find((o) => o.organisation === 'b-corp')
+    const aCorp = result.byOrganisation.find((o) => o.organisation === 'a-corp')
+    const bCorp = result.byOrganisation.find((o) => o.organisation === 'b-corp')
 
-    expect(a-corp?.models).toHaveLength(1)
-    expect(b-corp?.models).toHaveLength(1)
+    expect(aCorp?.models).toHaveLength(1)
+    expect(bCorp?.models).toHaveLength(1)
   })
   test('calculateModelVolume > basic aggregation', async () => {
     modelMocks.aggregate.mockResolvedValueOnce([
