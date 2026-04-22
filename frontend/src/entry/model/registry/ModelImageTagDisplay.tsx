@@ -8,8 +8,33 @@ import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { ArtefactKind, ModelImagesWithOptionalScanResults } from 'types/types'
+import { ArtefactKind, ImageTagResult, ModelImagesWithOptionalScanResults, SeverityLevel } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+
+const severities = [
+  SeverityLevel.CRITICAL,
+  SeverityLevel.HIGH,
+  SeverityLevel.MEDIUM,
+  SeverityLevel.LOW,
+  SeverityLevel.UNKNOWN,
+]
+
+function sortPlatformByVulnerability(scanResults: ImageTagResult[]): ImageTagResult[] {
+  const sortedResults = scanResults.sort((a, b) => {
+    let res = 0
+    for (let i = 0; i < severities.length; i++) {
+      if (a.severityCounts[severities[i]] > b.severityCounts[severities[i]]) {
+        res = -1
+        break
+      } else if (a.severityCounts[severities[i]] < b.severityCounts[severities[i]]) {
+        res = 1
+        break
+      }
+    }
+    return res
+  })
+  return sortedResults
+}
 
 function checkIfMultiPlatform(modelImage: ModelImagesWithOptionalScanResults, tag: string) {
   const correctTag = modelImage.scanSummaries.find((scan) => scan.tag === tag)
@@ -59,13 +84,16 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
       if (tagResults.length === 0) {
         return
       }
+      const sortedTagResults = sortPlatformByVulnerability(tagResults)
       const platforms =
-        tagResults && tagResults[0].platform
-          ? tagResults.map((result) => result.platform).filter((platform) => platform && platform !== 'unknown/unknown')
+        sortedTagResults && sortedTagResults[0].platform
+          ? sortedTagResults
+              .map((result) => result.platform)
+              .filter((platform) => platform && platform !== 'unknown/unknown')
           : undefined
       return (
         <VulnerabilityResult
-          scanResults={tagResults}
+          scanResults={sortedTagResults}
           platforms={platforms}
           warningOnly
           detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${tagResults[0].tag}/`}
