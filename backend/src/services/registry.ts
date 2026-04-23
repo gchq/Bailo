@@ -30,6 +30,7 @@ import {
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponses.js'
 import { platformToString } from '../utils/registryUtils.js'
+import { useTransaction } from '../utils/transactions.js'
 import { getLayersForImage } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -579,9 +580,16 @@ export async function softDeleteImage(
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
   const softDeleteNamespace = `${softDeletePrefix}/${imageRef.repository}`
-  await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
-  await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
+  async function deleteOperation(tx: ClientSession | undefined) {
+    await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, tx)
+    await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
+  }
+  if (session) {
+    await deleteOperation(session)
+  } else {
+    await useTransaction([deleteOperation])
+  }
   /**
    * TODO: add a scheduled deletion of `ScanModel`s.
    *

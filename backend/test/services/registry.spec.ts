@@ -19,6 +19,8 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const ScanModelMock = getTypedModelMock('ScanModel')
 
+vi.mock('../../../../src/utils/transactions.js')
+
 const authMocks = vi.hoisted(() => ({
   default: {
     image: vi.fn(),
