@@ -1,4 +1,4 @@
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 interface OverviewStatPanelProps {
@@ -20,11 +20,10 @@ export default function OverviewStatPanel({ label, value }: OverviewStatPanelPro
       }}
     >
       <Stack spacing={2}>
-        <Typography fontWeight='bold' variant='h6'>
-          {label}
+        <Typography variant='h5' fontWeight='bold' color='primary'>
+          {value}
         </Typography>
-        <Divider flexItem />
-        <Typography>{value}</Typography>
+        <Typography variant='h6'>{label}</Typography>
       </Stack>
     </Box>
   )

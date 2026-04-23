@@ -9,7 +9,7 @@ interface PolicyMetricsChartsProps {
   data: PolicyBaseMetrics
 }
 
-export default function PolicywMetricsCharts({ data }: PolicyMetricsChartsProps) {
+export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
@@ -21,8 +21,8 @@ export default function PolicywMetricsCharts({ data }: PolicyMetricsChartsProps)
         <TableCell>
           <List dense>
             {row.missingRoles.map((missingRole) => (
-              <ListItem key={missingRole} sx={{ pl: 0 }}>
-                {missingRole.toUpperCase()}
+              <ListItem key={missingRole.roleId} sx={{ pl: 0 }}>
+                {missingRole.roleName}
               </ListItem>
             ))}
           </List>
@@ -31,32 +31,22 @@ export default function PolicywMetricsCharts({ data }: PolicyMetricsChartsProps)
     ))
   }, [data.models])
 
+  const displayMissingRoleCounts = useMemo(() => {
+    return data.summary.map((roleSummary) => {
+      return <OverviewStatPanel key={roleSummary.roleId} label='Total models missing MSRO' value={roleSummary.count} />
+    })
+  }, [data.summary])
+
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
   }
 
-  const getMissingRoleCount = (role: string) => {
-    const roleCount = data.summary.find((roleSummary) => roleSummary.role === role)
-    if (roleCount) {
-      return roleCount.count
-    } else {
-      return 0
-    }
-  }
-
   return (
-    <Stack spacing={4}>
-      <Stack spacing={2}>
-        <Typography fontWeight='bold' variant='h6' color='primary'>
-          General overview
-        </Typography>
-        <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
-          <OverviewStatPanel label='Total models missing MSRO' value={getMissingRoleCount('msro')} />
-          <OverviewStatPanel label='Total models missing MTR' value={getMissingRoleCount('mtr')} />
-          <OverviewStatPanel label='Total models missing Model Developer' value={getMissingRoleCount('owner')} />
-        </Stack>
+    <Stack spacing={4} alignItems='center'>
+      <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
+        {displayMissingRoleCounts}
       </Stack>
-      <Stack spacing={2}>
+      <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography fontWeight='bold' variant='h6' color='primary'>
           Models missing roles
         </Typography>

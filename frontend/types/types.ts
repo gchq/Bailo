@@ -962,13 +962,19 @@ export interface OverviewMetrics {
 }
 
 export interface PolicySummaryMetrics {
-  role: string
+  roleId: string
+  roleName: string
   count: number
+}
+
+export interface PolicyRoleMetric {
+  roleId: string
+  roleName: string
 }
 
 export interface PolicyModelMetrics {
   modelId: string
-  missingRoles: string[]
+  missingRoles: PolicyRoleMetric[]
 }
 
 export interface PolicyBaseMetrics {
