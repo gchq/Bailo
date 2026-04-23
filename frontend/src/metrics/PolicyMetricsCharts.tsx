@@ -2,6 +2,7 @@ import { Box, List, ListItem, Stack, Table, TableBody, TableCell, TableHead, Tab
 import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
+import Link from 'src/Link'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { PolicyBaseMetrics } from 'types/types'
 
@@ -16,7 +17,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
     return data.models.map((row) => (
       <TableRow key={row.modelId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
-          {row.modelId}
+          <Link href={`/model/${row.modelId}`}>{row.modelId}</Link>
         </TableCell>
         <TableCell>
           <List dense>
@@ -33,7 +34,13 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
 
   const displayMissingRoleCounts = useMemo(() => {
     return data.summary.map((roleSummary) => {
-      return <OverviewStatPanel key={roleSummary.roleId} label='Total models missing MSRO' value={roleSummary.count} />
+      return (
+        <OverviewStatPanel
+          key={roleSummary.roleId}
+          label={`Total models missing ${roleSummary.roleId.toUpperCase()}`}
+          value={roleSummary.count}
+        />
+      )
     })
   }, [data.summary])
 
@@ -42,7 +49,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
   }
 
   return (
-    <Stack spacing={4} alignItems='center'>
+    <Stack spacing={4}>
       <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
         {displayMissingRoleCounts}
       </Stack>

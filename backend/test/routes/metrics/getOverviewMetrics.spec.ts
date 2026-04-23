@@ -44,7 +44,7 @@ describe('routes > metrics > getOverviewMetrics', () => {
       byOrganisation: [],
     })
 
-    const res = await testGet('/api/v2/metrics')
+    const res = await testGet('/api/v3/metrics')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
@@ -66,7 +66,7 @@ describe('routes > metrics > getOverviewMetrics', () => {
   test('403 > user without Admin role is rejected', async () => {
     mockAuth.hasRole.mockResolvedValue(false)
 
-    const res = await testGet('/api/v2/metrics')
+    const res = await testGet('/api/v3/metrics')
 
     expect(res.statusCode).toBe(403)
   })

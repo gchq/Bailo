@@ -2,9 +2,12 @@ import { Request, Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { Roles } from '../../../connectors/authentication/constants.js'
+import authentication from '../../../connectors/authentication/index.js'
 import { z } from '../../../lib/zod.js'
 import { calculatePolicyMetrics } from '../../../services/metrics.js'
 import { registerPath } from '../../../services/specification.js'
+import { Forbidden } from '../../../utils/error.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getOverviewMetricsSchema = z.object({
@@ -66,6 +69,13 @@ export type GetPolicyMetricsResponse = z.infer<typeof GetPolicyMetricsResponseSc
 export const getPolicyMetrics = [
   async (req: Request, res: Response<GetPolicyMetricsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewMetric
+
+    if (!(await authentication.hasRole(req.user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: req.user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
 
     parse(req, getOverviewMetricsSchema)
 

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { BaseMetricsConnector, ModelVolumeDataPoint, ModelVolumePeriod } from '../../../src/connectors/metrics/base.js'
+import { BaseMetricsConnector, ModelVolumeBucket } from '../../../src/connectors/metrics/base.js'
+import { GetModelVolumeResponse } from '../../../src/routes/v2/metrics/getModelVolume.js'
 import { GetPolicyMetricsResponse } from '../../../src/routes/v2/metrics/getPolicyMetrics.js'
 
 class TestMetricsConnector extends BaseMetricsConnector {
@@ -20,20 +21,16 @@ class TestMetricsConnector extends BaseMetricsConnector {
     }
   }
   async calculateModelVolume(
-    _period: ModelVolumePeriod,
+    bucket: ModelVolumeBucket,
     startDate: string | number | Date,
-    endDate?: string | number | Date,
+    endDate: string | number | Date,
     _timezone?: string,
-    _organisation?: string,
-  ): Promise<{
-    startDate: string
-    endDate: string
-    dataPoints: ModelVolumeDataPoint[]
-  }> {
+  ): Promise<GetModelVolumeResponse> {
     return {
+      bucket,
       startDate: new Date(startDate).toISOString(),
       endDate: new Date(endDate ?? startDate).toISOString(),
-      dataPoints: [],
+      data: [],
     }
   }
 }
@@ -66,18 +63,13 @@ describe('connectors > metrics > base', () => {
   test('subclass can implement calculateModelVolume()', async () => {
     const connector = new TestMetricsConnector()
 
-    const result = await connector.calculateModelVolume(
-      'month',
-      '2026-01-01',
-      '2026-03-01',
-      'UTC',
-      'Example Organisation',
-    )
+    const result = await connector.calculateModelVolume('month', '2026-01-01', '2026-03-01', 'UTC')
 
     expect(result).toEqual({
+      bucket: 'month',
       startDate: new Date('2026-01-01').toISOString(),
       endDate: new Date('2026-03-01').toISOString(),
-      dataPoints: [],
+      data: [],
     })
   })
 })

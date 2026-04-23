@@ -37,117 +37,9 @@ export function useGetModelVolumeMetrics(
   }
 }
 
-function multiFetcher<T>(urls: string[]): Promise<T[]> {
-  return Promise.all(urls.map((url) => fetcher<false>(url)))
-}
-
-const mockedTimelineData = [
-  {
-    increment: '01/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '02/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '03/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '04/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '05/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '06/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '07/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '08/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '09/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '10/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '11/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-  {
-    increment: '12/2026',
-    count: 3,
-    organisations: [
-      { organisation: 'Example Organisation', count: 2 },
-      { organisation: 'unset', count: 1 },
-    ],
-  },
-]
-
-export function useVolumeForModel(
-  organisations: string[],
-  period: string = 'month',
-  startDate?: string,
-  endDate?: string,
-) {
+export function useVolumeForModel(bucket: string = 'month', startDate?: string, endDate?: string) {
   const queryParams = {
-    period,
+    bucket,
     ...(startDate != undefined && { startDate }),
     ...(endDate != undefined && { endDate }),
   }
@@ -156,16 +48,11 @@ export function useVolumeForModel(
       data: ModelVolume
       ErrorInfo
     }[]
-  >(
-    organisations.map(
-      (organisation) => `/api/v2/metrics/modelVolume?organisation=${organisation}&${qs.stringify(queryParams)}`,
-    ),
-    multiFetcher,
-  )
+  >(`/api/v2/metrics/modelVolume?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateModelVolume: mutate,
-    modelVolume: data ? mockedTimelineData : [],
+    modelVolume: data ? data : [],
     isModelVolumeLoading: isLoading,
     isModelVolumeError: error,
   }

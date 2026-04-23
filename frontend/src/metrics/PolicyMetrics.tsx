@@ -77,7 +77,7 @@ export default function PolicyMetrics() {
   }
 
   return (
-    <Container maxWidth='lg'>
+    <Container maxWidth='xl'>
       <Stack spacing={4} sx={{ mt: 2 }}>
         <Select
           sx={{ maxWidth: '300px' }}

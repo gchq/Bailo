@@ -21,7 +21,7 @@ describe('routes > metrics > getModelVolume', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getModelVolumeSchema)
 
-    const res = await testGet(`/api/v2/metrics/modelVolume?${qs.stringify(fixture.query)}`)
+    const res = await testGet(`/api/v3/metrics/modelVolume?${qs.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -30,7 +30,7 @@ describe('routes > metrics > getModelVolume', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(getModelVolumeSchema)
 
-    const res = await testGet(`/api/v2/metrics/modelVolume?${qs.stringify(fixture.query)}`)
+    const res = await testGet(`/api/v3/metrics/modelVolume?${qs.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewMetric).toBeCalled()

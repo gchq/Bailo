@@ -4,9 +4,10 @@ import { useTheme } from '@mui/material/styles'
 interface OverviewStatPanelProps {
   label: string
   value: number
+  minWidth?: string
 }
 
-export default function OverviewStatPanel({ label, value }: OverviewStatPanelProps) {
+export default function OverviewStatPanel({ label, value, minWidth }: OverviewStatPanelProps) {
   const theme = useTheme()
   return (
     <Box
@@ -17,6 +18,7 @@ export default function OverviewStatPanel({ label, value }: OverviewStatPanelPro
         borderColor: theme.palette.divider,
         p: 2,
         textAlign: 'center',
+        minWidth: minWidth || 'unset',
       }}
     >
       <Stack spacing={2}>
