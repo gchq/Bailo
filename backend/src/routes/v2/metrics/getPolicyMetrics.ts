@@ -44,7 +44,7 @@ export const GetPolicyMetricsResponseSchema = z.object({
 
 registerPath({
   method: 'get',
-  path: '/api/v2/metrics/policy',
+  path: '/api/v3/metrics/policy',
   tags: ['metrics'],
   description: 'Retrieve current point-in-time system and usage metrics.',
   schema: getOverviewMetricsSchema,

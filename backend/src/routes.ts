@@ -106,6 +106,8 @@ export const server = express()
 
 server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', httpLog)
+server.use('/api/v3', bodyParser.json())
+server.use('/api/v3', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -259,9 +261,9 @@ server.get('/api/v2/models/tags', getPopularTags)
 // server.get('/api/v3/metrics', requireRole(Roles.Admin), ...getOverviewMetrics)
 // server.get('/api/v3/metrics/policy', requireRole(Roles.Admin), ...getPolicyMetrics)
 // server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
-server.get('/api/v2/metrics', ...getOverviewMetrics)
-server.get('/api/v2/metrics/policy', ...getPolicyMetrics)
-server.get('/api/v2/metrics/modelVolume', ...getModelVolume)
+server.get('/api/v3/metrics', ...getOverviewMetrics)
+server.get('/api/v3/metrics/policy', ...getPolicyMetrics)
+server.get('/api/v3/metrics/modelVolume', ...getModelVolume)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
@@ -269,5 +271,6 @@ const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+server.use('/api/v3', expressErrorHandler)
 
 server.use('/internal', internalRouter)
