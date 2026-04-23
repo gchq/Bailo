@@ -18,14 +18,18 @@ export const TokenActions = {
     id: 'model:write',
     description: 'Grants write access to creation and updating of model/data card settings.',
   },
+  ModelExport: { id: 'model:export', description: 'Grants access to export model/data card settings.' },
+
   ReleaseRead: { id: 'release:read', description: 'Grants access to view releases.' },
   ReleaseWrite: { id: 'release:write', description: 'Grants access to create and update releases.' },
+  ReleaseExport: { id: 'release:export', description: 'Grants access to export releases.' },
 
   AccessRequestRead: { id: 'access_request:read', description: 'Grant access to list access requests' },
   AccessRequestWrite: {
     id: 'access_request:write',
     description: 'Grants access to create, approve and comment on access requests.',
   },
+
   FileRead: { id: 'file:read', description: 'Grant access to download and view files.' },
   FileWrite: { id: 'file:write', description: 'Grant access to upload and delete files.' },
 
