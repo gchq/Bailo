@@ -1,8 +1,8 @@
-import { Divider, Stack, Typography } from '@mui/material'
+import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
 import { PieChart } from '@mui/x-charts/PieChart'
 import { useVolumeForModel } from 'actions/metrics'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -13,6 +13,7 @@ interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
   organisationList: string[]
   selectedOrganisation: string
+  onSelectedOrganisationChange: (value: string) => void
 }
 
 interface PieChartData {
@@ -24,6 +25,7 @@ export default function OverviewMetricsCharts({
   data,
   organisationList,
   selectedOrganisation,
+  onSelectedOrganisationChange,
 }: OverviewMetricsChartsProps) {
   const [stateData, setStateData] = useState<PieChartData[]>([])
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
@@ -107,31 +109,20 @@ export default function OverviewMetricsCharts({
     hideLegend: true,
   }
 
-  const displaySelectedOrganisation = () => {
-    switch (selectedOrganisation) {
-      case 'All':
-        return (
-          <Typography fontStyle='italic'>
-            Showing results for the last 12 months for
-            <span style={{ fontWeight: 'bold' }}> all organisations</span>
-          </Typography>
-        )
-      case 'unset':
-        return (
-          <Typography fontStyle='italic'>
-            Showing results for the last 12 months for
-            <span style={{ fontWeight: 'bold' }}> models with no organisation set</span>
-          </Typography>
-        )
-      default:
-        return (
-          <Typography fontStyle='italic'>
-            Showing results for the last 12 months for
-            <span style={{ fontWeight: 'bold' }}> {selectedOrganisation}</span>
-          </Typography>
-        )
-    }
-  }
+  const listItems = useMemo(() => {
+    return organisationList.map((organisation) => (
+      <MenuItem key={organisation} value={organisation}>
+        {organisation === 'unset' ? <em>No organisation</em> : organisation}
+      </MenuItem>
+    ))
+  }, [organisationList])
+
+  const handleOrganisationSelectOnChange = useCallback(
+    (event: SelectChangeEvent) => {
+      onSelectedOrganisationChange(event.target.value)
+    },
+    [onSelectedOrganisationChange],
+  )
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
@@ -158,7 +149,19 @@ export default function OverviewMetricsCharts({
         {...barChartConfig}
       />
       <Stack spacing={4}>
-        {displaySelectedOrganisation()}
+        <Stack direction='row' alignItems='center' spacing={2}>
+          <Typography fontStyle='italic'>Showing results for</Typography>
+          <Select
+            sx={{ maxWidth: '300px' }}
+            value={selectedOrganisation}
+            onChange={(e) => handleOrganisationSelectOnChange(e)}
+          >
+            <MenuItem key='all' value='All'>
+              All organisations
+            </MenuItem>
+            {listItems}
+          </Select>
+        </Stack>
         <Stack spacing={6} alignItems='center' direction={{ lg: 'row', md: 'column' }}>
           <Stack spacing={2}>
             <OverviewStatPanel label='Total models' value={data.models} minWidth='300px' />

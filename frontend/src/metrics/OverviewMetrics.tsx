@@ -1,7 +1,7 @@
-import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
+import { Container, Stack } from '@mui/material'
 import { useGetGetOverviewMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import MessageAlert from 'src/MessageAlert'
@@ -53,21 +53,6 @@ export default function OverviewMetrics() {
     }
   }, [overviewMetrics, selectedOrganisation])
 
-  const handleOrganisationSelectOnChange = useCallback((event: SelectChangeEvent) => {
-    setSelectedOrganisation(event.target.value)
-  }, [])
-
-  const listItems = useMemo(() => {
-    if (!overviewMetrics) {
-      return
-    }
-    return overviewMetrics.byOrganisation.map((organisationSubset) => (
-      <MenuItem key={organisationSubset.organisation} value={organisationSubset.organisation}>
-        {organisationSubset.organisation === 'unset' ? <em>No organisation</em> : organisationSubset.organisation}
-      </MenuItem>
-    ))
-  }, [overviewMetrics])
-
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
@@ -79,16 +64,6 @@ export default function OverviewMetrics() {
   return (
     <Container maxWidth='xl'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        <Select
-          sx={{ maxWidth: '300px' }}
-          value={selectedOrganisation}
-          onChange={(e) => handleOrganisationSelectOnChange(e)}
-        >
-          <MenuItem key='all' value='All'>
-            All organisations
-          </MenuItem>
-          {listItems}
-        </Select>
         {filteredDataset && overviewMetrics && (
           <OverviewMetricsCharts
             data={filteredDataset}
@@ -96,6 +71,7 @@ export default function OverviewMetrics() {
               (organisationSubset) => organisationSubset.organisation,
             )}
             selectedOrganisation={selectedOrganisation}
+            onSelectedOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
           />
         )}
       </Stack>
