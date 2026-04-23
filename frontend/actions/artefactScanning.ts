@@ -28,9 +28,7 @@ export function rerunArtefactScan(modelId: string, artefactId: string) {
 }
 
 export function rerunImageArtefactScan(modelId: string, name: string, tag: string) {
-  const encodedName = encodeURIComponent(name)
-  const encodedTag = encodeURIComponent(tag)
-  return fetch(`/api/v2/filescanning/model/${modelId}/image/${encodedName}/${encodedTag}/scan`, {
+  return fetch(encodeURI(`/api/v2/filescanning/model/${modelId}/image/${name}/${tag}/scan`), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -43,15 +41,12 @@ export function useGetImageScanResults(
   digest: string,
   isRouterReady?: boolean,
 ) {
-  const encodedName = encodeURIComponent(name)
-  const encodedTag = encodeURIComponent(tag)
-  const encodedDigest = encodeURIComponent(digest)
   const { data, isLoading, error, mutate } = useSWR<
     {
       imageBreakdown: ImageTagResult
     },
     ErrorInfo
-  >(isRouterReady ? `/api/v3/model/${modelId}/image/${encodedName}/${encodedTag}/${encodedDigest}` : null, fetcher)
+  >(isRouterReady ? encodeURI(`/api/v3/model/${modelId}/image/${name}/${tag}/${digest}`) : null, fetcher)
 
   return {
     mutateImage: mutate,
