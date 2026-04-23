@@ -9,7 +9,6 @@ import {
   getImageTagManifest,
   getRegistryLayerStream,
   initialiseUpload,
-  isImageTagManifestList,
   listImageTags,
   listModelRepos,
   mountBlob,
@@ -482,126 +481,6 @@ describe('clients > registry', () => {
     })
 
     const response = listImageTags('token', { repository: 'modelId', name: 'image' })
-
-    await expect(response).rejects.toThrowError('Error response received from registry.')
-  })
-
-  test('isImageTagManifestList > true for manifest list media type', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      headers: new Headers({
-        'content-type': 'application/vnd.docker.distribution.manifest.list.v2+json',
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const result = await isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    expect(result).toBe(true)
-  })
-
-  test('isImageTagManifestList > false for single image manifest media type', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      headers: new Headers({
-        'content-type': DockerManifestMediaType,
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const result = await isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isImageTagManifestList > supports OCI image manifest media type', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      headers: new Headers({
-        'content-type': OCIManifestMediaType,
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const result = await isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isImageTagManifestList > missing content-type header throws error', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      text: vi.fn(() => 'text'),
-      headers: new Headers({
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const response = isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    await expect(response).rejects.toThrowError('Registry response missing Content-Type header.')
-  })
-
-  test('isImageTagManifestList > unrecognised content-type throws error', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      text: vi.fn(() => 'text'),
-      headers: new Headers({
-        'content-type': 'application/unknown',
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const response = isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    await expect(response).rejects.toThrowError('Unrecognised manifest media type.')
-  })
-
-  test('isImageTagManifestList > registry error response is propagated', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: false,
-      json: vi.fn(() => ({
-        errors: [
-          {
-            code: 'NAME_UNKNOWN',
-            message: 'repository name not known to registry',
-            detail: [],
-          },
-        ],
-      })),
-      headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
-    })
-
-    const response = isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
 
     await expect(response).rejects.toThrowError('Error response received from registry.')
   })

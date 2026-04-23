@@ -40,12 +40,23 @@ export default function MultiFileInputFileDisplay({
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
     setFileTagCount(newTags.length)
+    setFileTagErrorMessage('')
+    if (newTags.includes('')) {
+      setFileTagErrorMessage('Tags must have at least one character')
+      return
+    }
     if (isFileInterface(file)) {
-      setFileTagErrorMessage('')
       const res = await patchFile(file.modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
       mutateModelFiles()
-      if (res.status !== 200) {
-        setFileTagErrorMessage('You lack the required authorisation in order to add tags to a file.')
+
+      if (res.status && res.status >= 200 && res.status < 300) {
+        mutateModelFiles()
+        return
+      }
+      if (typeof res.data === 'string' && res.data.length > 0) {
+        setFileTagErrorMessage(res.data)
+      } else {
+        setFileTagErrorMessage('Failed to update file tags. Please try again.')
       }
     } else {
       setNewFileTags(newTags)

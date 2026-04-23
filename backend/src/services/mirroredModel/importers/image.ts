@@ -11,7 +11,7 @@ import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
-import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
+import { ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
@@ -31,7 +31,7 @@ export class ImageImporter extends BaseImporter {
   protected readonly user: UserInterface
   protected readonly imageName: string
   protected readonly imageTag: string
-  protected manifestBody: ImageManifestV2 | null = null
+  protected manifestBody: ImageManifestV2Schema | null = null
 
   static readonly manifestRegex = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,

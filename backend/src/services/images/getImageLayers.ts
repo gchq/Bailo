@@ -1,32 +1,46 @@
-import { getImageTagManifest, isImageTagManifestList } from '../../clients/registry.js'
+import { getImageTagManifest, getImageTagManifests } from '../../clients/registry.js'
 import { ImageRef } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { Descriptors } from '../../utils/registryResponses.js'
 
 /**
- * @throws InternalError if the requested image has a manifest list
  * @remarks
  * This does _not_ do an auth check on the user
  */
 export async function getImageLayers(repositoryToken: string, image: ImageRef): Promise<Descriptors[]> {
   try {
-    if (await isImageTagManifestList(repositoryToken, image)) {
-      // TODO: add support for manifest lists/fat manifests
-      throw InternalError('Bailo backend does not currently support manifest lists.', { image })
-    }
+    const manifestResponse = await getImageTagManifests(repositoryToken, image)
 
-    const res = await getImageTagManifest(repositoryToken, image)
-
-    if (!res.body) {
+    if (!manifestResponse.body) {
       throw InternalError('Registry manifest body missing.', { image })
     }
 
-    return [res.body.config, ...res.body.layers]
+    if ('manifests' in manifestResponse.body) {
+      return (
+        await Promise.all(
+          manifestResponse.body.manifests.map(async (manifest) =>
+            getLayersForImageTag(repositoryToken, { ...image, tag: manifest.digest }),
+          ),
+        )
+      ).flat()
+    }
+
+    return [manifestResponse.body.config, ...manifestResponse.body.layers]
   } catch (error) {
     if (isRegistryError(error) && error.context?.status === 404) {
       throw NotFound('Image does not exist', { image })
     }
     throw error
   }
+}
+
+export async function getLayersForImageTag(repositoryToken: string, imageRef: ImageRef): Promise<Descriptors[]> {
+  const manifest = await getImageTagManifest(repositoryToken, imageRef)
+
+  if (!manifest.body || 'manifests' in manifest.body) {
+    throw InternalError('The registry returned a response but the body was missing.', { manifest })
+  }
+
+  return [manifest.body.config, ...manifest.body.layers]
 }

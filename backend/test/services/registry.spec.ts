@@ -5,7 +5,7 @@ import {
   checkUserAuth,
   getImageBlob,
   getImageManifest,
-  getImageWithScanResults,
+  getModelImageWithScanResults,
   joinDistributionPackageName,
   listModelImages,
   listModelImagesWithScanResults,
@@ -45,16 +45,21 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
+  getImageTagManifests: vi.fn(),
+  getImageTagManfiestList: vi.fn(),
   getRegistryLayerStream: vi.fn(),
   listImageTags: vi.fn(() => [] as string[]),
   listModelRepos: vi.fn(),
   mountBlob: vi.fn(),
   putManifest: vi.fn(),
+  isImageTagManifestList: vi.fn(() => false),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersForImageTag: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersByPlatform: vi.fn(),
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
 
@@ -571,7 +576,7 @@ describe('services > registry', () => {
       ])
     })
 
-    test('getImageWithScanResults > includeFullDetail', async () => {
+    test('getModelImageWithScanResults > includeFullDetail', async () => {
       const scanResult = {
         summary: undefined,
         state: ArtefactScanState.Complete,
@@ -580,11 +585,16 @@ describe('services > registry', () => {
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        true,
+      const result = await getModelImageWithScanResults(
+        { dn: 'user' },
+        {
+          repository: 'repo',
+          name: 'img',
+          tag: 'v1',
+        } as any,
+        'sha:123456',
       )
 
       expect(result.scanResults).toEqual([
@@ -592,40 +602,105 @@ describe('services > registry', () => {
       ])
     })
 
-    test('getImageWithScanResults > ignores manifest list not supported error', async () => {
-      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(
-        InternalError('Bailo backend does not currently support manifest lists.'),
-      )
+    test('getModelImageWithScanResults > multiplatform > success', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
+      }
 
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-      )
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
 
-      expect(result).toEqual({
-        imageSize: 0,
-        lastRunAt: undefined,
-        state: 'notScanned',
-        severityCounts: {
-          critical: 0,
-          high: 0,
-          low: 0,
-          medium: 0,
-          unknown: 0,
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
         },
-        tag: 'v1',
+        headers: { 'docker-content-digest': 'sha:123456' },
       })
+
+      const result = await getModelImageWithScanResults(
+        { dn: 'user' },
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        'sha:123456',
+      )
+
+      expect(result.platform).toBe('linux/amd64')
     })
 
-    test('getImageWithScanResults > rethrows unexpected getImageLayers error', async () => {
-      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(InternalError('Some other error'))
+    test('getModelImageWithScanResults > multiplatform > no digest', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: {},
+      })
 
-      const promise = getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-      )
+      await expect(
+        getModelImageWithScanResults({ dn: 'user' }, { repository: 'repo', name: 'img', tag: 'v1' } as any, undefined),
+      ).rejects.toThrow('Must provide digest for multiplatform image')
+    })
 
-      await expect(promise).rejects.toThrowError('Some other error')
+    test('getModelImageWithScanResults > multiplatform > wrong digest', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults(
+          { dn: 'user' },
+          { repository: 'repo', name: 'img', tag: 'v1' } as any,
+          'sha:654321',
+        ),
+      ).rejects.toThrow('Digest does not exist in manifest list')
+    })
+
+    test('getModelImageWithScanResults > multiplatform > no platform', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults(
+          { dn: 'user' },
+          { repository: 'repo', name: 'img', tag: 'v1' } as any,
+          'sha:123456',
+        ),
+      ).rejects.toThrow('Manifest entry missing platform metadata')
     })
 
     test('listModelImagesWithScanResults > includeCount', async () => {
@@ -641,8 +716,36 @@ describe('services > registry', () => {
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
+
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
+      expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
+    })
+
+    test('listModelImagesWithScanResults > multiplatform', async () => {
+      const mockBody = [
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+      ]
+      const scanResult = {
+        summary: [{ severity: 'medium' }],
+        additionalInfo: [{ Results: [] }],
+        state: ArtefactScanState.Error,
+      }
+
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: { manifests: [mockBody] } })
+      getImageLayersMocks.getLayersByPlatform.mockResolvedValue({
+        'linux/amd64': Promise.resolve([{ digest: 'sha256:layer1', size: 42134 }]),
+      })
+
+      ScanModelMock.find.mockReturnValue({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
       expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
     })
 

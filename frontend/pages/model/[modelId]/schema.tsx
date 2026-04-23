@@ -4,17 +4,13 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import SchemaSelect from 'src/schemas/SchemaSelect'
-import { EntryKind, SchemaKind } from 'types/types'
+import { SchemaKind } from 'types/types'
 
 export default function ModelSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
 
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   if (isModelError) {
     return <ErrorWrapper message={isModelError.info.message} />
