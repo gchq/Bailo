@@ -20,7 +20,6 @@ import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import {
-  EntryKind,
   FileInterface,
   FileWithMetadataAndTags,
   FlattenedModelImage,
@@ -57,11 +56,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(release.modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
 
@@ -132,6 +127,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   }
 
   const handleCancel = () => {
+    setFailedFileUploads([])
     setErrorMessage('')
     resetForm()
     onIsEditChange(false)
@@ -161,13 +157,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
         const fileWithMetadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)
 
-        let textMetadata = ''
-        let tags: string[] = []
-
-        if (fileWithMetadata && fileWithMetadata.metadata) {
-          textMetadata = fileWithMetadata.metadata.text
-          tags = fileWithMetadata.metadata.tags
-        }
+        const textMetadata = fileWithMetadata?.metadata?.text ?? ''
+        const tags = fileWithMetadata?.metadata?.tags ?? []
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
@@ -178,8 +169,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
 
         try {
           const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, {
-            text: textMetadata ? textMetadata : '',
-            tags: tags ? tags : [],
+            text: textMetadata,
+            tags,
           })
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
@@ -190,24 +181,31 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
             return setIsLoading(false)
           }
         } catch (e) {
-          if (e instanceof Error) {
-            failedFiles.push({ fileName: file.name, error: e.message })
-            setIsLoading(false)
-            setCurrentFileUploadProgress(undefined)
-          }
+          const message = e instanceof Error ? e.message : 'Unknown upload error'
+          const failed = { fileName: file.name, error: message }
+          failedFiles.push(failed)
+
+          setFailedFileUploads((prev) => [...prev, failed])
+          setCurrentFileUploadProgress(undefined)
         }
       }
     }
-    successfulFiles.forEach((file) => {
-      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.fileName)) {
-        setSuccessfulFileUploads([...successfulFileUploads, file])
-      }
-    })
 
     if (failedFiles.length > 0) {
-      setFailedFileUploads(failedFiles)
+      setIsLoading(false)
+      setCurrentFileUploadProgress(undefined)
       return
     }
+
+    setSuccessfulFileUploads((prev) => {
+      const updated = [...prev]
+      successfulFiles.forEach((file) => {
+        if (!updated.find((f) => f.fileName === file.fileName)) {
+          updated.push(file)
+        }
+      })
+      return updated
+    })
 
     const updatedRelease: UpdateReleaseParams = {
       modelId: model.id,
@@ -265,7 +263,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
       {failedFileUploads.length > 0 && (
         <Alert severity='error' sx={{ my: 2 }}>
           <Stack spacing={1}>
-            <Typography>{`Unable to create release due to issues with the following ${plural(
+            <Typography>{`Unable to modify release due to issues with the following ${plural(
               failedFileUploads.length,
               'file',
             )}:`}</Typography>

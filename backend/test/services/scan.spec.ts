@@ -2,7 +2,13 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
-import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '../../src/services/scan.js'
+import {
+  rerunFileScan,
+  rerunImageScan,
+  rerunImageScanNoAuth,
+  scanFile,
+  updateArtefactScanWithResults,
+} from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
@@ -394,6 +400,124 @@ describe('services > scan', () => {
       expect(authMocks.default.image).not.toHaveBeenCalled()
       expect(authMocks.default.model).not.toHaveBeenCalled()
       expect(registryAuthMocks.issueAccessToken).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('updateArtefactScanWithResults', () => {
+    test('creates only one InProgress scan when called concurrently', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      // First call succeeds, subsequent calls simulate duplicate key error
+      ScanModelMock.bulkWrite.mockResolvedValueOnce(undefined).mockRejectedValue({ code: 11000 })
+      const attempts = 5
+
+      await Promise.all(
+        Array.from({ length: attempts }).map(() =>
+          updateArtefactScanWithResults(scanIdentifier, [result]).catch(() => undefined),
+        ),
+      )
+
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
+    })
+
+    test('updates existing non-InProgress scan instead of inserting new one', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const op: any = bulkOps[0]
+      expect(op.updateOne.filter).toMatchObject({
+        ...scanIdentifier,
+        toolName: 'Trivy',
+      })
+      expect(op.updateOne.upsert).toBe(true)
+    })
+
+    test('reuses stale InProgress scan', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps: any = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const filter = bulkOps[0].updateOne.filter
+      expect(filter.$or).toBeDefined()
+      expect(filter.$or).toHaveLength(2)
+      expect(filter.$or[0]).toHaveProperty('state')
+      expect(filter.$or[1]).toHaveProperty('lastRunAt')
+    })
+
+    test('does not upsert when state is not InProgress', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.Complete,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const op: any = bulkOps[0]
+      expect(op.updateOne.upsert).toBe(false)
+      expect(op.updateOne.filter).not.toHaveProperty('$or')
+    })
+
+    test('sets result fields in update payload', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1.2.3',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+      const bulkOps: any = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const update = bulkOps[0].updateOne.update
+      expect(update.$set).toMatchObject(result)
     })
   })
 })

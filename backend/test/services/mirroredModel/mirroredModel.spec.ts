@@ -12,35 +12,22 @@ import {
   importModel,
 } from '../../../src/services/mirroredModel/mirroredModel.js'
 import { MirrorKind } from '../../../src/types/types.js'
+import config from '../../../src/utils/config.js'
 import { BadReq, InternalError } from '../../../src/utils/error.js'
 
-const configMock = vi.hoisted(() => ({
-  ui: {
-    modelMirror: {
-      import: { enabled: true },
-      export: { enabled: true },
-    },
+vi.mock('../../../src/utils/config.js', async () => {
+  const actual = await vi.importActual<typeof import('../../../src/utils/config.js')>('../../../src/utils/config.js')
+  const mutableConfig = structuredClone(actual.default)
+
+  return { __esModule: true, default: mutableConfig }
+})
+config.ui = {
+  modelMirror: {
+    import: { enabled: true },
+    export: { enabled: true },
   },
-  connectors: {
-    authentication: {
-      kind: 'silly',
-    },
-    audit: {
-      kind: 'silly',
-    },
-    authorisation: {
-      kind: 'basic',
-    },
-    artefactScanners: {
-      kinds: [],
-    },
-  },
-  app: {
-    protocol: '',
-  },
-  modelMirror: { export: { concurrency: 1 }, metadataFile: 'meta.json' },
-}))
-vi.mock('../../../src/utils/config.js', () => ({ default: configMock }))
+} as any
+config.modelMirror = { export: { concurrency: 1 }, metadataFile: 'meta.json' } as any
 
 const logMock = vi.hoisted(() => ({ info: vi.fn(), debug: vi.fn(), error: vi.fn() }))
 vi.mock('../../../src/services/log.js', () => ({ default: logMock }))
@@ -78,6 +65,7 @@ const getModelByIdMock = vi.hoisted(() =>
 vi.mock('../../../src/services/model.js', () => ({
   getModelById: getModelByIdMock,
   getModelByIdNoAuth: getModelByIdMock,
+  getModelSystemRoles: vi.fn(() => ['owner']),
 }))
 
 const fetchMock = vi.hoisted(() =>
@@ -271,21 +259,21 @@ describe('services > mirroredModel', () => {
 
   describe('exportModel', () => {
     test('disabled export throws', async () => {
-      configMock.ui.modelMirror.export.enabled = false
+      config.ui.modelMirror.export.enabled = false
       await expect(exportModel({} as any, 'modelId', true)).rejects.toThrow(
         BadReq('Exporting models has not been enabled.'),
       )
     })
 
     test('missing disclaimer throws', async () => {
-      configMock.ui.modelMirror.export.enabled = true
+      config.ui.modelMirror.export.enabled = true
       await expect(exportModel({} as any, 'modelId', false)).rejects.toThrow(
         BadReq('You must agree to the disclaimer agreement before being able to export a model.'),
       )
     })
 
     test('success triggers queue', async () => {
-      configMock.ui.modelMirror.export.enabled = true
+      config.ui.modelMirror.export.enabled = true
       const id = await exportModel({} as any, 'modelId', true)
       expect(id).toBe('shortId123')
       expect(DocumentsExporterMock).toHaveBeenCalled()
@@ -293,7 +281,7 @@ describe('services > mirroredModel', () => {
     })
 
     test('success semvers', async () => {
-      configMock.ui.modelMirror.export.enabled = true
+      config.ui.modelMirror.export.enabled = true
       const id = await exportModel({} as any, 'modelId', true, ['1.0.0'])
       expect(id).toBe('shortId123')
       expect(DocumentsExporterMock).toHaveBeenCalled()
@@ -302,7 +290,7 @@ describe('services > mirroredModel', () => {
     })
 
     test('log error on exportQueue reject', async () => {
-      configMock.ui.modelMirror.export.enabled = true
+      config.ui.modelMirror.export.enabled = true
       exportQueueMock.exportQueueAddMock.mockImplementationOnce(() => Promise.reject(new Error('boom')))
 
       await exportModel({} as any, 'modelId', true)
@@ -323,12 +311,12 @@ describe('services > mirroredModel', () => {
 
   describe('importModel', () => {
     test('disabled import throws', async () => {
-      configMock.ui.modelMirror.import.enabled = false
+      config.ui.modelMirror.import.enabled = false
       await expect(importModel({} as any, 'url')).rejects.toThrow(BadReq('Importing models has not been enabled.'))
     })
 
     test('fetch rejects', async () => {
-      configMock.ui.modelMirror.import.enabled = true
+      config.ui.modelMirror.import.enabled = true
       fetchMock.mockRejectedValueOnce('err')
       await expect(importModel({} as any, 'url')).rejects.toThrow(
         InternalError('Unable to get the file.', { err: 'err', payloadUrl: 'url', importId: 'shortId123' }),
@@ -402,7 +390,7 @@ describe('services > mirroredModel', () => {
 
     test('fail > invalid importKind', () => {
       expect(() => getImporter({ importKind: 'invalid' } as any, {} as any, {} as any)).toThrowError(
-        `Unknown \`importKind\` specified in '${configMock.modelMirror.metadataFile}'.`,
+        `Unknown \`importKind\` specified in '${config.modelMirror.metadataFile}'.`,
       )
     })
   })
