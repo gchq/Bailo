@@ -4,7 +4,7 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { EntryInterface, EntryKind, ReleaseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 export interface ReleaseAssetsMainTextProps {
@@ -59,7 +59,13 @@ export default function ReleaseAssetsMainText({
           {latestVersionAdornment()}
         </Stack>
         {includeLinks && (
-          <Button onClick={() => router.push(`/model/${model.id}/history/${release.modelCardVersion}`)}>
+          <Button
+            onClick={() =>
+              router.push(
+                `/model/${model.id}/history/${release.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`,
+              )
+            }
+          >
             View Model Card
           </Button>
         )}
