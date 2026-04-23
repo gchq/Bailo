@@ -40,6 +40,9 @@ const config: PartialDeep<Config> = {
     artefactScanners: {
       kinds: [],
     },
+    metrics: {
+      kind: 'simple',
+    },
   },
   smtp: {
     enabled: true,

@@ -1,4 +1,5 @@
-import { PipelineStage } from 'mongoose'
+import { Model, PipelineStage } from 'mongoose'
+import NodeCache from 'node-cache'
 
 import AccessRequestModel from '../../models/AccessRequest.js'
 import ModelModel from '../../models/Model.js'
@@ -16,6 +17,15 @@ import { searchSchemas } from '../../services/schema.js'
 import { SchemaKind } from '../../types/enums.js'
 import { BadReq } from '../../utils/error.js'
 import { BaseMetricsConnector, ModelVolumeDataPoint, ModelVolumePeriod } from './base.js'
+
+const SCHEMA_ROLE_CACHE_TTL = 5 * 60 // 5 minutes
+const SCHEMA_ROLE_CACHE_KEY = 'schemaRoleMap'
+
+const schemaRoleCache = new NodeCache({
+  stdTTL: SCHEMA_ROLE_CACHE_TTL,
+  checkperiod: SCHEMA_ROLE_CACHE_TTL,
+  useClones: false,
+})
 
 type ModelFilter = {
   organisation?: string
@@ -82,17 +92,20 @@ async function calculateTotalModels(filter: ModelFilter): Promise<number> {
  * If an organisation filter is provided, a lookup is performed to ensure
  * only models belonging to that organisation are counted.
  */
-async function countDistinctModelsWithRelation(collection: any, filter: ModelFilter): Promise<number> {
-  const pipeline: PipelineStage[] = []
-
-  if (filter.organisation) {
-    pipeline.push(...buildOrganisationLookupStages(filter.organisation))
+async function countDistinctModelsWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
+  // Faster approach for no organisation filter
+  if (!filter.organisation) {
+    // may need to change this field depending on the collection type
+    const ids = await collection.distinct('modelId')
+    return ids.length
   }
-
-  pipeline.push({ $group: { _id: '$modelId' } }, { $count: 'count' })
-
+  // Organisation requires joining models
+  const pipeline: PipelineStage[] = [
+    ...buildOrganisationLookupStages(filter.organisation),
+    { $group: { _id: '$modelId' } },
+    { $count: 'count' },
+  ]
   const result = await collection.aggregate(pipeline)
-
   return result[0]?.count ?? 0
 }
 
@@ -140,7 +153,7 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
 async function calculateOverviewMetricsForOrg(org?: string): Promise<BaseMetrics> {
   const modelFilter: ModelFilter = org ? { organisation: org } : {}
 
-  const totalUsersPromise = org ? Promise.resolve(-1) : calculateTotalUsers()
+  const totalUsersPromise = org ? Promise.resolve<number | undefined>(undefined) : calculateTotalUsers()
 
   const [totalUsers, totalModels, stateMetrics, schemaMetrics, totalModelsWithReleases, totalModelsWithAccessRequests] =
     await Promise.all([
@@ -165,12 +178,13 @@ async function calculateOverviewMetricsForOrg(org?: string): Promise<BaseMetrics
 type SchemaRoleMap = {
   schemaRoleMap: Record<string, string[]>
   defaultRoles: string[]
+  roleMeta: Record<string, { roleId: string; roleName: string }>
 }
 
 /**
  * Builds a lookup structure describing which review roles apply to which schemas.
  */
-async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
+async function buildSchemaRoleMapInternal(): Promise<SchemaRoleMap> {
   const schemas = await SchemaModel.find({
     active: true,
     hidden: false,
@@ -179,7 +193,8 @@ async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
     .lean()
 
   // Fetch review roles (soft-deleted records automatically excluded)
-  const reviewRoles = await ReviewRoleModel.find().select('shortName systemRole').lean()
+  // const reviewRoles = await ReviewRoleModel.find().select('shortName systemRole').lean()
+  const reviewRoles = await ReviewRoleModel.find().select('shortName name systemRole').lean()
 
   // Extract system roles (apply to all models)
   const defaultRoles = reviewRoles.filter((role) => !!role.systemRole).map((role) => role.shortName)
@@ -191,17 +206,46 @@ async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
     schemaRoleMap[schema.id] = schema.reviewRoles ?? []
   }
 
+  const roleMeta: Record<string, { roleId: string; roleName: string }> = {}
+
+  for (const role of reviewRoles) {
+    roleMeta[role.shortName] = {
+      roleId: role.shortName,
+      roleName: role.name,
+    }
+  }
+
   return {
     schemaRoleMap,
     defaultRoles,
+    roleMeta,
   }
 }
 
+export async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
+  const cached = schemaRoleCache.get<SchemaRoleMap>(SCHEMA_ROLE_CACHE_KEY)
+  if (cached !== undefined) {
+    return cached
+  }
+
+  const value = await buildSchemaRoleMapInternal()
+  schemaRoleCache.set(SCHEMA_ROLE_CACHE_KEY, value)
+
+  return value
+}
+
 type PolicyMetricsResult = {
-  summary: { role: string; count: number }[]
+  summary: {
+    roleId: string
+    roleName: string
+    count: number
+  }[]
   models: {
     modelId: string
-    missingRoles: string[]
+    missingRoles: {
+      roleId: string
+      roleName: string
+    }[]
   }[]
 }
 
@@ -212,6 +256,7 @@ type PolicyMetricsResult = {
 async function calculateMissingModelRolesForOrg(
   schemaRoleMap: Record<string, string[]>,
   defaultRoles: string[],
+  roleMeta: Record<string, { roleId: string; roleName: string }>,
   org?: string,
 ): Promise<PolicyMetricsResult> {
   const filter: any = {
@@ -264,12 +309,19 @@ async function calculateMissingModelRolesForOrg(
     }
 
     // Determine missing roles
-    const missingRoles: string[] = []
+    const missingRoles: {
+      roleId: string
+      roleName: string
+    }[] = []
 
-    for (const role of applicableSet) {
-      if (!activeRoleSet.has(role)) {
-        missingRoles.push(role)
-        roleMissingCount[role] += 1
+    for (const roleId of applicableSet) {
+      if (!activeRoleSet.has(roleId)) {
+        roleMissingCount[roleId] += 1
+
+        missingRoles.push({
+          roleId,
+          roleName: roleMeta[roleId]?.roleName ?? roleId,
+        })
       }
     }
 
@@ -284,9 +336,10 @@ async function calculateMissingModelRolesForOrg(
   // Convert summary to expected format
   const summary = Object.keys(roleMissingCount)
     .sort()
-    .map((role) => ({
-      role,
-      count: roleMissingCount[role],
+    .map((roleId) => ({
+      roleId,
+      roleName: roleMeta[roleId]?.roleName ?? roleId,
+      count: roleMissingCount[roleId],
     }))
 
   return {
@@ -324,16 +377,16 @@ export class SimpleMetricsConnector extends BaseMetricsConnector {
     }
   }
   async calculatePolicyMetrics(): Promise<GetPolicyMetricsResponse> {
-    const { schemaRoleMap, defaultRoles } = await buildSchemaRoleMap()
+    const { schemaRoleMap, defaultRoles, roleMeta } = await buildSchemaRoleMap()
 
-    const global = await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles)
+    const global = await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles, roleMeta)
 
     const organisationIds = await getOrganisationIds()
 
     const byOrganisation = await Promise.all(
       organisationIds.map(async (org) => ({
         organisation: org || 'unset',
-        ...(await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles, org)),
+        ...(await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles, roleMeta, org)),
       })),
     )
 

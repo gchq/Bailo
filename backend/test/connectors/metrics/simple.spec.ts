@@ -23,6 +23,7 @@ vi.mock('../../../src/models/Model.js', () => ({
 
 const releaseMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
+  distinct: vi.fn(),
 }))
 vi.mock('../../../src/models/Release.js', () => ({
   default: releaseMocks,
@@ -30,6 +31,7 @@ vi.mock('../../../src/models/Release.js', () => ({
 
 const accessRequestMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
+  distinct: vi.fn(),
 }))
 vi.mock('../../../src/models/AccessRequest.js', () => ({
   default: accessRequestMocks,
@@ -77,7 +79,7 @@ describe('connectors > metrics > simple', () => {
 
     modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
       if (pipeline.some((stage) => stage.$unwind === '$collaborators')) {
-        return Promise.resolve([{ count: 5 }]) // users
+        return Promise.resolve([{ count: 5 }])
       }
 
       if (pipeline.some((stage) => stage.$group?._id === '$state')) {
@@ -91,19 +93,18 @@ describe('connectors > metrics > simple', () => {
       return Promise.resolve([])
     })
 
-    modelMocks.countDocuments
-      .mockResolvedValueOnce(10) // global models
-      .mockResolvedValueOnce(4) // org models
+    modelMocks.countDocuments.mockResolvedValueOnce(10).mockResolvedValueOnce(4)
 
-    releaseMocks.aggregate.mockResolvedValueOnce([{ count: 6 }]).mockResolvedValueOnce([{ count: 2 }])
+    releaseMocks.distinct.mockResolvedValueOnce(['m1', 'm2', 'm3', 'm4', 'm5', 'm6'])
 
-    accessRequestMocks.aggregate.mockResolvedValueOnce([{ count: 3 }]).mockResolvedValueOnce([{ count: 1 }])
+    releaseMocks.aggregate.mockResolvedValueOnce([{ count: 2 }])
+
+    accessRequestMocks.distinct.mockResolvedValueOnce(['a1', 'a2', 'a3'])
+    accessRequestMocks.aggregate.mockResolvedValueOnce([{ count: 1 }])
 
     schemaMocks.searchSchemas.mockResolvedValue([{ id: 'schema1', name: 'Schema 1' }])
 
-    serviceMocks.searchModels
-      .mockResolvedValueOnce({ models: [{}, {}] }) // global
-      .mockResolvedValueOnce({ models: [{}] }) // org
+    serviceMocks.searchModels.mockResolvedValueOnce({ models: [{}, {}] }).mockResolvedValueOnce({ models: [{}] })
 
     const connector = new SimpleMetricsConnector()
 
@@ -125,8 +126,8 @@ describe('connectors > metrics > simple', () => {
     modelMocks.aggregate.mockResolvedValue([])
     modelMocks.countDocuments.mockResolvedValue(0)
 
-    releaseMocks.aggregate.mockResolvedValue([])
-    accessRequestMocks.aggregate.mockResolvedValue([])
+    releaseMocks.distinct.mockResolvedValue([])
+    accessRequestMocks.distinct.mockResolvedValue([])
 
     schemaMocks.searchSchemas.mockResolvedValue([])
     serviceMocks.searchModels.mockResolvedValue({ models: [] })
@@ -157,8 +158,8 @@ describe('connectors > metrics > simple', () => {
       return Promise.resolve([])
     })
 
-    releaseMocks.aggregate.mockResolvedValue([])
-    accessRequestMocks.aggregate.mockResolvedValue([])
+    releaseMocks.distinct.mockResolvedValue([])
+    accessRequestMocks.distinct.mockResolvedValue([])
     modelMocks.countDocuments.mockResolvedValue(0)
 
     const connector = new SimpleMetricsConnector()
@@ -173,7 +174,7 @@ describe('connectors > metrics > simple', () => {
   test('calculatePolicyMetrics returns correct global summary and models', async () => {
     modelMocks.distinct.mockImplementation((field: string) => {
       if (field === 'organisation') {
-        return Promise.resolve(['west'])
+        return Promise.resolve(['a-corp'])
       }
       return Promise.resolve([])
     })
@@ -189,9 +190,9 @@ describe('connectors > metrics > simple', () => {
 
     reviewRoleMocks.find.mockReturnValue(
       mockQuery([
-        { shortName: 'msro', systemRole: 'msro' },
-        { shortName: 'mtr', systemRole: 'mtr' },
-        { shortName: 'md', systemRole: null },
+        { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
+        { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
+        { shortName: 'md', name: 'Model Developer', systemRole: null },
       ]),
     )
 
@@ -199,13 +200,13 @@ describe('connectors > metrics > simple', () => {
       mockQuery([
         {
           id: 'model-1',
-          organisation: 'west',
+          organisation: 'a-corp',
           card: { schemaId: 'schema1' },
           collaborators: [{ entity: 'user1', roles: ['mtr', 'md'] }],
         },
         {
           id: 'model-2',
-          organisation: 'west',
+          organisation: 'a-corp',
           card: { schemaId: 'schema1' },
           collaborators: [],
         },
@@ -220,29 +221,39 @@ describe('connectors > metrics > simple', () => {
 
     expect(result.global.models).toEqual(
       expect.arrayContaining([
-        { modelId: 'model-1', missingRoles: ['msro'] },
-        { modelId: 'model-2', missingRoles: ['msro', 'mtr', 'md'] },
+        {
+          modelId: 'model-1',
+          missingRoles: [{ roleId: 'msro', roleName: 'MSRO' }],
+        },
+        {
+          modelId: 'model-2',
+          missingRoles: [
+            { roleId: 'msro', roleName: 'MSRO' },
+            { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
+            { roleId: 'md', roleName: 'Model Developer' },
+          ],
+        },
       ]),
     )
 
     expect(result.global.summary).toEqual(
       expect.arrayContaining([
-        { role: 'msro', count: 2 },
-        { role: 'mtr', count: 1 },
-        { role: 'md', count: 1 },
+        { roleId: 'msro', roleName: 'MSRO', count: 2 },
+        { roleId: 'mtr', roleName: 'Model Technical Reviewer', count: 1 },
+        { roleId: 'md', roleName: 'Model Developer', count: 1 },
       ]),
     )
   })
   test('model without card only checks default roles', async () => {
-    modelMocks.distinct.mockResolvedValue(['west'])
+    modelMocks.distinct.mockResolvedValue(['a-corp'])
 
     schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['md'] }]))
 
     reviewRoleMocks.find.mockReturnValue(
       mockQuery([
-        { shortName: 'msro', systemRole: 'msro' },
-        { shortName: 'mtr', systemRole: 'mtr' },
-        { shortName: 'md', systemRole: null },
+        { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
+        { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
+        { shortName: 'md', name: 'Model Developer', systemRole: null },
       ]),
     )
 
@@ -250,7 +261,7 @@ describe('connectors > metrics > simple', () => {
       mockQuery([
         {
           id: 'model-no-card',
-          organisation: 'west',
+          organisation: 'a-corp',
           card: undefined,
           collaborators: [],
         },
@@ -261,27 +272,33 @@ describe('connectors > metrics > simple', () => {
 
     const result = await connector.calculatePolicyMetrics()
 
-    expect(result.global.models[0].missingRoles).toEqual(['msro', 'mtr'])
-    expect(result.global.summary).toEqual(expect.arrayContaining([{ role: 'md', count: 0 }]))
+    expect(result.global.models[0].missingRoles).toEqual([
+      { roleId: 'msro', roleName: 'MSRO' },
+      { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
+    ])
+
+    expect(result.global.summary).toEqual(
+      expect.arrayContaining([{ roleId: 'md', roleName: 'Model Developer', count: 0 }]),
+    )
   })
   test('groups results by organisation correctly', async () => {
-    modelMocks.distinct.mockResolvedValue(['west', 'east'])
+    modelMocks.distinct.mockResolvedValue(['a-corp', 'b-corp'])
 
     schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
 
-    reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', systemRole: 'msro' }]))
+    reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', name: 'MSRO', systemRole: 'msro' }]))
 
     modelMocks.find.mockImplementation((filter: any) => {
       const allModels = [
         {
-          id: 'model-west',
-          organisation: 'west',
+          id: 'model-a-corp',
+          organisation: 'a-corp',
           card: { schemaId: 'schema1' },
           collaborators: [],
         },
         {
-          id: 'model-east',
-          organisation: 'east',
+          id: 'model-b-corp',
+          organisation: 'b-corp',
           card: { schemaId: 'schema1' },
           collaborators: [],
         },
@@ -299,11 +316,11 @@ describe('connectors > metrics > simple', () => {
 
     expect(result.byOrganisation).toHaveLength(2)
 
-    const west = result.byOrganisation.find((o) => o.organisation === 'west')
-    const east = result.byOrganisation.find((o) => o.organisation === 'east')
+    const aCorp = result.byOrganisation.find((o) => o.organisation === 'a-corp')
+    const bCorp = result.byOrganisation.find((o) => o.organisation === 'b-corp')
 
-    expect(west?.models).toHaveLength(1)
-    expect(east?.models).toHaveLength(1)
+    expect(aCorp?.models).toHaveLength(1)
+    expect(bCorp?.models).toHaveLength(1)
   })
   test('calculateModelVolume > basic aggregation', async () => {
     modelMocks.aggregate.mockResolvedValueOnce([

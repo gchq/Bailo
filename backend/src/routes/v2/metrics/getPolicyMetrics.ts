@@ -11,36 +11,18 @@ export const getOverviewMetricsSchema = z.object({
   query: z.object({}).strict(),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v2/metrics/policy',
-  tags: ['metrics'],
-  description: 'Retrieve current point-in-time system and usage metrics.',
-  schema: getOverviewMetricsSchema,
-  responses: {
-    200: {
-      description: 'Current snapshot of system metrics.',
-      content: {
-        'application/json': {
-          schema: z.object({
-            usersTotal: z.number(),
-            activeUsers: z.number(),
-            storageUsedGb: z.number(),
-          }),
-        },
-      },
-    },
-  },
+export const RoleIdentitySchema = z.object({
+  roleId: z.string(),
+  roleName: z.string(),
 })
 
-export const RoleSummarySchema = z.object({
-  role: z.string(),
+export const RoleSummarySchema = RoleIdentitySchema.extend({
   count: z.number(),
 })
 
 export const ModelRoleMetricsSchema = z.object({
   modelId: z.string(),
-  missingRoles: z.array(z.string()),
+  missingRoles: z.array(RoleIdentitySchema),
 })
 
 export const PolicyBaseMetricsSchema = z.object({
@@ -55,6 +37,24 @@ export const PolicyOrganisationMetricsSchema = PolicyBaseMetricsSchema.extend({
 export const GetPolicyMetricsResponseSchema = z.object({
   global: PolicyBaseMetricsSchema,
   byOrganisation: z.array(PolicyOrganisationMetricsSchema),
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/metrics/policy',
+  tags: ['metrics'],
+  description: 'Retrieve current point-in-time system and usage metrics.',
+  schema: getOverviewMetricsSchema,
+  responses: {
+    200: {
+      description: 'Current snapshot of system metrics.',
+      content: {
+        'application/json': {
+          schema: GetPolicyMetricsResponseSchema,
+        },
+      },
+    },
+  },
 })
 
 export type RoleSummary = z.infer<typeof RoleSummarySchema>

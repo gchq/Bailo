@@ -54,6 +54,7 @@ const AccessRequestSchema = new Schema<AccessRequestDoc>(
 )
 
 AccessRequestSchema.plugin(softDeletionPlugin)
+AccessRequestSchema.index({ modelId: 1 })
 
 const AccessRequestModel = model<AccessRequestDoc>('v2_Access_Request', AccessRequestSchema)
 
