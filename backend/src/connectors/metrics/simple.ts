@@ -6,6 +6,7 @@ import ModelModel from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
+import { GetModelVolumeResponse } from '../../routes/v2/metrics/getModelVolume.js'
 import {
   BaseMetrics,
   GetOverviewMetricsResponse,
@@ -16,7 +17,8 @@ import { GetPolicyMetricsResponse } from '../../routes/v2/metrics/getPolicyMetri
 import { searchSchemas } from '../../services/schema.js'
 import { SchemaKind } from '../../types/enums.js'
 import { BadReq } from '../../utils/error.js'
-import { BaseMetricsConnector, ModelVolumeDataPoint, ModelVolumePeriod } from './base.js'
+import { BaseMetricsConnector, ModelVolumeBucket, ModelVolumeDataPoint } from './base.js'
+import { addBucket, buildModelMatchStage, ModelFilter, SchemaRoleMap } from './metricUtils.js'
 
 const SCHEMA_ROLE_CACHE_TTL = 5 * 60 // 5 minutes
 const SCHEMA_ROLE_CACHE_KEY = 'schemaRoleMap'
@@ -26,20 +28,6 @@ const schemaRoleCache = new NodeCache({
   checkperiod: SCHEMA_ROLE_CACHE_TTL,
   useClones: false,
 })
-
-type ModelFilter = {
-  organisation?: string
-}
-
-function buildModelMatchStage(filter: ModelFilter): PipelineStage.Match {
-  const match: Record<string, unknown> = {}
-
-  if (filter.organisation) {
-    match.organisation = filter.organisation
-  }
-
-  return { $match: match }
-}
 
 /**
  * Creates aggregation stages to join a related collection with the models
@@ -93,18 +81,17 @@ async function calculateTotalModels(filter: ModelFilter): Promise<number> {
  * only models belonging to that organisation are counted.
  */
 async function countDistinctModelsWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
-  // Faster approach for no organisation filter
-  if (!filter.organisation) {
-    // may need to change this field depending on the collection type
+  if (filter.organisation === undefined) {
     const ids = await collection.distinct('modelId')
     return ids.length
   }
-  // Organisation requires joining models
+
   const pipeline: PipelineStage[] = [
     ...buildOrganisationLookupStages(filter.organisation),
     { $group: { _id: '$modelId' } },
     { $count: 'count' },
   ]
+
   const result = await collection.aggregate(pipeline)
   return result[0]?.count ?? 0
 }
@@ -131,14 +118,28 @@ async function calculateModelsByState(filter: ModelFilter): Promise<StateInfo[]>
  * Calculates how many models use each schema.
  */
 async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo[]> {
+  // Fetch all available model schemas
   const schemas = await searchSchemas(SchemaKind.Model, false)
 
-  const pipeline: PipelineStage[] = [buildModelMatchStage(filter), { $group: { _id: '$schemaId', count: { $sum: 1 } } }]
+  const pipeline: PipelineStage[] = [
+    // Apply organisation filter if present
+    buildModelMatchStage(filter),
+    {
+      $group: {
+        _id: '$card.schemaId',
+        count: { $sum: 1 },
+      },
+    },
+  ]
 
   const modelCounts = await ModelModel.aggregate(pipeline)
 
-  const countMap = new Map<string, number>(modelCounts.map((r: any) => [r._id, r.count]))
+  // Build lookup of schemaId to count, ignoring models without a schema
+  const countMap = new Map<string, number>(
+    modelCounts.filter((row: any) => row._id).map((row: any) => [row._id, row.count]),
+  )
 
+  // Return all schemas with their usage count
   return schemas.map((schema) => ({
     schemaId: schema.id,
     schemaName: schema.name,
@@ -151,9 +152,9 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  * or scoped to a specific organisation.
  */
 async function calculateOverviewMetricsForOrg(org?: string): Promise<BaseMetrics> {
-  const modelFilter: ModelFilter = org ? { organisation: org } : {}
+  const modelFilter: ModelFilter = org === undefined ? {} : { organisation: org }
 
-  const totalUsersPromise = org ? Promise.resolve<number | undefined>(undefined) : calculateTotalUsers()
+  const totalUsersPromise = org === undefined ? calculateTotalUsers() : Promise.resolve<number | undefined>(undefined)
 
   const [totalUsers, totalModels, stateMetrics, schemaMetrics, totalModelsWithReleases, totalModelsWithAccessRequests] =
     await Promise.all([
@@ -175,12 +176,6 @@ async function calculateOverviewMetricsForOrg(org?: string): Promise<BaseMetrics
   }
 }
 
-type SchemaRoleMap = {
-  schemaRoleMap: Record<string, string[]>
-  defaultRoles: string[]
-  roleMeta: Record<string, { roleId: string; roleName: string }>
-}
-
 /**
  * Builds a lookup structure describing which review roles apply to which schemas.
  */
@@ -192,8 +187,7 @@ async function buildSchemaRoleMapInternal(): Promise<SchemaRoleMap> {
     .select('id reviewRoles')
     .lean()
 
-  // Fetch review roles (soft-deleted records automatically excluded)
-  // const reviewRoles = await ReviewRoleModel.find().select('shortName systemRole').lean()
+  // Fetch review roles
   const reviewRoles = await ReviewRoleModel.find().select('shortName name systemRole').lean()
 
   // Extract system roles (apply to all models)
@@ -259,11 +253,10 @@ async function calculateMissingModelRolesForOrg(
   roleMeta: Record<string, { roleId: string; roleName: string }>,
   org?: string,
 ): Promise<PolicyMetricsResult> {
-  const filter: any = {
-    deleted: { $ne: true },
-  }
+  const filter: any = {}
 
-  if (org) {
+  // Only undefined means global
+  if (org !== undefined) {
     filter.organisation = org
   }
 
@@ -364,7 +357,7 @@ export class SimpleMetricsConnector extends BaseMetricsConnector {
 
     const byOrganisationPromise = Promise.all(
       organisationIds.map(async (org) => ({
-        organisation: org,
+        organisation: org && org.trim() !== '' ? org : 'unset',
         ...(await calculateOverviewMetricsForOrg(org)),
       })),
     )
@@ -385,7 +378,7 @@ export class SimpleMetricsConnector extends BaseMetricsConnector {
 
     const byOrganisation = await Promise.all(
       organisationIds.map(async (org) => ({
-        organisation: org,
+        organisation: org || 'unset',
         ...(await calculateMissingModelRolesForOrg(schemaRoleMap, defaultRoles, roleMeta, org)),
       })),
     )
@@ -397,72 +390,129 @@ export class SimpleMetricsConnector extends BaseMetricsConnector {
   }
 
   async calculateModelVolume(
-    period: ModelVolumePeriod,
-    startDate: string | number | Date = 0,
-    endDate?: string | number | Date,
+    bucket: ModelVolumeBucket,
+    startDate: string | Date,
+    endDate: string | Date,
     timezone?: string,
-    organisation?: string,
-  ): Promise<{ startDate: string; endDate: string; dataPoints: ModelVolumeDataPoint[] }> {
+  ): Promise<GetModelVolumeResponse> {
     const start = new Date(startDate)
-    const end = endDate ? new Date(endDate) : new Date()
-
-    const match: Record<string, unknown> = {
-      createdAt: { $gte: start, $lte: end },
-    }
-
-    if (organisation) {
-      match.organisation = organisation
-    }
-
-    const pipeline: PipelineStage[] = [
-      { $match: match },
-
-      {
-        $group: {
-          _id: {
-            $dateTrunc: {
-              date: '$createdAt',
-              unit: period,
-              ...(timezone && { timezone }),
-            },
-          },
-          count: { $sum: 1 },
-        },
-      },
-
-      { $sort: { _id: 1 } },
-
-      {
-        $project: {
-          _id: 0,
-          periodStart: '$_id',
-          periodEnd: {
-            $dateAdd: {
-              startDate: '$_id',
-              unit: period,
-              amount: 1,
-              ...(timezone && { timezone }),
-            },
-          },
-          count: 1,
-        },
-      },
-    ]
+    const end = new Date(endDate)
 
     try {
-      const dataPoints = await ModelModel.aggregate<{
-        periodStart: Date
-        periodEnd: Date
+      const [{ alignedStart }] = await ModelModel.aggregate<{
+        alignedStart: Date
+      }>([
+        {
+          $project: {
+            alignedStart: {
+              $dateTrunc: {
+                date: start,
+                unit: bucket,
+                ...(bucket === 'week' ? { startOfWeek: 'sunday' } : {}),
+                ...(timezone && { timezone }),
+              },
+            },
+          },
+        },
+        { $limit: 1 },
+      ])
+
+      // Aggregate counts per time bucket and organisation
+      const pipeline: PipelineStage[] = [
+        {
+          $match: {
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              periodStart: {
+                $dateTrunc: {
+                  date: '$createdAt',
+                  unit: bucket,
+                  ...(bucket === 'week' ? { startOfWeek: 'sunday' } : {}),
+                  ...(timezone && { timezone }),
+                },
+              },
+              organisation: {
+                $cond: {
+                  if: { $or: [{ $eq: ['$organisation', null] }, { $eq: ['$organisation', ''] }] },
+                  then: 'unset',
+                  else: '$organisation',
+                },
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.periodStart': 1 } },
+      ]
+
+      const results = await ModelModel.aggregate<{
+        _id: { periodStart: Date; organisation: string }
         count: number
       }>(pipeline)
 
-      const formattedDataPoints = dataPoints.map((dataPoint) => ({
-        periodStart: dataPoint.periodStart.toISOString(),
-        periodEnd: dataPoint.periodEnd.toISOString(),
-        count: dataPoint.count,
-      }))
+      // Convert aggregation results into a lookup map
+      const bucketMap = new Map<string, Record<string, number>>()
 
-      return { startDate: start.toISOString(), endDate: end.toISOString(), dataPoints: formattedDataPoints }
+      for (const row of results) {
+        const key = row._id.periodStart.toISOString()
+
+        if (!bucketMap.has(key)) {
+          bucketMap.set(key, {})
+        }
+
+        bucketMap.get(key)![row._id.organisation] = row.count
+      }
+
+      // Derive full organisation list from database
+      const distinctOrgs = await ModelModel.distinct('organisation')
+      const allOrgs = distinctOrgs.filter((org) => org && org.trim() !== '')
+
+      // Always include "unset"
+      if (!allOrgs.includes('unset')) {
+        allOrgs.push('unset')
+      }
+
+      const buckets: ModelVolumeDataPoint[] = []
+
+      let cursor = new Date(alignedStart)
+
+      // Generate buckets from start to end date, filling gaps with zero counts
+      while (cursor <= end) {
+        const bucketStart = new Date(cursor)
+        const bucketEnd = addBucket(bucketStart, bucket)
+
+        const key = bucketStart.toISOString()
+        const orgCounts = bucketMap.get(key) ?? {}
+
+        const organisationsObject: Record<string, number> = {}
+        let total = 0
+
+        for (const org of allOrgs) {
+          const count = orgCounts[org] ?? 0
+          organisationsObject[org] = count
+          total += count
+        }
+
+        buckets.push({
+          startDate: bucketStart.toISOString(),
+          endDate: bucketEnd.toISOString(),
+          count: total,
+          organisations: organisationsObject,
+        })
+
+        cursor = addBucket(cursor, bucket)
+      }
+
+      return {
+        bucket,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        data: buckets,
+      }
     } catch (err: any) {
       if (err?.message?.includes('timezone') || err?.message?.includes('Time zone')) {
         throw BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.')
