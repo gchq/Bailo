@@ -57,12 +57,6 @@ module.exports = {
     region: 'ignored',
   },
 
-  artefactScanning: {
-    artefactscan: {
-      host: 'artefactscan',
-    },
-  },
-
   connectors: {},
 
   federation: {
