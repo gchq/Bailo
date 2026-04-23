@@ -36,7 +36,13 @@ export function rerunImageArtefactScan(modelId: string, name: string, tag: strin
   })
 }
 
-export function useGetImageScanResults(modelId: string, name: string, tag: string, digest: string) {
+export function useGetImageScanResults(
+  modelId: string,
+  name: string,
+  tag: string,
+  digest: string,
+  isRouterReady?: boolean,
+) {
   const encodedName = encodeURIComponent(name)
   const encodedTag = encodeURIComponent(tag)
   const encodedDigest = encodeURIComponent(digest)
@@ -45,7 +51,7 @@ export function useGetImageScanResults(modelId: string, name: string, tag: strin
       imageBreakdown: ImageTagResult
     },
     ErrorInfo
-  >(`/api/v3/model/${modelId}/image/${encodedName}/${encodedTag}/${encodedDigest}`, fetcher)
+  >(isRouterReady ? `/api/v3/model/${modelId}/image/${encodedName}/${encodedTag}/${encodedDigest}` : null, fetcher)
 
   return {
     mutateImage: mutate,

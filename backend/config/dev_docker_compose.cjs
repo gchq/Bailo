@@ -57,7 +57,20 @@ module.exports = {
     region: 'ignored',
   },
 
-  connectors: {},
+  artefactScanning: {
+    artefactscan: {
+      host: 'artefactscan',
+    },
+  },
+
+  connectors: {
+    artefactScanners: {
+      kinds: ['trivy'],
+      retryDelayInMinutes: 0,
+      maxInitRetries: 5,
+      initRetryDelay: 5000,
+    },
+  },
 
   federation: {
     id: 'localBailo',

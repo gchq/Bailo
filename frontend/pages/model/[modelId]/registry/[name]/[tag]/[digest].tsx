@@ -63,7 +63,7 @@ export default function ImageTagInformation() {
     isImageLoading,
     isImageError,
     mutateImage,
-  } = useGetImageScanResults(modelId as string, name as string, tag as string, digest as string)
+  } = useGetImageScanResults(modelId as string, name as string, tag as string, digest as string, router.isReady)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
@@ -251,7 +251,7 @@ export default function ImageTagInformation() {
 
   return (
     <>
-      <Title text={name && modelImage.tag ? `${name}:${modelImage.tag}` : 'Loading...'} />
+      <Title text={name && modelImage?.tag ? `${name}:${modelImage.tag}` : 'Loading...'} />
       <Container maxWidth='xl' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper sx={{ p: 4 }}>
           <Stack spacing={4}>

@@ -20,7 +20,7 @@ const severities = [
 ]
 
 function sortPlatformByVulnerability(scanResults: ImageTagResult[]): ImageTagResult[] {
-  const sortedResults = scanResults.sort((a, b) => {
+  return scanResults.toSorted((a, b) => {
     let res = 0
     for (let i = 0; i < severities.length; i++) {
       if (a.severityCounts[severities[i]] > b.severityCounts[severities[i]]) {
@@ -33,7 +33,6 @@ function sortPlatformByVulnerability(scanResults: ImageTagResult[]): ImageTagRes
     }
     return res
   })
-  return sortedResults
 }
 
 function checkIfMultiPlatform(modelImage: ModelImagesWithOptionalScanResults, tag: string) {
@@ -78,23 +77,26 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     [modelImage.name, modelImage.repository, mutate, sendNotification],
   )
 
+  function filterTagResult(tagResult: ImageTagResult, imageTag: string) {
+    if (tagResult.platform && tagResult.platform === 'unknown/unknown') {
+      return false
+    }
+    if (tagResult.tag === imageTag) {
+      return true
+    }
+    return false
+  }
+
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
-      const tagResults = modelImage.scanSummaries.filter((tagResult) => tagResult.tag === imageTag)
+      const tagResults = modelImage.scanSummaries.filter((tagResult) => filterTagResult(tagResult, imageTag))
       if (tagResults.length === 0) {
         return
       }
       const sortedTagResults = sortPlatformByVulnerability(tagResults)
-      const platforms =
-        sortedTagResults && sortedTagResults[0].platform
-          ? sortedTagResults
-              .map((result) => result.platform)
-              .filter((platform) => platform && platform !== 'unknown/unknown')
-          : undefined
       return (
         <VulnerabilityResult
           scanResults={sortedTagResults}
-          platforms={platforms}
           warningOnly
           detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${tagResults[0].tag}/`}
         />
@@ -121,9 +123,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
           </Box>
           {checkIfMultiPlatform(modelImage, tag) && (
             <Tooltip
-              title={
-                'A multi-platform image is a single registry entry (image:tag) that contains multiple copies of the same image, but for different OS and architecture combinations. e.g. linux/amd64, windows/amd64, linux/arm64, etc.'
-              }
+              title={'A single image tag that automatically provides the correct architecture for the host machine'}
             >
               <Chip color='primary' label='Multi-platform' />
             </Tooltip>
