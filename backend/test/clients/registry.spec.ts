@@ -38,7 +38,7 @@ const fetchMock: Mock = global.fetch as Mock
 
 class AbortControllerMock {
   signal: {
-    aborted: boolean;
+    aborted: boolean
     onabort: ((...args: any[]) => void) | null
     addEventListener: (type: string, listener: (...args: any[]) => void) => void
   }
