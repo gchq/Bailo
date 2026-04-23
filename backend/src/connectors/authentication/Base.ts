@@ -27,6 +27,14 @@ export abstract class BaseAuthenticationConnector {
         path: '/api/v2',
         middleware: [getTokenFromAuthHeader, checkAuthentication],
       },
+      {
+        path: '/api/v3/token',
+        middleware: [getTokenFromAuthHeader],
+      },
+      {
+        path: '/api/v3',
+        middleware: [getTokenFromAuthHeader, checkAuthentication],
+      },
     ]
   }
 }

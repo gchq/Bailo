@@ -2,9 +2,9 @@
 
 exports[`routes > metrics > getModelVolume > 200 > ok 1`] = `
 {
+  "bucket": "quarter",
   "data": [],
   "endDate": "string",
-  "period": "quarter",
   "startDate": "string",
 }
 `;

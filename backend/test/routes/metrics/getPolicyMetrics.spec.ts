@@ -43,7 +43,7 @@ describe('routes > metrics > getPolicyMetrics', () => {
       byOrganisation: [],
     })
 
-    const res = await testGet('/api/v2/metrics/policy')
+    const res = await testGet('/api/v3/metrics/policy')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
@@ -64,7 +64,7 @@ describe('routes > metrics > getPolicyMetrics', () => {
   test('403 > user without Admin role is rejected', async () => {
     mockAuth.hasRole.mockResolvedValue(false)
 
-    const res = await testGet('/api/v2/metrics/policy')
+    const res = await testGet('/api/v3/metrics/policy')
 
     expect(res.statusCode).toBe(403)
   })
