@@ -259,9 +259,6 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-// server.get('/api/v3/metrics', requireRole(Roles.Admin), ...getOverviewMetrics)
-// server.get('/api/v3/metrics/policy', requireRole(Roles.Admin), ...getPolicyMetrics)
-// server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
 server.get('/api/v3/metrics', ...getOverviewMetrics)
 server.get('/api/v3/metrics/policy', ...getPolicyMetrics)
 server.get('/api/v3/metrics/modelVolume', ...getModelVolume)
