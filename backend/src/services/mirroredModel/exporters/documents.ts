@@ -84,6 +84,8 @@ export class DocumentsExporter extends BaseExporter {
           throw BadReq('The releases contain file(s) that do not have a clean scan.', { scanErrors })
         }
       }
+    } else {
+      this.files = []
     }
   }
 
