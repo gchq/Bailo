@@ -66,7 +66,7 @@ export const handleRegistryEvents = [
 
     for (const event of events) {
       if (event?.action !== 'push') {
-        log.info({ event }, 'Ignoring registry event for non-push action')
+        log.debug({ event }, 'Ignoring registry event for non-push action')
         continue
       }
 
