@@ -18,7 +18,7 @@ export const patchFileSchema = z.object({
     }),
   }),
   body: z.object({
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string().toLowerCase()).optional(),
     metadata: z.object({}).optional(),
     name: z.string().optional(),
     mime: z.string().optional(),
