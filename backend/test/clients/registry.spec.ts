@@ -37,11 +37,20 @@ global.fetch = vi.fn()
 const fetchMock: Mock = global.fetch as Mock
 
 class AbortControllerMock {
-  signal: { aborted: boolean; onabort: ((...args: any[]) => void) | null }
+  signal: {
+    aborted: boolean
+    onabort: ((...args: any[]) => void) | null
+    addEventListener: (type: string, listener: (...args: any[]) => void) => void
+  }
   constructor() {
     this.signal = {
       aborted: false,
       onabort: null,
+      addEventListener: (type, listener) => {
+        if (type === 'abort' && typeof listener === 'function') {
+          this.signal.onabort = listener
+        }
+      },
     }
   }
   abort() {
