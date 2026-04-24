@@ -1,11 +1,9 @@
-import { LocalOffer } from '@mui/icons-material'
-import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
-import Restricted from 'src/common/Restricted'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
+import EntryTagSelector from 'src/common/TagSelector'
 import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
 
 interface MultiFileInputDisplayProps {
@@ -22,10 +20,8 @@ export default function MultiFileInputFileDisplay({
   readOnly = false,
 }: MultiFileInputDisplayProps) {
   const [metadata, setMetadata] = useState<FileUploadMetadata>({ text: '', tags: [] })
-  const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
   const [newFileTags, setNewFileTags] = useState<string[]>([])
-  const [fileTagCount, setFileTagCount] = useState(isFileInterface(file) ? file.tags.length : newFileTags.length)
 
   const { mutateModelFiles } = useGetModelFiles(isFileInterface(file) ? file.modelId : '')
 
@@ -39,7 +35,6 @@ export default function MultiFileInputFileDisplay({
   }
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
-    setFileTagCount(newTags.length)
     setFileTagErrorMessage('')
     if (newTags.includes('')) {
       setFileTagErrorMessage('Tags must have at least one character')
@@ -78,22 +73,11 @@ export default function MultiFileInputFileDisplay({
         </Tooltip>
       </Grid>
       <Grid size={{ xs: 7 }}>
-        <Restricted action='editEntry' fallback={<></>}>
-          <Button
-            sx={{ width: 'fit-content' }}
-            size='small'
-            startIcon={<LocalOffer />}
-            onClick={(event) => setAnchorElFileTag(event.currentTarget)}
-          >
-            {`Edit file tags ${fileTagCount > 0 ? `(${fileTagCount})` : ''}`}
-          </Button>
-        </Restricted>
         <EntryTagSelector
-          anchorEl={anchorElFileTag}
-          setAnchorEl={setAnchorElFileTag}
           onChange={handleFileTagSelectorOnChange}
           tags={isFileInterface(file) ? file.tags : newFileTags}
           errorText={fileTagErrorMessage}
+          restrictedToAction='editEntry'
         />
         <TextField
           size='small'

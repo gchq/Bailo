@@ -1,9 +1,7 @@
-import { LocalOffer } from '@mui/icons-material'
-import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback, useState } from 'react'
-import Restricted from 'src/common/Restricted'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
+import { ChangeEvent, useCallback } from 'react'
+import TagSelector from 'src/common/TagSelector'
 import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 
 interface FileToBeUploadedProps {
@@ -19,8 +17,6 @@ export default function FileToBeUploaded({
   onFileMetadataChange,
   onDelete,
 }: FileToBeUploadedProps) {
-  const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
-
   const handleMetadataTextOnChange = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
       onFileMetadataChange(
@@ -59,22 +55,10 @@ export default function FileToBeUploaded({
         </Tooltip>
       </Grid>
       <Grid size={{ xs: 2 }}>
-        <Restricted action='editEntry' fallback={<></>}>
-          <Button
-            sx={{ width: 'fit-content' }}
-            size='small'
-            startIcon={<LocalOffer />}
-            onClick={(event) => setAnchorElFileTag(event.currentTarget)}
-          >
-            {`Edit file tags ${fileWithMetadata.metadata && fileWithMetadata.metadata.tags.length > 0 ? `(${fileWithMetadata.metadata.tags.length})` : ''}`}
-          </Button>
-        </Restricted>
-        <EntryTagSelector
-          anchorEl={anchorElFileTag}
-          setAnchorEl={setAnchorElFileTag}
+        <TagSelector
+          restrictedToAction='editEntry'
           onChange={handleFileTagSelectorOnChange}
           tags={fileWithMetadata.metadata ? fileWithMetadata.metadata?.tags : []}
-          errorText={''}
         />
         {showMetaDataInput && (
           <TextField size='small' value={fileWithMetadata.metadata?.text} onChange={handleMetadataTextOnChange} />
