@@ -93,12 +93,14 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
       if (tagResults.length === 0) {
         return
       }
+      const multiplatform = !!tagResults && !!tagResults[0].platform
       const sortedTagResults = sortPlatformByVulnerability(tagResults)
       return (
         <VulnerabilityResult
           scanResults={sortedTagResults}
           warningOnly
           detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${tagResults[0].tag}/`}
+          multiplatform={multiplatform}
         />
       )
     }
