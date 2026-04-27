@@ -1,11 +1,16 @@
-import { MoreVert, Refresh } from '@mui/icons-material'
+import { Delete, Info, MoreVert, Refresh } from '@mui/icons-material'
 import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
+import { deleteEntryImage } from 'actions/entry'
+import { useGetReleasesForModelId } from 'actions/release'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
+import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { ArtefactKind, ImageTagResult, ModelImagesWithOptionalScanResults, SeverityLevel } from 'types/types'
@@ -55,6 +60,24 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
+  const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
+  const [deleteImageOpen, setDeleteImageOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+
+  const handleImageMoreButtonClose = () => {
+    setAnchorElMore(null)
+  }
+
+  const { releases } = useGetReleasesForModelId(modelImage.repository)
+  const latestRelease = releases.length > 0 ? releases[0].semver : ''
+
+  const associatedReleasesForTag = (tag: string) =>
+    releases.filter((release) =>
+      release.images.some(
+        (image) => image.repository === modelImage.repository && image.name === modelImage.name && image.tag === tag,
+      ),
+    )
 
   const handleRescan = useCallback(
     async (tag: string) => {
@@ -86,6 +109,35 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     }
     return false
   }
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!tag || isDeleting) {
+      return
+    }
+    try {
+      setIsDeleting(true)
+      setDeleteErrorMessage('')
+
+      const response = await deleteEntryImage(modelImage.repository, modelImage.name, tag)
+      if (!response.ok) {
+        setDeleteErrorMessage(await getErrorMessage(response))
+        return
+      }
+
+      sendNotification({
+        variant: 'success',
+        msg: `Image ${modelImage.name}:${tag} deleted`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+
+      setDeleteImageOpen(false)
+      handleImageMoreButtonClose()
+      mutate()
+    } catch (err) {
+      setDeleteErrorMessage(`Failed to delete image.\n${err}`)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [tag, isDeleting, modelImage.name, modelImage.repository, mutate, sendNotification])
 
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
@@ -131,25 +183,80 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
             </Tooltip>
           )}
         </Stack>
-        {scanners && !isScannersError && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
-          <Stack direction='row' spacing={2} alignItems='center'>
-            {reportDisplay(tag)}
-            <IconButton
-              aria-label='toggle image options menu'
-              onClick={(event) => setAnchorElMore(event.currentTarget)}
+        <Stack direction='row' spacing={2} alignItems='center'>
+          {reportDisplay(tag)}
+          <IconButton aria-label='toggle image options menu' onClick={(event) => setAnchorElMore(event.currentTarget)}>
+            <MoreVert color='primary' />
+          </IconButton>
+          <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => handleImageMoreButtonClose()}>
+            <MenuItem
+              onClick={() => {
+                handleImageMoreButtonClose()
+                setAssociatedReleasesOpen(true)
+              }}
             >
-              <MoreVert color='primary' />
-            </IconButton>
-            <Menu anchorEl={anchorElMore} open={Boolean(anchorElMore)} onClose={() => setAnchorElMore(null)}>
-              <MenuItem onClick={() => handleRescan(tag)}>
-                <ListItemIcon>
-                  <Refresh color='primary' fontSize='small' />
-                </ListItemIcon>
-                <ListItemText>Rerun image scan</ListItemText>
-              </MenuItem>
-            </Menu>
-          </Stack>
-        )}
+              <ListItemIcon>
+                <Info color='primary' fontSize='small' />
+              </ListItemIcon>
+              <ListItemText>Associated releases</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleImageMoreButtonClose()
+                setDeleteErrorMessage('')
+                setDeleteImageOpen(true)
+              }}
+            >
+              <ListItemIcon>
+                <Delete color='primary' fontSize='small' />
+              </ListItemIcon>
+              <ListItemText>Delete image</ListItemText>
+            </MenuItem>
+            {scanners &&
+              !isScannersError &&
+              scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
+                <MenuItem onClick={() => handleRescan(tag)}>
+                  <ListItemIcon>
+                    <Refresh color='primary' fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Rerun image scan</ListItemText>
+                </MenuItem>
+              )}
+          </Menu>
+          <ConfirmationDialogue
+            open={deleteImageOpen}
+            title='Delete Image'
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => {
+              if (!isDeleting) {
+                setDeleteImageOpen(false)
+              }
+            }}
+            errorMessage={deleteErrorMessage}
+            confirmDisabled={isDeleting}
+            confirmLoading={isDeleting}
+            dialogMessage={
+              associatedReleasesForTag(tag).length > 0
+                ? 'Deleting this image will affect the following releases:'
+                : 'Deleting this image will not affect any existing releases'
+            }
+          >
+            <Box sx={{ pt: 2 }}>
+              <AssociatedReleasesList
+                modelId={modelImage.repository}
+                latestRelease={latestRelease}
+                releases={associatedReleasesForTag(tag)}
+              />
+            </Box>
+          </ConfirmationDialogue>
+          <AssociatedReleasesDialog
+            open={associatedReleasesOpen}
+            onClose={() => setAssociatedReleasesOpen(false)}
+            modelId={modelImage.repository}
+            latestRelease={latestRelease}
+            sortedAssociatedReleases={associatedReleasesForTag(tag)}
+          />
+        </Stack>
       </Stack>
     </Box>
   )
