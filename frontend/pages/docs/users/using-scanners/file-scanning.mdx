@@ -1,0 +1,36 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import chipView from 'public/docs/bailo_file_scan_chip.png'
+import rescanView from 'public/docs/bailo_file_rescan.png'
+
+# Scanning Files
+
+## Using Scanners
+
+When uploading files to Bailo, your files will be automatically scanned (assuming scanners are configured and
+initialised).
+
+Bailo is configured, by default, to use the scanners: ClamAV and ModelScan (ArtefactScan), see
+[Bailo - Artefact Scanners](/docs/administration/microservices/artefact-scanners)
+
+For scan results:
+
+- Go to your model and click on File Management Tab
+- Click the Scan chip, towards the right of your file
+- View scan results, note the two scanners' results are listed separately
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view file scanning chip' src={chipView} />
+</Box>
+
+## Rescan File
+
+If you want to rescan, click the 3 dots to the right of the scan results chip and select the Rescan option.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image alt='popup confirming file scan results' src={rescanView} />
+</Box>
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

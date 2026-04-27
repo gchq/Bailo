@@ -1,0 +1,63 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import chipView from 'public/docs/bailo_image_vuln_report_chip.png'
+import detailedView from 'public/docs/bailo_image_vuln_detailed.png'
+import rescanView from 'public/docs/bailo_image_rescan.png'
+import multiPlatView from 'public/docs/bailo_image_multiplat_view.png'
+
+# Scanning Images
+
+## Using Scanner
+
+When pushing images up to the Bailo registry, your images are automatically scanned.
+
+Bailo is configured, by default, to use Trivy (ArtefactScan). See
+[Bailo - Artefact Scanners](/docs/administration/microservices/artefact-scanners)
+
+For scan results:
+
+- Go to your model and click on Registry Tab
+- Click the Scan chip, towards the right of your image
+- View scan results, we classify our vulnerabilities by severity, listing the amount of each as so:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view image scanning chip' src={chipView} />
+</Box>
+
+## Detailed View
+
+Want more detail? Follow the previous steps, and click the 'See detailed results' button. This will take you this
+image's vulnerability report page, which displays:
+
+- Compressed image size
+- Vulnerabilities
+- Scanner used
+- Detailed vulnerability report, containing CVE information.
+
+You can filter these results by Severity.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view image scan results' src={detailedView} />
+</Box>
+
+## Rescan Image
+
+If you want to rescan, click the 3 dots to the right of the scan results chip and select the Rescan option.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image alt='popup confirming image scan results' src={rescanView} />
+</Box>
+
+## Multiplatform Images
+
+We allow the use of multiplatform images on Bailo. By clicking on the Scan chip of a multiplatform image, you view the
+scan summary of each platform. You can also click the 'See detailed results' button, and view the platform-specific,
+detailed results page.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image alt='popup confirming image scan results' src={multiPlatView} />
+</Box>
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
