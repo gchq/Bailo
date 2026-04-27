@@ -34,7 +34,7 @@ registerPath({
                 id: z.string().openapi({ example: 'yolo-abcdef' }),
                 name: z.string().openapi({ example: 'Yolo v4' }),
                 description: z.string().openapi({ example: 'You only look once' }),
-                tags: z.array(z.string().toLowerCase()).openapi({ example: ['tag', 'ml'] }),
+                tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
                 kind: z.string().openapi({ example: EntryKind.Model }),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
