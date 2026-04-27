@@ -13,6 +13,7 @@ exports[`clients > registry > deleteManifest > success using digest reference 1`
       "method": "DELETE",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -191,6 +192,7 @@ exports[`clients > registry > getImageTagManifest > success using digest referen
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -210,6 +212,7 @@ exports[`clients > registry > getImageTagManifests > success image manifest 1`] 
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -229,6 +232,7 @@ exports[`clients > registry > getImageTagManifests > success manifest list 1`] =
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -248,6 +252,7 @@ exports[`clients > registry > getImageTagManifests > success using digest refere
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -403,6 +408,7 @@ exports[`clients > registry > putManifest > success using digest reference 1`] =
       "method": "PUT",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
