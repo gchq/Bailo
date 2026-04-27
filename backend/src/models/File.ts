@@ -7,6 +7,7 @@ import { ScanInterface } from './Scan.js'
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface FileInterface {
+  id: string
   _id: ObjectId
   modelId: string
 
@@ -29,7 +30,7 @@ export interface FileInterface {
 // object from Mongoose it should use this interface
 export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
 // `id` is used by the python API so we need to keep this to prevent a breaking change
-export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanInterface[]; id: string }
+export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanInterface[] }
 
 const FileSchema = new Schema<FileInterfaceDoc>(
   {
