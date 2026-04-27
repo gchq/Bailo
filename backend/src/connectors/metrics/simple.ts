@@ -132,7 +132,8 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
     },
   ]
 
-  const modelCounts = await ModelModel.aggregate(pipeline)
+  type SchemaAgg = { _id: string | null; count: number }
+  const modelCounts = await ModelModel.aggregate<SchemaAgg>(pipeline)
 
   // Build lookup of schemaId to count, ignoring models without a schema
   const countMap = new Map<string, number>(
@@ -244,6 +245,14 @@ type PolicyMetricsResult = {
 }
 
 /**
+ * Streams models for role evaluation using a mongoose cursor
+ * to avoid loading the entire result set into memory.
+ */
+function streamModelsForRoleEvaluation(filter: Record<string, any>) {
+  return ModelModel.find(filter).select('id organisation card collaborators').lean().cursor()
+}
+
+/**
  * Calculates which models are missing required review roles, either globally
  * or scoped to a specific organisation.
  */
@@ -260,7 +269,7 @@ async function calculateMissingModelRolesForOrg(
     filter.organisation = org
   }
 
-  const models = await ModelModel.find(filter).select('id organisation card collaborators').lean()
+  const models = streamModelsForRoleEvaluation(filter)
 
   const modelsResult: PolicyMetricsResult['models'] = []
 
@@ -279,8 +288,7 @@ async function calculateMissingModelRolesForOrg(
   }
 
   // Evaluate each model
-  for (const model of models) {
-    // Determine applicable roles
+  for await (const model of models) {
     let applicableRoles = [...defaultRoles]
 
     const schemaId = model.card?.schemaId
@@ -290,7 +298,6 @@ async function calculateMissingModelRolesForOrg(
 
     const applicableSet = new Set(applicableRoles)
 
-    // Collect active roles
     const activeRoleSet = new Set<string>()
 
     for (const collaborator of model.collaborators ?? []) {
@@ -301,11 +308,7 @@ async function calculateMissingModelRolesForOrg(
       }
     }
 
-    // Determine missing roles
-    const missingRoles: {
-      roleId: string
-      roleName: string
-    }[] = []
+    const missingRoles: { roleId: string; roleName: string }[] = []
 
     for (const roleId of applicableSet) {
       if (!activeRoleSet.has(roleId)) {
@@ -326,7 +329,6 @@ async function calculateMissingModelRolesForOrg(
     }
   }
 
-  // Convert summary to expected format
   const summary = Object.keys(roleMissingCount)
     .sort()
     .map((roleId) => ({
@@ -399,9 +401,7 @@ export class SimpleMetricsConnector extends BaseMetricsConnector {
     const end = new Date(endDate)
 
     try {
-      const [{ alignedStart }] = await ModelModel.aggregate<{
-        alignedStart: Date
-      }>([
+      const alignedResult = await ModelModel.aggregate<{ alignedStart: Date }>([
         {
           $project: {
             alignedStart: {
@@ -416,6 +416,8 @@ export class SimpleMetricsConnector extends BaseMetricsConnector {
         },
         { $limit: 1 },
       ])
+
+      const alignedStart = alignedResult[0]?.alignedStart ?? new Date(start)
 
       // Aggregate counts per time bucket and organisation
       const pipeline: PipelineStage[] = [
