@@ -32,6 +32,8 @@ class Agent:
         :param verify: Path to certificate authority file, or bool for SSL verification.
         """
         self.verify = verify
+        # reuse session for performance improvement
+        self.session = requests.Session()
 
     def __request(self, method, *args, **kwargs):
         """Private method. Make an HTTP request with error handling.
@@ -45,7 +47,7 @@ class Agent:
         """
         kwargs["verify"] = self.verify
 
-        res = requests.request(method, *args, **kwargs)
+        res = self.session.request(method, *args, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
@@ -53,7 +55,9 @@ class Agent:
 
         try:
             # Give the error message issued by bailo
-            raise BailoException(res.json()["error"]["message"])
+            payload = res.json()
+            message = payload.get("error", {}).get("message", "Unknown API error")
+            raise BailoException(message)
         except JSONDecodeError as e:
             # No response given
             raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}") from e
@@ -78,13 +82,6 @@ class Agent:
         :return: Response object.
         """
         return self.__request("PATCH", *args, **kwargs)
-
-    def push(self, *args, **kwargs):
-        """Make a PUSH request. See :func:`__request for parameters.
-
-        :return: Response object.
-        """
-        return self.__request("PUSH", *args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """Make a DELETE request. See :func:`__request` for parameters.
