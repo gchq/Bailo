@@ -19,13 +19,7 @@ vi.mock('../../src/utils/config.js', () => ({
 }))
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(function () {
-    return {
-      ok: true,
-      text: vi.fn(),
-      json: vi.fn(),
-    }
-  }),
+  default: vi.fn(),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
@@ -169,6 +163,7 @@ describe('clients > artefactScan', () => {
         return 'Unrecognised response'
       }),
       json: vi.fn(),
+      headers: new Headers(),
     })
 
     await expect(() => getCachedArtefactScanInfo()).rejects.toThrowError(
@@ -252,6 +247,7 @@ describe('clients > artefactScan', () => {
         return 'Unrecognised response'
       }),
       json: vi.fn(),
+      headers: new Headers(),
     })
 
     await expect(() => scanFileStream({} as Readable, 'safe_model.h5')).rejects.toThrowError(
@@ -303,6 +299,7 @@ describe('clients > artefactScan', () => {
       ok: false,
       text: vi.fn(() => 'Bad response'),
       json: vi.fn(),
+      headers: new Headers(),
     })
 
     await expect(() => scanImageBlobStream({} as Readable, 'sha256:abc')).rejects.toThrowError(
