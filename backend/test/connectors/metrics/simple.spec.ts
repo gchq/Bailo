@@ -66,6 +66,22 @@ const mockQuery = (result: any) => ({
   lean: vi.fn().mockResolvedValue(result),
 })
 
+const mockCursorQuery = (result: any[]) => {
+  const asyncIterable = {
+    async *[Symbol.asyncIterator]() {
+      for (const item of result) {
+        yield item
+      }
+    },
+  }
+
+  return {
+    select: vi.fn().mockReturnThis(),
+    lean: vi.fn().mockReturnThis(),
+    cursor: vi.fn().mockReturnValue(asyncIterable),
+  }
+}
+
 describe('connectors > metrics > simple > calculateOverviewMetrics', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -258,7 +274,7 @@ describe('connectors > metrics > simple > calculatePolicyMetrics', () => {
     )
 
     modelMocks.find.mockReturnValue(
-      mockQuery([
+      mockCursorQuery([
         {
           id: 'model-1',
           organisation: 'a corp',
@@ -319,7 +335,7 @@ describe('connectors > metrics > simple > calculatePolicyMetrics', () => {
     )
 
     modelMocks.find.mockReturnValue(
-      mockQuery([
+      mockCursorQuery([
         {
           id: 'model-no-card',
           organisation: 'a corp',
@@ -369,7 +385,7 @@ describe('connectors > metrics > simple > calculatePolicyMetrics', () => {
         ? allModels.filter((m) => m.organisation === filter.organisation)
         : allModels
 
-      return mockQuery(filtered)
+      return mockCursorQuery(filtered)
     })
 
     const connector = new SimpleMetricsConnector()
@@ -400,7 +416,7 @@ describe('connectors > metrics > simple > calculatePolicyMetrics', () => {
       const filtered =
         filter?.organisation !== undefined ? allModels.filter((m) => m.organisation === filter.organisation) : allModels
 
-      return mockQuery(filtered)
+      return mockCursorQuery(filtered)
     })
 
     const connector = new SimpleMetricsConnector()

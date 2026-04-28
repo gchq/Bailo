@@ -38,7 +38,7 @@ const GetModelVolumeResponseSchema = z.object({
 
 registerPath({
   method: 'get',
-  path: '/api/v2/metrics/modelVolume',
+  path: '/api/v3/metrics/modelVolume',
   tags: ['metrics'],
   description: 'Returns the count of models created over time, aggregated by the specified period.',
   schema: getModelVolumeSchema,

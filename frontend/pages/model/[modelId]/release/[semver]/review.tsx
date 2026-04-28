@@ -29,7 +29,7 @@ import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys, EntryKind } from 'types/types'
+import { DecisionKeys } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -41,11 +41,7 @@ export default function ReleaseReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
 
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)

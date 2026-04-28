@@ -5,7 +5,7 @@ import {
   checkUserAuth,
   getImageBlob,
   getImageManifest,
-  getImageWithScanResults,
+  getModelImageWithScanResults,
   joinDistributionPackageName,
   listModelImages,
   listModelImagesWithScanResults,
@@ -14,10 +14,12 @@ import {
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
-import { InternalError } from '../../src/utils/error.js'
+import { InternalError, RegistryError } from '../../src/utils/error.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const ScanModelMock = getTypedModelMock('ScanModel')
+
+vi.mock('../../../../src/utils/transactions.js')
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -45,16 +47,20 @@ vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
+  getImageTagManifests: vi.fn(),
   getRegistryLayerStream: vi.fn(),
   listImageTags: vi.fn(() => [] as string[]),
   listModelRepos: vi.fn(),
   mountBlob: vi.fn(),
   putManifest: vi.fn(),
+  isImageTagManifestList: vi.fn(() => false),
 }))
 vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersForImage: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersByPlatform: vi.fn(),
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
 
@@ -374,7 +380,7 @@ describe('services > registry', () => {
     })
 
     test('renameImage > source manifest not found', async () => {
-      registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error', { status: 404 }))
+      registryClientMocks.getImageTagManifests.mockRejectedValueOnce(RegistryError({} as any, { status: 404 }))
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
         'The requested image was not found.',
@@ -382,22 +388,34 @@ describe('services > registry', () => {
     })
 
     test('renameImage > manifest body missing', async () => {
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({})
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({})
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
         'The registry returned a response but the body was missing.',
       )
     })
 
+    test('renameImage > missing source digest header', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: { config: { digest: 'd' }, layers: [] },
+        headers: {},
+      })
+
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+        'The registry returned a response but the source digest header was missing.',
+      )
+    })
+
     test('renameImage > source manifest other error', async () => {
-      registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error'))
+      registryClientMocks.getImageTagManifests.mockRejectedValueOnce(InternalError('Error'))
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Error')
     })
 
     test('renameImage > config missing digest', async () => {
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: { config: {}, layers: [] },
+        headers: { 'docker-content-digest': 'digest' },
       })
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Could not extract layer digest.')
@@ -405,7 +423,7 @@ describe('services > registry', () => {
 
     test('renameImage > success and delete orphan', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest
+      registryClientMocks.getImageTagManifests
         .mockResolvedValueOnce({
           body: mockBody,
           headers: { 'docker-content-digest': 'digest' },
@@ -428,12 +446,16 @@ describe('services > registry', () => {
         'mediaType',
       )
       expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
+      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'digest',
+      })
     })
 
     test('renameImage > success no orphan found', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -456,7 +478,7 @@ describe('services > registry', () => {
 
     test('renameImage > success handle 404', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -474,12 +496,16 @@ describe('services > registry', () => {
         'mediaType',
       )
       expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
+      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'digest',
+      })
     })
 
     test('renameImage > rethrow error', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -501,9 +527,95 @@ describe('services > registry', () => {
       expect(registryClientMocks.deleteManifest).toHaveBeenCalledTimes(1)
     })
 
+    test('renameImage > multi manifest success', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          {
+            digest: 'sha256:child1',
+            platform: { architecture: 'amd64', os: 'linux' },
+          },
+        ],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer1' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({
+          body: manifestList,
+          headers: { 'docker-content-digest': 'sha256:listDigest' },
+        })
+        .mockResolvedValueOnce({
+          body: childManifest,
+          headers: {},
+        })
+      registryClientMocks.putManifest.mockResolvedValueOnce({
+        'docker-content-digest': 'sha256:newChildDigest',
+      })
+      const source = { repository: 'sourceRepo', name: 'img', tag: 'v1' }
+      const destination = { repository: 'destRepo', name: 'img', tag: 'v1' }
+
+      await renameImage({} as any, source, destination)
+
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalled()
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+    })
+
+    test('renameImage > multi manifest missing child manifest', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({
+          body: manifestList,
+          headers: { 'docker-content-digest': 'sha256:list' },
+        })
+        .mockResolvedValueOnce({
+          body: { manifests: [] },
+          headers: {},
+        })
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      const source = { repository: 'repo', name: 'img', tag: 'v1' }
+      const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
+
+      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Platform manifest missing.')
+    })
+
+    test('renameImage > multi manifest child PUT missing digest', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({
+          body: manifestList,
+          headers: { 'docker-content-digest': 'sha256:list' },
+        })
+        .mockResolvedValueOnce({
+          body: childManifest,
+          headers: {},
+        })
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      registryClientMocks.putManifest.mockResolvedValueOnce({})
+      const source = { repository: 'repo', name: 'img', tag: 'v1' }
+      const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
+
+      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Child manifest digest missing after PUT')
+    })
+
     test('softDeleteImage > success', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -526,7 +638,7 @@ describe('services > registry', () => {
         settings: { mirror: { sourceModelId: 'sourceModelId' } },
       } as any)
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -571,7 +683,22 @@ describe('services > registry', () => {
       ])
     })
 
-    test('getImageWithScanResults > includeFullDetail', async () => {
+    test('listModelImages > filters repositories with no tags', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1', 'repo2/image2'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1']).mockResolvedValueOnce([])
+
+      const result = await listModelImages({ dn: 'user' } as any, 'modelId')
+
+      expect(result).toEqual([
+        {
+          repository: 'repo1',
+          name: 'image1',
+          tags: ['tag1'],
+        },
+      ])
+    })
+
+    test('getModelImageWithScanResults > includeFullDetail', async () => {
       const scanResult = {
         summary: undefined,
         state: ArtefactScanState.Complete,
@@ -580,11 +707,16 @@ describe('services > registry', () => {
       ScanModelMock.find.mockReturnValueOnce({
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
 
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-        true,
+      const result = await getModelImageWithScanResults(
+        { dn: 'user' },
+        {
+          repository: 'repo',
+          name: 'img',
+          tag: 'v1',
+        } as any,
+        'sha:123456',
       )
 
       expect(result.scanResults).toEqual([
@@ -592,40 +724,105 @@ describe('services > registry', () => {
       ])
     })
 
-    test('getImageWithScanResults > ignores manifest list not supported error', async () => {
-      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(
-        InternalError('Bailo backend does not currently support manifest lists.'),
-      )
+    test('getModelImageWithScanResults > multiplatform > success', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
+      }
 
-      const result = await getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-      )
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
 
-      expect(result).toEqual({
-        imageSize: 0,
-        lastRunAt: undefined,
-        state: 'notScanned',
-        severityCounts: {
-          critical: 0,
-          high: 0,
-          low: 0,
-          medium: 0,
-          unknown: 0,
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
         },
-        tag: 'v1',
+        headers: { 'docker-content-digest': 'sha:123456' },
       })
+
+      const result = await getModelImageWithScanResults(
+        { dn: 'user' },
+        { repository: 'repo', name: 'img', tag: 'v1' } as any,
+        'sha:123456',
+      )
+
+      expect(result.platform).toBe('linux/amd64')
     })
 
-    test('getImageWithScanResults > rethrows unexpected getImageLayers error', async () => {
-      getImageLayersMocks.getImageLayers.mockRejectedValueOnce(InternalError('Some other error'))
+    test('getModelImageWithScanResults > multiplatform > no digest', async () => {
+      const scanResult = {
+        summary: undefined,
+        state: ArtefactScanState.Complete,
+        scanResults: [{ Results: [] }],
+      }
+      ScanModelMock.find.mockReturnValueOnce({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: {},
+      })
 
-      const promise = getImageWithScanResults(
-        { dn: 'user' } as any,
-        { repository: 'repo', name: 'img', tag: 'v1' } as any,
-      )
+      await expect(
+        getModelImageWithScanResults({ dn: 'user' }, { repository: 'repo', name: 'img', tag: 'v1' } as any, undefined),
+      ).rejects.toThrow('Must provide digest for multiplatform image')
+    })
 
-      await expect(promise).rejects.toThrowError('Some other error')
+    test('getModelImageWithScanResults > multiplatform > wrong digest', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults(
+          { dn: 'user' },
+          { repository: 'repo', name: 'img', tag: 'v1' } as any,
+          'sha:654321',
+        ),
+      ).rejects.toThrow('Digest does not exist in manifest list')
+    })
+
+    test('getModelImageWithScanResults > multiplatform > no platform', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: {
+          manifests: [
+            {
+              digest: 'sha:123456',
+            },
+          ],
+        },
+        headers: {},
+      })
+
+      await expect(
+        getModelImageWithScanResults(
+          { dn: 'user' },
+          { repository: 'repo', name: 'img', tag: 'v1' } as any,
+          'sha:123456',
+        ),
+      ).rejects.toThrow('Manifest entry missing platform metadata')
     })
 
     test('listModelImagesWithScanResults > includeCount', async () => {
@@ -641,8 +838,36 @@ describe('services > registry', () => {
         lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
       } as any)
 
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: {}, headers: {} })
+
       const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
 
+      expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
+    })
+
+    test('listModelImagesWithScanResults > multiplatform', async () => {
+      const mockBody = [
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+        { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' },
+      ]
+      const scanResult = {
+        summary: [{ severity: 'medium' }],
+        additionalInfo: [{ Results: [] }],
+        state: ArtefactScanState.Error,
+      }
+
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo/img'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['v1'])
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({ body: { manifests: [mockBody] } })
+      getImageLayersMocks.getLayersByPlatform.mockResolvedValue({
+        'linux/amd64': Promise.resolve([{ digest: 'sha256:layer1', size: 42134 }]),
+      })
+
+      ScanModelMock.find.mockReturnValue({
+        lean: () => ({ exec: vi.fn().mockResolvedValueOnce([scanResult]) }),
+      } as any)
+
+      const result = await listModelImagesWithScanResults({ dn: 'user' } as any, 'modelId')
       expect(result[0].scanSummaries[0].severityCounts).toEqual({ low: 0, medium: 1, high: 0, critical: 0, unknown: 0 })
     })
 
@@ -661,7 +886,7 @@ describe('services > registry', () => {
 
     test('restoreSoftDeletedImage > success', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -679,7 +904,7 @@ describe('services > registry', () => {
         settings: { mirror: { sourceModelId: 'sourceModelId' } },
       } as any)
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })

@@ -43,6 +43,10 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
         path: '/api/v2',
         middleware: [this.getUser],
       },
+      {
+        path: '/api/v3',
+        middleware: [this.getUser],
+      },
       ...super.authenticationMiddleware(),
     ]
   }

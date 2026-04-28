@@ -39,7 +39,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { deleteImage } from './routes/v2/model/images/deleteImage.js'
-import { getImage } from './routes/v2/model/images/getImage.js'
+import { getImage, getImageByDigest } from './routes/v2/model/images/getImage.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -106,6 +106,8 @@ export const server = express()
 
 server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', httpLog)
+server.use('/api/v3', bodyParser.json())
+server.use('/api/v3', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -182,6 +184,7 @@ server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
 server.get('/api/v2/model/:modelId/image/:name/:tag', ...getImage)
+server.get('/api/v3/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -256,12 +259,9 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-// server.get('/api/v3/metrics', requireRole(Roles.Admin), ...getOverviewMetrics)
-// server.get('/api/v3/metrics/policy', requireRole(Roles.Admin), ...getPolicyMetrics)
-// server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
-server.get('/api/v2/metrics', ...getOverviewMetrics)
-server.get('/api/v2/metrics/policy', ...getPolicyMetrics)
-server.get('/api/v2/metrics/modelVolume', ...getModelVolume)
+server.get('/api/v3/metrics', ...getOverviewMetrics)
+server.get('/api/v3/metrics/policy', ...getPolicyMetrics)
+server.get('/api/v3/metrics/modelVolume', ...getModelVolume)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
@@ -269,5 +269,6 @@ const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+server.use('/api/v3', expressErrorHandler)
 
 server.use('/internal', internalRouter)
