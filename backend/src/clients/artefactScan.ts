@@ -11,7 +11,9 @@ import { BadReq, InternalError } from '../utils/error.js'
 const ArtefactScanInfoResponseSchema = z.object({
   apiName: z.string(),
   apiVersion: z.string(),
+  maxFileSizeBytes: z.number().int().positive(),
   modelscanScannerName: z.string(),
+  modelscanSupportedExtensions: z.array(z.string()),
   modelscanVersion: z.string(),
   trivyScannerName: z.string(),
   trivyVersion: z.string(),
