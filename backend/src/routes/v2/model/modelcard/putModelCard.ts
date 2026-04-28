@@ -8,20 +8,6 @@ import { updateModelCard } from '../../../../services/model.js'
 import { modelCardRevisionInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
-const knownOverview = z.object({
-  tags: z.array(z.string()).optional(),
-})
-
-const overview = z.intersection(knownOverview, z.record(z.unknown()))
-
-const KnownMetadata = z
-  .object({
-    overview,
-  })
-  .optional()
-
-export const modelCardMetadata = z.intersection(KnownMetadata, z.record(z.unknown()))
-
 export const putModelCardSchema = z.object({
   params: z.object({
     modelId: z.string({
@@ -29,7 +15,7 @@ export const putModelCardSchema = z.object({
     }),
   }),
   body: z.object({
-    metadata: modelCardMetadata,
+    metadata: z.unknown(),
   }),
 })
 
