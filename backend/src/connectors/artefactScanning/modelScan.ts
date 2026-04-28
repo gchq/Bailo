@@ -6,6 +6,7 @@ import { FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
+import { ContentTooLarge } from '../../utils/error.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 const skippedScanTemplate: ModelScanResponse = {
@@ -83,10 +84,21 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
   protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
 
+    if (file.size > this.maxFileSizeBytes) {
+      throw ContentTooLarge('Unrecognised response returned by the ArtefactScan service.', {
+        status: 413,
+        statusText: 'Request Entity Too Large',
+        endpoint: this.artefactType,
+        fileName: file.name,
+        responseBody: {
+          detail: `Maximum content size limit (${this.maxFileSizeBytes}) exceeded (${file.size} bytes read)`,
+        },
+      })
+    }
+
     if (
-      file.size > this.maxFileSizeBytes! ||
-      (this.supportedExtensions!.length > 0 &&
-        !this.supportedExtensions!.some((supportedExtension) => file.name.endsWith(supportedExtension)))
+      this.supportedExtensions.length > 0 &&
+      !this.supportedExtensions.some((supportedExtension) => file.name.endsWith(supportedExtension))
     ) {
       const additionalInfo = this.getSkippedScanSummary(file)
       log.debug({ file, result: { additionalInfo }, ...scannerInfo }, 'Skipping file scan.')
@@ -130,7 +142,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       }
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
-        error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
+        error,
         file,
       })
     } finally {

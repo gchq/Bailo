@@ -330,14 +330,18 @@ export async function getRegistryLayerStream(
   return { stream: result.stream, abort: result.abort }
 }
 
+export async function headLayer(token: string, repoRef: ImageNameRef, digest: string) {
+  return await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
+    expectStream: true,
+    extraFetchOptions: {
+      method: 'HEAD',
+    },
+  })
+}
+
 export async function doesLayerExist(token: string, repoRef: ImageNameRef, digest: string) {
   try {
-    await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
-      expectStream: true,
-      extraFetchOptions: {
-        method: 'HEAD',
-      },
-    })
+    await headLayer(token, repoRef, digest)
     return true
   } catch (error) {
     if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {

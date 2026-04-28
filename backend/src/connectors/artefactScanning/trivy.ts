@@ -1,7 +1,7 @@
 import PQueue from 'p-queue'
 
 import { getCachedArtefactScanInfo, scanImageBlobStream } from '../../clients/artefactScan.js'
-import { getRegistryLayerStream } from '../../clients/registry.js'
+import { getRegistryLayerStream, headLayer } from '../../clients/registry.js'
 import {
   ArtefactKind,
   ArtefactKindKeys,
@@ -12,16 +12,19 @@ import {
 import { issueAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
+import { ContentTooLarge } from '../../utils/error.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
 
 export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
   readonly artefactType: ArtefactKindKeys = ArtefactKind.IMAGE
   readonly toolName: string = 'Trivy'
+  protected maxImageSizeBytes: number = Infinity
 
   async init(): Promise<void> {
     const artefactScanInfo = await getCachedArtefactScanInfo()
     this.version = artefactScanInfo.trivyVersion
+    this.maxImageSizeBytes = artefactScanInfo.maxFileSizeBytes ?? this.maxImageSizeBytes
   }
 
   protected async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
@@ -32,6 +35,27 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
       const repositoryToken = await issueAccessToken({ dn: this.toolName }, [
         { type: 'repository', name: `${layer.repository}/${layer.name}`, actions: ['pull'] },
       ])
+
+      if (this.maxImageSizeBytes != Infinity) {
+        const layerHeadDetails = await headLayer(
+          repositoryToken,
+          { repository: layer.repository, name: layer.name },
+          layer.layerDigest,
+        )
+        const layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
+
+        if (layerSize != Infinity && layerSize > this.maxImageSizeBytes) {
+          throw ContentTooLarge('Unrecognised response returned by the ArtefactScan service.', {
+            status: 413,
+            statusText: 'Request Entity Too Large',
+            endpoint: this.artefactType,
+            layer,
+            responseBody: {
+              detail: `Maximum content size limit (${this.maxImageSizeBytes}) exceeded (${layerSize} bytes read)`,
+            },
+          })
+        }
+      }
 
       const { stream, abort } = await getRegistryLayerStream(
         repositoryToken,
@@ -80,7 +104,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
       }
     } catch (error) {
       return this.scanError(`This image layer could not be scanned due to an error caused by ${this.toolName}`, {
-        error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
+        error,
         layer,
       })
     }

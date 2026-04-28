@@ -135,57 +135,6 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
     expect(result.scannerVersion).toBeUndefined()
   })
 
-  test('scan() skips unsupported extension', async () => {
-    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
-      modelscanVersion: '1.0.0',
-      modelscanSupportedExtensions: ['.txt'],
-    })
-    const connector = new ModelScanFileScanningConnector()
-    await connector.init()
-
-    const result = await connector.scan({
-      id: 'file1',
-      name: 'model.bin',
-      path: '/bucket/model.bin',
-    } as any)
-
-    expect(result.state).toBe(ArtefactScanState.Complete)
-    expect(result.summary).toHaveLength(0)
-    expect(result.artefactKind).toBe(ArtefactKind.FILE)
-    expect(result.additionalInfo).toMatchObject(
-      expect.objectContaining({
-        summary: {
-          total_issues: 0,
-          total_issues_by_severity: {
-            LOW: 0,
-            MEDIUM: 0,
-            HIGH: 0,
-            CRITICAL: 0,
-          },
-          input_path: '/tmp/model.bin',
-          absolute_path: '/tmp',
-          modelscan_version: '1.0.0',
-          timestamp: expect.anything(),
-          scanned: {
-            total_scanned: 0,
-          },
-          skipped: {
-            total_skipped: 1,
-            skipped_files: [
-              {
-                category: 'SCAN_NOT_SUPPORTED',
-                description: 'Model Scan did not scan file',
-                source: 'model.bin',
-              },
-            ],
-          },
-        },
-        issues: [],
-        errors: [],
-      }),
-    )
-  })
-
   test('scan() skips too large file', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       modelscanVersion: '1.0.0',
@@ -200,6 +149,24 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
       name: 'model.bin',
       path: '/bucket/model.bin',
       size: 2,
+    } as any)
+
+    expect(result.state).toBe(ArtefactScanState.Error)
+    expect(result.toolName).toBe('ModelScan')
+  })
+
+  test('scan() skips unsupported extension', async () => {
+    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
+      modelscanVersion: '1.0.0',
+      modelscanSupportedExtensions: ['.txt'],
+    })
+    const connector = new ModelScanFileScanningConnector()
+    await connector.init()
+
+    const result = await connector.scan({
+      id: 'file1',
+      name: 'model.bin',
+      path: '/bucket/model.bin',
     } as any)
 
     expect(result.state).toBe(ArtefactScanState.Complete)

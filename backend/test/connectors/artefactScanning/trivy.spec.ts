@@ -20,6 +20,7 @@ vi.mock('../../../src/clients/artefactScan.js', () => artefactScanClientMocks)
 
 const registryMocks = vi.hoisted(() => ({
   getRegistryLayerStream: vi.fn(),
+  headLayer: vi.fn(),
 }))
 vi.mock('../../../src/clients/registry.js', () => registryMocks)
 
@@ -46,8 +47,8 @@ vi.mock('p-queue', () => ({
   }),
 }))
 
-describe('connectors > artefactScanning > trivy', () => {
-  test('TrivyImageScanningConnector > successful image scan', async () => {
+describe('connectors > artefactScanning > trivy > TrivyImageScanningConnector', () => {
+  test('scan() success', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       trivyVersion: '0.69.1',
     })
@@ -95,7 +96,7 @@ describe('connectors > artefactScanning > trivy', () => {
     expect(result.artefactKind).toBe(ArtefactKind.IMAGE)
   })
 
-  test('TrivyImageScanningConnector > aborts registry stream on scan failure', async () => {
+  test('scan() abort registry stream on scan failure', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       trivyVersion: '0.69.1',
     })
@@ -119,7 +120,28 @@ describe('connectors > artefactScanning > trivy', () => {
     expect(abort).toBeCalled()
   })
 
-  test('TrivyImageScanningConnector > returns error when scannerVersion is undefined', async () => {
+  test('scan() skip too large image', async () => {
+    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
+      trivyVersion: '0.69.1',
+      maxImageSizeBytes: 1,
+    })
+    authMocks.issueAccessToken.mockResolvedValueOnce('token')
+    registryMocks.headLayer.mockResolvedValueOnce({
+      headers: { 'content-length': 2 },
+    })
+    const connector = new TrivyImageScanningConnector()
+    await connector.init()
+
+    const result = await connector.scan({
+      repository: 'repo',
+      name: 'image',
+      layerDigest: 'sha256:abc',
+    } as any)
+
+    expect(result.state).toBe(ArtefactScanState.Error)
+  })
+
+  test('scan() return error when scannerVersion is undefined', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({})
     const connector = new TrivyImageScanningConnector()
 
