@@ -193,7 +193,7 @@ export const TrivyScanResultResponseSchema = z
   .passthrough()
 export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponseSchema>
 
-async function handleBadResponse(res: FetchResponse, context?: Record<string, any>) {
+async function handleBadResponse(res: FetchResponse, context?: Record<string, unknown>) {
   const contentType = res.headers.get('content-type') ?? ''
   let responseBody: unknown
 

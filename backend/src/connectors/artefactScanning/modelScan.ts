@@ -85,7 +85,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     const scannerInfo = this.info()
 
     if (file.size > this.maxFileSizeBytes) {
-      throw ContentTooLarge('Unrecognised response returned by the ArtefactScan service.', {
+      throw ContentTooLarge('Artefact exceeds configured scanner size limit.', {
         status: 413,
         statusText: 'Request Entity Too Large',
         endpoint: this.artefactType,

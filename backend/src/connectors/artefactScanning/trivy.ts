@@ -45,7 +45,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         const layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
         if (layerSize != Infinity && layerSize > this.maxImageSizeBytes) {
-          throw ContentTooLarge('Unrecognised response returned by the ArtefactScan service.', {
+          throw ContentTooLarge('Artefact exceeds configured scanner size limit.', {
             status: 413,
             statusText: 'Request Entity Too Large',
             endpoint: this.artefactType,
