@@ -14,10 +14,12 @@ import {
   softDeleteImage,
   splitDistributionPackageName,
 } from '../../src/services/registry.js'
-import { InternalError } from '../../src/utils/error.js'
+import { InternalError, RegistryError } from '../../src/utils/error.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const ScanModelMock = getTypedModelMock('ScanModel')
+
+vi.mock('../../../../src/utils/transactions.js')
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -46,7 +48,6 @@ const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
   getImageTagManifest: vi.fn(),
   getImageTagManifests: vi.fn(),
-  getImageTagManfiestList: vi.fn(),
   getRegistryLayerStream: vi.fn(),
   listImageTags: vi.fn(() => [] as string[]),
   listModelRepos: vi.fn(),
@@ -58,7 +59,7 @@ vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
-  getLayersForImageTag: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
+  getLayersForImage: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
   getLayersByPlatform: vi.fn(),
 }))
 vi.mock('../../src/services/images/getImageLayers.js', () => getImageLayersMocks)
@@ -379,7 +380,7 @@ describe('services > registry', () => {
     })
 
     test('renameImage > source manifest not found', async () => {
-      registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error', { status: 404 }))
+      registryClientMocks.getImageTagManifests.mockRejectedValueOnce(RegistryError({} as any, { status: 404 }))
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
         'The requested image was not found.',
@@ -387,22 +388,34 @@ describe('services > registry', () => {
     })
 
     test('renameImage > manifest body missing', async () => {
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({})
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({})
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
         'The registry returned a response but the body was missing.',
       )
     })
 
+    test('renameImage > missing source digest header', async () => {
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: { config: { digest: 'd' }, layers: [] },
+        headers: {},
+      })
+
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+        'The registry returned a response but the source digest header was missing.',
+      )
+    })
+
     test('renameImage > source manifest other error', async () => {
-      registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error'))
+      registryClientMocks.getImageTagManifests.mockRejectedValueOnce(InternalError('Error'))
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Error')
     })
 
     test('renameImage > config missing digest', async () => {
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: { config: {}, layers: [] },
+        headers: { 'docker-content-digest': 'digest' },
       })
 
       await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Could not extract layer digest.')
@@ -410,7 +423,7 @@ describe('services > registry', () => {
 
     test('renameImage > success and delete orphan', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest
+      registryClientMocks.getImageTagManifests
         .mockResolvedValueOnce({
           body: mockBody,
           headers: { 'docker-content-digest': 'digest' },
@@ -433,12 +446,16 @@ describe('services > registry', () => {
         'mediaType',
       )
       expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
+      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'digest',
+      })
     })
 
     test('renameImage > success no orphan found', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -461,7 +478,7 @@ describe('services > registry', () => {
 
     test('renameImage > success handle 404', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -479,12 +496,16 @@ describe('services > registry', () => {
         'mediaType',
       )
       expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
+      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'digest',
+      })
     })
 
     test('renameImage > rethrow error', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -506,9 +527,95 @@ describe('services > registry', () => {
       expect(registryClientMocks.deleteManifest).toHaveBeenCalledTimes(1)
     })
 
+    test('renameImage > multi manifest success', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          {
+            digest: 'sha256:child1',
+            platform: { architecture: 'amd64', os: 'linux' },
+          },
+        ],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer1' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({
+          body: manifestList,
+          headers: { 'docker-content-digest': 'sha256:listDigest' },
+        })
+        .mockResolvedValueOnce({
+          body: childManifest,
+          headers: {},
+        })
+      registryClientMocks.putManifest.mockResolvedValueOnce({
+        'docker-content-digest': 'sha256:newChildDigest',
+      })
+      const source = { repository: 'sourceRepo', name: 'img', tag: 'v1' }
+      const destination = { repository: 'destRepo', name: 'img', tag: 'v1' }
+
+      await renameImage({} as any, source, destination)
+
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalled()
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+    })
+
+    test('renameImage > multi manifest missing child manifest', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({
+          body: manifestList,
+          headers: { 'docker-content-digest': 'sha256:list' },
+        })
+        .mockResolvedValueOnce({
+          body: { manifests: [] },
+          headers: {},
+        })
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      const source = { repository: 'repo', name: 'img', tag: 'v1' }
+      const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
+
+      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Platform manifest missing.')
+    })
+
+    test('renameImage > multi manifest child PUT missing digest', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({
+          body: manifestList,
+          headers: { 'docker-content-digest': 'sha256:list' },
+        })
+        .mockResolvedValueOnce({
+          body: childManifest,
+          headers: {},
+        })
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      registryClientMocks.putManifest.mockResolvedValueOnce({})
+      const source = { repository: 'repo', name: 'img', tag: 'v1' }
+      const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
+
+      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Child manifest digest missing after PUT')
+    })
+
     test('softDeleteImage > success', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -531,7 +638,7 @@ describe('services > registry', () => {
         settings: { mirror: { sourceModelId: 'sourceModelId' } },
       } as any)
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -572,6 +679,21 @@ describe('services > registry', () => {
           repository: 'repo1',
           name: 'image1',
           tags: ['tag1', 'tag2'],
+        },
+      ])
+    })
+
+    test('listModelImages > filters repositories with no tags', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1', 'repo2/image2'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1']).mockResolvedValueOnce([])
+
+      const result = await listModelImages({ dn: 'user' } as any, 'modelId')
+
+      expect(result).toEqual([
+        {
+          repository: 'repo1',
+          name: 'image1',
+          tags: ['tag1'],
         },
       ])
     })
@@ -764,7 +886,7 @@ describe('services > registry', () => {
 
     test('restoreSoftDeletedImage > success', async () => {
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })
@@ -782,7 +904,7 @@ describe('services > registry', () => {
         settings: { mirror: { sourceModelId: 'sourceModelId' } },
       } as any)
       const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
-      registryClientMocks.getImageTagManifest.mockResolvedValue({
+      registryClientMocks.getImageTagManifests.mockResolvedValue({
         body: mockBody,
         headers: { 'docker-content-digest': 'digest' },
       })

@@ -21,7 +21,7 @@ export const postModelSchema = z.object({
     description: z.string().min(1, 'You must provide a model description').openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
     tags: z
-      .array(z.string())
+      .array(z.string().toLowerCase())
       .optional()
       .openapi({ example: ['development'] }),
     collaborators: z
