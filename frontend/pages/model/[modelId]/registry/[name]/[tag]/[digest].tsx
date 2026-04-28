@@ -288,7 +288,9 @@ export default function ImageTagInformation() {
               {modelImage.platform && (
                 <Stack>
                   <Typography fontWeight='bold'>Platform</Typography>
-                  <Typography>{modelImage.platform ?? ''}</Typography>
+                  <Box pt={1}>
+                    <Typography>{modelImage.platform ?? ''}</Typography>
+                  </Box>
                 </Stack>
               )}
             </Stack>
