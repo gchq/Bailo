@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
 import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
@@ -63,10 +63,6 @@ const mockMetadata: ImageMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > ImageImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     expect(importer).toMatchSnapshot()

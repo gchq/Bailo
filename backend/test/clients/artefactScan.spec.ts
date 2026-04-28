@@ -56,7 +56,6 @@ describe('clients > artefactScan', () => {
   beforeEach(() => {
     // required due to cached `getCachedArtefactScanInfo` function
     vi.resetModules()
-    vi.clearAllMocks()
   })
 
   test('getCachedArtefactScanInfo > success', async () => {

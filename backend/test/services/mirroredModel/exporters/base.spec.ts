@@ -39,7 +39,6 @@ const mockLogData = { extra: 'info', exportId: 'exportId' }
 
 describe('services > mirroredModel > exporters > BaseExporter', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
     tarballMocks.initialiseTarGzUpload.mockResolvedValue({
       tarStream: {} as any,
       gzipStream: {} as any,

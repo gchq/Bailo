@@ -23,7 +23,6 @@ vi.mock('../../src/utils/database.js', () => {
 
 describe('utils => transactions', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
     vi.spyOn(mongoose.Connection.prototype, 'transaction').mockImplementation(async function (fn) {
       return await fn({} as ClientSession)
     })
