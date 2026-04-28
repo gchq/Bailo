@@ -2,7 +2,7 @@ import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from 
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
 import { PieChart } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
-import { useVolumeForModel } from 'actions/metrics'
+import { useGetVolumeForModel } from 'actions/metrics'
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -34,8 +34,9 @@ export default function OverviewMetricsCharts({
   const [structuredModelVolume, setStructuredModelVolume] = useState<any[]>([])
   const [startDate, setStartDate] = useState<Dayjs | null>(null)
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(new Date()))
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useVolumeForModel(
+  const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
     'month',
     `${startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`,
     `${endDate ? endDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`,
@@ -141,7 +142,11 @@ export default function OverviewMetricsCharts({
   }
 
   if (isModelVolumeError) {
-    return <MessageAlert message={isModelVolumeError.info.message} severity='error' />
+    if (isModelVolumeError.status === 400 && !errorMessage) {
+      setErrorMessage(isModelVolumeError.info.message)
+    } else if (isModelVolumeError.status !== 400) {
+      return <MessageAlert message={isModelVolumeError.info.message} severity='error' />
+    }
   }
 
   if (isModelVolumeLoading) {
@@ -159,7 +164,10 @@ export default function OverviewMetricsCharts({
             openTo='month'
             views={['year', 'month']}
             value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
+            onChange={(newValue) => {
+              setStartDate(newValue)
+              setErrorMessage('')
+            }}
           />
           <Typography fontWeight='bold' variant='h6' color='primary'>
             &
@@ -168,9 +176,13 @@ export default function OverviewMetricsCharts({
             openTo='month'
             views={['year', 'month']}
             value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
+            onChange={(newValue) => {
+              setEndDate(newValue)
+              setErrorMessage('')
+            }}
           />
         </Stack>
+        <Typography color='error'>{errorMessage}</Typography>
         <BarChart
           dataset={structuredModelVolume}
           series={[

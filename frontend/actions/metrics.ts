@@ -37,7 +37,7 @@ export function useGetModelVolumeMetrics(
   }
 }
 
-export function useVolumeForModel(bucket: string = 'month', startDate?: string, endDate?: string) {
+export function useGetVolumeForModel(bucket: string = 'month', startDate?: string, endDate?: string) {
   const queryParams = {
     bucket,
     ...(startDate != undefined && { startDate }),
@@ -48,7 +48,7 @@ export function useVolumeForModel(bucket: string = 'month', startDate?: string, 
       data: ModelVolume
       ErrorInfo
     }[]
-  >(`/api/v2/metrics/modelVolume?${qs.stringify(queryParams)}`, fetcher)
+  >(`/api/v3/metrics/modelVolume?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateModelVolume: mutate,
@@ -65,7 +65,7 @@ export function useGetGetOverviewMetrics() {
       byOrganisation: OrganisationOverviewMetrics[]
     },
     ErrorInfo
-  >('/api/v2/metrics', fetcher)
+  >('/api/v3/metrics', fetcher)
 
   return {
     mutateOverviewMetrics: mutate,
@@ -82,7 +82,7 @@ export function useGetPolicyMetrics() {
       byOrganisation: OrganisationPolicyMetrics[]
     },
     ErrorInfo
-  >('/api/v2/metrics/policy', fetcher)
+  >('/api/v3/metrics/policy', fetcher)
 
   return {
     mutateOverviewMetrics: mutate,
