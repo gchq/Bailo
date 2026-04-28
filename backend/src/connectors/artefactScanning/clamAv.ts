@@ -9,39 +9,34 @@ import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
-  try {
-    const match = versionStr.match(/ClamAV\s([\d.]+)\//)
-    if (match && match[1]) {
-      return match[1]
-    }
-    return versionStr
-  } catch {
-    return versionStr
+  const match = versionStr.match(/ClamAV\s([\d.]+)\//)
+  if (match && match[1]) {
+    return match[1]
   }
+  return versionStr
 }
 
 export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
-  queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
-  artefactType: ArtefactKindKeys = ArtefactKind.FILE
-  toolName = 'Clam AV'
-  av: NodeClam | undefined = undefined
+  readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
+  readonly artefactType: ArtefactKindKeys = ArtefactKind.FILE
+  readonly toolName = 'Clam AV'
+  protected av: NodeClam | undefined = undefined
 
   constructor() {
     super()
   }
 
-  async init() {
+  async init(): Promise<void> {
     this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
     log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
-    return this
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
+  protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
     if (!this.av) {
-      return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`, {
+      return await this.scanError(`Could not use ${this.toolName} as it has not been correctly initialised.`, {
         ...scannerInfo,
       })
     }

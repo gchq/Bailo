@@ -57,23 +57,20 @@ function formatDate(date = new Date()) {
 
 export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
-  artefactType: ArtefactKindKeys = ArtefactKind.FILE
-  toolName: string = 'ModelScan'
-  supportedExtensions?: string[]
-  maxFileSizeBytes?: number
+  readonly artefactType: ArtefactKindKeys = ArtefactKind.FILE
+  readonly toolName: string = 'ModelScan'
+  protected supportedExtensions: string[] = []
+  protected maxFileSizeBytes: number = Infinity
 
-  async init() {
-    if (!(this.version && this.supportedExtensions && this.maxFileSizeBytes)) {
-      const artefactScanInfo = await getCachedArtefactScanInfo()
-      this.version = artefactScanInfo.modelscanVersion
-      this.supportedExtensions = artefactScanInfo.modelscanSupportedExtensions ?? []
-      this.maxFileSizeBytes = artefactScanInfo.maxFileSizeBytes ?? Infinity
-    }
-    return this
+  async init(): Promise<void> {
+    const artefactScanInfo = await getCachedArtefactScanInfo()
+
+    this.version = artefactScanInfo.modelscanVersion
+    this.supportedExtensions = artefactScanInfo.modelscanSupportedExtensions ?? this.supportedExtensions
+    this.maxFileSizeBytes = artefactScanInfo.maxFileSizeBytes ?? this.maxFileSizeBytes
   }
 
-  async getSkippedScanSummary(file: FileInterfaceDoc): Promise<ModelScanResponse> {
-    await this.init()
+  protected getSkippedScanSummary(file: FileInterfaceDoc): ModelScanResponse {
     const skippedScanSummary = structuredClone(skippedScanTemplate)
     skippedScanSummary.summary.input_path = `/tmp/${file.name}`
     skippedScanSummary.summary.timestamp = formatDate()
@@ -83,19 +80,15 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     return skippedScanSummary
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
-    await this.init()
+  protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
-    if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
-    }
 
     if (
       file.size > this.maxFileSizeBytes! ||
       (this.supportedExtensions!.length > 0 &&
         !this.supportedExtensions!.some((supportedExtension) => file.name.endsWith(supportedExtension)))
     ) {
-      const additionalInfo = await this.getSkippedScanSummary(file)
+      const additionalInfo = this.getSkippedScanSummary(file)
       log.debug({ file, result: { additionalInfo }, ...scannerInfo }, 'Skipping file scan.')
       return {
         ...scannerInfo,

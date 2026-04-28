@@ -26,19 +26,23 @@ export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' 
 export abstract class BaseArtefactScanningConnector {
   abstract readonly toolName: string
   abstract readonly artefactType: ArtefactKindKeys
-  version: string | undefined = undefined
-
   abstract readonly queue: PQueue
+
+  protected version?: string
 
   info(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version, artefactKind: this.artefactType }
   }
 
-  abstract init()
+  abstract init(): Promise<void>
 
-  abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
+  protected abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
 
   async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult> {
+    if (!this.version) {
+      return this.scanError(`${this.toolName} used before initialisation`, { artefact })
+    }
+
     log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResult = await this.queue
       .add(() => this._scan(artefact))

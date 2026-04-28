@@ -16,23 +16,16 @@ import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, L
 
 export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
-  artefactType: ArtefactKindKeys = ArtefactKind.IMAGE
-  toolName: string = 'Trivy'
+  readonly artefactType: ArtefactKindKeys = ArtefactKind.IMAGE
+  readonly toolName: string = 'Trivy'
 
-  async init() {
-    if (!this.version) {
-      const artefactScanInfo = await getCachedArtefactScanInfo()
-      this.version = artefactScanInfo.trivyVersion
-    }
-    return this
+  async init(): Promise<void> {
+    const artefactScanInfo = await getCachedArtefactScanInfo()
+    this.version = artefactScanInfo.trivyVersion
   }
 
-  async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
-    await this.init()
+  protected async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
-    if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
-    }
 
     try {
       // User does not pull the layer so attribute to the scanner

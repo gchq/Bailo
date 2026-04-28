@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
 import { ModelScanFileScanningConnector } from '../../../src/connectors/artefactScanning/modelScan.js'
@@ -45,12 +45,8 @@ vi.mock('p-queue', () => ({
   }),
 }))
 
-describe('connectors > artefactScanning > modelScan', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  test('ModelScanFileScanningConnector > successful file scan', async () => {
+describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConnector', () => {
+  test('scan() success', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       modelscanVersion: '1.0.0',
     })
@@ -66,6 +62,7 @@ describe('connectors > artefactScanning > modelScan', () => {
       errors: [],
     })
     const connector = new ModelScanFileScanningConnector()
+    await connector.init()
 
     const result = await connector.scan({
       id: 'file1',
@@ -78,7 +75,7 @@ describe('connectors > artefactScanning > modelScan', () => {
     expect(result.artefactKind).toBe(ArtefactKind.FILE)
   })
 
-  test('ModelScanFileScanningConnector > scan returns errors', async () => {
+  test('scan() returns found errors', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       modelscanVersion: '1.0.0',
     })
@@ -88,6 +85,7 @@ describe('connectors > artefactScanning > modelScan', () => {
       errors: [{ description: 'failure' }],
     })
     const connector = new ModelScanFileScanningConnector()
+    await connector.init()
 
     const result = await connector.scan({
       id: 'file1',
@@ -98,7 +96,7 @@ describe('connectors > artefactScanning > modelScan', () => {
     expect(result.state).toBe(ArtefactScanState.Error)
   })
 
-  test('ModelScanFileScanningConnector > scan throws', async () => {
+  test('scan() handles thrown error', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       modelscanVersion: '1.0.0',
     })
@@ -107,6 +105,7 @@ describe('connectors > artefactScanning > modelScan', () => {
     s3Mocks.getObjectStream.mockResolvedValueOnce(stream)
     artefactScanClientMocks.scanFileStream.mockRejectedValueOnce(new Error('boom'))
     const connector = new ModelScanFileScanningConnector()
+    await connector.init()
 
     const result = await connector.scan({
       id: 'file1',
@@ -118,9 +117,12 @@ describe('connectors > artefactScanning > modelScan', () => {
     expect(destroySpy).toBeCalled()
   })
 
-  test('ModelScanFileScanningConnector > returns error when scannerVersion is undefined', async () => {
+  test('scan() returns error when scannerVersion is undefined', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({})
     const connector = new ModelScanFileScanningConnector()
+    await connector.init()
+    // @ts-expect-ignore accessing protected property
+    connector['scannerVersion'] = undefined
 
     const result = await connector.scan({
       id: 'file1',
@@ -131,5 +133,56 @@ describe('connectors > artefactScanning > modelScan', () => {
     expect(result.state).toBe(ArtefactScanState.Error)
     expect(result.toolName).toBe('ModelScan')
     expect(result.scannerVersion).toBeUndefined()
+  })
+
+  test('scan() skips unsupported extension', async () => {
+    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
+      modelscanVersion: '1.0.0',
+      modelscanSupportedExtensions: ['.txt'],
+    })
+    const connector = new ModelScanFileScanningConnector()
+    await connector.init()
+
+    const result = await connector.scan({
+      id: 'file1',
+      name: 'model.bin',
+      path: '/bucket/model.bin',
+    } as any)
+
+    expect(result.state).toBe(ArtefactScanState.Complete)
+    expect(result.summary).toHaveLength(0)
+    expect(result.artefactKind).toBe(ArtefactKind.FILE)
+    expect(result.additionalInfo).toMatchObject(
+      expect.objectContaining({
+        summary: {
+          total_issues: 0,
+          total_issues_by_severity: {
+            LOW: 0,
+            MEDIUM: 0,
+            HIGH: 0,
+            CRITICAL: 0,
+          },
+          input_path: '/tmp/model.bin',
+          absolute_path: '/tmp',
+          modelscan_version: '1.0.0',
+          timestamp: expect.anything(),
+          scanned: {
+            total_scanned: 0,
+          },
+          skipped: {
+            total_skipped: 1,
+            skipped_files: [
+              {
+                category: 'SCAN_NOT_SUPPORTED',
+                description: 'Model Scan did not scan file',
+                source: 'model.bin',
+              },
+            ],
+          },
+        },
+        issues: [],
+        errors: [],
+      }),
+    )
   })
 })

@@ -82,6 +82,7 @@ describe('connectors > artefactScanning > trivy', () => {
       ],
     })
     const connector = new TrivyImageScanningConnector()
+    await connector.init()
 
     const result = await connector.scan({
       repository: 'repo',
@@ -106,6 +107,7 @@ describe('connectors > artefactScanning > trivy', () => {
     })
     artefactScanClientMocks.scanImageBlobStream.mockRejectedValueOnce(new Error('scan failed'))
     const connector = new TrivyImageScanningConnector()
+    await connector.init()
 
     const result = await connector.scan({
       repository: 'repo',

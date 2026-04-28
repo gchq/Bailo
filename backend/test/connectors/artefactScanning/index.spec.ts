@@ -34,7 +34,6 @@ async function loadModule() {
 describe('connectors > artefactScanning > index', () => {
   beforeEach(() => {
     vi.resetModules()
-    vi.clearAllMocks()
   })
 
   test('initialise ClamAV scanner when enabled', async () => {
