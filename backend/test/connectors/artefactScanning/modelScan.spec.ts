@@ -117,12 +117,12 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
     expect(destroySpy).toBeCalled()
   })
 
-  test('scan() returns error when scannerVersion is undefined', async () => {
+  test('scan() returns error when version is undefined', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({})
     const connector = new ModelScanFileScanningConnector()
     await connector.init()
     // @ts-expect-ignore accessing protected property
-    connector['scannerVersion'] = undefined
+    connector['version'] = undefined
 
     const result = await connector.scan({
       id: 'file1',
