@@ -169,17 +169,6 @@ export default function SideNavigation({
               title='Help & Support'
               icon={<ContactSupportIcon />}
             />
-            {currentUser.isAdmin && (
-              <NavMenuItem
-                href='/metrics'
-                selectedPage={page}
-                primaryText='Metrics'
-                drawerOpen={drawerOpen}
-                menuPage='metrics'
-                title='Metrics'
-                icon={<Equalizer />}
-              />
-            )}
             <Divider aria-hidden='true' />
             {currentUser.isAdmin && (
               <>
@@ -203,6 +192,17 @@ export default function SideNavigation({
                 menuPage='reviewRoles'
                 title='Review Roles'
                 icon={<SupervisorAccount />}
+              />
+            )}
+            {currentUser.isAdmin && (
+              <NavMenuItem
+                href='/metrics'
+                selectedPage={page}
+                primaryText='Metrics'
+                drawerOpen={drawerOpen}
+                menuPage='metrics'
+                title='Metrics'
+                icon={<Equalizer />}
               />
             )}
           </StyledList>

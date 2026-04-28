@@ -1,7 +1,9 @@
 import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
 import { PieChart } from '@mui/x-charts/PieChart'
+import { DatePicker } from '@mui/x-date-pickers'
 import { useVolumeForModel } from 'actions/metrics'
+import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -30,15 +32,13 @@ export default function OverviewMetricsCharts({
   const [stateData, setStateData] = useState<PieChartData[]>([])
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
   const [structuredModelVolume, setStructuredModelVolume] = useState<any[]>([])
-
-  const startDate = new Date()
-  startDate.setFullYear(startDate.getFullYear() - 1)
-  const endDate = new Date()
+  const [startDate, setStartDate] = useState<Dayjs | null>(null)
+  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(new Date()))
 
   const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useVolumeForModel(
     'month',
-    `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getDate().toString().padStart(2, '0')}`,
-    `${endDate.getFullYear()}-${(endDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}`,
+    `${startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`,
+    `${endDate ? endDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`,
   )
 
   const updateStateData = useEffectEvent((newStateData) => {
@@ -57,6 +57,18 @@ export default function OverviewMetricsCharts({
       )
     }
   }, [data.modelState])
+
+  const updateStartDate = useEffectEvent((newDate: Date) => {
+    setStartDate(dayjs(newDate))
+  })
+
+  useEffect(() => {
+    if (!startDate) {
+      const updatedStartDate = new Date()
+      updatedStartDate.setFullYear(updatedStartDate.getFullYear() - 1)
+      updateStartDate(updatedStartDate)
+    }
+  }, [startDate])
 
   const updateSchemaData = useEffectEvent((newSchemaData) => {
     setSchemaData(newSchemaData)
@@ -138,16 +150,38 @@ export default function OverviewMetricsCharts({
 
   return (
     <Stack spacing={6} divider={<Divider flexItem />}>
-      <BarChart
-        dataset={structuredModelVolume}
-        series={[
-          ...organisationList.map((organisation) => {
-            return { dataKey: organisation, label: organisation }
-          }),
-        ]}
-        xAxis={[{ dataKey: 'label' }]}
-        {...barChartConfig}
-      />
+      <Stack spacing={2}>
+        <Stack direction='row' spacing={2} alignItems='center'>
+          <Typography fontWeight='bold' variant='h6' color='primary'>
+            Monthly uploads between
+          </Typography>
+          <DatePicker
+            openTo='month'
+            views={['year', 'month']}
+            value={startDate}
+            onChange={(newValue) => setStartDate(newValue)}
+          />
+          <Typography fontWeight='bold' variant='h6' color='primary'>
+            &
+          </Typography>
+          <DatePicker
+            openTo='month'
+            views={['year', 'month']}
+            value={endDate}
+            onChange={(newValue) => setEndDate(newValue)}
+          />
+        </Stack>
+        <BarChart
+          dataset={structuredModelVolume}
+          series={[
+            ...organisationList.map((organisation) => {
+              return { dataKey: organisation, label: organisation }
+            }),
+          ]}
+          xAxis={[{ dataKey: 'label' }]}
+          {...barChartConfig}
+        />
+      </Stack>
       <Stack spacing={4}>
         <Stack direction='row' alignItems='center' spacing={2}>
           <Typography fontStyle='italic'>Showing results for</Typography>
@@ -155,6 +189,7 @@ export default function OverviewMetricsCharts({
             sx={{ maxWidth: '300px' }}
             value={selectedOrganisation}
             onChange={(e) => handleOrganisationSelectOnChange(e)}
+            variant='standard'
           >
             <MenuItem key='all' value='All'>
               All organisations
