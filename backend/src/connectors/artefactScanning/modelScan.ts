@@ -17,10 +17,10 @@ const skippedScanTemplate: ModelScanResponse = {
       HIGH: 0,
       CRITICAL: 0,
     },
-    input_path: '/tmp/tmpuetcqh5n.zip',
+    input_path: '/tmp/fileName.extension',
     absolute_path: '/tmp',
-    modelscan_version: '0.8.8',
-    timestamp: '2026-04-21T13:36:47.628305',
+    modelscan_version: 'x.y.z',
+    timestamp: 'YYYY-MM-DDTHH:mm:ss.ssssss',
     scanned: {
       total_scanned: 0,
     },
@@ -30,7 +30,7 @@ const skippedScanTemplate: ModelScanResponse = {
         {
           category: 'SCAN_NOT_SUPPORTED',
           description: 'Model Scan did not scan file',
-          source: 'tmpuetcqh5n.zip:zul_enu_generalnn_2026020200',
+          source: 'fileName.extension',
         },
       ],
     },
@@ -66,8 +66,8 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     if (!(this.version && this.supportedExtensions && this.maxFileSizeBytes)) {
       const artefactScanInfo = await getCachedArtefactScanInfo()
       this.version = artefactScanInfo.modelscanVersion
-      this.supportedExtensions = artefactScanInfo.modelscanSupportedExtensions
-      this.maxFileSizeBytes = artefactScanInfo.maxFileSizeBytes
+      this.supportedExtensions = artefactScanInfo.modelscanSupportedExtensions ?? []
+      this.maxFileSizeBytes = artefactScanInfo.maxFileSizeBytes ?? Infinity
     }
     return this
   }
@@ -92,7 +92,8 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
 
     if (
       file.size > this.maxFileSizeBytes! ||
-      !this.supportedExtensions!.some((supportedExtension) => file.name.endsWith(supportedExtension))
+      (this.supportedExtensions!.length > 0 &&
+        !this.supportedExtensions!.some((supportedExtension) => file.name.endsWith(supportedExtension)))
     ) {
       const additionalInfo = await this.getSkippedScanSummary(file)
       log.debug({ file, result: { additionalInfo }, ...scannerInfo }, 'Skipping file scan.')
