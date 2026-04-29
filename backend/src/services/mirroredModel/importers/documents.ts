@@ -8,6 +8,7 @@ import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
+import ModelTransferModel, { TransferStatus } from '../../../models/ModelTransfer.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
@@ -18,6 +19,7 @@ import log from '../../log.js'
 import { getModelByIdNoAuth, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
+import { completeImportNotification, startImportNotification } from '../../smtp/smtp.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -176,6 +178,47 @@ export class DocumentsImporter extends BaseImporter {
       'Finished importing the collection of model documents.',
     )
 
+    let modelTransfer = await ModelTransferModel.findOne({ exportId: this.metadata.exportId })
+
+    if (!modelTransfer) {
+      const fileStatus = Object.fromEntries(this.fileIds.map((id) => [id, TransferStatus.InProgress]))
+
+      const imageStatus = Object.fromEntries(this.imageIds.map((id) => [id, TransferStatus.InProgress]))
+
+      modelTransfer = await ModelTransferModel.create({
+        exportId: this.metadata.exportId,
+        createdBy: this.metadata.exporter,
+        modelId: this.metadata.mirroredModelId,
+        documentStatus: TransferStatus.Completed,
+        fileStatus,
+        imageStatus,
+      })
+
+      await startImportNotification(this.metadata.mirroredModelId, this.newReleases)
+    } else {
+      const fileUpdates = Object.fromEntries(this.fileIds.map((id) => [`fileStatus.${id}`, TransferStatus.InProgress]))
+
+      const imageUpdates = Object.fromEntries(
+        this.imageIds.map((id) => [`imageStatus.${id}`, TransferStatus.InProgress]),
+      )
+
+      modelTransfer = await ModelTransferModel.findOneAndUpdate(
+        { exportId: this.metadata.exportId },
+        {
+          $set: {
+            documentStatus: TransferStatus.Completed,
+            ...fileUpdates,
+            ...imageUpdates,
+          },
+        },
+        { new: true },
+      )
+    }
+
+    if (modelTransfer?.status === TransferStatus.Completed && !modelTransfer.notificationSent) {
+      await completeImportNotification(this.metadata.mirroredModelId)
+      await ModelTransferModel.updateOne({ exportId: this.metadata.exportId }, { $set: { notificationSent: true } })
+    }
     resolve({
       metadata: this.metadata,
       modelCardVersions: this.modelCardVersions,
