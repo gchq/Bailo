@@ -1,5 +1,6 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, JSX, SetStateAction } from 'react'
+import OverviewMetrics from 'src/metrics/OverviewMetrics'
 
 export interface BailoError extends Error {
   id?: string
@@ -918,3 +919,76 @@ export type ImageScanResults = {
 }
 
 export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
+
+export type ModelVolumeData = {
+  startDate: string
+  endDate: string
+  count: number
+  organisations: Record<string, number>
+}
+
+export type ModelVolume = {
+  data: ModelVolumeData
+  bucket: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  startDate: string
+  endDate: string
+}
+
+export interface SchemaBreakDownMetrics {
+  schemaId: string
+  schemaName: string
+  count: number
+}
+
+export interface ModelStateMetrics {
+  state: string
+  count: number
+}
+
+export interface OverviewBaseMetrics {
+  users: number
+  models: number
+  schemaBreakdown: SchemaBreakDownMetrics[]
+  modelState: ModelStateMetrics[]
+  withReleases: number
+  withAccessRequest: number
+}
+
+export interface OrganisationOverviewMetrics extends OverviewBaseMetrics {
+  organisation: string
+}
+
+export interface OverviewMetrics {
+  global: OverviewBaseMetrics
+  byOrganisation: OrganisationOverviewMetrics[]
+}
+
+export interface PolicySummaryMetrics {
+  roleId: string
+  roleName: string
+  count: number
+}
+
+export interface PolicyRoleMetric {
+  roleId: string
+  roleName: string
+}
+
+export interface PolicyModelMetrics {
+  modelId: string
+  missingRoles: PolicyRoleMetric[]
+}
+
+export interface PolicyBaseMetrics {
+  summary: PolicySummaryMetrics[]
+  models: PolicyModelMetrics[]
+}
+
+export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
+  organisation: string
+}
+
+export interface PolicyMetrics {
+  global: PolicyBaseMetrics
+  byOrganisation: OrganisationPolicyMetrics
+}

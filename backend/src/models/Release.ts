@@ -98,6 +98,7 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
 
 ReleaseSchema.plugin(softDeletionPlugin)
 ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
+ReleaseSchema.index({ modelId: 1 })
 
 const ReleaseModel = model<ReleaseDoc>('v2_Release', ReleaseSchema)
 

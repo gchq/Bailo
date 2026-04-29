@@ -10,6 +10,12 @@ exports[`connectors > authentication > silly > authenticationMiddleware 1`] = `
   },
   {
     "middleware": [
+      [Function],
+    ],
+    "path": "/api/v3",
+  },
+  {
+    "middleware": [
       "Token Middleware",
     ],
     "path": "/api/v2/token",
@@ -20,6 +26,19 @@ exports[`connectors > authentication > silly > authenticationMiddleware 1`] = `
       "Authentication Check Middleware",
     ],
     "path": "/api/v2",
+  },
+  {
+    "middleware": [
+      "Token Middleware",
+    ],
+    "path": "/api/v3/token",
+  },
+  {
+    "middleware": [
+      "Token Middleware",
+      "Authentication Check Middleware",
+    ],
+    "path": "/api/v3",
   },
 ]
 `;
