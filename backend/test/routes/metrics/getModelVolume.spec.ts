@@ -7,25 +7,21 @@ import { createFixture, testGet } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
-const mockReviewService = vi.hoisted(() => ({
+const mockMetricsService = vi.hoisted(() => ({
   calculateModelVolume: vi.fn(() => ({
     startDate: 'string',
     endDate: 'string',
     dataPoints: [],
   })),
 }))
-vi.mock('../../../src/services/metrics.js', async (importOriginal) => {
-  const actual = (await importOriginal()) as any
-  return {
-    ...actual,
-    ...mockReviewService,
-  }
-})
+
+vi.mock('../../../src/services/metrics.js', () => mockMetricsService)
 
 describe('routes > metrics > getModelVolume', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getModelVolumeSchema)
-    const res = await testGet(`/api/v2/metrics/modelVolume?${qs.stringify(fixture.query)}`)
+
+    const res = await testGet(`/api/v3/metrics/modelVolume?${qs.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -33,7 +29,8 @@ describe('routes > metrics > getModelVolume', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(getModelVolumeSchema)
-    const res = await testGet(`/api/v2/metrics/modelVolume?${qs.stringify(fixture.query)}`)
+
+    const res = await testGet(`/api/v3/metrics/modelVolume?${qs.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewMetric).toBeCalled()

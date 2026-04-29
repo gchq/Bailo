@@ -10,6 +10,7 @@ import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
+import { MetricsKindKeys } from '../connectors/metrics/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
@@ -55,6 +56,10 @@ export interface Config {
       retryDelayInMinutes: number
       maxInitRetries: number
       initRetryDelay: number
+    }
+
+    metrics: {
+      kind: MetricsKindKeys
     }
   }
 

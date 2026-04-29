@@ -4,11 +4,9 @@ import path from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
-import { Roles } from './connectors/authentication/constants.js'
 import authentication from './connectors/authentication/index.js'
 import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
-import { requireRole } from './routes/middleware/requireRoles.js'
 import { escalateUser } from './routes/middleware/userEscalation.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getArtefactScanningInfo } from './routes/v2/artefactScanning/getArtefactScanningInfo.js'
@@ -18,6 +16,8 @@ import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { getModelVolume } from './routes/v2/metrics/getModelVolume.js'
+import { getOverviewMetrics } from './routes/v2/metrics/getOverviewMetrics.js'
+import { getPolicyMetrics } from './routes/v2/metrics/getPolicyMetrics.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -106,6 +106,8 @@ export const server = express()
 
 server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', httpLog)
+server.use('/api/v3', bodyParser.json())
+server.use('/api/v3', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -257,7 +259,9 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-server.get('/api/v2/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
+server.get('/api/v3/metrics', ...getOverviewMetrics)
+server.get('/api/v3/metrics/policy', ...getPolicyMetrics)
+server.get('/api/v3/metrics/modelVolume', ...getModelVolume)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
@@ -265,5 +269,6 @@ const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+server.use('/api/v3', expressErrorHandler)
 
 server.use('/internal', internalRouter)
