@@ -3,6 +3,9 @@
 exports[`routes > review > getReviews > audit > expected call 1`] = `
 [
   {
+    "_id": {
+      "toString": [MockFunction],
+    },
     "createdAt": 2023-08-13T00:00:00.000Z,
     "kind": "release",
     "modelId": "abc",
@@ -18,6 +21,7 @@ exports[`routes > review > getReviews > returns only reviews for the specified m
 {
   "reviews": [
     {
+      "_id": {},
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "modelId": "abc",
@@ -50,6 +54,7 @@ exports[`routes > review > getReviews > returns reviews 1`] = `
 {
   "reviews": [
     {
+      "_id": {},
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "modelId": "abc",

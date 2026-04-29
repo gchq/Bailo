@@ -113,7 +113,7 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ kind: 'model' })),
+  getModelById: vi.fn(() => ({ kind: 'model', _id: { toString: vi.fn(() => 'modelId') } })),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -209,7 +209,7 @@ describe('services > file', () => {
     const mime = 'text/plain'
     const stream = new Readable() as any
 
-    modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model' })
+    modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model', _id: { toString: vi.fn(() => 'modelId') } })
 
     await expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
       /^Cannot upload files to a mirrored model./,
@@ -263,7 +263,7 @@ describe('services > file', () => {
   })
 
   test('startUploadMultipartFile > should throw an error when attempting to upload a file to a mirrored model', async () => {
-    modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model' })
+    modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model', _id: { toString: vi.fn(() => 'modelId') } })
 
     await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
       /^Cannot upload files to a mirrored model./,

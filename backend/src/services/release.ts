@@ -259,7 +259,7 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
     kind: ResponseKind.Comment,
     comment,
     createdAt: new Date().toISOString(),
-    parentId: release._id,
+    parentId: release._id.toString(),
   })
 
   const savedComment = await commentResponse.save()
@@ -387,7 +387,7 @@ export async function getReleaseBySemver(user: UserInterface, model: string | Mo
 
   const auth = await authorisation.release(user, model, ReleaseAction.View, release)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id.toString() })
   }
 
   return release
@@ -539,7 +539,7 @@ export async function deleteReleases(
 
     const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
     if (!auth.success) {
-      throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+      throw Forbidden(auth.info, { userDn: user.dn, release: release._id.toString() })
     }
 
     const reviewsForRelease: ReviewDoc[] = await Review.find({

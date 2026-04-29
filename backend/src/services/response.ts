@@ -127,7 +127,7 @@ export async function respondToReview(
     entity: toEntity('user', user.dn),
     kind: ResponseKind.Review,
     role,
-    parentId: review._id,
+    parentId: review._id.toString(),
     ...response,
   })
 
@@ -186,7 +186,7 @@ async function sendReviewResponseNotification(
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   const reviews = await findReviewsForAccessRequests(accessRequestIds)
   const approvals = await ResponseModel.find({
-    parentId: reviews.map((review) => review._id),
+    parentId: reviews.map((review) => review._id.toString()),
     decision: Decision.Approve,
   })
   return approvals.length > 0

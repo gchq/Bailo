@@ -262,7 +262,10 @@ describe('services > response', () => {
   })
 
   test('respondToReview > unable to send notification due to missing access request ID', async () => {
-    reviewMock.findReviewForResponse.mockReturnValueOnce({ kind: 'access' } as any)
+    reviewMock.findReviewForResponse.mockReturnValueOnce({
+      kind: 'access',
+      _id: { toString: vi.fn(() => 'mockId') },
+    } as any)
     await respondToReview(
       user,
       'modelId',
@@ -276,7 +279,9 @@ describe('services > response', () => {
     )
 
     expect(logMock.error).toHaveBeenCalledWith(
-      { review: { kind: 'access' } },
+      expect.objectContaining({
+        review: { _id: expect.anything(), kind: 'access' },
+      }),
       'Unable to send notification for review response. Cannot find access request ID.',
     )
   })
@@ -328,7 +333,10 @@ describe('services > response', () => {
   })
 
   test('respondToReview > missing semver', async () => {
-    reviewMock.findReviewForResponse.mockReturnValueOnce({ kind: 'release' } as any)
+    reviewMock.findReviewForResponse.mockReturnValueOnce({
+      kind: 'release',
+      _id: { toString: vi.fn(() => 'mockId') },
+    } as any)
     await respondToReview(
       user,
       'modelId',
@@ -342,9 +350,9 @@ describe('services > response', () => {
     )
 
     expect(logMock.error).toHaveBeenCalledWith(
-      {
-        review: { kind: 'release' },
-      },
+      expect.objectContaining({
+        review: { _id: expect.anything(), kind: 'release' },
+      }),
       'Unable to send notification for review response. Cannot find semver.',
     )
   })
@@ -369,7 +377,10 @@ describe('services > response', () => {
   })
 
   test('checkAccessRequestsApproved > approved access request exists', async () => {
-    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'msro' }, { role: 'random' }] as any)
+    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([
+      { role: 'msro', _id: { toString: vi.fn(() => 'testId-1') } },
+      { role: 'random', _id: { toString: vi.fn(() => 'testId-2') } },
+    ] as any)
     ResponseModelMock.find.mockReturnValueOnce(['approved'])
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
@@ -379,7 +390,9 @@ describe('services > response', () => {
   })
 
   test('checkAccessRequestsApproved > no approved access requests with a required role', async () => {
-    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'random' }] as any)
+    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([
+      { role: 'random', _id: { toString: vi.fn(() => 'testId') } },
+    ] as any)
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
 

@@ -1,3 +1,5 @@
+import { vi } from 'vitest'
+
 import {} from '../../src/models/SchemaMigration.js'
 import { ReviewKind, SchemaKind, SchemaMigrationKind } from '../../src/types/enums.js'
 
@@ -66,6 +68,7 @@ export const testReviewResponse = {
 }
 
 export const testReleaseReview = {
+  _id: { toString: vi.fn(() => 'testReleaseReview') },
   modelId: 'abc',
   semver: '3.0.3',
   kind: ReviewKind.Release,
@@ -77,6 +80,7 @@ export const testReleaseReview = {
 }
 
 export const testAccessRequestReview = {
+  _id: { toString: vi.fn(() => 'testAccessRequestReview') },
   modelId: 'abc',
   accessRequestId: 'cba',
   kind: ReviewKind.Access,

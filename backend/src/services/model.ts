@@ -282,7 +282,7 @@ export async function searchModels(
   const processLocalModels = localModelsPromise.then((localModels) => {
     results.models.push(
       ...localModels.map((model) => ({
-        _id: model._id,
+        _id: model._id.toString(),
         name: model.name,
         description: model.description,
         tags: model.tags,
@@ -881,5 +881,5 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
 
 export async function popularTagsForEntries() {
   const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
-  return tags.map((tag) => tag._id) as string[]
+  return tags.map((tag) => tag._id.toString()) as string[]
 }

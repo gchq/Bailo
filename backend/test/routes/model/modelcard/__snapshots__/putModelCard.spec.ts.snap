@@ -3,12 +3,8 @@
 exports[`routes > model > putModelCard > 200 > ok 1`] = `
 {
   "card": {
-    "_id": "6776901b879d08e34b599d7e",
-    "deleted": false,
-    "deletedAt": "",
-    "deletedBy": "",
-    "mirrored": false,
-    "modelId": "test",
+    "_id": {},
+    "modelId": "modelId",
   },
 }
 `;
@@ -17,11 +13,9 @@ exports[`routes > model > putModelCard > audit > expected call 1`] = `"expedita"
 
 exports[`routes > model > putModelCard > audit > expected call 2`] = `
 {
-  "_id": "6776901b879d08e34b599d7e",
-  "deleted": false,
-  "deletedAt": "",
-  "deletedBy": "",
-  "mirrored": false,
-  "modelId": "test",
+  "_id": {
+    "toString": [MockFunction],
+  },
+  "modelId": "modelId",
 }
 `;

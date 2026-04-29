@@ -195,7 +195,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   }
   const rerunArtefactScanAuth = await authorisation.image(user, model, {
     type: 'repository',
-    name: model._id,
+    name: model._id.toString(),
     actions: ['pull'],
   })
   if (!rerunArtefactScanAuth.success) {

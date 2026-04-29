@@ -262,7 +262,7 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
     entity: toEntity('user', user.dn),
     kind: ResponseKind.Comment,
     comment: message,
-    parentId: accessRequest._id,
+    parentId: accessRequest._id.toString(),
     createdAt: new Date().toISOString(),
   })
 

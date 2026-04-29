@@ -79,7 +79,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
   }
   const modelSchema = await getSchemaById(model.card.schemaId)
   if (!modelSchema) {
-    throw BadReq('Cannot find schema for associated model', { modelId: model._id })
+    throw BadReq('Cannot find schema for associated model', { modelId: model._id.toString() })
   }
 
   const requiredRolesForRelease = await ReviewRoleModel.find({ shortName: { $in: modelSchema.reviewRoles } })
@@ -108,7 +108,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
   const accessRequestSchema = await SchemaModel.findOne({ id: accessRequest.schemaId })
   if (!accessRequestSchema) {
-    throw BadReq('Cannot find schema for associated model', { modelId: model._id })
+    throw BadReq('Cannot find schema for associated model', { modelId: model._id.toString() })
   }
 
   const requiredRolesForAccessRequest = await ReviewRoleModel.find({

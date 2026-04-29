@@ -46,8 +46,8 @@ async function script() {
   const reviews = await ReviewModel.find({ modelId })
   log.info(`Deleting ${reviews.length} reviews`)
   for (const review of reviews) {
-    const responses = await ResponseModel.find({ parentId: review._id })
-    log.info(`Deleting ${responses.length} responses from review ${review._id} `)
+    const responses = await ResponseModel.find({ parentId: review._id.toString() })
+    log.info(`Deleting ${responses.length} responses from review ${review._id.toString()} `)
     for (const response of responses) {
       await response.delete()
     }
