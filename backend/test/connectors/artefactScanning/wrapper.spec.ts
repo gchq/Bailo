@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScanning/wrapper.js'
@@ -9,7 +9,7 @@ vi.mock('../../../src/services/log.js')
 const configMock = vi.hoisted(() => ({
   connectors: {
     artefactScanners: {
-      maxInitRetries: 1,
+      maxInitRetries: 2,
       initRetryDelay: 0,
     },
   },
@@ -52,10 +52,6 @@ class TestImageScanner extends BaseArtefactScanningConnector {
 }
 
 describe('connectors > artefactScanning > wrapper', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('initialiseScanners() initialises all scanners', async () => {
     const scanner = new TestFileScanner()
     const wrapper = new ArtefactScanningWrapper(new Set([scanner]))

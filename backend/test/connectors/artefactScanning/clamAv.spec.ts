@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
 import { ClamAvFileScanningConnector } from '../../../src/connectors/artefactScanning/clamAv.js'
@@ -37,10 +37,6 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
 describe('connectors > artefactScanning > clamAv', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('init() initialises ClamAV and parses version', async () => {
     clamAvMocks.getVersion.mockResolvedValueOnce('ClamAV 1.2.3/456')
     const connector = new ClamAvFileScanningConnector()
@@ -48,10 +44,11 @@ describe('connectors > artefactScanning > clamAv', () => {
     await connector.init()
 
     expect(clamAvMocks.getVersion).toHaveBeenCalled()
-    expect(connector.version).toBe('1.2.3')
+    // @ts-expect-ignore accessing protected property
+    expect(connector['version']).toBe('1.2.3')
   })
 
-  test('_scan() returns error when scanner is not initialised', async () => {
+  test('scan() returns error when scanner is not initialised', async () => {
     const connector = new ClamAvFileScanningConnector()
 
     const result = await connector.scan({
@@ -64,7 +61,7 @@ describe('connectors > artefactScanning > clamAv', () => {
     expect(result.toolName).toBe('Clam AV')
   })
 
-  test('_scan() completes successfully with no viruses', async () => {
+  test('scan() completes successfully with no viruses', async () => {
     clamAvMocks.getVersion.mockResolvedValueOnce('ClamAV 1.2.3/456')
     clamAvMocks.scanStream.mockResolvedValueOnce({ viruses: [] })
     const stream = Readable.from('file')
@@ -85,7 +82,7 @@ describe('connectors > artefactScanning > clamAv', () => {
     expect(destroySpy).toHaveBeenCalled()
   })
 
-  test('_scan() returns error when ClamAV scan throws', async () => {
+  test('scan() returns error when ClamAV scan throws', async () => {
     clamAvMocks.getVersion.mockResolvedValueOnce('ClamAV 1.2.3/456')
     clamAvMocks.scanStream.mockRejectedValueOnce(new Error('scan failed'))
     const stream = Readable.from('file')
@@ -102,5 +99,21 @@ describe('connectors > artefactScanning > clamAv', () => {
 
     expect(result.state).toBe(ArtefactScanState.Error)
     expect(destroySpy).toHaveBeenCalled()
+  })
+
+  test('scan() returns error when av unset', async () => {
+    clamAvMocks.getVersion.mockResolvedValueOnce('1.2.3')
+    const connector = new ClamAvFileScanningConnector()
+    await connector.init()
+    // @ts-expect-ignore accessing protected property
+    connector['av'] = undefined
+
+    const result = await connector.scan({
+      id: 'file1',
+      name: 'file.bin',
+      path: '/bucket/file.bin',
+    } as any)
+
+    expect(result.state).toBe(ArtefactScanState.Error)
   })
 })

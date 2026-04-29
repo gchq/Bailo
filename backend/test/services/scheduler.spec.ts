@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { getScheduler, startScheduler } from '../../src/services/schedule/scheduler.js'
 
@@ -28,10 +28,6 @@ vi.mock('../../src/services/log.js', () => ({
 }))
 
 describe('scheduler', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('getScheduler throws if scheduler not started', () => {
     expect(() => getScheduler()).toThrow('Scheduler has not been started')
   })

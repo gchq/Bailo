@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import {
   DocumentsImporter,
@@ -68,10 +68,6 @@ const mockMetadata: DocumentsMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     expect(importer).toMatchSnapshot()

@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
 import config from '../../../../src/utils/__mocks__/config.js'
@@ -57,10 +57,6 @@ const mockMetadata: FileMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > FileImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new FileImporter(mockMetadata, mockLogData)
 

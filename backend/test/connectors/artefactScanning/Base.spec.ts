@@ -1,5 +1,5 @@
 import PQueue from 'p-queue'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
@@ -18,10 +18,6 @@ class TestConnector extends BaseArtefactScanningConnector {
 }
 
 describe('connectors > artefactScanning > Base', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('info() returns scanner metadata', () => {
     const connector = new TestConnector()
 
