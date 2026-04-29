@@ -36,10 +36,20 @@ export default function OverviewMetricsCharts({
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(new Date()))
   const [errorMessage, setErrorMessage] = useState('')
 
+  const setAsFirstDayOfMonth = (date: Dayjs) => {
+    date = date.date(1)
+    return date.toISOString().split('T')[0]
+  }
+
+  const setAsLastDayOfMonth = (date: Dayjs) => {
+    date = date.endOf('month')
+    return date.toISOString().split('T')[0]
+  }
+
   const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
     'month',
-    `${startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`,
-    `${endDate ? endDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`,
+    `${startDate ? setAsFirstDayOfMonth(startDate) : setAsFirstDayOfMonth(dayjs(new Date()))}`,
+    `${endDate ? setAsLastDayOfMonth(endDate) : setAsLastDayOfMonth(dayjs(new Date()))}`,
   )
 
   const updateStateData = useEffectEvent((newStateData) => {
@@ -91,8 +101,9 @@ export default function OverviewMetricsCharts({
   const updateModelVolume = useEffectEvent((modelVolume) => {
     if (modelVolume && modelVolume.data) {
       const updatedStructure = modelVolume.data.map((volumeData: ModelVolumeData) => {
+        const formattedDate = dayjs(volumeData.startDate).format('MMM YYYY')
         const incrementObject = {
-          label: volumeData.startDate.split('T')[0],
+          label: formattedDate,
         }
         for (const organisationKey of Object.keys(volumeData.organisations)) {
           incrementObject[organisationKey] = volumeData.organisations[organisationKey]
