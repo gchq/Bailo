@@ -86,6 +86,8 @@
   },
   "devDependencies": {
     "@anatine/zod-mock": "^3.14.0",
+    "@babel/plugin-proposal-decorators": "^7.29.0",
+    "@rolldown/plugin-babel": "^0.2.3",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^4.4.0",
     "@types/content-disposition": "^0.5.9",
@@ -104,7 +106,7 @@
     "@types/tar-stream": "^3.1.4",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.31.1",
-    "@vitest/coverage-v8": "~4.0.18",
+    "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^10.1.0",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -114,7 +116,7 @@
     "supertest": "^7.2.2",
     "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "~4.0.18"
+    "vitest": "^4.1.5"
   },
   "overrides": {
     "mv": "npm:dry-uninstall"
