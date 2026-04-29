@@ -1,18 +1,17 @@
-import { Info, LocalOffer } from '@mui/icons-material'
+import { Info } from '@mui/icons-material'
 import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchEntry, useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
-import Restricted from 'src/common/Restricted'
+import TagSelector from 'src/common/TagSelector'
 import UserDisplay from 'src/common/UserDisplay'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { EntryCardKindLabel, EntryInterface } from 'types/types'
+import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -22,7 +21,6 @@ interface OrganisationAndStateDetailsProps {
 
 export default function EntryOverviewDetails({ entry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
   const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
@@ -43,15 +41,19 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     )
   }, [entry])
 
-  const handleEntryTagOnChange = async (newTags: string[]) => {
-    setEntryTagUpdateErrorMessage('')
-    const response = await patchEntry(entry.id, { tags: newTags })
-    if (!response.ok) {
-      setEntryTagUpdateErrorMessage(await getErrorMessage(response))
-    } else {
-      mutateEntry()
-    }
-  }
+  const handleEntryTagOnChange = useCallback(
+    async (newTags: string[]) => {
+      setEntryTagUpdateErrorMessage('')
+      const response = await patchEntry(entry.id, { tags: newTags })
+      if (!response.ok) {
+        setEntryTagUpdateErrorMessage(await getErrorMessage(response))
+        mutateEntry()
+      } else {
+        mutateEntry()
+      }
+    },
+    [entry.id, mutateEntry],
+  )
 
   if (isUiConfigLoading || isSchemaLoading) {
     return <Loading />
@@ -120,23 +122,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {collaboratorList}
         </Stack>
         <Box>
-          <Restricted action='editEntry' fallback={<></>}>
-            <Button
-              sx={{ width: 'fit-content' }}
-              size='small'
-              startIcon={<LocalOffer />}
-              onClick={(event) => setAnchorEl(event.currentTarget)}
-            >
-              {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
-            </Button>
-          </Restricted>
-          <EntryTagSelector
-            anchorEl={anchorEl}
-            setAnchorEl={setAnchorEl}
+          <TagSelector
             onChange={handleEntryTagOnChange}
-            tags={entry.tags}
             errorText={entryTagUpdateErrorMessage}
-          />
+            tags={entry.tags}
+            restrictedToAction={'editEntry'}
+          ></TagSelector>
         </Box>
       </Stack>
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />

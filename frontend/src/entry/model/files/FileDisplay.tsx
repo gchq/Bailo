@@ -1,7 +1,6 @@
-import { Delete, Done, Error, Info, LocalOffer, MoreVert, Pending, Refresh, Warning } from '@mui/icons-material'
+import { Delete, Done, Error, Info, MoreVert, Pending, Refresh, Warning } from '@mui/icons-material'
 import {
   Box,
-  Button,
   Chip,
   Divider,
   IconButton,
@@ -34,10 +33,9 @@ import {
 } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
-import Restricted from 'src/common/Restricted'
+import TagSelector from 'src/common/TagSelector'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import { KeyedMutator } from 'swr'
 import {
@@ -62,18 +60,6 @@ export type MutateFiles = KeyedMutator<{
   files: FileInterface[]
 }>
 
-type ClickableFileDownloadProps =
-  | {
-      isClickable: true
-      activeFileTag: string
-      activeFileTagOnChange: (newFileTag: string) => void
-    }
-  | {
-      isClickable?: false
-      activeFileTag?: string
-      activeFileTagOnChange?: (newFileTag: string) => void
-    }
-
 type FileDisplayProps = {
   modelId: string
   file: FileInterface
@@ -87,7 +73,7 @@ type FileDisplayProps = {
   style?: CSSProperties
   key?: string
   releases: ReleaseInterface[]
-} & ClickableFileDownloadProps
+}
 
 interface ChipDetails {
   label: string
@@ -101,16 +87,12 @@ export default function FileDisplay({
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
   hideTags = false,
-  isClickable = false,
-  activeFileTag = '',
-  activeFileTagOnChange,
   style = {},
   key = '',
   releases,
 }: FileDisplayProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
-  const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteFileOpen, setDeleteFileOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -369,16 +351,6 @@ export default function FileDisplay({
     }
   }
 
-  const handleFileTagOnClick = (fileTag: string) => {
-    if (activeFileTagOnChange) {
-      if (fileTag === activeFileTag) {
-        activeFileTagOnChange('')
-      } else {
-        activeFileTagOnChange(fileTag)
-      }
-    }
-  }
-
   if (isFileInterface(file) && !file.complete) {
     return (
       <Typography>
@@ -475,36 +447,8 @@ export default function FileDisplay({
           <Stack spacing={2} direction='row' alignItems='center'>
             {!hideTags && (
               <>
-                <Restricted action='editEntry' fallback={<></>}>
-                  <Button
-                    sx={{ width: 'fit-content' }}
-                    size='small'
-                    startIcon={<LocalOffer />}
-                    onClick={(event) => setAnchorElFileTag(event.currentTarget)}
-                  >
-                    Apply file tags
-                  </Button>
-                </Restricted>
-                <Box sx={{ whiteSpace: 'pre-wrap' }}>
-                  {file.tags.map((fileTag) => {
-                    if (isClickable) {
-                      return (
-                        <Chip
-                          key={fileTag}
-                          label={fileTag}
-                          sx={{ width: 'fit-content', m: 0.5 }}
-                          onClick={() => handleFileTagOnClick(fileTag)}
-                          color={activeFileTag === fileTag ? 'secondary' : undefined}
-                        />
-                      )
-                    } else {
-                      return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content', m: 0.5 }} />
-                    }
-                  })}
-                </Box>
-                <EntryTagSelector
-                  anchorEl={anchorElFileTag}
-                  setAnchorEl={setAnchorElFileTag}
+                <TagSelector
+                  restrictedToAction={'editEntry'}
                   onChange={handleFileTagSelectorOnChange}
                   tags={file.tags || []}
                   errorText={fileTagErrorMessage}
