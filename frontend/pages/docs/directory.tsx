@@ -34,6 +34,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Using a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
   { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
+  { title: 'Using scanners', slug: 'users/using-scanners', header: true },
+  { title: 'File scanning', slug: 'users/using-scanners/file-scanning' },
+  { title: 'Image scanning', slug: 'users/using-scanners/image-scanning' },
+
   { title: 'Deletion', slug: 'users/deletion', header: true },
   { title: 'Deleting a File', slug: 'users/deletion/file-deletion' },
   { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },

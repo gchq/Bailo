@@ -1,0 +1,65 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+import Alert from '@mui/material/Alert'
+
+import chipView from 'public/docs/bailo_image_vuln_report_chip.png'
+import detailedView from 'public/docs/bailo_image_vuln_detailed.png'
+import rescanView from 'public/docs/bailo_image_rescan.png'
+import multiPlatView from 'public/docs/bailo_image_multiplat_view.png'
+
+# Scanning Images
+
+## Using Scanner
+
+When pushing images up to the Bailo container registry, your images are automatically scanned. Bailo is configured, by
+default, to use Trivy which is packaged in [Bailo Artefact Scan](/docs/administration/microservices/artefact-scanners)
+Trivy is a static analysis tool focused on the security of containers, and informing users about potential issues. You
+can read more about the principles and scope of Trivy [here](https://trivy.dev/docs/latest/community/principles/).
+
+For scan results:
+
+- Go to your model and click on Registry Tab
+- Click the Scan chip, towards the right of your image
+- View scan results, we classify our vulnerabilities by severity, listing the amount of each as so:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view image scanning chip' src={chipView} />
+</Box>
+
+## Detailed View
+
+To view more detail, click the 'See detailed results' button. This will take you to the vulnerability report page:
+
+- Compressed image size
+- Vulnerabilities
+- Scanner used
+- Detailed vulnerability report, containing CVE information.
+
+You can filter these results by Severity, using the tags at the top of the page.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view image scan results' src={detailedView} />
+</Box>
+
+## Rescan Image
+
+If you want to rescan, click the 3 dots to the right of the scan results chip and select the Rescan option.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image alt='view rescan button' src={rescanView} />
+</Box>
+
+## Multiplatform Images
+
+<Alert severity='info'>A multiplatform image will appear with a purple tag next to the name</Alert>
+
+Bailo also allows you to scan multiplatform images, which are images that point to a different set of layers based on
+your host architecture. You can also click the 'See detailed results' button, and view the platform-specific, detailed
+results page.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image alt='view multiplatform image summary' src={multiPlatView} />
+</Box>
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

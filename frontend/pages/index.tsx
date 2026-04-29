@@ -383,7 +383,7 @@ export default function Marketplace() {
                   inputProps={{ spellCheck: 'false' }}
                   onChange={handleFilterChange}
                   endAdornment={
-                    <Tooltip title='Full Text'>
+                    <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>
                       <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
                         {titleOnly ? <TitleIcon /> : <SubjectIcon />}
                       </IconButton>

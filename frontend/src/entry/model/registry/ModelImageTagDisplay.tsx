@@ -1,5 +1,5 @@
 import { Delete, Info, MoreVert, Refresh } from '@mui/icons-material'
-import { Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { deleteEntryImage } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
@@ -13,8 +13,40 @@ import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedRelease
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { ArtefactKind, ModelImagesWithOptionalScanResults } from 'types/types'
+import { ArtefactKind, ImageTagResult, ModelImagesWithOptionalScanResults, SeverityLevel } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+
+const severities = [
+  SeverityLevel.CRITICAL,
+  SeverityLevel.HIGH,
+  SeverityLevel.MEDIUM,
+  SeverityLevel.LOW,
+  SeverityLevel.UNKNOWN,
+]
+
+function sortPlatformByVulnerability(scanResults: ImageTagResult[]): ImageTagResult[] {
+  return scanResults.toSorted((a, b) => {
+    let res = 0
+    for (let i = 0; i < severities.length; i++) {
+      if (a.severityCounts[severities[i]] > b.severityCounts[severities[i]]) {
+        res = -1
+        break
+      } else if (a.severityCounts[severities[i]] < b.severityCounts[severities[i]]) {
+        res = 1
+        break
+      }
+    }
+    return res
+  })
+}
+
+function checkIfMultiPlatform(modelImage: ModelImagesWithOptionalScanResults, tag: string) {
+  const correctTag = modelImage.scanSummaries.find((scan) => scan.tag === tag)
+  if (correctTag) {
+    return !!correctTag.platform
+  }
+  return false
+}
 
 interface ModelImageTagDisplayProps {
   modelImage: ModelImagesWithOptionalScanResults
@@ -68,6 +100,15 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     [modelImage.name, modelImage.repository, mutate, sendNotification],
   )
 
+  function filterTagResult(tagResult: ImageTagResult, imageTag: string) {
+    if (tagResult.platform && tagResult.platform === 'unknown/unknown') {
+      return false
+    }
+    if (tagResult.tag === imageTag) {
+      return true
+    }
+    return false
+  }
   const handleDeleteConfirm = useCallback(async () => {
     if (!tag || isDeleting) {
       return
@@ -100,13 +141,18 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
 
   const reportDisplay = (imageTag: string) => {
     if (modelImage && modelImage.scanSummaries) {
-      const tagResults = modelImage.scanSummaries.find((tagResult) => tagResult.tag === imageTag)
-
+      const tagResults = modelImage.scanSummaries.filter((tagResult) => filterTagResult(tagResult, imageTag))
+      if (tagResults.length === 0) {
+        return
+      }
+      const multiplatform = !!tagResults && !!tagResults[0].platform
+      const sortedTagResults = sortPlatformByVulnerability(tagResults)
       return (
         <VulnerabilityResult
-          results={tagResults}
+          scanResults={sortedTagResults}
           warningOnly
-          detailedViewUrl={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${imageTag}`}
+          detailedViewUrlPrefix={`/model/${modelImage.repository}/registry/${encodeURIComponent(modelImage.name)}/${tagResults[0].tag}/`}
+          multiplatform={multiplatform}
         />
       )
     }
@@ -123,12 +169,19 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
   return (
     <Box width='100%' key={`${modelImage.repository}-${modelImage.name}-${tag}`} sx={{ py: 0.5 }}>
       <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-between' alignItems='center' spacing={2}>
-        <Stack spacing={2} direction='row' divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
+        <Stack spacing={2} direction='row' alignItems='center'>
           <Box width='fit-content'>
             <CodeLine
               line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
             />
           </Box>
+          {checkIfMultiPlatform(modelImage, tag) && (
+            <Tooltip
+              title={'A single image tag that automatically provides the correct architecture for the host machine'}
+            >
+              <Chip color='primary' label='Multi-platform' />
+            </Tooltip>
+          )}
         </Stack>
         <Stack direction='row' spacing={2} alignItems='center'>
           {reportDisplay(tag)}
