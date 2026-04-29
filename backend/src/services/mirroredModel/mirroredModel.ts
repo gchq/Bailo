@@ -116,7 +116,7 @@ export async function exportModel(
             await Promise.all(
               release.images.map((image) =>
                 new ImageExporter(user, model, release, image, {
-                  imageId: image._id.toString(),
+                  imageId: image.id,
                   imageName: image.name,
                   imageTag: image.tag,
                   exportId,

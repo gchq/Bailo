@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { RoleKindKeys } from '../types/types.js'
 import { SystemRolesKeys } from './Model.js'
@@ -14,7 +14,7 @@ export interface ReviewRoleInterface {
   systemRole?: SystemRolesKeys
 }
 
-export type ReviewRoleDoc = ReviewRoleInterface & SoftDeleteDocument
+export type ReviewRoleDoc = HydratedDocument<ReviewRoleInterface> & SoftDeleteDocument
 
 const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
   {

@@ -1,16 +1,20 @@
 import ScanModel, { ArtefactScanSummary, ScanSummary, SeverityLevelKeys } from '../models/Scan.js'
 
 export async function up() {
-  await ScanModel.updateMany({ summary: { $exists: false }, viruses: { $exists: true } }, [
-    {
-      $set: {
-        summary: '$viruses',
+  await ScanModel.updateMany(
+    { summary: { $exists: false }, viruses: { $exists: true } },
+    [
+      {
+        $set: {
+          summary: '$viruses',
+        },
       },
-    },
-    {
-      $unset: ['viruses', 'isInfected'],
-    },
-  ])
+      {
+        $unset: ['viruses', 'isInfected'],
+      },
+    ],
+    { updatePipeline: true },
+  )
 
   const modelScans = await ScanModel.find({
     toolName: 'ModelScan',

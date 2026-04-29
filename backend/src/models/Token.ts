@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
-import { model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
 import { BadReq } from '../utils/error.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -90,7 +90,7 @@ export interface TokenInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type TokenDoc = TokenInterface & SoftDeleteDocument
+export type TokenDoc = HydratedDocument<TokenInterface> & SoftDeleteDocument
 
 const TokenSchema = new Schema<TokenDoc>(
   {
@@ -111,9 +111,8 @@ const TokenSchema = new Schema<TokenDoc>(
   },
 )
 
-TokenSchema.pre('save', function userPreSave(next) {
+TokenSchema.pre('save', function userPreSave() {
   if (!this.isModified('secretKey') || !this.secretKey) {
-    next()
     return
   }
 
@@ -124,19 +123,16 @@ TokenSchema.pre('save', function userPreSave(next) {
   if (this.hashMethod === HashType.Bcrypt) {
     bcrypt.hash(this.secretKey, 8, (err: Error | null, result: string | undefined) => {
       if (err) {
-        next(err)
-        return
+        throw err
       }
       if (!result) {
         throw BadReq('Unable to create token')
       }
       this.secretKey = result
-      next()
     })
   } else if (this.hashMethod === HashType.SHA256) {
     const hash = createHash('sha256').update(this.secretKey).digest('hex')
     this.secretKey = hash
-    next()
   } else {
     throw new Error('Unexpected hash type: ' + this.hashMethod)
   }

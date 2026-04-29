@@ -15,7 +15,7 @@ const rangeMock = vi.hoisted(() => ({
 vi.mock('../../../../src/utils/range.js', () => rangeMock)
 
 const mockFileObject = {
-  _id: { toString: vi.fn(() => 'fileId') },
+  id: 'fileId',
   updatedAt: { getTime: vi.fn(() => 123456789) },
   size: 100,
   name: 'test-file.txt',

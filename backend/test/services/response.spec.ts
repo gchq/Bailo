@@ -1,3 +1,4 @@
+import { Types } from 'mongoose'
 import { describe, expect, test, vi } from 'vitest'
 
 import { Decision, ReactionKind } from '../../src/models/Response.js'
@@ -88,12 +89,17 @@ describe('services > response', () => {
   const user: any = { dn: 'test' }
 
   test('findResponseById > success', async () => {
-    const mockResponse = { _id: 'response' }
+    const validId = new Types.ObjectId()
+
+    const mockResponse = { _id: validId }
 
     ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
-    expect(await findResponseById('test')).toBe(mockResponse)
+    const result = await findResponseById(validId.toHexString())
+
+    expect(result).toBe(mockResponse)
   })
+
   test('findResponseById > response not found', async () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
@@ -102,15 +108,17 @@ describe('services > response', () => {
 
   test('getResponsesByParentIds > success', async () => {
     const mockResponses = [{ _id: 'response' }]
-
     ResponseModelMock.find.mockResolvedValueOnce(mockResponses)
-
-    expect(await getResponsesByParentIds(['test'])).toBe(mockResponses)
+    const result = await getResponsesByParentIds(['507f1f77bcf86cd799439011'])
+    expect(result).toBe(mockResponses)
   })
+
   test('getResponsesByParentIds > response not found', async () => {
     ResponseModelMock.find.mockResolvedValueOnce(undefined)
 
-    await expect(getResponsesByParentIds(['test'])).rejects.toThrowError('The requested response was not found.')
+    await expect(getResponsesByParentIds(['507f1f77bcf86cd799439011'])).rejects.toThrowError(
+      'The requested response was not found.',
+    )
   })
 
   test('updateResponse > success', async () => {

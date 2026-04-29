@@ -8,7 +8,7 @@ import { FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
-import Review, { ReviewDoc } from '../models/Review.js'
+import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
@@ -542,17 +542,11 @@ export async function deleteReleases(
       throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
     }
 
-    const reviewsForRelease: ReviewDoc[] = await Review.find({
-      modelId,
-      semver,
-    })
+    const reviewsForRelease = await ReviewModel.find({ modelId, semver })
 
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
-    await removeResponsesByParentIds(
-      [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
-      session,
-    )
+    await removeResponsesByParentIds([...reviewsForRelease.map((review) => review.id), release.id], session)
   }
 
   return { modelId, semvers }

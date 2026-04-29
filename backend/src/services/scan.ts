@@ -135,11 +135,7 @@ export async function scanFile(file: FileInterfaceDoc) {
   await runScans(scannersInfo, fileIdentifier, file)
 
   const scanResults = await ScanModel.find(fileIdentifier)
-  const ret: FileWithScanResultsInterface = {
-    ...file.toObject(),
-    scanResults,
-    id: file._id.toString(),
-  }
+  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults })
 
   return ret
 }

@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -41,9 +41,12 @@ export type ImageRef = ImageTagRef | ImageDigestRef
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
-  images: Array<ImageTagRef & { _id: Schema.Types.ObjectId }>
-} & SoftDeleteDocument
+export type ReleaseDoc = HydratedDocument<
+  Omit<ReleaseInterface, 'images'> & {
+    images: Array<HydratedDocument<ImageTagRef>>
+  }
+> &
+  SoftDeleteDocument
 
 export interface SemverObject {
   major: number

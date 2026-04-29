@@ -21,9 +21,8 @@ export function parseModelCard(
       ...logData,
     })
   }
-  const modelId = modelCard.modelId
-  modelCard.modelId = mirroredModelId
-  delete modelCard._id
+  // destructure and clone to omit old _id, rather than delete modelCard._id
+  const { _id, modelId, ...rest } = modelCard
   if (sourceModelId !== modelId) {
     throw InternalError(
       'Compressed file contains model cards that have a model ID that does not match the source model Id.',
@@ -34,7 +33,11 @@ export function parseModelCard(
       },
     )
   }
-  return modelCard
+
+  return {
+    ...rest,
+    modelId: mirroredModelId,
+  }
 }
 
 export function parseRelease(
@@ -51,11 +54,8 @@ export function parseRelease(
       ...logData,
     })
   }
-
-  const modelId = release.modelId
-  release.modelId = mirroredModelId
-  delete release._id
-
+  // destructure and clone to omit old _id, rather than delete release._id
+  const { _id, modelId, ...rest } = release
   if (sourceModelId !== modelId) {
     throw InternalError(
       'Compressed file contains releases that have a model ID that does not match the source model Id.',
@@ -68,8 +68,12 @@ export function parseRelease(
     )
   }
 
-  return release
+  return {
+    ...rest,
+    modelId: mirroredModelId,
+  }
 }
+
 export async function parseFile(
   file: unknown,
   mirroredModelId: string,
