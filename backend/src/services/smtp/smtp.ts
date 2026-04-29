@@ -10,7 +10,9 @@ import { ReviewDoc } from '../../models/Review.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { sanitiseEmail } from '../../utils/smtp.js'
+import { plural } from '../../utils/string.js'
 import log from '../log.js'
+import { getModelByIdNoAuth } from '../model.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
 
 const transporter = await generateTransporter(config.smtp.transporter)
@@ -40,7 +42,10 @@ export async function generateTransporter(transportOption: TransportOption): Pro
   }
 }
 
-async function dispatchEmail(entity: string, emailContent: EmailContent) {
+async function dispatchEmail(entity: string, emailContent: EmailContent | undefined) {
+  if (!emailContent) {
+    return
+  }
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
@@ -54,6 +59,20 @@ async function dispatchEmail(entity: string, emailContent: EmailContent) {
       }),
   )
   await Promise.all(sendEmailResponses)
+}
+
+export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent | undefined) {
+  if (!emailContent) {
+    return
+  }
+  const model = await getModelByIdNoAuth(modelId)
+  const entities = await Promise.all(
+    model.collaborators
+      .filter((collaborator) => collaborator.roles.includes(role))
+      .map((collaborator) => authentication.getUserInformation(collaborator.entity)),
+  )
+  const emails = entities.map((entry) => entry.email).filter((email): email is string => email !== undefined)
+  sendEmail({ to: emails, ...emailContent })
 }
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -214,6 +233,53 @@ async function sendEmail(email: Mail.Options) {
     log.warn({ content, error }, `Unable to send email`)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
+}
+
+export async function startImportNotification(modelId: string, releases: Omit<ReleaseDoc, '_id'>[]) {
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+  const emailContent = buildEmail(
+    `${mirroredModel.name} has begun importing`,
+    releases.map((release) => ({
+      title: `Release ${release.semver}`,
+      data: `has ${plural(release.fileIds.length, 'file')} and ${plural(release.images.length, 'image')}`,
+    })),
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+    ],
+  )
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+}
+
+export async function completeImportNotification(modelId: string) {
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+  const emailContent = buildEmail(
+    `${mirroredModel.name} has finished importing`,
+    [],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+    ],
+  )
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+}
+
+export async function failImportNotification(modelId: string, errorMessage: string, errorContext?: string) {
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+
+  const emailContent = buildEmail(
+    `Oh no there was a problem with importing ${mirroredModel.name}!`,
+    [{ title: errorMessage, data: errorContext ?? '' }],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+      { name: 'Contact Support', url: config.ui.issues.contactHref },
+    ],
+  )
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }
 
 function getReleaseUrl(release: ReleaseDoc) {

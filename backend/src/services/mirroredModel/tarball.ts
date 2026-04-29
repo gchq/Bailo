@@ -175,7 +175,7 @@ export async function extractTarGzStream(
     })
 
     // Successful completion of the tar stream
-    untarStream.once('finish', () => {
+    untarStream.once('finish', async () => {
       if (settled) {
         return
       }
@@ -190,7 +190,7 @@ export async function extractTarGzStream(
       }
 
       try {
-        importer.handleStreamCompletion(resolve, reject)
+        await importer.handleStreamCompletion(resolve, reject)
         settled = true
       } catch (err) {
         fail(err)

@@ -1,5 +1,8 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
+import sanitizeHtml from 'sanitize-html'
+
+import log from '../log.js'
 
 export type EmailContent = {
   subject: string
@@ -17,12 +20,46 @@ export type actions = {
   url: string
 }
 
+export function deepSanitise<T>(input: T): T {
+  function recurse(value: any, parentKey?: string): any {
+    if (value === null || typeof value !== 'object') {
+      if (typeof value === 'string') {
+        return sanitizeHtml(value) === value
+      }
+      return false
+    }
+
+    if (Array.isArray(value)) {
+      return value.every((item) => recurse(item, parentKey))
+    }
+
+    const output: Record<string, any> = {}
+
+    for (const [key, val] of Object.entries(value)) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue
+      }
+
+      output[key] = recurse(val, key)
+    }
+
+    return output
+  }
+
+  return recurse(input)
+}
+
 export async function buildEmail(
   title: string,
   metadata: Info[],
   actions: actions[],
   actionRequired?: boolean,
-): Promise<EmailContent> {
+): Promise<EmailContent | undefined> {
+  if (!(deepSanitise(title) && deepSanitise(metadata) && deepSanitise(actions))) {
+    log.error({ title, metadata, actions }, 'Email failed sanitisation. Not forwarding request')
+    return
+  }
+
   return {
     subject: actionRequired ? `ACTION REQUIRED: ${title}` : title,
     text: emailText(title, metadata, actions),

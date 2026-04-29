@@ -4,12 +4,14 @@ import { Headers } from 'tar-stream'
 
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
+import ModelTransferModel, { TransferStatus } from '../../../models/ModelTransfer.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { createFilePath } from '../../../utils/fileUtils.js'
 import { markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
+import { completeImportNotification, startImportNotification } from '../../smtp/smtp.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
@@ -75,8 +77,55 @@ export class FileImporter extends BaseImporter {
     }
   }
 
+  async handleStreamError(
+    error: unknown,
+    _resolve: (reason?: any) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    await ModelTransferModel.findOneAndUpdate(
+      { exportId: this.metadata.exportId },
+      {
+        status: TransferStatus.Failed,
+        $set: {
+          [`fileStatus.${this.metadata.filePath}`]: TransferStatus.Failed,
+        },
+      },
+      { upsert: true, setDefaultsOnInsert: true },
+    )
+    return super.handleStreamError(error, _resolve, reject)
+  }
+
   // Type resolve
-  handleStreamCompletion(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
+  async handleStreamCompletion(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
+    let modelTransfer = await ModelTransferModel.findOne({ exportId: this.metadata.exportId })
+
+    if (!modelTransfer) {
+      modelTransfer = await ModelTransferModel.create({
+        exportId: this.metadata.exportId,
+        modelId: this.metadata.mirroredModelId,
+        createdBy: this.metadata.exporter,
+        imageStatus: { [this.metadata.filePath]: TransferStatus.Completed },
+      })
+
+      await startImportNotification(this.metadata.mirroredModelId, [])
+    } else {
+      modelTransfer = await ModelTransferModel.findOneAndUpdate(
+        { exportId: this.metadata.exportId },
+        {
+          $set: {
+            [`fileStatus.${this.metadata.filePath}`]: TransferStatus.Completed,
+          },
+        },
+        { new: true, upsert: true },
+      )
+    }
+
+    if (modelTransfer?.status === TransferStatus.Completed && !modelTransfer.notificationSent) {
+      await completeImportNotification(this.metadata.mirroredModelId)
+
+      await ModelTransferModel.updateOne({ exportId: this.metadata.exportId }, { $set: { notificationSent: true } })
+    }
+
     resolve({ metadata: this.metadata, sourcePath: this.metadata.filePath, newPath: this.updatedPath })
   }
 }

@@ -70,6 +70,7 @@
     "pretty-bytes": "^7.1.0",
     "proxy-agent": "^8.0.1",
     "qs": "^6.15.0",
+    "sanitize-html": "^2.17.3",
     "semver": "^7.7.4",
     "shelljs": "^0.10.0",
     "showdown": "^2.1.0",
