@@ -236,6 +236,11 @@ async function sendEmail(email: Mail.Options) {
 }
 
 export async function startImportNotification(modelId: string, releases: Omit<ReleaseDoc, '_id'>[]) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
   const mirroredModel = await getModelByIdNoAuth(modelId)
   const emailContent = buildEmail(
     `${mirroredModel.name} has begun importing`,
@@ -253,6 +258,11 @@ export async function startImportNotification(modelId: string, releases: Omit<Re
 }
 
 export async function completeImportNotification(modelId: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
   const mirroredModel = await getModelByIdNoAuth(modelId)
   const emailContent = buildEmail(
     `${mirroredModel.name} has finished importing`,
@@ -267,6 +277,11 @@ export async function completeImportNotification(modelId: string) {
 }
 
 export async function failImportNotification(modelId: string, errorMessage: string, errorContext?: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
   const mirroredModel = await getModelByIdNoAuth(modelId)
 
   const emailContent = buildEmail(
