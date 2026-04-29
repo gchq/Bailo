@@ -11,7 +11,8 @@ export const WebhookEvent = {
 export type WebhookEventKeys = (typeof WebhookEvent)[keyof typeof WebhookEvent]
 
 export interface WebhookInterface {
-  id: string
+  _id: string
+
   modelId: string
   name: string
   uri: string
@@ -25,7 +26,7 @@ export type WebhookDoc = WebhookInterface & SoftDeleteDocument
 
 const WebhookSchema = new Schema<WebhookDoc>(
   {
-    id: { type: String, required: true, unique: true, index: true },
+    _id: { type: String, required: true, unique: true, index: true },
     modelId: { type: String, required: true },
     name: { type: String, required: true },
 

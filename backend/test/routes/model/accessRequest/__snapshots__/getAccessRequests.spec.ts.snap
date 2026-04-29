@@ -7,7 +7,6 @@ exports[`routes > accessRequest > getAccessRequests > 200 > ok 1`] = `
     "deleted": false,
     "deletedAt": "",
     "deletedBy": "",
-    "id": "test-access-request-13623",
     "modelId": "test-model-4342",
   },
 }
@@ -19,7 +18,6 @@ exports[`routes > accessRequest > getAccessRequests > audit > expected call 1`] 
   "deleted": false,
   "deletedAt": "",
   "deletedBy": "",
-  "id": "test-access-request-13623",
   "modelId": "test-model-4342",
 }
 `;

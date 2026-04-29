@@ -495,7 +495,7 @@ export abstract class BaseAuditConnector {
   ): Promise<void>
 
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
-  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
+  abstract onViewReviewRoles(req: Request, reviewRole: Omit<ReviewRoleInterface, '_id'>[]): Promise<void>
   abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
 

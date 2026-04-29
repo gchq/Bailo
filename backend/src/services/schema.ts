@@ -75,7 +75,7 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 
   if (overwrite) {
-    await Schema.deleteOne({ id: schema.id })
+    await Schema.deleteOne({ _id: schema._id })
   }
 
   try {

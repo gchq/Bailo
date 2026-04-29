@@ -64,7 +64,7 @@ export const postStartMultipartUpload = [
     await audit.onCreateFile(req, file)
 
     res.json({
-      fileId: file.id,
+      fileId: file._id.toString(),
       uploadId,
       chunks,
     })

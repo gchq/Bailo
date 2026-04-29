@@ -28,7 +28,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.CreateModel, req)
-    const event = this.generateEvent(req, { id: model.id })
+    const event = this.generateEvent(req, { id: model._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
@@ -42,7 +42,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     this.checkEventType(AuditInfo.SearchModels, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
-      results: models.map((model) => model.id),
+      results: models.map((model) => model._id.toString()),
     })
 
     req.log.info(event, req.audit.description)
@@ -50,7 +50,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onUpdateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.UpdateModel, req)
-    const event = this.generateEvent(req, { id: model.id })
+    const event = this.generateEvent(req, { id: model._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
@@ -62,7 +62,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
-    const event = this.generateEvent(req, { modelId: model.id, version: modelCard.version })
+    const event = this.generateEvent(req, { modelId: model._id.toString(), version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
@@ -197,13 +197,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.CreateAccessRequest, req)
-    const event = this.generateEvent(req, { id: accessRequest.id })
+    const event = this.generateEvent(req, { id: accessRequest._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
   async onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.ViewAccessRequest, req)
-    const event = this.generateEvent(req, { id: accessRequest.id })
+    const event = this.generateEvent(req, { id: accessRequest._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
@@ -212,7 +212,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     const event = this.generateEvent(req, {
       url: req.originalUrl,
       results: accessRequests.map((accessRequest) => ({
-        id: accessRequest.id,
+        id: accessRequest._id.toString(),
       })),
     })
     req.log.info(event, req.audit.description)
@@ -220,7 +220,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.UpdateAccessRequest, req)
-    const event = this.generateEvent(req, { id: accessRequest.id })
+    const event = this.generateEvent(req, { id: accessRequest._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
@@ -245,13 +245,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateSchema(req: Request, schema: SchemaInterface) {
     this.checkEventType(AuditInfo.CreateSchema, req)
-    const event = this.generateEvent(req, { id: schema.id })
+    const event = this.generateEvent(req, { id: schema._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
   async onViewSchema(req: Request, schema: SchemaInterface) {
     this.checkEventType(AuditInfo.ViewSchema, req)
-    const event = this.generateEvent(req, { id: schema.id })
+    const event = this.generateEvent(req, { id: schema._id.toString() })
     req.log.info(event, req.audit.description)
   }
 
@@ -259,14 +259,14 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     this.checkEventType(AuditInfo.SearchSchemas, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
-      results: schemas.map((schema) => ({ id: schema.id })),
+      results: schemas.map((schema) => ({ id: schema._id.toString() })),
     })
     req.log.info(event, req.audit.description)
   }
 
   async onUpdateSchema(req: Request, schema: SchemaDoc) {
     this.checkEventType(AuditInfo.UpdateSchema, req)
-    const event = this.generateEvent(req, { id: schema.id })
+    const event = this.generateEvent(req, { id: schema._id.toString() })
     req.log.info(event, req.audit.description)
   }
 

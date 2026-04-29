@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongoose'
+
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
@@ -56,11 +58,11 @@ export class BasicAuthorisationConnector {
   }
 
   async hasApprovedAccessRequest(user: UserInterface, model: ModelDoc) {
-    const accessRequests = await getModelAccessRequestsForUser(user, model.id)
+    const accessRequests = await getModelAccessRequestsForUser(user, model._id.toString())
     if (accessRequests.length === 0) {
       return false
     }
-    return await checkAccessRequestsApproved(accessRequests.map((accessRequest) => accessRequest.id))
+    return await checkAccessRequestsApproved(accessRequests.map((accessRequest) => accessRequest._id.toString()))
   }
 
   async model(user: UserInterface, model: ModelDoc, action: ModelActionKeys) {
@@ -112,7 +114,7 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       models.map(async (model) => {
         // Is this a constrained user token.
-        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        const tokenAuth = await validateTokenForModel(user.token, model._id.toString(), ActionLookup[action])
         if (!tokenAuth.success) {
           return tokenAuth
         }
@@ -120,7 +122,7 @@ export class BasicAuthorisationConnector {
         // Prohibit non-collaborators from interacting with private models
         if (ModelAction.Import !== action && !(await this.hasModelVisibilityAccess(user, model))) {
           return {
-            id: model.id,
+            id: model._id.toString(),
             success: false,
             info: 'You cannot interact with a private model that you do not have access to.',
           }
@@ -128,11 +130,19 @@ export class BasicAuthorisationConnector {
 
         // Check a user has a role before allowing write actions
         if (ModelAction.Write === action && (await missingRequiredRole(user, model, ['owner', 'contributor']))) {
-          return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
+          return {
+            id: model._id.toString(),
+            success: false,
+            info: 'You do not have permission to update a model card.',
+          }
         }
 
         if (ModelAction.Delete === action && (await missingRequiredRole(user, model, ['owner']))) {
-          return { id: model.id, success: false, info: 'You do not have permission to delete a model card.' }
+          return {
+            id: model._id.toString(),
+            success: false,
+            info: 'You do not have permission to delete a model card.',
+          }
         }
 
         if (
@@ -140,18 +150,18 @@ export class BasicAuthorisationConnector {
           (await missingRequiredRole(user, model, ['owner'])) &&
           !(await authentication.hasRole(user, Roles.Admin))
         ) {
-          return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
+          return { id: model._id.toString(), success: false, info: 'You do not have permission to update a model.' }
         }
 
         if (ModelAction.Import === action && (await missingRequiredRole(user, model, ['owner']))) {
-          return { id: model.id, success: false, info: 'You do not have permission to import a model.' }
+          return { id: model._id.toString(), success: false, info: 'You do not have permission to import a model.' }
         }
 
         if (ModelAction.Export === action && (await missingRequiredRole(user, model, ['owner']))) {
-          return { id: model.id, success: false, info: 'You do not have permission to export a model.' }
+          return { id: model._id.toString(), success: false, info: 'You do not have permission to export a model.' }
         }
 
-        return { id: model.id, success: true }
+        return { id: model._id.toString(), success: true }
       }),
     )
   }
@@ -184,7 +194,7 @@ export class BasicAuthorisationConnector {
 
           if (!isAdmin) {
             return {
-              id: schema.id,
+              id: schema._id.toString(),
               success: false,
               info: 'You cannot upload or modify a schema if you are not an admin.',
             }
@@ -192,7 +202,7 @@ export class BasicAuthorisationConnector {
         }
 
         return {
-          id: schema.id,
+          id: schema._id.toString(),
           success: true,
         }
       }),
@@ -217,7 +227,7 @@ export class BasicAuthorisationConnector {
 
           if (!isAdmin) {
             return {
-              id: schema.id,
+              id: schema._id.toString(),
               success: false,
               info: 'You cannot upload a schema migration if you are not an admin.',
             }
@@ -225,7 +235,7 @@ export class BasicAuthorisationConnector {
         }
 
         return {
-          id: schema.id,
+          id: schema._id.toString(),
           success: true,
         }
       }),
@@ -235,7 +245,7 @@ export class BasicAuthorisationConnector {
   async releases(
     user: UserInterface,
     model: ModelDoc,
-    releases: Array<ReleaseDoc | ReleaseInterface>,
+    releases: Array<ReleaseDoc | (Omit<ReleaseInterface, '_id'> & { _id?: ObjectId })>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
     // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
@@ -250,7 +260,7 @@ export class BasicAuthorisationConnector {
     }
 
     // Is this a constrained user token.
-    const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+    const tokenAuth = await validateTokenForModel(user.token, model._id.toString(), ActionLookup[action])
     if (!tokenAuth.success) {
       return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
@@ -269,7 +279,7 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       accessRequests.map(async (request) => {
         // Is this a constrained user token.
-        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        const tokenAuth = await validateTokenForModel(user.token, model._id.toString(), ActionLookup[action])
         if (!tokenAuth.success) {
           return tokenAuth
         }
@@ -288,7 +298,11 @@ export class BasicAuthorisationConnector {
           (await missingRequiredRole(user, model, ['owner'])) &&
           ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
         ) {
-          return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
+          return {
+            success: false,
+            info: 'You cannot change an access request you do not own.',
+            id: request._id.toString(),
+          }
         }
 
         if (
@@ -299,12 +313,12 @@ export class BasicAuthorisationConnector {
           return {
             success: false,
             info: 'You cannot view an access request for a model you cannot view.',
-            id: request.id,
+            id: request._id.toString(),
           }
         }
 
         // Otherwise they either own the model, access request or this is a read-only action.
-        return { success: true, id: request.id }
+        return { success: true, id: request._id.toString() }
       }),
     )
   }
@@ -320,7 +334,7 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       files.map(async (file) => {
         // Is this a constrained user token.
-        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        const tokenAuth = await validateTokenForModel(user.token, model._id.toString(), ActionLookup[action])
         if (!tokenAuth.success) {
           return tokenAuth
         }
@@ -435,7 +449,7 @@ export class BasicAuthorisationConnector {
 
         // Is this a constrained user token.
         for (const action of actions) {
-          const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+          const tokenAuth = await validateTokenForModel(user.token, model._id.toString(), ActionLookup[action])
           if (!tokenAuth.success) {
             return tokenAuth
           }

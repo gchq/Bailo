@@ -205,7 +205,11 @@ export abstract class BaseExporter {
     this.logData = { exporterType: this.constructor.name, ...logData }
 
     log.trace(
-      { user: this.user, ...(this.model && this.model?.id && { modelId: this.model.id }), ...this.logData },
+      {
+        user: this.user,
+        ...(this.model && this.model?._id.toString() && { modelId: this.model._id.toString() }),
+        ...this.logData,
+      },
       `Constructed new ${this.constructor.name}.`,
     )
   }
@@ -251,7 +255,7 @@ export abstract class BaseExporter {
   protected async _checkModelAuths() {
     const modelAuth = await authorisation.model(this.user, this.model, ModelAction.Export)
     if (!modelAuth.success) {
-      throw Forbidden(modelAuth.info, { userDn: this.user.dn, modelId: this.model.id, ...this.logData })
+      throw Forbidden(modelAuth.info, { userDn: this.user.dn, modelId: this.model._id.toString(), ...this.logData })
     }
   }
 

@@ -13,6 +13,7 @@ export function shortId() {
 export function convertStringToId(string: string) {
   const safeString = string
     .toLowerCase()
+    .trim()
     .replace(/[^a-z 0-9]/g, '')
     .replace(/ /g, '-')
     .slice(0, 128)

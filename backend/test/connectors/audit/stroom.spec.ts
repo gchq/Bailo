@@ -136,22 +136,22 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onCreateModel > save expected event', async () => {
-    await connector.onCreateModel(createEventRequest, { id: 'test-model' } as ModelDoc)
+    await connector.onCreateModel(createEventRequest, { _id: 'test-model' } as ModelDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewModel > save expected event', async () => {
-    await connector.onViewModel(createEventRequest, { id: 'test-model' } as ModelDoc)
+    await connector.onViewModel(createEventRequest, { _id: 'test-model' } as ModelDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onSearchModel > save expected event', async () => {
-    await connector.onSearchModel(searchEventRequest, [{ id: 'test-model' } as ModelInterface])
+    await connector.onSearchModel(searchEventRequest, [{ _id: 'test-model' } as ModelInterface])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateModel > save expected event', async () => {
-    await connector.onUpdateModel(createEventRequest, { id: 'test-model' } as ModelDoc)
+    await connector.onUpdateModel(createEventRequest, { _id: 'test-model' } as ModelDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -163,7 +163,7 @@ describe('connectors > audit > stroom', () => {
   test('onCreateModelCard > save expected event', async () => {
     await connector.onCreateModelCard(
       createEventRequest,
-      { id: 'test-model' } as ModelDoc,
+      { _id: 'test-model' } as ModelDoc,
       { version: 1 } as ModelCardInterface,
     )
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
@@ -275,14 +275,14 @@ describe('connectors > audit > stroom', () => {
 
   test('onCreateAccessRequest > save expected event', async () => {
     await connector.onCreateAccessRequest(createEventRequest, {
-      id: 'id',
+      _id: 'id',
     } as AccessRequestDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewAccessRequest > save expected event', async () => {
     await connector.onViewAccessRequest(viewEventRequest, {
-      id: 'id',
+      _id: 'id',
     } as AccessRequestDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
@@ -290,7 +290,7 @@ describe('connectors > audit > stroom', () => {
   test('onViewAccessRequests > save expected event', async () => {
     await connector.onViewAccessRequests(viewEventRequest, [
       {
-        id: 'id',
+        _id: 'id',
       } as AccessRequestDoc,
     ])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
@@ -298,7 +298,7 @@ describe('connectors > audit > stroom', () => {
 
   test('onUpdateAccessRequest > save expected event', async () => {
     await connector.onUpdateAccessRequest(createEventRequest, {
-      id: 'id',
+      _id: 'id',
     } as AccessRequestDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
@@ -316,22 +316,22 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onCreateSchema > save expected event', async () => {
-    await connector.onCreateSchema(createEventRequest, { id: 'id' } as SchemaInterface)
+    await connector.onCreateSchema(createEventRequest, { _id: 'id' } as SchemaInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewSchema > save expected event', async () => {
-    await connector.onViewSchema(viewEventRequest, { id: 'id' } as SchemaInterface)
+    await connector.onViewSchema(viewEventRequest, { _id: 'id' } as SchemaInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onSearchSchemas > save expected event', async () => {
-    await connector.onSearchSchemas(searchEventRequest, [{ id: 'id' } as SchemaInterface])
+    await connector.onSearchSchemas(searchEventRequest, [{ _id: 'id' } as SchemaInterface])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateSchema > save expected event', async () => {
-    await connector.onUpdateSchema(updateEventRequest, { id: 'id' } as SchemaInterface)
+    await connector.onUpdateSchema(updateEventRequest, { _id: 'id' } as SchemaInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -341,47 +341,47 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onCreateSchemaMigration > save expected event', async () => {
-    await connector.onCreateSchemaMigration(createEventRequest, { id: 'test-schema' } as SchemaMigrationInterface)
+    await connector.onCreateSchemaMigration(createEventRequest, { _id: 'test-schema' } as SchemaMigrationInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewSchemaMigration > save expected event', async () => {
-    await connector.onViewSchemaMigration(viewEventRequest, { id: 'test-schema' } as SchemaMigrationInterface)
+    await connector.onViewSchemaMigration(viewEventRequest, { _id: 'test-schema' } as SchemaMigrationInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewSchemaMigrations > save expected event', async () => {
-    await connector.onViewSchemaMigrations(viewEventRequest, [{ id: 'test-schema' } as SchemaMigrationInterface])
+    await connector.onViewSchemaMigrations(viewEventRequest, [{ _id: 'test-schema' } as SchemaMigrationInterface])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateSchemaMigration > save expected event', async () => {
-    await connector.onUpdateSchemaMigration(updateEventRequest, { id: 'test-schema' } as SchemaMigrationInterface)
+    await connector.onUpdateSchemaMigration(updateEventRequest, { _id: 'test-schema' } as SchemaMigrationInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onCreateInference > save expected event', async () => {
-    await connector.onCreateInference(createEventRequest, { id: 'id' } as InferenceDoc)
+    await connector.onCreateInference(createEventRequest, { _id: 'id' } as InferenceDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewInference > save expected event', async () => {
-    await connector.onViewInference(viewEventRequest, { id: 'id' } as InferenceDoc)
+    await connector.onViewInference(viewEventRequest, { _id: 'id' } as InferenceDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewInferences > save expected event', async () => {
-    await connector.onViewInferences(viewEventRequest, [{ id: 'id' } as InferenceDoc])
+    await connector.onViewInferences(viewEventRequest, [{ _id: 'id' } as InferenceDoc])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateInference > save expected event', async () => {
-    await connector.onUpdateInference(updateEventRequest, { id: 'id' } as InferenceDoc)
+    await connector.onUpdateInference(updateEventRequest, { _id: 'id' } as InferenceDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onDeleteInference > save expected event', async () => {
-    await connector.onDeleteInference(deleteEventRequest, { id: 'id' } as InferenceDoc)
+    await connector.onDeleteInference(deleteEventRequest, { _id: 'id' } as InferenceDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -409,7 +409,7 @@ describe('connectors > audit > stroom', () => {
   test('onCreateImport > save expected event for MongoDocumentMirrorInformation', async () => {
     await connector.onCreateImport(
       createEventRequest,
-      { id: 'mirrored-model' } as ModelInterface,
+      { _id: 'mirrored-model' } as ModelInterface,
       'source-model',
       'exporter',
       {
@@ -426,7 +426,7 @@ describe('connectors > audit > stroom', () => {
   test('onCreateImport > save expected event for FileMirrorInformation', async () => {
     await connector.onCreateImport(
       createEventRequest,
-      { id: 'mirrored-model' } as ModelInterface,
+      { _id: 'mirrored-model' } as ModelInterface,
       'source-model',
       'exporter',
       { metadata: 'file', newPath: 'newPath' } as unknown as FileMirrorInformation,
@@ -437,7 +437,7 @@ describe('connectors > audit > stroom', () => {
   test('onCreateImport > save expected event for ImageMirrorInformation', async () => {
     await connector.onCreateImport(
       createEventRequest,
-      { id: 'mirrored-model' } as ModelInterface,
+      { _id: 'mirrored-model' } as ModelInterface,
       'source-model',
       'exporter',
       { metadata: 'metadata', image: { imageName: 'string', imageTag: 'string' } } as unknown as ImageMirrorInformation,

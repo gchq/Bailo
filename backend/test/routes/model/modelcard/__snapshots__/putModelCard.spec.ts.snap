@@ -7,7 +7,6 @@ exports[`routes > model > putModelCard > 200 > ok 1`] = `
     "deleted": false,
     "deletedAt": "",
     "deletedBy": "",
-    "id": "6776901b879d08e34b599d7e",
     "mirrored": false,
     "modelId": "test",
   },

@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -12,6 +12,8 @@ export const TransferStatus = {
 export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferStatus]
 
 export interface ModelTransferInterface {
+  _id: ObjectId
+
   modelId: string
   // The Bailo instance ID where the model is being transferred from
   peerId: string

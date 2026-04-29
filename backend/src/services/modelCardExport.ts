@@ -49,7 +49,7 @@ export type ReviewExport = {
 
 export async function getModelCardHtml(
   user: UserInterface,
-  modelId: ModelInterface['id'],
+  modelId: ModelInterface['_id'],
   version: number | GetModelCardVersionOptionsKeys,
 ) {
   const model = await getModelById(user, modelId)

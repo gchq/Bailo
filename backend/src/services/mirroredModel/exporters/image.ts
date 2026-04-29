@@ -43,7 +43,7 @@ export class ImageExporter extends BaseExporter {
     const imageCheck = this.release.images.find((image) => image._id.toString() === this.image._id.toString())
     if (!imageCheck) {
       throw InternalError('Could not find image associated with release.', {
-        modelId: this.model.id,
+        modelId: this.model._id.toString(),
         semver: this.release.semver,
         imageId: this.image._id.toString(),
         ...this.logData,
@@ -51,7 +51,7 @@ export class ImageExporter extends BaseExporter {
     }
 
     // update the distributionPackageName to use the mirroredModelId
-    const modelIdRe = new RegExp(String.raw`^${this.model.id}`)
+    const modelIdRe = new RegExp(String.raw`^${this.model._id.toString()}`)
     this.distributionPackageName = joinDistributionPackageName({
       domain: '',
       path: this.image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
@@ -64,7 +64,7 @@ export class ImageExporter extends BaseExporter {
     if (!releaseAuth.success) {
       throw Forbidden(releaseAuth.info, {
         userDn: this.user.dn,
-        modelId: this.model.id,
+        modelId: this.model._id.toString(),
         semver: this.release.semver,
         ...this.logData,
       })
@@ -72,13 +72,13 @@ export class ImageExporter extends BaseExporter {
 
     const imageAuth = await authorisation.image(this.user, this.model!, {
       type: 'repository',
-      name: this.model.id,
+      name: this.model._id.toString(),
       actions: ['pull'],
     })
     if (!imageAuth.success) {
       throw Forbidden(imageAuth.info, {
         userDn: this.user.dn,
-        modelId: this.model.id,
+        modelId: this.model._id.toString(),
         semver: this.release.semver,
         imageId: this.image._id.toString(),
         ...this.logData,
@@ -105,7 +105,7 @@ export class ImageExporter extends BaseExporter {
       {
         schemaVersion: 1,
         exporter: this.user.dn,
-        sourceModelId: this.model.id,
+        sourceModelId: this.model._id.toString(),
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         distributionPackageName: this.distributionPackageName!,
         importKind: MirrorKind.Image,
@@ -119,7 +119,7 @@ export class ImageExporter extends BaseExporter {
     // Non-null assertion operator used due to `requiresInit` performing assertion
     await addCompressedRegistryImageComponents(
       this.user,
-      this.model.id,
+      this.model._id.toString(),
       this.distributionPackageName!,
       this.tarStream!,
       this.logData,

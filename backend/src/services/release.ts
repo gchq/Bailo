@@ -97,11 +97,11 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
       }
       fileNames.push(file.name)
 
-      if (file.modelId !== model.id) {
+      if (file.modelId !== model._id.toString()) {
         throw BadReq(
-          `The file '${fileId}' comes from the model '${file.modelId}', but this release is being created for '${model.id}'`,
+          `The file '${fileId}' comes from the model '${file.modelId}', but this release is being created for '${model._id.toString()}'`,
           {
-            modelId: model.id,
+            modelId: model._id.toString(),
             fileId: fileId,
             fileModelId: file.modelId,
           },
@@ -142,7 +142,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     await getModelCardRevision(user, releaseParams.modelId, releaseParams.modelCardVersion)
   } else {
     if (!model.card) {
-      throw BadReq('This model does not have a model card associated with it yet.', { modelId: model.id })
+      throw BadReq('This model does not have a model card associated with it yet.', { modelId: model._id.toString() })
     }
 
     releaseParams.modelCardVersion = model.card?.version
@@ -377,12 +377,12 @@ export async function getReleaseBySemver(user: UserInterface, model: string | Mo
   }
   const semverObj = semverStringToObject(semver)
   const release = await ReleaseModel.findOne({
-    modelId: model.id,
+    modelId: model._id.toString(),
     semver: semverObj,
   })
 
   if (!release) {
-    throw NotFound(`The requested release was not found.`, { modelId: model.id, semver })
+    throw NotFound(`The requested release was not found.`, { modelId: model._id.toString(), semver })
   }
 
   const auth = await authorisation.release(user, model, ReleaseAction.View, release)
@@ -550,7 +550,7 @@ export async function deleteReleases(
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
     await removeResponsesByParentIds(
-      [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
+      [...reviewsForRelease.map((review) => review._id.toString()), release._id.toString()],
       session,
     )
   }
@@ -585,7 +585,7 @@ export async function removeFileFromReleases(
   }
 
   const query = {
-    modelId: model.id,
+    modelId: model._id.toString(),
     // Match documents where the element exists in the array
     fileIds: fileId,
   }

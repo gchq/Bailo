@@ -56,7 +56,7 @@ vi.mock('../../../src/services/token.js', () => mockTokenService)
 
 describe('connectors > authorisation > base', () => {
   const user = { dn: 'testUser' } as UserInterface
-  const model = { id: 'testModel' } as ModelDoc
+  const model = { _id: { toString: vi.fn(() => 'testModel') } } as ModelDoc
 
   test('hasApprovedAccessRequest > no access requests for model', async () => {
     const connector = new BasicAuthorisationConnector()
@@ -69,7 +69,7 @@ describe('connectors > authorisation > base', () => {
 
   test('hasApprovedAccessRequest > return access request check', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([{ id: 'accessRequest' }])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([{ _id: 'accessRequest' }])
     const approvedAccessRequest = true
     mockResponseService.checkAccessRequestsApproved.mockReturnValueOnce(approvedAccessRequest)
 
@@ -84,7 +84,7 @@ describe('connectors > authorisation > base', () => {
     mockModelService.getModelSystemRoles.mockReturnValue(['consumer'])
     ReviewRoleModelMock.find.mockResolvedValue([])
     const ar = {
-      id: 'ar1',
+      _id: 'ar1',
       metadata: { overview: { entities: ['entity2'] } },
     } as any
 
@@ -100,7 +100,10 @@ describe('connectors > authorisation > base', () => {
   test('hasModelVisibilityAccess > public model', async () => {
     const connector = new BasicAuthorisationConnector()
 
-    const result = await connector.hasModelVisibilityAccess(user, { id: 'testModel', visibility: 'public' } as ModelDoc)
+    const result = await connector.hasModelVisibilityAccess(user, {
+      _id: 'testModel',
+      visibility: 'public',
+    } as ModelDoc)
 
     expect(result).toBe(true)
   })
@@ -111,7 +114,7 @@ describe('connectors > authorisation > base', () => {
     mockModelService.getModelSystemRoles.mockReturnValue([])
 
     const result = await connector.hasModelVisibilityAccess(user, {
-      id: 'testModel',
+      _id: 'testModel',
       visibility: 'private',
     } as ModelDoc)
 
@@ -124,7 +127,7 @@ describe('connectors > authorisation > base', () => {
     ReviewRoleModelMock.find.mockResolvedValue([testReviewRole])
 
     const result = await connector.hasModelVisibilityAccess(user, {
-      id: 'testModel',
+      _id: 'testModel',
       visibility: 'private',
     } as ModelDoc)
 
@@ -147,7 +150,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.model(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
       ModelAction.Create,
@@ -168,7 +171,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.model(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
       ModelAction.Create,
@@ -189,7 +192,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Write,
@@ -209,7 +212,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Write,
@@ -229,7 +232,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Write,
@@ -250,7 +253,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Write,
@@ -288,7 +291,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Update,
@@ -308,7 +311,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Update,
@@ -329,7 +332,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Update,
@@ -350,7 +353,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Update,
@@ -386,7 +389,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Import,
@@ -406,7 +409,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Import,
@@ -427,7 +430,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Import,
@@ -448,7 +451,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Import,
@@ -471,7 +474,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Export,
@@ -491,7 +494,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Export,
@@ -512,7 +515,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Export,
@@ -533,7 +536,7 @@ describe('connectors > authorisation > base', () => {
       const result = await connector.model(
         user,
         {
-          id: 'testModel',
+          _id: 'testModel',
           visibility: 'public',
         } as ModelDoc,
         ModelAction.Export,
@@ -551,7 +554,7 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.hasRole.mockReturnValueOnce(true)
 
-    const result = await connector.schema(user, { id: 'testSchema' } as SchemaDoc, SchemaAction.Create)
+    const result = await connector.schema(user, { _id: 'testSchema' } as SchemaDoc, SchemaAction.Create)
 
     expect(result).toStrictEqual({
       id: 'testSchema',
@@ -563,7 +566,7 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.hasRole.mockReturnValueOnce(false)
 
-    const result = await connector.schema(user, { id: 'testSchema' } as SchemaDoc, SchemaAction.Create)
+    const result = await connector.schema(user, { _id: 'testSchema' } as SchemaDoc, SchemaAction.Create)
 
     expect(result).toStrictEqual({
       id: 'testSchema',
@@ -576,7 +579,11 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.hasRole.mockResolvedValue(false)
 
-    const result = await connector.schemaMigration(user, { id: 'schemaMigration' } as any, SchemaMigrationAction.Create)
+    const result = await connector.schemaMigration(
+      user,
+      { _id: 'schemaMigration' } as any,
+      SchemaMigrationAction.Create,
+    )
 
     expect(result).toStrictEqual({
       id: 'schemaMigration',
@@ -606,7 +613,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.release(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
       ReleaseAction.Create,
@@ -625,7 +632,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.release(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
       ReleaseAction.Create,
@@ -647,7 +654,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.release(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
       } as ModelDoc,
       ReleaseAction.Import,
@@ -668,7 +675,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.release(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
       } as ModelDoc,
       ReleaseAction.Import,
@@ -688,7 +695,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.release(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
       } as ModelDoc,
       ReleaseAction.Export,
@@ -709,7 +716,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.release(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
       } as ModelDoc,
       ReleaseAction.Export,
@@ -780,7 +787,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.images(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
       } as ModelDoc,
       [
@@ -810,7 +817,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.images(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
         settings: { ungovernedAccess: false },
       } as ModelDoc,
@@ -841,7 +848,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.images(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
         settings: { ungovernedAccess: false },
       } as ModelDoc,
@@ -872,7 +879,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.images(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
         settings: { ungovernedAccess: false },
       } as ModelDoc,
@@ -907,7 +914,7 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.images(
       user,
       {
-        id: 'testModel',
+        _id: 'testModel',
         visibility: 'public',
         settings: { ungovernedAccess: false },
       } as ModelDoc,
@@ -937,7 +944,7 @@ describe('connectors > authorisation > base', () => {
 
     const result = await connector.image(
       user as any,
-      { id: 'testModel', kind: EntryKind.Model } as any,
+      { _id: 'testModel', kind: EntryKind.Model } as any,
       {
         type: 'repository',
         name: 'img1',
@@ -963,7 +970,7 @@ describe('connectors > authorisation > base', () => {
       id: 'testModel',
     } as any)
 
-    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.Model } as any, {
+    const result = await connector.image(user as any, { _id: 'testModel', kind: EntryKind.Model } as any, {
       type: 'repository',
       name: 'img1',
       actions: ['pull'],
@@ -982,7 +989,7 @@ describe('connectors > authorisation > base', () => {
     mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
     ReviewRoleModelMock.find.mockResolvedValue([])
 
-    const result = await connector.image(user as any, { id: 'testModel', kind: EntryKind.MirroredModel } as any, {
+    const result = await connector.image(user as any, { _id: 'testModel', kind: EntryKind.MirroredModel } as any, {
       type: 'repository',
       name: 'img1',
       actions: ['pull'],

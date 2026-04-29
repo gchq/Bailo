@@ -11,8 +11,9 @@ export interface QuestionMigration {
 }
 
 export interface SchemaMigrationInterface {
+  _id: string
+
   name: string
-  id: string
   description?: string
 
   sourceSchema: string
@@ -30,8 +31,8 @@ export type SchemaMigrationDoc = SchemaMigrationInterface & Document<any, any, S
 
 const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
   {
+    _id: { type: String, unique: true, required: true },
     name: { type: String, required: true },
-    id: { type: String, unique: true, required: true },
     description: { type: String, required: false, default: '' },
 
     sourceSchema: { type: String, required: true },
@@ -41,7 +42,7 @@ const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
 
     questionMigrations: [
       {
-        id: { type: String, required: true },
+        _id: { type: String, required: true },
         kind: { type: String, enum: Object.values(SchemaMigrationKind), required: true },
         sourcePath: { type: String, required: true },
         targetPath: { type: String },

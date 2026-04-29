@@ -136,7 +136,7 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
       additionalFields: ['tags', 'cardData', 'createdAt', 'author'],
     })) {
       models.push({
-        id: model.id,
+        _id: model.id,
         name: model.name,
         description: model.task || '',
         tags: model.tags || [],

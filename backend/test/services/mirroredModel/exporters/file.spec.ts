@@ -57,12 +57,12 @@ vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirrore
 
 const mockUser = { dn: 'userDN' } as any
 const mockModel = {
-  id: 'modelId',
+  _id: { toString: vi.fn(() => 'modelId') },
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
 const mockFile = {
-  id: 'fileId',
+  _id: { toString: vi.fn(() => 'fileId') },
   name: 'test.txt',
   size: 500,
   scanResults: [{ state: ArtefactScanState.Complete }],
@@ -112,8 +112,8 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
     const expectedErr = Forbidden('no file access\nMethod `FileExporter._checkAuths` failure.', {
       userDn: mockUser.dn,
-      modelId: mockModel.id,
-      fileId: mockFile.id,
+      modelId: mockModel._id.toString(),
+      fileId: mockFile._id.toString(),
       ...mockLogData,
     })
 
@@ -139,7 +139,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file is missing vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
-      fileId: badFile.id,
+      fileId: badFile._id.toString(),
     })
 
     // @ts-expect-error calling protected method
@@ -152,7 +152,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has incomplete vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
-      fileId: badFile.id,
+      fileId: badFile._id.toString(),
     })
 
     // @ts-expect-error calling protected method
@@ -168,7 +168,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
     const expectedErr = BadReq('The file has failed vulnerability scan(s).\nMethod `FileExporter._init` failure.', {
       filename: badFile.name,
-      fileId: badFile.id,
+      fileId: badFile._id.toString(),
     })
 
     // @ts-expect-error calling protected method
@@ -181,12 +181,12 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     // @ts-expect-error calling protected method
     const params = exporter.getInitialiseTarGzUploadParams()
 
-    expect(params[0]).toBe(`${mockFile.id}.tar.gz`)
+    expect(params[0]).toBe(`${mockFile._id.toString()}.tar.gz`)
     expect(params[1]).toMatchObject({
       exporter: mockUser.dn,
-      sourceModelId: mockModel.id,
+      sourceModelId: mockModel._id.toString(),
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
-      filePath: mockFile.id,
+      filePath: mockFile._id.toString(),
       importKind: mirroredModelMocks.MirrorKind.File,
     })
     expect(params[2]).toEqual(mockLogData)
@@ -217,12 +217,12 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
 
     await exporter.addData()
 
-    expect(fileServiceMocks.downloadFile).toHaveBeenCalledWith(mockUser, mockFile.id)
+    expect(fileServiceMocks.downloadFile).toHaveBeenCalledWith(mockUser, mockFile._id.toString())
     expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledWith(
       exporter['tarStream'],
       expect.objectContaining({
         type: 'stream',
-        filename: mockFile.id,
+        filename: mockFile._id.toString(),
         size: mockFile.size,
         stream: expect.any(Readable),
       }),

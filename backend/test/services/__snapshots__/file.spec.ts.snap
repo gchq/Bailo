@@ -138,7 +138,6 @@ exports[`services > file > removeFile > success 1`] = `
       ],
     },
   },
-  "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
 }
 `;
@@ -180,7 +179,6 @@ exports[`services > file > removeFiles > success 2`] = `
         ],
       },
     },
-    "id": "73859F8D26679D2E52597326",
     "modelId": "testModel",
   },
   {
@@ -197,7 +195,6 @@ exports[`services > file > removeFiles > success 2`] = `
         ],
       },
     },
-    "id": "62379525E2D97662D8F95837",
     "modelId": "testModel2",
   },
 ]
@@ -240,7 +237,6 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
         ],
       },
     },
-    "id": "73859F8D26679D2E52597326",
     "modelId": "testModel",
   },
   {
@@ -257,7 +253,6 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
         ],
       },
     },
-    "id": "62379525E2D97662D8F95837",
     "modelId": "testModel2",
   },
 ]
@@ -300,7 +295,6 @@ exports[`services > file > removeFiles > success hard delete 2`] = `
         ],
       },
     },
-    "id": "73859F8D26679D2E52597326",
     "modelId": "testModel",
   },
   {
@@ -317,7 +311,6 @@ exports[`services > file > removeFiles > success hard delete 2`] = `
         ],
       },
     },
-    "id": "62379525E2D97662D8F95837",
     "modelId": "testModel2",
   },
 ]
@@ -386,24 +379,8 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
 exports[`services > file > updateFile > success 1`] = `
 {
   "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-      ],
-    },
+    "toString": [MockFunction],
   },
-  "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
 }
 `;
@@ -411,24 +388,8 @@ exports[`services > file > updateFile > success 1`] = `
 exports[`services > file > updateFile > success multiple params 1`] = `
 {
   "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-      ],
-    },
+    "toString": [MockFunction],
   },
-  "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
 }
 `;

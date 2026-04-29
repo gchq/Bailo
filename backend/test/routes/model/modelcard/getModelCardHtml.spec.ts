@@ -10,6 +10,7 @@ import { createFixture, testGet } from '../../../testUtils/routes.js'
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const mockModelCard: ModelCardInterface = {
+  _id: 'id' as any,
   schemaId: 'schema123',
   version: 1,
   mirrored: false,

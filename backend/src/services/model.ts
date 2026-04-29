@@ -86,7 +86,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 
   const model = new ModelModel({
     ...modelParams,
-    id: modelId,
+    _id: modelId,
     collaborators,
   })
 
@@ -179,7 +179,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
         // ModelCardRevision
         Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
         // Review
-        Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
+        Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id.toString(), session))),
         // Token
         dropModelIdFromTokens(user, modelId, allModelTokens, session),
         // Webhook
@@ -210,14 +210,14 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
         // Reviews are already deleted but Responses are only partially deleted and may overlap so cannot be concurrent.
         removeAccessRequests(
           user,
-          allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
+          allModelAccessRequests.flatMap((accessRequest) => accessRequest._id.toString()),
           session,
         ),
         // Only delete Files after deleting Releases as removeFiles modifies File, Scan & Release Documents.
         removeFiles(
           user,
           modelId,
-          allModelFiles.flatMap((file) => file.id),
+          allModelFiles.flatMap((file) => file._id.toString()),
           true,
           undefined,
           session,
@@ -282,7 +282,7 @@ export async function searchModels(
   const processLocalModels = localModelsPromise.then((localModels) => {
     results.models.push(
       ...localModels.map((model) => ({
-        id: model.id,
+        _id: model._id,
         name: model.name,
         description: model.description,
         tags: model.tags,
@@ -412,9 +412,9 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       score: { $meta: 'textScore' },
     })
     // Remove duplicate items
-    const mask = new Set(results.map((model) => model.id))
+    const mask = new Set(results.map((model) => model._id.toString()))
 
-    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model.id))
+    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model._id.toString()))
     results = results.concat(fullTextOnlyResults)
   }
 
@@ -776,7 +776,7 @@ export async function setLatestImportedModelCard(modelId: string) {
   updatedModel.mirroredCard = { ...latestModelCard }
   if (updatedModel.card === undefined || updatedModel.card.metadata === undefined) {
     const newCard = new ModelCardRevisionModel({
-      modelId: updatedModel.id,
+      modelId: updatedModel._id.toString(),
       schemaId: latestModelCard.schemaId,
       version: 1,
       mirrored: false,

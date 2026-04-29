@@ -40,8 +40,8 @@ export class DocumentsExporter extends BaseExporter {
   protected async _init() {
     if (this.releases.length > 0) {
       const semvers = this.getSemvers()
-      const fileIds = await getAllFileIds(this.model.id, semvers)
-      this.files = await getFilesByIds(this.user, this.model.id, fileIds)
+      const fileIds = await getAllFileIds(this.model._id.toString(), semvers)
+      this.files = await getFilesByIds(this.user, this.model._id.toString(), fileIds)
 
       // Check the total size of the export if more than one release is being exported
       if (this.releases.length > 1) {
@@ -50,7 +50,7 @@ export class DocumentsExporter extends BaseExporter {
         }
         const totalFileSize = await getTotalFileSize(fileIds)
         log.debug(
-          { modelId: this.model.id, semvers, size: prettyBytes(totalFileSize) },
+          { modelId: this.model._id.toString(), semvers, size: prettyBytes(totalFileSize) },
           'Calculated estimated total file size included in export.',
         )
         if (totalFileSize > config.modelMirror.export.maxSize) {
@@ -69,11 +69,11 @@ export class DocumentsExporter extends BaseExporter {
         } = { missingScan: [], incompleteScan: [], failedScan: [] }
         for (const file of this.files) {
           if (!file.scanResults || file.scanResults.length === 0) {
-            scanErrors.missingScan.push({ name: file.name, id: file.id })
+            scanErrors.missingScan.push({ name: file.name, id: file._id.toString() })
           } else if (file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
-            scanErrors.incompleteScan.push({ name: file.name, id: file.id })
+            scanErrors.incompleteScan.push({ name: file.name, id: file._id.toString() })
           } else if (file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary?.length > 0)) {
-            scanErrors.failedScan.push({ name: file.name, id: file.id })
+            scanErrors.failedScan.push({ name: file.name, id: file._id.toString() })
           }
         }
         if (
@@ -98,11 +98,11 @@ export class DocumentsExporter extends BaseExporter {
       })
     }
     return [
-      `${this.model.id}.tar.gz`,
+      `${this.model._id.toString()}.tar.gz`,
       {
         schemaVersion: 1,
         exporter: this.user.dn,
-        sourceModelId: this.model.id,
+        sourceModelId: this.model._id.toString(),
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         importKind: MirrorKind.Documents,
         exportId: this.logData.exportId,
@@ -137,16 +137,16 @@ export class DocumentsExporter extends BaseExporter {
   @withStreams
   protected async addModelCardRevisionsToTarball() {
     log.debug(
-      { user: this.user, modelId: this.model.id, ...this.logData },
+      { user: this.user, modelId: this.model._id.toString(), ...this.logData },
       'Adding model card revisions to Tarball file.',
     )
-    const cards = await getModelCardRevisions(this.user, this.model.id)
+    const cards = await getModelCardRevisions(this.user, this.model._id.toString())
     for (const card of cards) {
       const cardJson = JSON.stringify(card.toJSON())
       await addEntryToTarGzUpload(
         this.tarStream!, // Non-null assertion operator used due to `withStreams` performing assertion
         { type: 'text', filename: `${card.version}.json`, content: cardJson },
-        { modelId: this.model.id, ...this.logData },
+        { modelId: this.model._id.toString(), ...this.logData },
       )
     }
     log.debug(
@@ -168,7 +168,7 @@ export class DocumentsExporter extends BaseExporter {
       throw InternalError('Error when adding release(s) to Tarball file.', { errors, ...this.logData })
     }
     log.debug(
-      { user: this.user, modelId: this.model.id, semvers: this.getSemvers(), ...this.logData },
+      { user: this.user, modelId: this.model._id.toString(), semvers: this.getSemvers(), ...this.logData },
       'Completed adding model releases to Tarball file.',
     )
   }
@@ -185,14 +185,14 @@ export class DocumentsExporter extends BaseExporter {
       await addEntryToTarGzUpload(
         this.tarStream!,
         { type: 'text', filename: `releases/${release.semver}.json`, content: releaseJson },
-        { modelId: this.model.id, ...this.logData },
+        { modelId: this.model._id.toString(), ...this.logData },
       )
     } catch (error: unknown) {
       throw InternalError('Error when generating the tarball file.', {
         error,
-        modelId: this.model.id,
+        modelId: this.model._id.toString(),
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
-        releaseId: release.id,
+        releaseId: release._id.toString(),
         ...this.logData,
       })
     }
@@ -212,12 +212,12 @@ export class DocumentsExporter extends BaseExporter {
         await addEntryToTarGzUpload(
           this.tarStream!,
           { type: 'text', filename: `files/${file._id.toString()}.json`, content: fileJson },
-          { modelId: this.model.id, ...this.logData },
+          { modelId: this.model._id.toString(), ...this.logData },
         )
       } catch (error: unknown) {
         throw InternalError('Error when generating the tarball file.', {
           error,
-          modelId: this.model.id,
+          modelId: this.model._id.toString(),
           file,
           ...this.logData,
         })

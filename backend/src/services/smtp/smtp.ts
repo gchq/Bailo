@@ -221,5 +221,5 @@ function getReleaseUrl(release: ReleaseDoc) {
 }
 
 function getAccessRequestUrl(accessRequest: AccessRequestDoc) {
-  return `${appBaseUrl}/model/${accessRequest.modelId}/access-request/${accessRequest.id}`
+  return `${appBaseUrl}/model/${accessRequest.modelId}/access-request/${accessRequest._id}`
 }

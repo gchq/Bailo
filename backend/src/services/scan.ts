@@ -131,7 +131,7 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
 
 export async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.scannersInfo()
-  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
+  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file._id.toString() }
   await runScans(scannersInfo, fileIdentifier, file)
 
   const scanResults = await ScanModel.find(fileIdentifier)
@@ -164,7 +164,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
     throw BadReq('Cannot run scan on an empty file')
   }
 
-  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
+  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file._id.toString() }
   const minutesBeforeRescanning = await artefactScanDelay(fileIdentifier)
   if (minutesBeforeRescanning > 0) {
     throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
@@ -195,7 +195,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   }
   const rerunArtefactScanAuth = await authorisation.image(user, model, {
     type: 'repository',
-    name: model.id,
+    name: model._id,
     actions: ['pull'],
   })
   if (!rerunArtefactScanAuth.success) {

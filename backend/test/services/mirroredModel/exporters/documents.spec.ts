@@ -56,13 +56,13 @@ vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirrore
 
 const mockUser = { dn: 'userDN' } as any
 const mockModel = {
-  id: 'modelId',
+  _id: { toString: vi.fn(() => 'modelId') },
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
 
 const mockRelease = {
-  id: 'relId',
+  _id: { toString: vi.fn(() => 'relId') },
   semver: '1.0.0',
   modelId: 'modelId',
   fileIds: ['f1'],
@@ -70,8 +70,7 @@ const mockRelease = {
 } as any
 
 const mockFile = {
-  id: 'fileId',
-  _id: { toString: () => 'fileId' },
+  _id: { toString: vi.fn(() => 'fileId') },
   name: 'f',
   scanResults: [{ state: ArtefactScanState.Complete }],
 } as any
@@ -141,7 +140,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
 
   test('_init throws BadReq if scan issues (missing scan)', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(['item1'])
-    const badFile = { id: 'f', name: 'name', scanResults: [] }
+    const badFile = { _id: { toString: vi.fn(() => 'f') }, name: 'name', scanResults: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     const expectedErr = BadReq(
@@ -156,7 +155,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   test('_init throws BadReq if scan incomplete', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(['item1'])
     const incompleteFile = {
-      id: 'f',
+      _id: { toString: vi.fn(() => 'f') },
       name: 'name',
       scanResults: [{ state: ArtefactScanState.InProgress }],
     }
@@ -174,7 +173,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   test('_init throws BadReq if scan failed', async () => {
     scannersMocks.default.scannersInfo.mockReturnValue(['item1'])
     const infectedFile = {
-      id: 'f',
+      _id: { toString: vi.fn(() => 'f') },
       name: 'name',
       scanResults: [
         {
@@ -200,10 +199,10 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     // @ts-expect-error calling protected method
     const params = exporter.getInitialiseTarGzUploadParams()
 
-    expect(params[0]).toBe(`${mockModel.id}.tar.gz`)
+    expect(params[0]).toBe(`${mockModel._id.toString()}.tar.gz`)
     expect(params[1]).toMatchObject({
       exporter: mockUser.dn,
-      sourceModelId: mockModel.id,
+      sourceModelId: mockModel._id.toString(),
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
       importKind: mirroredModelMocks.MirrorKind.Documents,
     })

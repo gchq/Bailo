@@ -71,9 +71,9 @@ vi.mock('../../src/utils/config.js', () => ({
 
 const authMocks = vi.hoisted(() => ({
   default: {
-    file: vi.fn(() => ({ success: true, id: '123abc' })),
-    model: vi.fn(() => ({ success: true, id: '123abc' })),
-    image: vi.fn(() => ({ success: true, id: '123abc' })),
+    file: vi.fn(() => ({ success: true, _id: { toString: vi.fn(() => '123abc') } })),
+    model: vi.fn(() => ({ success: true, _id: { toString: vi.fn(() => '123abc') } })),
+    image: vi.fn(() => ({ success: true, _id: { toString: vi.fn(() => '123abc') } })),
   },
 }))
 vi.mock('../../src/connectors/authorisation/index.js', () => authMocks)
@@ -100,12 +100,14 @@ const fileScanningMock = vi.hoisted(() => ({
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ id: 'model123', kind: 'model' }) as any),
+  getModelById: vi.fn(() => ({ _id: { toString: vi.fn(() => 'model123') }, kind: 'model' }) as any),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const fileMocks = vi.hoisted(() => ({
-  getFileById: vi.fn(() => ({ modelId: 'random_model', size: 1, name: 'file.txt' }) as any),
+  getFileById: vi.fn(
+    () => ({ modelId: 'random_model', size: 1, name: 'file.txt', _id: { toString: vi.fn(() => 'file123') } }) as any,
+  ),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 
@@ -143,8 +145,7 @@ describe('services > scan', () => {
       ScanModelMock.find.mockResolvedValueOnce([scanResult])
       ScanModelMock.updateOne.mockResolvedValueOnce(undefined)
       const file = {
-        id: 'file123',
-        _id: 'file123',
+        _id: { toString: vi.fn(() => 'file123') },
         toObject: () => ({ name: 'file.txt', size: 1 }),
       } as any
 
@@ -158,8 +159,7 @@ describe('services > scan', () => {
       ScanModelMock.find.mockResolvedValueOnce([])
       ScanModelMock.updateOne.mockResolvedValue(undefined)
       const file = {
-        id: 'file123',
-        _id: 'file123',
+        _id: { toString: vi.fn(() => 'file123') },
         toObject: () => ({ name: 'file.txt', size: 1 }),
       } as any
 
@@ -172,8 +172,7 @@ describe('services > scan', () => {
       fileScanningMock.scannersInfo.mockReturnValueOnce([])
       ScanModelMock.find.mockResolvedValueOnce([])
       const file = {
-        id: 'file123',
-        _id: 'file123',
+        _id: { toString: vi.fn(() => 'file123') },
         toObject: () => ({ name: 'file.txt', size: 1 }),
       } as any
 
@@ -185,8 +184,7 @@ describe('services > scan', () => {
     test('sets scan state to InProgress before completing', async () => {
       ScanModelMock.find.mockResolvedValueOnce([])
       const file = {
-        id: 'file123',
-        _id: 'file123',
+        _id: { toString: vi.fn(() => 'file123') },
         toObject: () => ({ name: 'file.txt', size: 1 }),
       } as any
 
@@ -218,8 +216,7 @@ describe('services > scan', () => {
       ScanModelMock.find.mockResolvedValueOnce([])
       ScanModelMock.updateOne.mockResolvedValue(undefined)
       const file = {
-        id: 'file123',
-        _id: 'file123',
+        _id: { toString: vi.fn(() => 'file123') },
         toObject: () => ({ name: 'file.txt', size: 1 }),
       } as any
       await scanFile(file)

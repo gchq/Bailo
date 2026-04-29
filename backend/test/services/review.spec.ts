@@ -26,10 +26,10 @@ const ResponseModelMock = getTypedModelMock('ResponseModel')
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
   default: {
     reviewRole: vi.fn(() => {
-      return { id: '', success: true }
+      return { _id: { toString: vi.fn(() => '') }, success: true }
     }),
     models: vi.fn(() => {
-      return { id: '', success: true }
+      return { _id: { toString: vi.fn(() => '') }, success: true }
     }),
   },
 }))
@@ -46,7 +46,7 @@ const smtpMock = vi.hoisted(() => ({
 vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const modelMock = vi.hoisted(() => ({
-  getModelById: vi.fn(),
+  getModelById: vi.fn(() => ({ _id: { toString: vi.fn(() => 'model-123') } })),
 }))
 vi.mock('../../src/services/model.js', async () => modelMock)
 
@@ -122,10 +122,14 @@ describe('services > review', () => {
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
+    SchemaModelMock.findOne.mockResolvedValueOnce({ _id: { toString: vi.fn(() => 'test123') } })
     ReviewRoleModelMock.find.mockResolvedValueOnce([])
     const result: Promise<void> = createReleaseReviews(
-      { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] } as any,
+      {
+        _id: { toString: vi.fn(() => '123') },
+        card: {},
+        collaborators: [{ entity: 'user:user', roles: 'reviewer' }],
+      } as any,
       {} as any,
     )
 
@@ -135,11 +139,15 @@ describe('services > review', () => {
   })
 
   test('createReleaseReviews > successful', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
+    SchemaModelMock.findOne.mockResolvedValueOnce({ _id: { toString: vi.fn(() => 'test123') } })
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
     await createReleaseReviews(
-      { collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr', 'reviewer'] }], card: {} } as any,
-      {} as any,
+      {
+        _id: { toString: vi.fn(() => 'model-123') },
+        collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr', 'reviewer'] }],
+        card: {},
+      } as any,
+      { _id: { toString: vi.fn(() => 'access-request-123') } } as any,
     )
 
     expect(ReviewModelMock.save).toBeCalled()
@@ -147,12 +155,15 @@ describe('services > review', () => {
   })
 
   test('createAccessRequestReviews > successful', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
+    SchemaModelMock.findOne.mockResolvedValueOnce({ _id: { toString: vi.fn(() => 'test123') } })
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
 
     await createAccessRequestReviews(
-      { collaborators: [{ entity: 'user:user', roles: ['reviewer', 'owner'] }] } as any,
-      {} as any,
+      {
+        _id: { toString: vi.fn(() => 'model-123') },
+        collaborators: [{ entity: 'user:user', roles: ['reviewer', 'owner'] }],
+      } as any,
+      { _id: { toString: vi.fn(() => 'access-request-123') } } as any,
     )
 
     expect(ReviewModelMock.save).toBeCalled()
@@ -222,7 +233,11 @@ describe('services > review', () => {
     ReviewRoleModelMock.findOne.mockResolvedValue({ ...testReviewRole, delete: vi.fn() })
     SchemaModelMock.find.mockResolvedValue([{ ...testModelSchema, save: vi.fn() }])
     ModelModelMock.find.mockResolvedValue([
-      { id: 'test-1234', collaborators: [{ entity: 'user:user', roles: ['reviewer'] }], save: vi.fn() },
+      {
+        _id: { toString: vi.fn(() => 'test-1234') },
+        collaborators: [{ entity: 'user:user', roles: ['reviewer'] }],
+        save: vi.fn(),
+      },
     ])
     await removeReviewRole({} as any, 'reviewer')
 

@@ -1,10 +1,12 @@
-import { Document, model, Schema } from 'mongoose'
+import { Document, model, ObjectId, Schema } from 'mongoose'
 
 export interface MigrationMetadata {
   [key: string]: any
 }
 
 export interface Migration {
+  _id: ObjectId
+
   name: string
   metadata?: MigrationMetadata
 

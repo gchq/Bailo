@@ -1,5 +1,5 @@
 import { Validator } from 'jsonschema'
-import { ClientSession, PipelineStage, Types } from 'mongoose'
+import { ClientSession, PipelineStage } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
@@ -52,7 +52,7 @@ export async function createAccessRequest(
 
   const accessRequestId = convertStringToId(accessRequestInfo.metadata.overview.name)
   const accessRequest = new AccessRequestModel({
-    id: accessRequestId,
+    _id: accessRequestId,
     createdBy: user.dn,
     modelId,
     comments: [],
@@ -262,7 +262,7 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
     entity: toEntity('user', user.dn),
     kind: ResponseKind.Comment,
     comment: message,
-    parentId: accessRequest._id as Types.ObjectId,
+    parentId: accessRequest._id,
     createdAt: new Date().toISOString(),
   })
 

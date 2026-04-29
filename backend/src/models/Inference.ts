@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -9,6 +9,8 @@ export interface InferenceSetting {
 }
 
 export interface InferenceInterface {
+  _id: ObjectId
+
   modelId: string
   image: string
   tag: string

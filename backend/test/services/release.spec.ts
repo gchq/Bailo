@@ -33,7 +33,7 @@ const ReviewModelMock = getTypedModelMock('ReviewModel')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({
-    id: 'test_model_id',
+    _id: { toString: vi.fn(() => 'test_model_id') },
     card: { version: 1 },
     kind: 'model',
   })),
@@ -199,7 +199,7 @@ describe('services > release', () => {
   test('createRelease > release with duplicate file names', async () => {
     fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
     modelMocks.getModelById.mockResolvedValue({
-      id: 'test_model_id',
+      _id: { toString: vi.fn(() => 'test_model_id') },
       card: { version: 1 },
       kind: 'model',
     })
@@ -245,7 +245,7 @@ describe('services > release', () => {
 
   test('createRelease > automatic model card version', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
+      _id: { toString: vi.fn(() => 'test_model_id') },
       card: { version: 999 },
       kind: 'model',
     })
@@ -259,7 +259,7 @@ describe('services > release', () => {
 
   test('createRelease > no model card', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
+      _id: { toString: vi.fn(() => 'test_model_id') },
       card: undefined as any,
       kind: 'model',
     })
@@ -273,7 +273,7 @@ describe('services > release', () => {
 
   test('createRelease > should throw Bad Req if the user tries to alter a mirrored model card', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
+      _id: { toString: vi.fn(() => 'test_model_id') },
       card: { version: 1 },
       kind: 'mirrored-model',
     })
@@ -284,7 +284,7 @@ describe('services > release', () => {
   })
 
   test('createRelease > release with previously deleted semver', async () => {
-    ReleaseModelMock.findOne.mockResolvedValue({ id: 'id' })
+    ReleaseModelMock.findOne.mockResolvedValue({ _id: { toString: vi.fn(() => 'id') } })
     const result = createRelease(
       {} as any,
       {
@@ -354,7 +354,7 @@ describe('services > release', () => {
 
   test('updateRelease > should throw Bad Req when attempting to update a release on a mirrored model ', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
+      _id: { toString: vi.fn(() => 'test_model_id') },
       card: { version: 1 },
       kind: 'mirrored-model',
     })
@@ -382,7 +382,7 @@ describe('services > release', () => {
 
   test('newReleaseComment > should throw bad request when attempting to create a release comment on a mirrored model', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
+      _id: { toString: vi.fn(() => 'test_model_id') },
       card: { version: 1 },
       kind: 'mirrored-model',
     })
@@ -509,7 +509,7 @@ describe('services > release', () => {
 
     test('success bypass mirrored model check', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
-        id: 'test_model_id',
+        _id: { toString: vi.fn(() => 'test_model_id') },
         card: { version: 1 },
         kind: 'mirrored-model',
       })
@@ -524,7 +524,7 @@ describe('services > release', () => {
 
     test('throw on mirrored model', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
-        id: 'test_model_id',
+        _id: { toString: vi.fn(() => 'test_model_id') },
         card: { version: 1 },
         kind: 'mirrored-model',
       })
@@ -537,7 +537,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > no permission', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test' }
+    const mockModel: any = { _id: { toString: vi.fn(() => 'test') } }
     const mockRelease = { _id: 'release' }
 
     vi.mocked(authorisation.releases).mockResolvedValue([
@@ -558,7 +558,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > success', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test' }
+    const mockModel: any = { _id: { toString: vi.fn(() => 'test') } }
     const mockRelease = { _id: 'release' }
     const resultObject = { modifiedCount: 2, matchedCount: 2 }
 
@@ -572,7 +572,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > should throw a bad req when attempting to remove a file from a mirrored model', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', kind: 'mirrored-model' }
+    const mockModel: any = { _id: { toString: vi.fn(() => 'test') }, kind: 'mirrored-model' }
 
     await expect(() => removeFileFromReleases(mockUser, mockModel, '123')).rejects.toThrowError(
       /^Cannot remove a file from a mirrored model./,
@@ -582,7 +582,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > allow removing a file from a mirrored model with arg', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', kind: 'mirrored-model' }
+    const mockModel: any = { _id: { toString: vi.fn(() => 'test') }, kind: 'mirrored-model' }
     const mockRelease = { _id: 'release' }
     const resultObject = { modifiedCount: 2, matchedCount: 2 }
 

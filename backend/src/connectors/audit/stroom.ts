@@ -194,22 +194,22 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateModel(req: Request, model: ModelDoc) {
-    this.auditGenericEvent(req, model.id)
+    this.auditGenericEvent(req, model._id)
   }
 
   async onViewModel(req: Request, model: ModelDoc) {
-    this.auditGenericEvent(req, model.id)
+    this.auditGenericEvent(req, model._id)
   }
 
   async onSearchModel(req: Request, models: EntrySearchResult[]) {
     this.auditSearchEvent(
       req,
-      models.map((model) => ({ Id: model.id })),
+      models.map((model) => ({ Id: model._id })),
     )
   }
 
   async onUpdateModel(req: Request, model: ModelDoc) {
-    this.auditGenericEvent(req, model.id)
+    this.auditGenericEvent(req, model._id)
   }
 
   async onDeleteModel(req: Request, modelId: string) {
@@ -217,7 +217,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
-    this.auditGenericEvent(req, `${model.id}:${modelCard.version}`)
+    this.auditGenericEvent(req, `${model._id}:${modelCard.version}`)
   }
 
   async onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
@@ -317,25 +317,25 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
-    this.auditGenericEvent(req, accessRequest.id)
+    this.auditGenericEvent(req, accessRequest._id)
   }
 
   async onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
-    this.auditGenericEvent(req, accessRequest.id)
+    this.auditGenericEvent(req, accessRequest._id)
   }
 
   async onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
     this.auditMultipleViewEvent(
       req,
       accessRequests.map((accessRequest) => ({
-        Id: accessRequest.id,
+        Id: accessRequest._id,
       })),
       'access Request',
     )
   }
 
   async onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
-    this.auditGenericEvent(req, accessRequest.id)
+    this.auditGenericEvent(req, accessRequest._id)
   }
 
   async onDeleteAccessRequest(req: Request, accessRequestId: string) {
@@ -350,22 +350,22 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateSchema(req: Request, schema: SchemaInterface) {
-    this.auditGenericEvent(req, schema.id)
+    this.auditGenericEvent(req, schema._id.toString())
   }
 
   async onViewSchema(req: Request, schema: SchemaInterface) {
-    this.auditGenericEvent(req, schema.id)
+    this.auditGenericEvent(req, schema._id.toString())
   }
 
   async onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
     this.auditSearchEvent(
       req,
-      schemas.map((schema) => ({ Id: `${schema.id}` })),
+      schemas.map((schema) => ({ Id: `${schema._id.toString()}` })),
     )
   }
 
   async onUpdateSchema(req: Request, schema: SchemaInterface) {
-    this.auditGenericEvent(req, schema.id)
+    this.auditGenericEvent(req, schema._id.toString())
   }
 
   async onDeleteSchema(req: Request, schemaId: string) {
@@ -373,23 +373,23 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.auditGenericEvent(req, schemaMigration.id)
+    this.auditGenericEvent(req, schemaMigration._id)
   }
 
   async onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.auditGenericEvent(req, schemaMigration.id)
+    this.auditGenericEvent(req, schemaMigration._id)
   }
 
   async onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
     this.auditMultipleViewEvent(
       req,
-      schemaMigrations.map((schemaMigration) => ({ Id: schemaMigration.id })),
+      schemaMigrations.map((schemaMigration) => ({ Id: schemaMigration._id })),
       'schema migration',
     )
   }
 
   async onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
-    this.auditGenericEvent(req, schemaMigration.id)
+    this.auditGenericEvent(req, schemaMigration._id)
   }
 
   async onCreateInference(req: Request, inference: InferenceDoc) {
@@ -459,7 +459,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     exporter: string,
     importResult: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
   ) {
-    this.auditImportEvent(req, sourceModelId, exporter, mirroredModel.id, { ...importResult })
+    this.auditImportEvent(req, sourceModelId, exporter, mirroredModel._id, { ...importResult })
   }
 
   async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {

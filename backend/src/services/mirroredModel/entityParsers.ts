@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongoose'
+
 import { objectExists } from '../../clients/s3.js'
 import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
@@ -23,7 +25,7 @@ export function parseModelCard(
   }
   const modelId = modelCard.modelId
   modelCard.modelId = mirroredModelId
-  delete modelCard._id
+  delete (modelCard as Omit<ModelCardRevisionDoc, '_id'> & { _id?: ObjectId })._id
   if (sourceModelId !== modelId) {
     throw InternalError(
       'Compressed file contains model cards that have a model ID that does not match the source model Id.',
@@ -54,7 +56,7 @@ export function parseRelease(
 
   const modelId = release.modelId
   release.modelId = mirroredModelId
-  delete release._id
+  delete (release as Omit<ReleaseDoc, '_id'> & { _id?: ObjectId })._id
 
   if (sourceModelId !== modelId) {
     throw InternalError(
@@ -80,7 +82,7 @@ export async function parseFile(
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
   }
 
-  file.path = createFilePath(mirroredModelId, file.id)
+  file.path = createFilePath(mirroredModelId, file._id.toString())
 
   try {
     file.complete = await objectExists(file.path)

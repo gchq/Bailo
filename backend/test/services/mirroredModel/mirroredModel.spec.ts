@@ -49,7 +49,7 @@ vi.mock('../../../src/services/http.js', () => ({ getHttpsAgent: getHttpsAgentMo
 const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
     return {
-      id: 'modelId',
+      _id: { toString: vi.fn(() => 'modelId') },
       card: {
         schemaId: 'minimal-general-v10',
         version: 2,
@@ -69,9 +69,14 @@ vi.mock('../../../src/services/model.js', () => ({
 }))
 
 const fetchMock = vi.hoisted(() =>
-  vi.fn(function () {
-    return { ok: true, body: Readable.from(['data']), text: vi.fn() } as any
-  }),
+  vi.fn(
+    () =>
+      ({
+        ok: true,
+        body: Readable.from(['data']),
+        text: vi.fn(),
+      }) as any,
+  ),
 )
 vi.mock('node-fetch', () => ({ default: fetchMock }))
 
@@ -86,21 +91,19 @@ const tarballMocks = vi.hoisted(() => ({
 vi.mock('../../../src/services/mirroredModel/tarball.js', () => tarballMocks)
 
 const registryMocks = vi.hoisted(() => ({
-  splitDistributionPackageName: vi.fn(function () {
-    return {
-      path: 'img',
-      tag: 'tag',
-    }
-  }),
+  splitDistributionPackageName: vi.fn(() => ({
+    path: 'img',
+    tag: 'tag',
+  })),
   getImageManifest: vi.fn(),
   getImageBlob: vi.fn(),
 }))
 vi.mock('../../../src/services/registry.js', () => registryMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getReleasesForExport: vi.fn(function () {
-    return Promise.resolve([{ id: 'rel1', semver: '1.0.0', images: [] }])
-  }),
+  getReleasesForExport: vi.fn(() =>
+    Promise.resolve([{ _id: { toString: vi.fn(() => 'rel1') }, semver: '1.0.0', images: [] }]),
+  ),
 }))
 vi.mock('../../../src/services/release.js', () => releaseMocks)
 
@@ -112,7 +115,7 @@ const DocumentsExporterMock = vi.hoisted(() => {
       }),
       getModel: vi.fn(function () {
         return {
-          id: 'modelId',
+          _id: { toString: vi.fn(() => 'modelId') },
           card: {
             schemaId: 'minimal-general-v10',
             version: 2,
@@ -128,7 +131,7 @@ const DocumentsExporterMock = vi.hoisted(() => {
         return Promise.resolve()
       }),
       getReleases: vi.fn(function () {
-        return [{ id: 'rel1', semver: '1.0.0', images: [] }]
+        return [{ _id: { toString: vi.fn(() => 'rel1') }, semver: '1.0.0', images: [] }]
       }),
       addData: vi.fn(function () {
         return Promise.resolve()

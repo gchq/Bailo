@@ -31,7 +31,7 @@ vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const mockUser = { dn: 'userDN' } as any
 const mockModel = {
-  id: 'modelId',
+  _id: { toString: vi.fn(() => 'modelId') },
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
@@ -75,7 +75,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     const expectedErr = InternalError(
       'Could not find image associated with release.\nMethod `ImageExporter._init` failure.',
       {
-        modelId: mockModel.id,
+        modelId: mockModel._id.toString(),
         semver: mockRelease.semver,
         imageId: mockImage._id.toString(),
         ...mockLogData,
@@ -101,7 +101,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     const exporter = new ImageExporter(mockUser, mockModel, mockRelease, mockImage, mockLogData)
     const expectedErr = Forbidden('no release access\nMethod `ImageExporter._checkAuths` failure.', {
       userDn: mockUser.dn,
-      modelId: mockModel.id,
+      modelId: mockModel._id.toString(),
       semver: mockRelease.semver,
       ...mockLogData,
     })
@@ -115,7 +115,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     const exporter = new ImageExporter(mockUser, mockModel, mockRelease, mockImage, mockLogData)
     const expectedErr = Forbidden('no image access\nMethod `ImageExporter._checkAuths` failure.', {
       userDn: mockUser.dn,
-      modelId: mockModel.id,
+      modelId: mockModel._id.toString(),
       semver: mockRelease.semver,
       imageId: mockImage._id.toString(),
       ...mockLogData,
@@ -135,7 +135,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     expect(params[0]).toBe('imageId.tar.gz')
     expect(params[1]).toMatchObject({
       exporter: mockUser.dn,
-      sourceModelId: mockModel.id,
+      sourceModelId: mockModel._id.toString(),
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
       distributionPackageName: 'joined/name:tag',
       importKind: mirroredModelMocks.MirrorKind.Image,
@@ -176,7 +176,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
 
     expect(mirroredModelMocks.addCompressedRegistryImageComponents).toHaveBeenCalledWith(
       mockUser,
-      mockModel.id,
+      mockModel._id.toString(),
       'joined/name:tag',
       exporter['tarStream'],
       mockLogData,

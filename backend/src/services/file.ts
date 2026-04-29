@@ -183,7 +183,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
 
   const auth = await authorisation.file(user, model, file, FileAction.Download)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model._id })
   }
 
   const stream = await getObjectStream(file.path, undefined, range)
@@ -210,7 +210,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         total: totalPretty,
         totalBytes,
         fileId,
-        modelId: model.id,
+        modelId: model._id,
       },
       'Object download is in progress',
     )
@@ -224,7 +224,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
         total: prettyBytes(file.size),
         totalBytes: file.size,
         fileId,
-        modelId: model.id,
+        modelId: model._id,
       },
       progress === file.size
         ? 'Object download stream closed with no data remaining'
@@ -257,14 +257,14 @@ export async function getFileById(
   if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
-  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id.toString() }
+  const file: FileWithScanResultsInterface = { ...files[0], _id: files[0]._id }
 
   if (!model) {
     model = await getModelById(user, file.modelId)
   }
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model.id })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId, modelId: model._id })
   }
 
   return file
@@ -344,7 +344,7 @@ export async function removeFiles(
 
     await removeFileFromReleases(user, model, fileId, deleteMirroredModel, session)
 
-    await ScanModel.deleteMany({ fileId: { $eq: file.id } }, session)
+    await ScanModel.deleteMany({ fileId: { $eq: file._id.toString() } }, session)
 
     // Unless specified, we don't actually remove the file from storage, we only hide all
     // references to it.  This makes the file not visible to the user.

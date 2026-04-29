@@ -31,7 +31,7 @@ class TestExporter extends BaseExporter {
 
 const mockUser = { dn: 'userDN' } as any
 const mockModel = {
-  id: 'modelId',
+  _id: { toString: vi.fn(() => 'modelId') },
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
@@ -103,7 +103,7 @@ describe('services > mirroredModel > exporters > BaseExporter', () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
 
     await expect(exporter['_checkModelAuths']()).rejects.toEqual(
-      Forbidden('nope', { userDn: mockUser.dn, modelId: mockModel.id, ...exporter.getLogData() }),
+      Forbidden('nope', { userDn: mockUser.dn, modelId: mockModel._id.toString(), ...exporter.getLogData() }),
     )
   })
 

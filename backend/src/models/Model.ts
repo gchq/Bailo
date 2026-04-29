@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -41,6 +41,8 @@ export interface ModelMetadata {
 }
 
 export interface ModelCardInterface {
+  _id: ObjectId
+
   schemaId: string
   version: number
   createdBy: string
@@ -59,7 +61,7 @@ export interface Settings {
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface ModelInterface {
-  id: string
+  _id: string
 
   name: string
   kind: EntryKindKeys
@@ -87,7 +89,7 @@ export type ModelDoc = ModelInterface & SoftDeleteDocument
 
 const ModelSchema = new Schema<ModelDoc>(
   {
-    id: { type: String, required: true, unique: true, index: true },
+    _id: { type: String, required: true, unique: true, index: true },
 
     name: { type: String, required: true },
     kind: { type: String, enum: Object.values(EntryKind) },

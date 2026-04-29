@@ -28,7 +28,7 @@ export async function createWebhook(user: UserInterface, webhookParams: CreateWe
   const id = convertStringToId(webhookParams.name)
   const webhook = new WebhookModel({
     ...webhookParams,
-    id,
+    _id: id,
   })
 
   await webhook.save()

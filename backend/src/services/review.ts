@@ -74,7 +74,7 @@ export async function findReviews(
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
   if (!model.card) {
     throw BadReq('A model needs to have a model card before a review can be made for its releases', {
-      modelId: model.id,
+      modelId: model._id.toString(),
     })
   }
   const modelSchema = await getSchemaById(model.card.schemaId)
@@ -91,7 +91,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new ReviewModel({
       semver: release.semver,
-      modelId: model.id,
+      modelId: model._id.toString(),
       kind: ReviewKind.Release,
       role: roleInfo.role,
     })
@@ -122,8 +122,8 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new ReviewModel({
-      accessRequestId: accessRequest.id,
-      modelId: model.id,
+      accessRequestId: accessRequest._id.toString(),
+      modelId: model._id.toString(),
       kind: ReviewKind.Access,
       role: roleInfo.role,
     })
@@ -278,7 +278,7 @@ async function findUserInCollaborators(user: UserInterface) {
   }
 }
 
-export async function createReviewRole(user: UserInterface, newReviewRole: ReviewRoleInterface) {
+export async function createReviewRole(user: UserInterface, newReviewRole: Omit<ReviewRoleInterface, '_id'>) {
   const reviewRole = new ReviewRoleModel({
     ...newReviewRole,
   })
@@ -410,19 +410,21 @@ export async function removeReviewRole(user: UserInterface, reviewRoleShortName:
 }
 
 export async function addReviewsForNewRole(user: UserInterface, newReviewRole: ReviewRoleInterface, model: ModelDoc) {
-  const releases = await ReleaseModel.find({ modelId: model.id })
-  const accessRequests = await AccessRequestModel.find({ modelId: model.id })
+  const releases = await ReleaseModel.find({ modelId: model._id.toString() })
+  const accessRequests = await AccessRequestModel.find({ modelId: model._id.toString() })
   const reviews = await ReviewModel.find()
 
   for (const release of releases) {
     const validReviews = reviews.find(
       (review) =>
-        review.role === newReviewRole.shortName && review.modelId === model.id && review.semver === release.semver,
+        review.role === newReviewRole.shortName &&
+        review.modelId === model._id.toString() &&
+        review.semver === release.semver,
     )
     if (!Array.isArray(validReviews) || validReviews.length === 0) {
       const review = new ReviewModel({
         semver: release.semver,
-        modelId: model.id,
+        modelId: model._id.toString(),
         kind: ReviewKind.Release,
         role: newReviewRole.shortName,
       })
@@ -434,13 +436,13 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
     const validReviews = reviews.find(
       (review) =>
         review.role === newReviewRole.shortName &&
-        review.modelId === model.id &&
+        review.modelId === model._id.toString() &&
         review.accessRequestId === accessRequest.id,
     )
     if (!Array.isArray(validReviews) || validReviews.length === 0) {
       const review = new ReviewModel({
-        accessRequestId: accessRequest.id,
-        modelId: model.id,
+        accessRequestId: accessRequest._id.toString(),
+        modelId: model._id.toString(),
         kind: ReviewKind.Access,
         role: newReviewRole.shortName,
       })

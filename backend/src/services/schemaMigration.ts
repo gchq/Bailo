@@ -18,7 +18,7 @@ export async function createSchemaMigrationPlan(
     throw BadReq('Could not create an ID for the schema migration due to missing name property')
   }
   const migrationId = convertStringToId(schemaMigration.name)
-  const schemaMigrationDoc = new SchemaMigrationModel({ id: migrationId, ...schemaMigration })
+  const schemaMigrationDoc = new SchemaMigrationModel({ _id: migrationId, ...schemaMigration })
 
   const auth = await authorisation.schemaMigration(user, schemaMigrationDoc, SchemaMigrationAction.Create)
   if (!auth.success) {

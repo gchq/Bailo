@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 
 import { EventDetail } from '../connectors/audit/stroom.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -24,6 +24,8 @@ export interface StroomEventObject {
 }
 
 export interface StroomEventInterface {
+  _id: ObjectId
+
   event: StroomEventObject
   batchId: string
   inFlight: boolean

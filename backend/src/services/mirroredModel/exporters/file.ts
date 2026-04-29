@@ -34,14 +34,20 @@ export class FileExporter extends BaseExporter {
 
     if (scanners.scannersInfo().length > 0) {
       if (!this.file.scanResults || this.file.scanResults.length === 0) {
-        throw BadReq('The file is missing vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
+        throw BadReq('The file is missing vulnerability scan(s).', {
+          filename: this.file.name,
+          fileId: this.file._id.toString(),
+        })
       } else if (this.file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
         throw BadReq('The file has incomplete vulnerability scan(s).', {
           filename: this.file.name,
-          fileId: this.file.id,
+          fileId: this.file._id.toString(),
         })
       } else if (this.file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary.length > 0)) {
-        throw BadReq('The file has failed vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
+        throw BadReq('The file has failed vulnerability scan(s).', {
+          filename: this.file.name,
+          fileId: this.file._id.toString(),
+        })
       }
     }
   }
@@ -51,8 +57,8 @@ export class FileExporter extends BaseExporter {
     if (!fileAuth.success) {
       throw Forbidden(fileAuth.info, {
         userDn: this.user.dn,
-        modelId: this.model.id,
-        fileId: this.file.id,
+        modelId: this.model._id.toString(),
+        fileId: this.file._id.toString(),
         ...this.logData,
       })
     }
@@ -60,13 +66,13 @@ export class FileExporter extends BaseExporter {
 
   protected getInitialiseTarGzUploadParams(): Parameters<typeof initialiseTarGzUpload> {
     return [
-      `${this.file.id}.tar.gz`,
+      `${this.file._id.toString()}.tar.gz`,
       {
         schemaVersion: 1,
         exporter: this.user.dn,
-        sourceModelId: this.model.id,
+        sourceModelId: this.model._id.toString(),
         mirroredModelId: this.model.settings.mirror.destinationModelId!,
-        filePath: this.file.id,
+        filePath: this.file._id.toString(),
         importKind: MirrorKind.File,
         exportId: this.logData.exportId,
       },
@@ -79,8 +85,8 @@ export class FileExporter extends BaseExporter {
       this.tarStream!,
       {
         type: 'stream',
-        filename: this.file.id,
-        stream: await downloadFile(this.user, this.file.id),
+        filename: this.file._id.toString(),
+        stream: await downloadFile(this.user, this.file._id.toString()),
         size: this.file.size,
       },
       this.logData,

@@ -1,10 +1,12 @@
+import mongoose from 'mongoose'
+
 import { AccessRequestInterface } from '../../models/AccessRequest.js'
 import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseInterface } from '../../models/Release.js'
 
 export const model: ModelInterface = {
   // Basic model example
-  id: 'basic-model-abcdef',
+  _id: 'basic-model-abcdef',
   kind: EntryKind.Model,
 
   name: 'Basic Model',
@@ -38,6 +40,8 @@ export const model: ModelInterface = {
   },
 
   card: {
+    _id: new mongoose.Schema.Types.ObjectId('100000000000000000000001'),
+
     schemaId: 'minimal-general-v10-beta',
     version: 5,
     mirrored: false,
@@ -73,6 +77,8 @@ No identity or demographic information is detected.
 }
 
 export const release: ReleaseInterface = {
+  _id: new mongoose.Schema.Types.ObjectId('100000000000000000000001'),
+
   modelId: 'example',
   modelCardVersion: 0,
 
@@ -102,7 +108,7 @@ Other information could be included here.  This is just an example.`,
 }
 
 export const accessRequest: AccessRequestInterface = {
-  id: 'example-access-request-abcdef',
+  _id: 'example-access-request-abcdef',
   modelId: 'basic-model-abcdef',
   schemaId: 'minimal-access-request-general-v10-beta',
 

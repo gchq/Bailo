@@ -223,7 +223,7 @@ describe('services > model', () => {
       const modelCardRevisionMockDelete = vi.fn(() => Promise.resolve())
       const webhookMockDelete = vi.fn(() => Promise.resolve())
 
-      reviewMock.findReviews.mockResolvedValueOnce(Array(itemsFound).fill({ _id }))
+      reviewMock.findReviews.mockResolvedValueOnce(Array(itemsFound).fill({ _id: { toString: vi.fn(() => _id) } }))
       registryMock.listModelImages.mockResolvedValueOnce(
         Array(itemsFound).fill({ tags: ['tag1', 'tag2'], repository: 'repository', name: 'name' }),
       )
@@ -239,11 +239,13 @@ describe('services > model', () => {
           delete: modelCardRevisionMockDelete,
         })),
       )
-      fileMock.getFilesByModel.mockResolvedValueOnce(Array(itemsFound).fill({ id: fileId }))
+      fileMock.getFilesByModel.mockResolvedValueOnce(Array(itemsFound).fill({ _id: { toString: vi.fn(() => fileId) } }))
       inferenceMock.getInferencesByModel.mockResolvedValueOnce(
         Array(itemsFound).fill({ modelId, image: 'image', tag: 'tag' }),
       )
-      accessRequestMock.getAccessRequestsByModel.mockResolvedValueOnce(Array(itemsFound).fill({ id: accessRequestId }))
+      accessRequestMock.getAccessRequestsByModel.mockResolvedValueOnce(
+        Array(itemsFound).fill({ _id: { toString: vi.fn(() => accessRequestId) } }),
+      )
 
       const result = await removeModel(user, modelId)
 
@@ -590,7 +592,11 @@ describe('services > model', () => {
 
   test('setLatestImportedModelCard > success', async () => {
     const mockModelCard = { modelId: '123', version: 1 }
-    const testModelForImport = { settings: { mirror: { sourceModelId: 'abc' } }, save: vi.fn() }
+    const testModelForImport = {
+      settings: { mirror: { sourceModelId: 'abc' } },
+      save: vi.fn(),
+      _id: { toString: vi.fn(() => 'modelId') },
+    }
     ModelModelMock.findOne.mockResolvedValue(testModelForImport)
     ModelCardRevisionModelMock.findOne.mockResolvedValue(mockModelCard)
     await setLatestImportedModelCard('abc')

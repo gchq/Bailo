@@ -7,7 +7,7 @@ import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface SchemaInterface {
-  id: string
+  _id: string
   name: string
   description: string
 
@@ -26,11 +26,11 @@ export interface SchemaInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type SchemaDoc = SchemaInterface & Document<any, any, SchemaInterface>
+export type SchemaDoc = Omit<SchemaInterface & Document<any, any, SchemaInterface>, 'id'>
 
 const SchemaSchema = new Schema<SchemaInterface>(
   {
-    id: { type: String, required: true, unique: true, index: true },
+    _id: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
     description: { type: String, required: false, default: '' },
 

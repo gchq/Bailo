@@ -175,7 +175,7 @@ export interface UiConfig {
 }
 
 export interface EntrySearchResult {
-  id: string
+  _id: string
   name: string
   description: string
   tags: Array<string>

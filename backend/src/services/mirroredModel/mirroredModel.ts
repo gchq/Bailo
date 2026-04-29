@@ -54,11 +54,13 @@ export async function exportModel(
   }
 
   if (!model.card) {
-    throw BadReq('Cannot export a model that does have a valid model card.', { modelId: model.id })
+    throw BadReq('Cannot export a model that does have a valid model card.', { modelId: model._id.toString() })
   }
 
   if (model.card.version === 1) {
-    throw BadReq('You must make changes to your model card before requesting an export.', { modelId: model.id })
+    throw BadReq('You must make changes to your model card before requesting an export.', {
+      modelId: model._id.toString(),
+    })
   }
 
   const mirroredModelId = model.settings.mirror.destinationModelId
@@ -99,7 +101,7 @@ export async function exportModel(
           await Promise.all(
             files.map((file) =>
               new FileExporter(user, model, file, {
-                fileId: file.id,
+                fileId: file._id.toString(),
                 fileName: file.name,
                 exportId,
               }).init(),

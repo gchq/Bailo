@@ -39,6 +39,18 @@ exports[`routes > model > file > postStartMultipartUpload > 400 > no name 1`] = 
 
 exports[`routes > model > file > postStartMultipartUpload > audit > expected call 1`] = `
 {
-  "id": "test",
+  "_id": {
+    "toString": [MockFunction] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "test",
+        },
+      ],
+    },
+  },
 }
 `;

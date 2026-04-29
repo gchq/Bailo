@@ -18,7 +18,7 @@ export interface AccessRequestMetadata {
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface AccessRequestInterface {
-  id: string
+  _id: string
   modelId: string
 
   schemaId: string
@@ -39,7 +39,7 @@ export type AccessRequestDoc = AccessRequestInterface & SoftDeleteDocument
 
 const AccessRequestSchema = new Schema<AccessRequestDoc>(
   {
-    id: { type: String, unique: true, required: true },
+    _id: { type: String, unique: true, required: true },
     modelId: { type: String, required: true },
 
     schemaId: { type: String, required: true },

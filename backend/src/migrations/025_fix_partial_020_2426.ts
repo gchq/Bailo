@@ -19,7 +19,7 @@ export async function up() {
   }
 
   // Rest of script as in 020_2426_remove_orphaned_reviews_responses.ts
-  const reviewIds = deletedReviews.map((r) => r.id)
+  const reviewIds = deletedReviews.map((r) => r._id.toString())
   // For each deleted review, delete the responses associated with it
   const deletedResponses = await removeResponses(reviewIds)
 

@@ -17,6 +17,7 @@ export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
   _id: ObjectId
+
   entity: string
   kind: ResponseKindKeys
   role?: string

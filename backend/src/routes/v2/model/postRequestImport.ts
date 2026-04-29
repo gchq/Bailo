@@ -58,7 +58,7 @@ export const postRequestImportFromS3 = [
     )
 
     res.json({
-      mirroredModelId: mirroredModel.id,
+      mirroredModelId: mirroredModel._id,
       sourceModelId: importResult.metadata.sourceModelId,
     })
   },

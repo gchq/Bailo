@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -7,6 +7,8 @@ import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlug
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface ReleaseInterface {
+  _id: ObjectId
+
   modelId: string
   modelCardVersion: number
 
