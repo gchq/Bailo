@@ -28,28 +28,30 @@ export function rerunArtefactScan(modelId: string, artefactId: string) {
 }
 
 export function rerunImageArtefactScan(modelId: string, name: string, tag: string) {
-  const encodedModelId = encodeURIComponent(modelId)
   const encodedName = encodeURIComponent(name)
-  const encodedTag = encodeURIComponent(tag)
-  return fetch(`/api/v2/filescanning/model/${encodedModelId}/image/${encodedName}/${encodedTag}/scan`, {
+  return fetch(`/api/v2/filescanning/model/${modelId}/image/${encodedName}/${tag}/scan`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export function useGetImageScanResults(modelId: string, name: string, tag: string) {
-  const encodedModelId = encodeURIComponent(modelId)
+export function useGetImageScanResults(
+  modelId: string,
+  name: string,
+  tag: string,
+  digest: string,
+  isRouterReady?: boolean,
+) {
   const encodedName = encodeURIComponent(name)
-  const encodedTag = encodeURIComponent(tag)
   const { data, isLoading, error, mutate } = useSWR<
     {
       imageBreakdown: ImageTagResult
     },
     ErrorInfo
-  >(`/api/v2/model/${encodedModelId}/image/${encodedName}/${encodedTag}`, fetcher)
+  >(isRouterReady ? `/api/v3/model/${modelId}/image/${encodedName}/${tag}/${digest}` : null, fetcher)
 
   return {
-    mutateImages: mutate,
+    mutateImage: mutate,
     image: data?.imageBreakdown,
     isImageLoading: isLoading,
     isImageError: error,

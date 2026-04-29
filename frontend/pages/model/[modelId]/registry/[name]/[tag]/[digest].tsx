@@ -55,14 +55,16 @@ interface VulnerabilityResultItem {
 
 export default function ImageTagInformation() {
   const router = useRouter()
-  const { modelId, name, tag }: { modelId?: string; name?: string; tag?: string } = router.query
+  const { modelId, name, tag, digest }: { modelId?: string; name?: string; tag?: string; digest?: string } =
+    router.query
 
   const {
     image: modelImage,
     isImageLoading,
     isImageError,
-    mutateImages,
-  } = useGetImageScanResults(modelId as string, name as string, tag as string)
+    mutateImage,
+  } = useGetImageScanResults(modelId as string, name as string, tag as string, digest as string, router.isReady)
+
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
 
@@ -152,7 +154,7 @@ export default function ImageTagInformation() {
       resultList = resultList.filter((resultListItem) => filterList.includes(resultListItem.severity))
     }
     setFormattedDataEvent(resultList)
-  }, [filterList, name, modelImage, tag, modelId])
+  }, [filterList, name, modelImage, modelId])
 
   const handleModalOpen = useCallback((cve: string, description: string) => {
     handleOpen()
@@ -211,14 +213,17 @@ export default function ImageTagInformation() {
   }
 
   const handleRescan = useCallback(async () => {
-    const response = await rerunImageArtefactScan(modelId as string, name as string, tag as string)
+    if (!modelImage) {
+      return
+    }
+    const response = await rerunImageArtefactScan(modelId as string, name as string, modelImage.tag as string)
     if (response.status === 200) {
       sendNotification({
         variant: 'success',
-        msg: `The image ${name}:${tag} is being rescanned`,
+        msg: `The image ${name}:${modelImage.tag} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      mutateImages()
+      mutateImage()
     } else {
       sendNotification({
         variant: 'error',
@@ -226,7 +231,7 @@ export default function ImageTagInformation() {
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
-  }, [modelId, mutateImages, name, sendNotification, tag])
+  }, [modelId, modelImage, mutateImage, name, sendNotification])
 
   const handleClearFiltersButton = useCallback(() => {
     setFilterList([])
@@ -246,7 +251,7 @@ export default function ImageTagInformation() {
 
   return (
     <>
-      <Title text={name && tag ? `${name}:${tag}` : 'Loading...'} />
+      <Title text={name && modelImage?.tag ? `${name}:${modelImage.tag}` : 'Loading...'} />
       <Container maxWidth='xl' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper sx={{ p: 4 }}>
           <Stack spacing={4}>
@@ -262,7 +267,7 @@ export default function ImageTagInformation() {
               </Link>
               <Stack overflow='hidden' direction='row' alignItems='center'>
                 <Typography overflow='hidden' textOverflow='ellipsis' variant='h6' component='h1' color='primary'>
-                  {name && tag ? `${name}:${tag}` : 'Loading...'}
+                  {name && modelImage.tag ? `${name}:${modelImage.tag}` : 'Loading...'}
                 </Typography>
                 <CopyToClipboardButton
                   textToCopy={''}
@@ -271,13 +276,23 @@ export default function ImageTagInformation() {
                 />
               </Stack>
             </Stack>
-            <Stack spacing={1}>
-              <Typography fontWeight='bold'>URI</Typography>
-              <Box width='fit-content'>
-                <CodeLine
-                  line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${tag}`}
-                />
-              </Box>
+            <Stack direction={{ sm: 'column', md: 'row' }} spacing={4}>
+              <Stack direction='column'>
+                <Typography fontWeight='bold'>URI</Typography>
+                <Box width='fit-content'>
+                  <CodeLine
+                    line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${modelImage.tag}`}
+                  />
+                </Box>
+              </Stack>
+              {modelImage.platform && (
+                <Stack>
+                  <Typography fontWeight='bold'>Platform</Typography>
+                  <Box pt={1}>
+                    <Typography>{modelImage.platform ?? ''}</Typography>
+                  </Box>
+                </Stack>
+              )}
             </Stack>
             <Stack
               direction={{ md: 'row', sm: 'column' }}
@@ -296,7 +311,7 @@ export default function ImageTagInformation() {
                   Vulnerabilities
                 </Typography>
                 <Stack direction='row'>
-                  <VulnerabilityResult results={modelImage} />
+                  <VulnerabilityResult scanResults={[modelImage]} />
                   <Tooltip title='Rerun image scan'>
                     <IconButton size='small' onClick={handleRescan} sx={{ mx: 1 }}>
                       <Refresh color='primary' />
