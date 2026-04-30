@@ -222,6 +222,10 @@ export interface Config {
   inference: {
     authorisationToken: string
   }
+
+  untrustedModels: {
+    defaultState: 'Production'
+  }
 }
 
 const config = _config.util.toObject(_config)

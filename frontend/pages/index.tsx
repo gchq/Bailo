@@ -124,6 +124,24 @@ export default function Marketplace() {
     titleOnly,
   )
 
+  const {
+    entries: untrustedModels,
+    isEntriesError: isUntrustedModelsError,
+    isEntriesLoading: isUntrustedModelsLoading,
+  } = useListEntries(
+    EntryKind.UNTRUSTED_MODEL,
+    selectedRoles,
+    '',
+    selectedTags,
+    selectedOrganisations,
+    selectedStates,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
+    false,
+    '',
+    titleOnly,
+  )
+
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
@@ -304,8 +322,11 @@ export default function Marketplace() {
     if (isMirroredModelsError) {
       errorMessage += `${isMirroredModelsError.info.message}. `
     }
+    if (isUntrustedModelsError) {
+      errorMessage += `${isUntrustedModelsError.info.message}. `
+    }
     return errorMessage
-  }, [isMirroredModelsError, isModelsError])
+  }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
 
   useEffect(() => {
     if (reviewRoles) {
@@ -318,7 +339,14 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
+  if (
+    isReviewRolesLoading ||
+    isUiConfigLoading ||
+    isTagsLoading ||
+    isPeersLoading ||
+    isStatusLoading ||
+    isUntrustedModelsLoading
+  ) {
     return <Loading />
   }
 
@@ -525,7 +553,7 @@ export default function Marketplace() {
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
-                    entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels]}
+                    entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels, ...untrustedModels]}
                     entriesErrorMessage={combinedModelErrorMessage || ''}
                     selectedChips={selectedTags}
                     onSelectedChipsChange={handlePopularTagsOnChange}

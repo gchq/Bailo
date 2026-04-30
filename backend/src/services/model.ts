@@ -7,7 +7,14 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKind, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, {
+  CollaboratorEntry,
+  EntryKind,
+  EntryKindKeys,
+  EntryVisibility,
+  ModelDoc,
+  ModelInterface,
+} from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
@@ -22,6 +29,7 @@ import {
   MirrorImportLogData,
 } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
+import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -61,8 +69,12 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   if (modelParams.tags) {
     const tagSet = new Set(modelParams.tags.map((tag) => tag.trim().toLowerCase()))
     if (tagSet.size !== modelParams.tags.length) {
-      throw BadReq('You cannot have duplicate tags')
+      throw BadReq('You cannot have duplicate tags.')
     }
+  }
+
+  if (modelParams.kind === EntryKind.UntrustedModel && modelParams.visibility === EntryVisibility.Public) {
+    throw BadReq('Untrusted models cannot be made public.')
   }
 
   let collaborators: CollaboratorEntry[]
@@ -88,6 +100,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ...modelParams,
     id: modelId,
     collaborators,
+    state: config.untrustedModels.defaultState || '',
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
@@ -580,6 +593,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     if (tagSet.size !== modelDiff.tags.length) {
       throw BadReq('You cannot have duplicate tags')
     }
+  }
+  if (model.kind === EntryKind.UntrustedModel && modelDiff.visibility === EntryVisibility.Public) {
+    throw BadReq('Untrusted models cannot be made public.')
+  }
+  if (model.kind === EntryKind.UntrustedModel && modelDiff.state) {
+    throw BadReq('Untrusted models can not have their state manually changed.')
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)

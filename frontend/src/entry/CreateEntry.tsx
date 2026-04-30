@@ -55,7 +55,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
-  const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
+  const [visibility, setVisibility] = useState<EntryForm['visibility']>(
+    createEntryKind !== EntryKind.UNTRUSTED_MODEL ? EntryVisibility.Public : EntryVisibility.Private,
+  )
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
@@ -76,7 +78,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   }, [])
 
   const entryKindForRedirect = useMemo(() => {
-    return createEntryKind === EntryKind.MODEL || createEntryKind === EntryKind.MIRRORED_MODEL
+    return createEntryKind === EntryKind.MODEL ||
+      createEntryKind === EntryKind.MIRRORED_MODEL ||
+      createEntryKind === EntryKind.UNTRUSTED_MODEL
       ? EntryKind.MODEL
       : createEntryKind
   }, [createEntryKind])
@@ -226,12 +230,14 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                   value='public'
                   control={<Radio />}
                   label={publicLabel}
+                  disabled={createEntryKind === EntryKind.UNTRUSTED_MODEL}
                   data-test='publicButtonSelector'
                 />
                 <FormControlLabel
                   value='private'
                   control={<Radio />}
                   label={privateLabel}
+                  disabled={createEntryKind === EntryKind.UNTRUSTED_MODEL}
                   data-test='privateButtonSelector'
                 />
               </RadioGroup>

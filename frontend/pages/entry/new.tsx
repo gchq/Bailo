@@ -33,6 +33,11 @@ export default function NewEntry() {
           disabled: uiConfig?.modelMirror.import.enabled === false,
         },
         {
+          title: 'Create Untrusted Model',
+          description: 'TBC',
+          handleClick: () => setCreateEntryKind(EntryKind.UNTRUSTED_MODEL),
+        },
+        {
           title: 'Create Data Card',
           description:
             'Data cards allow you to track and reference the training data used to generate your models. Adding data cards to Bailo allows you to link it to any model, keep track of its storage location and other accreditation requirements.',

@@ -351,4 +351,8 @@ module.exports = {
   inference: {
     authorisationToken: '',
   },
+
+  untrustedModels: {
+    defaultState: 'Production',
+  },
 }

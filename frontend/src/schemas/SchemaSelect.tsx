@@ -32,6 +32,7 @@ import {
   SchemaKindKeys,
   SchemaKindLabel,
 } from 'types/types'
+import { entryKindForRedirect } from 'utils/routerUtils'
 
 type SchemaSelectProps = {
   schemaKind: SchemaKindKeys
@@ -71,7 +72,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
 
         if (response.status && response.status < 400) {
           await mutateEntry()
-          router.push(`/${entry.kind}/${entry.id}`)
+          router.push(`/${entryKindForRedirect(entry.kind)}/${entry.id}`)
         } else {
           setLoading(false)
         }
