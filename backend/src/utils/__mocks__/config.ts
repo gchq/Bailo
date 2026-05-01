@@ -141,6 +141,9 @@ const config: PartialDeep<Config> = {
     contentDirectory: 'content-dir',
     metadataFile: 'meta.json',
   },
+  untrustedModels: {
+    defaultState: 'Production',
+  },
 }
 
 export default config

@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -148,6 +149,22 @@ describe('services > model', () => {
     await expect(() =>
       createModel({} as any, { collaborators: [{ entity: 'user:unknown_user', roles: [] }] } as any),
     ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
+  })
+
+  test('createModel > throws an error when attempting to create a public untrusted model', async () => {
+    const testModel = {
+      name: 'untrusted model',
+      kind: EntryKind.UntrustedModel,
+      description: 'test',
+      visibility: EntryVisibility.Public,
+      collaborators: [],
+      settings: { mirror: {}, ungovernedAccess: false, allowTemplating: false },
+    }
+
+    await expect(() => createModel({} as any, testModel)).rejects.toThrowError(
+      /^Untrusted models cannot be made public./,
+    )
+    expect(ModelModelMock.save).not.toBeCalled()
   })
 
   test('getModelByIdNoAuth > good', async () => {
@@ -561,6 +578,22 @@ describe('services > model', () => {
     await expect(() =>
       updateModel({} as any, '123', { collaborators: [{ entity: 'user:unknown_user', roles: [] }] }),
     ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
+  })
+
+  test('updateModel > throws an error when attempting to update an untrusted model to be public', async () => {
+    const testModel = {
+      name: 'untrusted model',
+      kind: EntryKind.UntrustedModel,
+      description: 'test',
+      visibility: EntryVisibility.Private,
+      collaborators: [],
+      settings: { mirror: {}, ungovernedAccess: false, allowTemplating: false },
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+
+    await expect(() => updateModel({} as any, 'test123', { visibility: EntryVisibility.Public })).rejects.toThrowError(
+      /^Untrusted models cannot be made public./,
+    )
   })
 
   test('createModelCardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {

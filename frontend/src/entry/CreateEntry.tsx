@@ -221,6 +221,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               <Typography component='h3' variant='h6'>
                 Access control
               </Typography>
+              {createEntryKind === EntryKind.UNTRUSTED_MODEL && (
+                <Typography color='warning'>Untrusted models can only be private.</Typography>
+              )}
               <RadioGroup
                 defaultValue='public'
                 value={visibility}

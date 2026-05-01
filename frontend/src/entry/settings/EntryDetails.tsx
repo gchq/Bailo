@@ -97,7 +97,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
         <>
           <Typography variant='h6' component='h2' color='primary'>
-            {`${toSentenceCase(EntryKindLabel[entry.kind])} details`}
+            {`Details`}
           </Typography>
           <Divider />
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
@@ -118,7 +118,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
             Access control
           </Typography>
           {entry.kind === EntryKind.UNTRUSTED_MODEL && (
-            <Typography color='warning'>Untrusted models can only be set to private.</Typography>
+            <Typography color='warning'>Untrusted models can only be private.</Typography>
           )}
           <RadioGroup
             defaultValue='public'

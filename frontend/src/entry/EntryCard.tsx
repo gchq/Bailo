@@ -1,5 +1,4 @@
-import { FileUpload } from '@mui/icons-material'
-import { Button, Card, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 
 interface EntryCardProps {
   title: string
@@ -7,28 +6,39 @@ interface EntryCardProps {
   handleClick: () => void
   dataTest?: string
   disabled?: boolean
+  recommended?: boolean
 }
 
-export default function EntryCard({ title, description, dataTest, handleClick }: EntryCardProps) {
+export default function EntryCard({ title, description, dataTest, handleClick, recommended = false }: EntryCardProps) {
   return (
-    <Card
+    <Box
       sx={{
-        width: '300px',
-        p: 2,
-        m: 2,
+        width: '100%',
       }}
     >
-      <Stack spacing={2} justifyContent='space-between' sx={{ height: '100%' }}>
-        <Stack spacing={2}>
-          <Typography component='h2' variant='h6' color='primary'>
-            {title}
-          </Typography>
+      <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center'>
+        <Stack spacing={1}>
+          <Stack direction='row' spacing={1}>
+            <Typography component='h2' fontWeight='bold' color='primary'>
+              {title}
+            </Typography>
+            {recommended && (
+              <Typography component='h2' fontWeight='bold' color='secondary'>
+                (recommended)
+              </Typography>
+            )}
+          </Stack>
           <Typography>{description}</Typography>
         </Stack>
-        <Button fullWidth variant='contained' onClick={handleClick} data-test={dataTest} startIcon={<FileUpload />}>
+        <Button
+          sx={{ minWidth: '150px', height: 'fit-content' }}
+          variant='contained'
+          onClick={handleClick}
+          data-test={dataTest}
+        >
           Create
         </Button>
       </Stack>
-    </Card>
+    </Box>
   )
 }
