@@ -636,4 +636,38 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
       },
     })
   })
+  test('calculateModelVolume > month interval includes models created on last day', async () => {
+    const start = new Date('2026-05-01T00:00:00.000Z')
+
+    modelMocks.aggregate
+      // aligned start
+      .mockResolvedValueOnce([{ alignedStart: start }])
+      // aggregation results
+      .mockResolvedValueOnce([
+        {
+          _id: {
+            periodStart: new Date('2026-05-01T00:00:00.000Z'),
+            organisation: 'org-1',
+          },
+          count: 1,
+        },
+      ])
+
+    modelMocks.distinct.mockResolvedValueOnce(['org-1'])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['org-1'])
+
+    const result = await connector.calculateModelVolume('month', '2026-05-01', '2026-05-31')
+
+    expect(result.data[0]).toEqual({
+      startDate: '2026-05-01T00:00:00.000Z',
+      endDate: '2026-06-01T00:00:00.000Z',
+      count: 1,
+      organisations: {
+        'org-1': 1,
+        unset: 0,
+      },
+    })
+  })
 })

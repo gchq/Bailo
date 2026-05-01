@@ -518,10 +518,11 @@ export class BaseMetricsConnector {
       const alignedStart = alignedResult[0]?.alignedStart ?? new Date(start)
 
       // Aggregate counts per time interval and organisation
+      const endExclusive = addInterval(end, 'day')
       const pipeline: PipelineStage[] = [
         {
           $match: {
-            createdAt: { $gte: start, $lte: end },
+            createdAt: { $gte: start, $lt: endExclusive },
           },
         },
         {
@@ -581,7 +582,7 @@ export class BaseMetricsConnector {
       let cursor = new Date(alignedStart)
 
       // Generate intervals from start to end date, filling gaps with zero counts
-      while (cursor <= end) {
+      while (cursor < endExclusive) {
         const intervalStart = new Date(cursor)
         const intervalEnd = addInterval(intervalStart, interval)
 
