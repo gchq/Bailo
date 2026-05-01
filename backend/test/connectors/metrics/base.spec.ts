@@ -1,75 +1,639 @@
-import { describe, expect, test } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { BaseMetricsConnector, ModelVolumeBucket } from '../../../src/connectors/metrics/base.js'
-import { GetModelVolumeResponse } from '../../../src/routes/v2/metrics/getModelVolume.js'
-import { GetPolicyMetricsResponse } from '../../../src/routes/v2/metrics/getPolicyMetrics.js'
+import { BadReq } from '../../../src/utils/error.js'
 
-class TestMetricsConnector extends BaseMetricsConnector {
-  async calculateOverviewMetrics(): Promise<any> {
-    return {
-      global: { users: 1, models: 2 },
-      byOrganisation: [],
-    }
+async function loadConnector() {
+  return await import('../../../src/connectors/metrics/base.js')
+}
+
+vi.mock('../../../src/models/Model.js')
+vi.mock('../../../src/models/Release.js')
+vi.mock('../../../src/models/AccessRequest.js')
+vi.mock('../../../src/services/model.js')
+vi.mock('../../../src/services/schema.js')
+vi.mock('../../../src/models/Schema.js')
+vi.mock('../../../src/models/ReviewRole.js')
+
+const modelMocks = vi.hoisted(() => ({
+  aggregate: vi.fn(),
+  countDocuments: vi.fn(),
+  distinct: vi.fn(),
+  find: vi.fn(),
+}))
+vi.mock('../../../src/models/Model.js', () => ({
+  default: modelMocks,
+}))
+
+const releaseMocks = vi.hoisted(() => ({
+  aggregate: vi.fn(),
+  distinct: vi.fn(),
+}))
+vi.mock('../../../src/models/Release.js', () => ({
+  default: releaseMocks,
+}))
+
+const accessRequestMocks = vi.hoisted(() => ({
+  aggregate: vi.fn(),
+  distinct: vi.fn(),
+}))
+vi.mock('../../../src/models/AccessRequest.js', () => ({
+  default: accessRequestMocks,
+}))
+
+const serviceMocks = vi.hoisted(() => ({
+  searchModels: vi.fn(),
+}))
+vi.mock('../../../src/services/model.js', () => serviceMocks)
+
+const schemaMocks = vi.hoisted(() => ({
+  searchSchemas: vi.fn(),
+}))
+vi.mock('../../../src/services/schema.js', () => schemaMocks)
+
+const schemaModelMocks = vi.hoisted(() => ({
+  find: vi.fn(),
+  aggregate: vi.fn(),
+}))
+vi.mock('../../../src/models/Schema.js', () => ({
+  default: schemaModelMocks,
+}))
+
+const reviewRoleMocks = vi.hoisted(() => ({
+  find: vi.fn(),
+}))
+vi.mock('../../../src/models/ReviewRole.js', () => ({
+  default: reviewRoleMocks,
+}))
+
+modelMocks.aggregate.mockRejectedValueOnce(Object.assign(new Error('Invalid timezone'), { name: 'MongoServerError' }))
+const mockQuery = (result: any) => ({
+  select: vi.fn().mockReturnThis(),
+  lean: vi.fn().mockResolvedValue(result),
+})
+
+const mockCursorQuery = (result: any[]) => {
+  const asyncIterable = {
+    async *[Symbol.asyncIterator]() {
+      for (const item of result) {
+        yield item
+      }
+    },
   }
-  async calculatePolicyMetrics(): Promise<GetPolicyMetricsResponse> {
-    return {
-      global: {
-        summary: [],
-        models: [],
-      },
-      byOrganisation: [],
-    }
-  }
-  async calculateModelVolume(
-    bucket: ModelVolumeBucket,
-    startDate: string | number | Date,
-    endDate: string | number | Date,
-    _timezone?: string,
-  ): Promise<GetModelVolumeResponse> {
-    return {
-      bucket,
-      startDate: new Date(startDate).toISOString(),
-      endDate: new Date(endDate ?? startDate).toISOString(),
-      data: [],
-    }
+
+  return {
+    select: vi.fn().mockReturnThis(),
+    lean: vi.fn().mockReturnThis(),
+    cursor: vi.fn().mockReturnValue(asyncIterable),
   }
 }
 
-describe('connectors > metrics > base', () => {
-  test('subclass can implement calculateOverviewMetrics()', async () => {
-    const connector = new TestMetricsConnector()
+describe('connectors > metrics > simple > getUsageMetrics', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.clearAllMocks()
 
-    const result = await connector.calculateOverviewMetrics()
+    releaseMocks.aggregate.mockResolvedValue([])
+    accessRequestMocks.aggregate.mockResolvedValue([])
+  })
+
+  test('calculateUsageMetrics returns global metrics', async () => {
+    modelMocks.distinct.mockResolvedValueOnce(['m1', 'm2']).mockResolvedValueOnce(['m1', 'm2'])
+
+    modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
+      if (pipeline.some((stage) => stage.$unwind === '$collaborators')) {
+        return Promise.resolve([{ count: 5 }])
+      }
+
+      if (pipeline.some((stage) => stage.$group?._id === '$state')) {
+        return Promise.resolve([{ _id: 'active', count: 3 }])
+      }
+
+      if (pipeline.some((stage) => stage.$group?._id === '$schemaId')) {
+        return Promise.resolve([{ _id: 'schema1', count: 2 }])
+      }
+
+      return Promise.resolve([])
+    })
+
+    modelMocks.countDocuments.mockResolvedValueOnce(4).mockResolvedValueOnce(6)
+
+    releaseMocks.aggregate.mockResolvedValueOnce([{ count: 4 }]).mockResolvedValueOnce([{ count: 2 }])
+
+    accessRequestMocks.aggregate.mockResolvedValueOnce([{ count: 2 }]).mockResolvedValueOnce([{ count: 1 }])
+
+    schemaMocks.searchSchemas.mockResolvedValue([{ id: 'schema1', name: 'Schema 1' }])
+
+    serviceMocks.searchModels.mockResolvedValueOnce({ models: [{}, {}] }).mockResolvedValueOnce({ models: [{}] })
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.getUsageMetrics()
+
+    expect(result.global.models).toBe(10)
+    expect(result.global.users).toBe(5)
+    expect(result.global.withReleases).toBe(6)
+    expect(result.global.withAccessRequest).toBe(3)
+
+    expect(result.byOrganisation).toHaveLength(2)
+
+    const corp = result.byOrganisation.find((o) => o.organisation === 'b corp')
+    const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
+
+    expect(corp?.models).toBe(4)
+    expect(unset?.models).toBe(6)
+  })
+
+  test('returns zero counts when aggregates return empty', async () => {
+    modelMocks.distinct.mockResolvedValueOnce([])
+
+    modelMocks.aggregate.mockResolvedValue([])
+    modelMocks.countDocuments.mockResolvedValue(0)
+
+    releaseMocks.distinct.mockResolvedValue([])
+    accessRequestMocks.distinct.mockResolvedValue([])
+
+    schemaMocks.searchSchemas.mockResolvedValue([])
+    serviceMocks.searchModels.mockResolvedValue({ models: [] })
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.getUsageMetrics()
+
+    expect(result.global.models).toBe(0)
+    expect(result.global.users).toBe(0)
+    expect(result.global.withReleases).toBe(0)
+    expect(result.global.withAccessRequest).toBe(0)
+    expect(result.byOrganisation).toHaveLength(2)
+  })
+
+  test('schema breakdown returns correct counts', async () => {
+    modelMocks.distinct.mockResolvedValue([])
+    modelMocks.aggregate.mockResolvedValue([])
+
+    schemaMocks.searchSchemas.mockResolvedValue([
+      { id: 'schema1', name: 'Schema 1' },
+      { id: 'schema2', name: 'Schema 2' },
+    ])
+
+    schemaModelMocks.aggregate
+      .mockResolvedValueOnce([
+        { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
+        { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
+      ])
+      .mockResolvedValueOnce([
+        { schemaId: 'schema1', schemaName: 'Schema 1', count: 0 },
+        { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
+      ])
+
+    releaseMocks.distinct.mockResolvedValue([])
+    accessRequestMocks.distinct.mockResolvedValue([])
+    modelMocks.countDocuments.mockResolvedValue(0)
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+    const result = await connector.getUsageMetrics()
+
+    expect(result.global.schemaBreakdown).toEqual([
+      { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
+      { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
+    ])
+  })
+  test('global model count equals sum of organisation + unset counts', async () => {
+    modelMocks.countDocuments
+      .mockResolvedValueOnce(3) // b corp
+      .mockResolvedValueOnce(3) // unset
+
+    // Minimal mocks for other aggregations
+    modelMocks.aggregate.mockResolvedValue([])
+    releaseMocks.distinct.mockResolvedValue([])
+
+    // aggregate called once per organisation (3 orgs here)
+    releaseMocks.aggregate.mockResolvedValue([])
+    accessRequestMocks.distinct.mockResolvedValue([])
+    accessRequestMocks.aggregate.mockResolvedValue([])
+
+    schemaMocks.searchSchemas.mockResolvedValue([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.getUsageMetrics()
+
+    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.models, 0)
+
+    expect(result.global.models).toBe(6)
+    expect(sumOfOrgs).toBe(result.global.models)
+  })
+  test('global model count equals sum of organisations when no unset exists', async () => {
+    modelMocks.countDocuments
+      .mockResolvedValueOnce(3) // b corp
+      .mockResolvedValueOnce(1) // c corp
+      .mockResolvedValueOnce(0) // unset
+
+    modelMocks.aggregate.mockResolvedValue([])
+    releaseMocks.distinct.mockResolvedValue([])
+    releaseMocks.aggregate.mockResolvedValue([])
+    accessRequestMocks.distinct.mockResolvedValue([])
+    accessRequestMocks.aggregate.mockResolvedValue([])
+    schemaMocks.searchSchemas.mockResolvedValue([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp', 'c corp'])
+
+    const result = await connector.getUsageMetrics()
+
+    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.models, 0)
+
+    expect(result.global.models).toBe(4)
+    expect(sumOfOrgs).toBe(result.global.models)
+  })
+})
+
+describe('connectors > metrics > simple > getComplianceMetrics', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  test('calculateComplianceMetrics returns correct global summary and models', async () => {
+    modelMocks.distinct.mockImplementation((field: string) => {
+      if (field === 'organisation') {
+        return Promise.resolve(['a corp'])
+      }
+      return Promise.resolve([])
+    })
+
+    schemaModelMocks.find.mockReturnValue(
+      mockQuery([
+        {
+          id: 'schema1',
+          reviewRoles: ['md'],
+        },
+      ]),
+    )
+
+    reviewRoleMocks.find.mockReturnValue(
+      mockQuery([
+        { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
+        { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
+        { shortName: 'md', name: 'Model Developer', systemRole: null },
+      ]),
+    )
+
+    modelMocks.find.mockReturnValue(
+      mockCursorQuery([
+        {
+          id: 'model-1',
+          organisation: 'a corp',
+          card: { schemaId: 'schema1' },
+          collaborators: [{ entity: 'user1', roles: ['mtr', 'md'] }],
+        },
+        {
+          id: 'model-2',
+          organisation: 'a corp',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+      ]),
+    )
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.getComplianceMetrics()
+
+    expect(result.global.models).toHaveLength(2)
+
+    expect(result.global.models).toEqual(
+      expect.arrayContaining([
+        {
+          modelId: 'model-1',
+          missingRoles: [{ roleId: 'msro', roleName: 'MSRO' }],
+        },
+        {
+          modelId: 'model-2',
+          missingRoles: [
+            { roleId: 'msro', roleName: 'MSRO' },
+            { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
+            { roleId: 'md', roleName: 'Model Developer' },
+          ],
+        },
+      ]),
+    )
+
+    expect(result.global.summary).toEqual(
+      expect.arrayContaining([
+        { roleId: 'msro', roleName: 'MSRO', count: 2 },
+        { roleId: 'mtr', roleName: 'Model Technical Reviewer', count: 1 },
+        { roleId: 'md', roleName: 'Model Developer', count: 1 },
+      ]),
+    )
+  })
+  test('model without card only checks default roles', async () => {
+    modelMocks.distinct.mockResolvedValue(['a corp'])
+
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['md'] }]))
+
+    reviewRoleMocks.find.mockReturnValue(
+      mockQuery([
+        { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
+        { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
+        { shortName: 'md', name: 'Model Developer', systemRole: null },
+      ]),
+    )
+
+    modelMocks.find.mockReturnValue(
+      mockCursorQuery([
+        {
+          id: 'model-no-card',
+          organisation: 'a corp',
+          card: undefined,
+          collaborators: [],
+        },
+      ]),
+    )
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.getComplianceMetrics()
+
+    expect(result.global.models[0].missingRoles).toEqual([
+      { roleId: 'msro', roleName: 'MSRO' },
+      { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
+    ])
+
+    expect(result.global.summary).toEqual(
+      expect.arrayContaining([{ roleId: 'md', roleName: 'Model Developer', count: 0 }]),
+    )
+  })
+  test('groups results by organisation correctly', async () => {
+    modelMocks.distinct.mockResolvedValue(['a corp', 'b corp'])
+
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
+
+    reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', name: 'MSRO', systemRole: 'msro' }]))
+
+    modelMocks.find.mockImplementation((filter: any) => {
+      const allModels = [
+        {
+          id: 'model-a corp',
+          organisation: 'a corp',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+        {
+          id: 'model-b corp',
+          organisation: 'b corp',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+      ]
+
+      const filtered = filter?.organisation
+        ? allModels.filter((m) => m.organisation === filter.organisation)
+        : allModels
+
+      return mockCursorQuery(filtered)
+    })
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+    const result = await connector.getComplianceMetrics()
+
+    expect(result.byOrganisation).toHaveLength(2)
+
+    const bCorp = result.byOrganisation.find((o) => o.organisation === 'b corp')
+    const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
+
+    expect(bCorp?.models).toHaveLength(1)
+    expect(unset?.models).toHaveLength(2)
+  })
+  test('unset compliance metrics only include models with empty organisation', async () => {
+    // Distinct organisations includes empty string
+    modelMocks.distinct.mockResolvedValue(['', 'orgA'])
+
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
+
+    reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', name: 'MSRO', systemRole: 'msro' }]))
+
+    modelMocks.find.mockImplementation((filter: any) => {
+      const allModels = [
+        { id: 'unset-model', organisation: '', card: {}, collaborators: [] },
+        { id: 'orgA-model', organisation: 'orgA', card: {}, collaborators: [] },
+      ]
+
+      const filtered =
+        filter?.organisation !== undefined ? allModels.filter((m) => m.organisation === filter.organisation) : allModels
+
+      return mockCursorQuery(filtered)
+    })
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+    const result = await connector.getComplianceMetrics()
+
+    const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
+
+    expect(unset).toBeDefined()
+    expect(unset?.models).toHaveLength(1)
+    expect(unset?.models[0].modelId).toBe('unset-model')
+  })
+})
+
+describe('connectors > metrics > simple > calculateModelVolue', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('calculateModelVolume > basic aggregation', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
+      .mockResolvedValueOnce([
+        {
+          _id: {
+            periodStart: new Date('2026-01-01T00:00:00.000Z'),
+            organisation: 'org-1',
+          },
+          count: 5,
+        },
+      ])
+
+    modelMocks.distinct.mockResolvedValueOnce(['org-1'])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('day', '2026-01-01', '2026-01-03')
+
+    expect(modelMocks.aggregate).toHaveBeenCalledTimes(2)
+    expect(modelMocks.distinct).toHaveBeenCalledWith('organisation')
 
     expect(result).toEqual({
-      global: { users: 1, models: 2 },
-      byOrganisation: [],
+      interval: 'day',
+      startDate: '2026-01-01T00:00:00.000Z',
+      endDate: '2026-01-03T00:00:00.000Z',
+      data: [
+        {
+          startDate: '2026-01-01T00:00:00.000Z',
+          endDate: '2026-01-02T00:00:00.000Z',
+          count: 5,
+          organisations: {
+            'org-1': 5,
+            unset: 0,
+          },
+        },
+        {
+          startDate: '2026-01-02T00:00:00.000Z',
+          endDate: '2026-01-03T00:00:00.000Z',
+          count: 0,
+          organisations: {
+            'org-1': 0,
+            unset: 0,
+          },
+        },
+        {
+          startDate: '2026-01-03T00:00:00.000Z',
+          endDate: '2026-01-04T00:00:00.000Z',
+          count: 0,
+          organisations: {
+            'org-1': 0,
+            unset: 0,
+          },
+        },
+      ],
     })
   })
-  test('subclass can implement calculatePolicyMetrics()', async () => {
-    const connector = new TestMetricsConnector()
 
-    const result = await connector.calculatePolicyMetrics()
+  test('calculateModelVolume > bad timezone', async () => {
+    modelMocks.aggregate.mockRejectedValueOnce(
+      Object.assign(new Error('Invalid timezone'), { name: 'MongoServerError' }),
+    )
 
-    expect(result).toEqual({
-      global: {
-        summary: [],
-        models: [],
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    await expect(
+      connector.calculateModelVolume('week', '2026-01-01', '2026-02-01', 'notARealTimeZone'),
+    ).rejects.toThrowError(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
+  })
+
+  test('calculateModelVolume > day interval stepping', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
+      .mockResolvedValueOnce([])
+
+    modelMocks.distinct.mockResolvedValueOnce([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('day', '2026-01-01', '2026-01-03')
+
+    expect(result.interval).toBe('day')
+    expect(result.data).toHaveLength(3)
+    expect(result.data[0].endDate).toBe('2026-01-02T00:00:00.000Z')
+  })
+
+  test('calculateModelVolume > week interval stepping', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-04T00:00:00.000Z') }])
+      .mockResolvedValueOnce([])
+
+    modelMocks.distinct.mockResolvedValueOnce([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('week', '2026-01-04', '2026-01-18')
+
+    expect(result.interval).toBe('week')
+    expect(result.data).toHaveLength(3)
+    expect(result.data[0].endDate).toBe('2026-01-11T00:00:00.000Z')
+  })
+
+  test('calculateModelVolume > month interval stepping', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
+      .mockResolvedValueOnce([])
+
+    modelMocks.distinct.mockResolvedValueOnce([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('month', '2026-01-01', '2026-03-01')
+
+    expect(result.interval).toBe('month')
+    expect(result.data).toHaveLength(3)
+    expect(result.data[0].endDate).toBe('2026-02-01T00:00:00.000Z')
+  })
+
+  test('calculateModelVolume > quarter interval stepping', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
+      .mockResolvedValueOnce([])
+
+    modelMocks.distinct.mockResolvedValueOnce([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('quarter', '2026-01-01', '2026-07-01')
+
+    expect(result.interval).toBe('quarter')
+    expect(result.data).toHaveLength(3)
+    expect(result.data[0].endDate).toBe('2026-04-01T00:00:00.000Z')
+  })
+
+  test('calculateModelVolume > year interval stepping', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
+      .mockResolvedValueOnce([])
+
+    modelMocks.distinct.mockResolvedValueOnce([])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('year', '2026-01-01', '2028-01-01')
+
+    expect(result.interval).toBe('year')
+    expect(result.data).toHaveLength(3)
+    expect(result.data[0].endDate).toBe('2027-01-01T00:00:00.000Z')
+  })
+
+  test('calculateModelVolume > empty string organisation is counted as unset', async () => {
+    modelMocks.aggregate
+      .mockResolvedValueOnce([{ alignedStart: new Date('2026-04-01T00:00:00.000Z') }])
+      .mockResolvedValueOnce([
+        {
+          _id: {
+            periodStart: new Date('2026-04-01T00:00:00.000Z'),
+            organisation: 'unset',
+          },
+          count: 1,
+        },
+      ])
+
+    // Simulate DB containing an empty string org
+    modelMocks.distinct.mockResolvedValueOnce(['', 'Example Organisation'])
+
+    const { BaseMetricsConnector } = await loadConnector()
+    const connector = new BaseMetricsConnector(['b corp'])
+
+    const result = await connector.calculateModelVolume('month', '2026-04-01', '2026-04-28')
+
+    expect(result.data[0]).toEqual({
+      startDate: '2026-04-01T00:00:00.000Z',
+      endDate: '2026-05-01T00:00:00.000Z',
+      count: 1,
+      organisations: {
+        'Example Organisation': 0,
+        unset: 1,
       },
-      byOrganisation: [],
-    })
-  })
-
-  test('subclass can implement calculateModelVolume()', async () => {
-    const connector = new TestMetricsConnector()
-
-    const result = await connector.calculateModelVolume('month', '2026-01-01', '2026-03-01', 'UTC')
-
-    expect(result).toEqual({
-      bucket: 'month',
-      startDate: new Date('2026-01-01').toISOString(),
-      endDate: new Date('2026-03-01').toISOString(),
-      data: [],
     })
   })
 })

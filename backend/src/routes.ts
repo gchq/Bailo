@@ -15,9 +15,6 @@ import { putImageScan } from './routes/v2/artefactScanning/putImageScan.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
-import { getModelVolume } from './routes/v2/metrics/getModelVolume.js'
-import { getOverviewMetrics } from './routes/v2/metrics/getOverviewMetrics.js'
-import { getPolicyMetrics } from './routes/v2/metrics/getPolicyMetrics.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -98,6 +95,9 @@ import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import { getComplianceMetrics } from './routes/v3/metrics/getComplianceMetrics.js'
+import { getModelVolume } from './routes/v3/metrics/getModelVolume.js'
+import { getUsageMetrics } from './routes/v3/metrics/getUsageMetrics.js'
 import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
@@ -259,8 +259,8 @@ server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 server.get('/api/v2/models/tags', getPopularTags)
 
-server.get('/api/v3/metrics', ...getOverviewMetrics)
-server.get('/api/v3/metrics/policy', ...getPolicyMetrics)
+server.get('/api/v3/metrics/usage', ...getUsageMetrics)
+server.get('/api/v3/metrics/compliance', ...getComplianceMetrics)
 server.get('/api/v3/metrics/modelVolume', ...getModelVolume)
 
 // Python docs

@@ -1,15 +1,15 @@
 import { PipelineStage } from 'mongoose'
 
-import { ModelVolumeBucket } from './base.js'
+import { ModelVolumeInterval } from '../../routes/v3/metrics/getModelVolume.js'
 
 /**
- * Returns a new Date incremented by one bucket
+ * Returns a new Date incremented by one interval
  * (day/week/month/quarter/year) in UTC.
  */
-export function addBucket(date: Date, bucket: ModelVolumeBucket): Date {
+export function addInterval(date: Date, interval: ModelVolumeInterval): Date {
   const d = new Date(date)
 
-  switch (bucket) {
+  switch (interval) {
     case 'day':
       d.setUTCDate(d.getUTCDate() + 1)
       break

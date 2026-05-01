@@ -4,17 +4,33 @@ import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { Roles } from '../../../connectors/authentication/constants.js'
 import authentication from '../../../connectors/authentication/index.js'
-import { ModelVolumeBucketEnum, ModelVolumeDataPointSchema } from '../../../connectors/metrics/base.js'
+import metrics from '../../../connectors/metrics/index.js'
 import { z } from '../../../lib/zod.js'
-import { calculateModelVolume } from '../../../services/metrics.js'
 import { registerPath } from '../../../services/specification.js'
 import { Forbidden } from '../../../utils/error.js'
 import { parse } from '../../../utils/validate.js'
 
+export const ModelVolumeDataPointSchema = z.object({
+  startDate: z.string().datetime().openapi({ example: '2026-01-01' }),
+  endDate: z.string().datetime().openapi({ example: '2026-01-31' }),
+  count: z.number().int().nonnegative().openapi({ example: 7 }),
+  organisations: z.record(z.number().int().nonnegative()).openapi({
+    example: {
+      unset: 1,
+      'E corporation': 3,
+      'A corporation': 2,
+    },
+  }),
+})
+
+export const ModelVolumeIntervalEnum = z.enum(['day', 'week', 'month', 'quarter', 'year'])
+export type ModelVolumeInterval = z.infer<typeof ModelVolumeIntervalEnum>
+export type ModelVolumeDataPoint = z.infer<typeof ModelVolumeDataPointSchema>
+
 export const getModelVolumeSchema = z.object({
   query: z
     .object({
-      bucket: ModelVolumeBucketEnum.openapi({ example: 'month' }),
+      interval: ModelVolumeIntervalEnum.openapi({ example: 'month' }),
 
       startDate: z.string().date().openapi({ example: '2026-01-01' }),
 
@@ -29,7 +45,7 @@ export const getModelVolumeSchema = z.object({
 })
 
 const GetModelVolumeResponseSchema = z.object({
-  bucket: ModelVolumeBucketEnum.openapi({ example: 'month' }),
+  interval: ModelVolumeIntervalEnum.openapi({ example: 'month' }),
   startDate: z.string().date().openapi({ example: '2026-01-01' }),
   endDate: z.string().date().openapi({ example: '2026-04-01' }),
   data: z.array(ModelVolumeDataPointSchema),
@@ -67,17 +83,17 @@ export const getModelVolume = [
     }
 
     const {
-      query: { bucket, startDate, endDate, timezone },
+      query: { interval, startDate, endDate, timezone },
     } = parse(req, getModelVolumeSchema)
 
     const {
       startDate: modelVolumeStartDate,
       endDate: modelVolumeEndDate,
       data: modelVolumeDataPoints,
-    } = await calculateModelVolume(bucket, startDate, endDate, timezone)
+    } = await metrics.calculateModelVolume(interval, startDate, endDate, timezone)
 
     await audit.onViewMetric(req)
 
-    res.json({ bucket, startDate: modelVolumeStartDate, endDate: modelVolumeEndDate, data: modelVolumeDataPoints })
+    res.json({ interval, startDate: modelVolumeStartDate, endDate: modelVolumeEndDate, data: modelVolumeDataPoints })
   },
 ]
