@@ -34,11 +34,11 @@ export default function NewEntry() {
         },
         {
           title: 'Untrusted Model',
-          description: 'TBC',
+          description: uiConfig?.untrustedModelDescription,
           handleClick: () => setCreateEntryKind(EntryKind.UNTRUSTED_MODEL),
         },
       ].filter((entryCardProp) => !entryCardProp.disabled),
-    [uiConfig?.modelMirror.import.enabled],
+    [uiConfig?.modelMirror.import.enabled, uiConfig?.untrustedModelDescription],
   )
 
   const otherEntryProps = [

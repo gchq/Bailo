@@ -262,6 +262,8 @@ module.exports = {
       contributor: 'Contributor',
       consumer: 'Consumer',
     },
+
+    untrustedModelDescription: 'TBD',
   },
 
   connectors: {

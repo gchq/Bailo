@@ -230,6 +230,8 @@ data:
           consumer: '{{ .Values.config.ui.roleDisplayNames.consumer }}',
           contributor: '{{ .Values.config.ui.roleDisplayNames.contributor }}',
         },
+
+        untrustedModelDescription: '{{ .Values.config.ui.untrustedModelDescription }}'
       },
 
       connectors: {

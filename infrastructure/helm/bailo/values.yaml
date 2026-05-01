@@ -273,6 +273,8 @@ config:
       consumer: 'Consumer'
       contributor: 'Contributor'
 
+    untrustedModelDescription: 'TBD'
+
   smtp:
     #host: 'mail' #service name
     port: 1025
