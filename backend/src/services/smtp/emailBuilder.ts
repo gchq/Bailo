@@ -20,33 +20,29 @@ export type actions = {
   url: string
 }
 
-export function deepSanitise<T>(input: T): T {
-  function recurse(value: any, parentKey?: string): any {
-    if (value === null || typeof value !== 'object') {
-      if (typeof value === 'string') {
-        return sanitizeHtml(value) === value
-      }
-      return false
-    }
-
-    if (Array.isArray(value)) {
-      return value.every((item) => recurse(item, parentKey))
-    }
-
-    const output: Record<string, any> = {}
-
-    for (const [key, val] of Object.entries(value)) {
-      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-        continue
-      }
-
-      output[key] = recurse(val, key)
-    }
-
-    return output
+export function validateHtmlInput(input: unknown): boolean {
+  if (input === null) {
+    return true
   }
 
-  return recurse(input)
+  if (typeof input === 'string') {
+    return sanitizeHtml(input, { allowedTags: ['br'] }) === input
+  }
+
+  if (Array.isArray(input)) {
+    return input.every(validateHtmlInput)
+  }
+
+  if (typeof input === 'object') {
+    return Object.entries(input).every(([key, val]) => {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        return false
+      }
+      return validateHtmlInput(val)
+    })
+  }
+
+  return false
 }
 
 export async function buildEmail(
@@ -55,7 +51,7 @@ export async function buildEmail(
   actions: actions[],
   actionRequired?: boolean,
 ): Promise<EmailContent | undefined> {
-  if (!(deepSanitise(title) && deepSanitise(metadata) && deepSanitise(actions))) {
+  if (!validateHtmlInput({ title, metadata, actions })) {
     log.error({ title, metadata, actions }, 'Email failed sanitisation. Not forwarding request')
     return
   }

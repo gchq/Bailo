@@ -10,10 +10,9 @@ import { ReviewDoc } from '../../models/Review.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { sanitiseEmail } from '../../utils/smtp.js'
-import { plural } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth } from '../model.js'
-import { buildEmail, EmailContent } from './emailBuilder.js'
+import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const transporter = await generateTransporter(config.smtp.transporter)
 
@@ -72,7 +71,7 @@ export async function dispatchEmailToModelRole(modelId: string, role: string, em
       .map((collaborator) => authentication.getUserInformation(collaborator.entity)),
   )
   const emails = entities.map((entry) => entry.email).filter((email): email is string => email !== undefined)
-  sendEmail({ to: emails, ...emailContent })
+  await sendEmail({ to: emails, ...emailContent })
 }
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -235,7 +234,7 @@ async function sendEmail(email: Mail.Options) {
   }
 }
 
-export async function startImportNotification(modelId: string, releases: Omit<ReleaseDoc, '_id'>[]) {
+export async function startImportNotification(modelId: string) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -244,28 +243,6 @@ export async function startImportNotification(modelId: string, releases: Omit<Re
   const mirroredModel = await getModelByIdNoAuth(modelId)
   const emailContent = buildEmail(
     `${mirroredModel.name} has begun importing`,
-    releases.map((release) => ({
-      title: `Release ${release.semver}`,
-      data: `has ${plural(release.fileIds.length, 'file')} and ${plural(release.images.length, 'image')}`,
-    })),
-    [
-      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
-      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
-    ],
-  )
-
-  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
-}
-
-export async function completeImportNotification(modelId: string) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-
-  const mirroredModel = await getModelByIdNoAuth(modelId)
-  const emailContent = buildEmail(
-    `${mirroredModel.name} has finished importing`,
     [],
     [
       { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
@@ -276,7 +253,11 @@ export async function completeImportNotification(modelId: string) {
   await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }
 
-export async function failImportNotification(modelId: string, errorMessage: string, errorContext?: string) {
+export async function completeImportNotification(
+  modelId: string,
+  successfulFiles: string[],
+  successfulImages: string[],
+) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -284,15 +265,55 @@ export async function failImportNotification(modelId: string, errorMessage: stri
 
   const mirroredModel = await getModelByIdNoAuth(modelId)
 
-  const emailContent = buildEmail(
-    `Oh no there was a problem with importing ${mirroredModel.name}!`,
-    [{ title: errorMessage, data: errorContext ?? '' }],
-    [
-      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
-      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
-      { name: 'Contact Support', url: config.ui.issues.contactHref },
-    ],
-  )
+  const information: Info[] = []
+  if (successfulFiles.length) {
+    information.push({ title: 'Successful Files', data: successfulFiles.join('<br />') })
+  }
+  if (successfulImages.length) {
+    information.push({ title: 'Successful Images', data: successfulImages.join('<br />') })
+  }
+
+  const emailContent = buildEmail(`${mirroredModel.name} has finished importing`, information, [
+    { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+    { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+  ])
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+}
+
+export async function failImportNotification(
+  modelId: string,
+  failedFiles: string[],
+  failedImages: string[],
+  successfulFiles: string[],
+  successfulImages: string[],
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+
+  const information: Info[] = []
+  if (failedFiles.length) {
+    information.push({ title: 'Failed Files', data: failedFiles.join('<br />') })
+  }
+  if (failedImages.length) {
+    information.push({ title: 'Failed Images', data: failedImages.join('<br />') })
+  }
+  if (successfulFiles.length) {
+    information.push({ title: 'Successful Files', data: successfulFiles.join('<br />') })
+  }
+  if (successfulImages.length) {
+    information.push({ title: 'Successful Images', data: successfulImages.join('<br />') })
+  }
+
+  const emailContent = buildEmail(`Oh no there was a problem with importing ${mirroredModel.name}!`, information, [
+    { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+    { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+    { name: 'Contact Support', url: config.ui.issues.contactHref },
+  ])
 
   await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }

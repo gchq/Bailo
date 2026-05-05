@@ -6,7 +6,7 @@ import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
-import ModelTransferModel, { TransferStatus } from '../../../models/ModelTransfer.js'
+import { TransferStatus } from '../../../models/ModelTransfer.js'
 import { UserInterface } from '../../../models/User.js'
 import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
@@ -14,8 +14,8 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
+import { finishTransfer, updateFile, updateImage } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
-import { completeImportNotification, startImportNotification } from '../../smtp/smtp.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {
@@ -160,16 +160,7 @@ export class ImageImporter extends BaseImporter {
     _resolve: (reason?: any) => void,
     reject: (reason?: unknown) => void,
   ): Promise<void> {
-    await ModelTransferModel.findOneAndUpdate(
-      { exportId: this.metadata.exportId },
-      {
-        status: TransferStatus.Failed,
-        $set: {
-          [`imageStatus.${this.metadata.distributionPackageName}`]: TransferStatus.Failed,
-        },
-      },
-      { upsert: true },
-    )
+    await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
     return super.handleStreamError(error, _resolve, reject)
   }
 
@@ -199,41 +190,13 @@ export class ImageImporter extends BaseImporter {
         },
         'Completed registry upload',
       )
-
-      let modelTransfer = await ModelTransferModel.findOne({ exportId: this.metadata.exportId })
-
-      if (!modelTransfer) {
-        modelTransfer = await ModelTransferModel.create({
-          exportId: this.metadata.exportId,
-          modelId: this.metadata.mirroredModelId,
-          createdBy: this.metadata.exporter,
-          imageStatus: { [this.metadata.distributionPackageName]: TransferStatus.Completed },
-        })
-
-        await startImportNotification(this.metadata.mirroredModelId, [])
-      } else {
-        modelTransfer = await ModelTransferModel.findOneAndUpdate(
-          { exportId: this.metadata.exportId },
-          {
-            $set: {
-              [`imageStatus.${this.metadata.distributionPackageName}`]: TransferStatus.Completed,
-            },
-          },
-          { new: true, upsert: true },
-        )
-      }
-
-      if (modelTransfer?.documentStatus === TransferStatus.Completed && !modelTransfer.notificationSent) {
-        await completeImportNotification(this.metadata.mirroredModelId)
-
-        await ModelTransferModel.updateOne({ exportId: this.metadata.exportId }, { $set: { notificationSent: true } })
-      }
-
+      await updateFile(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Completed)
       resolve({
         metadata: this.metadata,
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
+      await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
       reject(
         InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.', {
           metadata: this.metadata,
@@ -241,5 +204,6 @@ export class ImageImporter extends BaseImporter {
         }),
       )
     }
+    await finishTransfer(this.metadata.exportId)
   }
 }
