@@ -85,10 +85,10 @@ describe('services > release', () => {
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)
 
-    expect(ReleaseModelMock.save).toBeCalled()
-    expect(ReleaseModelMock).toBeCalled()
-    expect(mockReviewService.createReleaseReviews).toBeCalled()
-    expect(mockWebhookService.sendWebhooks).toBeCalled()
+    expect(ReleaseModelMock.save).toHaveBeenCalled()
+    expect(ReleaseModelMock).toHaveBeenCalled()
+    expect(mockReviewService.createReleaseReviews).toHaveBeenCalled()
+    expect(mockWebhookService.sendWebhooks).toHaveBeenCalled()
   })
 
   test('createRelease > minor release', async () => {
@@ -96,9 +96,9 @@ describe('services > release', () => {
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: true } as any)
 
-    expect(ReleaseModelMock.save).toBeCalled()
-    expect(ReleaseModelMock).toBeCalled()
-    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+    expect(ReleaseModelMock.save).toHaveBeenCalled()
+    expect(ReleaseModelMock).toHaveBeenCalled()
+    expect(mockReviewService.createReleaseReviews).not.toHaveBeenCalled()
   })
 
   test('createRelease > release with image', async () => {
@@ -115,9 +115,9 @@ describe('services > release', () => {
       } as any,
     )
 
-    expect(ReleaseModelMock.save).toBeCalled()
-    expect(ReleaseModelMock).toBeCalled()
-    expect(mockReviewService.createReleaseReviews).toBeCalled()
+    expect(ReleaseModelMock.save).toHaveBeenCalled()
+    expect(ReleaseModelMock).toHaveBeenCalled()
+    expect(mockReviewService.createReleaseReviews).toHaveBeenCalled()
   })
 
   test('createRelease > missing images in the registry', async () => {
@@ -137,9 +137,9 @@ describe('services > release', () => {
           ].concat(existingImages.flatMap(({ tags, ...rest }) => tags.map((tag) => ({ tag, ...rest })))),
         } as any,
       ),
-    ).rejects.toThrowError(/^The following images do not exist in the registry/)
-    expect(ReleaseModelMock.save).not.toBeCalled()
-    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+    ).rejects.toThrow(/^The following images do not exist in the registry/)
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
+    expect(mockReviewService.createReleaseReviews).not.toHaveBeenCalled()
   })
 
   test('createRelease > release with bad files', async () => {
@@ -155,9 +155,9 @@ describe('services > release', () => {
           fileIds: ['test'],
         } as any,
       ),
-    ).rejects.toThrowError(/^The file 'test' comes from the model/)
+    ).rejects.toThrow(/^The file 'test' comes from the model/)
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > release with bailo error', async () => {
@@ -173,9 +173,9 @@ describe('services > release', () => {
           fileIds: ['test'],
         } as any,
       ),
-    ).rejects.toThrowError(/^Unable to create release as the file cannot be found./)
+    ).rejects.toThrow(/^Unable to create release as the file cannot be found./)
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > release with generic error', async () => {
@@ -191,9 +191,9 @@ describe('services > release', () => {
           fileIds: ['test'],
         } as any,
       ),
-    ).rejects.toThrowError(/^File not found./)
+    ).rejects.toThrow(/^File not found./)
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > release with duplicate file names', async () => {
@@ -215,9 +215,9 @@ describe('services > release', () => {
             fileIds: ['test', 'test2'],
           } as any,
         ),
-    ).rejects.toThrowError(/^Releases cannot have multiple files with the same name/)
+    ).rejects.toThrow(/^Releases cannot have multiple files with the same name/)
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > release with bad semver', async () => {
@@ -229,16 +229,16 @@ describe('services > release', () => {
         modelCardVersion: 999,
       } as any,
     )
-    await expect(result).rejects.toThrowError(/is not a valid semver value./)
+    await expect(result).rejects.toThrow(/is not a valid semver value./)
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     ReleaseModelMock.findOne.mockResolvedValue(null)
-    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
+    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrow(
       /^You do not have permission/,
     )
   })
@@ -253,7 +253,7 @@ describe('services > release', () => {
 
     await createRelease({} as any, { semver: 'v1.0.0' } as any)
 
-    expect(ReleaseModelMock.save).toBeCalled()
+    expect(ReleaseModelMock.save).toHaveBeenCalled()
     expect(ReleaseModelMock.mock.calls.at(0)?.at(0)?.modelCardVersion).toBe(999)
   })
 
@@ -264,11 +264,11 @@ describe('services > release', () => {
       kind: 'model',
     })
 
-    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
+    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrow(
       /^This model does not have a model card associated with it/,
     )
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > should throw Bad Req if the user tries to alter a mirrored model card', async () => {
@@ -278,7 +278,7 @@ describe('services > release', () => {
       kind: 'mirrored-model',
     })
 
-    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
+    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrow(
       /^Cannot create a release from a mirrored model/,
     )
   })
@@ -292,22 +292,22 @@ describe('services > release', () => {
         modelCardVersion: 999,
       } as any,
     )
-    await expect(result).rejects.toThrowError(
+    await expect(result).rejects.toThrow(
       /^A release using this semver has been deleted. Please use a different semver or contact an admin to restore the deleted release./,
     )
 
-    expect(ReleaseModelMock.save).not.toBeCalled()
+    expect(ReleaseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createRelease > save generic error', async () => {
     ReleaseModelMock.findOne.mockResolvedValue(null)
     ReleaseModelMock.save.mockRejectedValueOnce(new Error('err'))
 
-    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrowError('err')
+    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrow('err')
 
-    expect(ReleaseModelMock.save).toBeCalled()
-    expect(ReleaseModelMock).toBeCalled()
-    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+    expect(ReleaseModelMock.save).toHaveBeenCalled()
+    expect(ReleaseModelMock).toHaveBeenCalled()
+    expect(mockReviewService.createReleaseReviews).not.toHaveBeenCalled()
   })
 
   test('createRelease > save mongo server error', async () => {
@@ -317,18 +317,18 @@ describe('services > release', () => {
     ReleaseModelMock.save.mockRejectedValueOnce(error)
     mongoUtilsMocks.isMongoServerError.mockReturnValueOnce(true)
 
-    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrowError(
+    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrow(
       /^A release with this semver already exists for this model./,
     )
 
-    expect(ReleaseModelMock.save).toBeCalled()
-    expect(ReleaseModelMock).toBeCalled()
-    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+    expect(ReleaseModelMock.save).toHaveBeenCalled()
+    expect(ReleaseModelMock).toHaveBeenCalled()
+    expect(mockReviewService.createReleaseReviews).not.toHaveBeenCalled()
   })
 
   test('updateRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
-    await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
+    await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrow(
       /^You do not have permission/,
     )
   })
@@ -341,7 +341,7 @@ describe('services > release', () => {
         semver: 'v1.0.0',
         fileIds: ['test'],
       } as any),
-    ).rejects.toThrowError(/^The file 'test' comes from the model/)
+    ).rejects.toThrow(/^The file 'test' comes from the model/)
   })
 
   test('updateRelease > success', async () => {
@@ -349,7 +349,7 @@ describe('services > release', () => {
 
     await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
 
-    expect(ReleaseModelMock.findOneAndUpdate).toBeCalled()
+    expect(ReleaseModelMock.findOneAndUpdate).toHaveBeenCalled()
   })
 
   test('updateRelease > should throw Bad Req when attempting to update a release on a mirrored model ', async () => {
@@ -359,7 +359,7 @@ describe('services > release', () => {
       kind: 'mirrored-model',
     })
 
-    await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
+    await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrow(
       /^Cannot update a release on a mirrored model./,
     )
   })
@@ -377,7 +377,7 @@ describe('services > release', () => {
 
     await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
 
-    expect(ResponseModelMock.save).toBeCalled()
+    expect(ResponseModelMock.save).toHaveBeenCalled()
   })
 
   test('newReleaseComment > should throw bad request when attempting to create a release comment on a mirrored model', async () => {
@@ -387,10 +387,10 @@ describe('services > release', () => {
       kind: 'mirrored-model',
     })
 
-    await expect(() => newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')).rejects.toThrowError(
+    await expect(() => newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')).rejects.toThrow(
       /^Cannot create a new comment on a mirrored model./,
     )
-    expect(ReleaseModelMock.findOneAndUpdate).not.toBeCalled()
+    expect(ReleaseModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 
   test('getModelReleases > good', async () => {
@@ -435,7 +435,7 @@ describe('services > release', () => {
   test('convertSemverQueryToMongoQuery > convertSemverQueryToMongoQuery handles bad semver', async () => {
     await expect(
       async () => await getModelReleases({ dn: 'user' } as UserInterface, 'test', '^2.2v.x'),
-    ).rejects.toThrowError(/^Semver range is invalid./)
+    ).rejects.toThrow(/^Semver range is invalid./)
   })
 
   test('getReleaseBySemver > good', async () => {
@@ -449,7 +449,7 @@ describe('services > release', () => {
   test('getReleaseBySemver > no release', async () => {
     ReleaseModelMock.findOne.mockResolvedValue(undefined)
 
-    await expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
+    await expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrow(
       /^The requested release was not found./,
     )
   })
@@ -464,7 +464,7 @@ describe('services > release', () => {
       id: '',
     })
 
-    await expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
+    await expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrow(
       /^You do not have permission to view this release./,
     )
   })
@@ -501,10 +501,10 @@ describe('services > release', () => {
         return { success: false, info: 'Unknown action.', id: '' }
       })
 
-      await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrowError(
+      await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrow(
         /^You do not have permission to delete this release./,
       )
-      expect(ReleaseModelMock.save).not.toBeCalled()
+      expect(ReleaseModelMock.save).not.toHaveBeenCalled()
     })
 
     test('success bypass mirrored model check', async () => {
@@ -529,7 +529,7 @@ describe('services > release', () => {
         kind: 'mirrored-model',
       })
 
-      await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrowError(
+      await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrow(
         /^Cannot delete a release on a mirrored model./,
       )
     })
@@ -552,8 +552,8 @@ describe('services > release', () => {
 
     const result = removeFileFromReleases(mockUser, mockModel, '')
 
-    await expect(result).rejects.toThrowError(/^You do not have permission to update these releases./)
-    expect(ReleaseModelMock.updateMany).not.toBeCalled()
+    await expect(result).rejects.toThrow(/^You do not have permission to update these releases./)
+    expect(ReleaseModelMock.updateMany).not.toHaveBeenCalled()
   })
 
   test('removeFileFromReleases > success', async () => {
@@ -574,10 +574,10 @@ describe('services > release', () => {
     const mockUser: any = { dn: 'test' }
     const mockModel: any = { id: 'test', kind: 'mirrored-model' }
 
-    await expect(() => removeFileFromReleases(mockUser, mockModel, '123')).rejects.toThrowError(
+    await expect(() => removeFileFromReleases(mockUser, mockModel, '123')).rejects.toThrow(
       /^Cannot remove a file from a mirrored model./,
     )
-    expect(ReleaseModelMock.delete).not.toBeCalled()
+    expect(ReleaseModelMock.delete).not.toHaveBeenCalled()
   })
 
   test('removeFileFromReleases > allow removing a file from a mirrored model with arg', async () => {
@@ -616,7 +616,7 @@ describe('services > release', () => {
     fileMocks.getFilesByIds.mockResolvedValueOnce([{ name: 'not_test.png' }])
 
     const result = getFileByReleaseFileName(mockUser, modelId, semver, fileName)
-    await expect(result).rejects.toThrowError(/^The requested file name was not found on the release./)
+    await expect(result).rejects.toThrow(/^The requested file name was not found on the release./)
   })
 
   test('getReleasesForExport > release not found', async () => {
@@ -627,7 +627,7 @@ describe('services > release', () => {
 
     const result = getReleasesForExport(mockUser, modelId, semvers)
 
-    await expect(result).rejects.toThrowError(/^The following releases were not found./)
+    await expect(result).rejects.toThrow(/^The following releases were not found./)
   })
 
   test('getReleasesForExport > release not found', async () => {
@@ -641,7 +641,7 @@ describe('services > release', () => {
 
     const result = getReleasesForExport(mockUser, modelId, semvers)
 
-    await expect(result).rejects.toThrowError(/^You do not have the necessary permissions to export these releases./)
+    await expect(result).rejects.toThrow(/^You do not have the necessary permissions to export these releases./)
   })
 
   test('getReleasesForExport > return releases', async () => {

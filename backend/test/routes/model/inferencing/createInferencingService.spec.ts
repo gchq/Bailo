@@ -23,7 +23,7 @@ describe('routes > inferencing > postInference', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/inference`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateInference).toBeCalled()
+    expect(audit.onCreateInference).toHaveBeenCalled()
     expect(audit.onCreateInference.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

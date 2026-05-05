@@ -114,7 +114,7 @@ describe('connectors > artefactScanning > trivy', () => {
     } as any)
 
     expect(result.state).toBe(ArtefactScanState.Error)
-    expect(abort).toBeCalled()
+    expect(abort).toHaveBeenCalled()
   })
 
   test('TrivyImageScanningConnector > returns error when scannerVersion is undefined', async () => {

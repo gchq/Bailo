@@ -36,7 +36,7 @@ describe('routes > metrics > getModelVolume', () => {
     const res = await testGet(`/api/v2/metrics/modelVolume?${qs.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewMetric).toBeCalled()
+    expect(audit.onViewMetric).toHaveBeenCalled()
     expect(audit.onViewMetric.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

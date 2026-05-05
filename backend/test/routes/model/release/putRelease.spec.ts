@@ -24,7 +24,7 @@ describe('routes > release > putRelease', () => {
     const res = await testPut(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.modelId}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateRelease).toBeCalled()
+    expect(audit.onUpdateRelease).toHaveBeenCalled()
     expect(audit.onUpdateRelease.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

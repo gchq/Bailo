@@ -29,7 +29,7 @@ describe('routes > schema > getSchema', () => {
     const res = await testGet(`/api/v2/schema/${testModelSchema.id}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewSchema).toBeCalled()
+    expect(audit.onViewSchema).toHaveBeenCalled()
     expect(audit.onViewSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

@@ -39,7 +39,7 @@ describe('services > modelTransfer', () => {
 
     const res = findModelTransferById(user, validObjectId)
 
-    await expect(res).rejects.toThrowError(/^The requested model transfer was not found/)
+    await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('findModelTransferById > returns valid transfer when found', async () => {
@@ -65,7 +65,7 @@ describe('services > modelTransfer', () => {
 
     const res = findModelTransfersByModelId(user, validObjectId)
 
-    await expect(res).rejects.toThrowError(/^No model transfers found/)
+    await expect(res).rejects.toThrow(/^No model transfers found/)
   })
 
   test('findModelTransfersByModelId > returns transfers when found', async () => {
@@ -133,7 +133,7 @@ describe('services > modelTransfer', () => {
   test('updateModelTransferStatus > throws BadReq for invalid ObjectId', async () => {
     const res = updateModelTransfer('001', TransferStatus.Completed)
 
-    await expect(res).rejects.toThrowError(/^Invalid object id/)
+    await expect(res).rejects.toThrow(/^Invalid object id/)
   })
 
   test('updateModelTransferStatus > throws NotFound when transfer does not exist', async () => {
@@ -143,7 +143,7 @@ describe('services > modelTransfer', () => {
 
     const res = updateModelTransfer(validObjectId, TransferStatus.Completed)
 
-    await expect(res).rejects.toThrowError(/^The requested model transfer was not found/)
+    await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('updateModelTransferStatus > updates and returns transfer', async () => {
@@ -172,7 +172,7 @@ describe('services > modelTransfer', () => {
   test('deleteModelTransfer > throws BadReq for invalid ObjectId', async () => {
     const res = deleteModelTransfer('001')
 
-    await expect(res).rejects.toThrowError(/^Invalid object id/)
+    await expect(res).rejects.toThrow(/^Invalid object id/)
   })
 
   test('deleteModelTransfer > throws NotFound when transfer does not exist', async () => {
@@ -180,7 +180,7 @@ describe('services > modelTransfer', () => {
 
     const res = deleteModelTransfer(validObjectId)
 
-    await expect(res).rejects.toThrowError(/^The requested model transfer was not found/)
+    await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('deleteModelTransfer > soft deletes transfer', async () => {
