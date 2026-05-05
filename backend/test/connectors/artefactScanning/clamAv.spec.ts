@@ -36,7 +36,7 @@ const s3Mocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
-vi.mock('p-queue', () => ({
+const pQueueMock = vi.hoisted(() => ({
   default: class {
     constructor(_opts?: any) {}
 
@@ -45,6 +45,7 @@ vi.mock('p-queue', () => ({
     }
   },
 }))
+vi.mock('p-queue', () => pQueueMock)
 
 describe('connectors > artefactScanning > clamAv', () => {
   test('init() initialises ClamAV and parses version', async () => {

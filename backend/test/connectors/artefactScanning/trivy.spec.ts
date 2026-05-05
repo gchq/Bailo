@@ -28,7 +28,7 @@ const authMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/routes/v1/registryAuth.js', () => authMocks)
 
-vi.mock('p-queue', () => ({
+const pQueueMock = vi.hoisted(() => ({
   default: class {
     constructor(_opts?: any) {}
 
@@ -37,6 +37,7 @@ vi.mock('p-queue', () => ({
     }
   },
 }))
+vi.mock('p-queue', () => pQueueMock)
 
 describe('connectors > artefactScanning > trivy', () => {
   test('TrivyImageScanningConnector > successful image scan', async () => {
