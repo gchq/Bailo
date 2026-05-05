@@ -3,7 +3,7 @@ import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
-import EntryTagSelector from 'src/common/TagSelector'
+import TagSelector from 'src/common/TagSelector'
 import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
 
 interface MultiFileInputDisplayProps {
@@ -73,7 +73,7 @@ export default function MultiFileInputFileDisplay({
         </Tooltip>
       </Grid>
       <Grid size={{ xs: 7 }}>
-        <EntryTagSelector
+        <TagSelector
           onChange={handleFileTagSelectorOnChange}
           tags={isFileInterface(file) ? file.tags : newFileTags}
           errorText={fileTagErrorMessage}
