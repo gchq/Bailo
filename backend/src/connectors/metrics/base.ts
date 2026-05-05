@@ -255,14 +255,6 @@ type ComplianceMetricsResult = {
 }
 
 /**
- * Streams models for role evaluation using a mongoose cursor
- * to avoid loading the entire result set into memory.
- */
-function streamModelsForRoleEvaluation(filter: Record<string, any>) {
-  return ModelModel.find(filter).select('id organisation card collaborators').lean().cursor()
-}
-
-/**
  * Calculates which models are missing required review roles, either globally
  * or scoped to a specific organisation.
  */
@@ -279,20 +271,19 @@ async function calculateMissingModelRoles(
     filter.organisation = org
   }
 
-  const models = streamModelsForRoleEvaluation(filter)
+  // Gets models by the specified organisation | no organisation
+  const models = ModelModel.find(filter).select('id organisation card collaborators').lean().cursor()
 
   const modelsResult: ComplianceMetricsResult['models'] = []
 
   // Build set of all known roles
   const allKnownRoles = new Set<string>(defaultRoles)
-
   Object.values(schemaRoleMap).forEach((roles) => {
     roles.forEach((role) => allKnownRoles.add(role))
   })
 
   // Initialise counters to 0
   const roleMissingCount: Record<string, number> = {}
-
   for (const role of allKnownRoles) {
     roleMissingCount[role] = 0
   }
@@ -302,17 +293,20 @@ async function calculateMissingModelRoles(
     let applicableRoles = [...defaultRoles]
 
     const schemaId = model.card?.schemaId
+
+    // If the model has a schema with additional review roles, include them
     if (schemaId && schemaRoleMap[schemaId]) {
       applicableRoles = [...defaultRoles, ...schemaRoleMap[schemaId]]
     }
 
     const applicableSet = new Set(applicableRoles)
-
     const activeRoleSet = new Set<string>()
 
+    // Run through all collaborators on the model and each role assigned to the collaborator
     for (const collaborator of model.collaborators ?? []) {
       for (const role of collaborator.roles ?? []) {
         if (role && role.trim() !== '') {
+          // If not empty/invalid then add the role to the set of active roles on the model
           activeRoleSet.add(role)
         }
       }
@@ -320,10 +314,10 @@ async function calculateMissingModelRoles(
 
     const missingRoles: { roleId: string; roleName: string }[] = []
 
+    // Compare required roles with the roles currently assigned
     for (const roleId of applicableSet) {
       if (!activeRoleSet.has(roleId)) {
         roleMissingCount[roleId] += 1
-
         missingRoles.push({
           roleId,
           roleName: roleMeta[roleId]?.roleName ?? roleId,
@@ -331,6 +325,7 @@ async function calculateMissingModelRoles(
       }
     }
 
+    // Only include the model in results if it has at least one missing role
     if (missingRoles.length > 0) {
       modelsResult.push({
         modelId: model.id,
