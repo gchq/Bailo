@@ -6,12 +6,12 @@ import { createFixture, testPatch } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
+vi.mock('../../../src/services/model.js', () => ({
+  updateModel: vi.fn(() => ({ _id: 'test' })),
+}))
+
 describe('routes > model > patchModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      updateModel: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const fixture = createFixture(patchModelSchema)
     const res = await testPatch(`/api/v2/model/${fixture.params.modelId}`, fixture)
 
@@ -20,10 +20,6 @@ describe('routes > model > patchModel', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      updateModel: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const fixture = createFixture(patchModelSchema)
     const res = await testPatch(`/api/v2/model/${fixture.params.modelId}`, fixture)
 

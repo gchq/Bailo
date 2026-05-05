@@ -6,17 +6,21 @@ import { createFixture, testPost } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
+vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
+  MirrorKind: {
+    Documents: 'documents',
+    File: 'file',
+    Image: 'image',
+  },
+  exportModel: vi.fn(),
+}))
+
+vi.mock('../../../src/services/model.js', () => ({
+  createModel: vi.fn(() => ({ _id: 'test' })),
+}))
+
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
-      MirrorKind: {
-        Documents: 'documents',
-        File: 'file',
-        Image: 'image',
-      },
-      exportModel: vi.fn(),
-    }))
-
     const fixture = createFixture(postRequestExportToS3Schema)
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export/s3`, fixture)
 
@@ -26,10 +30,6 @@ describe('routes > model > postModel', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      createModel: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const fixture = createFixture(postRequestExportToS3Schema)
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export/s3`, fixture)
 

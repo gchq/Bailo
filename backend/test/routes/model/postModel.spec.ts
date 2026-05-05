@@ -6,12 +6,12 @@ import { createFixture, testPost } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
+vi.mock('../../../src/services/model.js', () => ({
+  createModel: vi.fn(() => ({ _id: 'test' })),
+}))
+
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      createModel: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const fixture = createFixture(postModelSchema)
     const res = await testPost('/api/v2/models', fixture)
 
@@ -20,10 +20,6 @@ describe('routes > model > postModel', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      createModel: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const fixture = createFixture(postModelSchema)
     const res = await testPost('/api/v2/models', fixture)
 

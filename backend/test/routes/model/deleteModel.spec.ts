@@ -6,12 +6,12 @@ import { createFixture, testDelete } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
+vi.mock('../../../src/services/model.js', () => ({
+  removeModel: vi.fn(),
+}))
+
 describe('routes > model > deleteModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      removeModel: vi.fn(),
-    }))
-
     const fixture = createFixture(deleteModelSchema)
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}`)
 
@@ -20,10 +20,6 @@ describe('routes > model > deleteModel', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      removeModel: vi.fn(),
-    }))
-
     const fixture = createFixture(deleteModelSchema)
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}`)
 

@@ -6,14 +6,14 @@ import { createFixture, testPatch } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
+vi.mock('../../../../src/services/file.js', () => ({
+  updateFile: vi.fn(function () {
+    return {}
+  }),
+}))
+
 describe('routes > file > patchFile', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../../src/services/file.js', () => ({
-      updateFile: vi.fn(function () {
-        return {}
-      }),
-    }))
-
     const fixture = createFixture(patchFileSchema)
     const res = await testPatch(`/api/v2/model/${fixture.params.modelId}/file/${fixture.params.fileId}`, fixture)
 

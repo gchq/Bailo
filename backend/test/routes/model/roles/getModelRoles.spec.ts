@@ -6,12 +6,12 @@ import { testReviewRole } from '../../../testUtils/testModels.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
+vi.mock('../../../../src/services/roles.js', () => ({
+  getAllEntryRoles: vi.fn(() => [testReviewRole]),
+}))
+
 describe('routes > model > roles > getModelRoles', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../../src/services/roles.js', () => ({
-      getAllEntryRoles: vi.fn(() => [testReviewRole]),
-    }))
-
     const res = await testGet(`/api/v2/roles?modelId='1234'`)
 
     expect(res.statusCode).toBe(200)
@@ -19,10 +19,6 @@ describe('routes > model > roles > getModelRoles', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../../src/services/roles.js', () => ({
-      getAllEntryRoles: vi.fn(() => [testReviewRole]),
-    }))
-
     const res = await testGet(`/api/v2/roles?modelId='1234'`)
 
     expect(res.statusCode).toBe(200)

@@ -6,12 +6,12 @@ import { createFixture, testDelete } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
+vi.mock('../../../../src/services/release.js', () => ({
+  deleteRelease: vi.fn(() => ({ message: 'Successfully removed release.' })),
+}))
+
 describe('routes > release > deleteRelease', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../../src/services/release.js', () => ({
-      deleteRelease: vi.fn(() => ({ message: 'Successfully removed release.' })),
-    }))
-
     const fixture = createFixture(deleteReleaseSchema)
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
@@ -20,10 +20,6 @@ describe('routes > release > deleteRelease', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../../src/services/release.js', () => ({
-      deleteRelease: vi.fn(() => ({ message: 'Successfully removed release.' })),
-    }))
-
     const fixture = createFixture(deleteReleaseSchema)
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
