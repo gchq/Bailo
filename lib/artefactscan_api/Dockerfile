@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 WORKDIR /app
 CMD ["python3", "/venv/bin/fastapi", "run", "bailo_artefactscan_api/main.py", "--port", "3311"]
 
-FROM aquasec/trivy:0.69.3 AS trivy
+FROM aquasec/trivy:0.70.0 AS trivy
 
 FROM base AS dev
 

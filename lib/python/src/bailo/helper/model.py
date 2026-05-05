@@ -203,22 +203,24 @@ class Model(Entry):
             peers=peers,
             title_only=title_only,
         )
-        models = []
+        models: list[Model] = []
 
-        for model in res["models"]:
-            res_model = client.get_model(model_id=model["id"])["model"]
+        for model_data in res["models"]:
             model_obj = cls(
                 client=client,
-                model_id=model["id"],
-                name=model["name"],
-                description=model["description"],
-                collaborators=model["collaborators"],
-                organisation=model.get("organisation"),
-                state=model.get("state"),
-                tags=res.get("tags"),
+                model_id=model_data["id"],
+                name=model_data["name"],
+                description=model_data["description"],
+                collaborators=model_data["collaborators"],
+                organisation=model_data.get("organisation"),
+                state=model_data.get("state"),
+                tags=model_data.get("tags"),
             )
-            model_obj._unpack(res_model)
-            model_obj.get_card_latest()
+            model_obj._unpack(model_data)
+
+            if "card" in model_data:
+                model_obj._unpack_card(model_data["card"])
+
             models.append(model_obj)
 
         return models

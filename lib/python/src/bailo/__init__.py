@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 
 # Package Version
-__version__ = "3.7.0"
+__version__ = "3.7.1"
 
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent

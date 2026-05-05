@@ -11,16 +11,17 @@ export function findDuplicates<T>(arr: Array<T>): Array<T> {
 }
 
 /**
- * Deduplicate an array while preserving order.
+ * Deduplicate an array while preserving order, using a custom key function.
  * Uses SameValueZero equality (as per Set).
  */
-export function dedupe<T>(input: readonly T[]): T[] {
-  const seen = new Set<T>()
+export function dedupeByKey<T, K>(input: readonly T[], keyFn: (item: T) => K = (item) => item as unknown as K): T[] {
+  const seen = new Set<K>()
   const result: T[] = []
 
   for (const item of input) {
-    if (!seen.has(item)) {
-      seen.add(item)
+    const key = keyFn(item)
+    if (!seen.has(key)) {
+      seen.add(key)
       result.push(item)
     }
   }

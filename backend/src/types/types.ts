@@ -215,8 +215,8 @@ export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
 
 export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
   kind: z.nativeEnum(EntryKind).optional(),
-  task: z.string().optional(),
-  libraries: coerceArray(z.array(z.string()).optional()),
+  task: z.string().toLowerCase().optional(),
+  libraries: coerceArray(z.array(z.string().toLowerCase()).optional()),
   organisations: coerceArray(z.array(z.string()).optional()),
   states: coerceArray(z.array(z.string()).optional()),
   filters: coerceArray(z.array(z.string()).optional()),
@@ -239,13 +239,18 @@ export type ModelImageTags = {
   tags: Array<string>
 }
 
-export type ImageTagResult = {
-  tag: string
+export type ImageScanResult = {
   state: ArtefactScanStateKeys
   severityCounts: SeverityCounts
   scanResults?: ScanInterface[]
   imageSize: number
 }
+
+export type ImageTagResult = {
+  tag: string
+  digest: string
+  platform?: string
+} & ImageScanResult
 
 export type ImageScanResults = {
   scanSummaries: ImageTagResult[]

@@ -134,14 +134,21 @@ export default function NewRelease() {
             setCurrentFileUploadProgress(undefined)
           }
         } catch (e) {
-          if (e instanceof Error) {
-            failedFiles.push({ fileName: file.name, error: e.message })
-            setCurrentFileUploadProgress(undefined)
-          }
+          const message = e instanceof Error ? e.message : 'Unknown upload error'
+          const failed = { fileName: file.name, error: message }
+          failedFiles.push(failed)
+
+          setFailedFileUploads((prev) => [...prev, failed])
+          setCurrentFileUploadProgress(undefined)
         }
       }
     }
-    setFailedFileUploads(failedFiles)
+
+    if (failedFiles.length > 0) {
+      setCurrentFileUploadProgress(undefined)
+      setLoading(false)
+      return
+    }
 
     const updatedSuccessfulFiles = successfulFiles.reduce(
       (updatedFiles, file) => {

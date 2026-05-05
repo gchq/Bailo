@@ -35,26 +35,33 @@ export async function postFileForModelId(
     ...(metadata && metadata.text && { metadataText: metadata.text }),
     ...(metadata && metadata.tags.length > 0 && { tags: metadata.tags }),
   }
-  const fileResponse = await axios
-    .post(
+  try {
+    const fileResponse = await axios.post(
       `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify(queryParams)}`,
       file,
-      {
-        onUploadProgress,
-      },
+      { onUploadProgress },
     )
-    .catch(function (error) {
+    return fileResponse
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
       if (error.response) {
-        throw new Error(
-          `Error code ${error.response.status} received from server whilst attempting to upload file ${file.name}`,
-        )
-      } else if (error.request) {
-        throw new Error(`There was a problem with the request whilst attempting to upload file ${file.name}`)
-      } else {
-        throw new Error(`Unknown error whilst attempting to upload file ${file.name}`)
+        const serverMessage =
+          typeof error.response.data === 'string'
+            ? error.response.data
+            : error.response.data?.error?.message || JSON.stringify(error.response.data)
+
+        throw new Error(`${error.response.statusText} for "${file.name}": ${serverMessage}`)
       }
-    })
-  return fileResponse
+
+      if (error.request) {
+        throw new Error(`There was a problem with the request whilst attempting to upload file "${file.name}"`)
+      }
+
+      throw new Error(`Request setup failed while uploading "${file.name}": ${error.message}`)
+    }
+
+    throw new Error(`Unknown error whilst attempting to upload file "${file.name}"`)
+  }
 }
 
 export async function patchFile(modelId: string, fileId: string, metadata: Pick<FileInterface, 'tags'>) {

@@ -91,7 +91,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     fileServiceMocks.getTotalFileSize.mockResolvedValue(500)
     modelServiceMocks.getModelCardRevisions.mockResolvedValue([{ version: 'v1', toJSON: () => ({}) }])
     releaseServiceMocks.getAllFileIds.mockResolvedValue(['fileId'])
-    scannersMocks.default.scannersInfo.mockReturnValue(false)
+    scannersMocks.default.scannersInfo.mockReturnValue([])
     authMocks.default.model.mockResolvedValue({ success: true })
   })
 
@@ -140,7 +140,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init throws BadReq if scan issues (missing scan)', async () => {
-    scannersMocks.default.scannersInfo.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(['item1'])
     const badFile = { id: 'f', name: 'name', scanResults: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
@@ -154,7 +154,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init throws BadReq if scan incomplete', async () => {
-    scannersMocks.default.scannersInfo.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(['item1'])
     const incompleteFile = {
       id: 'f',
       name: 'name',
@@ -172,7 +172,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init throws BadReq if scan failed', async () => {
-    scannersMocks.default.scannersInfo.mockReturnValue(true)
+    scannersMocks.default.scannersInfo.mockReturnValue(['item1'])
     const infectedFile = {
       id: 'f',
       name: 'name',

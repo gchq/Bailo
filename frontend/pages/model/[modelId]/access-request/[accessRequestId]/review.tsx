@@ -13,7 +13,7 @@ import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAc
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys, EntryKind } from 'types/types'
+import { DecisionKeys } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -25,11 +25,7 @@ export default function AccessRequestReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isOpenAccessRequestDialogOpen, setIsOpenAccessRequestDialogOpen] = useState(false)
 
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({

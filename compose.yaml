@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.2.6-ubi9
+    image: mongodb/mongodb-community-server:8.2.7-ubi9
     networks:
       internal:
     environment:
@@ -60,7 +60,7 @@ services:
       - backend
 
   registry:
-    image: registry:3.1.0
+    image: registry:3.0.0
     networks:
       internal:
     environment:
