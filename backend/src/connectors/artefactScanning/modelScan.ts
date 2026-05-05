@@ -64,9 +64,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       })
     } finally {
       if (s3Stream) {
-        if (typeof s3Stream.destroy === 'function') {
-          s3Stream.destroy()
-        }
+        s3Stream?.destroy()
       }
     }
   }
