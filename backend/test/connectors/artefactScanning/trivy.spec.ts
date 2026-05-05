@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
 import { TrivyImageScanningConnector } from '../../../src/connectors/artefactScanning/trivy.js'
@@ -28,7 +28,7 @@ const authMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/routes/v1/registryAuth.js', () => authMocks)
 
-const pendingJobs: Promise<any>[] = []
+let pendingJobs: Promise<any>[] = []
 const exportQueueMock = vi.hoisted(() => {
   const exportQueueAddMock = vi.fn(function (job: () => Promise<any>) {
     const p = job()
@@ -47,6 +47,10 @@ vi.mock('p-queue', () => ({
 }))
 
 describe('connectors > artefactScanning > trivy', () => {
+  beforeEach(() => {
+    pendingJobs = []
+  })
+
   test('TrivyImageScanningConnector > successful image scan', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       trivyVersion: '0.69.1',

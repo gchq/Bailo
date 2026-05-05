@@ -27,7 +27,7 @@ const authMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/routes/v1/registryAuth.js', () => authMocks)
 
-const pendingJobs: Promise<any>[] = []
+let pendingJobs: Promise<any>[] = []
 const exportQueueMock = vi.hoisted(() => {
   const exportQueueAddMock = vi.fn(function (job: () => Promise<any>) {
     const p = job()
@@ -47,7 +47,7 @@ vi.mock('p-queue', () => ({
 
 describe('connectors > artefactScanning > modelScan', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    pendingJobs = []
   })
 
   test('ModelScanFileScanningConnector > successful file scan', async () => {

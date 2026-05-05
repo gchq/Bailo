@@ -36,9 +36,28 @@ const s3Mocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
+let pendingJobs: Promise<any>[] = []
+const exportQueueMock = vi.hoisted(() => {
+  const exportQueueAddMock = vi.fn(function (job: () => Promise<any>) {
+    const p = job()
+    pendingJobs.push(p)
+    return p
+  })
+  return {
+    add: exportQueueAddMock,
+    exportQueueAddMock,
+  }
+})
+vi.mock('p-queue', () => ({
+  default: vi.fn(function () {
+    return exportQueueMock
+  }),
+}))
+
 describe('connectors > artefactScanning > clamAv', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    pendingJobs = []
   })
 
   test('init() initialises ClamAV and parses version', async () => {
