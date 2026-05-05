@@ -106,6 +106,8 @@ export const server = express()
 
 server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', httpLog)
+server.use('/api/v3', bodyParser.json())
+server.use('/api/v3', httpLog)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -265,5 +267,6 @@ const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
+server.use('/api/v3', expressErrorHandler)
 
 server.use('/internal', internalRouter)

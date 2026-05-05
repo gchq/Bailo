@@ -10,6 +10,12 @@ exports[`connectors > authentication > silly > authenticationMiddleware 1`] = `
   },
   {
     "middleware": [
+      [Function],
+    ],
+    "path": "/api/v3",
+  },
+  {
+    "middleware": [
       "Token Middleware",
     ],
     "path": "/api/v2/token",
