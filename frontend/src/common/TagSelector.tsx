@@ -247,7 +247,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
               options={[...new Set([...popularTags, ...tags, ...pendingValue])]}
               renderInput={(params) => (
                 <Box sx={{ display: 'flex', justifyContent: 'center', width: '95%', height: '95%', mx: 'auto', pt: 1 }}>
-                  <TextField {...params} size='small' autoFocus placeholder='Filter existing or create new tag' />
+                  <TextField {...params} size='small' autoFocus placeholder='Add tag' />
                 </Box>
               )}
               slots={{
