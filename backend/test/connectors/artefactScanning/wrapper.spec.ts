@@ -5,6 +5,7 @@ import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScannin
 import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/log.js')
+vi.mock('p-queue')
 
 const configMock = vi.hoisted(() => ({
   connectors: {

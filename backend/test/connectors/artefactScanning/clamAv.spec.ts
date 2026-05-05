@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
 import { ClamAvFileScanningConnector } from '../../../src/connectors/artefactScanning/clamAv.js'
@@ -36,30 +36,15 @@ const s3Mocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
-let pendingJobs: Promise<any>[] = []
-const exportQueueMock = vi.hoisted(() => {
-  const exportQueueAddMock = vi.fn(function (job: () => Promise<any>) {
-    const p = job()
-    pendingJobs.push(p)
-    return p
-  })
-  return {
-    add: exportQueueAddMock,
-    exportQueueAddMock,
-  }
-})
 vi.mock('p-queue', () => ({
-  default: vi.fn(function () {
-    return exportQueueMock
-  }),
+  default: class {
+    add(job: () => Promise<any>) {
+      return job()
+    }
+  },
 }))
 
 describe('connectors > artefactScanning > clamAv', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    pendingJobs = []
-  })
-
   test('init() initialises ClamAV and parses version', async () => {
     clamAvMocks.getVersion.mockResolvedValueOnce('ClamAV 1.2.3/456')
     const connector = new ClamAvFileScanningConnector()
