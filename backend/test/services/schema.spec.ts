@@ -34,7 +34,7 @@ describe('services > schema', () => {
     SchemaModelModelMock.save.mockResolvedValueOnce(testModelSchema)
     const result = await createSchema(testUser, testModelSchema)
     expect(SchemaModelModelMock.save).toBeCalledTimes(1)
-    expect(SchemaModelModelMock.deleteOne).not.toBeCalled()
+    expect(SchemaModelModelMock.deleteOne).not.toHaveBeenCalled()
     expect(result).toBe(testModelSchema)
   })
 
@@ -46,10 +46,10 @@ describe('services > schema', () => {
     })
 
     const result = () => createSchema(testUser, testModelSchema)
-    await expect(result).rejects.toThrowError(/^You do not have permission to create this schema./)
+    await expect(result).rejects.toThrow(/^You do not have permission to create this schema./)
 
-    expect(SchemaModelModelMock.save).not.toBeCalled()
-    expect(SchemaModelModelMock.deleteOne).not.toBeCalled()
+    expect(SchemaModelModelMock.save).not.toHaveBeenCalled()
+    expect(SchemaModelModelMock.deleteOne).not.toHaveBeenCalled()
   })
 
   test('a schema can be overwritten', async () => {
@@ -69,7 +69,7 @@ describe('services > schema', () => {
     SchemaModelModelMock.save.mockRejectedValueOnce(mongoError)
     mockMongoUtils.isMongoServerError.mockReturnValueOnce(true)
 
-    await expect(() => createSchema(testUser, testModelSchema)).rejects.toThrowError(
+    await expect(() => createSchema(testUser, testModelSchema)).rejects.toThrow(
       /^The following is not unique: {"mockKey":"mockValue"}/,
     )
   })
@@ -82,7 +82,7 @@ describe('services > schema', () => {
 
   test('that a schema cannot be retrieved by ID when schema does not exist', async () => {
     SchemaModelModelMock.findOne.mockResolvedValueOnce(undefined)
-    await expect(() => getSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
+    await expect(() => getSchemaById(testModelSchema.id)).rejects.toThrow(/^The requested schema was not found/)
   })
 })
 

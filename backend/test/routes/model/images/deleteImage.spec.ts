@@ -36,7 +36,7 @@ describe('routes > images > getImages', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteImage).toBeCalled()
+    expect(audit.onDeleteImage).toHaveBeenCalled()
     expect(audit.onDeleteImage.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onDeleteImage.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

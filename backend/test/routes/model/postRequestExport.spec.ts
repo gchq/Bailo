@@ -34,7 +34,7 @@ describe('routes > model > postModel', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export/s3`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateS3Export).toBeCalled()
+    expect(audit.onCreateS3Export).toHaveBeenCalled()
     expect(audit.onCreateS3Export.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

@@ -44,7 +44,7 @@ describe('routes > model > postRequestImport', () => {
     const res = await testPost(`/api/v2/model/import/s3`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateImport).toBeCalled()
+    expect(audit.onCreateImport).toHaveBeenCalled()
     expect(audit.onCreateImport.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

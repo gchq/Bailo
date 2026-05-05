@@ -152,7 +152,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     )
 
     // @ts-expect-error calling protected method
-    expect(() => exporter.getInitialiseTarGzUploadParams()).toThrowError(expectedErr)
+    expect(() => exporter.getInitialiseTarGzUploadParams()).toThrow(expectedErr)
   })
 
   test('getInitialiseTarGzUploadParams throws if distributionPackageName missing', () => {
@@ -163,7 +163,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     )
 
     // @ts-expect-error calling protected method
-    expect(() => exporter.getInitialiseTarGzUploadParams()).toThrowError(expectedErr)
+    expect(() => exporter.getInitialiseTarGzUploadParams()).toThrow(expectedErr)
   })
 
   test('_addData calls addCompressedRegistryImageComponents', async () => {

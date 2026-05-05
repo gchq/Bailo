@@ -28,7 +28,7 @@ describe('routes > reviewRoles > deleteReviewRole', () => {
     const res = await testDelete(`/api/v2/review/role/${fixture.params.reviewRoleShortName}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteReviewRole).toBeCalled()
+    expect(audit.onDeleteReviewRole).toHaveBeenCalled()
     expect(audit.onDeleteReviewRole.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

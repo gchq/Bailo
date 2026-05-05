@@ -83,6 +83,6 @@ describe('services > metrics', () => {
 
     const result = calculateModelVolume('week', '2026-01-01', '2026-02-01', 'notARealTimeZone')
 
-    await expect(result).rejects.toThrowError(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
+    await expect(result).rejects.toThrow(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
   })
 })

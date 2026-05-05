@@ -28,7 +28,7 @@ describe('routes > model > patchModel', () => {
     const res = await testPatch(`/api/v2/model/${fixture.params.modelId}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateModel).toBeCalled()
+    expect(audit.onUpdateModel).toHaveBeenCalled()
     expect(audit.onUpdateModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

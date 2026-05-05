@@ -28,7 +28,7 @@ describe('routes > model > postModel', () => {
     const res = await testPost('/api/v2/models', fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateModel).toBeCalled()
+    expect(audit.onCreateModel).toHaveBeenCalled()
     expect(audit.onCreateModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

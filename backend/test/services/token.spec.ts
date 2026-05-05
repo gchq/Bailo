@@ -19,7 +19,7 @@ describe('services > token', () => {
 
   test('test that a token cannot create another token', async () => {
     const func = () => createToken({ ...testUser, token: { user: testUser.dn } as any }, {} as any)
-    await expect(func).rejects.toThrowError('A token cannot be used to create another token')
+    await expect(func).rejects.toThrow('A token cannot be used to create another token')
   })
 
   test('findUserTokens > success', async () => {
@@ -53,9 +53,9 @@ describe('services > token', () => {
   })
 
   test('dropModelIdFromTokens > bad auth', async () => {
-    await expect(() =>
-      dropModelIdFromTokens(testUser, 'modelId', [{ user: 'fakeUser' }] as any[]),
-    ).rejects.toThrowError(/^Only the token owner can modify the token./)
+    await expect(() => dropModelIdFromTokens(testUser, 'modelId', [{ user: 'fakeUser' }] as any[])).rejects.toThrow(
+      /^Only the token owner can modify the token./,
+    )
   })
 
   test('removeToken > success', async () => {
@@ -71,7 +71,7 @@ describe('services > token', () => {
   test('removeToken > bad auth', async () => {
     TokenModelMock.findOne.mockResolvedValueOnce({})
 
-    await expect(() => removeToken(testUser, 'accessKey')).rejects.toThrowError(
+    await expect(() => removeToken(testUser, 'accessKey')).rejects.toThrow(
       /^Only the token owner can remove the token./,
     )
   })
@@ -82,7 +82,7 @@ describe('services > token', () => {
     const result = await findTokenByAccessKey('accessKey')
 
     expect(result).toEqual({})
-    expect(TokenModelMock.findOne).toBeCalledWith({ accessKey: 'accessKey' })
+    expect(TokenModelMock.findOne).toHaveBeenCalledWith({ accessKey: 'accessKey' })
   })
 
   test('findTokenByAccessKey > success plus includeSecretKey', async () => {

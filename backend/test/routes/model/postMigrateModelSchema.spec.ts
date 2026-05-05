@@ -35,7 +35,7 @@ describe('routes > model > postModel', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateModel).toBeCalled()
+    expect(audit.onUpdateModel).toHaveBeenCalled()
     expect(audit.onUpdateModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

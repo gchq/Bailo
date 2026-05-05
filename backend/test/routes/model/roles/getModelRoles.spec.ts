@@ -26,7 +26,7 @@ describe('routes > model > roles > getModelRoles', () => {
     const res = await testGet(`/api/v2/roles?modelId='1234'`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewReviewRoles).toBeCalled()
+    expect(audit.onViewReviewRoles).toHaveBeenCalled()
     expect(audit.onViewReviewRoles.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

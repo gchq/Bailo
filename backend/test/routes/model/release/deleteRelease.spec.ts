@@ -28,7 +28,7 @@ describe('routes > release > deleteRelease', () => {
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteRelease).toBeCalled()
+    expect(audit.onDeleteRelease).toHaveBeenCalled()
     expect(audit.onDeleteRelease.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onDeleteRelease.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

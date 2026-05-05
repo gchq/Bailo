@@ -28,7 +28,7 @@ describe('routes > model > deleteModel', () => {
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteModel).toBeCalled()
+    expect(audit.onDeleteModel).toHaveBeenCalled()
     expect(audit.onDeleteModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onDeleteModel.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

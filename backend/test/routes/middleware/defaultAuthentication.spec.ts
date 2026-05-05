@@ -18,7 +18,7 @@ describe('middleware > defaultAuthentication', () => {
     getTokenFromAuthHeader(request, {} as Response, next)
 
     expect(request.user).toBe(undefined)
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
 
   test('getTokenFromAuthHeader > valid authentication', async () => {
@@ -33,7 +33,7 @@ describe('middleware > defaultAuthentication', () => {
 
     expect(request.user.token).toEqual(token)
     expect(request.user).toEqual({ dn: token.user, token })
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
 
   test('checkAuthentication > valid authentication', async () => {
@@ -44,7 +44,7 @@ describe('middleware > defaultAuthentication', () => {
 
     checkAuthentication(request, {} as Response, next)
 
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
 
   test('checkAuthentication > missing authentication', async () => {
@@ -53,7 +53,7 @@ describe('middleware > defaultAuthentication', () => {
 
     const func = () => checkAuthentication(request, {} as Response, next)
 
-    expect(func).toThrowError('No valid authentication provided')
-    expect(next).not.toBeCalled()
+    expect(func).toThrow('No valid authentication provided')
+    expect(next).not.toHaveBeenCalled()
   })
 })

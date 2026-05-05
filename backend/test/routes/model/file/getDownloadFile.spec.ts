@@ -67,7 +67,7 @@ describe('routes > files > getDownloadFile', () => {
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(200)
-      expect(audit.onViewFile).toBeCalled()
+      expect(audit.onViewFile).toHaveBeenCalled()
       expect(audit.onViewFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
       expect(audit.onViewFile.mock.calls.at(0)?.at(2)).toMatchSnapshot()
     })
