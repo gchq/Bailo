@@ -15,14 +15,14 @@ class Client:
     :param agent: An agent object to handle requests
     """
 
-    def __init__(self, url: str, agent: Agent = Agent()):
+    def __init__(self, url: str, agent: Agent | None = None):
         """Initialise a Client.
 
         :param url: URL of the Bailo instance website.
         :param agent: An agent object to handle requests, defaults to Agent().
         """
         self.url = url.rstrip("/") + "/api"
-        self.agent = agent
+        self.agent = agent or Agent()
 
     def post_model(
         self,
@@ -226,7 +226,7 @@ class Client:
         :return: JSON response object
         """
         return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={mirrored: mirrored}
+            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={"mirrored": mirrored}
         ).json()
 
     def put_model_card(

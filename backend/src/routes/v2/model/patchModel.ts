@@ -21,7 +21,7 @@ export const patchModelSchema = z.object({
     organisation: z.enum(organisationsList as [string, ...string[]]).optional(),
     state: z.enum(statesList as [string, ...string[]]).optional(),
     tags: z
-      .array(z.string())
+      .array(z.string().toLowerCase())
       .optional()
       .openapi({ example: ['development'] }),
     settings: z
