@@ -17,17 +17,25 @@ import { BadReq, InternalError } from '../../../src/utils/error.js'
 
 vi.mock('../../../src/utils/config.js', async () => {
   const actual = await vi.importActual<typeof import('../../../src/utils/config.js')>('../../../src/utils/config.js')
-  const mutableConfig = structuredClone(actual.default)
 
-  return { __esModule: true, default: mutableConfig }
+  return {
+    __esModule: true,
+    default: {
+      ...structuredClone(actual.default),
+      ui: {
+        modelMirror: {
+          import: { enabled: true },
+          export: { enabled: true },
+        },
+      },
+      modelMirror: {
+        export: { concurrency: 1 },
+        metadataFile: 'meta.json',
+      },
+    },
+  }
 })
-config.ui = {
-  modelMirror: {
-    import: { enabled: true },
-    export: { enabled: true },
-  },
-} as any
-config.modelMirror = { export: { concurrency: 1 }, metadataFile: 'meta.json' } as any
+const baseConfig = structuredClone(config)
 
 const logMock = vi.hoisted(() => ({ info: vi.fn(), debug: vi.fn(), error: vi.fn() }))
 vi.mock('../../../src/services/log.js', () => ({ default: logMock }))
@@ -255,6 +263,7 @@ describe('services > mirroredModel', () => {
   beforeEach(() => {
     pendingJobs = []
     vi.clearAllMocks()
+    Object.assign(config, structuredClone(baseConfig))
   })
 
   describe('exportModel', () => {

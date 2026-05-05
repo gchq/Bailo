@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { getScheduler, startScheduler } from '../../src/services/schedule/scheduler.js'
-
 vi.mock('agenda', () => {
   return {
     Agenda: class {
@@ -27,16 +25,20 @@ vi.mock('../../src/services/log.js', () => ({
   },
 }))
 
-describe('scheduler', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
+beforeEach(() => {
+  vi.resetModules()
+})
 
-  test('getScheduler throws if scheduler not started', () => {
+describe('scheduler', () => {
+  test('getScheduler throws if scheduler not started', async () => {
+    const { getScheduler } = await import('../../src/services/schedule/scheduler.js')
+
     expect(() => getScheduler()).toThrow('Scheduler has not been started')
   })
 
   test('startScheduler initialises and starts agenda', async () => {
+    const { getScheduler, startScheduler } = await import('../../src/services/schedule/scheduler.js')
+
     const agenda = await startScheduler()
     expect(agenda).toBeDefined()
     expect(agenda.start).toHaveBeenCalledOnce()
