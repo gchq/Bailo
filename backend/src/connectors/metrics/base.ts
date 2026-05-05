@@ -16,7 +16,14 @@ import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../
 import { SchemaKind } from '../../types/enums.js'
 import { BadReq } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
-import { addInterval, buildModelMatchStage, ModelFilter, SchemaRoleMap } from './metricUtils.js'
+import {
+  addInterval,
+  buildModelMatchStage,
+  getActiveRoleSet,
+  getApplicableRoleSet,
+  ModelFilter,
+  SchemaRoleMap,
+} from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
 const USAGE_METRICS_CACHE_KEY = 'usageMetrics'
@@ -290,28 +297,8 @@ async function calculateMissingModelRoles(
 
   // Evaluate each model
   for await (const model of models) {
-    let applicableRoles = [...defaultRoles]
-
-    const schemaId = model.card?.schemaId
-
-    // If the model has a schema with additional review roles, include them
-    if (schemaId && schemaRoleMap[schemaId]) {
-      applicableRoles = [...defaultRoles, ...schemaRoleMap[schemaId]]
-    }
-
-    const applicableSet = new Set(applicableRoles)
-    const activeRoleSet = new Set<string>()
-
-    // Run through all collaborators on the model and each role assigned to the collaborator
-    for (const collaborator of model.collaborators ?? []) {
-      for (const role of collaborator.roles ?? []) {
-        if (role && role.trim() !== '') {
-          // If not empty/invalid then add the role to the set of active roles on the model
-          activeRoleSet.add(role)
-        }
-      }
-    }
-
+    const applicableSet = getApplicableRoleSet(defaultRoles, schemaRoleMap, model.card?.schemaId)
+    const activeRoleSet = getActiveRoleSet(model.collaborators ?? [])
     const missingRoles: { roleId: string; roleName: string }[] = []
 
     // Compare required roles with the roles currently assigned
