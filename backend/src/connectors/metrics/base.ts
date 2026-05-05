@@ -1,11 +1,14 @@
 import { Model, PipelineStage } from 'mongoose'
 import NodeCache from 'node-cache'
 
+import { Roles } from '../../connectors/authentication/constants.js'
+import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
 import ModelModel from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
+import { UserInterface } from '../../models/User.js'
 import { GetComplianceMetricsResponse } from '../../routes/v3/metrics/getComplianceMetrics.js'
 import {
   GetModelVolumeResponse,
@@ -14,7 +17,7 @@ import {
 } from '../../routes/v3/metrics/getModelVolume.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { SchemaKind } from '../../types/enums.js'
-import { BadReq } from '../../utils/error.js'
+import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import {
   addInterval,
@@ -41,6 +44,15 @@ function getCached<T>(key: string): T | undefined {
 
 function setCached<T>(key: string, value: T): void {
   metricsCache.set(key, value)
+}
+
+async function checkUserIsAuthorised(user: UserInterface) {
+  if (!(await authentication.hasRole(user, Roles.Admin))) {
+    throw Forbidden('You do not have the required role.', {
+      userDn: user.dn,
+      requiredRole: Roles.Admin,
+    })
+  }
 }
 
 /**
@@ -186,7 +198,8 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  * Calculates the full set of usage metrics either globally
  * or scoped to a specific organisation.
  */
-async function calculateUsageMetrics(filter: ModelFilter): Promise<BaseMetrics> {
+async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): Promise<BaseMetrics> {
+  await checkUserIsAuthorised(user)
   const [totalModels, stateMetrics, schemaMetrics, totalModelsWithReleases, totalModelsWithAccessRequests] =
     await Promise.all([
       calculateTotalModels(filter),
@@ -361,7 +374,7 @@ export class BaseMetricsConnector {
   /**
    * Gets metrics around general model usage within Bailo.
    */
-  async getUsageMetrics(): Promise<GetUsageMetricsResponse> {
+  async getUsageMetrics(user: UserInterface): Promise<GetUsageMetricsResponse> {
     const cached = getCached<GetUsageMetricsResponse>(USAGE_METRICS_CACHE_KEY)
     if (cached !== undefined) {
       return cached
@@ -375,7 +388,7 @@ export class BaseMetricsConnector {
 
         const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
 
-        const metrics = await calculateUsageMetrics(filter)
+        const metrics = await calculateUsageMetrics(user, filter)
 
         return { organisation, ...metrics }
       }),
@@ -435,7 +448,9 @@ export class BaseMetricsConnector {
   /**
    * Gets metrics around system compliance and roles.
    */
-  async getComplianceMetrics(): Promise<GetComplianceMetricsResponse> {
+  async getComplianceMetrics(user: UserInterface): Promise<GetComplianceMetricsResponse> {
+    await checkUserIsAuthorised(user)
+
     const cached = getCached<GetComplianceMetricsResponse>(COMPLIANCE_METRICS_CACHE_KEY)
     if (cached !== undefined) {
       return cached
@@ -465,11 +480,14 @@ export class BaseMetricsConnector {
    * Calculates metrics about model usage over time.
    */
   async calculateModelVolume(
+    user: UserInterface,
     interval: ModelVolumeInterval,
     startDate: string | Date,
     endDate: string | Date,
     timezone?: string,
   ): Promise<GetModelVolumeResponse> {
+    checkUserIsAuthorised(user)
+
     const start = new Date(startDate)
     const end = new Date(endDate)
 

@@ -2,12 +2,9 @@ import { Request, Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { Roles } from '../../../connectors/authentication/constants.js'
-import authentication from '../../../connectors/authentication/index.js'
 import metrics from '../../../connectors/metrics/index.js'
 import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
-import { Forbidden } from '../../../utils/error.js'
 import { parse } from '../../../utils/validate.js'
 
 export const ModelVolumeDataPointSchema = z.object({
@@ -75,13 +72,6 @@ export const getModelVolume = [
   async (req: Request, res: Response<GetModelVolumeResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewMetric
 
-    if (!(await authentication.hasRole(req.user, Roles.Admin))) {
-      throw Forbidden('You do not have the required role.', {
-        userDn: req.user.dn,
-        requiredRole: Roles.Admin,
-      })
-    }
-
     const {
       query: { interval, startDate, endDate, timezone },
     } = parse(req, getModelVolumeSchema)
@@ -90,7 +80,7 @@ export const getModelVolume = [
       startDate: modelVolumeStartDate,
       endDate: modelVolumeEndDate,
       data: modelVolumeDataPoints,
-    } = await metrics.calculateModelVolume(interval, startDate, endDate, timezone)
+    } = await metrics.calculateModelVolume(req.user, interval, startDate, endDate, timezone)
 
     await audit.onViewMetric(req)
 
