@@ -1,4 +1,4 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema, Types } from 'mongoose'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -80,7 +80,18 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
     minor: { type: Boolean, required: true },
     draft: { type: Boolean, required: true },
 
-    fileIds: [{ type: Schema.Types.ObjectId }],
+    fileIds: [
+      {
+        type: Schema.Types.ObjectId,
+
+        set: function (stringId: string) {
+          return new Types.ObjectId(stringId)
+        },
+        get: function (objectId: ObjectId) {
+          return objectId.toString()
+        },
+      },
+    ],
     images: [
       {
         repository: { type: String },

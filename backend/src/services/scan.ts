@@ -64,7 +64,7 @@ export async function updateArtefactScanWithResults(
   })
 
   try {
-    return await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
+    await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
   } catch (err: any) {
     if (err.code === 11000) {
       throw Conflict('Scan already in progress', { scanIdentifier })
