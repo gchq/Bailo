@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip /venv/bin/pip install -r /requirements.txt
 
-FROM ubuntu:24.04 AS base
+FROM ubuntu:26.04 AS base
 ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
