@@ -6,6 +6,16 @@ import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/log.js')
 
+vi.mock('p-queue', () => ({
+  default: class {
+    constructor(_opts?: any) {}
+
+    async add(job: () => Promise<any>) {
+      return await job()
+    }
+  },
+}))
+
 class TestConnector extends BaseArtefactScanningConnector {
   toolName = 'TestScanner'
   version = '1.2.3'

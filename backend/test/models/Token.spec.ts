@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-vi.unmock('../../src/models/Token.ts')
+vi.unmock('../../src/models/Token.js')
 import TokenModel, { HashType } from '../../src/models/Token.js'
 
 const bcryptMocks = vi.hoisted(() => ({

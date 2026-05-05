@@ -38,8 +38,10 @@ vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
 vi.mock('p-queue', () => ({
   default: class {
-    add(job: () => Promise<any>) {
-      return job()
+    constructor(_opts?: any) {}
+
+    async add(job: () => Promise<any>) {
+      return await job()
     }
   },
 }))

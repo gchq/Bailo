@@ -7,7 +7,7 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/services/review.ts')
+vi.mock('../../src/services/review.js')
 
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')

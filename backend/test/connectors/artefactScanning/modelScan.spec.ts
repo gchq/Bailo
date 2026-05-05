@@ -29,8 +29,10 @@ vi.mock('../../../src/routes/v1/registryAuth.js', () => authMocks)
 
 vi.mock('p-queue', () => ({
   default: class {
-    add(job: () => Promise<any>) {
-      return job()
+    constructor(_opts?: any) {}
+
+    async add(job: () => Promise<any>) {
+      return await job()
     }
   },
 }))

@@ -42,7 +42,7 @@ const registryAuthMocks = vi.hoisted(() => ({
   issueAccessToken: vi.fn(() => 'token'),
   softDeletePrefix: 'soft_deleted',
 }))
-vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
+vi.mock('../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 
 const registryClientMocks = vi.hoisted(() => ({
   deleteManifest: vi.fn(),
@@ -55,7 +55,7 @@ const registryClientMocks = vi.hoisted(() => ({
   putManifest: vi.fn(),
   isImageTagManifestList: vi.fn(() => false),
 }))
-vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+vi.mock('../../src/clients/registry.js', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
