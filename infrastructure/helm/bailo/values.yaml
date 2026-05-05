@@ -273,7 +273,9 @@ config:
       consumer: 'Consumer'
       contributor: 'Contributor'
 
-    untrustedModelDescription: 'TBD'
+    untrustedModel:
+      enabled: true
+      untrustedModelDescription: 'These are private only models.'
 
   smtp:
     #host: 'mail' #service name

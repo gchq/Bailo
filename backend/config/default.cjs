@@ -263,7 +263,10 @@ module.exports = {
       consumer: 'Consumer',
     },
 
-    untrustedModelDescription: 'TBD',
+    untrustedModel: {
+      enabled: true,
+      untrustedModelDescription: 'These are private only models.',
+    },
   },
 
   connectors: {

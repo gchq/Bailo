@@ -24,7 +24,7 @@ export default function EntryCard({ title, description, dataTest, handleClick, r
             </Typography>
             {recommended && (
               <Typography component='h2' fontWeight='bold' color='secondary'>
-                (recommended)
+                (most popular)
               </Typography>
             )}
           </Stack>

@@ -34,11 +34,16 @@ export default function NewEntry() {
         },
         {
           title: 'Untrusted Model',
-          description: uiConfig?.untrustedModelDescription,
+          description: uiConfig?.untrustedModel.untrustedModelDescription || '',
           handleClick: () => setCreateEntryKind(EntryKind.UNTRUSTED_MODEL),
+          disabled: uiConfig?.untrustedModel.enabled === false,
         },
       ].filter((entryCardProp) => !entryCardProp.disabled),
-    [uiConfig?.modelMirror.import.enabled, uiConfig?.untrustedModelDescription],
+    [
+      uiConfig?.modelMirror.import.enabled,
+      uiConfig?.untrustedModel.enabled,
+      uiConfig?.untrustedModel.untrustedModelDescription,
+    ],
   )
 
   const otherEntryProps = [

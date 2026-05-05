@@ -52,7 +52,7 @@ export default function Model() {
                 />
               ),
               disabled: !entry.card,
-              disabledText: 'Select a schema to view this tab',
+              disabledText: 'Select a schema to view this tab.',
             },
             {
               title: 'Access requests',
@@ -60,12 +60,13 @@ export default function Model() {
               view: <AccessRequests model={entry} currentUserRoles={currentUserRoles} />,
               datatest: 'accessRequestTab',
               disabled: !entry.card || entry.kind === EntryKind.UNTRUSTED_MODEL,
-              disabledText: 'Select a schema to view this tab',
+              disabledText: 'Select a schema to view this tab.',
             },
             {
               title: 'Registry',
               path: 'registry',
               disabled: entry.kind === EntryKind.UNTRUSTED_MODEL,
+              disabledText: 'The registry is not available for untrusted models.',
               view: <ModelImages model={entry} readOnly={entry.kind === EntryKind.MIRRORED_MODEL} />,
             },
             {

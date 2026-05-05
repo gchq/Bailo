@@ -231,7 +231,10 @@ data:
           contributor: '{{ .Values.config.ui.roleDisplayNames.contributor }}',
         },
 
-        untrustedModelDescription: '{{ .Values.config.ui.untrustedModelDescription }}'
+        untrustedModel: {
+          enabled: {{ .Values.config.ui.untrustedModel.enabled }}
+          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}'
+        }
       },
 
       connectors: {
