@@ -100,10 +100,6 @@ const Button = styled(ButtonBase)(({ theme }) => ({
   '& span': {
     width: '100%',
   },
-  '& svg': {
-    width: 16,
-    height: 16,
-  },
 }))
 
 export default function TagSelector({ onChange, tags, errorText = '', restrictedToAction }: EntryTagSelectorProps) {
@@ -142,7 +138,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
           {restrictedToAction && userPermissions[restrictedToAction].hasPermission ? (
             <Box>
               <span>Update Tags: </span>
-              <Edit />
+              <Edit sx={{ fontSize: 16 }} />
             </Box>
           ) : (
             <span>Tags: </span>
