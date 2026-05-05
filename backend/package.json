@@ -43,7 +43,6 @@
     "config": "^4.4.0",
     "connect-mongo": "6.0.0",
     "content-disposition": "^1.1.0",
-    "cssnano-preset-lite": "^4.0.4",
     "dedent-js": "^1.0.1",
     "dev-null": "^0.1.1",
     "express": "5.2.1",
