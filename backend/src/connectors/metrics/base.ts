@@ -36,6 +36,7 @@ const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
   checkperiod: METRICS_CACHE_TTL,
   useClones: false,
+  maxKeys: 5000,
 })
 
 function getCached<T>(key: string): T | undefined {
@@ -154,7 +155,7 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
     // Lookup models that reference this schema
     {
       $lookup: {
-        from: 'models',
+        from: 'v2_models',
         let: { schemaId: '$_id' },
         pipeline: [
           {
@@ -375,7 +376,8 @@ export class BaseMetricsConnector {
    * Gets metrics around general model usage within Bailo.
    */
   async getUsageMetrics(user: UserInterface): Promise<GetUsageMetricsResponse> {
-    const cached = getCached<GetUsageMetricsResponse>(USAGE_METRICS_CACHE_KEY)
+    const cacheKey = `${USAGE_METRICS_CACHE_KEY}:${user.dn}`
+    const cached = getCached<GetUsageMetricsResponse>(cacheKey)
     if (cached !== undefined) {
       return cached
     }
@@ -486,7 +488,7 @@ export class BaseMetricsConnector {
     endDate: string | Date,
     timezone?: string,
   ): Promise<GetModelVolumeResponse> {
-    checkUserIsAuthorised(user)
+    await checkUserIsAuthorised(user)
 
     const start = new Date(startDate)
     const end = new Date(endDate)
