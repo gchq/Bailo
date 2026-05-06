@@ -7,14 +7,14 @@ import ModelTransferModel, {
 } from '../models/ModelTransfer.js'
 import { UserInterface } from '../models/User.js'
 import { NotFound } from '../utils/error.js'
-import { useTransaction } from '../utils/transactions.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 import { completeImportNotification, failImportNotification, startImportNotification } from './smtp/smtp.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
     exportId,
-  })
+  }).lean<ModelTransferInterface>()
 
   if (!transfer) {
     throw NotFound('The requested model transfer was not found.', { exportId })
@@ -37,7 +37,9 @@ export async function findModelTransfersByModelId(
 
   const transfers = await ModelTransferModel.find({
     modelId,
-  }).sort({ createdAt: -1 })
+  })
+    .sort({ createdAt: -1 })
+    .lean<ModelTransferInterface[]>()
 
   if (transfers.length === 0) {
     throw NotFound('No model transfers found.', { modelId })
@@ -61,7 +63,11 @@ export async function updateModelTransfer(
   exportId: string,
   transferDiff: Partial<ModelTransferInterface>,
 ): Promise<ModelTransferInterface> {
-  const updated = await ModelTransferModel.findOneAndUpdate({ exportId }, { transferDiff }, { new: true })
+  const updated = await ModelTransferModel.findOneAndUpdate(
+    { exportId },
+    { $set: transferDiff },
+    { new: true },
+  ).lean<ModelTransferInterface>()
 
   if (!updated) {
     throw NotFound('The requested model transfer was not found.', { exportId })
@@ -74,28 +80,44 @@ export async function updateFile(
   exportId: string,
   file: string,
   status: TransferStatusKeys,
-): Promise<ModelTransferInterface> {
-  return ModelTransferModel.findOneAndUpdate(
+): Promise<ModelTransferInterface | null> {
+  const updated = await ModelTransferModel.findOneAndUpdate(
     { exportId },
     {
       $set: { [`fileStatus.${file}`]: status },
     },
-    { new: true, upsert: true },
+    { new: true },
   )
+
+  if (!updated) {
+    log.warn({ exportId, file }, 'The requested model transfer was not found.')
+    return null
+  }
+
+  return updated.toObject()
 }
 
 export async function updateImage(
   exportId: string,
   image: string,
   status: TransferStatusKeys,
-): Promise<ModelTransferInterface> {
-  return ModelTransferModel.findOneAndUpdate(
+): Promise<ModelTransferInterface | null> {
+  const updated = await ModelTransferModel.findOneAndUpdate(
     { exportId },
     {
-      $set: { [`imageStatus.${image}`]: status },
+      $set: {
+        [`imageStatus.${image}`]: status,
+      },
     },
-    { new: true, upsert: true },
+    { new: true },
   )
+
+  if (!updated) {
+    log.warn({ exportId, image }, 'The requested model transfer was not found.')
+    return null
+  }
+
+  return updated.toObject()
 }
 
 export async function upsertArtefacts(
@@ -139,7 +161,7 @@ export async function deleteModelTransfer(exportId: string): Promise<string> {
 
   await transfer.delete()
 
-  return transfer.id
+  return transfer.exportId
 }
 
 export async function beginTransfer(exportId: string, modelId: string, createdBy: string, peerId?: string) {
@@ -150,12 +172,14 @@ export async function beginTransfer(exportId: string, modelId: string, createdBy
   )
 
   if (updated && !updated.startedNotificationSent) {
-    await useTransaction([
-      async (session) => {
-        await startImportNotification(modelId, [])
-        return await ModelTransferModel.updateOne({ exportId }, { startedNotificationSent: true }, { session })
-      },
-    ])
+    const updated = await ModelTransferModel.findOneAndUpdate(
+      { exportId },
+      { startedNotificationSent: true },
+      { new: true },
+    )
+    if (updated) {
+      await startImportNotification(modelId)
+    }
   }
 }
 
@@ -177,28 +201,32 @@ export async function finishTransfer(exportId: string) {
     .map(([distributionPackageName]) => distributionPackageName)
 
   if (transfer?.status === TransferStatus.Completed) {
-    await useTransaction([
-      async (session) => {
-        await completeImportNotification(transfer.modelId, successfulFiles, successfulImages)
-        return await ModelTransferModel.updateOne({ exportId }, { completedNotificationSent: true }, { session })
-      },
-    ])
+    const updated = await ModelTransferModel.findOneAndUpdate(
+      { exportId },
+      { completedNotificationSent: true },
+      { new: true },
+    )
+    if (updated) {
+      await completeImportNotification(transfer.modelId, successfulFiles, successfulImages)
+    }
   }
 
   if (transfer.status === TransferStatus.Failed) {
     const failedFiles = [...transfer.fileStatus.entries()]
-      .filter(([_filePath, status]) => status === TransferStatus.Completed)
+      .filter(([_filePath, status]) => status === TransferStatus.Failed)
       .map(([filePath]) => filePath)
 
     const failedImages = [...transfer.imageStatus.entries()]
-      .filter(([_distributionPackageName, status]) => status === TransferStatus.Completed)
+      .filter(([_distributionPackageName, status]) => status === TransferStatus.Failed)
       .map(([distributionPackageName]) => distributionPackageName)
 
-    await useTransaction([
-      async (session) => {
-        await failImportNotification(transfer.modelId, failedFiles, failedImages, successfulFiles, successfulImages)
-        return await ModelTransferModel.updateOne({ exportId }, { completedNotificationSent: true }, { session })
-      },
-    ])
+    const updated = await ModelTransferModel.findOneAndUpdate(
+      { exportId },
+      { completedNotificationSent: true },
+      { new: true },
+    )
+    if (updated) {
+      await failImportNotification(transfer.modelId, failedFiles, failedImages, successfulFiles, successfulImages)
+    }
   }
 }

@@ -193,19 +193,19 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent after an import has begun', async () => {
-    await startImportNotification('modelId', [])
+    await startImportNotification('modelId')
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that an email is sent after an import has complete', async () => {
-    await completeImportNotification('modelId')
+    await completeImportNotification('modelId', ['fileabc'], ['alpine:latest'])
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that an email is sent after an import has failed', async () => {
-    await failImportNotification('modelId', 'This is an error')
+    await failImportNotification('modelId', ['fileabcd'], ['alpine:old'], ['fileabc'], ['alpine:latest'])
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })

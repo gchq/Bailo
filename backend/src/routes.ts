@@ -229,7 +229,7 @@ server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
-server.get('/api/v2/transfer/:transferId', ...getModelTransfer)
+server.get('/api/v2/transfer/:exportId', ...getModelTransfer)
 server.get('/api/v2/model/:modelId/transfers', ...getModelTransfers)
 
 server.get('/api/v2/config/ui', ...getUiConfig)

@@ -48,6 +48,7 @@ const mirroredModelMocks = vi.hoisted(() => {
     processEntry: processEntrySpy,
     handleStreamCompletion: handleStreamCompletionSpy,
     handleStreamError: handleStreamErrorSpy,
+    getMetadata: vi.fn(() => dummyMetadata),
   }))
 
   return {
@@ -63,6 +64,12 @@ const mirroredModelMocks = vi.hoisted(() => {
   }
 })
 vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+
+const modelTransferMocks = vi.hoisted(() => ({
+  beginTransfer: vi.fn(),
+  finishTransfer: vi.fn(),
+}))
+vi.mock('../../../src/services/modelTransfer.js', () => modelTransferMocks)
 
 const dummyMetadata = {
   schemaVersion: 1,

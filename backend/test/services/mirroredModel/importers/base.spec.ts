@@ -32,7 +32,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.handleStreamCompletion(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).toHaveBeenCalledWith({ metadata: mockMetadata })
     expect(reject).not.toHaveBeenCalled()

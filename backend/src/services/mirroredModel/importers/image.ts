@@ -14,7 +14,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
-import { finishTransfer, updateFile, updateImage } from '../../modelTransfer.js'
+import { finishTransfer, updateImage } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -190,7 +190,7 @@ export class ImageImporter extends BaseImporter {
         },
         'Completed registry upload',
       )
-      await updateFile(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Completed)
+      await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Completed)
       resolve({
         metadata: this.metadata,
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },

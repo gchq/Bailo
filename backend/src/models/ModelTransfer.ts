@@ -3,9 +3,11 @@ import { model, Schema } from 'mongoose'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TransferStatus = {
+  Requested: 'requested',
+  Denied: 'denied',
   InProgress: 'in_progress',
-  Completed: 'completed',
   Failed: 'failed',
+  Completed: 'completed',
 } as const
 
 export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferStatus]
@@ -115,6 +117,8 @@ ModelTransferSchema.virtual('completed').get(function (): boolean {
     imageStatuses.every((status) => status !== TransferStatus.InProgress)
   )
 })
+
+ModelTransferSchema.index({ modelId: 1, createdAt: -1 })
 ModelTransferSchema.index({ exportId: 1, createdAt: -1 })
 
 ModelTransferSchema.plugin(softDeletionPlugin)
