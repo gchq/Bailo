@@ -1,22 +1,16 @@
 import { Close, Done, Edit } from '@mui/icons-material'
-import { Chip, Grid, TextField, Typography } from '@mui/material'
+import { Button, Chip, Grid, TextField, Typography } from '@mui/material'
 import Autocomplete, { autocompleteClasses, AutocompleteCloseReason } from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
-import ButtonBase from '@mui/material/ButtonBase'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
-import Popper from '@mui/material/Popper'
+import Popper, { type PopperProps } from '@mui/material/Popper'
 import { styled, useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags } from 'actions/entry'
-import { useContext } from 'react'
-import * as React from 'react'
+import { ChangeEvent, KeyboardEvent, useContext, useMemo, useState } from 'react'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import { RestrictedActionKeys } from 'types/types'
 
-interface PopperComponentProps {
-  anchorEl?: any
-  disablePortal?: boolean
-  open: boolean
-}
+type PopperComponentProps = Pick<PopperProps, 'anchorEl' | 'disablePortal' | 'open'>
 
 interface EntryTagSelectorProps {
   onChange: (newTag: string[]) => void
@@ -81,30 +75,9 @@ const StyledPopper = styled(Popper)(({ theme }) => ({
   }),
 }))
 
-const Button = styled(ButtonBase)(({ theme }) => ({
-  fontSize: 13,
-  width: '100%',
-  textAlign: 'left',
-  paddingBottom: 8,
-  fontWeight: 600,
-  color: '#586069',
-  ...theme.applyStyles('dark', {
-    color: '#8b949e',
-  }),
-  '&:hover,&:focus': {
-    color: '#0366d6',
-    ...theme.applyStyles('dark', {
-      color: '#58a6ff',
-    }),
-  },
-  '& span': {
-    width: '100%',
-  },
-}))
-
 export default function TagSelector({ onChange, tags, errorText = '', restrictedToAction }: EntryTagSelectorProps) {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [pendingValue, setPendingValue] = React.useState<string[]>([])
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [pendingValue, setPendingValue] = useState<string[]>([])
   const { userPermissions } = useContext(UserPermissionsContext)
   const { tags: popularTags, isTagsError } = useGetPopularEntryTags()
   const theme = useTheme()
@@ -125,15 +98,21 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
   const open = Boolean(anchorEl)
   const id = open ? 'tag-selector' : undefined
 
+  const options = useMemo(
+    () => [...new Set([...popularTags, ...tags, ...pendingValue])],
+    [popularTags, tags, pendingValue],
+  )
+
   return (
     <Box sx={{ p: 1 }}>
       <Box sx={{ fontSize: 13 }}>
         <Button
+          size='small'
+          sx={{ width: 'max-content', fontWeight: 'bold' }}
           disabled={restrictedToAction && !userPermissions[restrictedToAction].hasPermission}
           disableRipple
           aria-describedby={id}
           onClick={handleClick}
-          style={{ fontWeight: 'bold', color: theme.palette.primary.main, width: 'auto' }}
         >
           {restrictedToAction && userPermissions[restrictedToAction].hasPermission ? (
             <Box>
@@ -153,7 +132,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
         >
           {tags.map((label) => (
             <Grid key={label}>
-              <Chip variant='filled' label={label} key={label} />
+              <Chip variant='filled' label={label} />
             </Grid>
           ))}
         </Grid>
@@ -178,7 +157,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
               disableClearable={true}
               open
               multiple
-              onClose={(event: React.ChangeEvent<object>, reason: AutocompleteCloseReason) => {
+              onClose={(event: ChangeEvent<object>, reason: AutocompleteCloseReason) => {
                 if (reason === 'escape') {
                   handleClose()
                 }
@@ -187,8 +166,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
               onChange={(event, newValue, reason) => {
                 if (
                   event.type === 'keydown' &&
-                  ((event as React.KeyboardEvent).key === 'Backspace' ||
-                    (event as React.KeyboardEvent).key === 'Delete') &&
+                  ((event as KeyboardEvent).key === 'Backspace' || (event as KeyboardEvent).key === 'Delete') &&
                   reason === 'removeOption'
                 ) {
                   return
@@ -244,7 +222,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
                   </li>
                 )
               }}
-              options={[...new Set([...popularTags, ...tags, ...pendingValue])]}
+              options={options}
               renderInput={(params) => (
                 <Box sx={{ display: 'flex', justifyContent: 'center', width: '95%', height: '95%', mx: 'auto', pt: 1 }}>
                   <TextField {...params} size='small' autoFocus placeholder='Add tag' />
@@ -255,8 +233,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
               }}
             />
             <Typography variant='caption' color={theme.palette.error.main}>
-              {errorText}
-              {isTagsError?.info.message}
+              {[errorText, isTagsError?.info?.message].filter(Boolean).join(' ')}
             </Typography>
           </Box>
         </ClickAwayListener>
