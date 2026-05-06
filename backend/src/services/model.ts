@@ -75,7 +75,7 @@ type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators' | 'state'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 > &
   OptionalCreateModelParams
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
