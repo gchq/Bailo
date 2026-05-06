@@ -42,6 +42,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "bulkWrite": [MockFunction],
+    "exec": [MockFunction],
     "filter": [MockFunction],
     "find": [MockFunction] {
       "calls": [
@@ -60,6 +61,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
       ],
     },
     "group": [MockFunction],
+    "lean": [MockFunction],
     "lookup": [MockFunction],
     "map": [MockFunction],
     "match": [MockFunction],
@@ -445,6 +447,7 @@ exports[`services > file > uploadFile > success 1`] = `
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "bulkWrite": [MockFunction],
+    "exec": [MockFunction],
     "filter": [MockFunction],
     "find": [MockFunction] {
       "calls": [
@@ -463,6 +466,7 @@ exports[`services > file > uploadFile > success 1`] = `
       ],
     },
     "group": [MockFunction],
+    "lean": [MockFunction],
     "lookup": [MockFunction],
     "map": [MockFunction],
     "match": [MockFunction],
@@ -489,6 +493,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
     "aggregate": [MockFunction],
     "append": [MockFunction],
     "bulkWrite": [MockFunction],
+    "exec": [MockFunction],
     "filter": [MockFunction],
     "find": [MockFunction] {
       "calls": [
@@ -507,6 +512,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       ],
     },
     "group": [MockFunction],
+    "lean": [MockFunction],
     "lookup": [MockFunction],
     "map": [MockFunction],
     "match": [MockFunction],

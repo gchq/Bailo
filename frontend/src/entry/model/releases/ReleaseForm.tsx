@@ -39,7 +39,9 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
+  ArtefactKind,
   EntryInterface,
+  EntryKind,
   FileInterface,
   FileWithMetadataAndTags,
   FlattenedModelImage,
@@ -171,12 +173,12 @@ export default function ReleaseForm({
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
   const FileRowItem = memoize(({ data }) =>
-    isFileInterface(data) && !isScannersLoading ? (
+    isFileInterface(data) && !isScannersLoading && !isScannersError ? (
       <FileDisplay
         key={data.name}
         file={data}
         modelId={model.id}
-        showMenuItems={{ rescanFile: scanners.length > 0 }}
+        showMenuItems={{ rescanFile: scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) }}
         mutator={mutateReleases}
         style={{ padding: 1 }}
         releases={releases}
@@ -192,10 +194,6 @@ export default function ReleaseForm({
 
   if (isEntryCardRevisionsError) {
     return <MessageAlert message={isEntryCardRevisionsError.info.message} severity='error' />
-  }
-
-  if (isScannersError) {
-    return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
   const error = MultipleErrorWrapper('Unable to load release form', {
@@ -248,7 +246,9 @@ export default function ReleaseForm({
           {isReadOnly ? (
             <Typography>
               {formData.modelCardVersion} -{' '}
-              <Link href={`/${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
+              <Link
+                href={`/model/${model.id}/history/${formData.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`}
+              >
                 <Button size='small'>View Model card</Button>
               </Link>
             </Typography>

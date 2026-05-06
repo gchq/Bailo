@@ -83,5 +83,6 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewReviewRoles(_req: Request, _reviewRole: ReviewRoleInterface[]) {}
   async onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   async onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
+  async onViewMetric(_req: Request): Promise<void> {}
   async onError(_req: Request, _error: BailoError) {}
 }

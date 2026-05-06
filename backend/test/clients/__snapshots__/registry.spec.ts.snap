@@ -1,6 +1,27 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`clients > registry > deleteManifest > success 1`] = `
+exports[`clients > registry > deleteManifest > success using digest reference 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/sha256:digest",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "method": "DELETE",
+      "signal": {
+        "aborted": false,
+        "addEventListener": [Function],
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > deleteManifest > success using tag reference 1`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag",
@@ -13,6 +34,7 @@ exports[`clients > registry > deleteManifest > success 1`] = `
       "method": "DELETE",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -32,6 +54,7 @@ exports[`clients > registry > doesLayerExist > success false 1`] = `
       "method": "HEAD",
       "signal": {
         "aborted": true,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -51,6 +74,7 @@ exports[`clients > registry > doesLayerExist > success true 1`] = `
       "method": "HEAD",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -69,6 +93,7 @@ exports[`clients > registry > getApiVersion > bad version 1`] = `
       },
       "signal": {
         "aborted": true,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -87,6 +112,7 @@ exports[`clients > registry > getApiVersion > success 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -94,7 +120,7 @@ exports[`clients > registry > getApiVersion > success 1`] = `
 ]
 `;
 
-exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
+exports[`clients > registry > getImageTagManifest > success Docker spec using tag reference 1`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",
@@ -106,6 +132,7 @@ exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -113,7 +140,7 @@ exports[`clients > registry > getImageTagManifest > success Docker spec 1`] = `
 ]
 `;
 
-exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
+exports[`clients > registry > getImageTagManifest > success OCI spec using tag reference 1`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",
@@ -125,6 +152,7 @@ exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -132,7 +160,7 @@ exports[`clients > registry > getImageTagManifest > success OCI spec 1`] = `
 ]
 `;
 
-exports[`clients > registry > getImageTagManifest > success OCI spec 2`] = `
+exports[`clients > registry > getImageTagManifest > success OCI spec using tag reference 2`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",
@@ -144,6 +172,87 @@ exports[`clients > registry > getImageTagManifest > success OCI spec 2`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifest > success using digest reference 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/sha256:digest",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "addEventListener": [Function],
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifests > success image manifest 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "addEventListener": [Function],
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifests > success manifest list 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "addEventListener": [Function],
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > getImageTagManifests > success using digest reference 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/sha256:digest",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Authorization": "Bearer token",
+      },
+      "signal": {
+        "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -163,6 +272,7 @@ exports[`clients > registry > getRegistryLayerStream > success 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -182,6 +292,7 @@ exports[`clients > registry > initialiseUpload > success 1`] = `
       "method": "POST",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -200,6 +311,7 @@ exports[`clients > registry > listImageTags > success 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -218,6 +330,7 @@ exports[`clients > registry > listImageTags > success multiple pages 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -231,6 +344,7 @@ exports[`clients > registry > listImageTags > success multiple pages 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -249,6 +363,7 @@ exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
       },
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -269,6 +384,7 @@ exports[`clients > registry > mountBlob > success 1`] = `
       "method": "POST",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -276,7 +392,31 @@ exports[`clients > registry > mountBlob > success 1`] = `
 ]
 `;
 
-exports[`clients > registry > putManifest > success 1`] = `
+exports[`clients > registry > putManifest > success using digest reference 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/undefined",
+    {
+      "body": "{}",
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+        "Content-Type": "application/vnd.docker.distribution.manifest.v2+json",
+        "name": "modelId/image",
+        "reference": undefined,
+      },
+      "method": "PUT",
+      "signal": {
+        "aborted": false,
+        "addEventListener": [Function],
+        "onabort": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > putManifest > success using tag reference 1`] = `
 [
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag",
@@ -292,6 +432,7 @@ exports[`clients > registry > putManifest > success 1`] = `
       "method": "PUT",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
     },
@@ -316,6 +457,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
       "redirect": "error",
       "signal": {
         "aborted": false,
+        "addEventListener": [Function],
         "onabort": null,
       },
       "window": null,

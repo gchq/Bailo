@@ -73,6 +73,8 @@ const audit = {
   onUpdateReviewRole: vi.fn(),
   onDeleteReviewRole: vi.fn(),
 
+  onViewMetric: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit

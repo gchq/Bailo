@@ -420,6 +420,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onViewMetric(req: Request): Promise<void> {
+    this.checkEventType(AuditInfo.ViewMetric, req)
+    const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
   async onError(req: Request, error: BailoError) {
     if (!req.audit) {
       // No audit information has been attached to the request

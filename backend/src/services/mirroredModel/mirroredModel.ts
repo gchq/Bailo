@@ -6,12 +6,14 @@ import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
+import { ModelAction } from '../../connectors/authorisation/actions.js'
+import authorisation from '../../connectors/authorisation/index.js'
 import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { BadReq, InternalError } from '../../utils/error.js'
+import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
@@ -46,6 +48,11 @@ export async function exportModel(
   const exportId = shortId()
   const model = await getModelById(user, modelId, EntryKind.Model)
 
+  const modelAuth = await authorisation.model(user, model, ModelAction.Export)
+  if (!modelAuth.success) {
+    throw Forbidden(modelAuth.info, { userDn: user.dn, modelId })
+  }
+
   if (!model.card) {
     throw BadReq('Cannot export a model that does have a valid model card.', { modelId: model.id })
   }
@@ -73,6 +80,12 @@ export async function exportModel(
     'Request checks complete, starting export.',
   )
 
+  const files = documentsExporter.getFiles()
+  if (!Array.isArray(files)) {
+    // TS type narrowing - this should never be thrown as `files` will always be a list (even if only an empty list) after calling `.init()`
+    throw InternalError('DocumentsExporter returned no files after init()', { exportId })
+  }
+
   // Not `await`ed for fire-and-forget approach
   exportQueue
     .add(async () => {
@@ -82,24 +95,23 @@ export async function exportModel(
       log.debug({ exportId, sourceModelId: modelId, mirroredModelId, semvers }, 'Successfully finalized Tarball file.')
 
       if (releases && releases.length > 0) {
-        for (const release of releases) {
-          addAndFinaliseExporters(
-            await Promise.all(
-              documentsExporter.getFiles()!.map((file) =>
-                new FileExporter(user, model, file, {
-                  fileId: file.id,
-                  fileName: file.name,
-                  exportId,
-                }).init(),
-              ),
+        addAndFinaliseExporters(
+          await Promise.all(
+            files.map((file) =>
+              new FileExporter(user, model, file, {
+                fileId: file.id,
+                fileName: file.name,
+                exportId,
+              }).init(),
             ),
-            {
-              modelId,
-              mirroredModelId: mirroredModelId,
-              release: release.semver,
-              exportId,
-            },
-          )
+          ),
+          {
+            modelId,
+            mirroredModelId: mirroredModelId,
+            exportId,
+          },
+        )
+        for (const release of releases) {
           addAndFinaliseExporters(
             await Promise.all(
               release.images.map((image) =>

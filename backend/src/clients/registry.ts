@@ -10,6 +10,7 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
+  AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBodySchema,
   BaseApiCheckResponseHeadersSchema,
@@ -21,8 +22,7 @@ import {
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
   ImageManifestV2Schema,
-  ManifestListMediaTypeSchema,
-  ManifestMediaTypeSchema,
+  ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
   TagsListResponseBodySchema,
@@ -145,7 +145,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    const { body: rawBody, stream } = await readBody(res, expectStream)
+    const { body: rawBody, stream } = await readBody(res, expectStream && res.ok)
     const context = {
       url: res.url,
       status: res.status,
@@ -157,6 +157,11 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       controller.abort()
       if (rawBody && RegistryErrorResponseBodySchema.safeParse(rawBody).success) {
         throw RegistryError(RegistryErrorResponseBodySchema.parse(rawBody), context)
+      }
+
+      // allow callers to handle plain 404s without registry error body
+      if (res.status === 404) {
+        throw RegistryError({ errors: [{ code: 'NAME_UNKNOWN', message: 'Not found', detail: [] }] }, context)
       }
 
       throw InternalError('Unrecognised registry error response.', {
@@ -229,6 +234,10 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
   }
 }
 
+function getImageRefId(imageRef: ImageRef): string {
+  return 'tag' in imageRef ? imageRef.tag : imageRef.digest
+}
+
 export async function getApiVersion(token: string) {
   const result = await registryRequest(token, '', {
     bodySchema: BaseApiCheckResponseBodySchema,
@@ -277,48 +286,37 @@ export async function listImageTags(token: string, repoRef: ImageNameRef) {
   }
 }
 
-export async function isImageTagManifestList(token: string, imageRef: ImageRef): Promise<boolean> {
-  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
-    // do not validate the body here as we only care about Content-Type
-    headersSchema: ManifestResponseHeadersSchema,
-    extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+/**
+ * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
+ */
+export async function getImageTagManifest(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      bodySchema: ImageManifestV2Schema,
+      headersSchema: ManifestResponseHeadersSchema,
+      extraHeaders: {
+        Accept: AcceptManifestMediaTypeHeaderValue,
+      },
     },
-  })
+  )
 
-  const rawContentType = result.headers['content-type']
-  const contentType = rawContentType?.split(';')[0]?.trim()
-
-  if (!contentType) {
-    throw InternalError('Registry response missing Content-Type header.', {
-      imageRef,
-    })
-  }
-
-  if ((ManifestListMediaTypeSchema.options as string[]).includes(contentType)) {
-    return true
-  }
-  if ((ManifestMediaTypeSchema.options as string[]).includes(contentType)) {
-    return false
-  }
-
-  throw InternalError('Unrecognised manifest media type.', {
-    imageRef,
-    contentType,
-  })
+  return { body: result.body, headers: result.headers }
 }
 
-export async function getImageTagManifest(token: string, imageRef: ImageRef) {
-  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
-  // TODO: handle multi-platform images
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
-    bodySchema: ImageManifestV2Schema,
-    headersSchema: ManifestResponseHeadersSchema,
-    extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+export async function getImageTagManifests(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      bodySchema: ManifestResponseBodySchema,
+      headersSchema: ManifestResponseHeadersSchema,
+      extraHeaders: {
+        Accept: AcceptManifestListMediaTypeHeaderValue,
+      },
     },
-  })
+  )
 
   return { body: result.body, headers: result.headers }
 }
@@ -358,7 +356,7 @@ export async function doesLayerExist(token: string, repoRef: ImageNameRef, diges
     })
     return true
   } catch (error) {
-    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
+    if (error && isRegistryError(error) && error?.context?.status === 404) {
       // 404 response indicates that the layer does not exist
       return false
     } else {
@@ -444,15 +442,19 @@ export async function mountBlob(
   return result.headers
 }
 
-export async function deleteManifest(token: string, imageRef: ImageTagRef) {
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    headersSchema: DeleteManifestResponseHeadersSchema,
-    expectStream: true,
-    extraFetchOptions: {
-      method: 'DELETE',
+export async function deleteManifest(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      headersSchema: DeleteManifestResponseHeadersSchema,
+      expectStream: true,
+      extraFetchOptions: {
+        method: 'DELETE',
+      },
+      extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
     },
-    extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
-  })
+  )
 
   return result.headers
 }

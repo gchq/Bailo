@@ -41,6 +41,7 @@ export const ResourceKind = {
   Inference: 'inference',
   Export: 'export',
   ArtefactScanning: 'artefact scanning',
+  Metric: 'metric',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -410,6 +411,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.ArtefactScanning,
   },
+  ViewMetric: {
+    typeId: 'ViewMetric',
+    description: 'Metric Viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Metric,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -491,6 +498,8 @@ export abstract class BaseAuditConnector {
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
   abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
+
+  abstract onViewMetric(req: Request): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

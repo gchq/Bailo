@@ -146,6 +146,7 @@ const ModelSchema = new Schema<ModelDoc>(
 
 ModelSchema.plugin(softDeletionPlugin)
 ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
+ModelSchema.index({ createdAt: 1 })
 
 const ModelModel = model<ModelDoc>('v2_Model', ModelSchema)
 

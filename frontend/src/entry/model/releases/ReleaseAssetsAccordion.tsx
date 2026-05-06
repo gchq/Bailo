@@ -7,7 +7,7 @@ import { useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { ArtefactKind, EntryInterface, ReleaseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 export interface ReleaseAssetsAccordionProps {
@@ -38,7 +38,11 @@ export default function ReleaseAssetsAccordion({
       file={data}
       modelId={model.id}
       releases={[release]}
-      showMenuItems={mode === 'interactive' ? { rescanFile: scanners.length > 0 } : {}}
+      showMenuItems={
+        mode === 'interactive'
+          ? { rescanFile: scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) }
+          : {}
+      }
     />
   ))
 

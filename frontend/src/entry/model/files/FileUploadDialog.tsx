@@ -1,11 +1,12 @@
 import styled from '@emotion/styled'
-import { Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import { EntryInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import { plural } from 'utils/stringUtils'
 
 interface FileUploadDialogProps {
   model: EntryInterface
@@ -91,11 +92,12 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
           setCurrentFileUploadProgress(undefined)
         }
       } catch (e) {
-        if (e instanceof Error) {
-          failedFiles.push({ fileName: fileItem.file.name, error: e.message })
-          setFailedFileUploads([...failedFileUploads, { fileName: fileItem.file.name, error: e.message }])
-          setCurrentFileUploadProgress(undefined)
-        }
+        const message = e instanceof Error ? e.message : 'Unknown upload error'
+        const failed = { fileName: fileItem.file.name, error: message }
+        failedFiles.push(failed)
+
+        setFailedFileUploads((prev) => [...prev, failed])
+        setCurrentFileUploadProgress(undefined)
       }
     }
     setUploadedFiles([])
@@ -105,7 +107,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
       onDialogClose()
       setFilesToBeUpload([])
     }
-  }, [failedFileUploads, model.id, mutateModelFiles, filesToBeUploaded, onDialogClose])
+  }, [model.id, mutateModelFiles, filesToBeUploaded, onDialogClose])
 
   const handleDeleteFileFromUploadList = useCallback(
     (fileName: string) => {
@@ -176,7 +178,14 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               Upload files
             </Button>
           </Box>
-          {failedFileList}
+          {failedFileUploads.length > 0 && (
+            <Alert severity='error' sx={{ my: 2 }}>
+              <Stack spacing={1}>
+                <Typography>{`Unable to upload the following ${plural(failedFileUploads.length, 'file')}:`}</Typography>
+                {failedFileList}
+              </Stack>
+            </Alert>
+          )}
         </Stack>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-# Integration test files
+# ModelScan Integration Test Files
 
 Simple, minimal test files for use with `pytest -m integration`. These files may contain "malicious" code which is
 specifically chosen to actually be safe to run while having the footprint of dangerous code.
