@@ -9,7 +9,6 @@ export const TransferStatus = {
   Failed: 'failed',
   Completed: 'completed',
 } as const
-
 export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferStatus]
 
 export interface ModelTransferInterface {
@@ -21,7 +20,6 @@ export interface ModelTransferInterface {
   imageStatus: Map<string, TransferStatusKeys>
   startedNotificationSent: boolean
   completedNotificationSent: boolean
-  failedNotificationSent: boolean
   completed: boolean
   createdBy: string
   createdAt: Date
