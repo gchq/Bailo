@@ -117,7 +117,12 @@ export default function SideNavigation({
         })}
       />
       {drawerOpen !== undefined && (
-        <Stack sx={{ height: '100%' }} justifyContent='space-between'>
+        <Stack
+          sx={{
+            justifyContent: 'space-between',
+            height: '100%',
+          }}
+        >
           <StyledList>
             <NavMenuItem
               href='/'

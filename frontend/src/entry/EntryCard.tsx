@@ -18,7 +18,12 @@ export default function EntryCard({ title, description, dataTest, handleClick }:
         m: 2,
       }}
     >
-      <Stack spacing={2} justifyContent='space-between' sx={{ height: '100%' }}>
+      <Stack
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+          height: '100%'
+        }}>
         <Stack spacing={2}>
           <Typography component='h2' variant='h6' color='primary'>
             {title}
@@ -30,5 +35,5 @@ export default function EntryCard({ title, description, dataTest, handleClick }:
         </Button>
       </Stack>
     </Card>
-  )
+  );
 }

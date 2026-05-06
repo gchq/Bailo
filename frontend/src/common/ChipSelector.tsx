@@ -108,7 +108,11 @@ export default function ChipSelector({
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
             {allOptions.length === 0 && (
-              <Typography color='text.secondary' textAlign='center'>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                  textAlign: 'center'
+                }}>
                 No items available
               </Typography>
             )}
@@ -119,13 +123,19 @@ export default function ChipSelector({
           </>
         </AccordionDetails>
       </Accordion>
-    )
+    );
   }
 
   return (
     <>
       {label && (
-        <Typography component='h2' variant='h6' alignContent='center' sx={{ height: '56px' }}>{`${label}`}</Typography>
+        <Typography
+          component='h2'
+          variant='h6'
+          sx={{
+            alignContent: 'center',
+            height: '56px'
+          }}>{`${label}`}</Typography>
       )}
       {!expanded && allOptions.slice(0, expandThreshold)}
       {expanded && allOptions}
@@ -133,7 +143,7 @@ export default function ChipSelector({
         <Button onClick={toggleExpansion}>{expanded ? 'Show less' : 'Show more...'}</Button>
       )}
     </>
-  )
+  );
 }
 
 type ChipItemProps = {

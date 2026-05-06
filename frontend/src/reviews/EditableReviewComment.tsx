@@ -43,7 +43,14 @@ export default function EditableReviewComment({
       {isEditMode && (
         <>
           <RichTextEditor value={comment} onChange={onCommentChange} />
-          <Stack sx={{ textAlign: 'right', pt: 2 }} direction='row' spacing={1} justifyContent='right'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              justifyContent: 'right',
+              textAlign: 'right',
+              pt: 2
+            }}>
             <Button onClick={onCancel} startIcon={<Close />}>
               Cancel
             </Button>
@@ -54,5 +61,5 @@ export default function EditableReviewComment({
         </>
       )}
     </>
-  )
+  );
 }

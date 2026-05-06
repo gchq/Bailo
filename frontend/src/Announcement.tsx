@@ -21,10 +21,28 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
         p: 0.5,
       }}
     >
-      <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row' width='100%'>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='center' alignItems='center'>
+      <Stack
+        spacing={1}
+        direction='row'
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%'
+        }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
           <CampaignIcon color='primary' />
-          <Typography color='primary' fontWeight='bold' sx={{ textAlign: 'center' }}>
+          <Typography
+            color='primary'
+            sx={{
+              fontWeight: 'bold',
+              textAlign: 'center'
+            }}>
             Announcement
           </Typography>
           <CampaignIcon color='primary' />
@@ -37,5 +55,5 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
         </IconButton>
       </Stack>
     </Box>
-  )
+  );
 }

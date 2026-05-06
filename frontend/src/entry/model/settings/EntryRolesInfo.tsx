@@ -39,7 +39,9 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
         if (entryRole.kind === roleKind) {
           filteredRoles.push(
             <Box key={entryRole.shortName}>
-              <Typography fontWeight='bold'>{entryRole.name}</Typography>
+              <Typography sx={{
+                fontWeight: 'bold'
+              }}>{entryRole.name}</Typography>
               <Typography>{entryRole.description}</Typography>
               <em>
                 This role also shares permissions with the {getRoleDisplayName(systemRole, entryRoles)} system role.
@@ -58,7 +60,9 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     return rows.map((row) => (
       <TableRow key={row.permission} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
-          <Stack direction='row' alignItems='center'>
+          <Stack direction='row' sx={{
+            alignItems: 'center'
+          }}>
             {row.permission}
             <RowHelpText row={row} />
           </Stack>
@@ -79,7 +83,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
           <RoleActionIcon role={RoleValue.ACCESS_REVIEWER} roles={row.roles} />
         </TableCell>
       </TableRow>
-    ))
+    ));
   }, [])
 
   if (isEntryRolesError) {
@@ -102,7 +106,9 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
           <Typography>Review roles can also optionally share permissions with system roles.</Typography>
           <Stack spacing={2}>
             <Stack spacing={1}>
-              <Typography component='h3' variant='h6' fontWeight='bold'>
+              <Typography component='h3' variant='h6' sx={{
+                fontWeight: 'bold'
+              }}>
                 General Permissions
               </Typography>
               <TableContainer component={Paper} sx={{ maxHeight: 250 }}>
@@ -123,7 +129,9 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
             </Stack>
             <Stack spacing={1}>
               <Box>
-                <Typography component='h3' variant='h6' fontWeight='bold'>
+                <Typography component='h3' variant='h6' sx={{
+                  fontWeight: 'bold'
+                }}>
                   Dynamic Roles
                 </Typography>
                 <Typography variant='caption'>
@@ -136,7 +144,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
         </Stack>
       )}
     </>
-  )
+  );
 }
 
 const rows: Row[] = [

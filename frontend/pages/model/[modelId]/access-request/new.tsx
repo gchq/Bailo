@@ -6,7 +6,7 @@ import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -25,19 +25,9 @@ export default function NewAccessRequest() {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [submissionErrorText, setSubmissionErrorText] = useState('')
-  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
-  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
-
-  const isLoading = useMemo(
-    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
-    [isModelLoading, isSchemaLoading, isCurrentUserLoading],
-  )
-
-  useEffect(() => {
+  function getDefaultState() {
     if (!model || !schema || !currentUser) {
-      return
+      return { reference: '', steps: [] }
     }
 
     const defaultState = {
@@ -51,8 +41,18 @@ export default function NewAccessRequest() {
       step.steps = steps
     }
 
-    setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model, currentUser])
+    return { reference: schema.id, steps }
+  }
+
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>(getDefaultState())
+  const [submissionErrorText, setSubmissionErrorText] = useState('')
+  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
+
+  const isLoading = useMemo(
+    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
+    [isModelLoading, isSchemaLoading, isCurrentUserLoading],
+  )
 
   async function onSubmit() {
     setSubmissionErrorText('')
@@ -133,7 +133,11 @@ export default function NewAccessRequest() {
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList
                 />
-                <Stack alignItems='flex-end'>
+                <Stack
+                  sx={{
+                    alignItems: 'flex-end',
+                  }}
+                >
                   <Button
                     sx={{ width: 'fit-content' }}
                     variant='contained'

@@ -5,7 +5,7 @@ import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -27,7 +27,6 @@ import { isValidSemver, plural } from 'utils/stringUtils'
 export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
-  const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
@@ -49,11 +48,7 @@ export default function NewRelease() {
     isEntryError: isModelError,
   } = useGetEntry(modelId, EntryKind.MODEL)
 
-  useEffect(() => {
-    if (model && !modelCardVersion) {
-      setModelCardVersion(model.card.version)
-    }
-  }, [model, setModelCardVersion, modelCardVersion])
+  const [modelCardVersion, setModelCardVersion] = useState(model ? model.card.version : 0)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
@@ -61,7 +56,12 @@ export default function NewRelease() {
     () =>
       failedFileUploads.map((file) => (
         <div key={file.fileName}>
-          <Box component='span' fontWeight='bold'>
+          <Box
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {file.fileName}
           </Box>
           {` - ${file.error}`}
@@ -205,7 +205,13 @@ export default function NewRelease() {
                     Back to model
                   </Button>
                 </Link>
-                <Stack spacing={2} alignItems='center' justifyContent='center'>
+                <Stack
+                  spacing={2}
+                  sx={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   <Typography variant='h6' component='h1' color='primary'>
                     Draft New Release
                   </Typography>
@@ -238,7 +244,11 @@ export default function NewRelease() {
                   uploadedFiles={uploadedFiles}
                   filesToUploadCount={files.length}
                 />
-                <Stack alignItems='flex-end'>
+                <Stack
+                  sx={{
+                    alignItems: 'flex-end',
+                  }}
+                >
                   <Button
                     variant='contained'
                     loading={loading}

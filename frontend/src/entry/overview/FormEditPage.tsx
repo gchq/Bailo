@@ -44,7 +44,6 @@ type FormEditPageProps = {
 export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const [migrationErrorMessage, setMigrationErrorMessage] = useState('')
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
@@ -66,6 +65,28 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const sendNotification = useNotification()
   const { mutateEntryCardRevisions } = useGetEntryCardRevisions(entry.id)
+
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: schema ? schema.id : '', steps: [] })
+
+  const updateSplitSchema = useEffectEvent((newValue: SplitSchemaNoRender) => {
+    setSplitSchema(newValue)
+  })
+
+  useEffect(() => {
+    if (schema) {
+      const steps = getStepsFromSchema(
+        schema,
+        {},
+        ['properties.contacts'],
+        entry.card.metadata,
+        entry.mirroredCard?.metadata || {},
+      )
+      for (const step of steps) {
+        step.steps = steps
+      }
+      updateSplitSchema({ reference: schema ? schema.id : '', steps })
+    }
+  }, [entry.card.metadata, entry.mirroredCard?.metadata, schema])
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -116,27 +137,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       setIsEdit(false)
     }
   }
-
-  const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
-    setSplitSchema(newSplitSchema)
-  })
-
-  useEffect(() => {
-    if (!entry || !schema) {
-      return
-    }
-    const steps = getStepsFromSchema(
-      schema,
-      {},
-      ['properties.contacts'],
-      entry.card.metadata,
-      entry.mirroredCard?.metadata || {},
-    )
-    for (const step of steps) {
-      step.steps = steps
-    }
-    onSplitSchemaChange({ reference: schema.id, steps })
-  }, [schema, entry])
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -229,7 +229,13 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction='row' justifyContent='space-between' spacing={1}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                justifyContent: 'space-between',
+              }}
+            >
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}
@@ -307,7 +313,13 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             </Stack>
           )}
           {isEdit && (
-            <Stack direction='row' spacing={1} justifyContent='space-between'>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                justifyContent: 'space-between',
+              }}
+            >
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}

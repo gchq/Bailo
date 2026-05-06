@@ -34,7 +34,13 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const collaboratorList = useMemo(() => {
     return (
-      <Stack direction='row' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         {entry.collaborators.slice(0, 5).map((collaborator) => {
           return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar smallAvatars />
         })}
@@ -77,8 +83,19 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Typography>
         <Stack spacing={1}>
           {schema && (
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main,
+                }}
+              >
                 Schema:
               </Typography>
               <Typography>{schema.name}</Typography>

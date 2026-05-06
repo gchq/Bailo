@@ -30,7 +30,7 @@ export function NavMenuItem({
     <ListItem disablePadding>
       <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%' }}>
         <ListItemButton selected={selectedPage === menuPage}>
-          <ListItemIcon>
+          <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
                 <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>

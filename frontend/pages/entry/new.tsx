@@ -54,17 +54,30 @@ export default function NewEntry() {
   return (
     <>
       <Title text={`New ${createEntryKind ? camelCaseToTitleCase(createEntryKind) : 'Entry'}`} />
-      <Container>
+      <Container maxWidth='md'>
         {createEntryKind ? (
           <CreateEntry createEntryKind={createEntryKind} onBackClick={() => setCreateEntryKind(undefined)} />
         ) : (
           <Paper sx={{ p: 4, mb: 4 }}>
-            <Stack spacing={4} justifyContent='center' alignItems='center'>
+            <Stack
+              spacing={4}
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
               <Typography variant='h6' component='h1' color='primary'>
                 Create Entry
               </Typography>
               <FileUpload color='primary' fontSize='large' />
-              <Box alignItems='stretch' justifyContent='center' display='flex' flexWrap='wrap'>
+              <Box
+                sx={{
+                  alignItems: 'stretch',
+                  justifyContent: 'center',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                }}
+              >
                 {entryCardProps.map((entryCardProp) => (
                   <EntryCard key={entryCardProp.title} {...entryCardProp} />
                 ))}

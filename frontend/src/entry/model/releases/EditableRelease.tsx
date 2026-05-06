@@ -83,7 +83,9 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     () =>
       failedFileUploads.map((file) => (
         <div key={file.fileName}>
-          <Box component='span' fontWeight='bold'>
+          <Box component='span' sx={{
+            fontWeight: 'bold'
+          }}>
             {file.fileName}
           </Box>
           {` - ${file.error}`}
@@ -235,9 +237,15 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     <Stack spacing={2}>
       <EditableFormHeading
         heading={
-          <Stack overflow='hidden' justifyContent='center'>
+          <Stack
+            sx={{
+              overflow: 'hidden',
+              justifyContent: 'center'
+            }}>
             <Stack direction='row' spacing={1}>
-              <Typography fontWeight='bold'>Release name</Typography>
+              <Typography sx={{
+                fontWeight: 'bold'
+              }}>Release name</Typography>
               <HelpPopover>
                 The release name is automatically generated using the model name and release semantic version
               </HelpPopover>
@@ -308,5 +316,5 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
       />
     </Stack>
-  )
+  );
 }

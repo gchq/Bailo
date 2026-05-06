@@ -9,8 +9,10 @@ type ProfileTabProps = {
 export default function ProfileTab({ user }: ProfileTabProps) {
   return (
     <Box sx={{ px: 2, py: 4 }}>
-      <Typography fontWeight='bold'>Name</Typography>
+      <Typography sx={{
+        fontWeight: 'bold'
+      }}>Name</Typography>
       <Typography>{user.dn}</Typography>
     </Box>
-  )
+  );
 }

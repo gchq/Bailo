@@ -21,17 +21,7 @@ import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import {
-  CSSProperties,
-  Fragment,
-  MouseEvent,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-} from 'react'
+import { CSSProperties, Fragment, MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
@@ -122,8 +112,6 @@ export default function FileDisplay({
   const { mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
-  const [latestRelease, setLatestRelease] = useState('')
-
   const sortedAssociatedReleases = useMemo(
     () =>
       releases
@@ -131,16 +119,6 @@ export default function FileDisplay({
         .sort(sortByCreatedAtDescending),
     [file, releases],
   )
-
-  const onLatestReleaseChange = useEffectEvent((semver: string) => {
-    setLatestRelease(semver)
-  })
-
-  useEffect(() => {
-    if (releases.length > 0 && sortedAssociatedReleases.length > 0) {
-      onLatestReleaseChange(releases[0].semver)
-    }
-  }, [releases, setLatestRelease, sortedAssociatedReleases])
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!isFileInterface(file) || isDeleting) {
@@ -180,8 +158,6 @@ export default function FileDisplay({
     setAnchorElMore(null)
   }
 
-  const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
-
   const findings = useCallback((file: FileInterface) => {
     if (file.scanResults === undefined) {
       return 0
@@ -191,42 +167,35 @@ export default function FileDisplay({
     }, 0)
   }, [])
 
-  const updateChipDetails = useEffectEvent(() => {
+  const chipDetailDisplay = useCallback((): ChipDetails => {
     if (!isFileInterface(file) || file.scanResults === undefined) {
-      setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
-      return
+      return { label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> }
     } else if (findings(file as FileInterface)) {
-      setChipDisplay({
+      return {
         label: `Scan failed: ${plural(findings(file as FileInterface), 'finding')}`,
         colour: 'error',
         icon: <Error />,
-      })
-      return
+      }
     } else if (
       isFileInterface(file) &&
       file.scanResults !== undefined &&
       file.scanResults.some((scan) => scan.state === ScanState.Error)
     ) {
-      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Error /> })
-      return
+      return { label: 'One or more scanning tools failed', colour: 'error', icon: <Error /> }
     } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
-      setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
+      return { label: 'Scans in progress', colour: 'warning', icon: <Pending /> }
     } else if (file.scanResults.some((scan) => scan.state === ScanState.NotScanned)) {
-      setChipDisplay({ label: 'Not scanned', colour: 'warning', icon: <Warning /> })
+      return { label: 'Not scanned', colour: 'warning', icon: <Warning /> }
     } else if (!findings(file as FileInterface)) {
-      setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
+      return { label: 'Scan passed', colour: 'success', icon: <Done /> }
     } else {
-      setChipDisplay({
+      return {
         label: 'There was a problem fetching the file scan results',
         colour: 'error',
         icon: <Warning />,
-      })
+      }
     }
-  })
-
-  useEffect(() => {
-    updateChipDetails()
-  }, [file])
+  }, [file, findings])
 
   const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
 
@@ -269,17 +238,17 @@ export default function FileDisplay({
   }, [handleRerunFileScanOnClick, scanners, isScannersError, showMenuItems.rescanFile])
 
   const scanResultChip = useMemo(() => {
-    if (!chipDisplay) {
+    if (!chipDetailDisplay()) {
       return <Skeleton variant='text' sx={{ fontSize: '1rem', width: '150px' }} />
     }
     return (
       <>
-        {chipDisplay && (
+        {chipDetailDisplay() && (
           <Chip
-            color={chipDisplay.colour}
-            icon={chipDisplay.icon}
+            color={chipDetailDisplay().colour}
+            icon={chipDetailDisplay().icon}
             onClick={(e) => setAnchorElScan(e.currentTarget)}
-            label={chipDisplay.label}
+            label={chipDetailDisplay().label}
           />
         )}
         <Popover
@@ -347,7 +316,7 @@ export default function FileDisplay({
         </Popover>
       </>
     )
-  }, [anchorElScan, chipDisplay, file.scanResults, openScan])
+  }, [anchorElScan, chipDetailDisplay, file.scanResults, openScan])
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
     setFileTagErrorMessage('')
@@ -399,12 +368,21 @@ export default function FileDisplay({
     <Box sx={{ ...style, p: 1 }} key={key}>
       {isFileInterface(file) && (
         <Stack spacing={1}>
-          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+          <Stack
+            direction={{ sm: 'column', md: 'row' }}
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <Stack
               direction={{ sm: 'column', md: 'row' }}
               spacing={2}
-              alignItems='center'
-              sx={{ wordBreak: 'break-word' }}
+              sx={{
+                alignItems: 'center',
+                wordBreak: 'break-word',
+              }}
             >
               <Tooltip title={file.name}>
                 <Link
@@ -412,7 +390,13 @@ export default function FileDisplay({
                   href={`/api/v2/model/${modelId}/file/${file._id}/download`}
                   data-test={`fileLink-${file.name}`}
                 >
-                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
+                  <Typography
+                    variant='h6'
+                    sx={{
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
                     {file.name}
                   </Typography>
                 </Link>
@@ -425,9 +409,21 @@ export default function FileDisplay({
                 <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
               </Typography>
             </Stack>
-            <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
+            <Stack
+              direction={{ sm: 'column', md: 'row' }}
+              spacing={2}
+              sx={{
+                alignItems: { sm: 'center' },
+              }}
+            >
               {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
-                <Stack direction='row' spacing={1} alignItems='center'>
+                <Stack
+                  direction='row'
+                  spacing={1}
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   {scanResultChip}
                 </Stack>
               )}
@@ -472,7 +468,13 @@ export default function FileDisplay({
               </Stack>
             </Stack>
           </Stack>
-          <Stack spacing={2} direction='row' alignItems='center'>
+          <Stack
+            spacing={2}
+            direction='row'
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             {!hideTags && (
               <>
                 <Restricted action='editEntry' fallback={<></>}>
@@ -518,7 +520,7 @@ export default function FileDisplay({
         modelId={modelId}
         open={associatedReleasesOpen}
         onClose={() => setAssociatedReleasesOpen(false)}
-        latestRelease={latestRelease}
+        latestRelease={releases.length > 0 ? releases[0].semver : ''}
         sortedAssociatedReleases={sortedAssociatedReleases}
       />
       <ConfirmationDialogue
@@ -540,7 +542,11 @@ export default function FileDisplay({
         }
       >
         <Box sx={{ pt: 2 }}>
-          <AssociatedReleasesList modelId={modelId} latestRelease={latestRelease} releases={sortedAssociatedReleases} />
+          <AssociatedReleasesList
+            modelId={modelId}
+            latestRelease={releases.length > 0 ? releases[0].semver : ''}
+            releases={sortedAssociatedReleases}
+          />
         </Box>
       </ConfirmationDialogue>
     </Box>

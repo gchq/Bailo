@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
-import { MouseEvent, ReactElement, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
 
@@ -67,23 +67,14 @@ export default function Paginate<T>({
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(defaultSortDirection)
   const [searchFilter, setSearchFilter] = useState('')
-  const [filteredList, setFilteredList] = useState(list)
 
-  const theme = useTheme()
-
-  const onFilteredListUpdated = useEffectEvent((newList: T[]) => {
-    setFilteredList(newList)
+  const filteredList = list.filter((item: T) => {
+    if (searchFilterProperty !== undefined && item[searchFilterProperty as string]) {
+      return item[searchFilterProperty as string].toLowerCase().includes(searchFilter.toLowerCase())
+    }
   })
 
-  useEffect(() => {
-    onFilteredListUpdated(
-      list.filter((item: T) => {
-        if (searchFilterProperty !== undefined && item[searchFilterProperty as string]) {
-          return item[searchFilterProperty as string].toLowerCase().includes(searchFilter.toLowerCase())
-        }
-      }),
-    )
-  }, [setFilteredList, list, searchFilter, searchFilterProperty])
+  const theme = useTheme()
 
   const pageCount = useMemo(
     () => (isArray(filteredList) ? Math.ceil(filteredList.length / pageSize) : 10),
@@ -246,10 +237,15 @@ export default function Paginate<T>({
     <>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        sx={{ pt: 1, pb: 2, width: '100%', px: 2 }}
         spacing={1}
-        justifyContent='space-between'
-        alignItems='center'
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pt: 1,
+          pb: 2,
+          width: '100%',
+          px: 2,
+        }}
       >
         {hideSearchInput ? (
           <div style={{ maxWidth: '200px', width: '100%' }}></div>
@@ -268,7 +264,14 @@ export default function Paginate<T>({
           sx={{ maxWidth: '200px' }}
           fullWidth
         >
-          <Stack sx={{ minWidth: '150px' }} direction='row' spacing={2} justifyContent='space-evenly'>
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{
+              justifyContent: 'space-evenly',
+              minWidth: '150px',
+            }}
+          >
             {checkAscOrDesc(SortingDirection.ASC) ? (
               <Sort color='primary' />
             ) : (
@@ -299,7 +302,14 @@ export default function Paginate<T>({
           {listDisplay}
         </Stack>
       </Box>
-      <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
+      <Stack
+        sx={{
+          alignItems: 'center',
+          width: '100%',
+          pt: 3,
+          pb: 1,
+        }}
+      >
         <Pagination
           count={pageCount}
           page={page}

@@ -147,7 +147,12 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 {`Back to ${EntryKindLabel[entry.kind]}`}
               </Button>
             </Link>
-            <Stack spacing={2} justifyContent='center' alignItems='center'>
+            <Stack
+              spacing={2}
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
               <Typography variant='h6' component='h1' color='primary'>
                 Select a schema
               </Typography>
@@ -157,7 +162,12 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 {` ${SchemaKindLabel[schemaKind]}`} you create. Select from the list below:
               </Typography>
             </Stack>
-            <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
+            <Stack
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+                mt: 2
+              }}>
               <Accordion defaultExpanded sx={accordionStyling} slotProps={{ heading: { component: 'h2' } }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h3'>
@@ -166,7 +176,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ m: 2 }}>
-                    <Grid container spacing={2} justifyContent='center'>
+                    <Grid container spacing={2} sx={{
+                      justifyContent: 'center'
+                    }}>
                       {activeSchemaButtons}
                     </Grid>
                   </Box>
@@ -186,7 +198,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                         have feel you have a valid use-case.
                       </Typography>
                     </Box>
-                    <Grid container spacing={2} justifyContent='center'>
+                    <Grid container spacing={2} sx={{
+                      justifyContent: 'center'
+                    }}>
                       {inactiveSchemaButtons}
                     </Grid>
                   </Stack>
@@ -197,5 +211,5 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
         </Container>
       )}
     </>
-  )
+  );
 }
