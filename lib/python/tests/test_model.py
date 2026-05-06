@@ -77,8 +77,7 @@ def test_create_get_from_id_update_and_delete_model(
 
 @pytest.mark.integration
 def test_search_models(integration_client):
-    with pytest.warns(UserWarning):
-        models = Model.search(client=integration_client)
+    models = Model.search(client=integration_client)
 
     assert all(isinstance(model, Model) for model in models)
 

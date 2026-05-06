@@ -276,17 +276,23 @@ export default function ImageTagInformation() {
                 />
               </Stack>
             </Stack>
-            <Stack spacing={1}>
-              <Stack direction={'row'} spacing={4}>
-                <Stack direction={'column'}>
-                  <Typography fontWeight='bold'>URI</Typography>
-                  <Box width='fit-content'>
-                    <CodeLine
-                      line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${modelImage.tag}`}
-                    />
+            <Stack direction={{ sm: 'column', md: 'row' }} spacing={4}>
+              <Stack direction='column'>
+                <Typography fontWeight='bold'>URI</Typography>
+                <Box width='fit-content'>
+                  <CodeLine
+                    line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${modelImage.tag}`}
+                  />
+                </Box>
+              </Stack>
+              {modelImage.platform && (
+                <Stack>
+                  <Typography fontWeight='bold'>Platform</Typography>
+                  <Box pt={1}>
+                    <Typography>{modelImage.platform ?? ''}</Typography>
                   </Box>
                 </Stack>
-              </Stack>
+              )}
             </Stack>
             <Stack
               direction={{ md: 'row', sm: 'column' }}
