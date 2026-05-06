@@ -133,6 +133,10 @@ const config: PartialDeep<Config> = {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
+    untrustedModel: {
+      enabled: false,
+      untrustedModelDescription: 'tbd',
+    },
   },
   modelMirror: {
     export: {

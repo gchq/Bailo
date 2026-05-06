@@ -1,5 +1,4 @@
 import semver from 'semver'
-import { EntryKind, EntryKindKeys } from 'types/types'
 
 export const toTitleCase = (value: string): string => {
   return value
@@ -64,8 +63,4 @@ export const truncateText = (text: string | undefined, limit: number = 100) => {
   }
 
   return text.slice(0, limit) + '\u2026'
-}
-
-export const vowelSoundCheckForEntryKind = (entryKind: EntryKindKeys) => {
-  return entryKind === EntryKind.UNTRUSTED_MODEL ? 'an' : 'a'
 }

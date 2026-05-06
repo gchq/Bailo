@@ -224,8 +224,8 @@ export interface Config {
   }
 
   untrustedModels: {
-    defaultState: 'Production'
-    entryDescription: 'TBD'
+    defaultState: string
+    entryDescription: string
   }
 }
 

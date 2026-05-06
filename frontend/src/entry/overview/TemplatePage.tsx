@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import Link from 'src/Link'
 import { EntryCardKindLabel, EntryInterface, EntryKind } from 'types/types'
 import { entryKindForRedirect } from 'utils/routerUtils'
-import { toTitleCase, vowelSoundCheckForEntryKind } from 'utils/stringUtils'
+import { toTitleCase } from 'utils/stringUtils'
 
 type TemplatePageProps = {
   entry: EntryInterface
@@ -26,7 +26,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
     <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
       <Stack spacing={4} justifyContent='center' alignItems='center'>
         <Typography component='h2' variant='h6' color='primary' data-test='createEntryCardOverview'>
-          {`Create ${vowelSoundCheckForEntryKind(entry.kind)} ${toTitleCase(EntryCardKindLabel[entry.kind])}`}
+          {`Create ${toTitleCase(EntryCardKindLabel[entry.kind])}`}
         </Typography>
         <PostAdd fontSize='large' color='primary' />
         <Typography variant='body1'>{entryCardDescription}</Typography>
@@ -48,7 +48,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                 Create from schema
               </Typography>
               <Typography>
-                {`Create ${vowelSoundCheckForEntryKind(entry.kind)} ${EntryCardKindLabel[entry.kind]} from scratch using a predefined schema.`}
+                {`Create ${EntryCardKindLabel[entry.kind]} from scratch using a predefined schema.`}
               </Typography>
               <Button
                 href={`/${entryKindForRedirect(entry.kind)}/${entry.id}/schema`}

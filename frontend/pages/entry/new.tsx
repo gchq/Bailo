@@ -23,7 +23,7 @@ export default function NewEntry() {
             'Creating a model allows you to create artefacts and images, write a model card and control who has access over your model. Use it when you have used training data to create a model, or are using a model from another source.',
           handleClick: () => setCreateEntryKind(EntryKind.MODEL),
           dataTest: 'createModelButton',
-          recommended: true,
+          mostPopular: true,
         },
         {
           title: 'Mirrored Model',

@@ -6,10 +6,10 @@ interface EntryCardProps {
   handleClick: () => void
   dataTest?: string
   disabled?: boolean
-  recommended?: boolean
+  mostPopular?: boolean
 }
 
-export default function EntryCard({ title, description, dataTest, handleClick, recommended = false }: EntryCardProps) {
+export default function EntryCard({ title, description, dataTest, handleClick, mostPopular = false }: EntryCardProps) {
   return (
     <Box
       sx={{
@@ -22,7 +22,7 @@ export default function EntryCard({ title, description, dataTest, handleClick, r
             <Typography component='h2' fontWeight='bold' color='primary'>
               {title}
             </Typography>
-            {recommended && (
+            {mostPopular && (
               <Typography component='h2' fontWeight='bold' color='secondary'>
                 (most popular)
               </Typography>

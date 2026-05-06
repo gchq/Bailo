@@ -12,6 +12,7 @@ import ModelModel, {
   EntryKind,
   EntryKindKeys,
   EntryVisibility,
+  EntryVisibilityKeys,
   ModelDoc,
   ModelInterface,
 } from '../models/Model.js'
@@ -46,9 +47,27 @@ import { getSchemaById } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
-export function checkModelRestriction(model: ModelInterface) {
+function checkMirroredModelRestriction(model: ModelInterface) {
   if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot alter a mirrored model.`)
+  }
+}
+
+type UntrustedModelRestrictionCheck = {
+  state?: string | undefined
+  visibility?: EntryVisibilityKeys
+  [key: string]: any
+}
+function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel: UntrustedModelRestrictionCheck) {
+  if (modelKind === EntryKind.UntrustedModel) {
+    if (partialModel.visibility) {
+      if (partialModel.visibility === EntryVisibility.Public) {
+        throw BadReq('Untrusted models cannot be made public.')
+      }
+    }
+    if (partialModel.state) {
+      throw BadReq('Untrusted models can not have their state manually changed.')
+    }
   }
 }
 
@@ -56,7 +75,7 @@ type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators' | 'state'
 > &
   OptionalCreateModelParams
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
@@ -73,9 +92,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     }
   }
 
-  if (modelParams.kind === EntryKind.UntrustedModel && modelParams.visibility === EntryVisibility.Public) {
-    throw BadReq('Untrusted models cannot be made public.')
-  }
+  checkUntrustedModelRestrictions(modelParams.kind, modelParams)
 
   let collaborators: CollaboratorEntry[]
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -594,12 +611,8 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
       throw BadReq('You cannot have duplicate tags')
     }
   }
-  if (model.kind === EntryKind.UntrustedModel && modelDiff.visibility === EntryVisibility.Public) {
-    throw BadReq('Untrusted models cannot be made public.')
-  }
-  if (model.kind === EntryKind.UntrustedModel && modelDiff.state) {
-    throw BadReq('Untrusted models can not have their state manually changed.')
-  }
+
+  checkUntrustedModelRestrictions(model.kind, modelDiff)
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
@@ -669,7 +682,7 @@ export async function createModelCardFromSchema(
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  checkModelRestriction(model)
+  checkMirroredModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
@@ -722,7 +735,7 @@ export async function createModelCardFromTemplate(
   if (model.card?.schemaId) {
     throw BadReq('This model already has a model card.', { modelId })
   }
-  checkModelRestriction(model)
+  checkMirroredModelRestriction(model)
   const template = await getModelById(user, templateId)
   // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
   const templateAuth = await authorisation.model(user, template, ModelAction.View)

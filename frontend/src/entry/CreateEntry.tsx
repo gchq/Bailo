@@ -291,31 +291,33 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       formContext={{ editMode: true }}
                     />
                   </Stack>
-                  <Stack spacing={2}>
-                    <Typography variant='h6' component='h2'>
-                      Additional settings
-                    </Typography>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          onChange={(e) => setUngovernedAccess(e.target.checked)}
-                          checked={ungovernedAccess}
-                          size='small'
-                        />
-                      }
-                      label={ungovernedAccessLabel}
-                    />
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          onChange={(event) => setAllowTemplating(event.target.checked)}
-                          checked={allowTemplating}
-                          size='small'
-                        />
-                      }
-                      label={allowTemplatingLabel}
-                    />
-                  </Stack>
+                  {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (
+                    <Stack spacing={2}>
+                      <Typography variant='h6' component='h2'>
+                        Additional settings
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={(e) => setUngovernedAccess(e.target.checked)}
+                            checked={ungovernedAccess}
+                            size='small'
+                          />
+                        }
+                        label={ungovernedAccessLabel}
+                      />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={(event) => setAllowTemplating(event.target.checked)}
+                            checked={allowTemplating}
+                            size='small'
+                          />
+                        }
+                        label={allowTemplatingLabel}
+                      />
+                    </Stack>
+                  )}
                 </Stack>
               </AccordionDetails>
             </Accordion>
