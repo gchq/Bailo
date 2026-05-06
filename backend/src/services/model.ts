@@ -870,7 +870,7 @@ export async function getCurrentUserPermissionsByModel(
   }
 }
 
-export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) {
+export async function getModelSystemRoles(user: UserInterface, model: ModelDoc): Promise<string[]> {
   const entities = await authentication.getEntities(user)
   const normalizedEntities = entities.map((entity) => entity.toLowerCase())
 
