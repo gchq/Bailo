@@ -96,7 +96,6 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
   }
 
   const open = Boolean(anchorEl)
-  const id = open ? 'tag-selector' : undefined
 
   const options = useMemo(
     () => [...new Set([...popularTags, ...tags, ...pendingValue])],
@@ -111,7 +110,6 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
           sx={{ width: 'max-content', fontWeight: 'bold' }}
           disabled={restrictedToAction && !userPermissions[restrictedToAction].hasPermission}
           disableRipple
-          aria-describedby={id}
           onClick={handleClick}
         >
           {restrictedToAction && userPermissions[restrictedToAction].hasPermission ? (
@@ -137,12 +135,11 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
           ))}
         </Grid>
       </Box>
-      <StyledPopper id={id} open={open} anchorEl={anchorEl} placement='bottom-start'>
+      <StyledPopper open={open} anchorEl={anchorEl} placement='bottom-start'>
         <ClickAwayListener onClickAway={handleClose}>
           <Box sx={{ p: 3 }}>
             <Box
               sx={(t) => ({
-                borderBottom: '1px solid #30363d',
                 padding: '8px 10px',
                 fontWeight: 600,
                 ...t.applyStyles('light', {
@@ -188,26 +185,9 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
                       }}
                     />
                     <Box
-                      component='span'
                       sx={{
-                        width: 14,
-                        height: 14,
-                        flexShrink: 0,
-                        borderRadius: '3px',
-                        mr: 1,
-                        mt: '2px',
-                      }}
-                    />
-                    <Box
-                      sx={(t) => ({
                         flexGrow: 1,
-                        '& span': {
-                          color: '#8b949e',
-                          ...t.applyStyles('light', {
-                            color: '#586069',
-                          }),
-                        },
-                      })}
+                      }}
                     >
                       {option}
                       <br />

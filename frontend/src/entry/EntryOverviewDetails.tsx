@@ -47,10 +47,8 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
       const response = await patchEntry(entry.id, { tags: newTags })
       if (!response.ok) {
         setEntryTagUpdateErrorMessage(await getErrorMessage(response))
-        mutateEntry()
-      } else {
-        mutateEntry()
       }
+      mutateEntry()
     },
     [entry.id, mutateEntry],
   )
