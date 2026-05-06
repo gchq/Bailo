@@ -156,10 +156,10 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
     {
       $lookup: {
         from: 'v2_models',
-        let: { schemaId: '$_id' },
+        let: { schemaId: '$id' },
         pipeline: [
           {
-            // Match models whose card.schemaId equals this schema's _id
+            // Match models whose card.schemaId equals this schema's id
             $match: {
               $expr: { $eq: ['$card.schemaId', '$$schemaId'] },
               ...(filter.organisation !== undefined && {
