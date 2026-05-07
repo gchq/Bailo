@@ -4,7 +4,7 @@ import Autocomplete, { autocompleteClasses, AutocompleteCloseReason } from '@mui
 import Box from '@mui/material/Box'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Popper, { type PopperProps } from '@mui/material/Popper'
-import { styled, useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import { useGetPopularEntryTags } from 'actions/entry'
 import { ChangeEvent, KeyboardEvent, useContext, useMemo, useState } from 'react'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
@@ -28,10 +28,6 @@ const StyledAutocompletePopper = styled('div')(({ theme }) => ({
   },
   [`& .${autocompleteClasses.listbox}`]: {
     padding: 0,
-    backgroundColor: '#fff',
-    ...theme.applyStyles('dark', {
-      backgroundColor: '#1c2128',
-    }),
     [`& .${autocompleteClasses.option}`]: {
       minHeight: 'auto',
       alignItems: 'flex-start',
@@ -61,18 +57,11 @@ function PopperComponent(props: PopperComponentProps) {
 const StyledPopper = styled(Popper)(({ theme }) => ({
   border: '1px solid #e1e4e8',
   boxShadow: `0 8px 24px ${'rgba(149, 157, 165, 0.2)'}`,
-  color: '#24292e',
   backgroundColor: '#fff',
   borderRadius: 6,
   width: 300,
   zIndex: theme.zIndex.modal,
   fontSize: 13,
-  ...theme.applyStyles('dark', {
-    border: '1px solid #30363d',
-    boxShadow: '0 8px 24px rgb(1, 4, 9)',
-    color: '#c9d1d9',
-    backgroundColor: '#1c2128',
-  }),
 }))
 
 export default function TagSelector({ onChange, tags, errorText = '', restrictedToAction }: EntryTagSelectorProps) {
@@ -80,7 +69,6 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
   const [pendingValue, setPendingValue] = useState<string[]>([])
   const { userPermissions } = useContext(UserPermissionsContext)
   const { tags: popularTags, isTagsError } = useGetPopularEntryTags()
-  const theme = useTheme()
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setPendingValue(tags)
@@ -190,7 +178,6 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
                       }}
                     >
                       {option}
-                      <br />
                     </Box>
                     <Box
                       component={Close}
@@ -212,7 +199,7 @@ export default function TagSelector({ onChange, tags, errorText = '', restricted
                 popper: PopperComponent,
               }}
             />
-            <Typography variant='caption' color={theme.palette.error.main}>
+            <Typography variant='caption' color='error'>
               {[errorText, isTagsError?.info?.message].filter(Boolean).join(' ')}
             </Typography>
           </Box>
