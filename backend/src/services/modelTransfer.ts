@@ -6,10 +6,12 @@ import ModelTransferModel, {
   TransferStatusKeys,
 } from '../models/ModelTransfer.js'
 import { UserInterface } from '../models/User.js'
+import { WebhookEvent } from '../models/Webhook.js'
 import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { completeImportNotification, failImportNotification, startImportNotification } from './smtp/smtp.js'
+import { sendWebhooks } from './webhook.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
@@ -164,7 +166,12 @@ export async function deleteModelTransfer(exportId: string): Promise<string> {
   return transfer.exportId
 }
 
-export async function beginTransfer(exportId: string, modelId: string, createdBy: string, peerId?: string) {
+export async function beginTransfer(
+  exportId: string,
+  modelId: string,
+  createdBy: string,
+  peerId?: string,
+): Promise<void> {
   const updated = await ModelTransferModel.findOneAndUpdate(
     { exportId },
     { exportId, modelId, peerId, createdBy },
@@ -183,7 +190,7 @@ export async function beginTransfer(exportId: string, modelId: string, createdBy
   }
 }
 
-export async function finishTransfer(exportId: string) {
+export async function finishTransfer(exportId: string): Promise<void> {
   const transfer = await ModelTransferModel.findOne({
     exportId,
   })
@@ -208,6 +215,9 @@ export async function finishTransfer(exportId: string) {
     )
     if (updated) {
       await completeImportNotification(transfer.modelId, successfulFiles, successfulImages)
+      sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported.`, {
+        transfer,
+      })
     }
   }
 
@@ -227,6 +237,9 @@ export async function finishTransfer(exportId: string) {
     )
     if (updated) {
       await failImportNotification(transfer.modelId, failedFiles, failedImages, successfulFiles, successfulImages)
+      sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has failed to import.`, {
+        transfer,
+      })
     }
   }
 }
