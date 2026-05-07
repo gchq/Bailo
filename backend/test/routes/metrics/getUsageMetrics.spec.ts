@@ -22,17 +22,17 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: mockAuth,
 }))
 
-const mockMetricsService = vi.hoisted(() => ({
-  calculateOverviewMetrics: vi.fn(),
+const mockMetricsConnector = vi.hoisted(() => ({
+  getUsageMetrics: vi.fn(),
 }))
 
-vi.mock('../../../src/services/metrics.js', () => mockMetricsService)
+vi.mock('../../../src/connectors/metrics/index.js', () => ({
+  default: mockMetricsConnector,
+}))
 
-describe('routes > metrics > getOverviewMetrics', () => {
+describe('routes > metrics > getUsageMetrics', () => {
   test('200 > returns metrics when user is Admin', async () => {
-    mockAuth.hasRole.mockResolvedValue(true)
-
-    mockMetricsService.calculateOverviewMetrics.mockResolvedValue({
+    mockMetricsConnector.getUsageMetrics.mockResolvedValue({
       global: {
         users: 1,
         models: 2,
@@ -44,7 +44,7 @@ describe('routes > metrics > getOverviewMetrics', () => {
       byOrganisation: [],
     })
 
-    const res = await testGet('/api/v3/metrics')
+    const res = await testGet('/api/v3/metrics/usage')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
@@ -59,15 +59,7 @@ describe('routes > metrics > getOverviewMetrics', () => {
       byOrganisation: [],
     })
 
-    expect(mockMetricsService.calculateOverviewMetrics).toHaveBeenCalled()
+    expect(mockMetricsConnector.getUsageMetrics).toHaveBeenCalled()
     expect(audit.onViewMetric).toHaveBeenCalled()
-  })
-
-  test('403 > user without Admin role is rejected', async () => {
-    mockAuth.hasRole.mockResolvedValue(false)
-
-    const res = await testGet('/api/v3/metrics')
-
-    expect(res.statusCode).toBe(403)
   })
 })

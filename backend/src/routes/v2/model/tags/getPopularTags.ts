@@ -18,7 +18,7 @@ registerPath({
       description: 'A list of commonly used tags in string format',
       content: {
         'application/json': {
-          schema: z.object({ tags: z.array(z.string()) }),
+          schema: z.object({ tags: z.array(z.string().toLowerCase()) }),
         },
       },
     },

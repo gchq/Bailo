@@ -108,6 +108,7 @@ export interface ScanResultInterface {
   state: ScanStateKeys
   scannerVersion?: string
   summary?: Array<ModelScanSummary | ClamAVScanSummary>
+  platform?: string
   toolName: string
   lastRunAt: string
 
@@ -529,7 +530,7 @@ export interface ModelImage {
   repository: string
   name: string
   tags: Array<string>
-  scanResults: ScanResultInterface[]
+  scanSummaries: ScanResultInterface[]
 }
 
 export interface FlattenedModelImage {
@@ -910,6 +911,8 @@ export type ImageTagResult = {
   tag: string
   state: ArtefactScanStateKeys
   severityCounts: SeverityCounts
+  platform?: string
+  digest?: string
   scanResults?: ScanInterface[]
   imageSize: number
 }

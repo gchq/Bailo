@@ -1,7 +1,6 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BaseMetricsConnector } from './base.js'
-import { SimpleMetricsConnector } from './simple.js'
 
 export const MetricsKind = {
   Simple: 'simple',
@@ -16,7 +15,7 @@ export function getMetricsConnector(cache = true) {
 
   switch (config.connectors.metrics.kind) {
     case MetricsKind.Simple:
-      metricsConnector = new SimpleMetricsConnector()
+      metricsConnector = new BaseMetricsConnector(config.ui.modelDetails.organisations)
       break
     default:
       throw ConfigurationError(`'${config.connectors.metrics.kind}' is not a valid metrics kind.`, {
