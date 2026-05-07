@@ -38,17 +38,20 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
       container
       sx={{
         maxWidth: 'xl',
-        py: 2
-      }}>
+        py: 2,
+      }}
+    >
       <Grid size={{ md: 3, sm: 12 }}>
         <Box sx={{ m: 2 }}>
           <EntryOverviewDetails entry={entry} />
         </Box>
       </Grid>
       <Grid size={{ md: 9, sm: 12 }}>
-        <Box sx={{
-          width: '100%'
-        }}>
+        <Box
+          sx={{
+            width: '100%',
+          }}
+        >
           <Container sx={{ m: 'auto' }} maxWidth='xl'>
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
             {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}
@@ -56,5 +59,5 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
         </Box>
       </Grid>
     </Grid>
-  );
+  )
 }

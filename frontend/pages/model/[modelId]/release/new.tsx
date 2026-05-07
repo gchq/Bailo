@@ -5,7 +5,7 @@ import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -27,6 +27,7 @@ import { isValidSemver, plural } from 'utils/stringUtils'
 export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
+  const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
@@ -48,7 +49,15 @@ export default function NewRelease() {
     isEntryError: isModelError,
   } = useGetEntry(modelId, EntryKind.MODEL)
 
-  const [modelCardVersion, setModelCardVersion] = useState(model ? model.card.version : 0)
+  const updateModelCardVersionEffectEvent = useEffectEvent((cardVersion: number) => {
+    setModelCardVersion(cardVersion)
+  })
+
+  useEffect(() => {
+    if (model && !modelCardVersion) {
+      updateModelCardVersionEffectEvent(model.card.version)
+    }
+  }, [model, setModelCardVersion, modelCardVersion])
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
