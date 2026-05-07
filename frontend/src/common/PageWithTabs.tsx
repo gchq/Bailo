@@ -213,6 +213,7 @@ export default function PageWithTabs({
         scrollButtons='auto'
         variant='scrollable'
         allowScrollButtonsMobile
+        sx={{ height: '20px' }}
       >
         {tabsList}
       </Tabs>

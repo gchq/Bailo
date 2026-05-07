@@ -10,13 +10,14 @@ import DescriptionIcon from '@mui/icons-material/Description'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
+import { Divider, List, ListItem, ListItemButton, ListItemIcon, ListSubheader, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
 import { useGetUserResponses } from 'actions/response'
 import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
+import PythonIcon from 'src/common/PythonIcon'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
 import { User } from 'types/types'
@@ -143,7 +144,8 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            <Divider aria-hidden='true' />
+            {!drawerOpen && <Divider aria-hidden='true' />}
+            {drawerOpen && <ListSubheader>Documentation & support</ListSubheader>}
             <NavMenuItem
               href='/api/v2/docs'
               selectedPage={page}
@@ -155,13 +157,23 @@ export default function SideNavigation({
               openLinkInNewTab
             />
             <NavMenuItem
+              href='/docs'
+              selectedPage={page}
+              primaryText='User docs'
+              drawerOpen={drawerOpen}
+              menuPage='userDocs'
+              title='User documentation'
+              icon={<DescriptionIcon />}
+              openLinkInNewTab
+            />
+            <NavMenuItem
               href='/docs/python/index.html'
               selectedPage={page}
-              primaryText='Python Client Docs'
+              primaryText='Python client docs'
               drawerOpen={drawerOpen}
               menuPage='pythonDocs'
-              title='Python Client Docs'
-              icon={<DescriptionIcon />}
+              title='Python client documentation'
+              icon={<PythonIcon />}
               openLinkInNewTab
             />
             <NavMenuItem
@@ -170,12 +182,13 @@ export default function SideNavigation({
               primaryText='Support'
               drawerOpen={drawerOpen}
               menuPage='help'
-              title='Help & Support'
+              title='Help & support'
               icon={<ContactSupportIcon />}
             />
-            <Divider aria-hidden='true' />
+            {!drawerOpen && <Divider aria-hidden='true' />}
             {currentUser.isAdmin && (
               <>
+                {drawerOpen && <ListSubheader>Administration</ListSubheader>}
                 <NavMenuItem
                   href='/schemas/list'
                   selectedPage={page}
@@ -191,10 +204,10 @@ export default function SideNavigation({
               <NavMenuItem
                 href='/reviewRoles/view'
                 selectedPage={page}
-                primaryText='Review Roles'
+                primaryText='Review roles'
                 drawerOpen={drawerOpen}
                 menuPage='reviewRoles'
-                title='Review Roles'
+                title='Review roles'
                 icon={<SupervisorAccount />}
               />
             )}

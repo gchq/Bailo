@@ -108,7 +108,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
         style={
           noWrap
             ? { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', textDecoration: 'none' }
-            : { textDecoration: 'none' }
+            : { textDecoration: 'none', width: 'inherit' }
         }
       />
     )
