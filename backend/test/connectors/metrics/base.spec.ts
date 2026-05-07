@@ -111,6 +111,7 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
   test('calculateUsageMetrics returns global metrics', async () => {
     modelMocks.distinct.mockResolvedValueOnce(['m1', 'm2']).mockResolvedValueOnce(['m1', 'm2'])
+    schemaModelMocks.aggregate.mockResolvedValue([])
 
     modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
       if (pipeline.some((stage) => stage.$unwind === '$collaborators')) {
@@ -159,6 +160,7 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
   test('returns zero counts when aggregates return empty', async () => {
     modelMocks.distinct.mockResolvedValueOnce([])
+    schemaModelMocks.aggregate.mockResolvedValue([])
 
     modelMocks.aggregate.mockResolvedValue([])
     modelMocks.countDocuments.mockResolvedValue(0)
@@ -211,12 +213,14 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
     expect(result.global.schemaBreakdown).toEqual([
       { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
       { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
+      { schemaId: 'unset', schemaName: 'unset', count: 0 },
     ])
   })
   test('global model count equals sum of organisation + unset counts', async () => {
     modelMocks.countDocuments
       .mockResolvedValueOnce(3) // b corp
       .mockResolvedValueOnce(3) // unset
+    schemaModelMocks.aggregate.mockResolvedValue([])
 
     // Minimal mocks for other aggregations
     modelMocks.aggregate.mockResolvedValue([])
@@ -244,6 +248,7 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
       .mockResolvedValueOnce(3) // b corp
       .mockResolvedValueOnce(1) // c corp
       .mockResolvedValueOnce(0) // unset
+    schemaModelMocks.aggregate.mockResolvedValue([])
 
     modelMocks.aggregate.mockResolvedValue([])
     releaseMocks.distinct.mockResolvedValue([])

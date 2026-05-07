@@ -210,10 +210,25 @@ async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): 
       countDistinctModelsWithRelation(AccessRequestModel, filter),
     ])
 
+  // Sum models counted in schemas
+  const schemaTotal = schemaMetrics.reduce((sum, s) => sum + s.count, 0)
+
+  // Models with no schema
+  const unsetCount = Math.max(totalModels - schemaTotal, 0)
+
+  const schemaBreakdown: SchemaInfo[] = [
+    ...schemaMetrics,
+    {
+      schemaId: 'unset',
+      schemaName: 'unset',
+      count: unsetCount,
+    },
+  ]
+
   return {
     users: undefined,
     models: totalModels,
-    schemaBreakdown: schemaMetrics,
+    schemaBreakdown,
     modelState: stateMetrics,
     withReleases: totalModelsWithReleases,
     withAccessRequest: totalModelsWithAccessRequests,
