@@ -37,9 +37,9 @@ export function useGetModelVolumeMetrics(
   }
 }
 
-export function useGetVolumeForModel(bucket: string = 'month', startDate?: string, endDate?: string) {
+export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
   const queryParams = {
-    bucket,
+    interval,
     ...(startDate != undefined && { startDate }),
     ...(endDate != undefined && { endDate }),
   }
@@ -65,7 +65,7 @@ export function useGetGetOverviewMetrics() {
       byOrganisation: OrganisationOverviewMetrics[]
     },
     ErrorInfo
-  >('/api/v3/metrics', fetcher)
+  >('/api/v3/metrics/usage', fetcher)
 
   return {
     mutateOverviewMetrics: mutate,
@@ -82,7 +82,7 @@ export function useGetPolicyMetrics() {
       byOrganisation: OrganisationPolicyMetrics[]
     },
     ErrorInfo
-  >('/api/v3/metrics/policy', fetcher)
+  >('/api/v3/metrics/compliance', fetcher)
 
   return {
     mutateOverviewMetrics: mutate,
