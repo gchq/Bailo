@@ -2,7 +2,7 @@ import { generateMock, GenerateMockOptions } from '@anatine/zod-mock'
 import supertest from 'supertest'
 import z, { ZodSchema } from 'zod'
 
-import { server } from '../../src/routes.js'
+import { server } from '../../src/routes/v2/routes.js'
 
 export function createFixture<T extends ZodSchema>(schema: T, options?: GenerateMockOptions): z.infer<T> {
   return generateMock(schema, {
