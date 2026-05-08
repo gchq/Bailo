@@ -36,7 +36,7 @@ def normalise_query_params(value: Any) -> Any:
     if isinstance(value, bool):
         return str(value).lower()
     if isinstance(value, Enum):
-        return value.value
+        return normalise_query_params(value.value)
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):  # e.g. list, tuple
         return [normalise_query_params(v) for v in value]
     if isinstance(value, Mapping):  # e.g. dict

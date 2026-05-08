@@ -35,7 +35,7 @@ def test_schema():
 def test_get_all_schema_ids(requests_mock):
     requests_mock.get(
         "https://example.com/api/v2/schemas?kind=model",
-        json={"success": "true", "schemas": [{"id": f"schema{i}"} for i in range(3)]},
+        json={"success": True, "schemas": [{"id": f"schema{i}"} for i in range(3)]},
     )
 
     client = Client("https://example.com")
