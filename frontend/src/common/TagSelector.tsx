@@ -1,16 +1,21 @@
-import { Close, Done, Edit } from '@mui/icons-material'
-import { Button, Chip, Grid, TextField, Typography } from '@mui/material'
-import Autocomplete, { autocompleteClasses, AutocompleteCloseReason } from '@mui/material/Autocomplete'
+import CancelIcon from '@mui/icons-material/Cancel'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Autocomplete,
+  Chip,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { createFilterOptions } from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
-import ClickAwayListener from '@mui/material/ClickAwayListener'
-import Popper, { type PopperProps } from '@mui/material/Popper'
-import { styled } from '@mui/material/styles'
 import { useGetPopularEntryTags } from 'actions/entry'
-import { ChangeEvent, KeyboardEvent, useContext, useMemo, useState } from 'react'
+import { useContext, useState } from 'react'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import { RestrictedActionKeys } from 'types/types'
-
-type PopperComponentProps = Pick<PopperProps, 'anchorEl' | 'disablePortal' | 'open'>
 
 interface EntryTagSelectorProps {
   onChange: (newTag: string[]) => void
@@ -19,192 +24,89 @@ interface EntryTagSelectorProps {
   restrictedToAction?: RestrictedActionKeys
 }
 
-const StyledAutocompletePopper = styled('div')(({ theme }) => ({
-  [`& .${autocompleteClasses.paper}`]: {
-    boxShadow: 'none',
-    margin: 0,
-    color: 'inherit',
-    fontSize: 13,
-  },
-  [`& .${autocompleteClasses.listbox}`]: {
-    padding: 0,
-    [`& .${autocompleteClasses.option}`]: {
-      minHeight: 'auto',
-      alignItems: 'flex-start',
-      padding: 8,
-      borderBottom: '1px solid #eaecef',
-      ...theme.applyStyles('dark', {
-        borderBottom: '1px solid #30363d',
-      }),
-      '&[aria-selected="true"]': {
-        backgroundColor: 'transparent',
-      },
-      [`&.${autocompleteClasses.focused}, &.${autocompleteClasses.focused}[aria-selected="true"]`]: {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
-  },
-  [`&.${autocompleteClasses.popperDisablePortal}`]: {
-    position: 'relative',
-  },
-}))
-
-function PopperComponent(props: PopperComponentProps) {
-  const { disablePortal: _disablePortal, anchorEl: _anchorEl, open: _open, ...other } = props
-  return <StyledAutocompletePopper {...other} />
-}
-
-const StyledPopper = styled(Popper)(({ theme }) => ({
-  border: '1px solid #e1e4e8',
-  boxShadow: `0 8px 24px ${'rgba(149, 157, 165, 0.2)'}`,
-  backgroundColor: '#fff',
-  borderRadius: 6,
-  width: 300,
-  zIndex: theme.zIndex.modal,
-  fontSize: 13,
-}))
-
-export default function TagSelector({ onChange, tags, errorText = '', restrictedToAction }: EntryTagSelectorProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [pendingValue, setPendingValue] = useState<string[]>([])
+export default function TagSelector({
+  onChange,
+  tags,
+  errorText: _errorText = '',
+  restrictedToAction,
+}: EntryTagSelectorProps) {
   const { userPermissions } = useContext(UserPermissionsContext)
+  const canEdit = !restrictedToAction || userPermissions[restrictedToAction]?.hasPermission
   const { tags: popularTags, isTagsError } = useGetPopularEntryTags()
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setPendingValue(tags)
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    onChange(pendingValue)
-    if (anchorEl) {
-      anchorEl.focus()
-    }
-    setAnchorEl(null)
-  }
-
-  const open = Boolean(anchorEl)
-
-  const options = useMemo(
-    () => [...new Set([...popularTags, ...tags, ...pendingValue])],
-    [popularTags, tags, pendingValue],
-  )
+  const [inputValue, setInputValue] = useState('')
+  type TagOption = { tag: string; kind: 'popular' | 'new' }
+  const filter = createFilterOptions<TagOption>()
 
   return (
-    <Box sx={{ p: 1 }}>
-      <Box sx={{ fontSize: 13 }}>
-        <Button
-          size='small'
-          sx={{ width: 'max-content', fontWeight: 'bold' }}
-          disabled={restrictedToAction && !userPermissions[restrictedToAction].hasPermission}
-          disableRipple
-          onClick={handleClick}
-        >
-          {restrictedToAction && userPermissions[restrictedToAction].hasPermission ? (
-            <Box>
-              <span>Update Tags: </span>
-              <Edit sx={{ fontSize: 16 }} />
-            </Box>
-          ) : (
-            <span>Tags: </span>
-          )}
-        </Button>
-        <Grid
-          container
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-          }}
-        >
-          {tags.map((label) => (
-            <Grid key={label}>
-              <Chip variant='filled' label={label} />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-      <StyledPopper open={open} anchorEl={anchorEl} placement='bottom-start'>
-        <ClickAwayListener onClickAway={handleClose}>
-          <Box sx={{ p: 3 }}>
-            <Box
-              sx={(t) => ({
-                padding: '8px 10px',
-                fontWeight: 600,
-                ...t.applyStyles('light', {
-                  borderBottom: '1px solid #eaecef',
-                }),
-              })}
-            >
-              Add a new tag or select an existing popular tag
-            </Box>
-            <Autocomplete
-              freeSolo
-              disableClearable={true}
-              open
-              multiple
-              onClose={(event: ChangeEvent<object>, reason: AutocompleteCloseReason) => {
-                if (reason === 'escape') {
-                  handleClose()
-                }
-              }}
-              value={pendingValue}
-              onChange={(event, newValue, reason) => {
-                if (
-                  event.type === 'keydown' &&
-                  ((event as KeyboardEvent).key === 'Backspace' || (event as KeyboardEvent).key === 'Delete') &&
-                  reason === 'removeOption'
-                ) {
-                  return
-                }
-                setPendingValue(newValue)
-              }}
-              disableCloseOnSelect
+    <Box>
+      {canEdit && (
+        <Accordion sx={{ backgroundColor: 'transparent' }}>
+          <AccordionSummary sx={{ pl: 0, borderTop: 'none' }} expandIcon={<ExpandMoreIcon />} id='tag-add-header'>
+            <Typography>Add tags</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 0 }}>
+            <Autocomplete<TagOption>
               renderValue={() => null}
-              noOptionsText='No tags'
-              renderOption={(props, option, { selected }) => {
-                const { key, ...optionProps } = props
-                return (
-                  <li key={key} {...optionProps}>
-                    <Box
-                      component={Done}
-                      sx={{ width: 17, height: 17, mr: '5px', ml: '-2px' }}
-                      style={{
-                        visibility: selected ? 'visible' : 'hidden',
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                      }}
-                    >
-                      {option}
-                    </Box>
-                    <Box
-                      component={Close}
-                      sx={{ opacity: 0.6, width: 18, height: 18 }}
-                      style={{
-                        visibility: selected ? 'visible' : 'hidden',
-                      }}
-                    />
-                  </li>
-                )
+              options={(isTagsError ? [] : (popularTags ?? []))
+                .filter((t) => !tags.includes(t))
+                .map((t) => ({ tag: t, kind: 'popular' as const }))}
+              inputValue={inputValue}
+              onInputChange={(_, v) => setInputValue(v)}
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params)
+                const v = params.inputValue.trim()
+                const lower = v.toLowerCase()
+                const existsInSelected = tags.some((t) => t.toLowerCase() === lower)
+                const existsInOptions = options.some((opt) => opt.tag.toLowerCase() === lower)
+                if (v && !existsInSelected && !existsInOptions) {
+                  filtered.push({ tag: v, kind: 'new' })
+                }
+                return filtered
               }}
-              options={options}
+              groupBy={(option) => (option.kind === 'popular' ? 'Suggested tags' : 'Add a new tag')}
+              getOptionLabel={(option) => option.tag}
+              onChange={(_, newValue) => {
+                const v = newValue ? newValue.tag : ''
+                const trimmed = v.trim()
+                if (trimmed && !tags.includes(trimmed)) {
+                  onChange([...tags, trimmed])
+                }
+                setInputValue('')
+              }}
+              filterSelectedOptions
+              disabled={!canEdit}
+              sx={{ mt: 1 }}
               renderInput={(params) => (
-                <Box sx={{ display: 'flex', justifyContent: 'center', width: '95%', height: '95%', mx: 'auto', pt: 1 }}>
-                  <TextField {...params} size='small' autoFocus placeholder='Add tag' />
-                </Box>
+                <TextField
+                  {...params}
+                  label='Add a tag'
+                  size='small'
+                  placeholder='Type to search or add'
+                  disabled={!canEdit}
+                />
               )}
-              slots={{
-                popper: PopperComponent,
-              }}
             />
-            <Typography variant='caption' color='error'>
-              {[errorText, isTagsError?.info?.message].filter(Boolean).join(' ')}
-            </Typography>
-          </Box>
-        </ClickAwayListener>
-      </StyledPopper>
+          </AccordionDetails>
+        </Accordion>
+      )}
+      <Grid
+        container
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        {tags.map((label) => (
+          <Grid key={label}>
+            <Chip
+              variant='filled'
+              label={label}
+              onDelete={canEdit ? () => onChange(tags.filter((t) => t !== label)) : undefined}
+              deleteIcon={<CancelIcon fontSize='small' />}
+            />
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   )
 }

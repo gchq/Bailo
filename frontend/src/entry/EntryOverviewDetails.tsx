@@ -120,6 +120,9 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {collaboratorList}
         </Stack>
         <Box>
+          <Typography>
+            <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Tags: </span>
+          </Typography>
           <TagSelector
             onChange={handleEntryTagOnChange}
             errorText={entryTagUpdateErrorMessage}
