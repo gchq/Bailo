@@ -55,12 +55,15 @@ registerPath({
   path: '/api/v2/model/{modelId}/image/{name}/{tag}',
 })
 
-registerPath({
-  ...pathSpec,
-  schema: getImageByDigestSchema,
-  description: 'Get information associated with a specific tagged image and digest for a model.',
-  path: '/api/v3/model/{modelId}/image/{name}/{tag}/{digest}',
-})
+registerPath(
+  {
+    ...pathSpec,
+    schema: getImageByDigestSchema,
+    description: 'Get information associated with a specific tagged image and digest for a model.',
+    path: '/api/v3/model/{modelId}/image/{name}/{tag}/{digest}',
+  },
+  'v3',
+)
 interface GetImagesResponse {
   imageBreakdown: ImageTagResult
 }

@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import swaggerUi from 'swagger-ui-express'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import { generateSwaggerSpec } from '../../services/specification.js'
@@ -98,7 +97,7 @@ const router = Router()
 
 // Needs to be applied after authentication middleware as it requires the user details
 router.use('/models', escalateUser)
-router.use('/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
+router.get('/api-docs/swagger.json', (req, res) => res.json(generateSwaggerSpec()))
 
 router.get('/system/status', ...getSystemStatus)
 router.get('/system/peers', ...getPeerStatus)
@@ -239,5 +238,4 @@ router.put('/review/role/:shortName', ...putReviewRole)
 router.get('/models/tags', getPopularTags)
 
 router.get('/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
-
 export default router

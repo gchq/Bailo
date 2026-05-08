@@ -140,7 +140,7 @@ export default function SideNavigation({
             />
             <Divider aria-hidden='true' />
             <NavMenuItem
-              href='/api/v2/docs'
+              href='/api/docs'
               selectedPage={page}
               primaryText='API'
               drawerOpen={drawerOpen}

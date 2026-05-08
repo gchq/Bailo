@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser'
 import express from 'express'
 import path from 'path'
+import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
@@ -23,6 +24,26 @@ server.use('/api/v1', v1Router)
 server.use('/api/v2', v2Router)
 server.use('/api/v3', v3Router)
 server.use('/internal', internalRouter)
+
+server.use(
+  '/api/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(null, {
+    explorer: true,
+    swaggerOptions: {
+      urls: [
+        {
+          url: '/api/v2/api-docs/swagger.json',
+          name: 'v2.0.0',
+        },
+        {
+          url: '/api/v3/api-docs/swagger.json',
+          name: 'v3.0.0(beta)',
+        },
+      ],
+    },
+  }),
+)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
