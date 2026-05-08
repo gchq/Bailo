@@ -12,6 +12,7 @@ import {
   getModelById,
   getModelByIdNoAuth,
   getModelCardRevision,
+  getModelSystemRoles,
   isModelCardRevisionDoc,
   popularTagsForEntries,
   removeModel,
@@ -780,5 +781,24 @@ describe('services > model', () => {
     ModelModelMock.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
     const tags = await popularTagsForEntries()
     expect(tags).toEqual(['test-tag'])
+  })
+
+  test('getModelSystemRoles > should handle case-insensitive entity matching', async () => {
+    const mockModel = {
+      collaborators: [
+        {
+          entity: 'Bobs_User_Group',
+          roles: ['owner'],
+        },
+      ],
+    } as any
+
+    const mockUser = { dn: 'user' } as any
+
+    authenticationMocks.getEntities.mockResolvedValueOnce(['BOBS_USER_GROUP'])
+
+    const response = await getModelSystemRoles(mockUser, mockModel)
+
+    expect(response).toContain('owner')
   })
 })
