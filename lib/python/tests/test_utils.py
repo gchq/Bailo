@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.utils import NestedDict, filter_none
+from bailo.core.utils import NestedDict, filter_none, normalise_query_params
 
 
 def test_NestedDict_get_single_key():
@@ -104,6 +104,74 @@ def test_filter_none_should_leave_booleans():
     }
 
 
+def test_filter_none_removes_top_level_none():
+    assert filter_none({"a": None, "b": 1}) == {"b": 1}
+
+
+def test_filter_none_keeps_zero_and_empty_string():
+    input = {"a": 0, "b": "", "c": None}
+    expected = {"a": 0, "b": ""}
+    assert filter_none(input) == expected
+
+
+def test_filter_none_removes_empty_dict_after_cleaning():
+    input = {"a": {"b": None}}
+    assert filter_none(input) == {}
+
+
+def test_filter_none_keeps_empty_list():
+    input = {"a": []}
+    assert filter_none(input) == {"a": []}
+
+
+def test_filter_none_list_with_none_values():
+    input = {"a": [1, None, 2]}
+    # None inside lists is preserved by current implementation
+    assert filter_none(input) == {"a": [1, None, 2]}
+
+
+def test_filter_none_nested_list_dict_cleanup():
+    input = {"a": [{"b": None}, {"c": 1}]}
+    expected = {"a": [{}, {"c": 1}]}
+    assert filter_none(input) == expected
+
+
+def test_filter_none_tuple_is_converted_to_list():
+    input = {"a": (1, None, {"b": None})}
+    expected = {"a": [1, None, {}]}
+    assert filter_none(input) == expected
+
+
+def test_filter_none_string_not_treated_as_sequence():
+    input = {"a": "hello", "b": None}
+    expected = {"a": "hello"}
+    assert filter_none(input) == expected
+
+
+def test_filter_none_bytes_not_treated_as_sequence():
+    input = {"a": b"abc", "b": None}
+    expected = {"a": b"abc"}
+    assert filter_none(input) == expected
+
+
+def test_filter_none_deep_mixed_structure():
+    input = {
+        "a": None,
+        "b": {
+            "c": None,
+            "d": [{"e": None}, {"f": 2}],
+        },
+        "g": [],
+    }
+    expected = {
+        "b": {
+            "d": [{}, {"f": 2}],
+        },
+        "g": [],
+    }
+    assert filter_none(input) == expected
+
+
 def test_filter_none_should_keep_provided_values():
     """Should keep all provided values."""
     input = {
@@ -180,3 +248,60 @@ def test_filter_none_should_remove_none_values_and_keep_empty_arrays():
         "tags": [],
     }
     assert filter_none(input) == output
+
+
+def test_normalise_query_params_bool_true():
+    assert normalise_query_params(True) == "true"
+
+
+def test_normalise_query_params_bool_false():
+    assert normalise_query_params(False) == "false"
+
+
+def test_normalise_query_params_string_booleans():
+    assert normalise_query_params("True") == "True"
+    assert normalise_query_params("False") == "False"
+
+
+def test_normalise_query_params_string_non_boolean():
+    assert normalise_query_params("hello") == "hello"
+
+
+def test_normalise_query_params_dict_with_bool():
+    assert normalise_query_params({"a": True, "b": False}) == {"a": "true", "b": "false"}
+
+
+def test_normalise_query_params_nested_dict():
+    input = {"a": {"b": True}}
+    expected = {"a": {"b": "true"}}
+    assert normalise_query_params(input) == expected
+
+
+def test_normalise_query_params_list_with_bool():
+    assert normalise_query_params([True, False]) == ["true", "false"]
+
+
+def test_normalise_query_params_nested_list_dict():
+    input = {"a": [{"b": True}, {"c": False}]}
+    expected = {"a": [{"b": "true"}, {"c": "false"}]}
+    assert normalise_query_params(input) == expected
+
+
+def test_normalise_query_params_tuple_sequence():
+    input = (True, False)
+    expected = ["true", "false"]
+    assert normalise_query_params(input) == expected
+
+
+def test_normalise_query_params_mixed_structure():
+    input = {
+        "a": True,
+        "b": ["True", False, {"c": "False"}],
+        "d": {"e": True},
+    }
+    expected = {
+        "a": "true",
+        "b": ["True", "false", {"c": "False"}],
+        "d": {"e": "true"},
+    }
+    assert normalise_query_params(input) == expected

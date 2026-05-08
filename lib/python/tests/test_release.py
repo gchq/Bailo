@@ -35,7 +35,7 @@ def test_create_release(
     draft: bool,
     requests_mock,
 ):
-    requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
+    requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": "true"})
 
     client = Client("https://example.com")
 

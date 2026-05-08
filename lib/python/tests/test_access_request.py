@@ -21,7 +21,7 @@ def test_access_request():
 
 
 def test_update_access_request(requests_mock):
-    requests_mock.patch("https://example.com/api/v2/model/test_id/access-request/new_example", json={"success": True})
+    requests_mock.patch("https://example.com/api/v2/model/test_id/access-request/new_example", json={"success": "true"})
 
     client = Client("https://example.com")
 
