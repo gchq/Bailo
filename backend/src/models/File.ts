@@ -7,7 +7,6 @@ import { ScanInterface } from './Scan.js'
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface FileInterface {
-  id: string
   _id: ObjectId
   modelId: string
 
