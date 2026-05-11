@@ -59,7 +59,7 @@ export async function updateArtefactScanWithResults(
   })
 
   try {
-    return await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
+    await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
   } catch (err: any) {
     if (err.code === 11000) {
       throw Conflict('Scan already in progress', { scanIdentifier })
@@ -146,11 +146,7 @@ export async function scanFile(file: FileInterfaceDoc) {
   })
 
   const scanResults = await ScanModel.find(fileIdentifier)
-  const ret: FileWithScanResultsInterface = {
-    ...file.toObject(),
-    scanResults,
-    id: file._id.toString(),
-  }
+  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults })
 
   return ret
 }

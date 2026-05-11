@@ -10,7 +10,7 @@ vi.mock('../../../../src/connectors/authorisation/index.js')
 
 vi.mock('../../../../src/services/file.js', () => ({
   startUploadMultipartFile: vi.fn(() => ({
-    file: { id: 'test' },
+    file: { _id: 'test' },
     uploadId: 'test',
     chunks: [{ presignedUrl: 'string', startByte: 0, endByte: 12345 }],
   })),
