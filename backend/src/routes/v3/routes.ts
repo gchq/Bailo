@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { generateV3SwaggerSpec } from '../../services/specification.js'
-import { getImageByDigest } from '../v2/model/images/getImage.js'
+import { getImageByDigest } from '../v3/model/images/getImage.js'
 
 const router = Router()
 
