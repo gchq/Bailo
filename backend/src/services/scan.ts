@@ -4,7 +4,7 @@ import { ArtefactScanResult, ArtefactScanState, LayerRefInterface } from '../con
 import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { FileInterface } from '../models/File.js'
 import { ImageRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
@@ -72,7 +72,7 @@ type RunScansParams = { file: FileInterface; layerRef?: never } | { file?: never
 /**
  * Only await if you want to wait for the scans to complete.
  */
-async function runScans({ file, layerRef }: RunScansParams) {
+export async function runScans({ file, layerRef }: RunScansParams) {
   const requiredScannerType: ArtefactKindKeys = file ? 'file' : 'image'
   const scannersInfo = scanners.scannersInfo()
   const activeScanners = scannersInfo.filter((scannerInfo) => scannerInfo.artefactKind === requiredScannerType)
@@ -134,21 +134,6 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
     }
   }
   return Math.round(minutesBeforeRetrying / 60000)
-}
-
-export async function scanFile(file: FileInterfaceDoc) {
-  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
-  runScans({ file }).catch((error) => {
-    log.error(
-      { scanIdentifier: fileIdentifier, file, error },
-      'Unable to set failure state after failing to run file scans. Safely aborted.',
-    )
-  })
-
-  const scanResults = await ScanModel.find(fileIdentifier)
-  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults })
-
-  return ret
 }
 
 export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string) {

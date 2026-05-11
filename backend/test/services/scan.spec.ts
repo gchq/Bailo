@@ -6,7 +6,7 @@ import {
   rerunFileScan,
   rerunImageScan,
   rerunImageScanNoAuth,
-  scanFile,
+  runScans,
   updateArtefactScanWithResults,
 } from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -131,49 +131,15 @@ const registryAuthMocks = vi.hoisted(() => ({
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
 const testFileId = '73859F8D26679D2E52597326'
-const mockFile = { id: 'file123', name: 'file.txt', size: 1 } as any
+const mockFile = { _id: 'file123', name: 'file.txt', size: 1 } as any
 
 describe('services > scan', () => {
   describe('scanFile', () => {
-    test('successfully scans a file and returns scan results', async () => {
-      const scanResult = {
-        state: ArtefactScanState.Complete,
-        toolName: 'clamAv',
-        artefactKind: ArtefactKind.FILE,
-        lastRunAt: new Date(),
-      }
-      ScanModelMock.find.mockResolvedValueOnce([scanResult])
-      ScanModelMock.updateOne.mockResolvedValueOnce(undefined)
-
-      const result = await scanFile(mockFile)
-
-      expect(result.scanResults).toEqual([scanResult])
-      expect(result.name).toBe('file.txt')
-    })
-
-    test('runs scanners when scanning a file', async () => {
-      ScanModelMock.find.mockResolvedValueOnce([])
-      ScanModelMock.updateOne.mockResolvedValue(undefined)
-
-      await scanFile(mockFile)
-
-      expect(fileScanningMock.startScans).toHaveBeenCalledTimes(1)
-    })
-
-    test('returns file with no scan results when no scanners are enabled', async () => {
-      fileScanningMock.scannersInfo.mockReturnValueOnce([])
-      ScanModelMock.find.mockResolvedValueOnce([])
-
-      const result = await scanFile(mockFile)
-
-      expect(result.scanResults).toEqual([])
-    })
-
     test('sets scan state to InProgress before completing', async () => {
       ScanModelMock.find.mockResolvedValueOnce([])
       ScanModelMock.updateOne.mockResolvedValue(undefined)
 
-      await scanFile(mockFile)
+      await runScans({ file: mockFile })
 
       expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
       const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0]) // extract ops array(s)
@@ -201,7 +167,7 @@ describe('services > scan', () => {
       ScanModelMock.find.mockResolvedValueOnce([])
       ScanModelMock.updateOne.mockResolvedValue(undefined)
 
-      await scanFile(mockFile)
+      await runScans({ file: mockFile })
 
       expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
       const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
