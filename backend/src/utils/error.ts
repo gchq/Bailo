@@ -69,6 +69,10 @@ export function NotImplemented(message: string, context?: BailoError['context'],
   return GenericError(501, message, context, logger)
 }
 
+export function UnprocessableContent(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(422, message, context, logger)
+}
+
 export function ConfigurationError(message: string, context?: BailoError['context'], logger?: Logger) {
   return GenericError(503, `BAILO configuration error: ${message}`, context, logger)
 }

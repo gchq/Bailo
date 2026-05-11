@@ -11,7 +11,7 @@ import { UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Conflict, Forbidden } from '../utils/error.js'
+import { BadReq, Conflict, Forbidden, UnprocessableContent } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getFileById } from './file.js'
@@ -187,7 +187,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
   }
 
   if (!scanners.hasScannerForArtefactKind('file')) {
-    throw BadReq('No file scanners are enabled.')
+    throw UnprocessableContent('No file scanners are enabled.')
   }
 
   // Do not await so that the endpoint can return early (fire-and-forget)
@@ -220,7 +220,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   }
 
   if (!scanners.hasScannerForArtefactKind('image')) {
-    throw BadReq('No image scanners are enabled.')
+    throw UnprocessableContent('No image scanners are enabled.')
   }
 
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
