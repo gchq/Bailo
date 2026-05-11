@@ -83,7 +83,7 @@ async function runScans({ file, layerRef }: RunScansParams) {
   if (file) {
     scanIdentifier = {
       artefactKind: 'file',
-      fileId: file.id,
+      fileId: file._id.toString(),
     }
   } else if (layerRef) {
     scanIdentifier = {

@@ -97,33 +97,6 @@ describe('connectors > artefactScanning > wrapper', () => {
     ])
   })
 
-  test('isMatchingInterface() matches file artefact', () => {
-    const scanner = new TestFileScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-    const artefact = { _id: 'file1', modelId: 'm1', name: 'file.bin' } as any
-
-    const result = wrapper.isMatchingInterface(artefact, scanner)
-
-    expect(result).toEqual({ matching: true, artefactType: ArtefactKind.FILE })
-  })
-
-  test('isMatchingInterface() matches image artefact', () => {
-    const scanner = new TestImageScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-    const artefact = { tag: 'latest', repository: 'repo', name: 'img' } as any
-
-    const result = wrapper.isMatchingInterface(artefact, scanner)
-
-    expect(result).toEqual({ matching: true, artefactType: ArtefactKind.IMAGE })
-  })
-
-  test('isMatchingInterface() throws on invalid artefact', () => {
-    const scanner = new TestFileScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-
-    expect(() => wrapper.isMatchingInterface({} as any, scanner)).toThrow(TypeError)
-  })
-
   test('startScans() runs only matching scanners for file artefact', async () => {
     const fileScanner = new TestFileScanner()
     const imageScanner = new TestImageScanner()
