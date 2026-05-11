@@ -20,14 +20,14 @@ export const RoleSummarySchema = RoleIdentitySchema.extend({
   count: z.number(),
 })
 
-export const ModelRoleMetricsSchema = z.object({
-  modelId: z.string(),
+export const EntryRoleMetricsSchema = z.object({
+  entryId: z.string(),
   missingRoles: z.array(RoleIdentitySchema),
 })
 
 export const ComplianceBaseMetricsSchema = z.object({
   summary: z.array(RoleSummarySchema),
-  models: z.array(ModelRoleMetricsSchema),
+  entries: z.array(EntryRoleMetricsSchema),
 })
 
 export const ComplianceOrganisationMetricsSchema = ComplianceBaseMetricsSchema.extend({
@@ -35,6 +35,7 @@ export const ComplianceOrganisationMetricsSchema = ComplianceBaseMetricsSchema.e
 })
 
 export const GetComplianceMetricsResponseSchema = z.object({
+  lastUpdated: z.string(),
   global: ComplianceBaseMetricsSchema,
   byOrganisation: z.array(ComplianceOrganisationMetricsSchema),
 })

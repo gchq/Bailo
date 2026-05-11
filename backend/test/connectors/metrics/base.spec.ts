@@ -144,7 +144,7 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
     const result = await connector.getUsageMetrics(mockUser)
 
-    expect(result.global.models).toBe(10)
+    expect(result.global.entries).toBe(10)
     expect(result.global.users).toBe(5)
     expect(result.global.withReleases).toBe(6)
     expect(result.global.withAccessRequest).toBe(3)
@@ -154,8 +154,8 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
     const corp = result.byOrganisation.find((o) => o.organisation === 'b corp')
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
 
-    expect(corp?.models).toBe(4)
-    expect(unset?.models).toBe(6)
+    expect(corp?.entries).toBe(4)
+    expect(unset?.entries).toBe(6)
   })
 
   test('returns zero counts when aggregates return empty', async () => {
@@ -176,7 +176,7 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
     const result = await connector.getUsageMetrics(mockUser)
 
-    expect(result.global.models).toBe(0)
+    expect(result.global.entries).toBe(0)
     expect(result.global.users).toBe(0)
     expect(result.global.withReleases).toBe(0)
     expect(result.global.withAccessRequest).toBe(0)
@@ -238,10 +238,10 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
     const result = await connector.getUsageMetrics(mockUser)
 
-    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.models, 0)
+    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.entries, 0)
 
-    expect(result.global.models).toBe(6)
-    expect(sumOfOrgs).toBe(result.global.models)
+    expect(result.global.entries).toBe(6)
+    expect(sumOfOrgs).toBe(result.global.entries)
   })
   test('global model count equals sum of organisations when no unset exists', async () => {
     modelMocks.countDocuments
@@ -262,10 +262,10 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
     const result = await connector.getUsageMetrics(mockUser)
 
-    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.models, 0)
+    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.entries, 0)
 
-    expect(result.global.models).toBe(4)
-    expect(sumOfOrgs).toBe(result.global.models)
+    expect(result.global.entries).toBe(4)
+    expect(sumOfOrgs).toBe(result.global.entries)
   })
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
@@ -284,7 +284,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
     authenticationMocks.hasRole.mockResolvedValue(true)
   })
 
-  test('calculateComplianceMetrics returns correct global summary and models', async () => {
+  test('calculateComplianceMetrics returns correct global summary and entries', async () => {
     modelMocks.distinct.mockImplementation((field: string) => {
       if (field === 'organisation') {
         return Promise.resolve(['a corp'])
@@ -331,16 +331,16 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
 
     const result = await connector.getComplianceMetrics(mockUser)
 
-    expect(result.global.models).toHaveLength(2)
+    expect(result.global.entries).toHaveLength(2)
 
-    expect(result.global.models).toEqual(
+    expect(result.global.entries).toEqual(
       expect.arrayContaining([
         {
-          modelId: 'model-1',
+          entryId: 'model-1',
           missingRoles: [{ roleId: 'msro', roleName: 'MSRO' }],
         },
         {
-          modelId: 'model-2',
+          entryId: 'model-2',
           missingRoles: [
             { roleId: 'msro', roleName: 'MSRO' },
             { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
@@ -387,7 +387,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
 
     const result = await connector.getComplianceMetrics(mockUser)
 
-    expect(result.global.models[0].missingRoles).toEqual([
+    expect(result.global.entries[0].missingRoles).toEqual([
       { roleId: 'msro', roleName: 'MSRO' },
       { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
     ])
@@ -435,10 +435,10 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
     const bCorp = result.byOrganisation.find((o) => o.organisation === 'b corp')
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
 
-    expect(bCorp?.models).toHaveLength(1)
-    expect(unset?.models).toHaveLength(2)
+    expect(bCorp?.entries).toHaveLength(1)
+    expect(unset?.entries).toHaveLength(2)
   })
-  test('unset compliance metrics only include models with empty organisation', async () => {
+  test('unset compliance metrics only include entries with empty organisation', async () => {
     // Distinct organisations includes empty string
     modelMocks.distinct.mockResolvedValue(['', 'orgA'])
 
@@ -465,8 +465,8 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
 
     expect(unset).toBeDefined()
-    expect(unset?.models).toHaveLength(1)
-    expect(unset?.models[0].modelId).toBe('unset-model')
+    expect(unset?.entries).toHaveLength(1)
+    expect(unset?.entries[0].entryId).toBe('unset-model')
   })
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
@@ -478,13 +478,13 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
   })
 })
 
-describe('connectors > metrics > simple > calculateModelVolue', () => {
+describe('connectors > metrics > simple > calculateEntryVolue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     authenticationMocks.hasRole.mockResolvedValue(true)
   })
 
-  test('calculateModelVolume > basic aggregation', async () => {
+  test('calculateEntryVolume > basic aggregation', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
       .mockResolvedValueOnce([
@@ -502,12 +502,18 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'day', '2026-01-01', '2026-01-03')
+    const result = await connector.calculateEntryVolume(mockUser, 'day', '2026-01-01', '2026-01-03')
 
     expect(modelMocks.aggregate).toHaveBeenCalledTimes(2)
     expect(modelMocks.distinct).toHaveBeenCalledWith('organisation')
 
-    expect(result).toEqual({
+    expect(result.lastUpdated).toBeDefined()
+
+    const { lastUpdated, ...rest } = result
+
+    expect(lastUpdated).toEqual(expect.any(String))
+
+    expect(rest).toEqual({
       interval: 'day',
       startDate: '2026-01-01T00:00:00.000Z',
       endDate: '2026-01-03T00:00:00.000Z',
@@ -543,7 +549,7 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     })
   })
 
-  test('calculateModelVolume > bad timezone', async () => {
+  test('calculateEntryVolume > bad timezone', async () => {
     modelMocks.aggregate.mockRejectedValueOnce(
       Object.assign(new Error('Invalid timezone'), { name: 'MongoServerError' }),
     )
@@ -552,11 +558,11 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const connector = new BaseMetricsConnector(['b corp'])
 
     await expect(
-      connector.calculateModelVolume(mockUser, 'week', '2026-01-01', '2026-02-01', 'notARealTimeZone'),
+      connector.calculateEntryVolume(mockUser, 'week', '2026-01-01', '2026-02-01', 'notARealTimeZone'),
     ).rejects.toThrowError(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
   })
 
-  test('calculateModelVolume > day interval stepping', async () => {
+  test('calculateEntryVolume > day interval stepping', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
       .mockResolvedValueOnce([])
@@ -566,14 +572,14 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'day', '2026-01-01', '2026-01-03')
+    const result = await connector.calculateEntryVolume(mockUser, 'day', '2026-01-01', '2026-01-03')
 
     expect(result.interval).toBe('day')
     expect(result.data).toHaveLength(3)
     expect(result.data[0].endDate).toBe('2026-01-02T00:00:00.000Z')
   })
 
-  test('calculateModelVolume > week interval stepping', async () => {
+  test('calculateEntryVolume > week interval stepping', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-04T00:00:00.000Z') }])
       .mockResolvedValueOnce([])
@@ -583,14 +589,14 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'week', '2026-01-04', '2026-01-18')
+    const result = await connector.calculateEntryVolume(mockUser, 'week', '2026-01-04', '2026-01-18')
 
     expect(result.interval).toBe('week')
     expect(result.data).toHaveLength(3)
     expect(result.data[0].endDate).toBe('2026-01-11T00:00:00.000Z')
   })
 
-  test('calculateModelVolume > month interval stepping', async () => {
+  test('calculateEntryVolume > month interval stepping', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
       .mockResolvedValueOnce([])
@@ -600,14 +606,14 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'month', '2026-01-01', '2026-03-01')
+    const result = await connector.calculateEntryVolume(mockUser, 'month', '2026-01-01', '2026-03-01')
 
     expect(result.interval).toBe('month')
     expect(result.data).toHaveLength(3)
     expect(result.data[0].endDate).toBe('2026-02-01T00:00:00.000Z')
   })
 
-  test('calculateModelVolume > quarter interval stepping', async () => {
+  test('calculateEntryVolume > quarter interval stepping', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
       .mockResolvedValueOnce([])
@@ -617,14 +623,14 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'quarter', '2026-01-01', '2026-07-01')
+    const result = await connector.calculateEntryVolume(mockUser, 'quarter', '2026-01-01', '2026-07-01')
 
     expect(result.interval).toBe('quarter')
     expect(result.data).toHaveLength(3)
     expect(result.data[0].endDate).toBe('2026-04-01T00:00:00.000Z')
   })
 
-  test('calculateModelVolume > year interval stepping', async () => {
+  test('calculateEntryVolume > year interval stepping', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-01-01T00:00:00.000Z') }])
       .mockResolvedValueOnce([])
@@ -634,14 +640,14 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'year', '2026-01-01', '2028-01-01')
+    const result = await connector.calculateEntryVolume(mockUser, 'year', '2026-01-01', '2028-01-01')
 
     expect(result.interval).toBe('year')
     expect(result.data).toHaveLength(3)
     expect(result.data[0].endDate).toBe('2027-01-01T00:00:00.000Z')
   })
 
-  test('calculateModelVolume > empty string organisation is counted as unset', async () => {
+  test('calculateEntryVolume > empty string organisation is counted as unset', async () => {
     modelMocks.aggregate
       .mockResolvedValueOnce([{ alignedStart: new Date('2026-04-01T00:00:00.000Z') }])
       .mockResolvedValueOnce([
@@ -660,7 +666,7 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['b corp'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'month', '2026-04-01', '2026-04-28')
+    const result = await connector.calculateEntryVolume(mockUser, 'month', '2026-04-01', '2026-04-28')
 
     expect(result.data[0]).toEqual({
       startDate: '2026-04-01T00:00:00.000Z',
@@ -672,7 +678,7 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
       },
     })
   })
-  test('calculateModelVolume > month interval includes models created on last day', async () => {
+  test('calculateEntryVolume > month interval includes models created on last day', async () => {
     const start = new Date('2026-05-01T00:00:00.000Z')
 
     modelMocks.aggregate
@@ -694,7 +700,7 @@ describe('connectors > metrics > simple > calculateModelVolue', () => {
     const { BaseMetricsConnector } = await loadConnector()
     const connector = new BaseMetricsConnector(['org-1'])
 
-    const result = await connector.calculateModelVolume(mockUser, 'month', '2026-05-01', '2026-05-31')
+    const result = await connector.calculateEntryVolume(mockUser, 'month', '2026-05-01', '2026-05-31')
 
     expect(result.data[0]).toEqual({
       startDate: '2026-05-01T00:00:00.000Z',

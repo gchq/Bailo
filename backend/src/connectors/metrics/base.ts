@@ -11,10 +11,10 @@ import SchemaModel from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
 import { GetComplianceMetricsResponse } from '../../routes/v3/metrics/getComplianceMetrics.js'
 import {
-  GetModelVolumeResponse,
-  ModelVolumeDataPoint,
-  ModelVolumeInterval,
-} from '../../routes/v3/metrics/getModelVolume.js'
+  EntryVolumeDataPoint,
+  EntryVolumeInterval,
+  GetEntryVolumeResponse,
+} from '../../routes/v3/metrics/getEntryVolume.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { SchemaKind } from '../../types/enums.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
@@ -38,6 +38,11 @@ const metricsCache = new NodeCache({
   useClones: false,
   maxKeys: 5000,
 })
+
+type CachedMetrics<MetricsCache> = {
+  data: MetricsCache
+  lastUpdated: string
+}
 
 function getCached<T>(key: string): T | undefined {
   return metricsCache.get<T>(key)
@@ -94,20 +99,20 @@ async function calculateTotalUsers(): Promise<number> {
 }
 
 /**
- * Counts the total number of models matching the provided filter.
+ * Counts the total number of entries matching the provided filter.
  */
-async function calculateTotalModels(filter: ModelFilter): Promise<number> {
+async function calculateTotalEntries(filter: ModelFilter): Promise<number> {
   return ModelModel.countDocuments(filter)
 }
 
 /**
- * Counts distinct models referenced in another collection
+ * Counts distinct entries referenced in another collection
  * (e.g. releases or access requests).
  *
  * If an organisation filter is provided, a lookup is performed to ensure
  * only models belonging to that organisation are counted.
  */
-async function countDistinctModelsWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
+async function countDistinctEntriesWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
   if (filter.organisation === undefined) {
     const ids = await collection.distinct('modelId')
     return ids.length
@@ -124,25 +129,25 @@ async function countDistinctModelsWithRelation(collection: Model<any>, filter: M
 }
 
 /**
- * Returns the number of models grouped by lifecycle state.
+ * Returns the number of entries grouped by lifecycle state.
  */
-async function calculateModelsByState(filter: ModelFilter): Promise<StateInfo[]> {
+async function calculateEntriesByState(filter: ModelFilter): Promise<StateInfo[]> {
   const pipeline: PipelineStage[] = [
     buildModelMatchStage(filter),
     { $group: { _id: '$state', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
   ]
 
-  const modelsByState = await ModelModel.aggregate(pipeline)
+  const entriesByState = await ModelModel.aggregate(pipeline)
 
-  return modelsByState.map((row) => ({
+  return entriesByState.map((row) => ({
     state: row._id && row._id.trim() !== '' ? row._id : 'none',
     count: row.count,
   }))
 }
 
 /**
- * Calculates how many models use each schema.
+ * Calculates how many entries use each schema.
  */
 async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo[]> {
   const pipeline: PipelineStage[] = [
@@ -152,14 +157,14 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
         hidden: false,
       },
     },
-    // Lookup models that reference this schema
+    // Lookup entries that reference this schema
     {
       $lookup: {
         from: 'v2_models',
         let: { schemaId: '$id' },
         pipeline: [
           {
-            // Match models whose card.schemaId equals this schema's id
+            // Match entries whose card.schemaId equals this schema's id
             $match: {
               $expr: { $eq: ['$card.schemaId', '$$schemaId'] },
               ...(filter.organisation !== undefined && {
@@ -201,20 +206,20 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  */
 async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): Promise<BaseMetrics> {
   await checkUserIsAuthorised(user)
-  const [totalModels, stateMetrics, schemaMetrics, totalModelsWithReleases, totalModelsWithAccessRequests] =
+  const [totalEntries, stateMetrics, schemaMetrics, totalEntriesWithReleases, totalEntriesWithAccessRequests] =
     await Promise.all([
-      calculateTotalModels(filter),
-      calculateModelsByState(filter),
+      calculateTotalEntries(filter),
+      calculateEntriesByState(filter),
       calculateSchemaBreakdown(filter),
-      countDistinctModelsWithRelation(ReleaseModel, filter),
-      countDistinctModelsWithRelation(AccessRequestModel, filter),
+      countDistinctEntriesWithRelation(ReleaseModel, filter),
+      countDistinctEntriesWithRelation(AccessRequestModel, filter),
     ])
 
-  // Sum models counted in schemas
+  // Sum entries counted in schemas
   const schemaTotal = schemaMetrics.reduce((sum, s) => sum + s.count, 0)
 
-  // Models with no schema
-  const unsetCount = Math.max(totalModels - schemaTotal, 0)
+  // Entries with no schema
+  const unsetCount = Math.max(totalEntries - schemaTotal, 0)
 
   const schemaBreakdown: SchemaInfo[] = [
     ...schemaMetrics,
@@ -227,11 +232,11 @@ async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): 
 
   return {
     users: undefined,
-    models: totalModels,
+    entries: totalEntries,
     schemaBreakdown,
-    modelState: stateMetrics,
-    withReleases: totalModelsWithReleases,
-    withAccessRequest: totalModelsWithAccessRequests,
+    entryState: stateMetrics,
+    withReleases: totalEntriesWithReleases,
+    withAccessRequest: totalEntriesWithAccessRequests,
   }
 }
 
@@ -281,8 +286,8 @@ type ComplianceMetricsResult = {
     roleName: string
     count: number
   }[]
-  models: {
-    modelId: string
+  entries: {
+    entryId: string
     missingRoles: {
       roleId: string
       roleName: string
@@ -291,10 +296,10 @@ type ComplianceMetricsResult = {
 }
 
 /**
- * Calculates which models are missing required review roles, either globally
+ * Calculates which entries are missing required review roles, either globally
  * or scoped to a specific organisation.
  */
-async function calculateMissingModelRoles(
+async function calculateMissingEntryRoles(
   schemaRoleMap: Record<string, string[]>,
   defaultRoles: string[],
   roleMeta: Record<string, { roleId: string; roleName: string }>,
@@ -310,7 +315,7 @@ async function calculateMissingModelRoles(
   // Gets models by the specified organisation | no organisation
   const models = ModelModel.find(filter).select('id organisation card collaborators').lean().cursor()
 
-  const modelsResult: ComplianceMetricsResult['models'] = []
+  const entriesResult: ComplianceMetricsResult['entries'] = []
 
   // Build set of all known roles
   const allKnownRoles = new Set<string>(defaultRoles)
@@ -343,8 +348,8 @@ async function calculateMissingModelRoles(
 
     // Only include the model in results if it has at least one missing role
     if (missingRoles.length > 0) {
-      modelsResult.push({
-        modelId: model.id,
+      entriesResult.push({
+        entryId: model.id,
         missingRoles,
       })
     }
@@ -360,16 +365,16 @@ async function calculateMissingModelRoles(
 
   return {
     summary,
-    models: modelsResult,
+    entries: entriesResult,
   }
 }
 
 /**
- * Builds a cache key for model volume metrics based on
+ * Builds a cache key for entry metrics based on
  * interval, date range, and timezone to ensure parameter-safe caching.
  */
-function buildModelVolumeCacheKey(interval: ModelVolumeInterval, start: Date, end: Date, timezone?: string): string {
-  return ['modelVolume', interval, start.toISOString(), end.toISOString(), timezone ?? 'none'].join(':')
+function buildEntryVolumeCacheKey(interval: EntryVolumeInterval, start: Date, end: Date, timezone?: string): string {
+  return ['entryVolume', interval, start.toISOString(), end.toISOString(), timezone ?? 'none'].join(':')
 }
 
 export class BaseMetricsConnector {
@@ -392,9 +397,13 @@ export class BaseMetricsConnector {
    */
   async getUsageMetrics(user: UserInterface): Promise<GetUsageMetricsResponse> {
     const cacheKey = `${USAGE_METRICS_CACHE_KEY}:${user.dn}`
-    const cached = getCached<GetUsageMetricsResponse>(cacheKey)
+
+    const cached = getCached<CachedMetrics<GetUsageMetricsResponse>>(cacheKey)
     if (cached !== undefined) {
-      return cached
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
     }
 
     const organisationIds = await this.getOrganisationIds()
@@ -414,13 +423,13 @@ export class BaseMetricsConnector {
     const schemaCounts = new Map<string, SchemaInfo>()
     const stateCounts = new Map<string, StateInfo>()
 
-    let models = 0
+    let entries = 0
     let withReleases = 0
     let withAccessRequest = 0
 
     // Tally up the metrics for each org to get global metrics
     for (const org of byOrganisation) {
-      models += org.models
+      entries += org.entries
       withReleases += org.withReleases
       withAccessRequest += org.withAccessRequest
 
@@ -435,7 +444,7 @@ export class BaseMetricsConnector {
         }
       }
 
-      for (const state of org.modelState ?? []) {
+      for (const state of org.entryState ?? []) {
         const existing = stateCounts.get(state.state)
 
         if (existing) {
@@ -448,18 +457,25 @@ export class BaseMetricsConnector {
 
     const global: BaseMetrics = {
       users: await calculateTotalUsers(),
-      models,
+      entries,
       withReleases,
       withAccessRequest,
       schemaBreakdown: Array.from(schemaCounts.values()),
-      modelState: Array.from(stateCounts.values()).sort((a, b) => b.count - a.count),
+      entryState: Array.from(stateCounts.values()).sort((a, b) => b.count - a.count),
     }
 
     const result = { global, byOrganisation }
+    const lastUpdated = new Date().toISOString()
 
-    setCached(USAGE_METRICS_CACHE_KEY, result)
+    setCached(cacheKey, {
+      data: result,
+      lastUpdated,
+    })
 
-    return result
+    return {
+      ...result,
+      lastUpdated,
+    }
   }
 
   /**
@@ -468,51 +484,64 @@ export class BaseMetricsConnector {
   async getComplianceMetrics(user: UserInterface): Promise<GetComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
-    const cached = getCached<GetComplianceMetricsResponse>(COMPLIANCE_METRICS_CACHE_KEY)
+    const cached = getCached<CachedMetrics<GetComplianceMetricsResponse>>(COMPLIANCE_METRICS_CACHE_KEY)
     if (cached !== undefined) {
-      return cached
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
     }
 
     const { schemaRoleMap, defaultRoles, roleMeta } = await buildSchemaRoleMap()
 
-    const global = await calculateMissingModelRoles(schemaRoleMap, defaultRoles, roleMeta)
+    const global = await calculateMissingEntryRoles(schemaRoleMap, defaultRoles, roleMeta)
 
     const organisationIds = await this.getOrganisationIds()
 
     const byOrganisation = await Promise.all(
       organisationIds.map(async (org) => ({
         organisation: org || 'unset',
-        ...(await calculateMissingModelRoles(schemaRoleMap, defaultRoles, roleMeta, org)),
+        ...(await calculateMissingEntryRoles(schemaRoleMap, defaultRoles, roleMeta, org)),
       })),
     )
 
     const result = { global, byOrganisation }
+    const lastUpdated = new Date().toISOString()
 
-    setCached(COMPLIANCE_METRICS_CACHE_KEY, result)
+    setCached(COMPLIANCE_METRICS_CACHE_KEY, {
+      data: result,
+      lastUpdated,
+    })
 
-    return result
+    return {
+      ...result,
+      lastUpdated,
+    }
   }
 
   /**
-   * Calculates metrics about model usage over time.
+   * Calculates metrics about entry usage over time.
    */
-  async calculateModelVolume(
+  async calculateEntryVolume(
     user: UserInterface,
-    interval: ModelVolumeInterval,
+    interval: EntryVolumeInterval,
     startDate: string | Date,
     endDate: string | Date,
     timezone?: string,
-  ): Promise<GetModelVolumeResponse> {
+  ): Promise<GetEntryVolumeResponse> {
     await checkUserIsAuthorised(user)
 
     const start = new Date(startDate)
     const end = new Date(endDate)
 
-    const cacheKey = buildModelVolumeCacheKey(interval, start, end, timezone)
+    const cacheKey = buildEntryVolumeCacheKey(interval, start, end, timezone)
 
-    const cached = getCached<GetModelVolumeResponse>(cacheKey)
+    const cached = getCached<CachedMetrics<GetEntryVolumeResponse>>(cacheKey)
     if (cached !== undefined) {
-      return cached
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
     }
 
     try {
@@ -594,7 +623,7 @@ export class BaseMetricsConnector {
         allOrgs.push('unset')
       }
 
-      const intervals: ModelVolumeDataPoint[] = []
+      const intervals: EntryVolumeDataPoint[] = []
 
       let cursor = new Date(alignedStart)
 
@@ -625,16 +654,24 @@ export class BaseMetricsConnector {
         cursor = addInterval(cursor, interval)
       }
 
-      const result: GetModelVolumeResponse = {
+      const result = {
         interval,
         startDate: start.toISOString(),
         endDate: end.toISOString(),
         data: intervals,
       }
 
-      setCached(cacheKey, result)
+      const lastUpdated = new Date().toISOString()
 
-      return result
+      setCached(cacheKey, {
+        data: result,
+        lastUpdated,
+      })
+
+      return {
+        ...result,
+        lastUpdated,
+      }
     } catch (err: unknown) {
       if (isMongoServerError(err)) {
         const message = err.message ?? ''
