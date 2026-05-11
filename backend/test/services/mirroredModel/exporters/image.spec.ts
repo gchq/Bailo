@@ -35,7 +35,7 @@ const mockModel = {
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
-const mockImage = { _id: { toString: () => 'imageId' }, name: 'modelId/image', tag: 'latest' } as any
+const mockImage = { id: 'imageId', name: 'modelId/image', tag: 'latest' } as any
 const mockRelease = { semver: '1.0.0', images: [mockImage] } as any
 const mockLogData = { exporterType: 'ImageExporter', exportId: 'exportId' }
 
@@ -77,7 +77,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
       {
         modelId: mockModel.id,
         semver: mockRelease.semver,
-        imageId: mockImage._id.toString(),
+        imageId: mockImage.id,
         ...mockLogData,
       },
     )
@@ -117,7 +117,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
       userDn: mockUser.dn,
       modelId: mockModel.id,
       semver: mockRelease.semver,
-      imageId: mockImage._id.toString(),
+      imageId: mockImage.id,
       ...mockLogData,
     })
 
