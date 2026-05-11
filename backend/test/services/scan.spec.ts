@@ -91,6 +91,7 @@ const fileScanResult: ArtefactScanResult = {
 }
 
 const fileScanningMock = vi.hoisted(() => ({
+  hasScannerForArtefactKind: vi.fn(() => true),
   scannersInfo: vi.fn(() => [
     { toolName: 'fileScan', artefactKind: ArtefactKind.FILE, version: undefined },
     { toolName: 'imageScan', artefactKind: ArtefactKind.IMAGE, version: undefined },
@@ -313,7 +314,7 @@ describe('services > scan', () => {
     })
 
     test('throws service unavailable when no file scanners are enabled', async () => {
-      fileScanningMock.scannersInfo.mockReturnValueOnce([])
+      fileScanningMock.hasScannerForArtefactKind.mockReturnValueOnce(false)
       ScanModelMock.find.mockResolvedValueOnce([])
 
       await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
@@ -371,7 +372,7 @@ describe('services > scan', () => {
     })
 
     test('throws service unavailable when no image scanners are enabled', async () => {
-      fileScanningMock.scannersInfo.mockReturnValueOnce([])
+      fileScanningMock.hasScannerForArtefactKind.mockReturnValueOnce(false)
       imageMocks.getImageLayers.mockResolvedValueOnce([{ digest: 'sha256:layer1' }])
       ScanModelMock.find.mockResolvedValueOnce([])
 

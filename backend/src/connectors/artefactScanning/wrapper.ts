@@ -1,4 +1,5 @@
 import { FileInterface } from '../../models/File.js'
+import { ArtefactKindKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
@@ -48,6 +49,11 @@ export class ArtefactScanningWrapper {
     return Array.from(this.scanners).map((scanner) => {
       return scanner.info()
     })
+  }
+
+  hasScannerForArtefactKind(kind: ArtefactKindKeys) {
+    const info = this.scannersInfo()
+    return info.some((scannerInfo) => scannerInfo.artefactKind === kind)
   }
 
   async startScans({

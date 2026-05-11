@@ -11,7 +11,7 @@ import { UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Conflict, Forbidden } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getFileById } from './file.js'
@@ -76,9 +76,6 @@ async function runScans({ file, layerRef }: RunScansParams) {
   const requiredScannerType: ArtefactKindKeys = file ? 'file' : 'image'
   const scannersInfo = scanners.scannersInfo()
   const activeScanners = scannersInfo.filter((scannerInfo) => scannerInfo.artefactKind === requiredScannerType)
-  if (activeScanners.length === 0) {
-    throw NotFound(`No ${requiredScannerType} scanners are enabled.`)
-  }
   let scanIdentifier: ArtefactScanIdentifier
   if (file) {
     scanIdentifier = {
@@ -141,7 +138,12 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
 
 export async function scanFile(file: FileInterfaceDoc) {
   const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
-  runScans({ file })
+  runScans({ file }).catch((error) => {
+    log.error(
+      { scanIdentifier: fileIdentifier, file, error },
+      'Unable to set failure state after failing to run file scans. Safely aborted.',
+    )
+  })
 
   const scanResults = await ScanModel.find(fileIdentifier)
   const ret: FileWithScanResultsInterface = {
@@ -184,6 +186,10 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
+  if (!scanners.hasScannerForArtefactKind('file')) {
+    throw BadReq('No file scanners are enabled.')
+  }
+
   // Do not await so that the endpoint can return early (fire-and-forget)
   runScans({ file }).catch((error) => {
     log.error(
@@ -211,6 +217,10 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (!scanners.hasScannerForArtefactKind('image')) {
+    throw BadReq('No image scanners are enabled.')
   }
 
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
