@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -30,7 +30,7 @@ interface ModelTransferVirtuals {
   status: TransferStatusKeys
 }
 
-export type ModelTransferDoc = ModelTransferInterface & ModelTransferVirtuals & SoftDeleteDocument
+export type ModelTransferDoc = HydratedDocument<ModelTransferInterface & ModelTransferVirtuals> & SoftDeleteDocument
 
 const ModelTransferSchema = new Schema<ModelTransferDoc>(
   {

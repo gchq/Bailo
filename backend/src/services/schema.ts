@@ -4,7 +4,7 @@ import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import Schema, { SchemaInterface } from '../models/Schema.js'
+import SchemaModel, { SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
@@ -22,7 +22,7 @@ export interface DefaultSchema {
 }
 
 export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {
-  const schemas = await Schema.find({
+  const schemas = await SchemaModel.find({
     ...(kind && { kind }),
     ...(hidden != undefined && { hidden }),
   }).sort({ createdAt: -1 })
@@ -30,7 +30,7 @@ export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Pr
 }
 
 export async function getSchemaById(schemaId: string) {
-  const schema = await Schema.findOne({
+  const schema = await SchemaModel.findOne({
     id: schemaId,
   })
 
@@ -42,7 +42,7 @@ export async function getSchemaById(schemaId: string) {
 }
 
 export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<string> {
-  const schema = await Schema.findOne({
+  const schema = await SchemaModel.findOne({
     id: schemaId,
   })
 
@@ -64,7 +64,7 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
 }
 
 export async function createSchema(user: UserInterface, schema: Partial<SchemaInterface>, overwrite = false) {
-  const schemaDoc = new Schema(schema)
+  const schemaDoc = new SchemaModel(schema)
 
   const auth = await authorisation.schema(user, schemaDoc, SchemaAction.Create)
   if (!auth.success) {
@@ -75,7 +75,7 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 
   if (overwrite) {
-    await Schema.deleteOne({ id: schema.id })
+    await SchemaModel.deleteOne({ id: schema.id })
   }
 
   try {
@@ -171,37 +171,37 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 export async function addDefaultSchemas() {
   for (const schema of config.defaultSchemas.modelCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new Schema({
+    const modelSchema = new SchemaModel({
       ...schema,
       kind: SchemaKind.Model,
       active: true,
       hidden: false,
     })
-    await Schema.deleteOne({ id: schema.id })
+    await SchemaModel.deleteOne({ id: schema.id })
     await modelSchema.save()
   }
 
   for (const schema of config.defaultSchemas.dataCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const dataCardSchema = new Schema({
+    const dataCardSchema = new SchemaModel({
       ...schema,
       kind: SchemaKind.DataCard,
       active: true,
       hidden: false,
     })
-    await Schema.deleteOne({ id: schema.id })
+    await SchemaModel.deleteOne({ id: schema.id })
     await dataCardSchema.save()
   }
 
   for (const schema of config.defaultSchemas.accessRequests) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new Schema({
+    const modelSchema = new SchemaModel({
       ...schema,
       kind: SchemaKind.AccessRequest,
       active: true,
       hidden: false,
     })
-    await Schema.deleteOne({ id: schema.id })
+    await SchemaModel.deleteOne({ id: schema.id })
     await modelSchema.save()
   }
 }

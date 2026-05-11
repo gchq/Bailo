@@ -49,7 +49,7 @@ export async function uploadFile(
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file.id })
   }
 
   const { fileSize } = await putObjectStream(path, stream)
@@ -93,7 +93,7 @@ export async function startUploadMultipartFile(
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file.id })
   }
 
   const { uploadId } = await startMultipartUpload(path, mime)
@@ -257,7 +257,7 @@ export async function getFileById(
   if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
-  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id.toString() }
+  const file: FileWithScanResultsInterface = { ...files[0], id: files[0].id }
 
   if (!model) {
     model = await getModelById(user, file.modelId)
@@ -312,7 +312,7 @@ export async function getFilesByIds(
   ])
 
   if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file._id.toString() === id))
+    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file.id === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
