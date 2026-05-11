@@ -19,7 +19,7 @@ describe('Check that the documentation pages exist', () => {
     cy.request('/api/v3/api-docs/swagger.json')
       .its('body')
       .its('info')
-      .should('include', { title: 'Bailo API', version: '3.0.0' })
+      .should('include', { title: 'Bailo API', version: '3.0.0-beta' })
   })
 
   it('checks that the Python docs are accessible', () => {
