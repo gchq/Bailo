@@ -103,7 +103,6 @@ router.get('/system/peers', ...getPeerStatus)
 
 router.post('/models', ...postModel)
 router.get('/models/search', ...getModelsSearch)
-// router.post('/models/import', ...postModelImport)
 
 router.get('/model/:modelId', ...getModel)
 router.patch('/model/:modelId', ...patchModel)
@@ -115,8 +114,7 @@ router.post('/model/import/s3', ...postRequestImportFromS3)
 router.get('/model/:modelId/model-card/:version', ...getModelCard)
 router.get('/model/:modelId/model-card/:version/html', ...getModelCardHtml)
 router.get('/model/:modelId/model-card-revisions', ...getModelCardRevisions)
-router.put('/model/:modelId/model-cards', ...putModelCard) // *router.get('/template/models', ...getModelTemplates)
-// *router.post('/model/:modelId/setup/from-existing', ...postFromExisting)
+router.put('/model/:modelId/model-cards', ...putModelCard)
 router.post(`/model/:modelId/setup/from-template`, ...postFromTemplate)
 router.post('/model/:modelId/setup/from-schema', ...postFromSchema)
 
@@ -185,9 +183,6 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
 
 router.post('/model/:modelId/migrate-schema/:migrationId', ...postMigrateModelSchema)
 
-// *router.get('/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
-// *router.get('/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
-
 router.get('/schemas', ...getSchemas)
 router.get('/schema/:schemaId', ...getSchema)
 router.post('/schemas', ...postSchema)
@@ -220,7 +215,6 @@ router.get('/config/ui', ...getUiConfig)
 router.post('/user/tokens', ...postUserToken)
 router.get('/user/tokens', ...getUserTokens)
 router.get('/user/tokens/list', ...getUserTokenList)
-// router.get('/user/:userId/token/:tokenId', ...getUserToken)
 router.delete('/user/token/:accessKey', ...deleteUserToken)
 
 router.get('/filescanning/info', ...getArtefactScanningInfo)
