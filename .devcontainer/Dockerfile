@@ -1,4 +1,4 @@
-FROM python:3.12-bookworm
+FROM python:3.12-trixie
 
 LABEL dev.containers.image.node.version="24" \
       dev.containers.image.python.version="3.12"
