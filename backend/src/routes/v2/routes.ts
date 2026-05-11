@@ -84,7 +84,6 @@ import { patchSchema } from './schema/patchSchema.js'
 import { postSchema } from './schema/postSchema.js'
 import { postSchemaMigration } from './schema/postSchemaMigration.js'
 import { putSchemaMigration } from './schema/putSchemaMigration.js'
-import { getSpecification } from './specification.js'
 import { getPeerStatus } from './system/peers.js'
 import { getSystemStatus } from './system/status.js'
 import { getUiConfig } from './uiConfig/getUiConfig.js'
@@ -223,8 +222,6 @@ router.get('/user/tokens', ...getUserTokens)
 router.get('/user/tokens/list', ...getUserTokenList)
 // router.get('/user/:userId/token/:tokenId', ...getUserToken)
 router.delete('/user/token/:accessKey', ...deleteUserToken)
-
-router.get('/specification', ...getSpecification)
 
 router.get('/filescanning/info', ...getArtefactScanningInfo)
 router.put('/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
