@@ -10,14 +10,3 @@ exports[`routes > metrics > getEntryVolume > 200 > ok 1`] = `
 `;
 
 exports[`routes > metrics > getEntryVolume > audit > expected call 1`] = `undefined`;
-
-exports[`routes > metrics > getModelVolume > 200 > ok 1`] = `
-{
-  "data": [],
-  "endDate": "string",
-  "interval": "quarter",
-  "startDate": "string",
-}
-`;
-
-exports[`routes > metrics > getModelVolume > audit > expected call 1`] = `undefined`;
