@@ -22,6 +22,7 @@ export async function connectToMongoose() {
   try {
     mongoose.set('strictQuery', false)
     mongoose.set('strictPopulate', false)
+    mongoose.set('updatePipeline', true)
 
     await mongoose.connect(getConnectionURI())
     log.info('Connected to Mongoose')

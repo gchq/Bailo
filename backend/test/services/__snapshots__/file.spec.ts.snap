@@ -30,14 +30,38 @@ exports[`services > file > downloadFile > success 1`] = `
 
 exports[`services > file > finishUploadMultipartFile > success 1`] = `
 {
-  "_id": "mockFileId",
+  "_id": {
+    "toString": [Function],
+  },
+  "aggregate": [MockFunction],
+  "append": [MockFunction],
+  "bulkWrite": [MockFunction],
   "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
+  "delete": [MockFunction],
+  "deleteMany": [MockFunction],
+  "deleteOne": [MockFunction],
+  "find": [MockFunction],
+  "findById": [MockFunction],
+  "findByIdAndDelete": [MockFunction],
+  "findOne": [MockFunction],
+  "findOneAndDelete": [MockFunction],
+  "findOneAndUpdate": [MockFunction],
+  "group": [MockFunction],
   "id": "mock-id",
-  "mime": "mock/mime",
-  "modelId": "mockModelId",
-  "name": "mockFileName",
-  "path": "/mock/path",
+  "lookup": [MockFunction],
+  "markModified": [MockFunction],
+  "match": [MockFunction],
+  "save": [MockFunction] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
   "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
@@ -69,8 +93,12 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
     "unwind": [MockFunction],
   },
   "size": 100,
+  "sort": [MockFunction],
   "tags": [],
-  "updatedAt": 2024-01-02T00:00:00.000Z,
+  "toObject": [MockFunction],
+  "update": [MockFunction],
+  "updateMany": [MockFunction],
+  "updateOne": [MockFunction],
 }
 `;
 
@@ -125,19 +153,6 @@ exports[`services > file > getFilesByModel > success 1`] = `
 
 exports[`services > file > removeFile > success 1`] = `
 {
-  "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-      ],
-    },
-  },
   "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
 }
@@ -148,7 +163,7 @@ exports[`services > file > removeFiles > success 1`] = `
   [
     {
       "fileId": {
-        "$eq": "73859F8D26679D2E52597326",
+        "$eq": undefined,
       },
     },
     undefined,
@@ -156,7 +171,7 @@ exports[`services > file > removeFiles > success 1`] = `
   [
     {
       "fileId": {
-        "$eq": "62379525E2D97662D8F95837",
+        "$eq": undefined,
       },
     },
     undefined,
@@ -168,36 +183,16 @@ exports[`services > file > removeFiles > success 2`] = `
 [
   {
     "_id": {
-      "toString": [MockFunction] {
-        "calls": [
-          [],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": "73859F8D26679D2E52597326",
-          },
-        ],
-      },
+      "toString": [MockFunction],
     },
-    "id": "73859F8D26679D2E52597326",
+    "id": undefined,
     "modelId": "testModel",
   },
   {
     "_id": {
-      "toString": [MockFunction] {
-        "calls": [
-          [],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": "62379525E2D97662D8F95837",
-          },
-        ],
-      },
+      "toString": [MockFunction],
     },
-    "id": "62379525E2D97662D8F95837",
+    "id": undefined,
     "modelId": "testModel2",
   },
 ]
@@ -208,7 +203,7 @@ exports[`services > file > removeFiles > success bypass mirrored model check 1`]
   [
     {
       "fileId": {
-        "$eq": "73859F8D26679D2E52597326",
+        "$eq": undefined,
       },
     },
     undefined,
@@ -216,7 +211,7 @@ exports[`services > file > removeFiles > success bypass mirrored model check 1`]
   [
     {
       "fileId": {
-        "$eq": "62379525E2D97662D8F95837",
+        "$eq": undefined,
       },
     },
     undefined,
@@ -228,36 +223,16 @@ exports[`services > file > removeFiles > success bypass mirrored model check 2`]
 [
   {
     "_id": {
-      "toString": [MockFunction] {
-        "calls": [
-          [],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": "73859F8D26679D2E52597326",
-          },
-        ],
-      },
+      "toString": [MockFunction],
     },
-    "id": "73859F8D26679D2E52597326",
+    "id": undefined,
     "modelId": "testModel",
   },
   {
     "_id": {
-      "toString": [MockFunction] {
-        "calls": [
-          [],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": "62379525E2D97662D8F95837",
-          },
-        ],
-      },
+      "toString": [MockFunction],
     },
-    "id": "62379525E2D97662D8F95837",
+    "id": undefined,
     "modelId": "testModel2",
   },
 ]
@@ -268,7 +243,7 @@ exports[`services > file > removeFiles > success hard delete 1`] = `
   [
     {
       "fileId": {
-        "$eq": "73859F8D26679D2E52597326",
+        "$eq": undefined,
       },
     },
     undefined,
@@ -276,7 +251,7 @@ exports[`services > file > removeFiles > success hard delete 1`] = `
   [
     {
       "fileId": {
-        "$eq": "62379525E2D97662D8F95837",
+        "$eq": undefined,
       },
     },
     undefined,
@@ -288,36 +263,16 @@ exports[`services > file > removeFiles > success hard delete 2`] = `
 [
   {
     "_id": {
-      "toString": [MockFunction] {
-        "calls": [
-          [],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": "73859F8D26679D2E52597326",
-          },
-        ],
-      },
+      "toString": [MockFunction],
     },
-    "id": "73859F8D26679D2E52597326",
+    "id": undefined,
     "modelId": "testModel",
   },
   {
     "_id": {
-      "toString": [MockFunction] {
-        "calls": [
-          [],
-        ],
-        "results": [
-          {
-            "type": "return",
-            "value": "62379525E2D97662D8F95837",
-          },
-        ],
-      },
+      "toString": [MockFunction],
     },
-    "id": "62379525E2D97662D8F95837",
+    "id": undefined,
     "modelId": "testModel2",
   },
 ]
@@ -386,24 +341,9 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
 exports[`services > file > updateFile > success 1`] = `
 {
   "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-      ],
-    },
+    "toString": [MockFunction],
   },
-  "id": "73859F8D26679D2E52597326",
+  "id": undefined,
   "modelId": "testModel",
 }
 `;
@@ -411,38 +351,51 @@ exports[`services > file > updateFile > success 1`] = `
 exports[`services > file > updateFile > success multiple params 1`] = `
 {
   "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-      ],
-    },
+    "toString": [MockFunction],
   },
-  "id": "73859F8D26679D2E52597326",
+  "id": undefined,
   "modelId": "testModel",
 }
 `;
 
 exports[`services > file > uploadFile > success 1`] = `
 {
-  "_id": "mockFileId",
+  "_id": {
+    "toString": [Function],
+  },
+  "aggregate": [MockFunction],
+  "append": [MockFunction],
+  "bulkWrite": [MockFunction],
   "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
+  "delete": [MockFunction],
+  "deleteMany": [MockFunction],
+  "deleteOne": [MockFunction],
+  "find": [MockFunction],
+  "findById": [MockFunction],
+  "findByIdAndDelete": [MockFunction],
+  "findOne": [MockFunction],
+  "findOneAndDelete": [MockFunction],
+  "findOneAndUpdate": [MockFunction],
+  "group": [MockFunction],
   "id": "mock-id",
+  "lookup": [MockFunction],
+  "markModified": [MockFunction],
+  "match": [MockFunction],
   "mime": "text/plain",
   "modelId": "testModelId",
   "name": "testFile",
   "path": "beta/model/testModelId/files/mock-long-id",
+  "save": [MockFunction] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
   "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
@@ -474,21 +427,53 @@ exports[`services > file > uploadFile > success 1`] = `
     "unwind": [MockFunction],
   },
   "size": 100,
+  "sort": [MockFunction],
   "tags": [],
-  "updatedAt": 2024-01-02T00:00:00.000Z,
+  "toObject": [MockFunction],
+  "update": [MockFunction],
+  "updateMany": [MockFunction],
+  "updateOne": [MockFunction],
 }
 `;
 
 exports[`services > file > uploadFile > virus scan initialised 1`] = `
 {
-  "_id": "mockFileId",
+  "_id": {
+    "toString": [Function],
+  },
+  "aggregate": [MockFunction],
+  "append": [MockFunction],
+  "bulkWrite": [MockFunction],
   "complete": true,
-  "createdAt": 2024-01-01T00:00:00.000Z,
+  "delete": [MockFunction],
+  "deleteMany": [MockFunction],
+  "deleteOne": [MockFunction],
+  "find": [MockFunction],
+  "findById": [MockFunction],
+  "findByIdAndDelete": [MockFunction],
+  "findOne": [MockFunction],
+  "findOneAndDelete": [MockFunction],
+  "findOneAndUpdate": [MockFunction],
+  "group": [MockFunction],
   "id": "mock-id",
+  "lookup": [MockFunction],
+  "markModified": [MockFunction],
+  "match": [MockFunction],
   "mime": "text/plain",
   "modelId": "testModelId",
   "name": "testFile",
   "path": "beta/model/testModelId/files/mock-long-id",
+  "save": [MockFunction] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
   "scanResults": {
     "aggregate": [MockFunction],
     "append": [MockFunction],
@@ -520,8 +505,12 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
     "unwind": [MockFunction],
   },
   "size": 100,
+  "sort": [MockFunction],
   "tags": [],
-  "updatedAt": 2024-01-02T00:00:00.000Z,
+  "toObject": [MockFunction],
+  "update": [MockFunction],
+  "updateMany": [MockFunction],
+  "updateOne": [MockFunction],
 }
 `;
 
