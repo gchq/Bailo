@@ -409,7 +409,7 @@ class Release:
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self != other
+        return not self.__eq__(other)
 
     def __lt__(self, other):
         """Check if this release is less than another (by version).

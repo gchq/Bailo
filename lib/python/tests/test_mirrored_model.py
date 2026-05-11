@@ -117,7 +117,8 @@ def test_create_get_from_id_update_and_delete_mirrored_model(
     mirroredModel.description = "testing-1234"
     mirroredModel.update()
 
-    get_mirrored_model = MirroredModel.from_id(integration_client, mirroredModel.model_id)
+    with pytest.warns(UserWarning):
+        get_mirrored_model = MirroredModel.from_id(integration_client, mirroredModel.model_id)
 
     assert get_mirrored_model.description == "testing-1234"
 
@@ -129,7 +130,8 @@ def test_create_get_from_id_update_and_delete_mirrored_model(
 
 @pytest.mark.integration
 def test_search_mirrored_models_specific(integration_client, example_mirrored_model):
-    mirroredModels = MirroredModel.search(client=integration_client, search="FooBarBaz!")
+    with pytest.warns(UserWarning):
+        mirroredModels = MirroredModel.search(client=integration_client, search="FooBarBaz!")
 
     assert all(model.name == "Yolo-v4" for model in mirroredModels)
 

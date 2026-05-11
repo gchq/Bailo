@@ -34,7 +34,7 @@ mlflow = [
 test = [
     "black==26.3.1",
     "check-manifest==0.51",
-    "pre-commit==4.5.1",
+    "pre-commit==4.6.0",
     "pylint==4.0.5",
     "pylint_junit==0.3.5",
     "pytest-cov==7.1.0",
@@ -113,7 +113,6 @@ init-hook='import sys; sys.setrecursionlimit(8 * sys.getrecursionlimit())'
 jobs=0
 limit-inference-results=100
 persistent="yes"
-suggestion-mode="yes"
 unsafe-load-any-extension="no"
 
 [tool.pylint.'MESSAGES CONTROL']
@@ -235,7 +234,7 @@ min-public-methods=2
 [tool.pylint.'IMPORTS']
 allow-wildcard-with-all="no"
 analyse-fallback-blocks="no"
-deprecated-modules="optparse,tkinter.tix"
+deprecated-modules=["optparse","tkinter.tix"]
 
 [tool.pylint.'EXCEPTIONS']
 overgeneral-exceptions= [

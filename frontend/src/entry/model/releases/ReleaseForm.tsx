@@ -41,6 +41,7 @@ import MessageAlert from 'src/MessageAlert'
 import {
   ArtefactKind,
   EntryInterface,
+  EntryKind,
   FileInterface,
   FileWithMetadataAndTags,
   FlattenedModelImage,
@@ -245,7 +246,9 @@ export default function ReleaseForm({
           {isReadOnly ? (
             <Typography>
               {formData.modelCardVersion} -{' '}
-              <Link href={`/${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
+              <Link
+                href={`/model/${model.id}/history/${formData.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`}
+              >
                 <Button size='small'>View Model card</Button>
               </Link>
             </Typography>

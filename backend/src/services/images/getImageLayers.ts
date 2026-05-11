@@ -20,7 +20,11 @@ export async function getImageLayers(repositoryToken: string, image: ImageRef): 
       return (
         await Promise.all(
           manifestResponse.body.manifests.map(async (manifest) =>
-            getLayersForImageTag(repositoryToken, { ...image, tag: manifest.digest }),
+            getLayersForImage(repositoryToken, {
+              repository: image.repository,
+              name: image.name,
+              digest: manifest.digest,
+            }),
           ),
         )
       ).flat()
@@ -35,7 +39,7 @@ export async function getImageLayers(repositoryToken: string, image: ImageRef): 
   }
 }
 
-export async function getLayersForImageTag(repositoryToken: string, imageRef: ImageRef): Promise<Descriptors[]> {
+export async function getLayersForImage(repositoryToken: string, imageRef: ImageRef): Promise<Descriptors[]> {
   const manifest = await getImageTagManifest(repositoryToken, imageRef)
 
   if (!manifest.body || 'manifests' in manifest.body) {

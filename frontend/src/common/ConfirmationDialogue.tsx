@@ -16,6 +16,8 @@ type ConfirmationDialogProps = {
   dialogMessage?: string
   errorMessage?: string
   children?: ReactNode
+  confirmDisabled?: boolean
+  confirmLoading?: boolean
 }
 
 export default function ConfirmationDialogue({
@@ -26,6 +28,8 @@ export default function ConfirmationDialogue({
   errorMessage = '',
   dialogMessage = 'Are you sure you want to perform this action?',
   children,
+  confirmDisabled,
+  confirmLoading,
 }: ConfirmationDialogProps) {
   return (
     <Dialog fullWidth open={open} onClose={onCancel} TransitionComponent={Transition}>
@@ -39,7 +43,14 @@ export default function ConfirmationDialogue({
         <Button color='secondary' variant='outlined' onClick={onCancel}>
           Cancel
         </Button>
-        <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
+        <Button
+          variant='contained'
+          onClick={onConfirm}
+          disabled={confirmDisabled}
+          loading={confirmLoading}
+          autoFocus
+          data-test='confirmButton'
+        >
           Confirm
         </Button>
       </DialogActions>
