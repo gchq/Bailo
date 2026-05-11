@@ -14,7 +14,7 @@ export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferSt
 export interface ModelTransferInterface {
   exportId: string
   modelId: string
-  peerId: string | undefined
+  peerId?: string
   documentStatus: TransferStatusKeys
   fileStatus: Map<string, TransferStatusKeys>
   imageStatus: Map<string, TransferStatusKeys>

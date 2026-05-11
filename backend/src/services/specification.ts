@@ -68,6 +68,9 @@ export const modelTransferSchema = z.object({
   completedNotificationSent: z.boolean().openapi({ example: true }),
   startedNotificationSent: z.boolean().openapi({ example: false }),
   documentStatus: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
+  imageStatus: z.object({
+    'example.com/yolo-v4/alpine:latest': z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
+  }),
   fileStatus: z.object({
     '69fa066b3f64c06f027b4921': z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
   }),

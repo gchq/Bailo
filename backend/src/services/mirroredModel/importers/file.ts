@@ -83,13 +83,13 @@ export class FileImporter extends BaseImporter {
     reject: (reason?: unknown) => void,
   ): Promise<void> {
     await updateFile(this.metadata.exportId, this.metadata.filePath, TransferStatus.Failed)
-    return super.handleStreamError(error, _resolve, reject)
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   // Type resolve
   async handleStreamCompletion(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
     await updateFile(this.metadata.exportId, this.metadata.filePath, TransferStatus.Completed)
-    resolve({ metadata: this.metadata, sourcePath: this.metadata.filePath, newPath: this.updatedPath })
     await finishTransfer(this.metadata.exportId)
+    resolve({ metadata: this.metadata, sourcePath: this.metadata.filePath, newPath: this.updatedPath })
   }
 }

@@ -161,7 +161,7 @@ export class ImageImporter extends BaseImporter {
     reject: (reason?: unknown) => void,
   ): Promise<void> {
     await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
-    return super.handleStreamError(error, _resolve, reject)
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
@@ -191,12 +191,14 @@ export class ImageImporter extends BaseImporter {
         'Completed registry upload',
       )
       await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Completed)
+      await finishTransfer(this.metadata.exportId)
       resolve({
         metadata: this.metadata,
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
       await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
+      await finishTransfer(this.metadata.exportId)
       reject(
         InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.', {
           metadata: this.metadata,
@@ -204,6 +206,5 @@ export class ImageImporter extends BaseImporter {
         }),
       )
     }
-    await finishTransfer(this.metadata.exportId)
   }
 }

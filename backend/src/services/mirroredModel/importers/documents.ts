@@ -159,7 +159,7 @@ export class DocumentsImporter extends BaseImporter {
       { exportId: this.metadata.exportId },
       { documentStatus: TransferStatus.Failed },
     )
-    return super.handleStreamError(error, _resolve, reject)
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   async handleStreamCompletion(

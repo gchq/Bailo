@@ -76,6 +76,7 @@ export abstract class BaseImporter {
     _resolve: (reason?: any) => void,
     reject: (reason?: unknown) => void,
   ): Promise<void> {
+    await finishTransfer(this.metadata.exportId)
     if (isBailoError(error)) {
       reject(error)
     } else {
@@ -83,7 +84,6 @@ export abstract class BaseImporter {
         InternalError('Error processing tarball during import.', { error, metadata: this.metadata, ...this.logData }),
       )
     }
-    await finishTransfer(this.metadata.exportId)
   }
 
   /**

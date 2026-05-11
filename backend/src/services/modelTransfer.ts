@@ -188,7 +188,12 @@ export async function finishTransfer(exportId: string) {
     exportId,
   })
 
-  if (!transfer || !transfer.completed || transfer.completedNotificationSent) {
+  if (!transfer) {
+    log.warn({ exportId }, 'The requested model transfer was not found')
+    return
+  }
+
+  if (!transfer.completed || transfer.completedNotificationSent) {
     return
   }
 

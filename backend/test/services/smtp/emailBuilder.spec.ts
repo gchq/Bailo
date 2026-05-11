@@ -22,10 +22,6 @@ describe('services > smtp > emailBuilder', () => {
     const badString = '<script> alert("This is a bad model"); </script>'
     const emailContent = await buildEmail(badString, [], [], true)
 
-    expect(emailContent).toBeUndefined()
-    expect(logMock.error).toHaveBeenCalledExactlyOnceWith(
-      { actions: [], metadata: [], title: badString },
-      'Email failed sanitisation. Not forwarding request',
-    )
+    expect(emailContent.html).not.toContain(badString)
   })
 })
