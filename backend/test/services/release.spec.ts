@@ -482,7 +482,7 @@ describe('services > release', () => {
         modelId: 'test',
         semvers: ['test1', 'test2'],
       })
-      expect(ReleaseModelMock.delete).toBeCalledTimes(2)
+      expect(ReleaseModelMock.delete).toHaveBeenCalledTimes(2)
     })
 
     test('no permission', async () => {
@@ -519,7 +519,7 @@ describe('services > release', () => {
         modelId: 'test',
         semvers: ['test1', 'test2'],
       })
-      expect(ReleaseModelMock.delete).toBeCalledTimes(2)
+      expect(ReleaseModelMock.delete).toHaveBeenCalledTimes(2)
     })
 
     test('throw on mirrored model', async () => {

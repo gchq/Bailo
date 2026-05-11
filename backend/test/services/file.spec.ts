@@ -346,9 +346,9 @@ describe('services > file', () => {
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed])
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).not.toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
@@ -364,10 +364,10 @@ describe('services > file', () => {
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], undefined, true)
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
-    expect(s3Mocks.deleteObject).toBeCalledTimes(2)
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
+    expect(s3Mocks.deleteObject).toHaveBeenCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
 
@@ -425,9 +425,9 @@ describe('services > file', () => {
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], true)
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
 

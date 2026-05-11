@@ -145,9 +145,9 @@ describe('services > inference', () => {
     ])
 
     expect(result).toMatchSnapshot()
-    expect(InferenceModelMock.delete).toBeCalledTimes(3)
-    expect(inferenceServiceMocks.deleteInferenceService).toBeCalledTimes(3)
-    expect(modelMocks.getModelById).toBeCalledTimes(2)
+    expect(InferenceModelMock.delete).toHaveBeenCalledTimes(3)
+    expect(inferenceServiceMocks.deleteInferenceService).toHaveBeenCalledTimes(3)
+    expect(modelMocks.getModelById).toHaveBeenCalledTimes(2)
   })
 
   test('removeInferences > inferencing service does not exist', async () => {

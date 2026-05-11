@@ -604,7 +604,7 @@ describe('clients > registry', () => {
 
     const response = await listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(['tag1', 'tag2', 'tag3'])
   })
@@ -624,7 +624,7 @@ describe('clients > registry', () => {
     const response = listImageTags('token', { repository: 'modelId', name: 'image' })
 
     await expect(response).rejects.toThrow('Registry pagination limit exceeded.')
-    expect(fetchMock).toBeCalledTimes(100)
+    expect(fetchMock).toHaveBeenCalledTimes(100)
   })
 
   test('listImageTags > unknown name return empty list', async () => {

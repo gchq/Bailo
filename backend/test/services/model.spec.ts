@@ -264,16 +264,16 @@ describe('services > model', () => {
         true,
         undefined,
       )
-      expect(modelCardRevisionMockDelete).toBeCalledTimes(itemsFound)
+      expect(modelCardRevisionMockDelete).toHaveBeenCalledTimes(itemsFound)
       expect(accessRequestMock.removeAccessRequests).toHaveBeenCalledWith(
         user,
         Array(itemsFound).fill(accessRequestId),
         undefined,
       )
-      expect(ReviewModelMock.findByIdAndDelete).toBeCalledTimes(itemsFound)
+      expect(ReviewModelMock.findByIdAndDelete).toHaveBeenCalledTimes(itemsFound)
       expect(ReviewModelMock.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
       expect(tokenMock.dropModelIdFromTokens).toHaveBeenCalledWith(user, modelId, Array(itemsFound).fill({}), undefined)
-      expect(webhookMockDelete).toBeCalledTimes(itemsFound)
+      expect(webhookMockDelete).toHaveBeenCalledTimes(itemsFound)
       expect(fileMock.removeFiles).toHaveBeenCalledWith(
         user,
         modelId,
@@ -282,7 +282,7 @@ describe('services > model', () => {
         undefined,
         undefined,
       )
-      expect(registryMock.softDeleteImage).toBeCalledTimes(itemsFound * 2)
+      expect(registryMock.softDeleteImage).toHaveBeenCalledTimes(itemsFound * 2)
       expect(registryMock.softDeleteImage.mock.calls.at(0)).toEqual([
         user,
         { repository: 'repository', name: 'name', tag: 'tag1' },

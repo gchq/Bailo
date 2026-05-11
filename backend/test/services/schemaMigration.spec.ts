@@ -54,7 +54,7 @@ describe('services > schemaMigration', () => {
   test('a schema migration plan can be created', async () => {
     SchemaMigrationModelMock.save.mockResolvedValueOnce(testSchemaMigration)
     const result = await createSchemaMigrationPlan(testUser, testSchemaMigration)
-    expect(SchemaMigrationModelMock.save).toBeCalledTimes(1)
+    expect(SchemaMigrationModelMock.save).toHaveBeenCalledTimes(1)
     expect(result).toBe(testSchemaMigration)
   })
 
@@ -136,8 +136,8 @@ describe('services > schemaMigration', () => {
     ModelCardRevisionMock.save.mockResolvedValueOnce(testModelForMigration)
     ModelModelMock.save.mockResolvedValueOnce(testModelForMigration)
     await runModelSchemaMigration({} as UserInterface, 'my-model-123', testSchemaMigration.id)
-    expect(testModelForMigration.save).toBeCalledTimes(1)
-    expect(testModelForMigration.set).toBeCalledTimes(4)
+    expect(testModelForMigration.save).toHaveBeenCalledTimes(1)
+    expect(testModelForMigration.set).toHaveBeenCalledTimes(4)
   })
 
   test('update migration > success', async () => {

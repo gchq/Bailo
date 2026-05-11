@@ -33,7 +33,7 @@ describe('services > schema', () => {
   test('a schema can be created', async () => {
     SchemaModelModelMock.save.mockResolvedValueOnce(testModelSchema)
     const result = await createSchema(testUser, testModelSchema)
-    expect(SchemaModelModelMock.save).toBeCalledTimes(1)
+    expect(SchemaModelModelMock.save).toHaveBeenCalledTimes(1)
     expect(SchemaModelModelMock.deleteOne).not.toHaveBeenCalled()
     expect(result).toBe(testModelSchema)
   })
@@ -55,8 +55,8 @@ describe('services > schema', () => {
   test('a schema can be overwritten', async () => {
     SchemaModelModelMock.save.mockResolvedValueOnce(testModelSchema)
     const result = await createSchema(testUser, testModelSchema, true)
-    expect(SchemaModelModelMock.deleteOne).toBeCalledTimes(1)
-    expect(SchemaModelModelMock.save).toBeCalledTimes(1)
+    expect(SchemaModelModelMock.deleteOne).toHaveBeenCalledTimes(1)
+    expect(SchemaModelModelMock.save).toHaveBeenCalledTimes(1)
     expect(result).toBe(testModelSchema)
   })
 

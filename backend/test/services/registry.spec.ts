@@ -434,7 +434,7 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
       expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
@@ -461,7 +461,7 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
       expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
@@ -484,7 +484,7 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
       expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
@@ -512,7 +512,7 @@ describe('services > registry', () => {
       const promise = renameImage({} as any, source, destination)
 
       await expect(promise).rejects.toThrow('Error')
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
       expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
