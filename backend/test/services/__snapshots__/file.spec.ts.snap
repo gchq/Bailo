@@ -515,3 +515,10 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
 `;
 
 exports[`services > file > uploadFile > virus scan initialised 2`] = `[]`;
+
+exports[`services > file > uploadMultipartFilePart > success 1`] = `
+{
+  "ETag": "test-etag",
+  "PartNumber": 1,
+}
+`;
