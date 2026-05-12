@@ -1,5 +1,4 @@
 import { DescribeKeyCommand, KMSClient, SignCommand, SignCommandOutput } from '@aws-sdk/client-kms'
-import { ASN1HEX } from 'jsrsasign'
 
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
@@ -32,18 +31,50 @@ export async function sign(hash: string) {
     MessageType: 'DIGEST',
   })
   const signResponse = await client.send(signCommand)
-  const values = await getSignatureValues(signResponse)
-  return values
+  return await getSignatureValues(signResponse)
 }
 
 async function getSignatureValues(signResponse: SignCommandOutput) {
   if (!signResponse.Signature) {
     throw InternalError('Cannot get signature.', { response: signResponse })
   }
-  const hex = Buffer.from(signResponse.Signature).toString('hex')
-  const intIdx = ASN1HEX.getChildIdx(hex, 0)
-  const rBigInt = BigInt('0x' + ASN1HEX.getV(hex, intIdx[0])) // Convert r/s values from hex to big integers
-  const sBigInt = BigInt('0x' + ASN1HEX.getV(hex, intIdx[1]))
+  const { r, s } = parseEcdsaDerSignature(signResponse.Signature)
 
-  return { 'sig-r': rBigInt.toString(), 'sig-s': sBigInt.toString() }
+  return {
+    'sig-r': r.toString(),
+    'sig-s': s.toString(),
+  }
+}
+
+function parseEcdsaDerSignature(sig: Uint8Array) {
+  let offset = 0
+
+  if (sig[offset++] !== 0x30) {
+    throw new Error('Invalid DER signature')
+  }
+
+  const seqLen = sig[offset++]
+  if (seqLen + 2 !== sig.length) {
+    throw new Error('Malformed DER sequence')
+  }
+
+  if (sig[offset++] !== 0x02) {
+    throw new Error('Invalid DER: missing r integer')
+  }
+
+  const rLen = sig[offset++]
+  const r = sig.slice(offset, offset + rLen)
+  offset += rLen
+
+  if (sig[offset++] !== 0x02) {
+    throw new Error('Invalid DER: missing s integer')
+  }
+
+  const sLen = sig[offset++]
+  const s = sig.slice(offset, offset + sLen)
+
+  return {
+    r: BigInt('0x' + Buffer.from(r).toString('hex')),
+    s: BigInt('0x' + Buffer.from(s).toString('hex')),
+  }
 }

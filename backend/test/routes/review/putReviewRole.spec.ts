@@ -29,7 +29,7 @@ describe('routes > review > putReviewRole', () => {
     const res = await testPut(`/api/v2/review/role/${fixture.params.shortName}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateReviewRole).toBeCalled()
+    expect(audit.onUpdateReviewRole).toHaveBeenCalled()
     expect(audit.onUpdateReviewRole.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

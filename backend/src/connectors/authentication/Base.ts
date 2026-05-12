@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express'
+import type { PathParams } from 'express-serve-static-core'
 
 import { UserInterface } from '../../models/User.js'
 import { checkAuthentication, getTokenFromAuthHeader } from '../../routes/middleware/defaultAuthentication.js'
@@ -17,7 +18,7 @@ export abstract class BaseAuthenticationConnector {
     return Promise.all(entities.map((member) => this.getUserInformation(member)))
   }
 
-  authenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
+  authenticationMiddleware(): Array<{ path?: PathParams; middleware: Array<RequestHandler> }> {
     return [
       {
         path: '/api/v2/token',
@@ -25,6 +26,14 @@ export abstract class BaseAuthenticationConnector {
       },
       {
         path: '/api/v2',
+        middleware: [getTokenFromAuthHeader, checkAuthentication],
+      },
+      {
+        path: '/api/v3/token',
+        middleware: [getTokenFromAuthHeader],
+      },
+      {
+        path: '/api/v3',
         middleware: [getTokenFromAuthHeader, checkAuthentication],
       },
     ]

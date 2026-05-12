@@ -56,13 +56,13 @@ describe('connectors > artefactScanning > index', () => {
       throw new Error('init failed')
     })
 
-    await expect(loadModule()).rejects.toThrowError('Could not configure or initialise scanner clamAV')
+    await expect(loadModule()).rejects.toThrow('Could not configure or initialise scanner clamAV')
   })
 
   test('throw for invalid scanner kind', async () => {
     config.connectors.artefactScanners.kinds = ['invalidScanner'] as any
 
-    await expect(loadModule()).rejects.toThrowError("'invalidScanner' is not a valid scanning kind.")
+    await expect(loadModule()).rejects.toThrow("'invalidScanner' is not a valid scanning kind.")
   })
 
   test('return cached scannerWrapper when cache is enabled', async () => {

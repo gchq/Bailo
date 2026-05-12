@@ -133,15 +133,13 @@ describe('services > registry', () => {
     })
 
     test('splitDistributionPackageName > error', () => {
-      expect(() => splitDistributionPackageName('bad-name')).toThrowError('Could not parse Distribution Package Name.')
-      expect(() => splitDistributionPackageName('foo:bar:baz')).toThrowError(
+      expect(() => splitDistributionPackageName('bad-name')).toThrow('Could not parse Distribution Package Name.')
+      expect(() => splitDistributionPackageName('foo:bar:baz')).toThrow('Could not parse Distribution Package Name.')
+      expect(() => splitDistributionPackageName('')).toThrow('Could not parse Distribution Package Name.')
+      expect(() => splitDistributionPackageName('bad-name@:0123456789abcdef0123456789abcdef')).toThrow(
         'Could not parse Distribution Package Name.',
       )
-      expect(() => splitDistributionPackageName('')).toThrowError('Could not parse Distribution Package Name.')
-      expect(() => splitDistributionPackageName('bad-name@:0123456789abcdef0123456789abcdef')).toThrowError(
-        'Could not parse Distribution Package Name.',
-      )
-      expect(() => splitDistributionPackageName('bad-name@sha256:0')).toThrowError(
+      expect(() => splitDistributionPackageName('bad-name@sha256:0')).toThrow(
         'Could not parse Distribution Package Name.',
       )
     })
@@ -248,19 +246,19 @@ describe('services > registry', () => {
     })
 
     test('joinDistributionPackageName > error', () => {
-      expect(() => joinDistributionPackageName({ path: 'bad-name', tag: '' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: 'bad-name', tag: '' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ path: '', tag: 'foo:bar:baz' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: '', tag: 'foo:bar:baz' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ path: '', tag: '' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: '', tag: '' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ path: '', digest: ':0123456789abcdef0123456789abcdef' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: '', digest: ':0123456789abcdef0123456789abcdef' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ domain: 'bad-name', path: '', digest: 'sha256:0' })).toThrowError(
+      expect(() => joinDistributionPackageName({ domain: 'bad-name', path: '', digest: 'sha256:0' })).toThrow(
         'Could not join Distribution Package Name.',
       )
     })
@@ -342,8 +340,8 @@ describe('services > registry', () => {
     test('checkUserAuth > success', async () => {
       await checkUserAuth({ dn: 'user' }, 'modelId', ['list'])
 
-      expect(modelMocks.getModelById).toBeCalledWith({ dn: 'user' }, 'modelId')
-      expect(authMocks.default.image).toBeCalledWith(
+      expect(modelMocks.getModelById).toHaveBeenCalledWith({ dn: 'user' }, 'modelId')
+      expect(authMocks.default.image).toHaveBeenCalledWith(
         { dn: 'user' },
         { _id: 'test' },
         { type: 'repository', name: 'modelId', actions: ['list'] },
@@ -355,9 +353,9 @@ describe('services > registry', () => {
 
       const promise = checkUserAuth({ dn: 'user' }, 'modelId', ['list'])
 
-      await expect(promise).rejects.toThrowError('Error')
-      expect(modelMocks.getModelById).toBeCalledWith({ dn: 'user' }, 'modelId')
-      expect(authMocks.default.image).toBeCalledWith(
+      await expect(promise).rejects.toThrow('Error')
+      expect(modelMocks.getModelById).toHaveBeenCalledWith({ dn: 'user' }, 'modelId')
+      expect(authMocks.default.image).toHaveBeenCalledWith(
         { dn: 'user' },
         { _id: 'test' },
         { type: 'repository', name: 'modelId', actions: ['list'] },
@@ -374,7 +372,7 @@ describe('services > registry', () => {
     test('getImageManifest > bad response', async () => {
       registryClientMocks.getImageTagManifest.mockRejectedValue('Error')
 
-      await expect(getImageManifest({} as any, {} as any)).rejects.toThrowError('Error')
+      await expect(getImageManifest({} as any, {} as any)).rejects.toThrow('Error')
 
       expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
     })
@@ -382,15 +380,13 @@ describe('services > registry', () => {
     test('renameImage > source manifest not found', async () => {
       registryClientMocks.getImageTagManifests.mockRejectedValueOnce(RegistryError({} as any, { status: 404 }))
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
-        'The requested image was not found.',
-      )
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow('The requested image was not found.')
     })
 
     test('renameImage > manifest body missing', async () => {
       registryClientMocks.getImageTagManifests.mockResolvedValueOnce({})
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow(
         'The registry returned a response but the body was missing.',
       )
     })
@@ -401,7 +397,7 @@ describe('services > registry', () => {
         headers: {},
       })
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow(
         'The registry returned a response but the source digest header was missing.',
       )
     })
@@ -409,7 +405,7 @@ describe('services > registry', () => {
     test('renameImage > source manifest other error', async () => {
       registryClientMocks.getImageTagManifests.mockRejectedValueOnce(InternalError('Error'))
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Error')
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow('Error')
     })
 
     test('renameImage > config missing digest', async () => {
@@ -418,7 +414,7 @@ describe('services > registry', () => {
         headers: { 'docker-content-digest': 'digest' },
       })
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Could not extract layer digest.')
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow('Could not extract layer digest.')
     })
 
     test('renameImage > success and delete orphan', async () => {
@@ -438,15 +434,15 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
         repository: source.repository,
         name: source.name,
         digest: 'digest',
@@ -465,14 +461,14 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
       expect(registryClientMocks.deleteManifest).toHaveBeenCalledOnce()
     })
 
@@ -488,15 +484,15 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
         repository: source.repository,
         name: source.name,
         digest: 'digest',
@@ -515,15 +511,15 @@ describe('services > registry', () => {
 
       const promise = renameImage({} as any, source, destination)
 
-      await expect(promise).rejects.toThrowError('Error')
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      await expect(promise).rejects.toThrow('Error')
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
       expect(registryClientMocks.deleteManifest).toHaveBeenCalledTimes(1)
     })
 
@@ -583,7 +579,7 @@ describe('services > registry', () => {
       const source = { repository: 'repo', name: 'img', tag: 'v1' }
       const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
 
-      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Platform manifest missing.')
+      await expect(renameImage({} as any, source, dest)).rejects.toThrow('Platform manifest missing.')
     })
 
     test('renameImage > multi manifest child PUT missing digest', async () => {
@@ -610,7 +606,7 @@ describe('services > registry', () => {
       const source = { repository: 'repo', name: 'img', tag: 'v1' }
       const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
 
-      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Child manifest digest missing after PUT')
+      await expect(renameImage({} as any, source, dest)).rejects.toThrow('Child manifest digest missing after PUT')
     })
 
     test('softDeleteImage > success', async () => {
@@ -663,7 +659,7 @@ describe('services > registry', () => {
 
       const promise = softDeleteImage({} as any, {} as any)
 
-      await expect(promise).rejects.toThrowError(/^Cannot remove image from a mirrored model./)
+      await expect(promise).rejects.toThrow(/^Cannot remove image from a mirrored model./)
       expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
       expect(releaseMocks.findAndDeleteImageFromReleases).not.toHaveBeenCalled()
     })
@@ -923,7 +919,7 @@ describe('services > registry', () => {
 
       const promise = restoreSoftDeletedImage({} as any, {} as any)
 
-      await expect(promise).rejects.toThrowError(/^Cannot restore image to a mirrored model./)
+      await expect(promise).rejects.toThrow(/^Cannot restore image to a mirrored model./)
       expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
     })
   })

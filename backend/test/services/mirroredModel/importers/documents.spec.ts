@@ -75,7 +75,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
   test('constructor > error importKind not Documents', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
-    expect(() => new DocumentsImporter(mockUser, badMetadata, mockLogData)).toThrowError(
+    expect(() => new DocumentsImporter(mockUser, badMetadata, mockLogData)).toThrow(
       /^Cannot parse compressed Documents: incorrect metadata specified./,
     )
   })

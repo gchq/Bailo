@@ -1,4 +1,5 @@
 import { FileInterfaceDoc } from '../models/File.js'
+import { isHydratedMongoDoc } from './mongo.js'
 
 export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
   if (typeof data !== 'object' || data === null) {
@@ -19,8 +20,9 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
   ) {
     return false
   }
-  return true
+  return isHydratedMongoDoc(data)
 }
+
 export const createFilePath = (modelId: string, fileId: string) => {
   return `beta/model/${modelId}/files/${fileId}`
 }

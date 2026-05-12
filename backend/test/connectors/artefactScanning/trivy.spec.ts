@@ -117,7 +117,7 @@ describe('connectors > artefactScanning > trivy > TrivyImageScanningConnector', 
     } as any)
 
     expect(result.state).toBe(ArtefactScanState.Error)
-    expect(abort).toBeCalled()
+    expect(abort).toHaveBeenCalled()
   })
 
   test('scan() skip too large image', async () => {

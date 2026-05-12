@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, ObjectId, Schema, Types } from 'mongoose'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -41,9 +41,12 @@ export type ImageRef = ImageTagRef | ImageDigestRef
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
-  images: Array<ImageTagRef & { _id: Schema.Types.ObjectId }>
-} & SoftDeleteDocument
+export type ReleaseDoc = HydratedDocument<
+  Omit<ReleaseInterface, 'images'> & {
+    images: Array<HydratedDocument<ImageTagRef>>
+  }
+> &
+  SoftDeleteDocument
 
 export interface SemverObject {
   major: number
@@ -77,7 +80,18 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
     minor: { type: Boolean, required: true },
     draft: { type: Boolean, required: true },
 
-    fileIds: [{ type: Schema.Types.ObjectId }],
+    fileIds: [
+      {
+        type: Schema.Types.ObjectId,
+
+        set: function (stringId: string) {
+          return new Types.ObjectId(stringId)
+        },
+        get: function (objectId: ObjectId) {
+          return objectId.toString()
+        },
+      },
+    ],
     images: [
       {
         repository: { type: String },
@@ -98,6 +112,7 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
 
 ReleaseSchema.plugin(softDeletionPlugin)
 ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
+ReleaseSchema.index({ modelId: 1 })
 
 const ReleaseModel = model<ReleaseDoc>('v2_Release', ReleaseSchema)
 

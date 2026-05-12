@@ -67,7 +67,7 @@ describe('connectors > artefactScanning > wrapper', () => {
 
     const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
 
-    await expect(wrapper.initialiseScanners()).rejects.toThrowError(
+    await expect(wrapper.initialiseScanners()).rejects.toThrow(
       'Could not initialise scanner after max attempts, make sure that it is setup and configured correctly.',
     )
   })

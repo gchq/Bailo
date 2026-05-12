@@ -22,7 +22,7 @@ services:
     volumes:
       - ./backend/certs:/certs:ro
     healthcheck:
-      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3311/info')"]
       interval: 30s
       timeout: 10s
       retries: 5

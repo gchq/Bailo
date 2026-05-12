@@ -66,7 +66,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   test('constructor > error importKind not File', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
 
-    expect(() => new FileImporter(badMetadata, mockLogData)).toThrowError(
+    expect(() => new FileImporter(badMetadata, mockLogData)).toThrow(
       /^Cannot parse compressed File: incorrect metadata specified./,
     )
   })
@@ -112,7 +112,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    await expect(importer.processEntry(entry, stream2)).rejects.toThrowError(
+    await expect(importer.processEntry(entry, stream2)).rejects.toThrow(
       /^Cannot parse compressed file: multiple files found./,
     )
   })

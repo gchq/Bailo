@@ -50,7 +50,7 @@ describe('utils => transactions', () => {
   it('handles errors inside the callbacks appropriately', async () => {
     await expect(
       execute([(_) => callback(true), (_) => callback(false), (_) => callback(undefined), (_) => errorCallback(_)]),
-    ).rejects.toThrowError()
+    ).rejects.toThrow()
   })
 
   it('runs regular actions without a session when transactions disabled', async () => {
@@ -67,7 +67,7 @@ describe('utils => transactions', () => {
   })
 
   it('throws if an error happens outside transactions', async () => {
-    await expect(useTransaction([(_) => errorCallback(_)])).rejects.toThrowError()
+    await expect(useTransaction([(_) => errorCallback(_)])).rejects.toThrow()
   })
 
   it('runs actions inside a transaction when enabled', async () => {
@@ -90,7 +90,7 @@ describe('utils => transactions', () => {
         (_) => callback(undefined),
         (_) => errorCallback(_),
       ]),
-    ).rejects.toThrowError()
+    ).rejects.toThrow()
 
     expect(mongoose.connection.transaction).toHaveBeenCalledOnce()
   })

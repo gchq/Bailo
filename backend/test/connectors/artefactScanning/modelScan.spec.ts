@@ -114,7 +114,7 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
     } as any)
 
     expect(result.state).toBe(ArtefactScanState.Error)
-    expect(destroySpy).toBeCalled()
+    expect(destroySpy).toHaveBeenCalled()
   })
 
   test('scan() returns error when version is undefined', async () => {

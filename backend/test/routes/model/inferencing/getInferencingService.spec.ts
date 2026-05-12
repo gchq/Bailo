@@ -24,7 +24,7 @@ describe('routes > inferencing > getInference', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/inference/example/${fixture.params.tag}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewInference).toBeCalled()
+    expect(audit.onViewInference).toHaveBeenCalled()
     expect(audit.onViewInference.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

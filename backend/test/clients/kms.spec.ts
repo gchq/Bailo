@@ -45,6 +45,10 @@ vi.mock('../../src/utils/config.js', () => ({
 }))
 
 describe('clients > s3', () => {
+  // value from https://docs.yubico.com/yesdk/users-manual/application-piv/ecdsa-signatures.html
+  const exampleSignatureString =
+    '302c021500e91a49c5147db1a9aaf244f05a434d6486931d2d0213526db078b05edecbcd1eb4a208f3ae1617ae82'
+
   test('sign > success', async () => {
     kmsMocks.send.mockResolvedValueOnce({
       KeyMetadata: {
@@ -52,7 +56,7 @@ describe('clients > s3', () => {
       },
     })
     kmsMocks.send.mockResolvedValueOnce({
-      Signature: 'abcefgh',
+      Signature: Buffer.from(exampleSignatureString, 'hex'),
     })
 
     await sign('hash123')
@@ -63,10 +67,65 @@ describe('clients > s3', () => {
     expect(kmsMocks.send).toHaveBeenCalled()
   })
 
+  test('sign > invalid DER sequence', async () => {
+    kmsMocks.send.mockResolvedValueOnce({
+      KeyMetadata: {
+        SigningAlgorithms: ['abc'],
+      },
+    })
+    kmsMocks.send.mockResolvedValueOnce({
+      Signature: Buffer.from(exampleSignatureString.substring(1), 'hex'),
+    })
+
+    await expect(sign('hash123')).rejects.toThrow(/^Invalid DER signature/)
+  })
+
+  test('sign > DER too short', async () => {
+    kmsMocks.send.mockResolvedValueOnce({
+      KeyMetadata: {
+        SigningAlgorithms: ['abc'],
+      },
+    })
+    kmsMocks.send.mockResolvedValueOnce({
+      Signature: Buffer.from(exampleSignatureString.substring(0, exampleSignatureString.length - 1), 'hex'),
+    })
+
+    await expect(sign('hash123')).rejects.toThrow(/^Malformed DER sequence/)
+  })
+
+  test('sign > DER missing r integer', async () => {
+    kmsMocks.send.mockResolvedValueOnce({
+      KeyMetadata: {
+        SigningAlgorithms: ['abc'],
+      },
+    })
+    kmsMocks.send.mockResolvedValueOnce({
+      Signature: Buffer.from(exampleSignatureString.substring(0, 5) + '3' + exampleSignatureString.substring(6), 'hex'),
+    })
+
+    await expect(sign('hash123')).rejects.toThrow(/^Invalid DER: missing r integer/)
+  })
+
+  test('sign > DER missing s integer', async () => {
+    kmsMocks.send.mockResolvedValueOnce({
+      KeyMetadata: {
+        SigningAlgorithms: ['abc'],
+      },
+    })
+    kmsMocks.send.mockResolvedValueOnce({
+      Signature: Buffer.from(
+        exampleSignatureString.substring(0, 51) + '3' + exampleSignatureString.substring(52),
+        'hex',
+      ),
+    })
+
+    await expect(sign('hash123')).rejects.toThrow(/^Invalid DER: missing s integer/)
+  })
+
   test('sign > cannot get key information', async () => {
     kmsMocks.send.mockResolvedValueOnce({})
     kmsMocks.send.mockResolvedValueOnce({
-      Signature: 'abcefgh',
+      Signature: Buffer.from(exampleSignatureString, 'hex'),
     })
 
     const response = sign('hash123')
@@ -74,7 +133,7 @@ describe('clients > s3', () => {
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
       KeyId: configMock.modelMirror.export.kmsSignature.keyId,
     })
-    await expect(response).rejects.toThrowError(/^Cannot get key information./)
+    await expect(response).rejects.toThrow(/^Cannot get key information./)
   })
 
   test('sign > cannot get signature', async () => {
@@ -97,6 +156,6 @@ describe('clients > s3', () => {
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
       KeyId: configMock.modelMirror.export.kmsSignature.keyId,
     })
-    await expect(response).rejects.toThrowError(/^Cannot get signature./)
+    await expect(response).rejects.toThrow(/^Cannot get signature./)
   })
 })
