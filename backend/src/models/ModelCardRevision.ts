@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { ModelCardInterface } from './Model.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -14,7 +14,7 @@ export interface ModelCardRevisionInterface extends ModelCardInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ModelCardRevisionDoc = ModelCardRevisionInterface & SoftDeleteDocument
+export type ModelCardRevisionDoc = HydratedDocument<ModelCardRevisionInterface> & SoftDeleteDocument
 
 const ModelCardRevisionSchema = new Schema<ModelCardRevisionDoc>(
   {

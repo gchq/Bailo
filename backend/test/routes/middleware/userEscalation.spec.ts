@@ -66,7 +66,7 @@ describe('middleware > userEscalation', () => {
     expect(request.user).toEqual({
       dn: 'system-user-1',
     })
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
   test('escalateUser > should escalate when system user is authorised', async () => {
     const next = vi.fn()
@@ -87,7 +87,7 @@ describe('middleware > userEscalation', () => {
     expect(request.user).toEqual({
       dn: 'app-user-1',
     })
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
   test('escalateUser > should not escalate when system user is not authorised', async () => {
     const next = vi.fn()
@@ -109,7 +109,7 @@ describe('middleware > userEscalation', () => {
       dn: 'system-user-2',
     })
 
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
   test('escalateUser > should not escalate when instance is not in allowed list', async () => {
     const next = vi.fn()
@@ -131,7 +131,7 @@ describe('middleware > userEscalation', () => {
       dn: 'system-user-2',
     })
 
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
 })
 

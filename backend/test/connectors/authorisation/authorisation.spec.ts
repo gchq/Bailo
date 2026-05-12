@@ -78,8 +78,6 @@ describe('connectors > authorisation', () => {
   test('invalid', () => {
     const invalidConnector = 'invalid'
     configMock.connectors.authorisation.kind = invalidConnector
-    expect(() => getAuthorisationConnector(false)).toThrowError(
-      `'${invalidConnector}' is not a valid authorisation kind.`,
-    )
+    expect(() => getAuthorisationConnector(false)).toThrow(`'${invalidConnector}' is not a valid authorisation kind.`)
   })
 })

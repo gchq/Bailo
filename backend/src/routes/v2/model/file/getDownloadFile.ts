@@ -123,7 +123,7 @@ export const getDownloadFile = [
       file = await getFileById(req.user, params.fileId)
     }
 
-    const fileId = file._id.toString()
+    const fileId = file.id
 
     // Naive approach to generating an ETag - this is needed for some download tools to consider a file resumable
     const etag = createHash('sha256').update(`${fileId}/${file.updatedAt.getTime()}`).digest('hex')
