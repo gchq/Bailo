@@ -288,6 +288,10 @@ module.exports = {
       maxInitRetries: 5,
       initRetryDelay: 5000,
     },
+
+    metrics: {
+      kind: 'simple',
+    },
   },
 
   s3: {
