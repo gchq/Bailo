@@ -19,12 +19,11 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
   readonly artefactType: ArtefactKindKeys = ArtefactKind.IMAGE
   readonly toolName: string = 'Trivy'
-  protected maxImageSizeBytes: number = Infinity
 
   async init(): Promise<void> {
     const artefactScanInfo = await getCachedArtefactScanInfo()
     this.version = artefactScanInfo.trivyVersion
-    this.maxImageSizeBytes = artefactScanInfo.maxFileSizeBytes ?? this.maxImageSizeBytes
+    this.maxSize = artefactScanInfo.maxFileSizeBytes ?? this.maxSize
   }
 
   protected async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
@@ -36,7 +35,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         { type: 'repository', name: `${layer.repository}/${layer.name}`, actions: ['pull'] },
       ])
 
-      if (this.maxImageSizeBytes != Infinity) {
+      if (this.maxSize != Infinity) {
         const layerHeadDetails = await headLayer(
           repositoryToken,
           { repository: layer.repository, name: layer.name },
@@ -44,14 +43,14 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         )
         const layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
-        if (layerSize != Infinity && layerSize > this.maxImageSizeBytes) {
+        if (layerSize != Infinity && layerSize > this.maxSize) {
           throw ContentTooLarge('Artefact exceeds configured scanner size limit.', {
             status: 413,
             statusText: 'Request Entity Too Large',
             endpoint: this.artefactType,
             layer,
             responseBody: {
-              detail: `Maximum content size limit (${this.maxImageSizeBytes}) exceeded (${layerSize} bytes read)`,
+              detail: `Maximum content size limit (${this.maxSize}) exceeded (${layerSize} bytes read)`,
             },
           })
         }

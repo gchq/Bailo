@@ -29,6 +29,7 @@ export abstract class BaseArtefactScanningConnector {
   abstract readonly queue: PQueue
 
   protected version?: string
+  protected maxSize: number = Infinity
 
   info(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version, artefactKind: this.artefactType }

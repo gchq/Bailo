@@ -54,14 +54,13 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
   readonly artefactType: ArtefactKindKeys = ArtefactKind.FILE
   readonly toolName: string = 'ModelScan'
   protected supportedExtensions: string[] = []
-  protected maxFileSizeBytes: number = Infinity
 
   async init(): Promise<void> {
     const artefactScanInfo = await getCachedArtefactScanInfo()
 
     this.version = artefactScanInfo.modelscanVersion
     this.supportedExtensions = artefactScanInfo.modelscanSupportedExtensions ?? this.supportedExtensions
-    this.maxFileSizeBytes = artefactScanInfo.maxFileSizeBytes ?? this.maxFileSizeBytes
+    this.maxSize = artefactScanInfo.maxFileSizeBytes ?? this.maxSize
   }
 
   protected getSkippedScanSummary(file: FileInterfaceDoc): ModelScanResponse {
@@ -83,14 +82,14 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
   protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
 
-    if (file.size > this.maxFileSizeBytes) {
+    if (file.size > this.maxSize) {
       throw ContentTooLarge('Artefact exceeds configured scanner size limit.', {
         status: 413,
         statusText: 'Request Entity Too Large',
         endpoint: this.artefactType,
         fileName: file.name,
         responseBody: {
-          detail: `Maximum content size limit (${this.maxFileSizeBytes}) exceeded (${file.size} bytes read)`,
+          detail: `Maximum content size limit (${this.maxSize}) exceeded (${file.size} bytes read)`,
         },
       })
     }

@@ -6,6 +6,7 @@ import { FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys, ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
+import { InternalError } from '../../utils/error.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
@@ -15,6 +16,30 @@ function safeParseVersion(versionStr: string): string {
     return match[1]
   }
   return versionStr
+}
+
+function safeParseSize(sizeStr: string): number {
+  const match = sizeStr.trim().match(/^(\d+)\s*([KMG])?B?$/i)
+  if (!match) {
+    throw InternalError('Invalid ClamAV size value.', { sizeStr })
+  }
+
+  const amount = Number(match[1])
+  const unit = match[2]?.toUpperCase()
+
+  if (amount === 0) {
+    return Infinity
+  }
+  switch (unit) {
+    case 'G':
+      return amount * 1024 ** 3
+    case 'M':
+      return amount * 1024 ** 2
+    case 'K':
+      return amount * 1024
+    default:
+      return amount
+  }
 }
 
 export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
@@ -31,6 +56,7 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
+    this.maxSize = safeParseSize(config.artefactScanning.clamdscan.streamMaxLength)
     log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
   }
 
@@ -40,6 +66,10 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
       return await this.scanError(`Could not use ${this.toolName} as it has not been correctly initialised.`, {
         ...scannerInfo,
       })
+    }
+
+    if (file.size > this.maxSize) {
+      return await this.scanError(`Artefact exceeds configured scanner size limit.`, { ...scannerInfo })
     }
 
     const s3Stream = await getObjectStream(file.path)

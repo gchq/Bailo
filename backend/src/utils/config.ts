@@ -191,6 +191,7 @@ export interface Config {
   artefactScanning: {
     clamdscan: {
       concurrency: number
+      streamMaxLength: string
       host: string
       port: number
     }
