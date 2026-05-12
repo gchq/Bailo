@@ -304,7 +304,7 @@ describe('services > file', () => {
         scanResults: [],
       },
     ])
-    vi.mocked(authorisation.file).mockResolvedValueOnce({ success: true, id: '' }).mockResolvedValueOnce({
+    vi.mocked(authorisation.file).mockResolvedValueOnce({
       info: 'You do not have permission to upload a file to this model.',
       success: false,
       id: '',
