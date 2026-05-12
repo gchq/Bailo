@@ -10,6 +10,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { ModelVolumeData, OverviewBaseMetrics } from 'types/types'
+import { setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
@@ -35,16 +36,6 @@ export default function OverviewMetricsCharts({
   const [startDate, setStartDate] = useState<Dayjs | null>(null)
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(new Date()))
   const [errorMessage, setErrorMessage] = useState('')
-
-  const setAsFirstDayOfMonth = (date: Dayjs) => {
-    date = date.date(1)
-    return date.toISOString().split('T')[0]
-  }
-
-  const setAsLastDayOfMonth = (date: Dayjs) => {
-    date = date.endOf('month')
-    return date.toISOString().split('T')[0]
-  }
 
   const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
     'month',
@@ -99,7 +90,7 @@ export default function OverviewMetricsCharts({
   }, [data.schemaBreakdown])
 
   const updateModelVolume = useEffectEvent((modelVolume) => {
-    if (modelVolume && modelVolume.data) {
+    if (modelVolume.data) {
       const updatedStructure = modelVolume.data.map((volumeData: ModelVolumeData) => {
         const formattedDate = dayjs(volumeData.startDate).format('MMM YYYY')
         const incrementObject = {

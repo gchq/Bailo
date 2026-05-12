@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs'
 import { plural } from 'utils/stringUtils'
 
 export const formatDate = (date: Date) => {
@@ -48,4 +49,14 @@ export const timeDifference = (current: Date, previous: Date) => {
   }
 
   return `${plural(Math.round(elapsed / msPerYear), 'year')} ago`
+}
+
+export const setAsFirstDayOfMonth = (date: Dayjs): string => {
+  date = date.date(1)
+  return date.toISOString().split('T')[0]
+}
+
+export const setAsLastDayOfMonth = (date: Dayjs): string => {
+  date = date.endOf('month')
+  return date.toISOString().split('T')[0]
 }

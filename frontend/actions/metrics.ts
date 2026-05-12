@@ -46,13 +46,12 @@ export function useGetVolumeForModel(interval: string = 'month', startDate?: str
   const { data, isLoading, error, mutate } = useSWR<
     {
       data: ModelVolume
-      ErrorInfo
     }[]
   >(`/api/v3/metrics/entryVolume?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateModelVolume: mutate,
-    modelVolume: data ? data : [],
+    modelVolume: data,
     isModelVolumeLoading: isLoading,
     isModelVolumeError: error,
   }

@@ -1,6 +1,5 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, JSX, SetStateAction } from 'react'
-import OverviewMetrics from 'src/metrics/OverviewMetrics'
 
 export interface BailoError extends Error {
   id?: string
@@ -931,7 +930,7 @@ export type ModelVolumeData = {
 }
 
 export type ModelVolume = {
-  data: ModelVolumeData
+  data: ModelVolumeData[]
   bucket: 'day' | 'week' | 'month' | 'quarter' | 'year'
   startDate: string
   endDate: string
