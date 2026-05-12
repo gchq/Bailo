@@ -60,10 +60,8 @@ type UntrustedModelRestrictionCheck = {
 }
 function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel: UntrustedModelRestrictionCheck) {
   if (modelKind === EntryKind.UntrustedModel) {
-    if (partialModel.visibility) {
-      if (partialModel.visibility === EntryVisibility.Public) {
-        throw BadReq('Untrusted models cannot be made public.')
-      }
+    if (partialModel.visibility === EntryVisibility.Public) {
+      throw BadReq('Untrusted models cannot be made public.')
     }
     if (partialModel.state) {
       throw BadReq('Untrusted models can not have their state manually changed.')
@@ -117,8 +115,13 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ...modelParams,
     id: modelId,
     collaborators,
-    state: config.untrustedModels.defaultState || '',
   })
+
+  if (modelParams.kind === EntryKind.UntrustedModel) {
+    model.state = config.untrustedModels.defaultState || ''
+  } else {
+    model.state = modelParams.kind || ''
+  }
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
 
