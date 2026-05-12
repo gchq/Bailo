@@ -9,7 +9,8 @@ import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
-  const match = versionStr.match(/ClamAV\s([\d.]+)\//)
+  // extract 'x.y.z' from 'ClamAV x.y.z/abc'
+  const match = versionStr.match(/ClamAV\s([\d.]+)/)
   if (match && match[1]) {
     return match[1]
   }

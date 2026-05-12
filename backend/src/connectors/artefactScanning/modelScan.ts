@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 import PQueue from 'p-queue'
 
 import { getCachedArtefactScanInfo, ModelScanResponse, scanFileStream } from '../../clients/artefactScan.js'
@@ -40,20 +42,11 @@ const skippedScanTemplate: ModelScanResponse = {
   errors: [],
 }
 
+// Match ModelScan's date format
 function formatDate(date = new Date()) {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
-
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  const seconds = pad(date.getSeconds())
-
-  // Convert milliseconds (3 digits) to microseconds (6 digits)
-  const microseconds = pad(date.getMilliseconds() * 1000, 6)
-
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${microseconds}`
+  const iso = date.toISOString().replace('Z', '')
+  const micros = String(date.getMilliseconds() * 1000).padStart(6, '0')
+  return iso.replace(/\.\d{3}/, `.${micros}`)
 }
 
 export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
@@ -72,10 +65,16 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
   }
 
   protected getSkippedScanSummary(file: FileInterfaceDoc): ModelScanResponse {
-    const skippedScanSummary = structuredClone(skippedScanTemplate)
-    skippedScanSummary.summary.input_path = `/tmp/${file.name}`
-    skippedScanSummary.summary.timestamp = formatDate()
-    skippedScanSummary.summary.modelscan_version = this.version!
+    const skippedScanSummary: ModelScanResponse = {
+      ...skippedScanTemplate,
+      summary: {
+        ...skippedScanTemplate.summary,
+        input_path: `/tmp/${file.name}`,
+        timestamp: formatDate(),
+        modelscan_version: this.version!,
+        skipped: { ...skippedScanTemplate.summary.skipped },
+      },
+    }
     skippedScanSummary.summary.skipped.skipped_files![0].source = file.name
 
     return skippedScanSummary
@@ -96,10 +95,8 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       })
     }
 
-    if (
-      this.supportedExtensions.length > 0 &&
-      !this.supportedExtensions.some((supportedExtension) => file.name.endsWith(supportedExtension))
-    ) {
+    const fileExtension = path.extname(file.name).toLowerCase()
+    if (this.supportedExtensions.length > 0 && !this.supportedExtensions.includes(fileExtension)) {
       const additionalInfo = this.getSkippedScanSummary(file)
       log.debug({ file, result: { additionalInfo }, ...scannerInfo }, 'Skipping file scan.')
       return {
