@@ -116,4 +116,24 @@ describe('connectors > artefactScanning > clamAv', () => {
 
     expect(result.state).toBe(ArtefactScanState.Error)
   })
+
+  test('scan() skip too large file', async () => {
+    clamAvMocks.getVersion.mockResolvedValueOnce('ClamAV 1.2.3/456')
+    clamAvMocks.scanStream.mockResolvedValueOnce({ viruses: [] })
+    const stream = Readable.from('file')
+    const destroySpy = vi.spyOn(stream, 'destroy')
+    s3Mocks.getObjectStream.mockResolvedValueOnce(stream)
+    const connector = new ClamAvFileScanningConnector()
+    await connector.init()
+
+    const result = await connector.scan({
+      id: 'file1',
+      name: 'file.bin',
+      path: '/bucket/file.bin',
+      size: 1024 ** 3,
+    } as any)
+
+    expect(result.state).toBe(ArtefactScanState.Error)
+    expect(destroySpy).not.toHaveBeenCalled()
+  })
 })

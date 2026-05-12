@@ -113,6 +113,7 @@ const config: PartialDeep<Config> = {
       host: '127.0.0.1',
       port: 8080,
       concurrency: 1,
+      streamMaxLength: '10M',
     },
 
     artefactscan: {
