@@ -17,6 +17,7 @@ import {
   startUploadMultipartFile,
   updateFile,
   uploadFile,
+  uploadMultipartFilePart,
 } from '../../src/services/file.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -104,6 +105,7 @@ vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => ({ pipe: vi.fn(), on: vi.fn() })),
+  putObjectPartStream: vi.fn(() => ({ ETag: 'test-etag', PartNumber: 1 })),
   completeMultipartUpload: vi.fn(),
   deleteObject: vi.fn(),
   headObject: vi.fn(() => ({ ContentLength: 100 })),
@@ -268,6 +270,61 @@ describe('services > file', () => {
       /^Cannot upload files to a mirrored model./,
     )
     expect(FileModelMock.save).not.toBeCalled()
+  })
+
+  test('uploadMultipartFilePart > success', async () => {
+    const modelId = 'testModelId'
+    const uploadId = 'testUploadId'
+    const partNumber = 1
+    const stream = new Readable() as any
+    const bodySize = 1024
+    const path = 'test/path'
+    FileModelMock.aggregate.mockResolvedValueOnce([
+      {
+        id: testFileId,
+        modelId,
+        path,
+        scanResults: [],
+      },
+    ])
+
+    const result = await uploadMultipartFilePart({} as any, modelId, testFileId, uploadId, partNumber, stream, bodySize)
+
+    expect(s3Mocks.putObjectPartStream).toHaveBeenCalledWith(path, uploadId, partNumber, stream, bodySize)
+    expect(result).toMatchSnapshot()
+  })
+
+  test('uploadMultipartFilePart > no permission', async () => {
+    const modelId = 'testModelId'
+    FileModelMock.aggregate.mockResolvedValueOnce([
+      {
+        id: testFileId,
+        modelId,
+        path: 'test/path',
+        scanResults: [],
+      },
+    ])
+    vi.mocked(authorisation.file).mockResolvedValueOnce({ success: true, id: '' }).mockResolvedValueOnce({
+      info: 'You do not have permission to upload a file to this model.',
+      success: false,
+      id: '',
+    })
+
+    await expect(() =>
+      uploadMultipartFilePart({} as any, modelId, testFileId, 'testUploadId', 1, new Readable() as any, 1024),
+    ).rejects.toThrowError(/^You do not have permission to upload a file to this model./)
+
+    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
+  })
+
+  test('uploadMultipartFilePart > no file', async () => {
+    FileModelMock.aggregate.mockResolvedValueOnce([])
+
+    await expect(() =>
+      uploadMultipartFilePart({} as any, 'testModelId', testFileId, 'testUploadId', 1, new Readable() as any, 1024),
+    ).rejects.toThrowError(/^The requested file was not found./)
+
+    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
   })
 
   test('finishUploadMultipartFile > success', async () => {
