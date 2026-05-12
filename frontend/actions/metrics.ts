@@ -48,7 +48,7 @@ export function useGetVolumeForModel(interval: string = 'month', startDate?: str
       data: ModelVolume
       ErrorInfo
     }[]
-  >(`/api/v3/metrics/modelVolume?${qs.stringify(queryParams)}`, fetcher)
+  >(`/api/v3/metrics/entryVolume?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateModelVolume: mutate,

@@ -24,9 +24,9 @@ export const StateInfoSchema = z.object({
 
 export const BaseMetricsSchema = z.object({
   users: z.number().optional(),
-  models: z.number(),
+  entries: z.number(),
   schemaBreakdown: z.array(SchemaInfoSchema),
-  modelState: z.array(StateInfoSchema),
+  entryState: z.array(StateInfoSchema),
   withReleases: z.number(),
   withAccessRequest: z.number(),
 })
@@ -36,6 +36,7 @@ export const OrganisationMetricsSchema = BaseMetricsSchema.extend({
 })
 
 export const GetUsageMetricsResponseSchema = z.object({
+  lastUpdated: z.string(),
   global: BaseMetricsSchema,
   byOrganisation: z.array(OrganisationMetricsSchema),
 })

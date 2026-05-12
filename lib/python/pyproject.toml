@@ -113,7 +113,6 @@ init-hook='import sys; sys.setrecursionlimit(8 * sys.getrecursionlimit())'
 jobs=0
 limit-inference-results=100
 persistent="yes"
-suggestion-mode="yes"
 unsafe-load-any-extension="no"
 
 [tool.pylint.'MESSAGES CONTROL']
@@ -235,7 +234,7 @@ min-public-methods=2
 [tool.pylint.'IMPORTS']
 allow-wildcard-with-all="no"
 analyse-fallback-blocks="no"
-deprecated-modules="optparse,tkinter.tix"
+deprecated-modules=["optparse","tkinter.tix"]
 
 [tool.pylint.'EXCEPTIONS']
 overgeneral-exceptions= [

@@ -38,7 +38,7 @@ describe('routes > metrics > getComplianceMetrics', () => {
           { role: 'Reviewer', count: 2 },
           { role: 'Owner', count: 1 },
         ],
-        models: [{ modelId: 'model-1', missingRoles: ['Reviewer'] }],
+        entries: [{ entryId: 'model-1', missingRoles: ['Reviewer'] }],
       },
       byOrganisation: [],
     })
@@ -52,7 +52,7 @@ describe('routes > metrics > getComplianceMetrics', () => {
           { role: 'Reviewer', count: 2 },
           { role: 'Owner', count: 1 },
         ],
-        models: [{ modelId: 'model-1', missingRoles: ['Reviewer'] }],
+        entries: [{ entryId: 'model-1', missingRoles: ['Reviewer'] }],
       },
       byOrganisation: [],
     })

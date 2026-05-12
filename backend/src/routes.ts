@@ -96,7 +96,7 @@ import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import { getComplianceMetrics } from './routes/v3/metrics/getComplianceMetrics.js'
-import { getModelVolume } from './routes/v3/metrics/getModelVolume.js'
+import { getEntryVolume } from './routes/v3/metrics/getEntryVolume.js'
 import { getUsageMetrics } from './routes/v3/metrics/getUsageMetrics.js'
 import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
@@ -104,10 +104,7 @@ import config from './utils/config.js'
 
 export const server = express()
 
-server.use('/api/v2', bodyParser.json())
-server.use('/api/v2', httpLog)
-server.use('/api/v3', bodyParser.json())
-server.use('/api/v3', httpLog)
+server.use(['/api/v2', '/api/v3'], [bodyParser.json(), httpLog])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -261,14 +258,13 @@ server.get('/api/v2/models/tags', getPopularTags)
 
 server.get('/api/v3/metrics/usage', ...getUsageMetrics)
 server.get('/api/v3/metrics/compliance', ...getComplianceMetrics)
-server.get('/api/v3/metrics/modelVolume', ...getModelVolume)
+server.get('/api/v3/metrics/entryVolume', ...getEntryVolume)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
-server.use('/api/v2', expressErrorHandler)
-server.use('/api/v3', expressErrorHandler)
+server.use(['/api/v2', '/api/v3'], expressErrorHandler)
 
 server.use('/internal', internalRouter)

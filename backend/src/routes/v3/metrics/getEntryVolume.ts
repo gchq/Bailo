@@ -7,7 +7,7 @@ import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const ModelVolumeDataPointSchema = z.object({
+export const EntryVolumeDataPointSchema = z.object({
   startDate: z.string().datetime().openapi({ example: '2026-01-01' }),
   endDate: z.string().datetime().openapi({ example: '2026-01-31' }),
   count: z.number().int().nonnegative().openapi({ example: 7 }),
@@ -20,14 +20,14 @@ export const ModelVolumeDataPointSchema = z.object({
   }),
 })
 
-export const ModelVolumeIntervalEnum = z.enum(['day', 'week', 'month', 'quarter', 'year'])
-export type ModelVolumeInterval = z.infer<typeof ModelVolumeIntervalEnum>
-export type ModelVolumeDataPoint = z.infer<typeof ModelVolumeDataPointSchema>
+export const EntryVolumeIntervalEnum = z.enum(['day', 'week', 'month', 'quarter', 'year'])
+export type EntryVolumeInterval = z.infer<typeof EntryVolumeIntervalEnum>
+export type EntryVolumeDataPoint = z.infer<typeof EntryVolumeDataPointSchema>
 
-export const getModelVolumeSchema = z.object({
+export const getEntryVolumeSchema = z.object({
   query: z
     .object({
-      interval: ModelVolumeIntervalEnum.openapi({ example: 'month' }),
+      interval: EntryVolumeIntervalEnum.openapi({ example: 'month' }),
 
       startDate: z.string().date().openapi({ example: '2026-01-01' }),
 
@@ -41,50 +41,46 @@ export const getModelVolumeSchema = z.object({
     }),
 })
 
-const GetModelVolumeResponseSchema = z.object({
-  interval: ModelVolumeIntervalEnum.openapi({ example: 'month' }),
+const GetEntryVolumeResponseSchema = z.object({
+  lastUpdated: z.string(),
+  interval: EntryVolumeIntervalEnum.openapi({ example: 'month' }),
   startDate: z.string().date().openapi({ example: '2026-01-01' }),
   endDate: z.string().date().openapi({ example: '2026-04-01' }),
-  organisation: z.string().optional().openapi({ example: 'Example Organisation' }),
-  data: z.array(ModelVolumeDataPointSchema),
+  data: z.array(EntryVolumeDataPointSchema),
 })
 
 registerPath({
   method: 'get',
-  path: '/api/v3/metrics/modelVolume',
+  path: '/api/v3/metrics/entryVolume',
   tags: ['metrics'],
   description: 'Returns the count of models created over time, aggregated by the specified period.',
-  schema: getModelVolumeSchema,
+  schema: getEntryVolumeSchema,
   responses: {
     200: {
       description: 'Details about the historic model volumes.',
       content: {
         'application/json': {
-          schema: GetModelVolumeResponseSchema,
+          schema: GetEntryVolumeResponseSchema,
         },
       },
     },
   },
 })
 
-export type GetModelVolumeResponse = z.infer<typeof GetModelVolumeResponseSchema>
+export type GetEntryVolumeResponse = z.infer<typeof GetEntryVolumeResponseSchema>
 
-export const getModelVolume = [
-  async (req: Request, res: Response<GetModelVolumeResponse>): Promise<void> => {
+export const getEntryVolume = [
+  async (req: Request, res: Response<GetEntryVolumeResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewMetric
 
     const {
       query: { interval, startDate, endDate, timezone },
-    } = parse(req, getModelVolumeSchema)
+    } = parse(req, getEntryVolumeSchema)
 
-    const {
-      startDate: modelVolumeStartDate,
-      endDate: modelVolumeEndDate,
-      data: modelVolumeDataPoints,
-    } = await metrics.calculateModelVolume(req.user, interval, startDate, endDate, timezone)
+    const result = await metrics.calculateEntryVolume(req.user, interval, startDate, endDate, timezone)
 
     await audit.onViewMetric(req)
 
-    res.json({ interval, startDate: modelVolumeStartDate, endDate: modelVolumeEndDate, data: modelVolumeDataPoints })
+    res.json(result)
   },
 ]

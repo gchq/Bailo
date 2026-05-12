@@ -952,7 +952,7 @@ export interface OverviewBaseMetrics {
   users: number
   models: number
   schemaBreakdown: SchemaBreakDownMetrics[]
-  modelState: ModelStateMetrics[]
+  entryState: ModelStateMetrics[]
   withReleases: number
   withAccessRequest: number
 }
@@ -984,7 +984,7 @@ export interface PolicyModelMetrics {
 
 export interface PolicyBaseMetrics {
   summary: PolicySummaryMetrics[]
-  models: PolicyModelMetrics[]
+  entries: PolicyModelMetrics[]
 }
 
 export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {

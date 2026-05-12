@@ -1,13 +1,13 @@
 import { PipelineStage } from 'mongoose'
 
 import { CollaboratorEntry } from '../../models/Model.js'
-import { ModelVolumeInterval } from '../../routes/v3/metrics/getModelVolume.js'
+import { EntryVolumeInterval } from '../../routes/v3/metrics/getEntryVolume.js'
 
 /**
  * Returns a new Date incremented by one interval
  * (day/week/month/quarter/year) in UTC.
  */
-export function addInterval(date: Date, interval: ModelVolumeInterval): Date {
+export function addInterval(date: Date, interval: EntryVolumeInterval): Date {
   const d = new Date(date)
 
   switch (interval) {

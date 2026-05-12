@@ -57,9 +57,9 @@ export default function OverviewMetricsCharts({
   })
 
   useEffect(() => {
-    if (data.modelState) {
+    if (data.entryState) {
       updateStateData(
-        data.modelState.map((state) => {
+        data.entryState.map((state) => {
           return {
             label: state.state,
             value: state.count,
@@ -67,7 +67,7 @@ export default function OverviewMetricsCharts({
         }),
       )
     }
-  }, [data.modelState])
+  }, [data.entryState])
 
   const updateStartDate = useEffectEvent((newDate: Date) => {
     setStartDate(dayjs(newDate))

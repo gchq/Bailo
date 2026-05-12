@@ -14,7 +14,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
-    return data.models.map((row) => (
+    return data.entries.map((row) => (
       <TableRow key={row.modelId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
           <Link href={`/model/${row.modelId}`}>{row.modelId}</Link>
@@ -30,7 +30,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
         </TableCell>
       </TableRow>
     ))
-  }, [data.models])
+  }, [data.entries])
 
   const displayMissingRoleCounts = useMemo(() => {
     return data.summary.map((roleSummary) => {
