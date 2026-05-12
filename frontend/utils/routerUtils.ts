@@ -10,5 +10,7 @@ export const entryKindForRedirect = (entryKind: EntryKindKeys) => {
       return 'model'
     case EntryKind.DATA_CARD:
       return entryKind
+    default:
+      return 'model'
   }
 }
