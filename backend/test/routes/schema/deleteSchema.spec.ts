@@ -31,7 +31,7 @@ describe('routes > schema > deleteSchema', async () => {
     const res = await testDelete(`/api/v2/schema/${fixture.params.schemaId}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteSchema).toBeCalled()
+    expect(audit.onDeleteSchema).toHaveBeenCalled()
     expect(audit.onDeleteSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })
