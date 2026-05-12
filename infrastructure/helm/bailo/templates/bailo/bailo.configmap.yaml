@@ -232,7 +232,7 @@ data:
         },
 
         untrustedModel: {
-          enabled: {{ .Values.config.ui.untrustedModel.enabled }}
+          enabled: {{ .Values.config.ui.untrustedModel.enabled }},
           untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}'
         }
       },

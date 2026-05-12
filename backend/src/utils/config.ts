@@ -225,7 +225,6 @@ export interface Config {
 
   untrustedModels: {
     defaultState: string
-    entryDescription: string
   }
 }
 

@@ -120,26 +120,26 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           {entry.kind === EntryKind.UNTRUSTED_MODEL && (
             <Typography color='warning'>Untrusted models can only be private.</Typography>
           )}
-          <RadioGroup
-            defaultValue='public'
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
-          >
-            <FormControlLabel
-              value='public'
-              control={<Radio />}
-              label={publicLabel()}
-              data-test='publicButtonSelector'
-              disabled={entry.kind === EntryKind.UNTRUSTED_MODEL}
-            />
-            <FormControlLabel
-              value='private'
-              control={<Radio />}
-              label={privateLabel()}
-              data-test='privateButtonSelector'
-              disabled={entry.kind === EntryKind.UNTRUSTED_MODEL}
-            />
-          </RadioGroup>
+          {entry.kind !== EntryKind.UNTRUSTED_MODEL && (
+            <RadioGroup
+              defaultValue='public'
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
+            >
+              <FormControlLabel
+                value='public'
+                control={<Radio />}
+                label={publicLabel()}
+                data-test='publicButtonSelector'
+              />
+              <FormControlLabel
+                value='private'
+                control={<Radio />}
+                label={privateLabel()}
+                data-test='privateButtonSelector'
+              />
+            </RadioGroup>
+          )}
         </>
         <div>
           <Tooltip title={saveButtonTooltip}>

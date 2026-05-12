@@ -224,26 +224,26 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               {createEntryKind === EntryKind.UNTRUSTED_MODEL && (
                 <Typography color='warning'>Untrusted models can only be private.</Typography>
               )}
-              <RadioGroup
-                defaultValue='public'
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
-              >
-                <FormControlLabel
-                  value='public'
-                  control={<Radio />}
-                  label={publicLabel}
-                  disabled={createEntryKind === EntryKind.UNTRUSTED_MODEL}
-                  data-test='publicButtonSelector'
-                />
-                <FormControlLabel
-                  value='private'
-                  control={<Radio />}
-                  label={privateLabel}
-                  disabled={createEntryKind === EntryKind.UNTRUSTED_MODEL}
-                  data-test='privateButtonSelector'
-                />
-              </RadioGroup>
+              {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (
+                <RadioGroup
+                  defaultValue='public'
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+                >
+                  <FormControlLabel
+                    value='public'
+                    control={<Radio />}
+                    label={publicLabel}
+                    data-test='publicButtonSelector'
+                  />
+                  <FormControlLabel
+                    value='private'
+                    control={<Radio />}
+                    label={privateLabel}
+                    data-test='privateButtonSelector'
+                  />
+                </RadioGroup>
+              )}
             </>
             <Accordion sx={{ borderTop: 'none' }}>
               <AccordionSummary

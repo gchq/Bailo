@@ -60,7 +60,10 @@ export default function Model() {
               view: <AccessRequests model={entry} currentUserRoles={currentUserRoles} />,
               datatest: 'accessRequestTab',
               disabled: !entry.card || entry.kind === EntryKind.UNTRUSTED_MODEL,
-              disabledText: 'Select a schema to view this tab.',
+              disabledText:
+                entry.kind === EntryKind.UNTRUSTED_MODEL
+                  ? 'Access requests are not available for untrusted models.'
+                  : 'Select a schema to view this tab.',
             },
             {
               title: 'Registry',
