@@ -115,4 +115,20 @@ export function softDeletionPlugin(schema: Schema) {
   schema.pre('aggregate', function () {
     this.pipeline().unshift({ $match: { deleted: { $ne: true } } })
   })
+
+  schema.pre('countDocuments', function () {
+    if (this['_conditions'].deleted) {
+      this.where('deleted').equals(this['_conditions'].deleted)
+    } else {
+      this.or([{ deleted: { $exists: false } }, { deleted: false }])
+    }
+  })
+
+  schema.pre('distinct', function () {
+    if (this['_conditions'].deleted) {
+      this.where('deleted').equals(this['_conditions'].deleted)
+    } else {
+      this.or([{ deleted: { $exists: false } }, { deleted: false }])
+    }
+  })
 }
