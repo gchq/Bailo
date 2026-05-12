@@ -144,28 +144,28 @@ describe('services > smtp > smtp', () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
     await requestReviewForRelease('user:user', review, release)
 
-    expect(transporterMock.sendMail).not.toBeCalled()
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an Access Request Review email is not sent when disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
     await requestReviewForAccessRequest('user:user', review, access)
 
-    expect(transporterMock.sendMail).not.toBeCalled()
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent after a response for a release review if disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
     await notifyReviewResponseForRelease(testReviewResponse as any, release)
 
-    expect(transporterMock.sendMail).not.toBeCalled()
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent after a response for a an access request review if disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
     await notifyReviewResponseForAccess(testReviewResponse as any, access)
 
-    expect(transporterMock.sendMail).not.toBeCalled()
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is sent for Release Reviews', async () => {
@@ -252,6 +252,6 @@ describe('services > smtp > smtp', () => {
     transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
 
     const result: Promise<void> = requestReviewForRelease('user:user', review, release)
-    await expect(result).rejects.toThrowError(`Unable to send email`)
+    await expect(result).rejects.toThrow(`Unable to send email`)
   })
 })

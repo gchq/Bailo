@@ -32,7 +32,7 @@ describe('routes > model > modelcard > getModelCardRevisions', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card-revisions`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewModelCardRevisions).toBeCalled()
+    expect(audit.onViewModelCardRevisions).toHaveBeenCalled()
     expect(audit.onViewModelCardRevisions.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
@@ -40,7 +40,7 @@ describe('routes > model > modelcard > getModelCardRevisions', () => {
     mockModelService.getModelCardRevisions.mockResolvedValueOnce([])
     const res = await testGet(`/api/v2/model/no-model/model-card-revisions`)
 
-    expect(mockModelService.getModelCardRevisions).toBeCalled()
+    expect(mockModelService.getModelCardRevisions).toHaveBeenCalled()
     expect(res.statusCode).toBe(200)
     expect(res.body.modelCardRevisions).toHaveLength(0)
   })

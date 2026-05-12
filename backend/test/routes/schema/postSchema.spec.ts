@@ -30,7 +30,7 @@ describe('routes > schema > postSchema', async () => {
     const res = await testPost(`/api/v2/schemas`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateSchema).toBeCalled()
+    expect(audit.onCreateSchema).toHaveBeenCalled()
     expect(audit.onCreateSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })
