@@ -6,7 +6,7 @@
     "cy:run": "npm --prefix ./frontend/ run cy:run",
     "certs": "npm --prefix ./backend/ run certs",
     "script": "npm --prefix ./backend/ run script",
-    "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
+    "test": "npm --prefix ./backend/ run test && npm --prefix ./frontend/ run test",
     "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
     "style": "prettier --write .",
     "check-style": "prettier --check .",

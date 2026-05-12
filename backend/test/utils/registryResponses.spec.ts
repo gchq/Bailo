@@ -25,7 +25,7 @@ describe('clients > registryResponses', () => {
 
   test('parseRegistryResponse > unhandled error', () => {
     const header = { foo: 'bar' }
-    expect(() => parseRegistryResponse(BaseApiCheckResponseBodySchema, header)).toThrowError(
+    expect(() => parseRegistryResponse(BaseApiCheckResponseBodySchema, header)).toThrow(
       /^Response did not match expected schema or RegistryErrorResponse./,
     )
   })

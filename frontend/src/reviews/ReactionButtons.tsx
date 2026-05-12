@@ -33,7 +33,7 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
 
   const handleReactionClick = useCallback(
     async (kind: ReactionKindKeys) => {
-      const res = await patchResponseReaction(response['_id'], kind)
+      const res = await patchResponseReaction(response._id, kind)
       if (!res.ok) {
         onError(await getErrorMessage(res))
       }

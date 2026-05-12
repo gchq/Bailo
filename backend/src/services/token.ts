@@ -2,7 +2,7 @@ import { ClientSession } from 'mongoose'
 import { customAlphabet } from 'nanoid'
 
 import { Response } from '../connectors/authorisation/base.js'
-import Token, { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
+import TokenModel, { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
 import { getModelById } from './model.js'
@@ -32,7 +32,7 @@ export async function createToken(user: UserInterface, { description, scope, mod
     }
   }
 
-  const token = new Token({
+  const token = new TokenModel({
     user: user.dn,
     description,
 
@@ -51,13 +51,13 @@ export async function createToken(user: UserInterface, { description, scope, mod
 }
 
 export async function findUserTokens(user: UserInterface) {
-  return Token.find({
+  return TokenModel.find({
     user: user.dn,
   })
 }
 
 export async function getTokensForModel(user: UserInterface, modelId: string) {
-  return Token.find({
+  return TokenModel.find({
     user: user.dn,
     modelIds: modelId,
   })
@@ -103,7 +103,7 @@ interface GetTokenOptions {
 }
 
 export async function findTokenByAccessKey(accessKey: string, opts?: GetTokenOptions) {
-  let query = Token.findOne({
+  let query = TokenModel.findOne({
     accessKey,
   })
 
@@ -157,7 +157,7 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
 
   if (token.scope === TokenScope.Models) {
     return {
-      id: token._id.toString(),
+      id: token.id,
       success: false,
       info: 'This token must not have model restrictions for this endpoint',
     }
@@ -165,14 +165,14 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
 
   if (token.actions && !token.actions.includes(action)) {
     return {
-      id: token._id.toString(),
+      id: token.id,
       success: false,
       info: 'This token may not be used for this action',
     }
   }
 
   return {
-    id: token._id.toString(),
+    id: token.id,
     success: true,
   }
 }

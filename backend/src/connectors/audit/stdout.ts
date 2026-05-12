@@ -86,13 +86,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.CreateFile, req)
-    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
+    const event = this.generateEvent(req, { id: file.id, modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
   async onViewFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.ViewFile, req)
-    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
+    const event = this.generateEvent(req, { id: file.id, modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
@@ -149,7 +149,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateCommentResponse(req: Request, response: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateResponse, req)
-    const event = this.generateEvent(req, { id: response['_id'] })
+    const event = this.generateEvent(req, { id: response._id })
     req.log.info(event, req.audit.description)
   }
 
