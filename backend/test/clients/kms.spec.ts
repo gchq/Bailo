@@ -77,7 +77,7 @@ describe('clients > s3', () => {
       Signature: Buffer.from(exampleSignatureString.substring(1), 'hex'),
     })
 
-    await expect(sign('hash123')).rejects.toThrowError(/^Invalid DER signature/)
+    await expect(sign('hash123')).rejects.toThrow(/^Invalid DER signature/)
   })
 
   test('sign > DER too short', async () => {
@@ -90,7 +90,7 @@ describe('clients > s3', () => {
       Signature: Buffer.from(exampleSignatureString.substring(0, exampleSignatureString.length - 1), 'hex'),
     })
 
-    await expect(sign('hash123')).rejects.toThrowError(/^Malformed DER sequence/)
+    await expect(sign('hash123')).rejects.toThrow(/^Malformed DER sequence/)
   })
 
   test('sign > DER missing r integer', async () => {
@@ -103,7 +103,7 @@ describe('clients > s3', () => {
       Signature: Buffer.from(exampleSignatureString.substring(0, 5) + '3' + exampleSignatureString.substring(6), 'hex'),
     })
 
-    await expect(sign('hash123')).rejects.toThrowError(/^Invalid DER: missing r integer/)
+    await expect(sign('hash123')).rejects.toThrow(/^Invalid DER: missing r integer/)
   })
 
   test('sign > DER missing s integer', async () => {
@@ -119,7 +119,7 @@ describe('clients > s3', () => {
       ),
     })
 
-    await expect(sign('hash123')).rejects.toThrowError(/^Invalid DER: missing s integer/)
+    await expect(sign('hash123')).rejects.toThrow(/^Invalid DER: missing s integer/)
   })
 
   test('sign > cannot get key information', async () => {
@@ -133,7 +133,7 @@ describe('clients > s3', () => {
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
       KeyId: configMock.modelMirror.export.kmsSignature.keyId,
     })
-    await expect(response).rejects.toThrowError(/^Cannot get key information./)
+    await expect(response).rejects.toThrow(/^Cannot get key information./)
   })
 
   test('sign > cannot get signature', async () => {
@@ -156,6 +156,6 @@ describe('clients > s3', () => {
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
       KeyId: configMock.modelMirror.export.kmsSignature.keyId,
     })
-    await expect(response).rejects.toThrowError(/^Cannot get signature./)
+    await expect(response).rejects.toThrow(/^Cannot get signature./)
   })
 })

@@ -31,7 +31,7 @@ describe('routes > inferencing > deleteInference', () => {
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/inference/example/${fixture.params.tag}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteInference).toBeCalled()
+    expect(audit.onDeleteInference).toHaveBeenCalled()
     expect(audit.onDeleteInference.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

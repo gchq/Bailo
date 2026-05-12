@@ -24,7 +24,7 @@ describe('routes > release > getReleases', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/releases`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewReleases).toBeCalled()
+    expect(audit.onViewReleases).toHaveBeenCalled()
     expect(audit.onViewReleases.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

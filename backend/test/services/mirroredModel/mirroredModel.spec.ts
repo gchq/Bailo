@@ -389,7 +389,7 @@ describe('services > mirroredModel', () => {
     })
 
     test('fail > invalid importKind', () => {
-      expect(() => getImporter({ importKind: 'invalid' } as any, {} as any, {} as any)).toThrowError(
+      expect(() => getImporter({ importKind: 'invalid' } as any, {} as any, {} as any)).toThrow(
         `Unknown \`importKind\` specified in '${config.modelMirror.metadataFile}'.`,
       )
     })
