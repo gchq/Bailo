@@ -1,7 +1,7 @@
-import Release from '../models/Release.js'
+import ReleaseModel from '../models/Release.js'
 
 export async function up() {
-  const releases = await Release.find({})
+  const releases = await ReleaseModel.find({})
   for (const release of releases) {
     const semver = release.get('semver')
     if (semver !== undefined && typeof semver === typeof '') {

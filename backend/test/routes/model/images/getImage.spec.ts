@@ -28,8 +28,35 @@ describe('routes > images > getImage', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewModelImage).toBeCalled()
+    expect(audit.onViewModelImage).toHaveBeenCalled()
     expect(audit.onViewModelImage.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onViewModelImage.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })
 })
+<<<<<<< innovation/seperate-route-file
+=======
+
+describe('routes > images > getImageByDigest', () => {
+  test('200 > ok', async () => {
+    const fixture = createFixture(getImageByDigestSchema)
+    const res = await testGet(
+      `/api/v3/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}/${fixture.params.digest}`,
+    )
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    const fixture = createFixture(getImageByDigestSchema)
+    const res = await testGet(
+      `/api/v3/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}/${fixture.params.digest}`,
+    )
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onViewModelImage).toHaveBeenCalled()
+    expect(audit.onViewModelImage.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+    expect(audit.onViewModelImage.mock.calls.at(0)?.at(2)).toMatchSnapshot()
+  })
+})
+>>>>>>> main

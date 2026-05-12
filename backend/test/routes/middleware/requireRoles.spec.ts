@@ -19,7 +19,7 @@ describe('middleware > requireRoles', () => {
 
     const middleware = requireRole(Roles.Admin)
 
-    await expect(middleware(req, res, next)).rejects.toThrowError(Unauthorized('No valid authentication provided.'))
+    await expect(middleware(req, res, next)).rejects.toThrow(Unauthorized('No valid authentication provided.'))
   })
 
   test('requireRoles > 403 if user does not have required role', async () => {
@@ -30,7 +30,7 @@ describe('middleware > requireRoles', () => {
 
     const middleware = requireRoles([Roles.Admin])
 
-    await expect(middleware(req, res, next)).rejects.toThrowError(
+    await expect(middleware(req, res, next)).rejects.toThrow(
       Forbidden('You do not have the required role.', {
         userDn: req.user.dn,
         requiredRole: Roles.Admin,

@@ -110,7 +110,7 @@ describe('service > mirroredModel > tarball', () => {
     } as any
     const promise = initialiseTarGzUpload('file.tar.gz', badMeta, {} as any)
 
-    await expect(promise).rejects.toThrowError('bad-json')
+    await expect(promise).rejects.toThrow('bad-json')
   })
 
   test('finaliseTarGzUpload > success', async () => {
@@ -161,7 +161,7 @@ describe('service > mirroredModel > tarball', () => {
 
     const promise = addEntryToTarGzUpload(tarStream, { type: 'stream', filename: 'bin', stream }, {} as any)
 
-    await expect(promise).rejects.toThrowError('error')
+    await expect(promise).rejects.toThrow('error')
     expect(entrySpy).toHaveBeenCalled()
   })
 
@@ -180,7 +180,7 @@ describe('service > mirroredModel > tarball', () => {
 
     const promise = addEntryToTarGzUpload(tarStream, { type: 'bad' } as any, {} as any)
 
-    await expect(promise).rejects.toThrowError(/^Unable to handle entry for tar.gz packing stream./)
+    await expect(promise).rejects.toThrow(/^Unable to handle entry for tar.gz packing stream./)
   })
 
   test('createUnTarGzStreams > success', () => {
@@ -265,7 +265,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^Expected 'meta.json' as first entry, found 'wrong.txt'/)
+        await expect(promise).rejects.toThrow(/^Expected 'meta.json' as first entry, found 'wrong.txt'/)
       })
 
       test('invalid schemaVersion', async () => {
@@ -284,7 +284,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+        await expect(promise).rejects.toThrow(/^Error processing tarball during import./)
       })
 
       test('auth fails', async () => {
@@ -299,7 +299,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^nope/)
+        await expect(promise).rejects.toThrow(/^nope/)
       })
 
       test('non-Bailo', async () => {
@@ -316,7 +316,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError('Error')
+        await expect(promise).rejects.toThrow('Error')
       })
 
       test('getImporter', async () => {
@@ -334,7 +334,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+        await expect(promise).rejects.toThrow(/^Error processing tarball during import./)
         expect(authMocks.default.model).toHaveBeenCalled()
         expect(mirroredModelMocks.handleStreamErrorSpy).not.toHaveBeenCalled()
       })
@@ -353,7 +353,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError('Error')
+        await expect(promise).rejects.toThrow('Error')
         expect(authMocks.default.model).toHaveBeenCalled()
         expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
         expect(mirroredModelMocks.handleStreamErrorSpy).toHaveBeenCalled()
@@ -365,7 +365,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^Tarball finished before importer initialisation./)
+        await expect(promise).rejects.toThrow(/^Tarball finished before importer initialisation./)
       })
 
       test('tar data is invalid', async () => {
@@ -375,13 +375,13 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(badStream, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+        await expect(promise).rejects.toThrow(/^Error processing tarball during import./)
       })
 
       test('gzip stream is invalid', async () => {
         const promise = extractTarGzStream(Readable.from(['']), { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+        await expect(promise).rejects.toThrow(/^Error processing tarball during import./)
       })
 
       test('async entry handler routed via handleStreamError', async () => {
@@ -402,7 +402,7 @@ describe('service > mirroredModel > tarball', () => {
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
-        await expect(promise).rejects.toThrowError('async importer failure')
+        await expect(promise).rejects.toThrow('async importer failure')
         expect(mirroredModelMocks.handleStreamErrorSpy).toHaveBeenCalled()
         expect(mirroredModelMocks.handleStreamCompletionSpy).not.toHaveBeenCalled()
       })

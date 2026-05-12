@@ -43,25 +43,25 @@ describe('services > webhook', () => {
   test('createWebhook > simple', async () => {
     await createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    expect(WebhookModelMock.save).toBeCalled()
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(authorisation.model).toBeCalled()
+    expect(WebhookModelMock.save).toHaveBeenCalled()
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(authorisation.model).toHaveBeenCalled()
   })
 
   test('UpdateWebhook > simple', async () => {
     await updateWebhook(user, 'modelId', { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    expect(WebhookModelMock.findOneAndUpdate).toBeCalled()
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(authorisation.model).toBeCalled()
+    expect(WebhookModelMock.findOneAndUpdate).toHaveBeenCalled()
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(authorisation.model).toHaveBeenCalled()
   })
 
   test('removeWebhook > simple', async () => {
     await removeWebhook(user, 'model', 'webhook')
 
-    expect(WebhookModelMock.findOneAndDelete).toBeCalled()
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(authorisation.model).toBeCalled()
+    expect(WebhookModelMock.findOneAndDelete).toHaveBeenCalled()
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(authorisation.model).toHaveBeenCalled()
   })
 
   test('getWebhooks > simple', async () => {
@@ -70,9 +70,9 @@ describe('services > webhook', () => {
     const result = await getWebhooksByModel(user, 'model')
 
     expect(result).toBe(webhooks)
-    expect(WebhookModelMock.find).toBeCalled()
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(authorisation.model).toBeCalled()
+    expect(WebhookModelMock.find).toHaveBeenCalled()
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(authorisation.model).toHaveBeenCalled()
   })
 
   test('createWebhook > no permisson', async () => {
@@ -80,9 +80,9 @@ describe('services > webhook', () => {
 
     const result = createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(WebhookModelMock.save).not.toBeCalled()
+    await expect(result).rejects.toThrow(`You do not have permission to update this model.`)
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(WebhookModelMock.save).not.toHaveBeenCalled()
   })
 
   test('updateWebhook > no permisson', async () => {
@@ -90,9 +90,9 @@ describe('services > webhook', () => {
 
     const result = updateWebhook(user, 'modelId', { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(WebhookModelMock.findOneAndUpdate).not.toBeCalled()
+    await expect(result).rejects.toThrow(`You do not have permission to update this model.`)
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(WebhookModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 
   test('deleteWebhook > no permisson', async () => {
@@ -100,9 +100,9 @@ describe('services > webhook', () => {
 
     const result = removeWebhook(user, 'model', 'webhook')
 
-    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(WebhookModelMock.findOneAndDelete).not.toBeCalled()
+    await expect(result).rejects.toThrow(`You do not have permission to update this model.`)
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(WebhookModelMock.findOneAndDelete).not.toHaveBeenCalled()
   })
 
   test('getWebhooksByModel > no permisson', async () => {
@@ -110,9 +110,9 @@ describe('services > webhook', () => {
 
     const result = getWebhooksByModel(user, 'model')
 
-    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
-    expect(modelServiceMock.getModelById).toBeCalled()
-    expect(WebhookModelMock.find).not.toBeCalled()
+    await expect(result).rejects.toThrow(`You do not have permission to update this model.`)
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
+    expect(WebhookModelMock.find).not.toHaveBeenCalled()
   })
 
   test('deleteWebhook > webhook not found', async () => {
@@ -120,8 +120,8 @@ describe('services > webhook', () => {
 
     const result = removeWebhook(user, 'model', 'webhook')
 
-    await expect(result).rejects.toThrowError(`The requested webhook was not found.`)
-    expect(modelServiceMock.getModelById).toBeCalled()
+    await expect(result).rejects.toThrow(`The requested webhook was not found.`)
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
   })
 
   test('updateWebhook > webhook not found', async () => {
@@ -129,8 +129,8 @@ describe('services > webhook', () => {
 
     const result = updateWebhook(user, 'modelId', { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    await expect(result).rejects.toThrowError(`The requested webhook was not found.`)
-    expect(modelServiceMock.getModelById).toBeCalled()
+    await expect(result).rejects.toThrow(`The requested webhook was not found.`)
+    expect(modelServiceMock.getModelById).toHaveBeenCalled()
   })
 
   test('sendWebhooks > success', async () => {
@@ -139,7 +139,7 @@ describe('services > webhook', () => {
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
 
-    expect(fetchMock.default).toBeCalled()
+    expect(fetchMock.default).toHaveBeenCalled()
     expect(fetchMock.default.mock.calls.length).toBe(webhooks.length)
     expect(fetchMock.default.mock.calls.at(0)?.at(0)).toBe(webhooks[0].uri)
     expect(fetchMock.default.mock.calls.at(1)?.at(0)).toBe(webhooks[1].uri)
@@ -152,8 +152,8 @@ describe('services > webhook', () => {
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
 
-    expect(fetchMock.default).toBeCalled()
-    expect(logMock.error).toBeCalled()
+    expect(fetchMock.default).toHaveBeenCalled()
+    expect(logMock.error).toHaveBeenCalled()
   })
 
   test('sendWebhooks > fetch error', async () => {
@@ -163,7 +163,7 @@ describe('services > webhook', () => {
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
 
-    expect(fetchMock.default).toBeCalled()
-    expect(logMock.error).toBeCalled()
+    expect(fetchMock.default).toHaveBeenCalled()
+    expect(logMock.error).toHaveBeenCalled()
   })
 })

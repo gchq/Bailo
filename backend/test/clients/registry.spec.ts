@@ -79,7 +79,7 @@ describe('clients > registry', () => {
 
     const response = await getApiVersion('token')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual('registry/2.0')
   })
@@ -94,8 +94,8 @@ describe('clients > registry', () => {
 
     const response = getApiVersion('token')
 
-    await expect(response).rejects.toThrowError('Registry returned invalid headers.')
-    expect(fetchMock).toBeCalled()
+    await expect(response).rejects.toThrow('Registry returned invalid headers.')
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
   })
 
@@ -125,7 +125,7 @@ describe('clients > registry', () => {
 
     const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual({
       body: mockManifest,
@@ -195,7 +195,7 @@ describe('clients > registry', () => {
 
     const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual({
       body: mockManifest,
@@ -235,7 +235,7 @@ describe('clients > registry', () => {
       digest: 'sha256:digest',
     })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response.body).toStrictEqual(mockManifest)
   })
@@ -244,7 +244,7 @@ describe('clients > registry', () => {
     fetchMock.mockRejectedValueOnce('Error')
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('getImageTagManifest > invalid headers response', async () => {
@@ -255,7 +255,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Registry returned invalid headers.')
+    await expect(response).rejects.toThrow('Registry returned invalid headers.')
   })
 
   test('getImageTagManifest > unrecognised error response', async () => {
@@ -267,7 +267,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Unrecognised registry error response.')
+    await expect(response).rejects.toThrow('Unrecognised registry error response.')
   })
 
   test('getImageTagManifest > registry error response', async () => {
@@ -287,7 +287,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('getImageTagManifest > throw all errors apart from unknown name', async () => {
@@ -307,7 +307,7 @@ describe('clients > registry', () => {
 
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('getImageTagManifests > success manifest list', async () => {
@@ -338,7 +338,7 @@ describe('clients > registry', () => {
       tag: 'tag1',
     })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual({
       body: mockManifestList,
@@ -381,7 +381,7 @@ describe('clients > registry', () => {
       tag: 'tag1',
     })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response.body).toStrictEqual(mockManifest)
   })
@@ -407,7 +407,7 @@ describe('clients > registry', () => {
       digest: 'sha256:digest',
     })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response.body).toStrictEqual(mockManifestList)
   })
@@ -428,7 +428,7 @@ describe('clients > registry', () => {
       tag: 'tag1',
     })
 
-    await expect(response).rejects.toThrowError('Registry response body validation failed.')
+    await expect(response).rejects.toThrow('Registry response body validation failed.')
   })
 
   test('getImageTagManifests > cannot reach registry', async () => {
@@ -440,7 +440,7 @@ describe('clients > registry', () => {
       tag: 'tag1',
     })
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('getRegistryLayerStream > success', async () => {
@@ -452,7 +452,7 @@ describe('clients > registry', () => {
 
     const response = await getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response.stream).toBeInstanceOf(Readable)
     expect(response.abort).toBeTypeOf('function')
@@ -462,7 +462,7 @@ describe('clients > registry', () => {
     fetchMock.mockRejectedValueOnce('Error')
     const response = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('getRegistryLayerStream > unrecognised error response', async () => {
@@ -475,7 +475,7 @@ describe('clients > registry', () => {
     })
     const response = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    await expect(response).rejects.toThrowError('Unrecognised registry error response.')
+    await expect(response).rejects.toThrow('Unrecognised registry error response.')
   })
 
   test('getRegistryLayerStream > malformed response', async () => {
@@ -488,7 +488,7 @@ describe('clients > registry', () => {
 
     const response = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    await expect(response).rejects.toThrowError('Unrecognised response stream when getting image layer blob.')
+    await expect(response).rejects.toThrow('Unrecognised response stream when getting image layer blob.')
   })
 
   test('listModelRepos > only returns model repos', async () => {
@@ -500,7 +500,7 @@ describe('clients > registry', () => {
     })
     const response = await listModelRepos('token', modelId)
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual([`${modelId}/repo`])
   })
@@ -509,7 +509,7 @@ describe('clients > registry', () => {
     fetchMock.mockRejectedValueOnce('Error')
     const response = listModelRepos('token', 'modelId')
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('listModelRepos > unrecognised error response', async () => {
@@ -529,7 +529,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('listModelRepos > missing repositories in response', async () => {
@@ -540,7 +540,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    await expect(response).rejects.toThrowError('Registry response body validation failed.')
+    await expect(response).rejects.toThrow('Registry response body validation failed.')
   })
 
   test('listModelRepos > paginated link sets paginateParameter', async () => {
@@ -574,7 +574,7 @@ describe('clients > registry', () => {
 
     const response = await listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(tags)
   })
@@ -604,7 +604,7 @@ describe('clients > registry', () => {
 
     const response = await listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(['tag1', 'tag2', 'tag3'])
   })
@@ -623,8 +623,8 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    await expect(response).rejects.toThrowError('Registry pagination limit exceeded.')
-    expect(fetchMock).toBeCalledTimes(100)
+    await expect(response).rejects.toThrow('Registry pagination limit exceeded.')
+    expect(fetchMock).toHaveBeenCalledTimes(100)
   })
 
   test('listImageTags > unknown name return empty list', async () => {
@@ -664,7 +664,7 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('doesLayerExist > success true', async () => {
@@ -684,7 +684,7 @@ describe('clients > registry', () => {
 
     const response = await doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(true)
   })
@@ -700,7 +700,7 @@ describe('clients > registry', () => {
 
     const response = await doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(false)
   })
@@ -710,8 +710,8 @@ describe('clients > registry', () => {
 
     const response = doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
-    expect(fetchMock).toBeCalled()
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
+    expect(fetchMock).toHaveBeenCalled()
   })
 
   test('initialiseUpload > success', async () => {
@@ -730,7 +730,7 @@ describe('clients > registry', () => {
 
     const response = await initialiseUpload('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -753,7 +753,7 @@ describe('clients > registry', () => {
 
     const response = initialiseUpload('token', { repository: 'modelId', name: 'image' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('putManifest > success using tag reference', async () => {
@@ -771,7 +771,7 @@ describe('clients > registry', () => {
 
     const response = await putManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' }, null, '')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -797,7 +797,7 @@ describe('clients > registry', () => {
       DockerManifestMediaType,
     )
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -825,7 +825,7 @@ describe('clients > registry', () => {
       DockerManifestMediaType,
     )
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('uploadLayerMonolithic > success', async () => {
@@ -843,7 +843,7 @@ describe('clients > registry', () => {
 
     const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -853,7 +853,7 @@ describe('clients > registry', () => {
 
     const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('mountBlob > success', async () => {
@@ -877,7 +877,7 @@ describe('clients > registry', () => {
       'blob',
     )
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -905,7 +905,7 @@ describe('clients > registry', () => {
       'digest',
     )
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('deleteManifest > success using tag reference', async () => {
@@ -922,7 +922,7 @@ describe('clients > registry', () => {
 
     const response = await deleteManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -945,7 +945,7 @@ describe('clients > registry', () => {
       digest: 'sha256:digest',
     })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
@@ -972,6 +972,6 @@ describe('clients > registry', () => {
       tag: 'tag',
     })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 })
