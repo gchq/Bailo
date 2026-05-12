@@ -73,18 +73,18 @@ type RunScansParams = { file: FileInterface; layerRef?: never } | { file?: never
  * Only await if you want to wait for the scans to complete.
  */
 export async function runScans({ file, layerRef }: RunScansParams) {
-  const requiredScannerType: ArtefactKindKeys = file ? 'file' : 'image'
+  const requiredScannerType: ArtefactKindKeys = file ? ArtefactKind.FILE : ArtefactKind.IMAGE
   const scannersInfo = scanners.scannersInfo()
   const activeScanners = scannersInfo.filter((scannerInfo) => scannerInfo.artefactKind === requiredScannerType)
   let scanIdentifier: ArtefactScanIdentifier
   if (file) {
     scanIdentifier = {
-      artefactKind: 'file',
+      artefactKind: ArtefactKind.FILE,
       fileId: file._id.toString(),
     }
   } else if (layerRef) {
     scanIdentifier = {
-      artefactKind: 'image',
+      artefactKind: ArtefactKind.IMAGE,
       layerDigest: layerRef.layerDigest,
     }
   }
@@ -167,7 +167,7 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  if (!scanners.hasScannerForArtefactKind('file')) {
+  if (!scanners.hasScannerForArtefactKind(ArtefactKind.FILE)) {
     throw UnprocessableContent('No file scanners are enabled.')
   }
 
@@ -200,7 +200,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  if (!scanners.hasScannerForArtefactKind('image')) {
+  if (!scanners.hasScannerForArtefactKind(ArtefactKind.IMAGE)) {
     throw UnprocessableContent('No image scanners are enabled.')
   }
 

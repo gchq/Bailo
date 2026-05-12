@@ -1,5 +1,5 @@
 import { FileInterface } from '../../models/File.js'
-import { ArtefactKindKeys } from '../../models/Scan.js'
+import { ArtefactKind, ArtefactKindKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
@@ -63,7 +63,7 @@ export class ArtefactScanningWrapper {
     const results = await Promise.all(
       Array.from(this.scanners)
         .map((scanner) => {
-          if (file && scanner.artefactType === 'file') {
+          if (file && scanner.artefactType === ArtefactKind.FILE) {
             log.info(
               {
                 modelId: file.modelId,
@@ -74,7 +74,7 @@ export class ArtefactScanningWrapper {
               'Requesting scan to be queued',
             )
             return scanner.scan(file)
-          } else if (layerRef && scanner.artefactType === 'image') {
+          } else if (layerRef && scanner.artefactType === ArtefactKind.IMAGE) {
             log.info(
               {
                 ...layerRef,
