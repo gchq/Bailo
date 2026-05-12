@@ -106,8 +106,9 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
 
     await accessRequest.delete(session)
     await removeAccessRequestReviews(accessRequestId, session)
+    // do NOT use `accessRequest.id` as this (usually mongoose) property is overridden by a custom ID
     await removeResponsesByParentIds(
-      [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest['_id']] as string[],
+      [...reviewsForAccessRequest.map((review) => review.id), accessRequest._id.toString()],
       session,
     )
   }

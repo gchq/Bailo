@@ -62,7 +62,7 @@ const mockModel = {
 } as any
 
 const mockRelease = {
-  id: 'relId',
+  _id: { toString: () => 'relId' },
   semver: '1.0.0',
   modelId: 'modelId',
   fileIds: ['f1'],
