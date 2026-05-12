@@ -129,9 +129,9 @@ describe('services > review', () => {
       {} as any,
     )
 
-    await expect(result).resolves.not.toThrowError()
-    expect(smtpMock.requestReviewForRelease).not.toBeCalled()
-    expect(ReviewModelMock.save).not.toBeCalled()
+    await expect(result).resolves.not.toThrow()
+    expect(smtpMock.requestReviewForRelease).not.toHaveBeenCalled()
+    expect(ReviewModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createReleaseReviews > successful', async () => {
@@ -142,8 +142,8 @@ describe('services > review', () => {
       {} as any,
     )
 
-    expect(ReviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForRelease).toBeCalled()
+    expect(ReviewModelMock.save).toHaveBeenCalled()
+    expect(smtpMock.requestReviewForRelease).toHaveBeenCalled()
   })
 
   test('createAccessRequestReviews > successful', async () => {
@@ -155,8 +155,8 @@ describe('services > review', () => {
       {} as any,
     )
 
-    expect(ReviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
+    expect(ReviewModelMock.save).toHaveBeenCalled()
+    expect(smtpMock.requestReviewForAccessRequest).toHaveBeenCalled()
   })
 
   test('removeAccessRequestReviews > successful', async () => {
@@ -165,7 +165,7 @@ describe('services > review', () => {
     await removeAccessRequestReviews('accessRequestId')
 
     expect(ReviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewModelMock.delete).toBeCalled()
+    expect(ReviewModelMock.delete).toHaveBeenCalled()
   })
 
   test('removeAccessRequestReviews > could not delete failure', async () => {
@@ -174,7 +174,7 @@ describe('services > review', () => {
       throw Error('Error deleting object')
     })
 
-    await expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
+    await expect(() => removeAccessRequestReviews('')).rejects.toThrow(
       /^The requested access request review could not be deleted./,
     )
   })
@@ -215,7 +215,7 @@ describe('services > review', () => {
   test('addDefaultReviewRoles > successfully added default review roles', async () => {
     ReviewRoleModelMock.findOne.mockResolvedValue(undefined)
     await addDefaultReviewRoles()
-    expect(ReviewRoleModelMock.save).toBeCalled()
+    expect(ReviewRoleModelMock.save).toHaveBeenCalled()
   })
 
   test('removeReviewRole > successful', async () => {
@@ -240,7 +240,7 @@ describe('services > review', () => {
       defaultEntities: ['user:user2'],
     })
 
-    expect(ReviewRoleModelMock.save).toBeCalled()
+    expect(ReviewRoleModelMock.save).toHaveBeenCalled()
   })
 
   test('updateReviewRole > failure', async () => {
@@ -256,6 +256,6 @@ describe('services > review', () => {
       defaultEntities: ['user:user2'],
     })
 
-    await expect(res).rejects.toThrowError(/^The requested review role was not found/)
+    await expect(res).rejects.toThrow(/^The requested review role was not found/)
   })
 })

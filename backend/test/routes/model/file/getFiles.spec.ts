@@ -27,7 +27,7 @@ describe('routes > files > getFiles', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/files`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewFiles).toBeCalled()
+    expect(audit.onViewFiles).toHaveBeenCalled()
     expect(audit.onViewFiles.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onViewFiles.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

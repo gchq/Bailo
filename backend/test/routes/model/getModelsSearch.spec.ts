@@ -27,7 +27,7 @@ describe('routes > model > getModelsSearch', () => {
     const res = await testGet(`/api/v2/models/search?${qs.stringify(fixture)}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onSearchModel).toBeCalled()
+    expect(audit.onSearchModel).toHaveBeenCalled()
     expect(audit.onSearchModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

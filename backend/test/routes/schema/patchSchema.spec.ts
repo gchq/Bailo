@@ -46,7 +46,7 @@ describe('routes > schema > patchSchema', async () => {
     const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateSchema).toBeCalled()
+    expect(audit.onUpdateSchema).toHaveBeenCalled()
     expect(audit.onUpdateSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

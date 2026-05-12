@@ -60,7 +60,7 @@ describe('clients > cognito', () => {
     vi.spyOn(configMock, 'oauth', 'get').mockReturnValueOnce({})
     const response = listUsers('dn')
 
-    await expect(response).rejects.toThrowError('Cannot find userIdAttribute in oauth configuration')
+    await expect(response).rejects.toThrow('Cannot find userIdAttribute in oauth configuration')
   })
 
   test('listUsers > do not include users with missing DN', async () => {
@@ -94,7 +94,7 @@ describe('clients > cognito', () => {
 
     const response = listUsers('dn')
 
-    await expect(response).rejects.toThrowError('Error when querying Cognito for users')
+    await expect(response).rejects.toThrow('Error when querying Cognito for users')
   })
 
   test('listUsers > exact match', async () => {
@@ -102,7 +102,7 @@ describe('clients > cognito', () => {
 
     await listUsers('dn', true)
 
-    expect(cognitoMock.ListUsersCommand).toBeCalledWith({
+    expect(cognitoMock.ListUsersCommand).toHaveBeenCalledWith({
       UserPoolId: 'email',
       Filter: `"email"="dn"`,
     })
@@ -113,7 +113,7 @@ describe('clients > cognito', () => {
 
     await getGroupMembership('group1')
 
-    expect(cognitoMock.ListUsersInGroupCommand).toBeCalledWith({
+    expect(cognitoMock.ListUsersInGroupCommand).toHaveBeenCalledWith({
       UserPoolId: 'email',
       GroupName: 'group1',
     })
@@ -124,7 +124,7 @@ describe('clients > cognito', () => {
 
     const response = getGroupMembership('group1')
 
-    await expect(response).rejects.toThrowError('Error when querying Cognito for group membership')
+    await expect(response).rejects.toThrow('Error when querying Cognito for group membership')
   })
 
   test('getGroupMembership > no users', async () => {

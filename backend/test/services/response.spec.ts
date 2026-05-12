@@ -103,7 +103,7 @@ describe('services > response', () => {
   test('findResponseById > response not found', async () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
-    await expect(findResponseById('test')).rejects.toThrowError('The requested response was not found.')
+    await expect(findResponseById('test')).rejects.toThrow('The requested response was not found.')
   })
 
   test('getResponsesByParentIds > success', async () => {
@@ -116,7 +116,7 @@ describe('services > response', () => {
   test('getResponsesByParentIds > response not found', async () => {
     ResponseModelMock.find.mockResolvedValueOnce(undefined)
 
-    await expect(getResponsesByParentIds(['507f1f77bcf86cd799439011'])).rejects.toThrowError(
+    await expect(getResponsesByParentIds(['507f1f77bcf86cd799439011'])).rejects.toThrow(
       'The requested response was not found.',
     )
   })
@@ -134,21 +134,19 @@ describe('services > response', () => {
     const updatedResponse = await updateResponse({} as any, 'test', 'updated')
 
     expect(updatedResponse).toEqual(mockUpdatedResponse)
-    expect(mockResponse.save).toBeCalled()
+    expect(mockResponse.save).toHaveBeenCalled()
   })
   test('updateResponse > response not found', async () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
-    await expect(updateResponse({} as any, 'test', 'updated')).rejects.toThrowError(
-      'The requested response was not found.',
-    )
+    await expect(updateResponse({} as any, 'test', 'updated')).rejects.toThrow('The requested response was not found.')
   })
   test('updateResponse > invalid user', async () => {
     const mockResponse = { _id: 'response', entity: 'user:user', comment: 'test', save: vi.fn() }
 
     ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
-    await expect(updateResponse({} as any, 'test', 'updated')).rejects.toThrowError(
+    await expect(updateResponse({} as any, 'test', 'updated')).rejects.toThrow(
       'Only the original author can update a comment or review response.',
     )
   })
@@ -168,7 +166,7 @@ describe('services > response', () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await updateResponseReaction({ dn: 'user' } as any, 'test', ReactionKind.LIKE)).toEqual(mockUpdatedResponse)
-    expect(mockResponse.save).toBeCalled()
+    expect(mockResponse.save).toHaveBeenCalled()
   })
   test('updateResponseReaction > should remove user from reaction users array when a reaction of the same kind exists and user is present in users array', async () => {
     const mockResponse = {
@@ -194,7 +192,7 @@ describe('services > response', () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await updateResponseReaction({ dn: 'user' } as any, 'test', ReactionKind.LIKE)).toEqual(mockUpdatedResponse)
-    expect(mockResponse.save).toBeCalled()
+    expect(mockResponse.save).toHaveBeenCalled()
   })
   test(`updateResponseReaction > should add user to reaction users array when a reaction of the same kind exists and user is not present in users array`, async () => {
     const mockResponse = {
@@ -220,12 +218,12 @@ describe('services > response', () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(mockResponse)
 
     expect(await updateResponseReaction({ dn: 'user' } as any, 'test', ReactionKind.LIKE)).toEqual(mockUpdatedResponse)
-    expect(mockResponse.save).toBeCalled()
+    expect(mockResponse.save).toHaveBeenCalled()
   })
   test('updateResponseReaction > response not found', async () => {
     ResponseModelMock.findOne.mockResolvedValueOnce(undefined)
 
-    await expect(updateResponseReaction({} as any, 'test', ReactionKind.LIKE)).rejects.toThrowError(
+    await expect(updateResponseReaction({} as any, 'test', ReactionKind.LIKE)).rejects.toThrow(
       'The requested response was not found.',
     )
   })
@@ -372,8 +370,8 @@ describe('services > response', () => {
       'semver',
     )
 
-    await expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
-    expect(ResponseModelMock.save).not.toBeCalled()
+    await expect(result).rejects.toThrow(`Unable to find Review to respond to`)
+    expect(ResponseModelMock.save).not.toHaveBeenCalled()
   })
 
   test('checkAccessRequestsApproved > approved access request exists', async () => {
