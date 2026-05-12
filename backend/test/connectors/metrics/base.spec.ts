@@ -36,6 +36,7 @@ const accessRequestMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
   distinct: vi.fn(),
 }))
+
 vi.mock('../../../src/models/AccessRequest.js', () => ({
   default: accessRequestMocks,
 }))
@@ -54,6 +55,7 @@ const schemaModelMocks = vi.hoisted(() => ({
   find: vi.fn(),
   aggregate: vi.fn(),
 }))
+
 vi.mock('../../../src/models/Schema.js', () => ({
   default: schemaModelMocks,
 }))
