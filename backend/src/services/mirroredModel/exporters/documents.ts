@@ -211,7 +211,7 @@ export class DocumentsExporter extends BaseExporter {
         const fileJson = JSON.stringify(file)
         await addEntryToTarGzUpload(
           this.tarStream!,
-          { type: 'text', filename: `files/${file._id.toString()}.json`, content: fileJson },
+          { type: 'text', filename: `files/${file.id}.json`, content: fileJson },
           { modelId: this.model.id, ...this.logData },
         )
       } catch (error: unknown) {

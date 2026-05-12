@@ -1,4 +1,5 @@
 import { MongoServerError } from 'mongodb'
+import { HydratedDocument, isValidObjectId } from 'mongoose'
 
 import { BadReq } from './error.js'
 
@@ -12,6 +13,21 @@ export function isMongoServerError(err: unknown): err is MongoServerError {
   }
 
   return false
+}
+
+export function isHydratedMongoDoc<T>(value: unknown): value is HydratedDocument<T> {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const doc = value as any
+
+  return (
+    typeof doc.$isNew === 'boolean' &&
+    typeof doc.$get === 'function' &&
+    typeof doc.toObject === 'function' &&
+    isValidObjectId(doc._id)
+  )
 }
 
 export function handleDuplicateKeys(error: unknown) {

@@ -20,7 +20,7 @@ describe('routes > review > getReviewRoles', () => {
     const res = await testGet(`${endpoint}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewReviewRoles).toBeCalled()
+    expect(audit.onViewReviewRoles).toHaveBeenCalled()
     expect(audit.onViewReviewRoles.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

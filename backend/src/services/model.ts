@@ -902,11 +902,12 @@ export async function getCurrentUserPermissionsByModel(
   }
 }
 
-export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) {
+export async function getModelSystemRoles(user: UserInterface, model: ModelDoc): Promise<string[]> {
   const entities = await authentication.getEntities(user)
+  const normalisedEntities = entities.map((entity) => entity.toLowerCase())
 
   return model.collaborators
-    .filter((collaborator) => entities.includes(collaborator.entity))
+    .filter((collaborator) => normalisedEntities.includes(collaborator.entity.toLowerCase()))
     .map((collaborator) => collaborator.roles)
     .flat()
 }

@@ -1,10 +1,10 @@
-import { Document, model, Schema } from 'mongoose'
+import { Document, HydratedDocument, model, Schema } from 'mongoose'
 
 export interface MigrationMetadata {
   [key: string]: any
 }
 
-export interface Migration {
+export interface MigrationInterface {
   name: string
   metadata?: MigrationMetadata
 
@@ -12,9 +12,9 @@ export interface Migration {
   updatedAt: Date
 }
 
-export type MigrationDoc = Migration & Document<any, any, Migration>
+export type MigrationDoc = HydratedDocument<MigrationInterface> & Document<any, any, MigrationInterface>
 
-const MigrationSchema = new Schema<Migration>(
+const MigrationSchema = new Schema<MigrationInterface>(
   {
     name: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed },
@@ -24,6 +24,6 @@ const MigrationSchema = new Schema<Migration>(
   },
 )
 
-const MigrationModel = model<Migration>('Migration', MigrationSchema)
+const MigrationModel = model<MigrationInterface>('Migration', MigrationSchema)
 
 export default MigrationModel

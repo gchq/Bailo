@@ -35,7 +35,7 @@ describe('routes > review > postReleaseReviewResponse', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateReviewResponse).toBeCalled()
+    expect(audit.onCreateReviewResponse).toHaveBeenCalled()
     expect(audit.onCreateReviewResponse.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

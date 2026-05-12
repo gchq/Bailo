@@ -70,7 +70,7 @@ describe('clients > artefactScan', () => {
     })
     const response = await getCachedArtefactScanInfo()
 
-    expect(fetchMock.default).toBeCalled()
+    expect(fetchMock.default).toHaveBeenCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(expectedInfoResponse)
   })
@@ -172,7 +172,7 @@ describe('clients > artefactScan', () => {
       json: vi.fn(),
     })
 
-    await expect(() => getCachedArtefactScanInfo()).rejects.toThrowError(
+    await expect(() => getCachedArtefactScanInfo()).rejects.toThrow(
       /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
@@ -181,7 +181,7 @@ describe('clients > artefactScan', () => {
     const { getCachedArtefactScanInfo } = await loadClient()
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    await expect(() => getCachedArtefactScanInfo()).rejects.toThrowError(
+    await expect(() => getCachedArtefactScanInfo()).rejects.toThrow(
       /^Unable to communicate with the ArtefactScan service./,
     )
   })
@@ -226,9 +226,9 @@ describe('clients > artefactScan', () => {
 
     const response = await scanFileStream({} as Readable, 'safe_model.h5')
 
-    expect(fetchMock.default).toBeCalled()
+    expect(fetchMock.default).toHaveBeenCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
-    expect(formDataMock.default).toBeCalled()
+    expect(formDataMock.default).toHaveBeenCalled()
     expect(formDataMock.default.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -255,7 +255,7 @@ describe('clients > artefactScan', () => {
       json: vi.fn(),
     })
 
-    await expect(() => scanFileStream({} as Readable, 'safe_model.h5')).rejects.toThrowError(
+    await expect(() => scanFileStream({} as Readable, 'safe_model.h5')).rejects.toThrow(
       /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
@@ -265,7 +265,7 @@ describe('clients > artefactScan', () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
 
     // use a real Readable to make sure `.destroy()` is also called
-    await expect(() => scanFileStream(Readable.from(''), 'safe_model.h5')).rejects.toThrowError(
+    await expect(() => scanFileStream(Readable.from(''), 'safe_model.h5')).rejects.toThrow(
       /^Unable to communicate with the ArtefactScan service./,
     )
   })
@@ -292,8 +292,8 @@ describe('clients > artefactScan', () => {
 
     const response = await scanImageBlobStream({} as Readable, 'sha256:abc')
 
-    expect(fetchMock.default).toBeCalled()
-    expect(formDataMock.default).toBeCalled()
+    expect(fetchMock.default).toHaveBeenCalled()
+    expect(formDataMock.default).toHaveBeenCalled()
     expect(response).toStrictEqual(expectedResponse)
   })
 
@@ -306,7 +306,7 @@ describe('clients > artefactScan', () => {
       json: vi.fn(),
     })
 
-    await expect(() => scanImageBlobStream({} as Readable, 'sha256:abc')).rejects.toThrowError(
+    await expect(() => scanImageBlobStream({} as Readable, 'sha256:abc')).rejects.toThrow(
       /^Unrecognised response returned by the ArtefactScan service./,
     )
   })
@@ -319,10 +319,10 @@ describe('clients > artefactScan', () => {
     const stream = Readable.from('data')
     const destroySpy = vi.spyOn(stream, 'destroy')
 
-    await expect(() => scanImageBlobStream(stream, 'sha256:abc')).rejects.toThrowError(
+    await expect(() => scanImageBlobStream(stream, 'sha256:abc')).rejects.toThrow(
       /^Unable to communicate with the ArtefactScan service./,
     )
 
-    expect(destroySpy).toBeCalled()
+    expect(destroySpy).toHaveBeenCalled()
   })
 })

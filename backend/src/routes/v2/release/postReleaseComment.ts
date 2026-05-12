@@ -44,7 +44,7 @@ interface PostReleaseCommentResponse {
 
 export const postReleaseComment = [
   async (req: Request, res: Response<PostReleaseCommentResponse>): Promise<void> => {
-    req.audit = AuditInfo.UpdateRelease
+    req.audit = AuditInfo.CreateResponse
     const {
       params: { modelId, semver },
       body,

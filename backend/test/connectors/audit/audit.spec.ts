@@ -45,6 +45,6 @@ describe('connectors > audit', () => {
     const invalidConnector = 'invalid'
     configMock.connectors.audit.kind = invalidConnector
 
-    expect(() => getAuditConnector(false)).toThrowError(`'${invalidConnector}' is not a valid audit kind.`)
+    expect(() => getAuditConnector(false)).toThrow(`'${invalidConnector}' is not a valid audit kind.`)
   })
 })

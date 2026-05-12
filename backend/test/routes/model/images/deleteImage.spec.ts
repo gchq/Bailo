@@ -10,12 +10,12 @@ vi.mock('../../../../src/services/registry.js', () => ({
   listModelImages: vi.fn(() => [{ _id: 'test' }]),
 }))
 
+vi.mock('../../../../src/services/registry.js', () => ({
+  softDeleteImage: vi.fn(),
+}))
+
 describe('routes > images > getImages', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../../src/services/registry.js', () => ({
-      softDeleteImage: vi.fn(),
-    }))
-
     const fixture = createFixture(deleteImageSchema)
     const res = await testDelete(
       `/api/v2/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}`,
@@ -26,17 +26,13 @@ describe('routes > images > getImages', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../../src/services/registry.js', () => ({
-      softDeleteImage: vi.fn(),
-    }))
-
     const fixture = createFixture(deleteImageSchema)
     const res = await testDelete(
       `/api/v2/model/${fixture.params.modelId}/image/${fixture.params.name}/${fixture.params.tag}`,
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteImage).toBeCalled()
+    expect(audit.onDeleteImage).toHaveBeenCalled()
     expect(audit.onDeleteImage.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onDeleteImage.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

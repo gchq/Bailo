@@ -14,7 +14,7 @@
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-FROM python:3.14-bookworm AS sphinx-docs
+FROM python:3.14-trixie AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \

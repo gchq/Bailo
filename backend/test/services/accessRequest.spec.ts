@@ -82,10 +82,10 @@ describe('services > accessRequest', () => {
 
     await createAccessRequest({} as any, 'example-model', accessRequest)
 
-    expect(AccessRequestModelMock.save).toBeCalled()
-    expect(AccessRequestModelMock).toBeCalled()
-    expect(mockReviewService.createAccessRequestReviews).toBeCalled()
-    expect(mockWebhookService.sendWebhooks).toBeCalled()
+    expect(AccessRequestModelMock.save).toHaveBeenCalled()
+    expect(AccessRequestModelMock).toHaveBeenCalled()
+    expect(mockReviewService.createAccessRequestReviews).toHaveBeenCalled()
+    expect(mockWebhookService.sendWebhooks).toHaveBeenCalled()
   })
 
   test('createAccessRequest > bad authorisation', async () => {
@@ -98,7 +98,7 @@ describe('services > accessRequest', () => {
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
-    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       /^You do not have permission/,
     )
   })
@@ -122,7 +122,7 @@ describe('services > accessRequest', () => {
     schemaMocks.getSchemaById.mockResolvedValue({ hidden: true })
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
 
-    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       /^Cannot create new Access Request using a hidden schema./,
     )
   })
@@ -135,7 +135,7 @@ describe('services > accessRequest', () => {
       throw Error()
     })
 
-    await expect(() => createAccessRequest({} as any, 'test', {} as any)).rejects.toThrowError(
+    await expect(() => createAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
       /^Access Request Metadata could not be validated against the schema./,
     )
   })
@@ -194,7 +194,7 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > admin access without auth', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    await expect(() => findAccessRequests({} as any, [], '', true, true)).rejects.toThrowError(
+    await expect(() => findAccessRequests({} as any, [], '', true, true)).rejects.toThrow(
       /^You do not have the required role./,
     )
   })
@@ -234,7 +234,7 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    await expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
+    await expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrow(
       /^You do not have permission to delete this access request./,
     )
   })
@@ -264,7 +264,7 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    await expect(() => removeAccessRequests({} as any, ['test', 'test2'])).rejects.toThrowError(
+    await expect(() => removeAccessRequests({} as any, ['test', 'test2'])).rejects.toThrow(
       /^You do not have permission to delete this access request./,
     )
   })
@@ -293,7 +293,7 @@ describe('services > accessRequest', () => {
 
     const permissions = await getCurrentUserPermissionsByAccessRequest(mockUser, mockAccessRequestId)
 
-    expect(AccessRequestModelMock.findOne).toBeCalled()
+    expect(AccessRequestModelMock.findOne).toHaveBeenCalled()
     expect(permissions).toEqual(mockPermissions)
   })
 
@@ -314,7 +314,7 @@ describe('services > accessRequest', () => {
 
     const permissions = await getCurrentUserPermissionsByAccessRequest(mockUser, mockAccessRequestId)
 
-    expect(AccessRequestModelMock.findOne).toBeCalled()
+    expect(AccessRequestModelMock.findOne).toHaveBeenCalled()
     expect(permissions).toEqual(mockPermissions)
   })
 
@@ -347,7 +347,7 @@ describe('services > accessRequest', () => {
     })
 
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
-    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrowError(errorMessage)
+    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(errorMessage)
   })
 
   test('updateAccessRequest > validation error', async () => {
@@ -357,7 +357,7 @@ describe('services > accessRequest', () => {
       throw Error()
     })
 
-    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrowError(
+    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
       /^Access Request Metadata could not be validated against the schema./,
     )
   })
@@ -371,7 +371,7 @@ describe('services > accessRequest', () => {
   test('newAccessRequestComment > not found', async () => {
     AccessRequestModelMock.findOne.mockResolvedValue(undefined)
 
-    await expect(() => newAccessRequestComment({} as any, 'test', 'message')).rejects.toThrowError(
+    await expect(() => newAccessRequestComment({} as any, 'test', 'message')).rejects.toThrow(
       /^The requested access request was not found./,
     )
   })
