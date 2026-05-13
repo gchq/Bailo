@@ -15,6 +15,7 @@ import { getModelByIdNoAuth } from '../model.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const transporter = await generateTransporter(config.smtp.transporter)
+const LINE_BREAK = '<br />'
 
 /**
  * Generates a Node Mailer Transporter.
@@ -41,10 +42,7 @@ export async function generateTransporter(transportOption: TransportOption): Pro
   }
 }
 
-async function dispatchEmail(entity: string, emailContent: EmailContent | undefined) {
-  if (!emailContent) {
-    return
-  }
+export async function dispatchEmail(entity: string, emailContent: EmailContent) {
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
@@ -60,10 +58,7 @@ async function dispatchEmail(entity: string, emailContent: EmailContent | undefi
   await Promise.all(sendEmailResponses)
 }
 
-export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent | undefined) {
-  if (!emailContent) {
-    return
-  }
+export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent) {
   const model = await getModelByIdNoAuth(modelId)
   const entities = await Promise.all(
     model.collaborators
@@ -253,10 +248,10 @@ export async function startImportNotification(modelId: string) {
   await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }
 
-export async function completeImportNotification(
+export async function transferCompleteNotification(
   modelId: string,
-  successfulFiles: string[],
-  successfulImages: string[],
+  failed: boolean,
+  artefacts: Record<string, string[]>,
 ) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
@@ -265,55 +260,27 @@ export async function completeImportNotification(
 
   const mirroredModel = await getModelByIdNoAuth(modelId)
 
-  const information: Info[] = []
-  if (successfulFiles.length) {
-    information.push({ title: 'Successful Files', data: successfulFiles.join('<br />') })
-  }
-  if (successfulImages.length) {
-    information.push({ title: 'Successful Images', data: successfulImages.join('<br />') })
+  const title = failed
+    ? `Oh no there was a problem with importing ${mirroredModel.name}!`
+    : `${mirroredModel.name} has finished importing`
+
+  const infoArray: Info[] = []
+  for (const [key, values] of Object.entries(artefacts)) {
+    if (values.length > 0) {
+      infoArray.push({ title: key, data: values.join(LINE_BREAK) })
+    }
   }
 
-  const emailContent = buildEmail(`${mirroredModel.name} has finished importing`, information, [
+  const actions = [
     { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
     { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
-  ])
+  ]
 
-  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
-}
-
-export async function failImportNotification(
-  modelId: string,
-  failedFiles: string[],
-  failedImages: string[],
-  successfulFiles: string[],
-  successfulImages: string[],
-) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
+  if (failed) {
+    actions.push({ name: 'Contact Support', url: config.ui.issues.contactHref })
   }
 
-  const mirroredModel = await getModelByIdNoAuth(modelId)
-
-  const information: Info[] = []
-  if (failedFiles.length) {
-    information.push({ title: 'Failed Files', data: failedFiles.join('<br />') })
-  }
-  if (failedImages.length) {
-    information.push({ title: 'Failed Images', data: failedImages.join('<br />') })
-  }
-  if (successfulFiles.length) {
-    information.push({ title: 'Successful Files', data: successfulFiles.join('<br />') })
-  }
-  if (successfulImages.length) {
-    information.push({ title: 'Successful Images', data: successfulImages.join('<br />') })
-  }
-
-  const emailContent = buildEmail(`Oh no there was a problem with importing ${mirroredModel.name}!`, information, [
-    { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
-    { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
-    { name: 'Contact Support', url: config.ui.issues.contactHref },
-  ])
+  const emailContent = buildEmail(title, infoArray, actions)
 
   await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }

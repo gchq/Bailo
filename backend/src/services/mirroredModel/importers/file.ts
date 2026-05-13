@@ -11,7 +11,7 @@ import { InternalError } from '../../../utils/error.js'
 import { createFilePath } from '../../../utils/fileUtils.js'
 import { markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
-import { finishTransfer, updateFile } from '../../modelTransfer.js'
+import { updateFileTransferStatus } from '../../modelTransfer.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
@@ -82,14 +82,13 @@ export class FileImporter extends BaseImporter {
     _resolve: (reason?: any) => void,
     reject: (reason?: unknown) => void,
   ): Promise<void> {
-    await updateFile(this.metadata.exportId, this.metadata.filePath, TransferStatus.Failed)
+    await updateFileTransferStatus(this.metadata.exportId, this.metadata.filePath, TransferStatus.Failed)
     await super.handleStreamError(error, _resolve, reject)
   }
 
   // Type resolve
   async handleStreamCompletion(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
-    await updateFile(this.metadata.exportId, this.metadata.filePath, TransferStatus.Completed)
-    await finishTransfer(this.metadata.exportId)
+    await updateFileTransferStatus(this.metadata.exportId, this.metadata.filePath, TransferStatus.Completed)
     resolve({ metadata: this.metadata, sourcePath: this.metadata.filePath, newPath: this.updatedPath })
   }
 }

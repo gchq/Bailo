@@ -2,14 +2,16 @@ import { ObjectId } from 'mongoose'
 
 import ModelTransferModel, {
   ModelTransferInterface,
+  TransferArtefactStatus,
   TransferStatus,
   TransferStatusKeys,
 } from '../models/ModelTransfer.js'
 import { UserInterface } from '../models/User.js'
+import { MirrorKind, MirrorKindKeys } from '../types/types.js'
 import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { completeImportNotification, failImportNotification, startImportNotification } from './smtp/smtp.js'
+import { startImportNotification, transferCompleteNotification } from './smtp/smtp.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
@@ -76,78 +78,125 @@ export async function updateModelTransfer(
   return updated
 }
 
-export async function updateFile(
+export async function updateFileTransferStatus(
   exportId: string,
   file: string,
   status: TransferStatusKeys,
 ): Promise<ModelTransferInterface | null> {
   const updated = await ModelTransferModel.findOneAndUpdate(
-    { exportId },
+    { exportId, 'artefactStatus.key': file, 'artefactStatus.kind': MirrorKind.File },
     {
-      $set: { [`fileStatus.${file}`]: status },
+      $set: { 'artefactStatus.$.status': status },
     },
     { new: true },
   )
 
   if (!updated) {
-    log.warn({ exportId, file }, 'The requested model transfer was not found.')
-    return null
+    const added = await ModelTransferModel.findOneAndUpdate(
+      { exportId },
+      {
+        $push: { artefactStatus: { key: file, status, kind: MirrorKind.File } },
+      },
+      { new: true },
+    )
+
+    if (!added) {
+      log.warn({ exportId, file }, 'The requested model transfer was not found.')
+      return null
+    }
+
+    return added.toObject()
   }
+
+  await handleCompletionEmail(exportId)
 
   return updated.toObject()
 }
 
-export async function updateImage(
+export async function updateImageTransferStatus(
   exportId: string,
   image: string,
   status: TransferStatusKeys,
 ): Promise<ModelTransferInterface | null> {
   const updated = await ModelTransferModel.findOneAndUpdate(
-    { exportId },
+    { exportId, 'artefactStatus.key': image, 'artefactStatus.kind': MirrorKind.Image },
     {
-      $set: {
-        [`imageStatus.${image}`]: status,
-      },
+      $set: { 'artefactStatus.$.status': status },
     },
     { new: true },
   )
 
   if (!updated) {
-    log.warn({ exportId, image }, 'The requested model transfer was not found.')
-    return null
+    const added = await ModelTransferModel.findOneAndUpdate(
+      { exportId },
+      {
+        $push: { artefactStatus: { key: image, status, kind: MirrorKind.Image } },
+      },
+      { new: true },
+    )
+
+    if (!added) {
+      log.warn({ exportId, image }, 'The requested model transfer was not found.')
+      return null
+    }
+
+    return added.toObject()
   }
+
+  await handleCompletionEmail(exportId)
 
   return updated.toObject()
 }
 
-export async function upsertArtefacts(
+export async function updateArtefactsTransferStatus(
   exportId: string,
   images?: string[],
   files?: ObjectId[],
 ): Promise<ModelTransferInterface | null> {
-  const setUpdates: Record<string, any> = {
-    documentStatus: TransferStatus.Completed,
+  await ModelTransferModel.findOneAndUpdate(
+    { exportId, 'artefactStatus.key': 'documents', 'artefactStatus.kind': MirrorKind.Documents },
+    {
+      $set: { 'artefactStatus.$.status': TransferStatus.Completed },
+    },
+  )
+
+  const artefactsToAdd: any[] = []
+
+  if (images && images.length > 0) {
+    artefactsToAdd.push(
+      ...images.map((image) => ({ key: image, status: TransferStatus.InProgress, kind: MirrorKind.Image })),
+    )
   }
 
-  const addKey = (path: string) => {
-    setUpdates[path] = {
-      $ifNull: [`$${path}`, TransferStatus.InProgress],
-    }
+  if (files && files.length > 0) {
+    artefactsToAdd.push(
+      ...files.map((file) => ({ key: file.toString(), status: TransferStatus.InProgress, kind: MirrorKind.File })),
+    )
   }
 
-  if (images) {
-    for (const image of images) {
-      addKey(`imageStatus.${image}`)
-    }
+  if (artefactsToAdd.length > 0) {
+    await ModelTransferModel.findOneAndUpdate({ exportId }, [
+      {
+        $set: {
+          artefactStatus: {
+            $concatArrays: [
+              '$artefactStatus',
+              {
+                $filter: {
+                  input: artefactsToAdd,
+                  cond: { $not: { $in: ['$$this.key', '$artefactStatus.key'] } },
+                },
+              },
+            ],
+          },
+        },
+      },
+    ])
   }
 
-  if (files) {
-    for (const file of files) {
-      addKey(`fileStatus.${file}`)
-    }
-  }
+  await handleCompletionEmail(exportId)
 
-  return ModelTransferModel.findOneAndUpdate({ exportId }, [{ $set: setUpdates }], { new: true })
+  return ModelTransferModel.findOneAndUpdate({ exportId }, {}, { new: true })
 }
 
 export async function deleteModelTransfer(exportId: string): Promise<string> {
@@ -164,26 +213,27 @@ export async function deleteModelTransfer(exportId: string): Promise<string> {
   return transfer.exportId
 }
 
-export async function beginTransfer(exportId: string, modelId: string, createdBy: string, peerId?: string) {
+export async function handleStartEmail(exportId: string, modelId: string, createdBy: string, peerId?: string) {
   const updated = await ModelTransferModel.findOneAndUpdate(
     { exportId },
     { exportId, modelId, peerId, createdBy },
-    { new: true, setDefaultsOnInsert: true, upsert: true },
+    { upsert: true, setDefaultsOnInsert: true },
   )
 
-  if (updated && !updated.startedNotificationSent) {
-    const updated = await ModelTransferModel.findOneAndUpdate(
-      { exportId },
-      { startedNotificationSent: true },
-      { new: true },
-    )
-    if (updated) {
-      await startImportNotification(modelId)
-    }
+  if (!updated) {
+    await startImportNotification(modelId)
   }
 }
 
-export async function finishTransfer(exportId: string) {
+function filterArtefactsByKindAndStatus(
+  artefactStatus: TransferArtefactStatus[],
+  kind: MirrorKindKeys,
+  status: TransferStatusKeys,
+): string[] {
+  return artefactStatus.filter((item) => item.kind === kind && item.status === status).map((item) => item.key)
+}
+
+async function handleCompletionEmail(exportId: string) {
   const transfer = await ModelTransferModel.findOne({
     exportId,
   })
@@ -197,41 +247,27 @@ export async function finishTransfer(exportId: string) {
     return
   }
 
-  const successfulFiles = [...transfer.fileStatus.entries()]
-    .filter(([_filePath, status]) => status === TransferStatus.Completed)
-    .map(([filePath]) => filePath)
-
-  const successfulImages = [...transfer.imageStatus.entries()]
-    .filter(([_distributionPackageName, status]) => status === TransferStatus.Completed)
-    .map(([distributionPackageName]) => distributionPackageName)
-
-  if (transfer?.status === TransferStatus.Completed) {
-    const updated = await ModelTransferModel.findOneAndUpdate(
-      { exportId },
-      { completedNotificationSent: true },
-      { new: true },
-    )
-    if (updated) {
-      await completeImportNotification(transfer.modelId, successfulFiles, successfulImages)
-    }
+  const artefacts = {
+    'Failed Files': filterArtefactsByKindAndStatus(transfer.artefactStatus, MirrorKind.File, TransferStatus.Failed),
+    'Failed Images': filterArtefactsByKindAndStatus(transfer.artefactStatus, MirrorKind.Image, TransferStatus.Failed),
+    'Successful Files': filterArtefactsByKindAndStatus(
+      transfer.artefactStatus,
+      MirrorKind.File,
+      TransferStatus.Completed,
+    ),
+    'Successful Images': filterArtefactsByKindAndStatus(
+      transfer.artefactStatus,
+      MirrorKind.Image,
+      TransferStatus.Completed,
+    ),
   }
 
-  if (transfer.status === TransferStatus.Failed) {
-    const failedFiles = [...transfer.fileStatus.entries()]
-      .filter(([_filePath, status]) => status === TransferStatus.Failed)
-      .map(([filePath]) => filePath)
-
-    const failedImages = [...transfer.imageStatus.entries()]
-      .filter(([_distributionPackageName, status]) => status === TransferStatus.Failed)
-      .map(([distributionPackageName]) => distributionPackageName)
-
-    const updated = await ModelTransferModel.findOneAndUpdate(
-      { exportId },
-      { completedNotificationSent: true },
-      { new: true },
-    )
-    if (updated) {
-      await failImportNotification(transfer.modelId, failedFiles, failedImages, successfulFiles, successfulImages)
-    }
+  const updated = await ModelTransferModel.findOneAndUpdate(
+    { exportId },
+    { completedNotificationSent: true },
+    { new: true },
+  )
+  if (updated) {
+    await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
   }
 }

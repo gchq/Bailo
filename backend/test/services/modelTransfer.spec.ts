@@ -102,7 +102,6 @@ describe('services > modelTransfer', () => {
       modelId: 'model-123',
       peerId: 'peer-123',
       exportId: 'abc-123',
-      status: TransferStatus.Requested,
       createdBy: 'user:test',
     }
 

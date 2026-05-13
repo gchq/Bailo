@@ -36,9 +36,11 @@ interface ModelTransferResponse {
 
 export const getModelTransfer = [
   async (req: Request, res: Response<ModelTransferResponse>): Promise<void> => {
-    const { params } = parse(req, getModelTransferSchema)
+    const {
+      params: { exportId },
+    } = parse(req, getModelTransferSchema)
 
-    const modelTransfer = await findModelTransferById(req.user, params.exportId)
+    const modelTransfer = await findModelTransferById(req.user, exportId)
 
     res.json({
       transfer: modelTransfer,

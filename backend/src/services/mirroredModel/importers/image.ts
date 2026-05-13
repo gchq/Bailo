@@ -14,7 +14,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
-import { finishTransfer, updateImage } from '../../modelTransfer.js'
+import { updateImageTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -160,7 +160,11 @@ export class ImageImporter extends BaseImporter {
     _resolve: (reason?: any) => void,
     reject: (reason?: unknown) => void,
   ): Promise<void> {
-    await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
+    await updateImageTransferStatus(
+      this.metadata.exportId,
+      this.metadata.distributionPackageName,
+      TransferStatus.Failed,
+    )
     await super.handleStreamError(error, _resolve, reject)
   }
 
@@ -190,15 +194,21 @@ export class ImageImporter extends BaseImporter {
         },
         'Completed registry upload',
       )
-      await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Completed)
-      await finishTransfer(this.metadata.exportId)
+      await updateImageTransferStatus(
+        this.metadata.exportId,
+        this.metadata.distributionPackageName,
+        TransferStatus.Completed,
+      )
       resolve({
         metadata: this.metadata,
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
-      await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
-      await finishTransfer(this.metadata.exportId)
+      await updateImageTransferStatus(
+        this.metadata.exportId,
+        this.metadata.distributionPackageName,
+        TransferStatus.Failed,
+      )
       reject(
         InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.', {
           metadata: this.metadata,

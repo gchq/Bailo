@@ -18,7 +18,7 @@ export type actions = {
   url: string
 }
 
-export function sanitizeInput<T>(input: T) {
+function sanitizeInput<T>(input: T) {
   if (input === null) {
     return null
   }

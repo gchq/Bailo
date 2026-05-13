@@ -1,5 +1,6 @@
 import { HydratedDocument, model, Schema } from 'mongoose'
 
+import { MirrorKind, MirrorKindKeys } from '../types/types.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TransferStatus = {
@@ -11,16 +12,18 @@ export const TransferStatus = {
 } as const
 export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferStatus]
 
+export interface TransferArtefactStatus {
+  key: string
+  status: TransferStatusKeys
+  kind: MirrorKindKeys
+}
+
 export interface ModelTransferInterface {
   exportId: string
   modelId: string
   peerId?: string
-  documentStatus: TransferStatusKeys
-  fileStatus: Map<string, TransferStatusKeys>
-  imageStatus: Map<string, TransferStatusKeys>
-  startedNotificationSent: boolean
+  artefactStatus: TransferArtefactStatus[]
   completedNotificationSent: boolean
-  completed: boolean
   createdBy: string
   createdAt: Date
   updatedAt: Date
@@ -28,6 +31,7 @@ export interface ModelTransferInterface {
 
 interface ModelTransferVirtuals {
   status: TransferStatusKeys
+  completed: boolean
 }
 
 export type ModelTransferDoc = HydratedDocument<ModelTransferInterface & ModelTransferVirtuals> & SoftDeleteDocument
@@ -38,37 +42,20 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
     modelId: { type: String, required: true },
     peerId: { type: String },
 
-    documentStatus: {
-      type: String,
-      enum: Object.values(TransferStatus),
+    artefactStatus: {
+      type: [
+        {
+          key: { type: String, required: true },
+          status: {
+            type: String,
+            enum: Object.values(TransferStatus),
+            required: true,
+          },
+          kind: { type: String, required: true },
+        },
+      ],
       required: true,
-      default: TransferStatus.InProgress,
-    },
-
-    fileStatus: {
-      type: Map,
-      of: {
-        type: String,
-        enum: Object.values(TransferStatus),
-      },
-      required: true,
-      default: {},
-    },
-
-    imageStatus: {
-      type: Map,
-      of: {
-        type: String,
-        enum: Object.values(TransferStatus),
-      },
-      required: true,
-      default: {},
-    },
-
-    startedNotificationSent: {
-      type: Boolean,
-      required: true,
-      default: false,
+      default: [{ key: MirrorKind.Documents, status: TransferStatus.InProgress, kind: MirrorKind.Documents }],
     },
 
     completedNotificationSent: {
@@ -89,31 +76,21 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
 
 // TODO: Use access request status to infer 'requested' and 'denied' status'
 ModelTransferSchema.virtual('status').get(function (): TransferStatusKeys {
-  const fileStatuses = Array.from(this.fileStatus.values())
-  const imageStatuses = Array.from(this.imageStatus.values())
-  const allStatuses = [this.documentStatus, ...fileStatuses, ...imageStatuses]
+  const allStatuses = this.artefactStatus.map((item) => item.status)
 
   if (allStatuses.includes(TransferStatus.Failed)) {
     return TransferStatus.Failed
   }
 
-  const fullyComplete =
-    this.documentStatus === TransferStatus.Completed &&
-    fileStatuses.every((status) => status === TransferStatus.Completed) &&
-    imageStatuses.every((status) => status === TransferStatus.Completed)
+  const fullyComplete = allStatuses.every((status) => status === TransferStatus.Completed)
 
   return fullyComplete ? TransferStatus.Completed : TransferStatus.InProgress
 })
 
 ModelTransferSchema.virtual('completed').get(function (): boolean {
-  const fileStatuses = Array.from(this.fileStatus.values())
-  const imageStatuses = Array.from(this.imageStatus.values())
+  const allStatuses = this.artefactStatus.map((item) => item.status)
 
-  return (
-    this.documentStatus !== TransferStatus.InProgress &&
-    fileStatuses.every((status) => status !== TransferStatus.InProgress) &&
-    imageStatuses.every((status) => status !== TransferStatus.InProgress)
-  )
+  return allStatuses.every((status) => status !== TransferStatus.InProgress)
 })
 
 ModelTransferSchema.index({ modelId: 1, createdAt: -1 })

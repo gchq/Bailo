@@ -14,7 +14,7 @@ import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
-import { beginTransfer } from '../modelTransfer.js'
+import { handleStartEmail } from '../modelTransfer.js'
 import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
 import { getImporter } from './mirroredModel.js'
@@ -229,7 +229,7 @@ export async function extractTarGzStream(
 
             importer = getImporter(metadata, user, logData)
             const importMetadata = importer.getMetadata()
-            await beginTransfer(importMetadata.exportId, importMetadata.mirroredModelId, importMetadata.exporter)
+            await handleStartEmail(importMetadata.exportId, importMetadata.mirroredModelId, importMetadata.exporter)
             // Drain and continue
             next()
             return
