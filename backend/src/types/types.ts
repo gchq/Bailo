@@ -172,6 +172,11 @@ export interface UiConfig {
     contributor: string
     consumer: string
   }
+
+  untrustedModel: {
+    enabled: boolean
+    untrustedModelDescription: string
+  }
 }
 
 export interface EntrySearchResult {

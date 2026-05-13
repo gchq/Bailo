@@ -7,7 +7,15 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKind, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, {
+  CollaboratorEntry,
+  EntryKind,
+  EntryKindKeys,
+  EntryVisibility,
+  EntryVisibilityKeys,
+  ModelDoc,
+  ModelInterface,
+} from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
@@ -22,6 +30,7 @@ import {
   MirrorImportLogData,
 } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
+import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -38,9 +47,25 @@ import { getSchemaById } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
-export function checkModelRestriction(model: ModelInterface) {
+function checkMirroredModelRestriction(model: ModelInterface) {
   if (EntryKind.MirroredModel === model.kind) {
     throw BadReq(`Cannot alter a mirrored model.`)
+  }
+}
+
+type UntrustedModelRestrictionCheck = {
+  state?: string | undefined
+  visibility?: EntryVisibilityKeys
+  [key: string]: any
+}
+function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel: UntrustedModelRestrictionCheck) {
+  if (modelKind === EntryKind.UntrustedModel) {
+    if (partialModel.visibility === EntryVisibility.Public) {
+      throw BadReq('Untrusted models cannot be made public.')
+    }
+    if (partialModel.state) {
+      throw BadReq('Untrusted models can not have their state manually changed.')
+    }
   }
 }
 
@@ -61,9 +86,11 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   if (modelParams.tags) {
     const tagSet = new Set(modelParams.tags.map((tag) => tag.trim().toLowerCase()))
     if (tagSet.size !== modelParams.tags.length) {
-      throw BadReq('You cannot have duplicate tags')
+      throw BadReq('You cannot have duplicate tags.')
     }
   }
+
+  checkUntrustedModelRestrictions(modelParams.kind, modelParams)
 
   let collaborators: CollaboratorEntry[]
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -89,6 +116,10 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     id: modelId,
     collaborators,
   })
+
+  if (modelParams.kind === EntryKind.UntrustedModel) {
+    model.state = config.untrustedModels.defaultState || ''
+  }
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
 
@@ -582,6 +613,8 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     }
   }
 
+  checkUntrustedModelRestrictions(model.kind, modelDiff)
+
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
@@ -650,7 +683,7 @@ export async function createModelCardFromSchema(
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  checkModelRestriction(model)
+  checkMirroredModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
@@ -703,7 +736,7 @@ export async function createModelCardFromTemplate(
   if (model.card?.schemaId) {
     throw BadReq('This model already has a model card.', { modelId })
   }
-  checkModelRestriction(model)
+  checkMirroredModelRestriction(model)
   const template = await getModelById(user, templateId)
   // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
   const templateAuth = await authorisation.model(user, template, ModelAction.View)
