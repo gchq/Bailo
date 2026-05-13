@@ -949,7 +949,7 @@ export interface ModelStateMetrics {
 
 export interface OverviewBaseMetrics {
   users: number
-  models: number
+  entries: number
   schemaBreakdown: SchemaBreakDownMetrics[]
   entryState: ModelStateMetrics[]
   withReleases: number
@@ -977,7 +977,7 @@ export interface PolicyRoleMetric {
 }
 
 export interface PolicyModelMetrics {
-  modelId: string
+  entryId: string
   missingRoles: PolicyRoleMetric[]
 }
 

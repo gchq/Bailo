@@ -211,9 +211,9 @@ export default function OverviewMetricsCharts({
             {listItems}
           </Select>
         </Stack>
-        <Stack spacing={6} alignItems='center' direction={{ lg: 'row', md: 'column' }}>
+        <Stack spacing={6} alignItems='flex-start' direction={{ lg: 'row', md: 'column' }}>
           <Stack spacing={2}>
-            <OverviewStatPanel label='Total models' value={data.models} minWidth='300px' />
+            <OverviewStatPanel label='Total models' value={data.entries} minWidth='300px' />
             <OverviewStatPanel label='Models with releases' value={data.withReleases} minWidth='300px' />
             <OverviewStatPanel label='Models with access requests' value={data.withAccessRequest} minWidth='320px' />
           </Stack>

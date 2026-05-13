@@ -62,7 +62,7 @@ export default function OverviewMetrics() {
   }
 
   return (
-    <Container maxWidth='xl'>
+    <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
         {filteredDataset && overviewMetrics && (
           <OverviewMetricsCharts

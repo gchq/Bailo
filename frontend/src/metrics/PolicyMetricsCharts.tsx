@@ -15,9 +15,9 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
 
   const tableRows = useMemo(() => {
     return data.entries.map((row) => (
-      <TableRow key={row.modelId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+      <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
-          <Link href={`/model/${row.modelId}`}>{row.modelId}</Link>
+          <Link href={`/model/${row.entryId}`}>{row.entryId}</Link>
         </TableCell>
         <TableCell>
           <List dense>
