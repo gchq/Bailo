@@ -1,4 +1,4 @@
-import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
+import { Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { useGetPolicyMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
@@ -79,16 +79,20 @@ export default function PolicyMetrics() {
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        <Select
-          sx={{ maxWidth: '300px' }}
-          value={selectedOrganisation}
-          onChange={(e) => handleOrganisationSelectOnChange(e)}
-        >
-          <MenuItem key='all' value='All'>
-            All organisations
-          </MenuItem>
-          {listItems}
-        </Select>
+        <Stack direction='row' alignItems='center' spacing={2}>
+          <Typography fontStyle='italic'>Showing results for</Typography>
+          <Select
+            sx={{ maxWidth: '300px' }}
+            value={selectedOrganisation}
+            onChange={(e) => handleOrganisationSelectOnChange(e)}
+            variant='standard'
+          >
+            <MenuItem key='all' value='All'>
+              All organisations
+            </MenuItem>
+            {listItems}
+          </Select>
+        </Stack>
         {filteredDataset && <PolicyMetricsCharts data={filteredDataset} />}
       </Stack>
     </Container>

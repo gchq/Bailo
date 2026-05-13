@@ -1,6 +1,6 @@
 import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
-import { PieChart } from '@mui/x-charts/PieChart'
+import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
 import dayjs, { Dayjs } from 'dayjs'
@@ -121,7 +121,6 @@ export default function OverviewMetricsCharts({
     height: 250,
     margin: { left: 0 },
     yAxis: [{ width: 50 }],
-    hideLegend: true,
   }
 
   const listItems = useMemo(() => {
@@ -239,6 +238,11 @@ export default function OverviewMetricsCharts({
               <PieChart
                 series={[{ innerRadius: 50, outerRadius: 100, data: schemaData, arcLabel: 'value' }]}
                 {...pieChartSettings}
+                sx={{
+                  [`.${pieClasses.series}[data-series="outer"] .${pieClasses.arc}`]: {
+                    opacity: 0.6,
+                  },
+                }}
               />
             </Stack>
           </Stack>
