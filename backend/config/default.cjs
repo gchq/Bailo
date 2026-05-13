@@ -264,7 +264,7 @@ module.exports = {
     },
 
     untrustedModel: {
-      enabled: true,
+      enabled: false,
       untrustedModelDescription: 'These are private only models.',
     },
   },
