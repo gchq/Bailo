@@ -14,7 +14,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
-import { updateImageTransferStatus } from '../../modelTransfer.js'
+import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -160,9 +160,10 @@ export class ImageImporter extends BaseImporter {
     _resolve: (reason?: any) => void,
     reject: (reason?: unknown) => void,
   ): Promise<void> {
-    await updateImageTransferStatus(
+    await updateArtefactTransferStatus(
       this.metadata.exportId,
       this.metadata.distributionPackageName,
+      MirrorKind.Image,
       TransferStatus.Failed,
     )
     await super.handleStreamError(error, _resolve, reject)
@@ -194,9 +195,10 @@ export class ImageImporter extends BaseImporter {
         },
         'Completed registry upload',
       )
-      await updateImageTransferStatus(
+      await updateArtefactTransferStatus(
         this.metadata.exportId,
         this.metadata.distributionPackageName,
+        MirrorKind.Image,
         TransferStatus.Completed,
       )
       resolve({
@@ -204,9 +206,10 @@ export class ImageImporter extends BaseImporter {
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
-      await updateImageTransferStatus(
+      await updateArtefactTransferStatus(
         this.metadata.exportId,
         this.metadata.distributionPackageName,
+        MirrorKind.Image,
         TransferStatus.Failed,
       )
       reject(

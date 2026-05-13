@@ -78,48 +78,14 @@ export async function updateModelTransfer(
   return updated
 }
 
-export async function updateFileTransferStatus(
-  exportId: string,
-  file: string,
-  status: TransferStatusKeys,
-): Promise<ModelTransferInterface | null> {
-  const updated = await ModelTransferModel.findOneAndUpdate(
-    { exportId, 'artefactStatus.key': file, 'artefactStatus.kind': MirrorKind.File },
-    {
-      $set: { 'artefactStatus.$.status': status },
-    },
-    { new: true },
-  )
-
-  if (!updated) {
-    const added = await ModelTransferModel.findOneAndUpdate(
-      { exportId },
-      {
-        $push: { artefactStatus: { key: file, status, kind: MirrorKind.File } },
-      },
-      { new: true },
-    )
-
-    if (!added) {
-      log.warn({ exportId, file }, 'The requested model transfer was not found.')
-      return null
-    }
-
-    return added.toObject()
-  }
-
-  await handleCompletionEmail(exportId)
-
-  return updated.toObject()
-}
-
-export async function updateImageTransferStatus(
+export async function updateArtefactTransferStatus(
   exportId: string,
   image: string,
+  kind: MirrorKindKeys,
   status: TransferStatusKeys,
 ): Promise<ModelTransferInterface | null> {
   const updated = await ModelTransferModel.findOneAndUpdate(
-    { exportId, 'artefactStatus.key': image, 'artefactStatus.kind': MirrorKind.Image },
+    { exportId, 'artefactStatus.key': image, 'artefactStatus.kind': kind },
     {
       $set: { 'artefactStatus.$.status': status },
     },
@@ -130,7 +96,7 @@ export async function updateImageTransferStatus(
     const added = await ModelTransferModel.findOneAndUpdate(
       { exportId },
       {
-        $push: { artefactStatus: { key: image, status, kind: MirrorKind.Image } },
+        $push: { artefactStatus: { key: image, status, kind } },
       },
       { new: true },
     )

@@ -38,7 +38,7 @@ export type ModelTransferDoc = HydratedDocument<ModelTransferInterface & ModelTr
 
 const ModelTransferSchema = new Schema<ModelTransferDoc>(
   {
-    exportId: { type: String, required: true, unique: true },
+    exportId: { type: String, required: true },
     modelId: { type: String, required: true },
     peerId: { type: String },
 
@@ -51,7 +51,7 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
             enum: Object.values(TransferStatus),
             required: true,
           },
-          kind: { type: String, required: true },
+          kind: { type: String, enum: Object.values(MirrorKind), required: true },
         },
       ],
       required: true,
