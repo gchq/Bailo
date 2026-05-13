@@ -120,7 +120,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   if (modelParams.kind === EntryKind.UntrustedModel) {
     model.state = config.untrustedModels.defaultState || ''
   } else {
-    model.state = modelParams.kind || ''
+    model.state = modelParams.state || ''
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
