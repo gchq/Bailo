@@ -1,14 +1,13 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import {
-  completeImportNotification,
   dispatchEmailToModelRole,
-  failImportNotification,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
   requestReviewForRelease,
   startImportNotification,
+  transferCompleteNotification,
 } from '../../../src/services/smtp/smtp.js'
 import { fromEntity } from '../../../src/utils/entity.js'
 import { testReviewResponse } from '../../testUtils/testModels.js'
@@ -199,13 +198,20 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent after an import has complete', async () => {
-    await completeImportNotification('modelId', ['fileabc'], ['alpine:latest'])
+    await transferCompleteNotification('modelId', false, {
+      'Successful Files': ['fileabc'],
+      'Successful Images': ['alpine:latest'],
+    })
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that an email is sent after an import has failed', async () => {
-    await failImportNotification('modelId', ['fileabcd'], ['alpine:old'], ['fileabc'], ['alpine:latest'])
+    await transferCompleteNotification('modelId', true, {
+      'Failed Images': ['alpine:old'],
+      'Successful Files': ['fileabc'],
+      'Successful Images': ['alpine:latest'],
+    })
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })

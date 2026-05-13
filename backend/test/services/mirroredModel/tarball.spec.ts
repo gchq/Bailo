@@ -66,8 +66,8 @@ const mirroredModelMocks = vi.hoisted(() => {
 vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
 
 const modelTransferMocks = vi.hoisted(() => ({
-  beginTransfer: vi.fn(),
-  finishTransfer: vi.fn(),
+  handleStartEmail: vi.fn(),
+  handleCompleteEmail: vi.fn(),
 }))
 vi.mock('../../../src/services/modelTransfer.js', () => modelTransferMocks)
 

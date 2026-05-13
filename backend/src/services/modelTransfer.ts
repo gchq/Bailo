@@ -109,7 +109,7 @@ export async function updateArtefactTransferStatus(
     return added.toObject()
   }
 
-  await handleCompletionEmail(exportId)
+  await handleCompleteEmail(exportId)
 
   return updated.toObject()
 }
@@ -160,7 +160,7 @@ export async function updateArtefactsTransferStatus(
     ])
   }
 
-  await handleCompletionEmail(exportId)
+  await handleCompleteEmail(exportId)
 
   return ModelTransferModel.findOneAndUpdate({ exportId }, {}, { new: true })
 }
@@ -199,7 +199,7 @@ function filterArtefactsByKindAndStatus(
   return artefactStatus.filter((item) => item.kind === kind && item.status === status).map((item) => item.key)
 }
 
-async function handleCompletionEmail(exportId: string) {
+async function handleCompleteEmail(exportId: string) {
   const transfer = await ModelTransferModel.findOne({
     exportId,
   })
