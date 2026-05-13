@@ -172,7 +172,7 @@ export async function finishUploadMultipartFile(
     file.tags = tags
   }
 
-  file.save()
+  await file.save()
 
   return await scanFile(file)
 }
