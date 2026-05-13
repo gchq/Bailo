@@ -177,7 +177,7 @@ export async function finishUploadMultipartFile(
     file.tags = tags
   }
 
-  file.save()
+  await file.save()
 
   runScans({ file }).catch((error) => {
     log.error({ file, error }, 'Unable to set failure state after failing to run file scans. Safely aborted.')
