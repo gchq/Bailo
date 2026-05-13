@@ -2,7 +2,7 @@ import prettyBytes from 'pretty-bytes'
 
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
-import { FileWithScanResultsInterface } from '../../../models/File.js'
+import { FileWithScanResultsAggregate } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
@@ -18,7 +18,7 @@ import { BaseExporter, checkAuths, requiresInit, withStreams } from './base.js'
 
 export class DocumentsExporter extends BaseExporter {
   protected readonly releases: ReleaseDoc[]
-  protected files: FileWithScanResultsInterface[] | undefined
+  protected files: FileWithScanResultsAggregate[] | undefined
 
   constructor(user: UserInterface, model: ModelDoc, releases: ReleaseDoc[], logData: MirrorExportLogData) {
     super(user, model, logData)
@@ -178,7 +178,7 @@ export class DocumentsExporter extends BaseExporter {
   @withStreams
   protected async addReleaseToTarball(release: ReleaseDoc) {
     log.debug({ semver: release.semver, ...this.logData }, 'Adding release to tarball file of releases.')
-    const files: FileWithScanResultsInterface[] = await getFilesByIds(this.user, release.modelId, release.fileIds)
+    const files: FileWithScanResultsAggregate[] = await getFilesByIds(this.user, release.modelId, release.fileIds)
 
     try {
       const releaseJson = JSON.stringify(release.toJSON())
@@ -205,7 +205,7 @@ export class DocumentsExporter extends BaseExporter {
   @requiresInit
   @checkAuths
   @withStreams
-  protected async addFilesToTarball(files: FileWithScanResultsInterface[]) {
+  protected async addFilesToTarball(files: FileWithScanResultsAggregate[]) {
     for (const file of files) {
       try {
         const fileJson = JSON.stringify(file)
