@@ -14,7 +14,12 @@ import {
 } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../models/File.js'
+import FileModel, {
+  FileInterface,
+  FileInterfaceDoc,
+  FileWithScanResultsAggregate,
+  FileWithScanResultsInterface,
+} from '../models/File.js'
 import { EntryKind, ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
