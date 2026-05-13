@@ -12,77 +12,73 @@ import { BaseExporter } from './base.js'
 
 export class ImageExporter extends BaseExporter {
   protected readonly release: ReleaseDoc
-  protected readonly image: ReleaseDoc['images'][number]
-  protected distributionPackageName: string | undefined
+  protected readonly images: ReleaseDoc['images']
+  protected distributionPackageNames: string[] = []
 
   constructor(
     user: UserInterface,
     model: ModelDoc,
     release: ReleaseDoc,
-    image: ReleaseDoc['images'][number],
+    images: ReleaseDoc['images'],
     logData: MirrorExportLogData,
   ) {
     super(user, model, logData)
     this.release = release
-    this.image = image
+    this.images = images
   }
 
   getRelease() {
     return this.release
   }
 
-  getImage() {
-    return this.image
+  getImages() {
+    return this.images
   }
 
-  getDistributionPackageName() {
-    return this.distributionPackageName
+  getDistributionPackageNames() {
+    return this.distributionPackageNames
   }
 
   protected async _init() {
-    const imageCheck = this.release.images.find((image) => image.id === this.image.id)
-    if (!imageCheck) {
-      throw InternalError('Could not find image associated with release.', {
-        modelId: this.model.id,
-        semver: this.release.semver,
-        imageId: this.image.id,
-        ...this.logData,
-      })
-    }
-
     // update the distributionPackageName to use the mirroredModelId
     const modelIdRe = new RegExp(String.raw`^${this.model.id}`)
-    this.distributionPackageName = joinDistributionPackageName({
-      domain: '',
-      path: this.image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
-      tag: this.image.tag,
-    })
+
+    for (const image of this.images) {
+      const distributionPackageName = joinDistributionPackageName({
+        domain: '',
+        path: image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
+        tag: image.tag,
+      })
+      this.distributionPackageNames.push(distributionPackageName)
+    }
   }
 
   protected async _checkAuths() {
-    const releaseAuth = await authorisation.release(this.user, this.model!, ReleaseAction.View, this.release)
-    if (!releaseAuth.success) {
-      throw Forbidden(releaseAuth.info, {
-        userDn: this.user.dn,
-        modelId: this.model.id,
-        semver: this.release.semver,
-        ...this.logData,
-      })
-    }
+    for (const image of this.images) {
+      const releaseAuth = await authorisation.release(this.user, this.model!, ReleaseAction.View, this.release)
+      if (!releaseAuth.success) {
+        throw Forbidden(releaseAuth.info, {
+          userDn: this.user.dn,
+          modelId: this.model.id,
+          semver: this.release.semver,
+          ...this.logData,
+        })
+      }
 
-    const imageAuth = await authorisation.image(this.user, this.model!, {
-      type: 'repository',
-      name: this.model.id,
-      actions: ['pull'],
-    })
-    if (!imageAuth.success) {
-      throw Forbidden(imageAuth.info, {
-        userDn: this.user.dn,
-        modelId: this.model.id,
-        semver: this.release.semver,
-        imageId: this.image.id,
-        ...this.logData,
+      const imageAuth = await authorisation.image(this.user, this.model!, {
+        type: 'repository',
+        name: this.model.id,
+        actions: ['pull'],
       })
+      if (!imageAuth.success) {
+        throw Forbidden(imageAuth.info, {
+          userDn: this.user.dn,
+          modelId: this.model.id,
+          semver: this.release.semver,
+          imageId: image.id,
+          ...this.logData,
+        })
+      }
     }
   }
 
@@ -92,22 +88,14 @@ export class ImageExporter extends BaseExporter {
         ...this.logData,
       })
     }
-    if (!this.distributionPackageName) {
-      throw InternalError(
-        'Method `getInitialiseTarGzUploadParams` called before `this.distributionPackageName` defined.',
-        {
-          ...this.logData,
-        },
-      )
-    }
     return [
-      `${this.image.id}.tar.gz`,
+      `${this.model.id}-${this.release.semver}.tar.gz`,
       {
-        schemaVersion: 1,
+        schemaVersion: 2,
         exporter: this.user.dn,
         sourceModelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
-        distributionPackageName: this.distributionPackageName!,
+        distributionPackageName: this.distributionPackageNames[0],
         importKind: MirrorKind.Image,
         exportId: this.logData.exportId,
       },
@@ -120,7 +108,7 @@ export class ImageExporter extends BaseExporter {
     await addCompressedRegistryImageComponents(
       this.user,
       this.model.id,
-      this.distributionPackageName!,
+      this.distributionPackageNames,
       this.tarStream!,
       this.logData,
     )
