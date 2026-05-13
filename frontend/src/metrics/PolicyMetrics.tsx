@@ -1,12 +1,14 @@
-import { Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { useGetPolicyMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import MessageAlert from 'src/MessageAlert'
 import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
 import { PolicyBaseMetrics } from 'types/types'
+import { formatDateStringWithMinutes } from 'utils/dateUtils'
 
 export default function PolicyMetrics() {
   const router = useRouter()
@@ -17,6 +19,19 @@ export default function PolicyMetrics() {
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
   const [filteredDataset, setFilteredDataset] = useState<PolicyBaseMetrics | undefined>(undefined)
+
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  const exportModelCard = useReactToPrint({
+    contentRef: contentRef,
+    documentTitle: 'Bailo policy metrics',
+  })
+
+  const handleExportOnClick = () => {
+    if (contentRef) {
+      exportModelCard()
+    }
+  }
 
   const setSelectedOrganisationEffectEvent = useEffectEvent((newOrganisation: string) => {
     setSelectedOrganisation(newOrganisation)
@@ -79,21 +94,33 @@ export default function PolicyMetrics() {
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        <Stack direction='row' alignItems='center' spacing={2}>
-          <Typography fontStyle='italic'>Showing results for</Typography>
-          <Select
-            sx={{ maxWidth: '300px' }}
-            value={selectedOrganisation}
-            onChange={(e) => handleOrganisationSelectOnChange(e)}
-            variant='standard'
-          >
-            <MenuItem key='all' value='All'>
-              All organisations
-            </MenuItem>
-            {listItems}
-          </Select>
+        <Stack direction='row' justifyContent='space-between'>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography fontStyle='italic'>Showing results for</Typography>
+            <Select
+              sx={{ maxWidth: '300px' }}
+              value={selectedOrganisation}
+              onChange={(e) => handleOrganisationSelectOnChange(e)}
+              variant='standard'
+            >
+              <MenuItem key='all' value='All'>
+                All organisations
+              </MenuItem>
+              {listItems}
+            </Select>
+          </Stack>
+          <Stack>
+            <Button variant='contained' onClick={handleExportOnClick}>
+              Export as PDF
+            </Button>
+            {policyMetrics && <em>Last updated {formatDateStringWithMinutes(policyMetrics.lastUpdated)}</em>}
+          </Stack>
         </Stack>
-        {filteredDataset && <PolicyMetricsCharts data={filteredDataset} />}
+        {filteredDataset && (
+          <Box ref={contentRef}>
+            <PolicyMetricsCharts data={filteredDataset} />
+          </Box>
+        )}
       </Stack>
     </Container>
   )

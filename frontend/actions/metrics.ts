@@ -62,6 +62,7 @@ export function useGetGetOverviewMetrics() {
     {
       global: OverviewBaseMetrics
       byOrganisation: OrganisationOverviewMetrics[]
+      lastUpdated: string
     },
     ErrorInfo
   >('/api/v3/metrics/usage', fetcher)
@@ -79,6 +80,7 @@ export function useGetPolicyMetrics() {
     {
       global: PolicyBaseMetrics
       byOrganisation: OrganisationPolicyMetrics[]
+      lastUpdated: string
     },
     ErrorInfo
   >('/api/v3/metrics/compliance', fetcher)

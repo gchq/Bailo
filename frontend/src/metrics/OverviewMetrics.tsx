@@ -1,12 +1,14 @@
-import { Container, Stack } from '@mui/material'
+import { Box, Button, Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { useGetGetOverviewMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import MessageAlert from 'src/MessageAlert'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
 import { OverviewBaseMetrics } from 'types/types'
+import { formatDateStringWithMinutes } from 'utils/dateUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()
@@ -17,6 +19,19 @@ export default function OverviewMetrics() {
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
   const [filteredDataset, setFilteredDataset] = useState<OverviewBaseMetrics | undefined>(undefined)
+
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  const exportModelCard = useReactToPrint({
+    contentRef: contentRef,
+    documentTitle: 'Bailo policy metrics',
+  })
+
+  const handleExportOnClick = () => {
+    if (contentRef) {
+      exportModelCard()
+    }
+  }
 
   const setSelectedOrganisationEffectEvent = useEffectEvent((newOrganisation: string) => {
     setSelectedOrganisation(newOrganisation)
@@ -53,6 +68,26 @@ export default function OverviewMetrics() {
     }
   }, [overviewMetrics, selectedOrganisation])
 
+  const listItems = useMemo(() => {
+    if (!overviewMetrics) {
+      return []
+    }
+    return overviewMetrics.byOrganisation
+      .map((organisationSubset) => organisationSubset.organisation)
+      .map((organisation) => (
+        <MenuItem key={organisation} value={organisation}>
+          {organisation === 'unset' ? <em>No organisation</em> : organisation}
+        </MenuItem>
+      ))
+  }, [overviewMetrics])
+
+  const handleOrganisationSelectOnChange = useCallback(
+    (event: SelectChangeEvent) => {
+      setSelectedOrganisation(event.target.value)
+    },
+    [setSelectedOrganisation],
+  )
+
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
@@ -64,15 +99,39 @@ export default function OverviewMetrics() {
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
+        <Stack direction='row' justifyContent='space-between'>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Typography fontStyle='italic'>Showing results for</Typography>
+            <Select
+              sx={{ maxWidth: '300px' }}
+              value={selectedOrganisation}
+              onChange={(e) => handleOrganisationSelectOnChange(e)}
+              variant='standard'
+            >
+              <MenuItem key='all' value='All'>
+                All organisations
+              </MenuItem>
+              {listItems}
+            </Select>
+          </Stack>
+          <Stack>
+            <Button variant='contained' onClick={handleExportOnClick}>
+              Export as PDF
+            </Button>
+            {overviewMetrics && <em>Last updated {formatDateStringWithMinutes(overviewMetrics.lastUpdated)}</em>}
+          </Stack>
+        </Stack>
         {filteredDataset && overviewMetrics && (
-          <OverviewMetricsCharts
-            data={filteredDataset}
-            organisationList={overviewMetrics.byOrganisation.map(
-              (organisationSubset) => organisationSubset.organisation,
-            )}
-            selectedOrganisation={selectedOrganisation}
-            onSelectedOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
-          />
+          <Box ref={contentRef}>
+            <OverviewMetricsCharts
+              data={filteredDataset}
+              organisationList={overviewMetrics.byOrganisation.map(
+                (organisationSubset) => organisationSubset.organisation,
+              )}
+              selectedOrganisation={selectedOrganisation}
+              onSelectedOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
+            />
+          </Box>
         )}
       </Stack>
     </Container>

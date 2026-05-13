@@ -979,6 +979,7 @@ export interface PolicyRoleMetric {
 export interface PolicyModelMetrics {
   entryId: string
   missingRoles: PolicyRoleMetric[]
+  modelOwners: string[]
 }
 
 export interface PolicyBaseMetrics {
@@ -993,4 +994,5 @@ export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
 export interface PolicyMetrics {
   global: PolicyBaseMetrics
   byOrganisation: OrganisationPolicyMetrics
+  lastUpdated: string
 }

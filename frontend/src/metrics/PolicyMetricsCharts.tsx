@@ -1,17 +1,18 @@
-import { Box, Grid, List, ListItem, Stack, Typography } from '@mui/material'
-import { memoize } from 'lodash-es'
+import { Box, List, ListItem, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
-import Paginate from 'src/common/Paginate'
+import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
-import { PolicyBaseMetrics, PolicyModelMetrics } from 'types/types'
+import { PolicyBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
   data: PolicyBaseMetrics
 }
 
 export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) {
+  const theme = useTheme()
   const displayMissingRoleCounts = useMemo(() => {
     return data.summary.map((roleSummary) => {
       return (
@@ -24,26 +25,29 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
     })
   }, [data.summary])
 
-  const EntryRow = memoize(({ data: entry }: { data: PolicyModelMetrics }) => {
-    return (
-      <Grid container alignItems='center'>
-        <Grid size={{ sm: 6, xs: 12 }} sx={{ pl: 2 }}>
-          <Box>
-            <Link href={`/model/${entry.entryId}`}>{entry.entryId}</Link>
-          </Box>
-        </Grid>
-        <Grid size={{ sm: 6, xs: 12 }}>
+  const tableRows = useMemo(() => {
+    return data.entries.map((row) => (
+      <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+        <TableCell component='th' scope='row'>
+          <Link href={`/model/${row.entryId}`}>{row.entryId}</Link>
+        </TableCell>
+        <TableCell>
+          {row.modelOwners.map((owner) => (
+            <UserDisplay key={owner} dn={owner} />
+          ))}
+        </TableCell>
+        <TableCell>
           <List dense>
-            {entry.missingRoles.map((missingRole) => (
+            {row.missingRoles.map((missingRole) => (
               <ListItem key={missingRole.roleId} sx={{ pl: 0 }}>
                 {missingRole.roleName}
               </ListItem>
             ))}
-          </List>{' '}
-        </Grid>
-      </Grid>
-    )
-  })
+          </List>
+        </TableCell>
+      </TableRow>
+    ))
+  }, [data.entries])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
@@ -58,16 +62,18 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
         <Typography fontWeight='bold' variant='h6' color='primary'>
           Models missing roles
         </Typography>
-        <Paginate
-          list={data.entries}
-          emptyListText='No releases found'
-          defaultSortProperty='entryId'
-          searchFilterProperty='entryId'
-          searchPlaceholderText='Search by ID'
-          sortingProperties={[{ value: 'entryId', title: 'ID', iconKind: 'text' }]}
-        >
-          {EntryRow}
-        </Paginate>
+        <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
+          <Table sx={{ minWidth: 650 }} size='small'>
+            <TableHead>
+              <TableRow>
+                <TableCell>Model ID</TableCell>
+                <TableCell>Model Developer(s)</TableCell>
+                <TableCell>Missing roles</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableRows}</TableBody>
+          </Table>
+        </Box>
       </Stack>
     </Stack>
   )

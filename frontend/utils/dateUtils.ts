@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { plural } from 'utils/stringUtils'
 
 export const formatDate = (date: Date) => {
@@ -17,6 +17,10 @@ export const formatDateString = (value: string) => {
 export const formatDateTimeString = (value: string) => {
   const date = new Date(value)
   return formatDateTime(date)
+}
+
+export const formatDateStringWithMinutes = (value: string) => {
+  return dayjs(value).format('DD/MM/YY HH:mm:ss').toString()
 }
 
 export const timeDifference = (current: Date, previous: Date) => {

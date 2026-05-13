@@ -292,6 +292,7 @@ type ComplianceMetricsResult = {
       roleId: string
       roleName: string
     }[]
+    modelOwners: string[]
   }[]
 }
 
@@ -351,6 +352,9 @@ async function calculateMissingEntryRoles(
       entriesResult.push({
         entryId: model.id,
         missingRoles,
+        modelOwners: model.collaborators
+          .filter((collaborator) => collaborator.roles.includes('owner'))
+          .map((collaborator) => collaborator.entity),
       })
     }
   }
@@ -506,6 +510,7 @@ export class BaseMetricsConnector {
     )
 
     const result = { global, byOrganisation }
+
     const lastUpdated = new Date().toISOString()
 
     setCached(COMPLIANCE_METRICS_CACHE_KEY, {
