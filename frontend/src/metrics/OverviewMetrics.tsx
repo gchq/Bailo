@@ -129,7 +129,6 @@ export default function OverviewMetrics() {
                 (organisationSubset) => organisationSubset.organisation,
               )}
               selectedOrganisation={selectedOrganisation}
-              onSelectedOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
             />
           </Box>
         )}

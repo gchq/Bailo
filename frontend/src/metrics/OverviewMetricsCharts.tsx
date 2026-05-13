@@ -16,7 +16,6 @@ interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
   organisationList: string[]
   selectedOrganisation: string
-  onSelectedOrganisationChange: (value: string) => void
 }
 
 interface PieChartData {
