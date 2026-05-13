@@ -3,7 +3,8 @@ import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { MirrorImportLogData } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
-import { createFilePath, isFileInterfaceDoc } from '../../utils/fileUtils.js'
+import { createFilePath, isFileWithScanResultsInterface } from '../../utils/fileUtils.js'
+import log from '../log.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
 
@@ -80,11 +81,12 @@ export async function parseFile(
   sourceModelId: string,
   logData: MirrorImportLogData,
 ) {
-  if (!isFileInterfaceDoc(file)) {
+  log.info({ file })
+  if (!isFileWithScanResultsInterface(file)) {
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
   }
 
-  file.path = createFilePath(mirroredModelId, file.id)
+  file.path = createFilePath(mirroredModelId, file._id.toString())
 
   try {
     file.complete = await objectExists(file.path)
