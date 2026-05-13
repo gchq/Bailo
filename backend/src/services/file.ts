@@ -26,7 +26,7 @@ import { longId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
-import { scanFile } from './scan.js'
+import { runScans } from './scan.js'
 
 export async function uploadFile(
   user: UserInterface,
@@ -35,7 +35,7 @@ export async function uploadFile(
   mime: string,
   stream: Readable,
   tags?: string[],
-) {
+): Promise<FileWithScanResultsInterface> {
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
@@ -64,7 +64,12 @@ export async function uploadFile(
 
   await file.save()
 
-  return await scanFile(file)
+  runScans({ file }).catch((error) => {
+    log.error({ file, error }, 'Unable to set failure state after failing to run file scans. Safely aborted.')
+  })
+
+  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults: [] })
+  return ret
 }
 
 export async function saveImportedFile(file: FileInterface) {
@@ -174,7 +179,12 @@ export async function finishUploadMultipartFile(
 
   file.save()
 
-  return await scanFile(file)
+  runScans({ file }).catch((error) => {
+    log.error({ file, error }, 'Unable to set failure state after failing to run file scans. Safely aborted.')
+  })
+
+  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults: [] })
+  return ret
 }
 
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {
