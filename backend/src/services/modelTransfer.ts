@@ -237,6 +237,11 @@ async function handleCompleteEmail(exportId: string) {
   )
   if (updated) {
     await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
+    if (transfer.status === TransferStatus.Failed) {
+      sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has failed to import.`, {
+        transfer,
+      })
+    }
     sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported.`, {
       transfer,
     })
