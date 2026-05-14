@@ -4,19 +4,7 @@ exports[`routes > files > getDownloadFile > GET modelId + fileId download > 200 
 
 exports[`routes > files > getDownloadFile > GET modelId + fileId download > audit > expected call 1`] = `
 {
-  "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "fileId",
-        },
-      ],
-    },
-  },
+  "id": "fileId",
   "mime": "text/plain",
   "name": "test-file.txt",
   "size": 100,
@@ -42,19 +30,7 @@ exports[`routes > files > getDownloadFile > GET modelId + semver + fileName down
 
 exports[`routes > files > getDownloadFile > GET modelId + semver + fileName download > audit > expected call 1`] = `
 {
-  "_id": {
-    "toString": [MockFunction] {
-      "calls": [
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "fileId",
-        },
-      ],
-    },
-  },
+  "id": "fileId",
   "mime": "text/plain",
   "name": "test-file.txt",
   "size": 100,

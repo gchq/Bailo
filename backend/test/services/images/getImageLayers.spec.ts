@@ -36,6 +36,6 @@ describe('services > images > getImageLayers', () => {
         name: 'image',
         tag: 'latest',
       } as any),
-    ).rejects.toThrowError(/^Registry manifest body missing./)
+    ).rejects.toThrow(/^Registry manifest body missing./)
   })
 })

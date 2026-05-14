@@ -45,7 +45,7 @@ describe('routes > accessRequest > getAccessRequest', () => {
     const res = await testGet(`/api/v2/model/anything/access-request/${fixture.params.accessRequestId}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewAccessRequest).toBeCalled()
+    expect(audit.onViewAccessRequest).toHaveBeenCalled()
     expect(audit.onViewAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

@@ -4,11 +4,11 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileWithScanResultsInterface } from '../models/File.js'
+import { FileWithScanResultsAggregate, FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
-import Review, { ReviewDoc } from '../models/Review.js'
+import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
@@ -82,7 +82,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file: FileWithScanResultsInterface | undefined
+      let file: FileWithScanResultsAggregate | undefined
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
@@ -541,17 +541,11 @@ export async function deleteReleases(
       throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
     }
 
-    const reviewsForRelease: ReviewDoc[] = await Review.find({
-      modelId,
-      semver,
-    })
+    const reviewsForRelease = await ReviewModel.find({ modelId, semver })
 
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
-    await removeResponsesByParentIds(
-      [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
-      session,
-    )
+    await removeResponsesByParentIds([...reviewsForRelease.map((review) => review.id), release.id], session)
   }
 
   return { modelId, semvers }

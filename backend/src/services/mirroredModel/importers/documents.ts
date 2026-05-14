@@ -17,7 +17,7 @@ import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
 import log from '../../log.js'
 import { getModelByIdNoAuth, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
-import { finishTransfer, upsertArtefacts } from '../../modelTransfer.js'
+import { updateArtefactsTransferStatus } from '../../modelTransfer.js'
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
@@ -156,10 +156,16 @@ export class DocumentsImporter extends BaseImporter {
     reject: (reason?: unknown) => void,
   ): Promise<void> {
     await ModelTransferModel.findOneAndUpdate(
-      { exportId: this.metadata.exportId },
-      { documentStatus: TransferStatus.Failed },
+      {
+        exportId: this.metadata.exportId,
+        'artefactStatus.key': 'documents',
+        'artefactStatus.kind': MirrorKind.Documents,
+      },
+      {
+        $set: { 'artefactStatus.$.status': TransferStatus.Failed },
+      },
     )
-    return super.handleStreamError(error, _resolve, reject)
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   async handleStreamCompletion(
@@ -189,8 +195,7 @@ export class DocumentsImporter extends BaseImporter {
       },
       'Finished importing the collection of model documents.',
     )
-    await upsertArtefacts(this.metadata.exportId, this.imageIds, this.fileIds)
-    await finishTransfer(this.metadata.exportId)
+    await updateArtefactsTransferStatus(this.metadata.exportId, this.imageIds, this.fileIds)
 
     resolve({
       metadata: this.metadata,

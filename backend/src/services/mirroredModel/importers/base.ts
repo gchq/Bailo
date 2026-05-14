@@ -6,7 +6,6 @@ import { isBailoError } from '../../../types/error.js'
 import { MirrorImportLogData } from '../../../types/types.js'
 import { InternalError } from '../../../utils/error.js'
 import log from '../../log.js'
-import { finishTransfer } from '../../modelTransfer.js'
 
 export type BaseMirrorMetadata = {
   schemaVersion: number
@@ -83,7 +82,6 @@ export abstract class BaseImporter {
         InternalError('Error processing tarball during import.', { error, metadata: this.metadata, ...this.logData }),
       )
     }
-    await finishTransfer(this.metadata.exportId)
   }
 
   /**
@@ -96,7 +94,6 @@ export abstract class BaseImporter {
    * The type parameters use `any` due to Node.js stream callback API constraints.
    */
   async handleStreamCompletion(resolve: (reason?: any) => void, _reject: (reason?: unknown) => void): Promise<void> {
-    await finishTransfer(this.metadata.exportId)
     resolve({ metadata: this.metadata })
   }
 }

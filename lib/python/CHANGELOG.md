@@ -2,7 +2,12 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.7.1 - dd/mm/2026
+## 3.7.2 - dd/mm/2026
+
+- Fix boolean to string conversion for API requests.
+- Extend unit & integration test coverage
+
+## 3.7.1 - 27/04/2026
 
 ### Changes
 

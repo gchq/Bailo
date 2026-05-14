@@ -5,7 +5,7 @@ import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -14,7 +14,6 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
-  EntryKind,
   FileInterface,
   FileWithMetadataAndTags,
   FlattenedModelImage,
@@ -43,17 +42,7 @@ export default function NewRelease() {
   const router = useRouter()
 
   const { modelId }: { modelId?: string } = router.query
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
-
-  useEffect(() => {
-    if (model && !modelCardVersion) {
-      setModelCardVersion(model.card.version)
-    }
-  }, [model, setModelCardVersion, modelCardVersion])
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 

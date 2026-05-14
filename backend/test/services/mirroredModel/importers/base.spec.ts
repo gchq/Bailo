@@ -38,13 +38,13 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     expect(reject).not.toHaveBeenCalled()
   })
 
-  test('errorListener > error with generic Error containing metadata and logData', () => {
+  test('errorListener > error with generic Error containing metadata and logData', async () => {
     const importer = new TestImporter(mockMetadata, mockLogData)
     const error = new Error('failure')
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.handleStreamError(error, resolve, reject)
+    await importer.handleStreamError(error, resolve, reject)
 
     expect(resolve).not.toHaveBeenCalled()
     expect(reject).toHaveBeenCalledTimes(1)
@@ -59,13 +59,13 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     )
   })
 
-  test('errorListener > error with Bailo Error containing metadata and logData', () => {
+  test('errorListener > error with Bailo Error containing metadata and logData', async () => {
     const importer = new TestImporter(mockMetadata, mockLogData)
     const error = InternalError('failure', { mockMetadata, mockLogData })
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.handleStreamError(error, resolve, reject)
+    await importer.handleStreamError(error, resolve, reject)
 
     expect(resolve).not.toHaveBeenCalled()
     expect(reject).toHaveBeenCalledTimes(1)

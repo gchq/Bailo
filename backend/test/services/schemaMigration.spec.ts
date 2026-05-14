@@ -46,7 +46,7 @@ describe('services > schemaMigration', () => {
   test('searchSchemaMigrationById > not found', async () => {
     const schemaMigrationId = 'test-id'
     SchemaMigrationModelMock.findOne.mockResolvedValueOnce(null)
-    await expect(() => searchSchemaMigrationById(schemaMigrationId)).rejects.toThrowError(
+    await expect(() => searchSchemaMigrationById(schemaMigrationId)).rejects.toThrow(
       'Cannot find specified schema migration plan.',
     )
   })
@@ -54,15 +54,15 @@ describe('services > schemaMigration', () => {
   test('a schema migration plan can be created', async () => {
     SchemaMigrationModelMock.save.mockResolvedValueOnce(testSchemaMigration)
     const result = await createSchemaMigrationPlan(testUser, testSchemaMigration)
-    expect(SchemaMigrationModelMock.save).toBeCalledTimes(1)
+    expect(SchemaMigrationModelMock.save).toHaveBeenCalledTimes(1)
     expect(result).toBe(testSchemaMigration)
   })
 
   test('cannot run a schema migration plan when there is no model', async () => {
     ModelModelMock.findOne.mockResolvedValueOnce(undefined)
-    await expect(() =>
-      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
-    ).rejects.toThrowError(/^Model cannot be found/)
+    await expect(() => runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123')).rejects.toThrow(
+      /^Model cannot be found/,
+    )
   })
 
   test('cannot run a schema migration plan when there is no valid model card', async () => {
@@ -75,9 +75,9 @@ describe('services > schemaMigration', () => {
         }
       }),
     })
-    await expect(() =>
-      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
-    ).rejects.toThrowError(/^Model cannot be migrated as it does not have a valid model card./)
+    await expect(() => runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123')).rejects.toThrow(
+      /^Model cannot be migrated as it does not have a valid model card./,
+    )
   })
 
   test('cannot run a schema migration plan when there is no schema migration plan available', async () => {
@@ -92,9 +92,9 @@ describe('services > schemaMigration', () => {
       }),
     })
     SchemaMigrationModelMock.findOne.mockResolvedValueOnce(undefined)
-    await expect(() =>
-      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
-    ).rejects.toThrowError(/^Cannot find specified schema migration plan./)
+    await expect(() => runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123')).rejects.toThrow(
+      /^Cannot find specified schema migration plan./,
+    )
   })
 
   test('cannot run schema migration plan where source schema does not exist', async () => {
@@ -110,9 +110,9 @@ describe('services > schemaMigration', () => {
     })
     SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
     SchemaModelMock.findOne.mockResolvedValueOnce(undefined)
-    await expect(() =>
-      runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123'),
-    ).rejects.toThrowError(/^The schema for this model does not match the migration plan's source schema./)
+    await expect(() => runModelSchemaMigration({} as any, 'my-model-123', 'my-migration-plan-123')).rejects.toThrow(
+      /^The schema for this model does not match the migration plan's source schema./,
+    )
   })
 
   test('successfully runs a schema migration plan', async () => {
@@ -136,8 +136,8 @@ describe('services > schemaMigration', () => {
     ModelCardRevisionMock.save.mockResolvedValueOnce(testModelForMigration)
     ModelModelMock.save.mockResolvedValueOnce(testModelForMigration)
     await runModelSchemaMigration({} as UserInterface, 'my-model-123', testSchemaMigration.id)
-    expect(testModelForMigration.save).toBeCalledTimes(1)
-    expect(testModelForMigration.set).toBeCalledTimes(4)
+    expect(testModelForMigration.save).toHaveBeenCalledTimes(1)
+    expect(testModelForMigration.set).toHaveBeenCalledTimes(4)
   })
 
   test('update migration > success', async () => {
@@ -155,7 +155,7 @@ describe('services > schemaMigration', () => {
       ],
       draft: true,
     })
-    expect(SchemaMigrationModelMock.save).toBeCalled()
+    expect(SchemaMigrationModelMock.save).toHaveBeenCalled()
   })
 
   test('update migration > not found', async () => {
@@ -176,7 +176,7 @@ describe('services > schemaMigration', () => {
         ],
         draft: true,
       }),
-    ).rejects.toThrowError('Cannot find specified schema migration plan.')
+    ).rejects.toThrow('Cannot find specified schema migration plan.')
   })
 
   test('cannot run schema migration plan where mirrored model schema ID matches that of the source', async () => {
@@ -196,7 +196,7 @@ describe('services > schemaMigration', () => {
     })
     SchemaMigrationModelMock.findOne.mockResolvedValueOnce(testSchemaMigration)
     SchemaModelMock.findOne.mockResolvedValueOnce(undefined)
-    await expect(() => runModelSchemaMigration({} as any, 'test-model', 'example-model-schema-1')).rejects.toThrowError(
+    await expect(() => runModelSchemaMigration({} as any, 'test-model', 'example-model-schema-1')).rejects.toThrow(
       /^This mirrored model cannot be migrated as the schema matches that of the source model. Please migrate the source model first./,
     )
   })

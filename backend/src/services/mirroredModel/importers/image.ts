@@ -14,7 +14,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
-import { finishTransfer, updateImage } from '../../modelTransfer.js'
+import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -160,8 +160,13 @@ export class ImageImporter extends BaseImporter {
     _resolve: (reason?: any) => void,
     reject: (reason?: unknown) => void,
   ): Promise<void> {
-    await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
-    return super.handleStreamError(error, _resolve, reject)
+    await updateArtefactTransferStatus(
+      this.metadata.exportId,
+      this.metadata.distributionPackageName,
+      MirrorKind.Image,
+      TransferStatus.Failed,
+    )
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
@@ -190,13 +195,23 @@ export class ImageImporter extends BaseImporter {
         },
         'Completed registry upload',
       )
-      await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Completed)
+      await updateArtefactTransferStatus(
+        this.metadata.exportId,
+        this.metadata.distributionPackageName,
+        MirrorKind.Image,
+        TransferStatus.Completed,
+      )
       resolve({
         metadata: this.metadata,
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
-      await updateImage(this.metadata.exportId, this.metadata.distributionPackageName, TransferStatus.Failed)
+      await updateArtefactTransferStatus(
+        this.metadata.exportId,
+        this.metadata.distributionPackageName,
+        MirrorKind.Image,
+        TransferStatus.Failed,
+      )
       reject(
         InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.', {
           metadata: this.metadata,
@@ -204,6 +219,5 @@ export class ImageImporter extends BaseImporter {
         }),
       )
     }
-    await finishTransfer(this.metadata.exportId)
   }
 }

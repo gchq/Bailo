@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -22,7 +22,7 @@ export interface WebhookInterface {
   active?: boolean
 }
 
-export type WebhookDoc = WebhookInterface & SoftDeleteDocument
+export type WebhookDoc = HydratedDocument<WebhookInterface> & SoftDeleteDocument
 
 const WebhookSchema = new Schema<WebhookDoc>(
   {

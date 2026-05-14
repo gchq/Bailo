@@ -39,7 +39,7 @@ describe('models > Token', () => {
 
     const result = token.compareToken('abc')
 
-    await expect(result).rejects.toThrowError('Compare Error')
+    await expect(result).rejects.toThrow('Compare Error')
   })
 
   test('compareToken > return error for unrecognised hash method', async () => {
@@ -49,7 +49,7 @@ describe('models > Token', () => {
 
     const result = token.compareToken('abc')
 
-    await expect(result).rejects.toThrowError('Unexpected hash type: unknown method')
+    await expect(result).rejects.toThrow('Unexpected hash type: unknown method')
   })
 
   test('compareToken > return true on successful bcrypt comparison', async () => {

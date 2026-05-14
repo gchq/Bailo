@@ -1,13 +1,6 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { buildEmail } from '../../../src/services/smtp/emailBuilder.js'
-
-const logMock = vi.hoisted(() => ({
-  error: vi.fn(),
-}))
-vi.mock('../../../src/services/log.js', async () => ({
-  default: logMock,
-}))
 
 describe('services > smtp > emailBuilder', () => {
   test('buildEmail > success', async () => {
@@ -22,10 +15,6 @@ describe('services > smtp > emailBuilder', () => {
     const badString = '<script> alert("This is a bad model"); </script>'
     const emailContent = await buildEmail(badString, [], [], true)
 
-    expect(emailContent).toBeUndefined()
-    expect(logMock.error).toHaveBeenCalledExactlyOnceWith(
-      { actions: [], metadata: [], title: badString },
-      'Email failed sanitisation. Not forwarding request',
-    )
+    expect(emailContent.html).not.toContain(badString)
   })
 })

@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -35,7 +35,7 @@ export interface AccessRequestInterface {
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 
-export type AccessRequestDoc = AccessRequestInterface & SoftDeleteDocument
+export type AccessRequestDoc = HydratedDocument<AccessRequestInterface> & SoftDeleteDocument
 
 const AccessRequestSchema = new Schema<AccessRequestDoc>(
   {
@@ -54,6 +54,7 @@ const AccessRequestSchema = new Schema<AccessRequestDoc>(
 )
 
 AccessRequestSchema.plugin(softDeletionPlugin)
+AccessRequestSchema.index({ modelId: 1 })
 
 const AccessRequestModel = model<AccessRequestDoc>('v2_Access_Request', AccessRequestSchema)
 

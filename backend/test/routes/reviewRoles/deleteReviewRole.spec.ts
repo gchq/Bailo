@@ -6,12 +6,12 @@ import { createFixture, testDelete } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
+vi.mock('../../../src/services/review.js', () => ({
+  removeReviewRole: vi.fn(() => {}),
+}))
+
 describe('routes > reviewRoles > deleteReviewRole', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/review.js', () => ({
-      removeReviewRole: vi.fn(() => {}),
-    }))
-
     const fixture = createFixture(deleteReviewRoleSchema)
     const res = await testDelete(`/api/v2/review/role/${fixture.params.reviewRoleShortName}`)
 
@@ -20,15 +20,11 @@ describe('routes > reviewRoles > deleteReviewRole', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../../src/services/review.js', () => ({
-      removeReviewRole: vi.fn(() => {}),
-    }))
-
     const fixture = createFixture(deleteReviewRoleSchema)
     const res = await testDelete(`/api/v2/review/role/${fixture.params.reviewRoleShortName}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteReviewRole).toBeCalled()
+    expect(audit.onDeleteReviewRole).toHaveBeenCalled()
     expect(audit.onDeleteReviewRole.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

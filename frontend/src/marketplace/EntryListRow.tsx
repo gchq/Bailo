@@ -7,6 +7,7 @@ import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
 import { EntryKind, PeerConfigStatus } from 'types/types'
 import { getEntryUrl } from 'utils/peerUtils'
+import { entryKindForRedirect } from 'utils/routerUtils'
 
 interface EntryListRowProps {
   selectedChips: string[]
@@ -43,18 +44,17 @@ export default function EntryListRow({
 }: EntryListRowProps) {
   const theme = useTheme()
 
-  const entryKindForRedirect = useMemo(() => {
-    return entry.kind === EntryKind.MODEL || entry.kind === EntryKind.MIRRORED_MODEL ? EntryKind.MODEL : entry.kind
-  }, [entry])
-
-  const mirroredLabel = useMemo(() => {
-    if (entry.kind === EntryKind.MIRRORED_MODEL) {
-      return <Typography>Mirrored</Typography>
+  const label = useMemo(() => {
+    switch (entry.kind) {
+      case EntryKind.MIRRORED_MODEL:
+        return <Chip size='small' color='secondary' variant='outlined' label='Mirrored' />
+      case EntryKind.UNTRUSTED_MODEL:
+        return <Chip size='small' color='warning' variant='outlined' label='Untrusted' />
     }
   }, [entry])
 
   // Link to view this entry, defaults to 'this' instance
-  let href = `${entryKindForRedirect}/${entry.id}`
+  let href = `${entryKindForRedirect(entry.kind)}/${entry.id}`
 
   // Handle the case where the entry must be viewed on a different peer
   const peerId = entry.peerId
@@ -101,9 +101,7 @@ export default function EntryListRow({
               {entry.name}
             </Typography>
             <Stack spacing={2} direction='row'>
-              {entry.kind === EntryKind.MIRRORED_MODEL && (
-                <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
-              )}
+              {label}
               {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
               {isExternal && <LaunchOutlined />}
             </Stack>

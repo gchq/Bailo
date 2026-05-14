@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
@@ -86,13 +86,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.CreateFile, req)
-    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
+    const event = this.generateEvent(req, { id: file.id, modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
   async onViewFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.ViewFile, req)
-    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
+    const event = this.generateEvent(req, { id: file.id, modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
@@ -108,7 +108,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteFile(req: Request, file: FileWithScanResultsInterface) {
+  async onDeleteFile(req: Request, file: FileWithScanResultsAggregate) {
     this.checkEventType(AuditInfo.DeleteFile, req)
     const event = this.generateEvent(req, file)
     req.log.info(event, req.audit.description)
@@ -149,7 +149,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   async onCreateCommentResponse(req: Request, response: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateResponse, req)
-    const event = this.generateEvent(req, { id: response['_id'] })
+    const event = this.generateEvent(req, { id: response._id })
     req.log.info(event, req.audit.description)
   }
 
