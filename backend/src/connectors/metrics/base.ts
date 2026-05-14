@@ -254,9 +254,6 @@ export async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
   // Fetch review roles
   const reviewRoles = await ReviewRoleModel.find().select('shortName name systemRole').lean()
 
-  // Extract system roles (apply to all models)
-  const defaultRoles = reviewRoles.filter((role) => !!role.systemRole).map((role) => role.shortName)
-
   // Build schemaId -> roles mapping
   const schemaRoleMap: Record<string, string[]> = {}
 
@@ -275,7 +272,6 @@ export async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
 
   return {
     schemaRoleMap,
-    defaultRoles,
     roleMeta,
   }
 }
@@ -302,7 +298,6 @@ type ComplianceMetricsResult = {
  */
 async function calculateMissingEntryRoles(
   schemaRoleMap: Record<string, string[]>,
-  defaultRoles: string[],
   roleMeta: Record<string, { roleId: string; roleName: string }>,
   org?: string,
 ): Promise<ComplianceMetricsResult> {
@@ -319,7 +314,7 @@ async function calculateMissingEntryRoles(
   const entriesResult: ComplianceMetricsResult['entries'] = []
 
   // Build set of all known roles
-  const allKnownRoles = new Set<string>(defaultRoles)
+  const allKnownRoles = new Set<string>([])
   Object.values(schemaRoleMap).forEach((roles) => {
     roles.forEach((role) => allKnownRoles.add(role))
   })
@@ -332,7 +327,7 @@ async function calculateMissingEntryRoles(
 
   // Evaluate each model
   for await (const model of models) {
-    const applicableSet = getApplicableRoleSet(defaultRoles, schemaRoleMap, model.card?.schemaId)
+    const applicableSet = getApplicableRoleSet(schemaRoleMap, model.card?.schemaId)
     const activeRoleSet = getActiveRoleSet(model.collaborators ?? [])
     const missingRoles: { roleId: string; roleName: string }[] = []
 
@@ -496,16 +491,16 @@ export class BaseMetricsConnector {
       }
     }
 
-    const { schemaRoleMap, defaultRoles, roleMeta } = await buildSchemaRoleMap()
+    const { schemaRoleMap, roleMeta } = await buildSchemaRoleMap()
 
-    const global = await calculateMissingEntryRoles(schemaRoleMap, defaultRoles, roleMeta)
+    const global = await calculateMissingEntryRoles(schemaRoleMap, roleMeta)
 
     const organisationIds = await this.getOrganisationIds()
 
     const byOrganisation = await Promise.all(
       organisationIds.map(async (org) => ({
         organisation: org || 'unset',
-        ...(await calculateMissingEntryRoles(schemaRoleMap, defaultRoles, roleMeta, org)),
+        ...(await calculateMissingEntryRoles(schemaRoleMap, roleMeta, org)),
       })),
     )
 
