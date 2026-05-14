@@ -9,6 +9,7 @@ interface MetricsHeaderProps {
   children: ReactElement
   selectedOrganisation: string
   onOrganisationChange: (newOrganisation: string) => void
+  exportDocumentTitle: string
 }
 
 export default function MetricsHeader({
@@ -16,6 +17,7 @@ export default function MetricsHeader({
   children,
   selectedOrganisation,
   onOrganisationChange,
+  exportDocumentTitle,
 }: MetricsHeaderProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -74,7 +76,12 @@ export default function MetricsHeader({
         </Stack>
         {children}
       </Stack>
-      <MetricsExportPreview open={dialogOpen} setOpen={setDialogOpen} content={children} />
+      <MetricsExportPreview
+        open={dialogOpen}
+        setOpen={setDialogOpen}
+        content={children}
+        exportDocumentTitle={exportDocumentTitle}
+      />
     </Container>
   )
 }

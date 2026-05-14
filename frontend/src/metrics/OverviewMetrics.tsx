@@ -37,6 +37,7 @@ export default function OverviewMetrics() {
             data={overviewMetrics}
             onOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
             selectedOrganisation={selectedOrganisation}
+            exportDocumentTitle='Bailo overview metrics'
           >
             <OverviewMetricsCharts
               data={filteredDataset}

@@ -1,4 +1,6 @@
-import { Button, Container, Dialog, DialogActions, DialogContent } from '@mui/material'
+import { Button, Container, Dialog, DialogActions, DialogContent, Divider, Stack, Typography } from '@mui/material'
+import Image from 'next/image'
+import logo from 'public/horizontal-dark.png'
 import { ReactElement, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { Transition } from 'src/common/Transition'
@@ -7,14 +9,20 @@ interface MetricsExportPreviewProps {
   open: boolean
   setOpen: (isOpen: boolean) => void
   content: ReactElement
+  exportDocumentTitle: string
 }
 
-export default function MetricsExportPreview({ open, setOpen, content }: MetricsExportPreviewProps) {
+export default function MetricsExportPreview({
+  open,
+  setOpen,
+  content,
+  exportDocumentTitle,
+}: MetricsExportPreviewProps) {
   const contentRef = useRef<HTMLDivElement>(null)
 
   const exportMetricsOverview = useReactToPrint({
     contentRef: contentRef,
-    documentTitle: 'Bailo overview metrics',
+    documentTitle: exportDocumentTitle,
   })
 
   const handleExportOnClick = () => {
@@ -26,7 +34,15 @@ export default function MetricsExportPreview({ open, setOpen, content }: Metrics
   return (
     <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg' slots={{ transition: Transition }}>
       <DialogContent ref={contentRef}>
-        <Container>{content}</Container>
+        <Stack spacing={2} divider={<Divider />}>
+          <Stack direction='row' alignItems='center'>
+            <Image src={logo} alt='podman-icon' width={180} height={70} />
+            <Typography variant='h4' component='h1' sx={{ pl: 1 }} fontWeight='bold' color='primary'>
+              {exportDocumentTitle}
+            </Typography>
+          </Stack>
+          <Container>{content}</Container>
+        </Stack>
       </DialogContent>
       <DialogActions>
         <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>

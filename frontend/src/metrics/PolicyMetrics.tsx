@@ -37,6 +37,7 @@ export default function PolicyMetrics() {
             data={policyMetrics}
             onOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
             selectedOrganisation={selectedOrganisation}
+            exportDocumentTitle='Bailo policy metrics'
           >
             <PolicyMetricsCharts data={filteredDataset} />
           </MetricsHeader>
