@@ -262,6 +262,11 @@ module.exports = {
       contributor: 'Contributor',
       consumer: 'Consumer',
     },
+
+    untrustedModel: {
+      enabled: false,
+      untrustedModelDescription: 'These are private only models.',
+    },
   },
 
   connectors: {
@@ -354,5 +359,9 @@ module.exports = {
 
   inference: {
     authorisationToken: '',
+  },
+
+  untrustedModels: {
+    defaultState: 'Production',
   },
 }

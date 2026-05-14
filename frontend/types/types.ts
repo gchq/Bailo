@@ -77,6 +77,11 @@ export interface UiConfig {
     contributor: string
     consumer: string
   }
+
+  untrustedModel: {
+    enabled: boolean
+    untrustedModelDescription: string
+  }
 }
 
 export interface FileInterface {
@@ -417,6 +422,7 @@ export const EntryCardKindLabel = {
   model: 'model card',
   'data-card': 'data card',
   'mirrored-model': 'mirrored model',
+  'untrusted-model': 'untrusted model',
 } as const
 export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
 
@@ -444,6 +450,7 @@ export const EntryKindLabel = {
   model: 'model',
   'data-card': 'data card',
   'mirrored-model': 'mirrored model',
+  'untrusted-model': 'untrusted model',
 } as const
 export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
@@ -451,6 +458,7 @@ export const EntryKind = {
   MODEL: 'model',
   DATA_CARD: 'data-card',
   MIRRORED_MODEL: 'mirrored-model',
+  UNTRUSTED_MODEL: 'untrusted-model',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
