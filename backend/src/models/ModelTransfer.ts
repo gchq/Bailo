@@ -98,5 +98,5 @@ ModelTransferSchema.index({ exportId: 1, createdAt: -1 })
 
 ModelTransferSchema.plugin(softDeletionPlugin)
 
-const ModelTransferModel = model<ModelTransferDoc>('ModelTransfer', ModelTransferSchema)
+const ModelTransferModel = model<ModelTransferDoc>('v2_Model_Transfer', ModelTransferSchema)
 export default ModelTransferModel

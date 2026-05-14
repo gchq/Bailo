@@ -34,9 +34,6 @@ function sanitizeInput<T>(input: T) {
   if (typeof input === 'object') {
     const result: Record<string, unknown> = {}
     for (const [key, val] of Object.entries(input)) {
-      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-        continue
-      }
       result[key] = sanitizeInput(val)
     }
     return result

@@ -1,13 +1,6 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { buildEmail } from '../../../src/services/smtp/emailBuilder.js'
-
-const logMock = vi.hoisted(() => ({
-  error: vi.fn(),
-}))
-vi.mock('../../../src/services/log.js', async () => ({
-  default: logMock,
-}))
 
 describe('services > smtp > emailBuilder', () => {
   test('buildEmail > success', async () => {

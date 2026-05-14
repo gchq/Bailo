@@ -199,7 +199,7 @@ export async function extractTarGzStream(
     })
 
     // Handle each tar entry.
-    untarStream.on('entry', (entry, entryStream, next) => {
+    untarStream.on('entry', async (entry, entryStream, next) => {
       // This callback must remain synchronous, so all async work is wrapped in an IIFE and explicitly routed to `fail` on error.
       // See https://github.com/gchq/Bailo/pull/3115/changes#r2713416899 for more details.
       ;(async () => {
