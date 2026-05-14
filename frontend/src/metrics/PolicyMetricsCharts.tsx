@@ -55,7 +55,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
 
   return (
     <Stack spacing={4}>
-      <Stack direction={{ md: 'row', sm: 'column' }} spacing={2} sx={{ mt: 40 }}>
+      <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
         {displayMissingRoleCounts}
       </Stack>
       <Stack spacing={2} sx={{ width: '100%' }}>
