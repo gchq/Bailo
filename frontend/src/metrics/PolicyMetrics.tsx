@@ -94,26 +94,34 @@ export default function PolicyMetrics() {
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        <Stack direction='row' justifyContent='space-between'>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <Typography fontStyle='italic'>Showing results for</Typography>
-            <Select
-              sx={{ maxWidth: '300px' }}
-              value={selectedOrganisation}
-              onChange={(e) => handleOrganisationSelectOnChange(e)}
-              variant='standard'
-            >
-              <MenuItem key='all' value='All'>
-                All organisations
-              </MenuItem>
-              {listItems}
-            </Select>
+        <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-between'>
+          <Stack spacing={1}>
+            <Box>
+              <Stack direction={{ sm: 'column', md: 'row' }} spacing={1} alignItems='center'>
+                <Typography fontStyle='italic'>Showing results for</Typography>
+                <Select
+                  sx={{ maxWidth: '300px' }}
+                  value={selectedOrganisation}
+                  onChange={(e) => handleOrganisationSelectOnChange(e)}
+                  variant='standard'
+                >
+                  <MenuItem key='all' value='All'>
+                    All organisations
+                  </MenuItem>
+                  {listItems}
+                </Select>
+              </Stack>
+            </Box>
+            {policyMetrics && (
+              <Typography variant='caption'>
+                <em>Last updated {formatDateStringWithMinutes(policyMetrics.lastUpdated)}</em>
+              </Typography>
+            )}
           </Stack>
           <Stack>
             <Button variant='contained' onClick={handleExportOnClick}>
               Export as PDF
             </Button>
-            {policyMetrics && <em>Last updated {formatDateStringWithMinutes(policyMetrics.lastUpdated)}</em>}
           </Stack>
         </Stack>
         {filteredDataset && (

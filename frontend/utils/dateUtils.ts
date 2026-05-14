@@ -23,6 +23,10 @@ export const formatDateStringWithMinutes = (value: string) => {
   return dayjs(value).format('DD/MM/YY HH:mm:ss').toString()
 }
 
+export const formatDateStringAsMonthAndYear = (value: string) => {
+  return dayjs(value).format('MMM YYYY')
+}
+
 export const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000
   const msPerHour = msPerMinute * 60

@@ -1,5 +1,5 @@
 import { Box, Button, Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
-import { useGetGetOverviewMetrics } from 'actions/metrics'
+import { useGetOverviewMetrics } from 'actions/metrics'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -15,7 +15,7 @@ export default function OverviewMetrics() {
 
   const { organisationFromRouter } = router.query
 
-  const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetGetOverviewMetrics()
+  const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
   const [filteredDataset, setFilteredDataset] = useState<OverviewBaseMetrics | undefined>(undefined)
@@ -99,26 +99,34 @@ export default function OverviewMetrics() {
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        <Stack direction='row' justifyContent='space-between'>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <Typography fontStyle='italic'>Showing results for</Typography>
-            <Select
-              sx={{ maxWidth: '300px' }}
-              value={selectedOrganisation}
-              onChange={(e) => handleOrganisationSelectOnChange(e)}
-              variant='standard'
-            >
-              <MenuItem key='all' value='All'>
-                All organisations
-              </MenuItem>
-              {listItems}
-            </Select>
+        <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-between'>
+          <Stack spacing={1}>
+            <Box>
+              <Stack direction={{ sm: 'column', md: 'row' }} spacing={1} alignItems='center'>
+                <Typography fontStyle='italic'>Showing results for</Typography>
+                <Select
+                  sx={{ maxWidth: '300px' }}
+                  value={selectedOrganisation}
+                  onChange={(e) => handleOrganisationSelectOnChange(e)}
+                  variant='standard'
+                >
+                  <MenuItem key='all' value='All'>
+                    All organisations
+                  </MenuItem>
+                  {listItems}
+                </Select>
+              </Stack>
+            </Box>
+            {overviewMetrics && (
+              <Typography variant='caption'>
+                <em>Last updated {formatDateStringWithMinutes(overviewMetrics.lastUpdated)}</em>
+              </Typography>
+            )}
           </Stack>
           <Stack>
             <Button variant='contained' onClick={handleExportOnClick}>
               Export as PDF
             </Button>
-            {overviewMetrics && <em>Last updated {formatDateStringWithMinutes(overviewMetrics.lastUpdated)}</em>}
           </Stack>
         </Stack>
         {filteredDataset && overviewMetrics && (

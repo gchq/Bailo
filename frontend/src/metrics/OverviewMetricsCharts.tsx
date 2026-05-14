@@ -10,7 +10,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { ModelVolumeData, OverviewBaseMetrics } from 'types/types'
-import { setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
+import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
@@ -106,7 +106,7 @@ export default function OverviewMetricsCharts({
     }
     if (modelVolume.data) {
       const updatedStructure = modelVolume.data.map((volumeData: ModelVolumeData) => {
-        const formattedDate = dayjs(volumeData.startDate).format('MMM YYYY')
+        const formattedDate = formatDateStringAsMonthAndYear(volumeData.startDate)
         const incrementObject = {
           label: formattedDate,
         }
@@ -146,7 +146,7 @@ export default function OverviewMetricsCharts({
   return (
     <Stack spacing={4}>
       <Stack spacing={2}>
-        <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
           <Typography fontWeight='bold' variant='h6' color='primary'>
             Monthly uploads between
           </Typography>
@@ -160,7 +160,7 @@ export default function OverviewMetricsCharts({
             }}
           />
           <Typography fontWeight='bold' variant='h6' color='primary'>
-            &
+            -
           </Typography>
           <DatePicker
             openTo='month'

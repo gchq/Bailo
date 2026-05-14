@@ -57,7 +57,7 @@ export function useGetVolumeForModel(interval: string = 'month', startDate?: str
   }
 }
 
-export function useGetGetOverviewMetrics() {
+export function useGetOverviewMetrics() {
   const { data, isLoading, error } = useSWR<
     {
       global: OverviewBaseMetrics
