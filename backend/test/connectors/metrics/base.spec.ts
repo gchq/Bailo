@@ -304,7 +304,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       mockQuery([
         {
           id: 'schema1',
-          reviewRoles: ['owner'],
+          reviewRoles: ['msro'],
         },
       ]),
     )
@@ -313,7 +313,6 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       mockQuery([
         { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
         { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
-        { shortName: 'owner', name: 'Owner', systemRole: null },
       ]),
     )
 
@@ -350,64 +349,19 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
         },
         {
           entryId: 'model-2',
-          missingRoles: [
-            { roleId: 'msro', roleName: 'MSRO' },
-            { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
-            { roleId: 'owner', roleName: 'Owner' },
-          ],
+          missingRoles: [{ roleId: 'msro', roleName: 'MSRO' }],
           modelOwners: [],
         },
       ]),
     )
 
-    expect(result.global.summary).toEqual(
-      expect.arrayContaining([
-        { roleId: 'msro', roleName: 'MSRO', count: 2 },
-        { roleId: 'mtr', roleName: 'Model Technical Reviewer', count: 1 },
-        { roleId: 'owner', roleName: 'Owner', count: 1 },
-      ]),
-    )
+    expect(result.global.summary).toEqual(expect.arrayContaining([{ roleId: 'msro', roleName: 'MSRO', count: 2 }]))
   })
-  test('model without card only checks default roles', async () => {
-    modelMocks.distinct.mockResolvedValue(['a corp'])
 
-    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['owner'] }]))
-
-    reviewRoleMocks.find.mockReturnValue(
-      mockQuery([
-        { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
-        { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
-        { shortName: 'owner', name: 'Owner', systemRole: null },
-      ]),
-    )
-
-    modelMocks.find.mockReturnValue(
-      mockCursorQuery([
-        {
-          id: 'model-no-card',
-          organisation: 'a corp',
-          card: undefined,
-          collaborators: [],
-        },
-      ]),
-    )
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
-
-    const result = await connector.getComplianceMetrics(mockUser)
-
-    expect(result.global.entries[0].missingRoles).toEqual([
-      { roleId: 'msro', roleName: 'MSRO' },
-      { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
-    ])
-
-    expect(result.global.summary).toEqual(expect.arrayContaining([{ roleId: 'owner', roleName: 'Owner', count: 0 }]))
-  })
   test('groups results by organisation correctly', async () => {
     modelMocks.distinct.mockResolvedValue(['a corp', 'b corp'])
 
-    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['msro'] }]))
 
     reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', name: 'MSRO', systemRole: 'msro' }]))
 
@@ -446,18 +400,29 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
     expect(bCorp?.entries).toHaveLength(1)
     expect(unset?.entries).toHaveLength(2)
   })
+
   test('unset compliance metrics only include entries with empty organisation', async () => {
     // Distinct organisations includes empty string
     modelMocks.distinct.mockResolvedValue(['', 'orgA'])
 
-    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: [] }]))
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['msro'] }]))
 
     reviewRoleMocks.find.mockReturnValue(mockQuery([{ shortName: 'msro', name: 'MSRO', systemRole: 'msro' }]))
 
     modelMocks.find.mockImplementation((filter: any) => {
       const allModels = [
-        { id: 'unset-model', organisation: '', card: {}, collaborators: [] },
-        { id: 'orgA-model', organisation: 'orgA', card: {}, collaborators: [] },
+        {
+          id: 'unset-model',
+          organisation: '',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
+        {
+          id: 'orgA-model',
+          organisation: 'a corp',
+          card: { schemaId: 'schema1' },
+          collaborators: [],
+        },
       ]
 
       const filtered =
@@ -476,6 +441,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
     expect(unset?.entries).toHaveLength(1)
     expect(unset?.entries[0].entryId).toBe('unset-model')
   })
+
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
