@@ -1,10 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { createFilePath, isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
+import { createFilePath, isFileWithScanResultsInterface } from '../../src/utils/fileUtils.js'
 
-vi.mock('../../src/utils/mongo.js', () => ({
-  isHydratedMongoDoc: vi.fn(() => true),
+const mongooseMocks = vi.hoisted(() => ({
+  isValidObjectId: vi.fn(() => true),
 }))
+vi.mock('mongoose', () => mongooseMocks)
 
 describe('utils > array', () => {
   test('createFilePath', () => {
@@ -12,8 +13,9 @@ describe('utils > array', () => {
     expect(createFilePath('', '')).toStrictEqual(`beta/model//files/`)
   })
 
-  test('isFileInterfaceDoc > success', async () => {
-    const result = isFileInterfaceDoc({
+  test('isFileWithScanResultsInterface > success', async () => {
+    const result = isFileWithScanResultsInterface({
+      _id: '',
       modelId: '',
       name: '',
       size: 1,
@@ -21,17 +23,21 @@ describe('utils > array', () => {
       bucket: '',
       path: '',
       complete: true,
-      deleted: false,
+      tags: [],
       createdAt: '',
       updatedAt: '',
-      _id: '',
+      id: '',
+      scanResults: [],
+      deleted: false,
+      deletedAt: '',
+      deletedBy: '',
     })
 
     expect(result).toBe(true)
   })
 
-  test('isFileInterfaceDoc > missing property', async () => {
-    const result = isFileInterfaceDoc({
+  test('isFileWithScanResultsInterface > missing property', async () => {
+    const result = isFileWithScanResultsInterface({
       modelId: '',
       name: '',
       mime: '',
@@ -46,8 +52,8 @@ describe('utils > array', () => {
     expect(result).toBe(false)
   })
 
-  test('isFileInterfaceDoc > wrong type', async () => {
-    const result = isFileInterfaceDoc(null)
+  test('isFileWithScanResultsInterface > wrong type', async () => {
+    const result = isFileWithScanResultsInterface(null)
 
     expect(result).toBe(false)
   })

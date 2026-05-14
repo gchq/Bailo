@@ -1,7 +1,12 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/connectors/artefactScanning/Base.js'
+import {
+  ArtefactScanState,
+  BaseArtefactScanningConnector,
+  LayerRefInterface,
+} from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScanning/wrapper.js'
+import { FileInterface } from '../../../src/models/File.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/log.js')
@@ -93,42 +98,15 @@ describe('connectors > artefactScanning > wrapper', () => {
     ])
   })
 
-  test('isMatchingInterface() matches file artefact', () => {
-    const scanner = new TestFileScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-    const artefact = { _id: 'file1', modelId: 'm1', name: 'file.bin' } as any
-
-    const result = wrapper.isMatchingInterface(artefact, scanner)
-
-    expect(result).toEqual({ matching: true, artefactType: ArtefactKind.FILE })
-  })
-
-  test('isMatchingInterface() matches image artefact', () => {
-    const scanner = new TestImageScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-    const artefact = { tag: 'latest', repository: 'repo', name: 'img' } as any
-
-    const result = wrapper.isMatchingInterface(artefact, scanner)
-
-    expect(result).toEqual({ matching: true, artefactType: ArtefactKind.IMAGE })
-  })
-
-  test('isMatchingInterface() throws on invalid artefact', () => {
-    const scanner = new TestFileScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-
-    expect(() => wrapper.isMatchingInterface({} as any, scanner)).toThrow(TypeError)
-  })
-
   test('startScans() runs only matching scanners for file artefact', async () => {
     const fileScanner = new TestFileScanner()
     const imageScanner = new TestImageScanner()
 
     const wrapper = new ArtefactScanningWrapper(new Set([fileScanner, imageScanner]))
 
-    const artefact = { _id: 'file1', modelId: 'm1', name: 'file.bin' } as any
+    const artefact = { _id: 'file1', modelId: 'm1', name: 'file.bin' } as unknown as FileInterface
 
-    const results = await wrapper.startScans(artefact)
+    const results = await wrapper.startScans({ file: artefact })
 
     expect(fileScanner._scan).toHaveBeenCalled()
     expect(imageScanner._scan).not.toHaveBeenCalled()
@@ -141,20 +119,17 @@ describe('connectors > artefactScanning > wrapper', () => {
 
     const wrapper = new ArtefactScanningWrapper(new Set([fileScanner, imageScanner]))
 
-    const artefact = { repository: 'repository', name: 'name', tag: 'tag', layerDigest: 'sha256:1' } as any
+    const artefact = {
+      repository: 'repository',
+      name: 'name',
+      tag: 'tag',
+      layerDigest: 'sha256:1',
+    } as unknown as LayerRefInterface
 
-    const results = await wrapper.startScans(artefact)
+    const results = await wrapper.startScans({ layerRef: artefact })
 
     expect(fileScanner._scan).not.toHaveBeenCalled()
     expect(imageScanner._scan).toHaveBeenCalled()
     expect(results).toHaveLength(1)
-  })
-
-  test('startScans() throws InternalError on incompatible artefact type', async () => {
-    const scanner = new TestFileScanner()
-    const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
-    const artefact = {} as any
-
-    await expect(wrapper.startScans(artefact)).rejects.toBeInstanceOf(TypeError)
   })
 })

@@ -231,6 +231,11 @@ data:
           consumer: '{{ .Values.config.ui.roleDisplayNames.consumer }}',
           contributor: '{{ .Values.config.ui.roleDisplayNames.contributor }}',
         },
+
+        untrustedModel: {
+          enabled: {{ .Values.config.ui.untrustedModel.enabled }},
+          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}'
+        }
       },
 
       connectors: {
@@ -303,6 +308,10 @@ data:
         xmlns: '{{ .Values.stroom.xmlns }}',
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
+      }
+
+      untrustedModels: {
+        defaultState: '{{ .Values.untrustedModels.defaultState }}'
       }
     }
 

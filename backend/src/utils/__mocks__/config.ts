@@ -137,6 +137,10 @@ const config: PartialDeep<Config> = {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
+    untrustedModel: {
+      enabled: false,
+      untrustedModelDescription: 'tbd',
+    },
   },
   modelMirror: {
     export: {
@@ -144,6 +148,9 @@ const config: PartialDeep<Config> = {
     },
     contentDirectory: 'content-dir',
     metadataFile: 'meta.json',
+  },
+  untrustedModels: {
+    defaultState: 'Production',
   },
 }
 

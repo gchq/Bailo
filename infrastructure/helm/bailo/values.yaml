@@ -273,6 +273,10 @@ config:
       consumer: 'Consumer'
       contributor: 'Contributor'
 
+    untrustedModel:
+      enabled: true
+      untrustedModelDescription: 'These are private only models.'
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -339,6 +343,9 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
+
+untrustedModels:
+  defaultState: 'Production'
 
 # Inferencing cluster reference
 inference:

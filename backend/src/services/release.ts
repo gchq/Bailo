@@ -4,7 +4,7 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileWithScanResultsInterface } from '../models/File.js'
+import { FileWithScanResultsAggregate, FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
@@ -82,7 +82,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file: FileWithScanResultsInterface | undefined
+      let file: FileWithScanResultsAggregate | undefined
       try {
         file = await getFileById(user, fileId)
       } catch (e) {

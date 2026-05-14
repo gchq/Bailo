@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { EntryKind } from '../../src/models/Model.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
@@ -76,7 +77,7 @@ const accessRequest = {
 
 describe('services > accessRequest', () => {
   test('createAccessRequest > simple', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
+    modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
     await createAccessRequest({} as any, 'example-model', accessRequest)
@@ -94,7 +95,7 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    modelMocks.getModelById.mockResolvedValue(undefined)
+    modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
     await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
@@ -102,8 +103,24 @@ describe('services > accessRequest', () => {
     )
   })
 
+  test('createAccessRequest > bad request for untrusted model', async () => {
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
+      info: 'You do not have permission',
+      success: false,
+      id: '',
+    })
+
+    modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.UntrustedModel } as any)
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+      'Cannot create an access request for an untrusted model.',
+    )
+  })
+
   test('createAccessRequest > update hidden schema', async () => {
     schemaMocks.getSchemaById.mockResolvedValue({ hidden: true })
+    modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
 
     await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       /^Cannot create new Access Request using a hidden schema./,
@@ -112,6 +129,7 @@ describe('services > accessRequest', () => {
 
   test('createAccessRequest > validation error', async () => {
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
     validationMocks.isValidatorResultError.mockReturnValue(true)
     validator.validate.mockImplementationOnce(() => {
       throw Error()

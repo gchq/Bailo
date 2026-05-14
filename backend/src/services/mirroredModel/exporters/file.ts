@@ -2,7 +2,7 @@ import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
 import { FileAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { FileWithScanResultsInterface } from '../../../models/File.js'
+import { FileWithScanResultsAggregate } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
@@ -13,9 +13,9 @@ import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter } from './base.js'
 
 export class FileExporter extends BaseExporter {
-  protected readonly file: FileWithScanResultsInterface
+  protected readonly file: FileWithScanResultsAggregate
 
-  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsInterface, logData: MirrorExportLogData) {
+  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsAggregate, logData: MirrorExportLogData) {
     super(user, model, logData)
     this.file = file
   }

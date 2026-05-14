@@ -13,6 +13,7 @@ export const EntryKind = {
   Model: 'model',
   DataCard: 'data-card',
   MirroredModel: 'mirrored-model',
+  UntrustedModel: 'untrusted-model',
 } as const
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]

@@ -51,6 +51,12 @@ function isSettingsCategory(
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.DELETION
       )
+    case EntryKind.UNTRUSTED_MODEL:
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.DELETION
+      )
     default:
       return false
   }
