@@ -86,7 +86,6 @@
     "next-router-mock": "^1.0.5",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.5"
   }
 }
