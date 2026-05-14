@@ -62,36 +62,7 @@ exports[`services > file > finishUploadMultipartFile > success 1`] = `
       },
     ],
   },
-  "scanResults": {
-    "aggregate": [MockFunction],
-    "append": [MockFunction],
-    "bulkWrite": [MockFunction],
-    "exec": [MockFunction],
-    "filter": [MockFunction],
-    "find": [MockFunction] {
-      "calls": [
-        [
-          {
-            "artefactKind": "file",
-            "fileId": "mock-id",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
-    "group": [MockFunction],
-    "lean": [MockFunction],
-    "lookup": [MockFunction],
-    "map": [MockFunction],
-    "match": [MockFunction],
-    "sort": [MockFunction],
-    "unwind": [MockFunction],
-  },
+  "scanResults": [],
   "size": 100,
   "sort": [MockFunction],
   "tags": [],
@@ -396,36 +367,7 @@ exports[`services > file > uploadFile > success 1`] = `
       },
     ],
   },
-  "scanResults": {
-    "aggregate": [MockFunction],
-    "append": [MockFunction],
-    "bulkWrite": [MockFunction],
-    "exec": [MockFunction],
-    "filter": [MockFunction],
-    "find": [MockFunction] {
-      "calls": [
-        [
-          {
-            "artefactKind": "file",
-            "fileId": "mock-id",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
-    "group": [MockFunction],
-    "lean": [MockFunction],
-    "lookup": [MockFunction],
-    "map": [MockFunction],
-    "match": [MockFunction],
-    "sort": [MockFunction],
-    "unwind": [MockFunction],
-  },
+  "scanResults": [],
   "size": 100,
   "sort": [MockFunction],
   "tags": [],
@@ -474,36 +416,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       },
     ],
   },
-  "scanResults": {
-    "aggregate": [MockFunction],
-    "append": [MockFunction],
-    "bulkWrite": [MockFunction],
-    "exec": [MockFunction],
-    "filter": [MockFunction],
-    "find": [MockFunction] {
-      "calls": [
-        [
-          {
-            "artefactKind": "file",
-            "fileId": "mock-id",
-          },
-        ],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": [Circular],
-        },
-      ],
-    },
-    "group": [MockFunction],
-    "lean": [MockFunction],
-    "lookup": [MockFunction],
-    "map": [MockFunction],
-    "match": [MockFunction],
-    "sort": [MockFunction],
-    "unwind": [MockFunction],
-  },
+  "scanResults": [],
   "size": 100,
   "sort": [MockFunction],
   "tags": [],
@@ -515,3 +428,10 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
 `;
 
 exports[`services > file > uploadFile > virus scan initialised 2`] = `[]`;
+
+exports[`services > file > uploadMultipartFilePart > success 1`] = `
+{
+  "ETag": "test-etag",
+  "PartNumber": 1,
+}
+`;

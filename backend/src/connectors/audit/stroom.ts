@@ -4,7 +4,7 @@ import os from 'os'
 import { ParsedQs } from 'qs'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../../models/File.js'
+import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
@@ -252,7 +252,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, `${modelId} - ${fileId}`)
   }
 
-  async onDeleteFile(req: Request, file: FileWithScanResultsInterface) {
+  async onDeleteFile(req: Request, file: FileWithScanResultsAggregate) {
     this.auditFileEvent(req, [file])
   }
 
