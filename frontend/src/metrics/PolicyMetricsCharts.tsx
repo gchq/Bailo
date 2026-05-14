@@ -84,7 +84,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
       </Stack>
       <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography fontWeight='bold' variant='h6' color='primary'>
-          Entries missing roles
+          Entries missing review roles
         </Typography>
         <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
           <Table sx={{ minWidth: 650 }} size='small'>
