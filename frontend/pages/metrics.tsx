@@ -4,6 +4,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import Link from 'src/Link'
 import OverviewMetrics from 'src/metrics/OverviewMetrics'
 import PolicyMetrics from 'src/metrics/PolicyMetrics'
 
@@ -13,7 +14,11 @@ export default function Metrics() {
   if (!currentUser || !currentUser.isAdmin) {
     return (
       <Forbidden
-        errorMessage='If you think this is in error please contact the Bailo administrators.'
+        errorMessage={
+          <span>
+            If you think this is in error please {<Link href={'/help'}>contact</Link>} the Bailo administrators.
+          </span>
+        }
         noMargin
         hideNavButton
       />

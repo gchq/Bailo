@@ -1,6 +1,6 @@
 import { Box, Button, Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
-import { ReactElement, useCallback, useMemo, useRef } from 'react'
-import { useReactToPrint } from 'react-to-print'
+import { ReactElement, useCallback, useMemo, useState } from 'react'
+import MetricsExportPreview from 'src/metrics/MetricsExportPreview'
 import { OverviewMetrics, PolicyMetrics } from 'types/types'
 import { formatDateStringWithMinutes } from 'utils/dateUtils'
 
@@ -17,18 +17,7 @@ export default function MetricsHeader({
   selectedOrganisation,
   onOrganisationChange,
 }: MetricsHeaderProps) {
-  const contentRef = useRef<HTMLDivElement>(null)
-
-  const exportMetricsOverview = useReactToPrint({
-    contentRef: contentRef,
-    documentTitle: 'Bailo overview metrics',
-  })
-
-  const handleExportOnClick = () => {
-    if (contentRef) {
-      exportMetricsOverview()
-    }
-  }
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const listItems = useMemo(() => {
     if (!data) {
@@ -78,13 +67,14 @@ export default function MetricsHeader({
             )}
           </Stack>
           <Stack>
-            <Button variant='contained' onClick={handleExportOnClick}>
+            <Button variant='contained' onClick={() => setDialogOpen(true)}>
               Export as PDF
             </Button>
           </Stack>
         </Stack>
         {children}
       </Stack>
+      <MetricsExportPreview open={dialogOpen} setOpen={setDialogOpen} content={children} />
     </Container>
   )
 }

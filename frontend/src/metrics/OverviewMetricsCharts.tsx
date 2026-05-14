@@ -1,7 +1,7 @@
 import { Stack, Typography } from '@mui/material'
 import { blueberryTwilightPalette } from '@mui/x-charts'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
-import { PieChart } from '@mui/x-charts/PieChart'
+import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
 import dayjs, { Dayjs } from 'dayjs'
@@ -42,12 +42,20 @@ export default function OverviewMetricsCharts({
     height: 250,
     margin: { left: 0 },
     yAxis: [{ width: 50 }],
+    colors: blueberryTwilightPalette,
+    borderRadius: 2,
   })
 
   const pieChartSettings = {
     margin: { right: 5 },
     width: 200,
     height: 200,
+    sx: {
+      [`& .${pieClasses.arcLabel}`]: {
+        fontWeight: 'bold',
+      },
+    },
+    colors: blueberryTwilightPalette,
   }
 
   const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
@@ -178,11 +186,10 @@ export default function OverviewMetricsCharts({
           ]}
           xAxis={[{ dataKey: 'label' }]}
           {...barChartConfig}
-          colors={blueberryTwilightPalette}
         />
       </Stack>
       <Stack spacing={4}>
-        <Stack spacing={6} alignItems='flex-start' direction={{ lg: 'row', md: 'column' }}>
+        <Stack spacing={6} alignItems={{ lg: 'flex-start', md: 'center' }} direction={{ lg: 'row', md: 'column' }}>
           <Stack spacing={2}>
             <OverviewStatPanel label='total entries' value={data.entries} minWidth='300px' />
             <OverviewStatPanel label='entries with releases' value={data.withReleases} minWidth='300px' />
@@ -199,9 +206,17 @@ export default function OverviewMetricsCharts({
                 Life cycle status
               </Typography>
               <PieChart
-                series={[{ innerRadius: 50, outerRadius: 100, data: stateData, arcLabel: 'value' }]}
+                series={[
+                  {
+                    innerRadius: 50,
+                    outerRadius: 100,
+                    data: stateData,
+                    arcLabel: 'value',
+                    paddingAngle: 1,
+                    cornerRadius: 4,
+                  },
+                ]}
                 {...pieChartSettings}
-                colors={blueberryTwilightPalette}
               />
             </Stack>
             <Stack spacing={2}>
@@ -209,9 +224,17 @@ export default function OverviewMetricsCharts({
                 Schema usage
               </Typography>
               <PieChart
-                series={[{ innerRadius: 50, outerRadius: 100, data: schemaData, arcLabel: 'value' }]}
+                series={[
+                  {
+                    innerRadius: 50,
+                    outerRadius: 100,
+                    data: schemaData,
+                    arcLabel: 'value',
+                    paddingAngle: 1,
+                    cornerRadius: 4,
+                  },
+                ]}
                 {...pieChartSettings}
-                colors={blueberryTwilightPalette}
               />
             </Stack>
           </Stack>

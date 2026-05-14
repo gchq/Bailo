@@ -60,7 +60,7 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
   }, [splitSchema.steps])
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' TransitionComponent={Transition}>
+    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' slots={{ transition: Transition }}>
       <DialogContent ref={modelCardContentRef}>
         <Stack spacing={2} divider={<Divider />}>
           <Stack direction='row' alignItems='center'>
