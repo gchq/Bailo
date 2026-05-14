@@ -4,12 +4,12 @@ import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
 import dayjs, { Dayjs } from 'dayjs'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
-import { ModelVolumeData, OverviewBaseMetrics } from 'types/types'
+import { ModelVolume, ModelVolumeData, OverviewBaseMetrics } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
 
 interface OverviewMetricsChartsProps {
@@ -28,7 +28,7 @@ export default function OverviewMetricsCharts({
   organisationList,
   selectedOrganisation,
 }: OverviewMetricsChartsProps) {
-  const [stateData, setStateData] = useState<PieChartData[]>([])
+  //const [stateData, setStateData] = useState<PieChartData[]>([])
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
   const [structuredModelVolume, setStructuredModelVolume] = useState<any[]>([])
   const [startDate, setStartDate] = useState<Dayjs | null>(null)
@@ -52,21 +52,13 @@ export default function OverviewMetricsCharts({
     `${endDate ? setAsLastDayOfMonth(endDate) : setAsLastDayOfMonth(dayjs(new Date()))}`,
   )
 
-  const updateStateData = useEffectEvent((newStateData) => {
-    setStateData(newStateData)
-  })
-
-  useEffect(() => {
-    if (data.entryState) {
-      updateStateData(
-        data.entryState.map((state) => {
-          return {
-            label: state.state,
-            value: state.count,
-          }
-        }),
-      )
-    }
+  const stateData = useMemo(() => {
+    return (
+      data.entryState?.map((state) => ({
+        label: state.state,
+        value: state.count,
+      })) ?? []
+    )
   }, [data.entryState])
 
   const updateStartDate = useEffectEvent((newDate: Date) => {
@@ -98,7 +90,7 @@ export default function OverviewMetricsCharts({
     }
   }, [data.schemaBreakdown])
 
-  const updateModelVolume = useEffectEvent((modelVolume, changedOrganisation) => {
+  const updateModelVolume = useEffectEvent((modelVolume: ModelVolume, changedOrganisation: string) => {
     if (changedOrganisation === 'All') {
       setBarChartConfig({ ...barChartConfig, hideLegend: false })
     } else {
@@ -110,11 +102,11 @@ export default function OverviewMetricsCharts({
         const incrementObject = {
           label: formattedDate,
         }
-        for (const organisationKey of Object.keys(volumeData.organisations)) {
-          if (organisationKey === changedOrganisation || changedOrganisation === 'All') {
-            incrementObject[organisationKey] = volumeData.organisations[organisationKey]
-          }
-        }
+        Object.entries(volumeData.organisations)
+          .filter(([org]) => changedOrganisation === 'All' || org === changedOrganisation)
+          .forEach(([org, count]) => {
+            incrementObject[org] = count
+          })
         return incrementObject
       })
       setStructuredModelVolume(updatedStructure)

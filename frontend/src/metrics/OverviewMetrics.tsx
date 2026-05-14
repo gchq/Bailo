@@ -7,7 +7,7 @@ import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import MessageAlert from 'src/MessageAlert'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-import { OverviewBaseMetrics } from 'types/types'
+import { OrganisationOverviewMetrics, OverviewBaseMetrics } from 'types/types'
 import { formatDateStringWithMinutes } from 'utils/dateUtils'
 
 export default function OverviewMetrics() {
@@ -46,7 +46,7 @@ export default function OverviewMetrics() {
     }
   }, [organisationFromRouter, router])
 
-  const setFilteredDatasetEffectEvent = useEffectEvent((data: any) => {
+  const setFilteredDatasetEffectEvent = useEffectEvent((data: OverviewBaseMetrics | undefined) => {
     setFilteredDataset(data)
   })
 
@@ -58,7 +58,7 @@ export default function OverviewMetrics() {
       setFilteredDatasetEffectEvent(overviewMetrics.global)
     } else {
       const dataSubset = overviewMetrics.byOrganisation.find(
-        (subset: any) => subset.organisation === selectedOrganisation,
+        (subset: OrganisationOverviewMetrics) => subset.organisation === selectedOrganisation,
       )
       if (dataSubset) {
         setFilteredDatasetEffectEvent(dataSubset)

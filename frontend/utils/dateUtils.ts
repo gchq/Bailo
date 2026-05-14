@@ -60,11 +60,9 @@ export const timeDifference = (current: Date, previous: Date) => {
 }
 
 export const setAsFirstDayOfMonth = (date: Dayjs): string => {
-  date = date.date(1)
-  return date.toISOString().split('T')[0]
+  return date.date(1).toISOString().split('T')[0]
 }
 
 export const setAsLastDayOfMonth = (date: Dayjs): string => {
-  date = date.endOf('month')
-  return date.toISOString().split('T')[0]
+  return date.endOf('month').toISOString().split('T')[0]
 }

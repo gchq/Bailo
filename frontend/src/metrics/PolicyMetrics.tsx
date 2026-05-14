@@ -7,7 +7,7 @@ import Loading from 'src/common/Loading'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import MessageAlert from 'src/MessageAlert'
 import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
-import { PolicyBaseMetrics } from 'types/types'
+import { OrganisationPolicyMetrics, PolicyBaseMetrics } from 'types/types'
 import { formatDateStringWithMinutes } from 'utils/dateUtils'
 
 export default function PolicyMetrics() {
@@ -58,7 +58,7 @@ export default function PolicyMetrics() {
       setFilteredDatasetEffectEvent(policyMetrics.global)
     } else {
       const dataSubset = policyMetrics.byOrganisation.find(
-        (subset: any) => subset.organisation === selectedOrganisation,
+        (subset: OrganisationPolicyMetrics) => subset.organisation === selectedOrganisation,
       )
       if (dataSubset) {
         setFilteredDatasetEffectEvent(dataSubset)
