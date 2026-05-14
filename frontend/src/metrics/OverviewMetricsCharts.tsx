@@ -201,7 +201,7 @@ export default function OverviewMetricsCharts({
             justifyContent='space-around'
             sx={{ width: '100%' }}
           >
-            <Stack spacing={2}>
+            <Stack spacing={2} alignItems='center'>
               <Typography fontWeight='bold' variant='h6' color='primary'>
                 Life cycle status
               </Typography>
@@ -216,10 +216,19 @@ export default function OverviewMetricsCharts({
                     cornerRadius: 4,
                   },
                 ]}
+                slotProps={{
+                  legend: {
+                    direction: 'horizontal',
+                    position: {
+                      vertical: 'bottom',
+                      horizontal: 'center',
+                    },
+                  },
+                }}
                 {...pieChartSettings}
               />
             </Stack>
-            <Stack spacing={2}>
+            <Stack spacing={2} alignItems='center'>
               <Typography fontWeight='bold' variant='h6' color='primary'>
                 Schema usage
               </Typography>
@@ -234,6 +243,15 @@ export default function OverviewMetricsCharts({
                     cornerRadius: 4,
                   },
                 ]}
+                slotProps={{
+                  legend: {
+                    direction: 'horizontal',
+                    position: {
+                      vertical: 'bottom',
+                      horizontal: 'center',
+                    },
+                  },
+                }}
                 {...pieChartSettings}
               />
             </Stack>
