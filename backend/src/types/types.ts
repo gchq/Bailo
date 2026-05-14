@@ -12,7 +12,11 @@ import {
   MongoDocumentMirrorInformation,
 } from '../services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation, FileMirrorMetadata } from '../services/mirroredModel/importers/file.js'
-import { ImageMirrorInformation, ImageMirrorMetadata } from '../services/mirroredModel/importers/image.js'
+import {
+  ImageMirrorInformation,
+  ImageMirrorMetadataV1,
+  ImageMirrorMetadataV2,
+} from '../services/mirroredModel/importers/image.js'
 import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
 import { BailoError } from './error.js'
 
@@ -276,7 +280,11 @@ export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T 
   ? (typeof MirrorKind)[T]
   : (typeof MirrorKind)[keyof typeof MirrorKind]
 
-export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
+export type MirrorMetadata =
+  | DocumentsMirrorMetadata
+  | FileMirrorMetadata
+  | ImageMirrorMetadataV1
+  | ImageMirrorMetadataV2
 export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
 
 export type MirrorExportLogData = Record<string, unknown> & { exportId: string }

@@ -43,7 +43,7 @@ async function script() {
     },
     logData,
   )
-  await addCompressedRegistryImageComponents(user, sourceModelId, imageDistributionPackageName, tarStream, logData)
+  await addCompressedRegistryImageComponents(user, sourceModelId, [imageDistributionPackageName], tarStream, logData)
   await finaliseTarGzUpload(tarStream, uploadPromise)
 
   // cleanup
