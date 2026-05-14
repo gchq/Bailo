@@ -1,0 +1,97 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Understanding Schemas
+
+Schemas are the foundation of Bailo's governance model. They define the questions and structure of model cards and
+access request forms, ensuring that every model in your organisation is documented consistently.
+
+This page explains what schemas are and how they work. For step-by-step instructions on creating a schema, see
+[Creating a Schema](/docs/administration/schemas/create-a-schema).
+
+## What is a Schema?
+
+A schema is a template that defines:
+
+- What **questions** appear when someone fills in a model card or access request form
+- How those questions are **organised** into sections and tabs
+- Which questions are **required** and which are optional
+- What **format** answers should take (free text, dates, dropdowns, etc.)
+
+When a user creates a model or submits an access request, they select a schema. That schema then generates the form they
+fill in.
+
+## Schema Types
+
+There are three types of schema:
+
+| Type               | Purpose                                                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| **Model Card**     | Defines the structure of model documentation - intended use, training details, performance metrics, limitations, etc.       |
+| **Data Card**      | Defines the fields for the information about the dataset - size, format, data source, known limitations or biases etc.      |
+| **Access Request** | Defines the form users fill in when requesting access to a model - who is requesting, why, what permissions they need, etc. |
+
+## How Schemas Relate to Other Concepts
+
+```
+Schema ──defines──> Model Card Form
+Schema ──defines──> Data Card Form
+Schema ──defines──> Access Request Form
+Schema ──attached to──> Review Roles (which roles must approve)
+Model ──selects──> Schema (at setup time)
+Data Card ──selects──> Schema (at setup time)
+```
+
+When an administrator attaches review roles to a schema, every model that uses that schema will require those roles to
+be assigned and to approve releases and access requests.
+
+## Active vs Inactive Schemas
+
+Schemas can be **active** or **inactive**:
+
+- **Active** schemas appear in the selection list when users create new models or access requests
+- **Inactive** schemas are hidden from the selection list but continue to work for models that already use them
+
+This allows you to retire old schemas without breaking existing models.
+
+## Why Schemas Matter
+
+Without schemas, every model would be documented differently, making it difficult to:
+
+- Compare models against each other
+- Ensure governance requirements are met
+- Automate compliance checks
+- Maintain consistent quality across your model inventory
+
+Schemas give administrators control over what information is captured, while giving model owners a clear and structured
+form to fill in.
+
+## Schema Versioning and Migrations
+
+As your organisation's requirements evolve, you may need to update schemas. Rather than forcing model owners to re-enter
+all their information, Bailo supports **Schema Migrations** - plans that transform model card data from one schema
+version to another.
+
+See [Schema Migrations](/docs/administration/schemas/schema-migrations) for details.
+
+## Technical Details
+
+Schemas are built using [JSON Schema](https://json-schema.org/) and rendered using
+[React JSON Schema Form (RJSF)](https://rjsf-team.github.io/react-jsonschema-form/). This means schemas support:
+
+- Simple text fields, numbers, and dates
+- Dropdown selections and radio buttons
+- Conditional fields that appear based on other answers
+- Multi-section forms with tab navigation
+- Required field validation
+
+For technical instructions on writing schema JSON, see
+[Creating a Schema](/docs/administration/schemas/create-a-schema).
+
+## Related Pages
+
+- [Creating a Schema](/docs/administration/schemas/create-a-schema) - Step-by-step schema authoring guide
+- [Uploading a Schema](/docs/administration/schemas/upload-a-schema) - How to upload a schema to Bailo
+- [Schema Migrations](/docs/administration/schemas/schema-migrations) - Migrating data between schema versions
+- [Managing Review Roles](/docs/administration/review-roles/managing-review-roles) - Creating roles to attach to schemas
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

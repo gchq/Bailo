@@ -11,11 +11,17 @@ export interface DirectoryEntry {
   title: string
   slug: string
   header?: boolean
+  level?: number
 }
 
 export const flatDirectory: Array<DirectoryEntry> = [
   // Main Docs
   { title: 'Overview', slug: '', header: true },
+
+  // Getting Started
+  { title: 'Getting Started', slug: 'getting-started', header: true },
+  { title: 'Quick Start Guide', slug: 'getting-started/quick-start' },
+  { title: 'Core Concepts', slug: 'getting-started/core-concepts' },
 
   // Users
   { title: 'Users', slug: 'users', header: true },
@@ -28,26 +34,18 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
+  { title: 'Data Cards', slug: 'users/data-cards', header: true },
+  { title: 'Creating a Data Card', slug: 'users/data-cards/creating-a-data-card' },
+  { title: 'Managing Data Cards', slug: 'users/data-cards/managing-data-cards' },
+
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
   { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
   { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
   { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
-  { title: 'Using scanners', slug: 'users/using-scanners', header: true },
-  { title: 'File scanning', slug: 'users/using-scanners/file-scanning' },
-  { title: 'Image scanning', slug: 'users/using-scanners/image-scanning' },
-
-  { title: 'Deletion', slug: 'users/deletion', header: true },
-  { title: 'Deleting a File', slug: 'users/deletion/file-deletion' },
-  { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
-  { title: 'Soft Deletion', slug: 'users/deletion/soft-deletion' },
-
-  { title: 'Model Mirroring', slug: 'users/model-mirroring', header: true },
-  { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },
-  { title: 'Editing a Mirrored Model Card', slug: 'users/model-mirroring/editing-a-mirrored-model-card' },
-
   { title: 'Reviews', slug: 'users/reviews', header: true },
+  { title: 'Understanding Reviews', slug: 'users/reviews/understanding-reviews' },
   { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
   { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
   { title: 'Reviewing an Access Request', slug: 'users/reviews/reviewing/access' },
@@ -55,11 +53,24 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Releases', slug: 'users/reviews/reviewed/releases' },
   { title: 'Access Requests', slug: 'users/reviews/reviewed/access-request' },
 
-  { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
+  { title: 'Security Scanning', slug: 'users/using-scanners', header: true },
+  { title: 'File Scanning', slug: 'users/using-scanners/file-scanning' },
+  { title: 'Image Scanning', slug: 'users/using-scanners/image-scanning' },
+
+  { title: 'Model Mirroring', slug: 'users/model-mirroring', header: true },
+  { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },
+  { title: 'Editing a Mirrored Model Card', slug: 'users/model-mirroring/editing-a-mirrored-model-card' },
+
+  { title: 'Deletion', slug: 'users/deletion', header: true },
+  { title: 'Deleting a File', slug: 'users/deletion/file-deletion' },
+  { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
+  { title: 'Soft Deletion', slug: 'users/deletion/soft-deletion' },
+
+  { title: 'Programmatic Access', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
   { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
-  { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
   { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
+  { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
 
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
@@ -67,6 +78,17 @@ export const flatDirectory: Array<DirectoryEntry> = [
   /// Getting Started
   { title: 'Getting Started', slug: 'administration/getting-started', header: true },
   { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
+
+  /// Schema Management
+  { title: 'Schemas', slug: 'administration/schemas', header: true },
+  { title: 'Understanding Schemas', slug: 'administration/schemas/understanding-schemas' },
+  { title: 'Create a Schema', slug: 'administration/schemas/create-a-schema' },
+  { title: 'Upload a Schema', slug: 'administration/schemas/upload-a-schema' },
+  { title: 'Schema Migrations', slug: 'administration/schemas/schema-migrations' },
+
+  /// Review Roles
+  { title: 'Review Roles', slug: 'administration/review-roles', header: true },
+  { title: 'Managing Review Roles', slug: 'administration/review-roles/managing-review-roles' },
 
   /// Microservices
   { title: 'Microservices', slug: 'administration/microservices', header: true },
@@ -78,22 +100,23 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Configuration', slug: 'administration/helm/configuration' },
   { title: 'Isolated Environments', slug: 'administration/helm/isolated-environments' },
 
-  /// Schema Management
-  { title: 'Schema', slug: 'administration/schemas', header: true },
-  { title: 'Create a Schema', slug: 'administration/schemas/create-a-schema' },
-  { title: 'Upload a Schema', slug: 'administration/schemas/upload-a-schema' },
-
   /// Migrations
   { title: 'Migrations', slug: 'administration/migrations', header: true },
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
   { title: 'DataBase Scripts', slug: 'administration/migrations/scripts' },
+
+  // Reference
+  { title: 'Reference', slug: 'reference', header: true },
+  { title: 'Glossary', slug: 'reference/glossary' },
+  { title: 'Roles & Permissions', slug: 'reference/roles-and-permissions' },
 ]
 
 export interface DirectoryTree {
   slug: string
   title: string
   header?: boolean
+  level: number
   children?: DirectoryTree[]
 }
 
@@ -102,6 +125,7 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
     slug: '',
     title: 'Root',
     header: true,
+    level: 0,
     children: [],
   }
 
@@ -112,6 +136,7 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
     let currentId = ''
 
     for (const part of parts) {
+      const level = parts.indexOf(part) + 1
       const isLastPart = part === parts[parts.length - 1]
       const isFirstPart = part === parts[0]
 
@@ -128,6 +153,7 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
           slug: currentId,
           title: path.title,
           ...(path.header ? { header: true } : {}),
+          level,
           ...(isLastPart ? {} : { children: [] }),
         })
 
