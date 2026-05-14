@@ -22,6 +22,12 @@ const modelMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/models/Model.js', () => ({
   default: modelMocks,
+  SystemRoles: {
+    Owner: 'owner',
+    Contributor: 'contributor',
+    Consumer: 'consumer',
+    None: '',
+  },
 }))
 
 const releaseMocks = vi.hoisted(() => ({
@@ -298,7 +304,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       mockQuery([
         {
           id: 'schema1',
-          reviewRoles: ['md'],
+          reviewRoles: ['owner'],
         },
       ]),
     )
@@ -307,7 +313,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       mockQuery([
         { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
         { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
-        { shortName: 'md', name: 'Model Developer', systemRole: null },
+        { shortName: 'owner', name: 'Owner', systemRole: null },
       ]),
     )
 
@@ -317,7 +323,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
           id: 'model-1',
           organisation: 'a corp',
           card: { schemaId: 'schema1' },
-          collaborators: [{ entity: 'user1', roles: ['mtr', 'md'] }],
+          collaborators: [{ entity: 'user1', roles: ['mtr', 'owner'] }],
         },
         {
           id: 'model-2',
@@ -340,14 +346,16 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
         {
           entryId: 'model-1',
           missingRoles: [{ roleId: 'msro', roleName: 'MSRO' }],
+          modelOwners: ['user1'],
         },
         {
           entryId: 'model-2',
           missingRoles: [
             { roleId: 'msro', roleName: 'MSRO' },
             { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
-            { roleId: 'md', roleName: 'Model Developer' },
+            { roleId: 'owner', roleName: 'Owner' },
           ],
+          modelOwners: [],
         },
       ]),
     )
@@ -356,20 +364,20 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       expect.arrayContaining([
         { roleId: 'msro', roleName: 'MSRO', count: 2 },
         { roleId: 'mtr', roleName: 'Model Technical Reviewer', count: 1 },
-        { roleId: 'md', roleName: 'Model Developer', count: 1 },
+        { roleId: 'owner', roleName: 'Owner', count: 1 },
       ]),
     )
   })
   test('model without card only checks default roles', async () => {
     modelMocks.distinct.mockResolvedValue(['a corp'])
 
-    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['md'] }]))
+    schemaModelMocks.find.mockReturnValue(mockQuery([{ id: 'schema1', reviewRoles: ['owner'] }]))
 
     reviewRoleMocks.find.mockReturnValue(
       mockQuery([
         { shortName: 'msro', name: 'MSRO', systemRole: 'msro' },
         { shortName: 'mtr', name: 'Model Technical Reviewer', systemRole: 'mtr' },
-        { shortName: 'md', name: 'Model Developer', systemRole: null },
+        { shortName: 'owner', name: 'Owner', systemRole: null },
       ]),
     )
 
@@ -394,9 +402,7 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       { roleId: 'mtr', roleName: 'Model Technical Reviewer' },
     ])
 
-    expect(result.global.summary).toEqual(
-      expect.arrayContaining([{ roleId: 'md', roleName: 'Model Developer', count: 0 }]),
-    )
+    expect(result.global.summary).toEqual(expect.arrayContaining([{ roleId: 'owner', roleName: 'Owner', count: 0 }]))
   })
   test('groups results by organisation correctly', async () => {
     modelMocks.distinct.mockResolvedValue(['a corp', 'b corp'])
