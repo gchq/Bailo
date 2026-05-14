@@ -1,10 +1,13 @@
 import { Box, List, ListItem, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetEntryRoles } from 'actions/entry'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
+import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { PolicyBaseMetrics } from 'types/types'
 
@@ -14,12 +17,22 @@ interface PolicyMetricsChartsProps {
 
 export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) {
   const theme = useTheme()
+
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
+
+  const ownerRoleDisplayName = useMemo(() => {
+    if (entryRoles) {
+      const displayName = entryRoles.find((role) => role.shortName === 'owner')
+      return displayName ? displayName.name : 'Owner'
+    }
+  }, [entryRoles])
+
   const displayMissingRoleCounts = useMemo(() => {
     return data.summary.map((roleSummary) => {
       return (
         <OverviewStatPanel
           key={roleSummary.roleId}
-          label={`models missing ${roleSummary.roleId.toUpperCase()}`}
+          label={`entries missing ${roleSummary.roleId.toUpperCase()}`}
           value={roleSummary.count}
         />
       )
@@ -56,6 +69,14 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
   }
 
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} />
+  }
+
+  if (isEntryRolesLoading) {
+    return <Loading />
+  }
+
   return (
     <Stack spacing={4}>
       <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
@@ -63,14 +84,14 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
       </Stack>
       <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography fontWeight='bold' variant='h6' color='primary'>
-          Models missing roles
+          Entries missing roles
         </Typography>
         <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
           <Table sx={{ minWidth: 650 }} size='small'>
             <TableHead>
               <TableRow>
                 <TableCell>Model ID</TableCell>
-                <TableCell>Model Developer(s)</TableCell>
+                <TableCell>{ownerRoleDisplayName}</TableCell>
                 <TableCell>Missing roles</TableCell>
               </TableRow>
             </TableHead>

@@ -1,6 +1,7 @@
 import { Stack, Typography } from '@mui/material'
+import { blueberryTwilightPalette } from '@mui/x-charts'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
-import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
+import { PieChart } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
 import dayjs, { Dayjs } from 'dayjs'
@@ -177,14 +178,15 @@ export default function OverviewMetricsCharts({
           ]}
           xAxis={[{ dataKey: 'label' }]}
           {...barChartConfig}
+          colors={blueberryTwilightPalette}
         />
       </Stack>
       <Stack spacing={4}>
         <Stack spacing={6} alignItems='flex-start' direction={{ lg: 'row', md: 'column' }}>
           <Stack spacing={2}>
-            <OverviewStatPanel label='Total entries' value={data.entries} minWidth='300px' />
-            <OverviewStatPanel label='Entries with releases' value={data.withReleases} minWidth='300px' />
-            <OverviewStatPanel label='Entries with access requests' value={data.withAccessRequest} minWidth='320px' />
+            <OverviewStatPanel label='total entries' value={data.entries} minWidth='300px' />
+            <OverviewStatPanel label='entries with releases' value={data.withReleases} minWidth='300px' />
+            <OverviewStatPanel label='entries with access requests' value={data.withAccessRequest} minWidth='320px' />
           </Stack>
           <Stack
             spacing={2}
@@ -194,25 +196,22 @@ export default function OverviewMetricsCharts({
           >
             <Stack spacing={2}>
               <Typography fontWeight='bold' variant='h6' color='primary'>
-                State
+                Life cycle status
               </Typography>
               <PieChart
                 series={[{ innerRadius: 50, outerRadius: 100, data: stateData, arcLabel: 'value' }]}
                 {...pieChartSettings}
+                colors={blueberryTwilightPalette}
               />
             </Stack>
             <Stack spacing={2}>
               <Typography fontWeight='bold' variant='h6' color='primary'>
-                Model card schemas usage
+                Schema usage
               </Typography>
               <PieChart
                 series={[{ innerRadius: 50, outerRadius: 100, data: schemaData, arcLabel: 'value' }]}
                 {...pieChartSettings}
-                sx={{
-                  [`.${pieClasses.series}[data-series="outer"] .${pieClasses.arc}`]: {
-                    opacity: 0.6,
-                  },
-                }}
+                colors={blueberryTwilightPalette}
               />
             </Stack>
           </Stack>
