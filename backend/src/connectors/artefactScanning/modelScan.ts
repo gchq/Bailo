@@ -1,5 +1,3 @@
-import path from 'node:path'
-
 import PQueue from 'p-queue'
 
 import { getCachedArtefactScanInfo, ModelScanResponse, scanFileStream } from '../../clients/artefactScan.js'
@@ -94,8 +92,10 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       })
     }
 
-    const fileExtension = path.extname(file.name).toLowerCase()
-    if (this.supportedExtensions.length > 0 && !this.supportedExtensions.includes(fileExtension)) {
+    const lowerFileName = file.name.toLowerCase()
+    // Do not use `path.extname` as it will not handle compound extensions e.g. `.tar.gz`
+    const isSupported = this.supportedExtensions.some((ext) => lowerFileName.endsWith(ext.toLowerCase()))
+    if (this.supportedExtensions.length > 0 && !isSupported) {
       const additionalInfo = this.getSkippedScanSummary(file)
       log.debug({ file, result: { additionalInfo }, ...scannerInfo }, 'Skipping file scan.')
       return {

@@ -123,7 +123,7 @@ describe('connectors > artefactScanning > trivy > TrivyImageScanningConnector', 
   test('scan() skip too large image', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       trivyVersion: '0.69.1',
-      maxImageSizeBytes: 1,
+      maxFileSizeBytes: 1,
     })
     authMocks.issueAccessToken.mockResolvedValueOnce('token')
     registryMocks.headLayer.mockResolvedValueOnce({
@@ -139,6 +139,9 @@ describe('connectors > artefactScanning > trivy > TrivyImageScanningConnector', 
     } as any)
 
     expect(result.state).toBe(ArtefactScanState.Error)
+    expect(registryMocks.headLayer).toHaveBeenCalled()
+    expect(registryMocks.getRegistryLayerStream).not.toHaveBeenCalled()
+    expect(artefactScanClientMocks.scanImageBlobStream).not.toHaveBeenCalled()
   })
 
   test('scan() return error when scannerVersion is undefined', async () => {
