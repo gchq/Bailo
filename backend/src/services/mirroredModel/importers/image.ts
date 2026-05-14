@@ -24,6 +24,8 @@ export type ImageMirrorMetadataV1 = BaseMirrorMetadata & {
 
 export type ImageMirrorMetadataV2 = BaseMirrorMetadata & {
   importKind: MirrorKindKeys<'Image'>
+  // TODO FIX - temporary to resolve build issues
+  distributionPackageName: string
   schemaVersion: 2
 }
 

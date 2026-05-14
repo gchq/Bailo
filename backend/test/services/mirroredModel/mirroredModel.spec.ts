@@ -399,7 +399,7 @@ describe('services > mirroredModel', () => {
     test('no tag throws', async () => {
       registryMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'img' } as any)
       await expect(
-        addCompressedRegistryImageComponents({} as any, 'modelId', 'name', {} as any, {} as any),
+        addCompressedRegistryImageComponents({} as any, 'modelId', ['name'], {} as any, {} as any),
       ).rejects.toThrow(/must include a tag/)
     })
 
@@ -412,7 +412,7 @@ describe('services > mirroredModel', () => {
         },
       })
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['x']), abort: vi.fn() })
-      await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any)
+      await addCompressedRegistryImageComponents({} as any, 'modelId', ['img:tag'], {} as any, {} as any)
       expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalled()
     })
 
@@ -425,7 +425,7 @@ describe('services > mirroredModel', () => {
         },
       })
       await expect(
-        addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
+        addCompressedRegistryImageComponents({} as any, 'modelId', ['img:tag'], {} as any, {} as any),
       ).rejects.toThrow(/Could not extract layer digest/)
     })
 
@@ -441,7 +441,7 @@ describe('services > mirroredModel', () => {
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['']), abort: abortMock })
       tarballMocks.addEntryToTarGzUpload.mockResolvedValueOnce({}).mockRejectedValueOnce('err')
       await expect(
-        addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
+        addCompressedRegistryImageComponents({} as any, 'modelId', ['img:tag'], {} as any, {} as any),
       ).rejects.toThrow('err')
       expect(abortMock).toHaveBeenCalled()
     })
