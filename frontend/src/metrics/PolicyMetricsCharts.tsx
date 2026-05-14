@@ -43,9 +43,11 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
     return data.entries.map((row) => (
       <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
-          <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
-            {row.entryId}
-          </Link>
+          <Typography maxWidth='500px'>
+            <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
+              {row.entryId}
+            </Link>
+          </Typography>
         </TableCell>
         <TableCell>
           {row.modelOwners.map((owner) => (
