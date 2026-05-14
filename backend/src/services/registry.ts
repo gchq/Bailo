@@ -275,7 +275,7 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
   const initial = Object.fromEntries(Object.values(SeverityLevel).map((severity) => [severity, 0])) as SeverityCounts
 
   return scanSummary.reduce((acc, item) => {
-    if ('severity' in item) {
+    if (typeof item !== 'string' && 'severity' in item) {
       acc[item.severity]++
     }
     return acc

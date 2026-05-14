@@ -138,7 +138,14 @@ describe('connectors > artefactScanning > trivy > TrivyImageScanningConnector', 
       layerDigest: 'sha256:abc',
     } as any)
 
-    expect(result.state).toBe(ArtefactScanState.Error)
+    expect(result).toMatchObject({
+      toolName: 'Trivy',
+      scannerVersion: '0.69.1',
+      artefactKind: ArtefactKind.IMAGE,
+      summary: ['Artefact exceeds configured scanner size limit (2 B > 1 B).'],
+      state: ArtefactScanState.Skipped,
+    })
+    expect(result.lastRunAt).toBeInstanceOf(Date)
     expect(registryMocks.headLayer).toHaveBeenCalled()
     expect(registryMocks.getRegistryLayerStream).not.toHaveBeenCalled()
     expect(artefactScanClientMocks.scanImageBlobStream).not.toHaveBeenCalled()

@@ -60,6 +60,7 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
         },
       ],
       errors: [],
+      summary: { skipped: { total_skipped: 0 } },
     })
     const connector = new ModelScanFileScanningConnector()
     await connector.init()
@@ -151,14 +152,21 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
       size: 2,
     } as any)
 
-    expect(result.state).toBe(ArtefactScanState.Error)
+    expect(result).toMatchObject({
+      toolName: 'ModelScan',
+      scannerVersion: '1.0.0',
+      artefactKind: ArtefactKind.FILE,
+      summary: ['Artefact exceeds configured scanner size limit (2 B > 1 B).'],
+      state: ArtefactScanState.Skipped,
+    })
+    expect(result.lastRunAt).toBeInstanceOf(Date)
     expect(result.toolName).toBe('ModelScan')
   })
 
   test('scan() skips unsupported extension', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       modelscanVersion: '1.0.0',
-      modelscanSupportedExtensions: ['.txt'],
+      modelscanSupportedExtensions: ['.txt', '.pdf'],
     })
     const connector = new ModelScanFileScanningConnector()
     await connector.init()
@@ -169,40 +177,13 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
       path: '/bucket/model.bin',
     } as any)
 
-    expect(result.state).toBe(ArtefactScanState.Complete)
-    expect(result.summary).toHaveLength(0)
-    expect(result.artefactKind).toBe(ArtefactKind.FILE)
-    expect(result.additionalInfo).toMatchObject(
-      expect.objectContaining({
-        summary: {
-          total_issues: 0,
-          total_issues_by_severity: {
-            LOW: 0,
-            MEDIUM: 0,
-            HIGH: 0,
-            CRITICAL: 0,
-          },
-          input_path: '/tmp/model.bin',
-          absolute_path: '/tmp',
-          modelscan_version: '1.0.0',
-          timestamp: expect.anything(),
-          scanned: {
-            total_scanned: 0,
-          },
-          skipped: {
-            total_skipped: 1,
-            skipped_files: [
-              {
-                category: 'SCAN_NOT_SUPPORTED',
-                description: 'Model Scan did not scan file',
-                source: 'model.bin',
-              },
-            ],
-          },
-        },
-        issues: [],
-        errors: [],
-      }),
-    )
+    expect(result).toMatchObject({
+      toolName: 'ModelScan',
+      scannerVersion: '1.0.0',
+      artefactKind: ArtefactKind.FILE,
+      summary: ['Artefact type is not compatible with this scanner (model.bin not covered in [.txt, .pdf]).'],
+      state: ArtefactScanState.Skipped,
+    })
+    expect(result.lastRunAt).toBeInstanceOf(Date)
   })
 })

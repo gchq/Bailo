@@ -11,6 +11,7 @@ class TestConnector extends BaseArtefactScanningConnector {
   version = '1.2.3'
   artefactType = ArtefactKind.FILE
   queue = new PQueue({ concurrency: 1 })
+  maxSize = 123
 
   init = vi.fn()
 
@@ -72,13 +73,46 @@ describe('connectors > artefactScanning > Base', () => {
   test('scanError() returns minimal error ArtefactScanResult', async () => {
     const connector = new TestConnector()
 
-    const result = await connector.scanError('failure')
+    // @ts-expect-ignore accessing protected property
+    const result = connector['scanError']('failure')
 
     expect(result).toMatchObject({
       toolName: 'TestScanner',
       scannerVersion: '1.2.3',
       artefactKind: ArtefactKind.FILE,
       state: ArtefactScanState.Error,
+    })
+    expect(result.lastRunAt).toBeInstanceOf(Date)
+  })
+
+  test('scanSkip() returns minimal error ArtefactScanResult', async () => {
+    const connector = new TestConnector()
+
+    // @ts-expect-ignore accessing protected property
+    const result = connector['scanSkip']('message')
+
+    expect(result).toMatchObject({
+      toolName: 'TestScanner',
+      scannerVersion: '1.2.3',
+      artefactKind: ArtefactKind.FILE,
+      summary: ['message'],
+      state: ArtefactScanState.Skipped,
+    })
+    expect(result.lastRunAt).toBeInstanceOf(Date)
+  })
+
+  test('skipContentTooLarge() returns minimal error ArtefactScanResult', async () => {
+    const connector = new TestConnector()
+
+    // @ts-expect-ignore accessing protected property
+    const result = connector['skipContentTooLarge'](456)
+
+    expect(result).toMatchObject({
+      toolName: 'TestScanner',
+      scannerVersion: '1.2.3',
+      artefactKind: ArtefactKind.FILE,
+      summary: ['Artefact exceeds configured scanner size limit (456 B > 123 B).'],
+      state: ArtefactScanState.Skipped,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)
   })

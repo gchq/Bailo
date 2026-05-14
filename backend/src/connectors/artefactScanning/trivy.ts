@@ -11,8 +11,8 @@ import {
 } from '../../models/Scan.js'
 import { issueAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
+import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
-import { ContentTooLarge } from '../../utils/error.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
 
 export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
@@ -28,6 +28,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
 
   protected async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
+    let layerSize: number | undefined = undefined
 
     try {
       // User does not pull the layer so attribute to the scanner
@@ -41,18 +42,10 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
           { repository: layer.repository, name: layer.name },
           layer.layerDigest,
         )
-        const layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
+        layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
         if (layerSize != Infinity && layerSize > this.maxSize) {
-          throw ContentTooLarge('Artefact exceeds configured scanner size limit.', {
-            status: 413,
-            statusText: 'Request Entity Too Large',
-            endpoint: this.artefactType,
-            layer,
-            responseBody: {
-              detail: `Maximum content size limit (${this.maxSize}) exceeded (${layerSize} bytes read)`,
-            },
-          })
+          return this.skipContentTooLarge(layerSize)
         }
       }
 
@@ -102,6 +95,10 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         throw err
       }
     } catch (error) {
+      // Content too large
+      if (isBailoError(error) && error.code === 413 && layerSize !== undefined) {
+        return this.skipContentTooLarge(layerSize)
+      }
       return this.scanError(`This image layer could not be scanned due to an error caused by ${this.toolName}`, {
         error,
         layer,

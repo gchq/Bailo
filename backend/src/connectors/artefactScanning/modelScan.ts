@@ -1,51 +1,13 @@
 import PQueue from 'p-queue'
 
-import { getCachedArtefactScanInfo, ModelScanResponse, scanFileStream } from '../../clients/artefactScan.js'
+import { getCachedArtefactScanInfo, scanFileStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
-import { ContentTooLarge } from '../../utils/error.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
-
-const skippedScanTemplate: ModelScanResponse = {
-  summary: {
-    total_issues: 0,
-    total_issues_by_severity: {
-      LOW: 0,
-      MEDIUM: 0,
-      HIGH: 0,
-      CRITICAL: 0,
-    },
-    input_path: '/tmp/fileName.extension',
-    absolute_path: '/tmp',
-    modelscan_version: 'x.y.z',
-    timestamp: 'YYYY-MM-DDTHH:mm:ss.ssssss',
-    scanned: {
-      total_scanned: 0,
-    },
-    skipped: {
-      total_skipped: 1,
-      skipped_files: [
-        {
-          category: 'SCAN_NOT_SUPPORTED',
-          description: 'Model Scan did not scan file',
-          source: 'fileName.extension',
-        },
-      ],
-    },
-  },
-  issues: [],
-  errors: [],
-}
-
-// Match ModelScan's date format
-function formatDate(date = new Date()) {
-  const iso = date.toISOString().replace('Z', '')
-  const micros = String(date.getMilliseconds() * 1000).padStart(6, '0')
-  return iso.replace(/\.\d{3}/, `.${micros}`)
-}
 
 export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
@@ -61,50 +23,18 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     this.maxSize = artefactScanInfo.maxFileSizeBytes ?? this.maxSize
   }
 
-  protected getSkippedScanSummary(file: FileInterfaceDoc): ModelScanResponse {
-    const skippedScanSummary: ModelScanResponse = {
-      ...skippedScanTemplate,
-      summary: {
-        ...skippedScanTemplate.summary,
-        input_path: `/tmp/${file.name}`,
-        timestamp: formatDate(),
-        modelscan_version: this.version!,
-        skipped: { ...skippedScanTemplate.summary.skipped },
-      },
-    }
-    skippedScanSummary.summary.skipped.skipped_files![0].source = file.name
-
-    return skippedScanSummary
-  }
-
   protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
 
     if (file.size > this.maxSize) {
-      throw ContentTooLarge('Artefact exceeds configured scanner size limit.', {
-        status: 413,
-        statusText: 'Request Entity Too Large',
-        endpoint: this.artefactType,
-        fileName: file.name,
-        responseBody: {
-          detail: `Maximum content size limit (${this.maxSize}) exceeded (${file.size} bytes read)`,
-        },
-      })
+      return this.skipContentTooLarge(file.size)
     }
 
     const lowerFileName = file.name.toLowerCase()
     // Do not use `path.extname` as it will not handle compound extensions e.g. `.tar.gz`
     const isSupported = this.supportedExtensions.some((ext) => lowerFileName.endsWith(ext.toLowerCase()))
     if (this.supportedExtensions.length > 0 && !isSupported) {
-      const additionalInfo = this.getSkippedScanSummary(file)
-      log.debug({ file, result: { additionalInfo }, ...scannerInfo }, 'Skipping file scan.')
-      return {
-        ...scannerInfo,
-        state: ArtefactScanState.Complete,
-        summary: [],
-        additionalInfo,
-        lastRunAt: new Date(),
-      }
+      return this.skipUnsupportedFileType(file.name)
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -118,6 +48,10 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
           file,
           ...scannerInfo,
         })
+      }
+
+      if (scanResults.summary.skipped.total_skipped > 0) {
+        return this.skipUnsupportedFileType(file.name)
       }
 
       const summary: ArtefactScanSummary[] = scanResults.issues.map(
@@ -137,6 +71,10 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
         lastRunAt: new Date(),
       }
     } catch (error) {
+      // Content too large
+      if (isBailoError(error) && error.code === 413) {
+        return this.skipContentTooLarge(file.size)
+      }
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error,
         file,
@@ -148,5 +86,11 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
         }
       }
     }
+  }
+
+  protected skipUnsupportedFileType(fileName: string): ArtefactScanResult {
+    return this.scanSkip(
+      `Artefact type is not compatible with this scanner (${fileName} not covered in [${this.supportedExtensions.join(', ')}]).`,
+    )
   }
 }

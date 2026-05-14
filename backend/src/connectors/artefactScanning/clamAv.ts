@@ -5,6 +5,7 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys, ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
@@ -63,13 +64,13 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
   protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
     const scannerInfo = this.info()
     if (!this.av) {
-      return await this.scanError(`Could not use ${this.toolName} as it has not been correctly initialised.`, {
+      return this.scanError(`Could not use ${this.toolName} as it has not been correctly initialised.`, {
         ...scannerInfo,
       })
     }
 
     if (file.size > this.maxSize) {
-      return await this.scanError(`Artefact exceeds configured scanner size limit.`, { ...scannerInfo })
+      return this.skipContentTooLarge(file.size)
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -86,6 +87,10 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
         lastRunAt: new Date(),
       }
     } catch (error) {
+      // Content too large
+      if (isBailoError(error) && error.code === 413) {
+        return this.skipContentTooLarge(file.size)
+      }
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
         file,

@@ -1,4 +1,5 @@
 import PQueue from 'p-queue'
+import prettyBytes from 'pretty-bytes'
 
 import { FileInterface } from '../../models/File.js'
 import { ImageRef } from '../../models/Release.js'
@@ -17,6 +18,7 @@ export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',
   Complete: 'complete',
+  Skipped: 'skipped',
   Error: 'error',
 } as const
 export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
@@ -57,7 +59,7 @@ export abstract class BaseArtefactScanningConnector {
     return scanResult
   }
 
-  async scanError(message: string, context?: object): Promise<ArtefactScanResult> {
+  protected scanError(message: string, context?: Record<string, unknown>): ArtefactScanResult {
     const scannerInfo = this.info()
     log.error({ ...context, ...scannerInfo }, message)
     return {
@@ -65,5 +67,21 @@ export abstract class BaseArtefactScanningConnector {
       state: ArtefactScanState.Error,
       lastRunAt: new Date(),
     }
+  }
+
+  protected scanSkip(reason: string): ArtefactScanResult {
+    const scannerInfo = this.info()
+    return {
+      ...scannerInfo,
+      summary: [reason],
+      state: ArtefactScanState.Skipped,
+      lastRunAt: new Date(),
+    }
+  }
+
+  protected skipContentTooLarge(size: number): ArtefactScanResult {
+    return this.scanSkip(
+      `Artefact exceeds configured scanner size limit (${prettyBytes(size)} > ${prettyBytes(this.maxSize)}).`,
+    )
   }
 }
