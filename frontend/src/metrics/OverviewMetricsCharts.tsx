@@ -23,14 +23,17 @@ interface PieChartData {
   value: number
 }
 
+type BarChartRow = {
+  label: string
+} & Record<string, number | string>
+
 export default function OverviewMetricsCharts({
   data,
   organisationList,
   selectedOrganisation,
 }: OverviewMetricsChartsProps) {
-  //const [stateData, setStateData] = useState<PieChartData[]>([])
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
-  const [structuredModelVolume, setStructuredModelVolume] = useState<any[]>([])
+  const [structuredModelVolume, setStructuredModelVolume] = useState<BarChartRow[]>([])
   const [startDate, setStartDate] = useState<Dayjs | null>(null)
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(new Date()))
   const [errorMessage, setErrorMessage] = useState('')

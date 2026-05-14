@@ -101,9 +101,9 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     [pathname],
   )
 
-  const docList = useCallback(() => {
+  const docList = () => {
     return <StyledList>{createDocElement(directory)}</StyledList>
-  }, [StyledList, createDocElement])
+  }
 
   const currentIndex = useMemo(
     () => flatDirectory.findIndex((item) => item.slug === pathname.replace(/^(\/docs\/)/, '')),

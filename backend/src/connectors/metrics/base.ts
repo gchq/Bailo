@@ -4,7 +4,7 @@ import NodeCache from 'node-cache'
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel from '../../models/Model.js'
+import ModelModel, { SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -353,7 +353,7 @@ async function calculateMissingEntryRoles(
         entryId: model.id,
         missingRoles,
         modelOwners: model.collaborators
-          .filter((collaborator) => collaborator.roles.includes('owner'))
+          .filter((collaborator) => (collaborator.roles ?? []).includes(SystemRoles.Owner))
           .map((collaborator) => collaborator.entity),
       })
     }

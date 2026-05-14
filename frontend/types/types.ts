@@ -971,6 +971,7 @@ export interface OrganisationOverviewMetrics extends OverviewBaseMetrics {
 export interface OverviewMetrics {
   global: OverviewBaseMetrics
   byOrganisation: OrganisationOverviewMetrics[]
+  lastUpdated: string
 }
 
 export interface PolicySummaryMetrics {
@@ -1001,6 +1002,6 @@ export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
 
 export interface PolicyMetrics {
   global: PolicyBaseMetrics
-  byOrganisation: OrganisationPolicyMetrics
+  byOrganisation: OrganisationPolicyMetrics[]
   lastUpdated: string
 }

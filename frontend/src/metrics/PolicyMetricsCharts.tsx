@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
+import { SettingsCategory } from 'src/entry/settings/Settings'
 import Link from 'src/Link'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { PolicyBaseMetrics } from 'types/types'
@@ -29,7 +30,9 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
     return data.entries.map((row) => (
       <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
-          <Link href={`/model/${row.entryId}?tab=settings&category=permissions`}>{row.entryId}</Link>
+          <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
+            {row.entryId}
+          </Link>
         </TableCell>
         <TableCell>
           {row.modelOwners.map((owner) => (
