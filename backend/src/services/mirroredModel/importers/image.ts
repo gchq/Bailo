@@ -31,7 +31,6 @@ export type ImageMirrorMetadataV2 = BaseMirrorMetadata & {
 
 export type ImageMirrorInformation = {
   metadata: ImageMirrorMetadataV1 | ImageMirrorMetadataV2
-  // image: { modelId: string; imageName: string; imageTag: string }
   images: Array<{ modelId: string; imageName: string; imageTag: string }>
 }
 
@@ -42,24 +41,18 @@ export class ImageImporter extends BaseImporter {
   protected readonly imageName?: string
   protected readonly imageTag?: string
   protected manifestBody?: ImageManifestV2 | null = null
-  // New, for V2
   protected manifests = new Map<string, { imageName: string; imageTag: string; manifest: ImageManifestV2 }>()
 
-  // V1 -> { type: 'text', filename: 'manifest.json', content: tagManifestJson },
   static readonly manifestRegexV1 = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,
   )
-  // V2 -> { type: 'text', filename: `images/manifests/${imageName}/${imageTag}.json`, content: tagManifestJson },
-  // regex is more generic to capture the multiple, differently named manifests
   static readonly manifestRegexV2 = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/images/manifests.+json$`,
   )
 
-  // V1 'entryname' -> const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
   static readonly blobRegexV1 = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/sha256\/[0-9a-f]{64}$`,
   )
-  //V2 'entryname' -> const digest = layerDigest.replace(/^sha256:/, '') -> entryName = `images/blobs/sha256/${digest}`
   static readonly blobRegexV2 = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/images\/blobs\/sha256\/[0-9a-f]{64}$`,
   )
