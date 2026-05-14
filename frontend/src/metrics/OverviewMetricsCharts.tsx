@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material'
-import { blueberryTwilightPalette } from '@mui/x-charts'
+import { cheerfulFiestaPaletteDark, mangoFusionPaletteDark } from '@mui/x-charts'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
 import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -42,7 +42,7 @@ export default function OverviewMetricsCharts({
     height: 250,
     margin: { left: 0 },
     yAxis: [{ width: 50 }],
-    colors: blueberryTwilightPalette,
+    colors: cheerfulFiestaPaletteDark,
     borderRadius: 2,
   })
 
@@ -53,9 +53,10 @@ export default function OverviewMetricsCharts({
     sx: {
       [`& .${pieClasses.arcLabel}`]: {
         fontWeight: 'bold',
+        color: 'white',
       },
     },
-    colors: blueberryTwilightPalette,
+    colors: mangoFusionPaletteDark,
   }
 
   const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
@@ -214,6 +215,8 @@ export default function OverviewMetricsCharts({
                     arcLabel: 'value',
                     paddingAngle: 1,
                     cornerRadius: 4,
+                    highlightScope: { fade: 'global', highlight: 'item' },
+                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                   },
                 ]}
                 slotProps={{
@@ -241,6 +244,9 @@ export default function OverviewMetricsCharts({
                     arcLabel: 'value',
                     paddingAngle: 1,
                     cornerRadius: 4,
+                    color: 'red',
+                    highlightScope: { fade: 'global', highlight: 'item' },
+                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                   },
                 ]}
                 slotProps={{

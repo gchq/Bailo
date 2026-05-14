@@ -18,7 +18,7 @@ export default function OverviewStatPanel({ label, value, minWidth }: OverviewSt
         borderColor: theme.palette.divider,
         p: 2,
         textAlign: 'center',
-        minWidth: minWidth || 'unset',
+        minWidth: minWidth,
       }}
     >
       <Stack spacing={2}>

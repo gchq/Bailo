@@ -27,7 +27,7 @@ export function useGetOverviewMetrics() {
 
   return {
     mutateOverviewMetrics: mutate,
-    overviewMetrics: data ? data : undefined,
+    overviewMetrics: data,
     isOverviewMetricsLoading: isLoading,
     isOverviewMetricsError: error,
   }
@@ -38,7 +38,7 @@ export function useGetPolicyMetrics() {
 
   return {
     mutatePolicyMetrics: mutate,
-    policyMetrics: data ? data : undefined,
+    policyMetrics: data,
     isPolicyMetricsLoading: isLoading,
     isPolicyMetricsError: error,
   }

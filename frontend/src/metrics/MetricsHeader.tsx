@@ -52,7 +52,7 @@ export default function MetricsHeader({
                 <Select
                   sx={{ maxWidth: '300px' }}
                   value={selectedOrganisation}
-                  onChange={(e) => handleOrganisationSelectOnChange(e)}
+                  onChange={handleOrganisationSelectOnChange}
                   variant='standard'
                 >
                   <MenuItem key='all' value='All'>
