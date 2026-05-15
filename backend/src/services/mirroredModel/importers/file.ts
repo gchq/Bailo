@@ -4,12 +4,14 @@ import { Headers } from 'tar-stream'
 
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
+import { TransferStatus } from '../../../models/ModelTransfer.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { createFilePath } from '../../../utils/fileUtils.js'
 import { markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
+import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
@@ -75,8 +77,31 @@ export class FileImporter extends BaseImporter {
     }
   }
 
+  async handleStreamError(
+    error: unknown,
+    _resolve: (reason?: any) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    await updateArtefactTransferStatus(
+      this.metadata.exportId,
+      this.metadata.filePath,
+      MirrorKind.File,
+      TransferStatus.Failed,
+    )
+    await super.handleStreamError(error, _resolve, reject)
+  }
+
   // Type resolve
-  handleStreamCompletion(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
+  async handleStreamCompletion(
+    resolve: (reason?: FileMirrorInformation) => void,
+    _reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    await updateArtefactTransferStatus(
+      this.metadata.exportId,
+      this.metadata.filePath,
+      MirrorKind.File,
+      TransferStatus.Completed,
+    )
     resolve({ metadata: this.metadata, sourcePath: this.metadata.filePath, newPath: this.updatedPath })
   }
 }

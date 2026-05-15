@@ -8,7 +8,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const getModelTransfersSchema = z.object({
   params: z.object({
-    modelId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+    modelId: z.string().openapi({ example: 'model-abc123' }),
   }),
 })
 
@@ -23,7 +23,7 @@ registerPath({
       description: 'The transfers for this model',
       content: {
         'application/json': {
-          schema: z.array(modelTransferSchema),
+          schema: z.object({ transfers: z.array(modelTransferSchema) }),
         },
       },
     },

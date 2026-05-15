@@ -34,6 +34,7 @@ vi.mock('../../../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
   warn: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({
