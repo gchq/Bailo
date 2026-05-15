@@ -216,7 +216,6 @@ export default function OverviewMetricsCharts({
                     paddingAngle: 1,
                     cornerRadius: 4,
                     highlightScope: { fade: 'global', highlight: 'item' },
-                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                   },
                 ]}
                 slotProps={{
@@ -246,7 +245,6 @@ export default function OverviewMetricsCharts({
                     cornerRadius: 4,
                     color: 'red',
                     highlightScope: { fade: 'global', highlight: 'item' },
-                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                   },
                 ]}
                 slotProps={{
