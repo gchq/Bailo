@@ -20,6 +20,8 @@ function safeParseVersion(versionStr: string): string {
 }
 
 function safeParseSize(sizeStr: string): number {
+  // Match a string for any number of digits followed by their units (e.g. KB)
+  // Then extract digits to capture group 1, and units to capture group 2
   const match = sizeStr.trim().match(/^(\d+)\s*([KMG])?B?$/i)
   if (!match) {
     throw InternalError('Invalid ClamAV size value.', { sizeStr })

@@ -21,14 +21,17 @@ def extract_supported_file_types(settings: dict[str, Any]) -> set[str]:
     """
     supported: set[str] = set()
 
+    # Top-level zip extensions
     supported.update(settings.get("supported_zip_extensions", []) or [])
 
+    # Extensions from each scanner
     scanners = settings.get("scanners") or {}
     if isinstance(scanners, dict):
         for scanner in scanners.values():
             if isinstance(scanner, dict):
                 supported.update(scanner.get("supported_extensions", []) or [])
 
+    # Extensions from each middleware's format map
     middlewares = settings.get("middlewares") or {}
     if isinstance(middlewares, dict):
         for middleware in middlewares.values():
@@ -39,6 +42,7 @@ def extract_supported_file_types(settings: dict[str, Any]) -> set[str]:
                         if isinstance(extensions, (list, set, tuple)):
                             supported.update(extensions)
 
+    # Normalise all extensions to lowercase before returning
     return {ext.lower() for ext in supported}
 
 
