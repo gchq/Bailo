@@ -5,19 +5,19 @@ export const toTitleCase = (value: string): string => {
     .replace(/[-_]/g, ' ')
     .split(' ')
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
-    .join(' ')
+    .join(' ');
 }
 
 export const camelCaseToTitleCase = (value: string): string => {
-  return toTitleCase(value.replace(/([A-Z])/g, ' $1'))
+  return toTitleCase(value.replace(/([A-Z])/g, ' $1'));
 }
 
 export const toSentenceCase = (value: string): string => {
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`.replace(/[-_]/g, ' ')
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`.replace(/[-_]/g, ' ');
 }
 
 export const camelCaseToSentenceCase = (value: string): string => {
-  return toSentenceCase(value.replace(/([A-Z])/g, ' $1'))
+  return toSentenceCase(value.replace(/([A-Z])/g, ' $1'));
 }
 
 export const plural = (value: number, phrase: string) => {
@@ -47,11 +47,11 @@ export const toKebabCase = (value: string): string => {
   return value
     .replace(/[^\w -]/g, '')
     .replaceAll(' ', '-')
-    .toLowerCase()
+    .toLowerCase();
 }
 
 export const camelCasetoKebabCase = (value: string): string => {
-  return value.replaceAll(/([a-z]+)([A-Z]+[a-z]*)/g, '$1-$2').toLowerCase()
+  return value.replaceAll(/([a-z]+)([A-Z]+[a-z]*)/g, '$1-$2').toLowerCase();
 }
 
 export const truncateText = (text: string | undefined, limit: number = 100) => {

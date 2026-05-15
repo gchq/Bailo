@@ -50,11 +50,13 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     >
       <Stack
         direction='row'
-        justifyContent='space-between'
-        alignItems='center'
         spacing={2}
-        sx={{ px: 2, width: '100%' }}
-      >
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          px: 2,
+          width: '100%'
+        }}>
         <Stack direction='row' spacing={1}>
           <ReviewIcon />
           <Typography>Ready for review</Typography>
@@ -64,5 +66,5 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         </Button>
       </Stack>
     </Paper>
-  )
+  );
 }

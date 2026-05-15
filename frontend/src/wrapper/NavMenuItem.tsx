@@ -27,10 +27,10 @@ export function NavMenuItem({
 }: NavMenuItemProps) {
   const theme = useTheme()
   return (
-    <ListItem disablePadding>
-      <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%' }}>
+    <ListItem disablePadding dense={drawerOpen}>
+      <Link href={href} newTab={openLinkInNewTab} noLinkStyle>
         <ListItemButton selected={selectedPage === menuPage}>
-          <ListItemIcon>
+          <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
                 <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>

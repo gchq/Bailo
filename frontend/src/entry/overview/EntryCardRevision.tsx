@@ -26,7 +26,9 @@ export default function EntryCardRevision({ entryCard, entryKind }: EntryCardRev
         sx={{ '&:hover': { cursor: 'pointer' } }}
       >
         <TableCell>
-          <Stack direction='row' alignItems='center' spacing={1}>
+          <Stack direction='row' spacing={1} sx={{
+            alignItems: 'center'
+          }}>
             <Typography sx={{ color: theme.palette.secondary.main }}>{entryCard.version}</Typography>
             <Typography variant='caption'>{entryCard.mirrored && `(Mirrored)`}</Typography>
           </Stack>
@@ -37,5 +39,5 @@ export default function EntryCardRevision({ entryCard, entryKind }: EntryCardRev
         <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateString(entryCard.createdAt)}</TableCell>
       </TableRow>
     </TableBody>
-  )
+  );
 }

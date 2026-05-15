@@ -23,7 +23,13 @@ export default function ReviewRolesForm() {
   const [loading, setLoading] = useState(false)
 
   const newReviewRoleHeading = (
-    <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+    <Stack
+      spacing={2}
+      sx={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        mb: 4
+      }}>
       <Typography variant='h6' component='h1'>
         Create new Role
       </Typography>

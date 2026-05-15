@@ -1,4 +1,4 @@
-import ErrorIcon from '@mui/icons-material/ErrorOutline'
+import ErrorIcon from '@mui/icons-material/ErrorOutlined'
 import { Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { StepNoRender } from 'types/types'

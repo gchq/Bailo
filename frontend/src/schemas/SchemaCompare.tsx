@@ -57,9 +57,10 @@ export default function SchemaCompare() {
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 2, sm: 6 }}
-          justifyContent='center'
-          alignItems='center'
-        >
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
           <Autocomplete
             disablePortal
             options={schemas}
@@ -87,5 +88,5 @@ export default function SchemaCompare() {
         {schemaDiff}
       </Stack>
     </Box>
-  )
+  );
 }

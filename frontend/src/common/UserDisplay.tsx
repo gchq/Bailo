@@ -23,7 +23,6 @@ export type UserDisplayProps = {
   dn: string
   hidePopover?: boolean
   displayAsAvatar?: boolean
-  smallAvatars?: boolean
   showIcon?: boolean
 }
 
@@ -31,7 +30,6 @@ export default function UserDisplay({
   dn,
   hidePopover = false,
   displayAsAvatar = false,
-  smallAvatars = false,
   showIcon = false,
 }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -64,19 +62,26 @@ export default function UserDisplay({
         data-test='userDisplayName'
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
-        fontWeight='bold'
         onMouseEnter={(e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         onMouseLeave={() => setAnchorEl(null)}
+        sx={{
+          fontWeight: 'bold',
+        }}
       >
         {displayAsAvatar ? (
           <UserAvatar
             entity={{ kind: (dn.split(':')[0] as EntityKind) || EntityKind.USER, id: dn.split(':')[1] || dn }}
-            size={smallAvatars ? 'chip' : undefined}
           />
         ) : (
           <>
             {userInformation ? (
-              <Stack direction='row' alignItems='center' spacing={1}>
+              <Stack
+                direction='row'
+                spacing={1}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
                 {showIcon && (
                   <EntityIcon
                     entryCollaborator={{
@@ -88,7 +93,13 @@ export default function UserDisplay({
                 <Typography>{userInformation.name}</Typography>
               </Stack>
             ) : (
-              <Stack direction='row' alignItems='center' spacing={1}>
+              <Stack
+                direction='row'
+                spacing={1}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
                 {showIcon && <Error color='error' />}
                 <Typography color='error'>Unknown User/Group</Typography>
               </Stack>
@@ -119,9 +130,21 @@ export default function UserDisplay({
           disableRestoreFocus
         >
           <Stack spacing={1} sx={{ p: 2 }}>
-            <Stack direction='row' alignItems='center' spacing={1}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <UserIcon color='primary' />
-              <Typography color='primary' fontWeight='bold' data-test='userDisplayNameProperty'>
+              <Typography
+                color='primary'
+                data-test='userDisplayNameProperty'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}
               </Typography>
             </Stack>
@@ -131,10 +154,21 @@ export default function UserDisplay({
             )}
             {userInformation && (
               <>
-                <Stack direction='row' spacing={1} alignItems='center'>
+                <Stack
+                  direction='row'
+                  spacing={1}
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   <EmailIcon color='primary' />
                   <Typography data-test='userDisplayEmailProperty'>
-                    <Box component='span' fontWeight='bold'>
+                    <Box
+                      component='span'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       Email
                     </Box>
                     : {userInformation.email}
@@ -151,7 +185,12 @@ export default function UserDisplay({
                       <Stack direction='row' spacing={1} key={key}>
                         <Label color='primary' />
                         <Typography data-test={`userDisplayDynamicProperty-${key}`}>
-                          <Box component='span' fontWeight='bold'>
+                          <Box
+                            component='span'
+                            sx={{
+                              fontWeight: 'bold',
+                            }}
+                          >
                             {key.charAt(0).toUpperCase() + key.slice(1)}
                           </Box>
                           : {userInformation[key]}

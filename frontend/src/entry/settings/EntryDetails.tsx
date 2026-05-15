@@ -66,30 +66,46 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
 
   const privateLabel = () => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Private</Typography>
+          <Typography sx={{
+            fontWeight: 'bold'
+          }}>Private</Typography>
           <Typography variant='caption'>{`Only named individuals will be able to view this ${
             EntryKindLabel[entry.kind]
           }`}</Typography>
         </Stack>
       </Stack>
-    )
+    );
   }
 
   const publicLabel = () => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Public</Typography>
+          <Typography sx={{
+            fontWeight: 'bold'
+          }}>Public</Typography>
           <Typography variant='caption'>{`Any authorised user will be able to see this ${
             EntryKindLabel[entry.kind]
           }`}</Typography>
         </Stack>
       </Stack>
-    )
+    );
   }
 
   return (

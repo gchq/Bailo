@@ -16,7 +16,7 @@ export default function EntryCard({ title, description, dataTest, handleClick, m
         width: '100%',
       }}
     >
-      <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center'>
+      <Stack direction='row' spacing={2} sx={{ justifyContent: 'space-between' }} alignItems='center'>
         <Stack spacing={1}>
           <Stack direction='row' spacing={1}>
             <Typography component='h2' fontWeight='bold' color='primary'>

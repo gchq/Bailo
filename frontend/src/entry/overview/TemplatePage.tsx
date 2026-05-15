@@ -24,7 +24,12 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
 
   return (
     <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
-      <Stack spacing={4} justifyContent='center' alignItems='center'>
+      <Stack
+        spacing={4}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
         <Typography component='h2' variant='h6' color='primary' data-test='createEntryCardOverview'>
           {`Create ${toTitleCase(EntryCardKindLabel[entry.kind])}`}
         </Typography>
@@ -33,10 +38,11 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
         <Stack
           direction={{ sm: 'column', md: 'row' }}
           spacing={4}
-          justifyContent='center'
-          alignItems='center'
           divider={<Divider orientation='vertical' flexItem />}
-        >
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
           <Card
             sx={{
               width: '300px',
@@ -91,5 +97,5 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
         </Stack>
       </Stack>
     </Box>
-  )
+  );
 }

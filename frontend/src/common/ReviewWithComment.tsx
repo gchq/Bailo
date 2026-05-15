@@ -2,7 +2,7 @@ import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
@@ -44,7 +44,20 @@ export default function ReviewWithComment({
   const [reviewComment, setReviewComment] = useState('')
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
-  const [showUndoButton, setShowUndoButton] = useState(false)
+
+  function showUndoButton() {
+    if (reviewRequest) {
+      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
+        (latestReview) => latestReview.role === reviewRequest.role,
+      )
+      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
+        return true
+      } else {
+        return false
+      }
+    }
+    return false
+  }
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -69,23 +82,6 @@ export default function ReviewWithComment({
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
   }
-
-  const updateUndoButton = useEffectEvent((show: boolean) => {
-    setShowUndoButton(show)
-  })
-
-  useEffect(() => {
-    if (reviewRequest) {
-      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
-        (latestReview) => latestReview.role === reviewRequest.role,
-      )
-      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
-        updateUndoButton(true)
-      } else {
-        updateUndoButton(false)
-      }
-    }
-  }, [responses, reviewRequest])
 
   useEffect(() => {
     if (reviewRequest && !router.query.role) {
@@ -168,11 +164,13 @@ export default function ReviewWithComment({
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
               <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-                {showUndoButton && (
+                {showUndoButton() && (
                   <>
                     <Button
                       onClick={() => submitForm(Decision.Undo)}

@@ -91,10 +91,9 @@ export default function JsonSchemaViewer({
                 <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                   <Typography
                     sx={{
-                      wordBreak: 'break-word',
-                    }}
-                    width='100%'
-                  >
+                      width: '100%',
+                      wordBreak: 'break-word'
+                    }}>
                     {step.schema.title}
                   </Typography>
                   {displayLabelValidation && <ValidationErrorIcon step={step} />}
@@ -134,5 +133,5 @@ export default function JsonSchemaViewer({
         </Form>
       </Grid>
     </Grid>
-  )
+  );
 }

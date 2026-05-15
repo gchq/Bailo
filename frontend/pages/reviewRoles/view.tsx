@@ -5,7 +5,7 @@ import { useGetEntryRoles } from 'actions/entry'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { ChangeEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { ChangeEvent, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -22,7 +22,14 @@ import { getRoleDisplayName } from 'utils/roles'
 import { plural } from 'utils/stringUtils'
 
 const editReviewRoleHeading = (
-  <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+  <Stack
+    spacing={2}
+    sx={{
+      alignItems: 'center',
+      justifyContent: 'center',
+      mb: 4,
+    }}
+  >
     <Typography variant='h6' component='h1'>
       Update Existing Role
     </Typography>
@@ -44,11 +51,6 @@ export default function ReviewRoles() {
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   const [isEdit, setIsEdit] = useState<boolean>(false)
-  const [formData, setFormData] = useState<UpdateReviewRolesParams>({
-    name: '',
-    shortName: '',
-    systemRole: '',
-  })
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -68,15 +70,7 @@ export default function ReviewRoles() {
     }
   }
 
-  const onSetFormData = useEffectEvent((newFormData: UpdateReviewRolesParams) => {
-    setFormData(newFormData)
-  })
-
-  useEffect(() => {
-    if (reviewRoles) {
-      onSetFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
-    }
-  }, [reviewRoles, selectedRole])
+  const formData = removeExcessReviewRoleParams(reviewRoles[selectedRole])
 
   const listRoles = useMemo(
     () =>
@@ -146,7 +140,14 @@ export default function ReviewRoles() {
   const displayReviewRoleDefaultEntities = useMemo(() => {
     return formData?.defaultEntities && formData?.defaultEntities.length > 0
       ? formData.defaultEntities.map((defaultEntity) => (
-          <Stack key={defaultEntity} direction='row' alignItems='center' spacing={1}>
+          <Stack
+            key={defaultEntity}
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <UserDisplay dn={defaultEntity} showIcon />
           </Stack>
         ))
@@ -162,19 +163,34 @@ export default function ReviewRoles() {
               {!isEdit ? (
                 <Stack spacing={2}>
                   <Box>
-                    <Typography color='primary' fontWeight='bold'>
+                    <Typography
+                      color='primary'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       Name
                     </Typography>
                     <Typography>{formData.name}</Typography>
                   </Box>
                   <Box>
-                    <Typography color='primary' fontWeight='bold'>
+                    <Typography
+                      color='primary'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       Description
                     </Typography>
                     <Typography>{formData?.description || 'No description'}</Typography>
                   </Box>
                   <Box>
-                    <Typography color='primary' fontWeight='bold'>
+                    <Typography
+                      color='primary'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       System Role
                     </Typography>
                     <Typography>
@@ -182,12 +198,22 @@ export default function ReviewRoles() {
                     </Typography>
                   </Box>
                   <Box>
-                    <Typography color='primary' fontWeight='bold'>
+                    <Typography
+                      color='primary'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       Default entities
                     </Typography>
                     {displayReviewRoleDefaultEntities}
                   </Box>
-                  <Box display='flex' ml='auto'>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      ml: 'auto',
+                    }}
+                  >
                     <Stack direction='row' spacing={2}>
                       <Button
                         color='primary'
@@ -289,7 +315,15 @@ export default function ReviewRoles() {
   return (
     <>
       <Title text='View Review Roles' />
-      <Stack mx={2} mb={1} direction='row' divider={<Divider flexItem orientation='vertical' />} spacing={2}>
+      <Stack
+        direction='row'
+        divider={<Divider flexItem orientation='vertical' />}
+        spacing={2}
+        sx={{
+          mx: 2,
+          mb: 1,
+        }}
+      >
         <Typography component='h1' color='primary' variant='h6' noWrap data-test='ReviewRolesTitle'>
           Review Roles
         </Typography>

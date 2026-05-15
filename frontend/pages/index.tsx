@@ -31,7 +31,7 @@ import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -52,16 +52,84 @@ interface KeyAndLabel {
 const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 
 export default function Marketplace() {
-  const [filter, setFilter] = useState('')
+  const router = useRouter()
+
+  const {
+    filter: filterFromQuery,
+    peers: peersFromQuery,
+    organisations: organisationsFromQuery,
+    states: statesFromQuery,
+    tags: tagsFromQuery,
+    titleOnly: titleOnlyFromQuery,
+  } = router.query
+
+  function getTagsFromQuery() {
+    if (tagsFromQuery) {
+      let tagsAsArray: string[] = []
+      if (typeof tagsFromQuery === 'string') {
+        tagsAsArray.push(tagsFromQuery)
+      } else {
+        tagsAsArray = [...tagsFromQuery]
+      }
+      return [...tagsAsArray]
+    } else {
+      return []
+    }
+  }
+
+  function getOrganisationsFromQuery() {
+    if (organisationsFromQuery) {
+      let organisationsAsArray: string[] = []
+      if (typeof organisationsFromQuery === 'string') {
+        organisationsAsArray.push(organisationsFromQuery)
+      } else {
+        organisationsAsArray = [...organisationsFromQuery]
+      }
+
+      return [...organisationsAsArray]
+    } else {
+      return []
+    }
+  }
+
+  function getStatesFromQuery() {
+    if (statesFromQuery) {
+      let statesAsArray: string[] = []
+      if (typeof statesFromQuery === 'string') {
+        statesAsArray.push(statesFromQuery)
+      } else {
+        statesAsArray = [...statesFromQuery]
+      }
+      return [...statesAsArray]
+    } else {
+      return []
+    }
+  }
+
+  function getPeersFromQuery() {
+    if (peersFromQuery) {
+      let peersAsArray: string[] = []
+      if (typeof peersFromQuery === 'string') {
+        peersAsArray.push(peersFromQuery)
+      } else {
+        peersAsArray = [...peersFromQuery]
+      }
+      return [...peersAsArray]
+    } else {
+      return []
+    }
+  }
+
+  const [filter, setFilter] = useState((filterFromQuery as string) || '')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
-  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
-  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
-  const [selectedStates, setSelectedStates] = useState<string[]>([])
-  const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
+  const [selectedPeers, setSelectedPeers] = useState<string[]>(getPeersFromQuery())
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>(getOrganisationsFromQuery())
+  const [selectedStates, setSelectedStates] = useState<string[]>(getStatesFromQuery())
+
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [titleOnly, setTitleOnly] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>(getTagsFromQuery())
+  const [titleOnly, setTitleOnly] = useState(titleOnlyFromQuery === 'true' ? true : false)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -145,70 +213,16 @@ export default function Marketplace() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
+  const roleOptions = useMemo(() => {
+    return [
+      ...defaultRoleOptions,
+      ...reviewRoles.map((role) => {
+        return { key: role.shortName, label: `${role.name}` }
+      }),
+    ]
+  }, [reviewRoles])
+
   const theme = useTheme()
-  const router = useRouter()
-
-  const {
-    filter: filterFromQuery,
-    task: taskFromQuery,
-    peers: peersFromQuery,
-    organisations: organisationsFromQuery,
-    states: statesFromQuery,
-    tags: tagsFromQuery,
-    titleOnly: titleOnlyFromQuery,
-  } = router.query
-
-  useEffect(() => {
-    if (filterFromQuery) {
-      setFilter(filterFromQuery as string)
-    }
-    if (tagsFromQuery) {
-      let tagsAsArray: string[] = []
-      if (typeof tagsFromQuery === 'string') {
-        tagsAsArray.push(tagsFromQuery)
-      } else {
-        tagsAsArray = [...tagsFromQuery]
-      }
-      setSelectedTags([...tagsAsArray])
-    }
-    if (organisationsFromQuery) {
-      let organisationsAsArray: string[] = []
-      if (typeof organisationsFromQuery === 'string') {
-        organisationsAsArray.push(organisationsFromQuery)
-      } else {
-        organisationsAsArray = [...organisationsFromQuery]
-      }
-      setSelectedOrganisations([...organisationsAsArray])
-    }
-    if (statesFromQuery) {
-      let statesAsArray: string[] = []
-      if (typeof statesFromQuery === 'string') {
-        statesAsArray.push(statesFromQuery)
-      } else {
-        statesAsArray = [...statesFromQuery]
-      }
-      setSelectedStates([...statesAsArray])
-    }
-
-    if (peersFromQuery) {
-      let peersAsArray: string[] = []
-      if (typeof peersFromQuery === 'string') {
-        peersAsArray.push(peersFromQuery)
-      } else {
-        peersAsArray = [...peersFromQuery]
-      }
-      setSelectedPeers([...peersAsArray])
-    }
-    setTitleOnly(titleOnlyFromQuery === 'true')
-  }, [
-    filterFromQuery,
-    taskFromQuery,
-    tagsFromQuery,
-    organisationsFromQuery,
-    statesFromQuery,
-    peersFromQuery,
-    titleOnlyFromQuery,
-  ])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -328,17 +342,6 @@ export default function Marketplace() {
     return errorMessage
   }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
 
-  useEffect(() => {
-    if (reviewRoles) {
-      setRoleOptions([
-        ...defaultRoleOptions,
-        ...reviewRoles.map((role) => {
-          return { key: role.shortName, label: `${role.name}` }
-        }),
-      ])
-    }
-  }, [reviewRoles])
-
   if (
     isReviewRolesLoading ||
     isUiConfigLoading ||
@@ -383,8 +386,21 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left'>
-                <Typography component='h2' variant='h5' fontWeight='bold'>
+              <Stack
+                direction='row'
+                spacing={0.5}
+                sx={{
+                  marginBottom: 2,
+                  justifyContent: 'left',
+                }}
+              >
+                <Typography
+                  component='h2'
+                  variant='h5'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Filters
                 </Typography>
                 <HelpDialog title='Search Info' content={<SearchInfo />} />
@@ -519,7 +535,12 @@ export default function Marketplace() {
                   />
                 </Box>
               </Stack>
-              <Box justifySelf='center' marginTop={1}>
+              <Box
+                sx={{
+                  justifySelf: 'center',
+                  marginTop: 1,
+                }}
+              >
                 <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
                   Reset filters
                 </Button>

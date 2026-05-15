@@ -214,7 +214,11 @@ export default function NewToken() {
             </div>
             <Stack spacing={2}>
               <Stack>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Description <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
@@ -230,10 +234,21 @@ export default function NewToken() {
                 />
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Entries <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                <Stack direction='row' alignItems='start' justifyContent='center' spacing={2}>
+                <Stack
+                  direction='row'
+                  spacing={2}
+                  sx={{
+                    alignItems: 'start',
+                    justifyContent: 'center',
+                  }}
+                >
                   <FormControl>
                     <FormControlLabel
                       control={
@@ -270,10 +285,21 @@ export default function NewToken() {
                 </Stack>
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Permissions <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                <Stack direction='row' alignItems='start' justifyContent='center' spacing={2}>
+                <Stack
+                  direction='row'
+                  spacing={2}
+                  sx={{
+                    alignItems: 'start',
+                    justifyContent: 'center',
+                  }}
+                >
                   <FormControl>
                     <FormControlLabel
                       control={
@@ -297,11 +323,15 @@ export default function NewToken() {
                     getLimitTagsText={(more) => `+${plural(more, 'action')}`}
                     onChange={handleSelectedActionsChange}
                     renderInput={(params) => <TextField {...params} required size='small' />}
-                    renderTags={renderActionTags}
+                    renderValue={renderActionTags}
                   />
                 </Stack>
               </Stack>
-              <Stack alignItems='flex-end'>
+              <Stack
+                sx={{
+                  alignItems: 'flex-end',
+                }}
+              >
                 <Button
                   variant='contained'
                   loading={isLoading}

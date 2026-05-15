@@ -67,7 +67,13 @@ export default function SchemaListItem({
           />
         }
       />
-      <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center' sx={{ ml: 2 }}>
+      <Stack
+        spacing={1}
+        direction={{ xs: 'column', md: 'row' }}
+        sx={{
+          alignItems: 'center',
+          ml: 2
+        }}>
         <Chip
           label={schema.active ? 'Active' : 'Inactive'}
           size='small'
@@ -123,5 +129,5 @@ export default function SchemaListItem({
       />
       <UsageListDialog open={entriesListOpen} schema={schema} onClose={handleEntriesListDialogClose} />
     </ListItem>
-  )
+  );
 }

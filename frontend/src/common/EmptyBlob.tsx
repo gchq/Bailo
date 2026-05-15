@@ -10,19 +10,20 @@ type EmptyBlobProps = {
 
 export default function EmptyBlob({ text, style }: EmptyBlobProps) {
   return (
-    <Stack spacing={1} alignItems='center' style={style}>
+    <Stack spacing={1} style={style} sx={{
+      alignItems: 'center'
+    }}>
       <Image src='/emptyBlob.svg' alt='Empty blob' width={120} height={120} data-test='emptyBlobImage' />
       <Typography
         sx={{
+          color: 'text.secondary',
           whiteSpace: 'normal',
           wordBreak: 'break-word',
           maxWidth: '100%',
-          textAlign: 'center',
-        }}
-        color='text.secondary'
-      >
+          textAlign: 'center'
+        }}>
         {text}
       </Typography>
     </Stack>
-  )
+  );
 }

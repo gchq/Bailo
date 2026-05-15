@@ -55,7 +55,9 @@ export default function ReleaseAssetsAccordion({
           data-test={`release-files-accordion-${release.semver}`}
         >
           <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
-            <Typography fontWeight='bold'>
+            <Typography sx={{
+              fontWeight: 'bold'
+            }}>
               {`${expanded === 'files' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}
             </Typography>
           </AccordionSummary>
@@ -91,7 +93,9 @@ export default function ReleaseAssetsAccordion({
       {release.images.length > 0 && (
         <Accordion expanded={expanded === 'images'} onChange={handleAccordionChange('images')}>
           <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
-            <Typography fontWeight='bold'>
+            <Typography sx={{
+              fontWeight: 'bold'
+            }}>
               {`${expanded === 'images' ? 'Hide' : 'Show'} ${plural(release.images.length, 'Docker image')}`}
             </Typography>
           </AccordionSummary>
@@ -109,5 +113,5 @@ export default function ReleaseAssetsAccordion({
         </Accordion>
       )}
     </Stack>
-  )
+  );
 }

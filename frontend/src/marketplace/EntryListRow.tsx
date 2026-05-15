@@ -70,23 +70,28 @@ export default function EntryListRow({
 
   return (
     <Box
-      justifyContent='flex-start'
-      alignItems='center'
+      key={entry.id}
       sx={{
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         px: 3,
         py: 1,
         margin: 'auto',
-        ...style,
-      }}
-      key={entry.id}
-    >
+        ...style
+      }}>
       <Stack spacing={1}>
         <Link
           sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
           href={href}
           target={isExternal ? '_blank' : '_self'}
         >
-          <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
+          <Stack
+            spacing={1}
+            direction='row'
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
             <Typography
               variant='h5'
               component='h2'
@@ -126,7 +131,14 @@ export default function EntryListRow({
       <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
         {entry.description}
       </Typography>
-      <Stack direction='row' spacing={1} alignItems='center' sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          rowGap: 1
+        }}>
         <Stack direction='row' spacing={1}>
           {displayOrganisation && entry.organisation && (
             <ChipSelector
@@ -173,5 +185,5 @@ export default function EntryListRow({
         />
       </Stack>
     </Box>
-  )
+  );
 }
