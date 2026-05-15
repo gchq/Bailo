@@ -163,6 +163,8 @@ export default function OverviewMetricsCharts({
               setStartDate(newValue)
               setErrorMessage('')
             }}
+            minDate={dayjs('1970/01/01')}
+            maxDate={dayjs(new Date())}
           />
           <Typography fontWeight='bold' variant='h6' color='primary'>
             -
@@ -175,6 +177,8 @@ export default function OverviewMetricsCharts({
               setEndDate(newValue)
               setErrorMessage('')
             }}
+            minDate={dayjs('1970/01/01')}
+            maxDate={dayjs(new Date())}
           />
         </Stack>
         <Typography color='error'>{errorMessage}</Typography>

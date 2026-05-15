@@ -1,14 +1,25 @@
-import { Box, List, ListItem, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import {
+  Box,
+  Chip,
+  List,
+  ListItem,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryRoles } from 'actions/entry'
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { PolicyBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
@@ -17,6 +28,8 @@ interface PolicyMetricsChartsProps {
 
 export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) {
   const theme = useTheme()
+
+  const [missingRoleFilters, setMissingRolesFilters] = useState<string[]>([])
 
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
@@ -27,45 +40,67 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
     }
   }, [entryRoles])
 
-  const displayMissingRoleCounts = useMemo(() => {
+  const handleChipFilterOnClick = useCallback(
+    (roleId: string) => {
+      if (!missingRoleFilters.includes(roleId)) {
+        setMissingRolesFilters([...missingRoleFilters, roleId])
+      } else {
+        setMissingRolesFilters(missingRoleFilters.filter((roleFilter) => roleFilter !== roleId))
+      }
+    },
+    [missingRoleFilters],
+  )
+
+  const displayMissingRoleCountChips = useMemo(() => {
     return data.summary.map((roleSummary) => {
       return (
-        <OverviewStatPanel
+        <Chip
           key={roleSummary.roleId}
-          label={`entries missing ${roleSummary.roleId.toUpperCase()}`}
-          value={roleSummary.count}
+          label={`${roleSummary.count} entries missing ${roleSummary.roleId}`}
+          variant={missingRoleFilters.includes(roleSummary.roleId) ? 'filled' : 'outlined'}
+          onClick={() => handleChipFilterOnClick(roleSummary.roleId)}
+          color='primary'
         />
       )
     })
-  }, [data.summary])
+  }, [data.summary, handleChipFilterOnClick, missingRoleFilters])
 
   const tableRows = useMemo(() => {
-    return data.entries.map((row) => (
-      <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-        <TableCell component='th' scope='row'>
-          <Typography maxWidth='500px'>
-            <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
-              {row.entryId}
-            </Link>
-          </Typography>
-        </TableCell>
-        <TableCell>
-          {row.modelOwners.map((owner) => (
-            <UserDisplay key={owner} dn={owner} />
-          ))}
-        </TableCell>
-        <TableCell>
-          <List dense>
-            {row.missingRoles.map((missingRole) => (
-              <ListItem key={missingRole.roleId} sx={{ pl: 0 }}>
-                {missingRole.roleName}
-              </ListItem>
+    return data.entries
+      .filter((row) => {
+        if (missingRoleFilters.length === 0) {
+          return row
+        }
+        const concatDataAndFilter = missingRoleFilters.concat(row.missingRoles.map((missingRole) => missingRole.roleId))
+        const duplicates = concatDataAndFilter.filter((item, index) => concatDataAndFilter.indexOf(item) !== index)
+        return duplicates.length > 0
+      })
+      .map((row) => (
+        <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+          <TableCell component='th' scope='row'>
+            <Typography maxWidth='500px'>
+              <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
+                {row.entryId}
+              </Link>
+            </Typography>
+          </TableCell>
+          <TableCell>
+            {row.modelOwners.map((owner) => (
+              <UserDisplay key={owner} dn={owner} />
             ))}
-          </List>
-        </TableCell>
-      </TableRow>
-    ))
-  }, [data.entries])
+          </TableCell>
+          <TableCell>
+            <List dense>
+              {row.missingRoles.map((missingRole) => (
+                <ListItem key={missingRole.roleId} sx={{ pl: 0 }}>
+                  {missingRole.roleName}
+                </ListItem>
+              ))}
+            </List>
+          </TableCell>
+        </TableRow>
+      ))
+  }, [data.entries, missingRoleFilters])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
@@ -82,7 +117,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
   return (
     <Stack spacing={4}>
       <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
-        {displayMissingRoleCounts}
+        {displayMissingRoleCountChips}
       </Stack>
       <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography fontWeight='bold' variant='h6' color='primary'>
