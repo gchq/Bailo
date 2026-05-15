@@ -25,18 +25,20 @@ export default function MetricsHeader({
     if (!data) {
       return []
     }
-    return data.byOrganisation
-      .map((organisationSubset) => organisationSubset.organisation)
-      .map((organisation) => (
-        <MenuItem key={organisation} value={organisation}>
-          {organisation === 'unset' ? <em>No organisation</em> : organisation}
-        </MenuItem>
-      ))
+    return new Set(
+      data.byOrganisation
+        .map((organisationSubset) => organisationSubset.organisation)
+        .map((organisation) => (
+          <MenuItem key={organisation} value={organisation}>
+            {organisation === 'unset' ? <em>No organisation</em> : organisation}
+          </MenuItem>
+        )),
+    )
   }, [data])
 
   const handleOrganisationSelectOnChange = useCallback(
     (event: SelectChangeEvent) => {
-      onOrganisationChange(event.target.value)
+      onOrganisationChange(event.target.value as string)
     },
     [onOrganisationChange],
   )

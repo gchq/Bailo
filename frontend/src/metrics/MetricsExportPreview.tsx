@@ -36,7 +36,7 @@ export default function MetricsExportPreview({
       <DialogContent ref={contentRef}>
         <Stack spacing={2} divider={<Divider />}>
           <Stack direction='row' alignItems='center'>
-            <Image src={logo} alt='podman-icon' width={180} height={70} />
+            <Image src={logo} alt='bailo logo' width={180} height={70} />
             <Typography variant='h4' component='h1' sx={{ pl: 1 }} fontWeight='bold' color='primary'>
               {exportDocumentTitle}
             </Typography>

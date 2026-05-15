@@ -104,11 +104,10 @@ export default function OverviewMetricsCharts({
   }, [data.schemaBreakdown])
 
   const updateModelVolume = useEffectEvent((modelVolume: ModelVolume, changedOrganisation: string) => {
-    if (changedOrganisation === 'All') {
-      setBarChartConfig({ ...barChartConfig, hideLegend: false })
-    } else {
-      setBarChartConfig({ ...barChartConfig, hideLegend: true })
-    }
+    setBarChartConfig((prev) => ({
+      ...prev,
+      hideLegend: changedOrganisation !== 'All',
+    }))
     if (modelVolume.data) {
       const updatedStructure = modelVolume.data.map((volumeData: ModelVolumeData) => {
         const formattedDate = formatDateStringAsMonthAndYear(volumeData.startDate)
@@ -137,11 +136,7 @@ export default function OverviewMetricsCharts({
   }
 
   if (isModelVolumeError) {
-    if (isModelVolumeError.status === 400 && !errorMessage) {
-      setErrorMessage(isModelVolumeError.info.message)
-    } else if (isModelVolumeError.status !== 400) {
-      return <MessageAlert message={isModelVolumeError.info.message} severity='error' />
-    }
+    return <MessageAlert message={isModelVolumeError.info.message} severity='error' />
   }
 
   if (isModelVolumeLoading) {
@@ -164,7 +159,7 @@ export default function OverviewMetricsCharts({
               setErrorMessage('')
             }}
             minDate={dayjs('1970/01/01')}
-            maxDate={dayjs(new Date())}
+            maxDate={endDate || dayjs(new Date())}
           />
           <Typography fontWeight='bold' variant='h6' color='primary'>
             -
@@ -177,7 +172,7 @@ export default function OverviewMetricsCharts({
               setEndDate(newValue)
               setErrorMessage('')
             }}
-            minDate={dayjs('1970/01/01')}
+            minDate={startDate || dayjs('1970/01/01')}
             maxDate={dayjs(new Date())}
           />
         </Stack>

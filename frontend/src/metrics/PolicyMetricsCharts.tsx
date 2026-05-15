@@ -67,14 +67,10 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
 
   const tableRows = useMemo(() => {
     return data.entries
-      .filter((row) => {
-        if (missingRoleFilters.length === 0) {
-          return row
-        }
-        const concatDataAndFilter = missingRoleFilters.concat(row.missingRoles.map((missingRole) => missingRole.roleId))
-        const duplicates = concatDataAndFilter.filter((item, index) => concatDataAndFilter.indexOf(item) !== index)
-        return duplicates.length > 0
-      })
+      .filter(
+        (row) =>
+          missingRoleFilters.length === 0 || row.missingRoles.some((role) => missingRoleFilters.includes(role.roleId)),
+      )
       .map((row) => (
         <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
           <TableCell component='th' scope='row'>

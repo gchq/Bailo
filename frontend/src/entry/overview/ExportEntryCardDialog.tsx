@@ -64,7 +64,7 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
       <DialogContent ref={modelCardContentRef}>
         <Stack spacing={2} divider={<Divider />}>
           <Stack direction='row' alignItems='center'>
-            <Image src={logo} alt='podman-icon' width={180} height={70} />
+            <Image src={logo} alt='bailo logo' width={180} height={70} />
             <Typography
               variant='h4'
               component='h1'
