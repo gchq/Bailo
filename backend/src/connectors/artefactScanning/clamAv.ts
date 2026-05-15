@@ -70,7 +70,7 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     }
 
     if (file.size > this.maxSize) {
-      return this.skipContentTooLarge(file.size)
+      return this.skipContentTooLarge(file, file.size)
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -89,7 +89,7 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     } catch (error) {
       // Content too large
       if (isBailoError(error) && error.code === 413) {
-        return this.skipContentTooLarge(file.size)
+        return this.skipContentTooLarge(file, file.size)
       }
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,

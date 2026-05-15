@@ -143,6 +143,7 @@ export async function getScansFromLayers(
   const statePriority = [
     ArtefactScanState.Error,
     ArtefactScanState.InProgress,
+    ArtefactScanState.Skipped,
     ArtefactScanState.NotScanned,
     ArtefactScanState.Complete,
   ]

@@ -45,7 +45,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
         if (layerSize != Infinity && layerSize > this.maxSize) {
-          return this.skipContentTooLarge(layerSize)
+          return this.skipContentTooLarge(layer, layerSize)
         }
       }
 
@@ -97,7 +97,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
     } catch (error) {
       // Content too large
       if (isBailoError(error) && error.code === 413 && layerSize !== undefined) {
-        return this.skipContentTooLarge(layerSize)
+        return this.skipContentTooLarge(layer, layerSize)
       }
       return this.scanError(`This image layer could not be scanned due to an error caused by ${this.toolName}`, {
         error,

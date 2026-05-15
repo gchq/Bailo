@@ -142,8 +142,8 @@ describe('connectors > artefactScanning > trivy > TrivyImageScanningConnector', 
       toolName: 'Trivy',
       scannerVersion: '0.69.1',
       artefactKind: ArtefactKind.IMAGE,
-      summary: ['Artefact exceeds configured scanner size limit (2 B > 1 B).'],
-      state: ArtefactScanState.Skipped,
+      summary: ['Artefact exceeds configured scanner size limit.'],
+      state: ArtefactScanState.Error,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)
     expect(registryMocks.headLayer).toHaveBeenCalled()

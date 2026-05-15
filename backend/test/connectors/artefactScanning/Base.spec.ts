@@ -105,14 +105,14 @@ describe('connectors > artefactScanning > Base', () => {
     const connector = new TestConnector()
 
     // @ts-expect-ignore accessing protected property
-    const result = connector['skipContentTooLarge'](456)
+    const result = connector['skipContentTooLarge']({} as any, 456)
 
     expect(result).toMatchObject({
       toolName: 'TestScanner',
       scannerVersion: '1.2.3',
       artefactKind: ArtefactKind.FILE,
-      summary: ['Artefact exceeds configured scanner size limit (456 B > 123 B).'],
-      state: ArtefactScanState.Skipped,
+      summary: ['Artefact exceeds configured scanner size limit.'],
+      state: ArtefactScanState.Error,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)
   })

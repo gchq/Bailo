@@ -156,8 +156,8 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
       toolName: 'ModelScan',
       scannerVersion: '1.0.0',
       artefactKind: ArtefactKind.FILE,
-      summary: ['Artefact exceeds configured scanner size limit (2 B > 1 B).'],
-      state: ArtefactScanState.Skipped,
+      summary: ['Artefact exceeds configured scanner size limit.'],
+      state: ArtefactScanState.Error,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)
     expect(result.toolName).toBe('ModelScan')
@@ -181,7 +181,7 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
       toolName: 'ModelScan',
       scannerVersion: '1.0.0',
       artefactKind: ArtefactKind.FILE,
-      summary: ['Artefact type is not compatible with this scanner (model.bin not covered in [.txt, .pdf]).'],
+      summary: ['File type is not compatible with this scanner.', 'model.bin not covered in [.txt, .pdf].'],
       state: ArtefactScanState.Skipped,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)

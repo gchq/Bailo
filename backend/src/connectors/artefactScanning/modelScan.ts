@@ -9,10 +9,21 @@ import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
+const UNSUPPORTED_FILE_TYPE_MESSAGE = 'File type is not compatible with this scanner.'
+const TOOL_NAME = 'ModelScan'
+export function isScanAllowedSkip(scan: ArtefactScanResult): boolean {
+  return (
+    (scan.state === ArtefactScanState.Skipped &&
+      scan.toolName === TOOL_NAME &&
+      scan.summary?.includes(UNSUPPORTED_FILE_TYPE_MESSAGE)) ||
+    false
+  )
+}
+
 export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
   readonly artefactType: ArtefactKindKeys = ArtefactKind.FILE
-  readonly toolName: string = 'ModelScan'
+  readonly toolName: string = TOOL_NAME
   protected supportedExtensions: string[] = []
 
   async init(): Promise<void> {
@@ -27,7 +38,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     const scannerInfo = this.info()
 
     if (file.size > this.maxSize) {
-      return this.skipContentTooLarge(file.size)
+      return this.skipContentTooLarge(file, file.size)
     }
 
     const lowerFileName = file.name.toLowerCase()
@@ -73,7 +84,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     } catch (error) {
       // Content too large
       if (isBailoError(error) && error.code === 413) {
-        return this.skipContentTooLarge(file.size)
+        return this.skipContentTooLarge(file, file.size)
       }
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error,
@@ -89,8 +100,9 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
   }
 
   protected skipUnsupportedFileType(fileName: string): ArtefactScanResult {
-    return this.scanSkip(
-      `Artefact type is not compatible with this scanner (${fileName} not covered in [${this.supportedExtensions.join(', ')}]).`,
-    )
+    return this.scanSkip([
+      UNSUPPORTED_FILE_TYPE_MESSAGE,
+      `${fileName} not covered in [${this.supportedExtensions.join(', ')}].`,
+    ])
   }
 }

@@ -1,4 +1,15 @@
-import { Delete, Done, Error, Info, LocalOffer, MoreVert, Pending, Refresh, Warning } from '@mui/icons-material'
+import {
+  BlockOutlined,
+  Delete,
+  Done,
+  Error as ErrorIcon,
+  HourglassTop,
+  Info,
+  LocalOffer,
+  MoreVert,
+  Refresh,
+  Warning,
+} from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -42,25 +53,22 @@ import useNotification from 'src/hooks/useNotification'
 import { KeyedMutator } from 'swr'
 import {
   ArtefactKind,
+  ArtefactScanState,
+  ArtefactScanStateKeys,
   ClamAVScanSummary,
   FileInterface,
   isFileInterface,
   ModelScanSummary,
   ReleaseInterface,
-  ScanState,
+  ScanResultInterface,
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
-export type MutateReleases = KeyedMutator<{
-  releases: ReleaseInterface[]
-}>
-
-export type MutateFiles = KeyedMutator<{
-  files: FileInterface[]
-}>
+export type MutateReleases = KeyedMutator<{ releases: ReleaseInterface[] }>
+export type MutateFiles = KeyedMutator<{ files: FileInterface[] }>
 
 type ClickableFileDownloadProps =
   | {
@@ -91,8 +99,193 @@ type FileDisplayProps = {
 
 interface ChipDetails {
   label: string
-  colour: 'error' | 'warning' | 'success'
+  colour: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
   icon: ReactElement
+}
+
+const SCAN_STATE_PRECEDENCE: ArtefactScanStateKeys[] = [
+  ArtefactScanState.InProgress,
+  ArtefactScanState.NotScanned,
+  ArtefactScanState.Error,
+  ArtefactScanState.Skipped,
+  ArtefactScanState.Complete,
+]
+
+function countFindings(scanResults: ScanResultInterface[] | undefined): number {
+  if (!scanResults) {
+    return 0
+  }
+  return scanResults.reduce((acc, scan) => acc + (scan.summary?.length ?? 0), 0)
+}
+
+/**
+ * Returns the worst-case state across all scan results, or `undefined` if there are no scan results at all.
+ */
+function getWorstScanState(scanResults: ScanResultInterface[] | undefined): ArtefactScanStateKeys | undefined {
+  if (!scanResults || scanResults.length === 0) {
+    return undefined
+  }
+  const states = new Set(scanResults.map((r) => r.state))
+  return SCAN_STATE_PRECEDENCE.find((state) => states.has(state))
+}
+
+/**
+ * Derive the chip details from the worst-case scan state and total findings.
+ */
+function buildChipDetails(scanResults: ScanResultInterface[] | undefined): ChipDetails {
+  if (scanResults === undefined) {
+    return { label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> }
+  }
+
+  const worst = getWorstScanState(scanResults)
+  const findings = countFindings(scanResults)
+  const worstCount = scanResults.filter((s) => s.state === worst).length
+
+  switch (worst) {
+    case ArtefactScanState.InProgress: {
+      return {
+        label: `${plural(worstCount, 'scan')} remaining`,
+        colour: 'warning',
+        icon: <HourglassTop />,
+      }
+    }
+    case ArtefactScanState.NotScanned:
+      return { label: `${worstCount} not scanned`, colour: 'warning', icon: <Warning /> }
+    case ArtefactScanState.Error:
+      return findings > 0
+        ? {
+            label: `${plural(findings, 'finding')} detected`,
+            colour: 'error',
+            icon: <ErrorIcon />,
+          }
+        : { label: `${plural(worstCount, 'scanning tool')} failed`, colour: 'error', icon: <ErrorIcon /> }
+    case ArtefactScanState.Skipped:
+      return { label: `${plural(worstCount, 'scan')} skipped`, colour: 'default', icon: <BlockOutlined /> }
+    case ArtefactScanState.Complete:
+      return findings > 0
+        ? {
+            label: `${plural(findings, 'finding')} detected`,
+            colour: 'error',
+            icon: <ErrorIcon />,
+          }
+        : { label: 'No issues found', colour: 'success', icon: <Done /> }
+    default:
+      return {
+        label: 'There was a problem fetching the file scan results',
+        colour: 'error',
+        icon: <Warning />,
+      }
+  }
+}
+
+/**
+ * Renders a single scanner's result block inside the popover.
+ * Uses the scanner's own state (not the aggregated state) so each row shows the correct icon/wording for that individual tool.
+ */
+function ScanResultDetail({ scanResult }: { scanResult: ScanResultInterface }) {
+  const hasFindings = !!scanResult.summary && scanResult.summary.length > 0
+  const { state, toolName, scannerVersion, lastRunAt, summary } = scanResult
+
+  const renderHeader = (): ReactElement => {
+    if (hasFindings) {
+      if (state === ArtefactScanState.Skipped) {
+        return (
+          <>
+            <BlockOutlined color='action' />
+            <Typography>
+              <span style={{ fontWeight: 'bold' }}>{toolName}</span> was skipped:
+            </Typography>
+          </>
+        )
+      }
+      return (
+        <>
+          <ErrorIcon color='error' />
+          <Typography>
+            <span style={{ fontWeight: 'bold' }}>{toolName}</span> found the following:
+          </Typography>
+        </>
+      )
+    }
+
+    switch (state) {
+      case ArtefactScanState.InProgress:
+        return (
+          <>
+            <HourglassTop color='warning' />
+            <Typography>
+              <span style={{ fontWeight: 'bold' }}>{toolName}</span> is currently running
+            </Typography>
+          </>
+        )
+      case ArtefactScanState.NotScanned:
+      case ArtefactScanState.Error:
+        return (
+          <>
+            <Warning color='warning' />
+            <Typography>
+              <span style={{ fontWeight: 'bold' }}>{toolName}</span> could not be run
+            </Typography>
+          </>
+        )
+      case ArtefactScanState.Skipped:
+        return (
+          <>
+            <BlockOutlined color='action' />
+            <Typography>
+              <span style={{ fontWeight: 'bold' }}>{toolName}</span> was skipped
+            </Typography>
+          </>
+        )
+      case ArtefactScanState.Complete:
+      default:
+        return (
+          <>
+            <Done color='success' />
+            <Typography>
+              <span style={{ fontWeight: 'bold' }}>{toolName}</span> found no issues
+            </Typography>
+          </>
+        )
+    }
+  }
+
+  return (
+    <Stack spacing={2}>
+      <Stack spacing={1} direction='row' alignItems='center'>
+        {renderHeader()}
+      </Stack>
+      {scannerVersion && (
+        <Chip
+          size='small'
+          variant='outlined'
+          sx={{ width: 'fit-content' }}
+          label={`Scanner version: ${scannerVersion}`}
+        />
+      )}
+      <Typography>Last ran at: {formatDateTimeString(lastRunAt)}</Typography>
+      {hasFindings && summary && (
+        <ul>
+          {summary.map((vulnerability) => {
+            if (typeof vulnerability === 'string') {
+              return <li key={vulnerability}>{vulnerability}</li>
+            }
+            if (toolName === 'ModelScan') {
+              const v = vulnerability as ModelScanSummary
+              return (
+                <li key={v.vulnerabilityDescription}>
+                  <span style={{ fontWeight: 'bold' }}>{`${String(v.severity).toUpperCase()}:`}</span>{' '}
+                  {(vulnerability as ModelScanSummary).vulnerabilityDescription}
+                </li>
+              )
+            }
+            const v = vulnerability as ClamAVScanSummary
+            return <li key={v.virus}>{`Virus found: ${v.virus}`}</li>
+          })}
+        </ul>
+      )}
+    </Stack>
+  )
 }
 
 export default function FileDisplay({
@@ -118,7 +311,6 @@ export default function FileDisplay({
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
 
   const sendNotification = useNotification()
-
   const { mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
@@ -140,7 +332,7 @@ export default function FileDisplay({
     if (releases.length > 0 && sortedAssociatedReleases.length > 0) {
       onLatestReleaseChange(releases[0].semver)
     }
-  }, [releases, setLatestRelease, sortedAssociatedReleases])
+  }, [releases, sortedAssociatedReleases])
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!isFileInterface(file) || isDeleting) {
@@ -172,60 +364,17 @@ export default function FileDisplay({
     }
   }, [file, isDeleting, modelId, router, mutateModelFiles, sendNotification])
 
-  function handleFileMoreButtonClick(event: MouseEvent<HTMLButtonElement>) {
+  const handleFileMoreButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorElMore(event.currentTarget)
   }
 
-  const handleFileMoreButtonClose = () => {
-    setAnchorElMore(null)
-  }
+  const handleFileMoreButtonClose = () => setAnchorElMore(null)
 
-  const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
-
-  const findings = useCallback((file: FileInterface) => {
-    if (file.scanResults === undefined) {
-      return 0
+  const chipDisplay = useMemo<ChipDetails | undefined>(() => {
+    if (!isFileInterface(file)) {
+      return undefined
     }
-    return file.scanResults.reduce((acc, scan) => {
-      return scan.summary ? scan.summary.length + acc : acc
-    }, 0)
-  }, [])
-
-  const updateChipDetails = useEffectEvent(() => {
-    if (!isFileInterface(file) || file.scanResults === undefined) {
-      setChipDisplay({ label: 'Scan results could not be found', colour: 'warning', icon: <Warning /> })
-      return
-    } else if (findings(file as FileInterface)) {
-      setChipDisplay({
-        label: `Scan failed: ${plural(findings(file as FileInterface), 'finding')}`,
-        colour: 'error',
-        icon: <Error />,
-      })
-      return
-    } else if (
-      isFileInterface(file) &&
-      file.scanResults !== undefined &&
-      file.scanResults.some((scan) => scan.state === ScanState.Error)
-    ) {
-      setChipDisplay({ label: 'One or more scanning tools failed', colour: 'error', icon: <Error /> })
-      return
-    } else if (file.scanResults.some((scan) => scan.state === ScanState.InProgress)) {
-      setChipDisplay({ label: 'Scans in progress', colour: 'warning', icon: <Pending /> })
-    } else if (file.scanResults.some((scan) => scan.state === ScanState.NotScanned)) {
-      setChipDisplay({ label: 'Not scanned', colour: 'warning', icon: <Warning /> })
-    } else if (!findings(file as FileInterface)) {
-      setChipDisplay({ label: 'Scan passed', colour: 'success', icon: <Done /> })
-    } else {
-      setChipDisplay({
-        label: 'There was a problem fetching the file scan results',
-        colour: 'error',
-        icon: <Warning />,
-      })
-    }
-  })
-
-  useEffect(() => {
-    updateChipDetails()
+    return buildChipDetails(file.scanResults)
   }, [file])
 
   const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
@@ -234,7 +383,10 @@ export default function FileDisplay({
   const openScan = Boolean(anchorElScan)
 
   const handleRerunFileScanOnClick = useCallback(async () => {
-    const res = await rerunArtefactScan(modelId, (file as FileInterface)._id)
+    if (!isFileInterface(file)) {
+      return
+    }
+    const res = await rerunArtefactScan(modelId, file._id)
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -244,29 +396,32 @@ export default function FileDisplay({
     } else {
       sendNotification({
         variant: 'success',
-        msg: `${file.name} is being rescanned`,
+        msg: `Rescan started for ${file.name}`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      if (mutator) {
-        mutator()
-      }
+      mutator?.()
     }
   }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
+    if (!scanners || isScannersError) {
+      return null
+    }
+    if (!scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE)) {
+      return null
+    }
     return (
-      scanners &&
-      !isScannersError &&
-      scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
-        <MenuItem hidden={!showMenuItems.rescanFile} onClick={handleRerunFileScanOnClick}>
-          <ListItemIcon>
-            <Refresh color='primary' fontSize='small' />
-          </ListItemIcon>
-          <ListItemText>Rerun file scan</ListItemText>
-        </MenuItem>
-      )
+      <MenuItem hidden={!showMenuItems.rescanFile} onClick={handleRerunFileScanOnClick}>
+        <ListItemIcon>
+          <Refresh color='primary' fontSize='small' />
+        </ListItemIcon>
+        <ListItemText>Rerun file scan</ListItemText>
+      </MenuItem>
     )
   }, [handleRerunFileScanOnClick, scanners, isScannersError, showMenuItems.rescanFile])
+
+  const scanResults = isFileInterface(file) ? file.scanResults : undefined
+  const isAnyScanInProgress = scanResults?.some((res) => res.state === ArtefactScanState.InProgress) ?? false
 
   const scanResultChip = useMemo(() => {
     if (!chipDisplay) {
@@ -274,80 +429,31 @@ export default function FileDisplay({
     }
     return (
       <>
-        {chipDisplay && (
-          <Chip
-            color={chipDisplay.colour}
-            icon={chipDisplay.icon}
-            onClick={(e) => setAnchorElScan(e.currentTarget)}
-            label={chipDisplay.label}
-          />
-        )}
+        <Chip
+          color={chipDisplay.colour}
+          icon={chipDisplay.icon}
+          onClick={(e) => setAnchorElScan(e.currentTarget)}
+          label={chipDisplay.label}
+        />
         <Popover
-          hidden={file.scanResults && file.scanResults.some((res) => res.state === ScanState.InProgress)}
-          open={openScan}
+          // Do not open popover if scans are in progress as there aren't yet results
+          open={openScan && !isAnyScanInProgress}
           anchorEl={anchorElScan}
           onClose={() => setAnchorElScan(null)}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
           <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
-            {file.scanResults &&
-              file.scanResults.map((scanResult) => (
-                <Fragment key={scanResult.toolName}>
-                  {scanResult.summary && scanResult.summary.length > 0 ? (
-                    <Stack spacing={2}>
-                      <Stack spacing={1} direction='row'>
-                        <Error color='error' />
-                        <Typography>
-                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following:
-                        </Typography>
-                      </Stack>
-                      {scanResult.scannerVersion && (
-                        <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
-                      )}
-                      <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                      <ul>
-                        {scanResult.toolName === 'ModelScan'
-                          ? scanResult.summary.map((vulnerability) => (
-                              <li
-                                key={(vulnerability as ModelScanSummary).vulnerabilityDescription}
-                              >{`${((vulnerability as ModelScanSummary).severity as string).toUpperCase()}: ${(vulnerability as ModelScanSummary).vulnerabilityDescription}`}</li>
-                            ))
-                          : scanResult.summary.map((vulnerability) => (
-                              <li
-                                key={(vulnerability as ClamAVScanSummary).virus}
-                              >{`Virus found: ${(vulnerability as ClamAVScanSummary).virus}`}</li>
-                            ))}
-                      </ul>
-                    </Stack>
-                  ) : (
-                    <Stack spacing={2}>
-                      <Stack spacing={1} direction='row'>
-                        {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
-                        <Typography>
-                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                          {scanResult.state === 'error' ? ' was not able to be run' : ' did not find anything'}
-                        </Typography>
-                      </Stack>
-                      {scanResult.scannerVersion && (
-                        <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
-                      )}
-                      <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
-                    </Stack>
-                  )}
-                </Fragment>
-              ))}
+            {scanResults?.map((scanResult) => (
+              <Fragment key={scanResult.toolName}>
+                <ScanResultDetail scanResult={scanResult} />
+              </Fragment>
+            ))}
           </Stack>
         </Popover>
       </>
     )
-  }, [anchorElScan, chipDisplay, file.scanResults, openScan])
+  }, [anchorElScan, chipDisplay, scanResults, openScan, isAnyScanInProgress])
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
     setFileTagErrorMessage('')
@@ -355,7 +461,7 @@ export default function FileDisplay({
       setFileTagErrorMessage('Tags must have at least one character')
       return
     }
-    const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
+    const res = await patchFile(modelId, file._id, { tags: newTags.filter((t) => t !== '') })
     mutateModelFiles()
 
     if (res.status && res.status >= 200 && res.status < 300) {
@@ -370,13 +476,10 @@ export default function FileDisplay({
   }
 
   const handleFileTagOnClick = (fileTag: string) => {
-    if (activeFileTagOnChange) {
-      if (fileTag === activeFileTag) {
-        activeFileTagOnChange('')
-      } else {
-        activeFileTagOnChange(fileTag)
-      }
+    if (!activeFileTagOnChange) {
+      return
     }
+    activeFileTagOnChange(fileTag === activeFileTag ? '' : fileTag)
   }
 
   if (isFileInterface(file) && !file.complete) {
@@ -387,9 +490,8 @@ export default function FileDisplay({
     )
   }
 
-  const showMenu = () => {
-    return Object.keys(showMenuItems).length > 0 && Object.values(showMenuItems).some((item) => item === true)
-  }
+  const showMenu = () =>
+    Object.keys(showMenuItems).length > 0 && Object.values(showMenuItems).some((item) => item === true)
 
   if (isScannersLoading) {
     return <Loading />
@@ -486,21 +588,19 @@ export default function FileDisplay({
                   </Button>
                 </Restricted>
                 <Box sx={{ whiteSpace: 'pre-wrap' }}>
-                  {file.tags.map((fileTag) => {
-                    if (isClickable) {
-                      return (
-                        <Chip
-                          key={fileTag}
-                          label={fileTag}
-                          sx={{ width: 'fit-content', m: 0.5 }}
-                          onClick={() => handleFileTagOnClick(fileTag)}
-                          color={activeFileTag === fileTag ? 'secondary' : undefined}
-                        />
-                      )
-                    } else {
-                      return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content', m: 0.5 }} />
-                    }
-                  })}
+                  {file.tags.map((fileTag) =>
+                    isClickable ? (
+                      <Chip
+                        key={fileTag}
+                        label={fileTag}
+                        sx={{ width: 'fit-content', m: 0.5 }}
+                        onClick={() => handleFileTagOnClick(fileTag)}
+                        color={activeFileTag === fileTag ? 'secondary' : undefined}
+                      />
+                    ) : (
+                      <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content', m: 0.5 }} />
+                    ),
+                  )}
                 </Box>
                 <EntryTagSelector
                   anchorEl={anchorElFileTag}

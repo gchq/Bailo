@@ -109,9 +109,9 @@ export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanRe
 
 export interface ScanResultInterface {
   _id: string
-  state: ScanStateKeys
+  state: ArtefactScanStateKeys
   scannerVersion?: string
-  summary?: Array<ModelScanSummary | ClamAVScanSummary>
+  summary?: Array<ModelScanSummary | ClamAVScanSummary | string>
   platform?: string
   toolName: string
   lastRunAt: string
@@ -132,13 +132,14 @@ export const SeverityLevel = {
 } as const
 export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
-export const ScanState = {
+export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',
   Complete: 'complete',
+  Skipped: 'skipped',
   Error: 'error',
 } as const
-export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type AvScanResult = ScanResultInterface &
   (
@@ -778,14 +779,6 @@ export type ScanInfoInterface = {
   artefactKind: ArtefactKindKeys
 }
 
-export const ArtefactScanState = {
-  NotScanned: 'notScanned',
-  InProgress: 'inProgress',
-  Complete: 'complete',
-  Error: 'error',
-} as const
-export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
-
 export type ModelScanResponse = {
   summary: {
     total_issues: number
@@ -833,7 +826,7 @@ export type ModelScanResponse = {
   }
 }
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary | string)[]
 
 export type ArtefactScanSummary = {
   severity: SeverityLevelKeys

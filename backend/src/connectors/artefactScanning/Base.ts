@@ -64,24 +64,27 @@ export abstract class BaseArtefactScanningConnector {
     log.error({ ...context, ...scannerInfo }, message)
     return {
       ...scannerInfo,
+      summary: [message],
       state: ArtefactScanState.Error,
       lastRunAt: new Date(),
     }
   }
 
-  protected scanSkip(reason: string): ArtefactScanResult {
+  protected scanSkip(reason: string | string[]): ArtefactScanResult {
     const scannerInfo = this.info()
     return {
       ...scannerInfo,
-      summary: [reason],
+      summary: typeof reason === 'string' ? [reason] : reason,
       state: ArtefactScanState.Skipped,
       lastRunAt: new Date(),
     }
   }
 
-  protected skipContentTooLarge(size: number): ArtefactScanResult {
-    return this.scanSkip(
-      `Artefact exceeds configured scanner size limit (${prettyBytes(size)} > ${prettyBytes(this.maxSize)}).`,
-    )
+  protected skipContentTooLarge(artefact: ArtefactInterface, artefactSize: number): ArtefactScanResult {
+    return this.scanError('Artefact exceeds configured scanner size limit.', {
+      artefact,
+      artefactSize: prettyBytes(artefactSize),
+      maxSize: prettyBytes(this.maxSize),
+    })
   }
 }

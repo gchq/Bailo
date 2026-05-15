@@ -137,8 +137,8 @@ describe('connectors > artefactScanning > clamAv', () => {
       toolName: 'Clam AV',
       scannerVersion: '1.2.3',
       artefactKind: ArtefactKind.FILE,
-      summary: ['Artefact exceeds configured scanner size limit (1.07 GB > 10.5 MB).'],
-      state: ArtefactScanState.Skipped,
+      summary: ['Artefact exceeds configured scanner size limit.'],
+      state: ArtefactScanState.Error,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)
     expect(destroySpy).not.toHaveBeenCalled()
