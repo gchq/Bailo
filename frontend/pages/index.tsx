@@ -383,7 +383,7 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left'>
+              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
                 <Typography component='h2' variant='h5' fontWeight='bold'>
                   Filters
                 </Typography>

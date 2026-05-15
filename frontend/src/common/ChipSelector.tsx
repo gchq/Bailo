@@ -168,7 +168,7 @@ function ChipItem({
           color={activeChip ? 'secondary' : 'default'}
           size={size}
           key={chip}
-          sx={{ mx: 0.5, mb: 1, ...style }}
+          sx={{ mx: 0.5, my: 0.5, ...style }}
           label={chip}
           data-test={`chipOption-${chip}`}
           onClick={() => handleChange(chip)}

@@ -17,6 +17,7 @@ import { useGetUserResponses } from 'actions/response'
 import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
+import PythonIcon from 'src/common/PythonIcon'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
 import { User } from 'types/types'
@@ -150,13 +151,23 @@ export default function SideNavigation({
               openLinkInNewTab
             />
             <NavMenuItem
+              href='/docs'
+              selectedPage={page}
+              primaryText='User docs'
+              drawerOpen={drawerOpen}
+              menuPage='userDocs'
+              title='User documentation'
+              icon={<DescriptionIcon />}
+              openLinkInNewTab
+            />
+            <NavMenuItem
               href='/docs/python/index.html'
               selectedPage={page}
-              primaryText='Python Client Docs'
+              primaryText='Python client docs'
               drawerOpen={drawerOpen}
               menuPage='pythonDocs'
-              title='Python Client Docs'
-              icon={<DescriptionIcon />}
+              title='Python cient docs'
+              icon={<PythonIcon />}
               openLinkInNewTab
             />
             <NavMenuItem
