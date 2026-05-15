@@ -3,7 +3,7 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
+import { ImageImporter, ImageMirrorMetadataV1 } from '../../../../src/services/mirroredModel/importers/image.js'
 import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
 
 const authMocks = vi.hoisted(() => ({
@@ -55,11 +55,11 @@ const mirroredModelMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
 
 const mockUser = { dn: 'user' }
-const mockMetadata: ImageMirrorMetadata = {
+const mockMetadata: ImageMirrorMetadataV1 = {
   importKind: mirroredModelMocks.MirrorKind.Image,
   mirroredModelId: 'model1',
   distributionPackageName: 'domain/imageName:tag',
-} as ImageMirrorMetadata
+} as ImageMirrorMetadataV1
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > ImageImporter', () => {

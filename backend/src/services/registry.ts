@@ -82,6 +82,14 @@ export function joinDistributionPackageName(distributionPackageName: Distributio
   return `${distributionPackageName.path}@${distributionPackageName['digest']}`
 }
 
+export function parseManifestFilePath(manifestFilePath: string) {
+  const match = manifestFilePath.match(/images\/manifests\/(.+)\/(.+)\.json$/)
+  if (!match) {
+    throw InternalError('Invalid manifest path found', { manifestFilePath })
+  }
+  return { imageName: match[1], imageTag: match[2] }
+}
+
 export async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
   const model = await getModelById(user, modelId)
 

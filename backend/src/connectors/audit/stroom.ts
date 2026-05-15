@@ -881,12 +881,12 @@ export class StroomAuditConnector extends BaseAuditConnector {
               ]
             : [
                 {
-                  '@Name': 'Image Name',
-                  '@Value': importResult.image.imageName.toString(),
+                  '@Name': 'Image Names',
+                  '@Value': importResult.images.join(),
                 },
                 {
-                  '@Name': 'Image Tag',
-                  '@Value': importResult.image.imageTag.toString(),
+                  '@Name': 'Image Tags',
+                  '@Value': importResult.images.join(),
                 },
               ],
       },

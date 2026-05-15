@@ -58,7 +58,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
     const exporter = new ImageExporter(mockUser, mockModel, mockRelease, mockImage, mockLogData)
 
     expect(exporter.getRelease()).toEqual(mockRelease)
-    expect(exporter.getImage()).toEqual(mockImage)
+    expect(exporter.getImages()).toEqual(mockImage)
   })
 
   test('init success sets distributionPackageName via _init', async () => {
@@ -66,7 +66,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
 
     await exporter.init()
 
-    expect(exporter.getDistributionPackageName()).toBe('joined/name:tag')
+    expect(exporter.getDistributionPackageNames()).toBe('joined/name:tag')
     expect(registryMocks.joinDistributionPackageName).toHaveBeenCalled()
   })
 
