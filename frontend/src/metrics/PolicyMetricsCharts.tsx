@@ -56,7 +56,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
       return (
         <Chip
           key={roleSummary.roleId}
-          label={`${roleSummary.count} entries missing ${roleSummary.roleId}`}
+          label={`${roleSummary.count} entries missing ${roleSummary.roleName}`}
           variant={missingRoleFilters.includes(roleSummary.roleId) ? 'filled' : 'outlined'}
           onClick={() => handleChipFilterOnClick(roleSummary.roleId)}
           color='primary'
