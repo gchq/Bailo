@@ -64,7 +64,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         alignItems: 'center'
       }}>
         <Typography variant='h6' component='h2' color='primary'>
-          {`Manage ${toSentenceCase(entry.kind)} access`}
+          {`Manage access`}
         </Typography>
         <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
       </Stack>

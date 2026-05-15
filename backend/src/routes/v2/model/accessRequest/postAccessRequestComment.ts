@@ -44,7 +44,7 @@ interface PostRequestCommentResponse {
 
 export const postAccessRequestComment = [
   async (req: Request, res: Response<PostRequestCommentResponse>): Promise<void> => {
-    req.audit = AuditInfo.UpdateAccessRequest
+    req.audit = AuditInfo.CreateResponse
     const {
       body,
       params: { accessRequestId },

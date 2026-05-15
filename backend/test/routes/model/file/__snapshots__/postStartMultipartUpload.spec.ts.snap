@@ -9,7 +9,6 @@ exports[`routes > model > file > postStartMultipartUpload > 200 > ok 1`] = `
       "startByte": 0,
     },
   ],
-  "fileId": "test",
   "uploadId": "test",
 }
 `;
@@ -39,6 +38,6 @@ exports[`routes > model > file > postStartMultipartUpload > 400 > no name 1`] = 
 
 exports[`routes > model > file > postStartMultipartUpload > audit > expected call 1`] = `
 {
-  "id": "test",
+  "_id": "test",
 }
 `;

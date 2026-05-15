@@ -3,6 +3,7 @@ import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import Link from 'src/Link'
 import { EntryCardKindLabel, EntryInterface, EntryKind } from 'types/types'
+import { entryKindForRedirect } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 type TemplatePageProps = {
@@ -30,7 +31,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
           alignItems: 'center'
         }}>
         <Typography component='h2' variant='h6' color='primary' data-test='createEntryCardOverview'>
-          {`Create a ${toTitleCase(EntryCardKindLabel[entry.kind])}`}
+          {`Create ${toTitleCase(EntryCardKindLabel[entry.kind])}`}
         </Typography>
         <PostAdd fontSize='large' color='primary' />
         <Typography variant='body1'>{entryCardDescription}</Typography>
@@ -53,10 +54,10 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                 Create from schema
               </Typography>
               <Typography>
-                Create a {`${EntryCardKindLabel[entry.kind]}`} from scratch using a predefined schema.
+                {`Create ${EntryCardKindLabel[entry.kind]} from scratch using a predefined schema.`}
               </Typography>
               <Button
-                href={`/${entry.kind}/${entry.id}/schema`}
+                href={`/${entryKindForRedirect(entry.kind)}/${entry.id}/schema`}
                 LinkComponent={Link}
                 variant='contained'
                 sx={{ width: '100%' }}
@@ -68,7 +69,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
               </Button>
             </Stack>
           </Card>
-          {entry.kind === EntryKind.MODEL && (
+          {(entry.kind === EntryKind.MODEL || entry.kind === EntryKind.UNTRUSTED_MODEL) && (
             <Card
               sx={{
                 width: '300px',
@@ -83,7 +84,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                 <Button
                   sx={{ width: '100%' }}
                   variant='contained'
-                  href={`/${entry.kind}/${entry.id}/template`}
+                  href={`/${entryKindForRedirect(entry.kind)}/${entry.id}/template`}
                   LinkComponent={Link}
                   disabled={!!entry.settings.mirror?.sourceModelId}
                   startIcon={<Add />}

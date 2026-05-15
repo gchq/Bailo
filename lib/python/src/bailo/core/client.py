@@ -5,7 +5,7 @@ from typing import Any
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
-from bailo.core.utils import filter_none
+from bailo.core.utils import filter_none, normalise_query_params
 
 
 class Client:
@@ -59,7 +59,7 @@ class Client:
         if sourceModelId is None and kind == EntryKind.MIRRORED_MODEL:
             raise ValueError("Mirrored Models must specify a `sourceModelId` argument.")
 
-        filtered_json = filter_none(
+        filtered_params = filter_none(
             {
                 "name": name,
                 "kind": kind,
@@ -76,10 +76,11 @@ class Client:
                 "collaborators": collaborators,
             }
         )
+        normalised_params = normalise_query_params(filtered_params)
 
         return self.agent.post(
             f"{self.url}/v2/models",
-            json=filtered_json,
+            json=normalised_params,
         ).json()
 
     def get_models(
@@ -139,10 +140,11 @@ class Client:
                 "titleOnly": title_only,
             }
         )
+        normalised_params = normalise_query_params(filtered_params)
 
         return self.agent.get(
             f"{self.url}/v2/models/search",
-            params=filtered_params,
+            params=normalised_params,
         ).json()
 
     def get_model(
@@ -183,7 +185,7 @@ class Client:
         :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
-        filtered_json = filter_none(
+        filtered_params = filter_none(
             {
                 "name": name,
                 "organisation": organisation,
@@ -195,8 +197,9 @@ class Client:
                 "tags": tags,
             }
         )
+        normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
+        return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=normalised_params).json()
 
     def delete_model(
         self,
@@ -301,7 +304,7 @@ class Client:
         :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
         """
-        filtered_json = filter_none(
+        filtered_params = filter_none(
             {
                 "modelCardVersion": model_card_version,
                 "semver": release_version,
@@ -312,7 +315,9 @@ class Client:
                 "images": images,
             }
         )
-        return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=filtered_json).json()
+        normalised_params = normalise_query_params(filtered_params)
+
+        return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=normalised_params).json()
 
     def put_release(
         self,
@@ -598,10 +603,12 @@ class Client:
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
         """
-        filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
+        filtered_params = filter_none({"role": role, "decision": decision, "comment": comment})
+        normalised_params = normalise_query_params(filtered_params)
+
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/release/{version}/review",
-            json=filtered_json,
+            json=normalised_params,
         ).json()
 
     def get_model_roles(
@@ -681,10 +688,12 @@ class Client:
         :metadata: Metadata object, defined by access request schemas
         :return: JSON response object
         """
-        filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
+        filtered_params = filter_none({"schemaId": schema_id, "metadata": metadata})
+        normalised_params = normalise_query_params(filtered_params)
+
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-            json=filtered_json,
+            json=normalised_params,
         ).json()
 
     def put_file_scan(
@@ -735,8 +744,10 @@ class Client:
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
         """
-        filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
+        filtered_params = filter_none({"role": role, "decision": decision, "comment": comment})
+        normalised_params = normalise_query_params(filtered_params)
+
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
-            json=filtered_json,
+            json=normalised_params,
         ).json()

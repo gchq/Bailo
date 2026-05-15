@@ -7,6 +7,12 @@ const s3Mocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
+const fileUtilsMocks = vi.hoisted(() => ({
+  isFileWithScanResultsInterface: vi.fn(() => true),
+  createFilePath: vi.fn(() => 'beta/model/modelId/files/fileId'),
+}))
+vi.mock('../../../src/utils/fileUtils.js', () => fileUtilsMocks)
+
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('services > parsers > modelParser', () => {
@@ -30,7 +36,7 @@ describe('services > parsers > modelParser', () => {
   })
 
   test('parseModelCard > data not a model card', () => {
-    expect(() => parseModelCard({}, '', '', mockLogData)).toThrowError('Data cannot be converted into a model card.')
+    expect(() => parseModelCard({}, '', '', mockLogData)).toThrow('Data cannot be converted into a model card.')
   })
 
   test('parseModelCard > bad sourceModelId', () => {
@@ -49,7 +55,7 @@ describe('services > parsers > modelParser', () => {
         'badSourceModelId',
         mockLogData,
       ),
-    ).toThrowError('Compressed file contains model cards that have a model ID that does not match the source model Id.')
+    ).toThrow('Compressed file contains model cards that have a model ID that does not match the source model Id.')
   })
 
   test('parseRelease > success', () => {
@@ -78,7 +84,7 @@ describe('services > parsers > modelParser', () => {
   })
 
   test('parseRelease > data not a release', () => {
-    expect(() => parseRelease({}, '', '', mockLogData)).toThrowError('Data cannot be converted into a release.')
+    expect(() => parseRelease({}, '', '', mockLogData)).toThrow('Data cannot be converted into a release.')
   })
 
   test('parseRelease > bad sourceModelId', () => {
@@ -103,7 +109,7 @@ describe('services > parsers > modelParser', () => {
         'badSourceModelId',
         mockLogData,
       ),
-    ).toThrowError('Compressed file contains releases that have a model ID that does not match the source model Id.')
+    ).toThrow('Compressed file contains releases that have a model ID that does not match the source model Id.')
   })
 
   test('parseFile > success', () => {
@@ -129,7 +135,8 @@ describe('services > parsers > modelParser', () => {
   })
 
   test('parseFile > data not a file', async () => {
-    await expect(() => parseFile({}, '', '', mockLogData)).rejects.toThrowError('Data cannot be converted into a file.')
+    fileUtilsMocks.isFileWithScanResultsInterface.mockReturnValueOnce(false)
+    await expect(() => parseFile({}, '', '', mockLogData)).rejects.toThrow('Data cannot be converted into a file.')
   })
 
   test('parseFile > file does not exist', async () => {
@@ -152,7 +159,7 @@ describe('services > parsers > modelParser', () => {
         'sourceModelId',
         mockLogData,
       ),
-    ).rejects.toThrowError('Error checking existence of file in storage.')
+    ).rejects.toThrow('Error checking existence of file in storage.')
   })
 
   test('parseFile > bad sourceModelId', async () => {
@@ -174,8 +181,6 @@ describe('services > parsers > modelParser', () => {
         'badSourceModelId',
         mockLogData,
       ),
-    ).rejects.toThrowError(
-      'Compressed file contains files that have a model ID that does not match the source model Id.',
-    )
+    ).rejects.toThrow('Compressed file contains files that have a model ID that does not match the source model Id.')
   })
 })

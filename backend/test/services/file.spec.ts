@@ -17,8 +17,8 @@ import {
   startUploadMultipartFile,
   updateFile,
   uploadFile,
+  uploadMultipartFilePart,
 } from '../../src/services/file.js'
-import { isFileInterfaceDoc } from '../../src/utils/fileUtils.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -105,6 +105,7 @@ vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => ({ pipe: vi.fn(), on: vi.fn() })),
+  putObjectPartStream: vi.fn(() => ({ ETag: 'test-etag', PartNumber: 1 })),
   completeMultipartUpload: vi.fn(),
   deleteObject: vi.fn(),
   headObject: vi.fn(() => ({ ContentLength: 100 })),
@@ -162,8 +163,8 @@ describe('services > file', () => {
     const tags = []
     const result = await uploadFile(user, modelId, name, mime, stream, tags)
 
-    expect(s3Mocks.putObjectStream).toBeCalled()
-    expect(FileModelMock.save).toBeCalled()
+    expect(s3Mocks.putObjectStream).toHaveBeenCalled()
+    expect(FileModelMock.save).toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
 
@@ -184,8 +185,8 @@ describe('services > file', () => {
 
     const result = await uploadFile(user, modelId, name, mime, stream, tags)
 
-    expect(s3Mocks.putObjectStream).toBeCalled()
-    expect(FileModelMock.save).toBeCalled()
+    expect(s3Mocks.putObjectStream).toHaveBeenCalled()
+    expect(FileModelMock.save).toHaveBeenCalled()
     expect(result).toMatchSnapshot()
     expect(clamscan.on.mock.calls).toMatchSnapshot()
   })
@@ -197,7 +198,7 @@ describe('services > file', () => {
       id: '',
     })
 
-    await expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
+    await expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrow(
       /^You do not have permission to upload a file to this model./,
     )
   })
@@ -211,10 +212,10 @@ describe('services > file', () => {
 
     modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model' })
 
-    await expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
+    await expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrow(
       /^Cannot upload files to a mirrored model./,
     )
-    expect(FileModelMock.save).not.toBeCalled()
+    expect(FileModelMock.save).not.toHaveBeenCalled()
   })
 
   test('uploadFile > fileSize 0', async () => {
@@ -222,9 +223,9 @@ describe('services > file', () => {
       fileSize: 0,
     })
 
-    await expect(() =>
-      uploadFile({} as any, 'modelId', 'mockFileName', 'mime', new Readable() as any),
-    ).rejects.toThrowError(/^Could not upload mockFileName as it is an empty file./)
+    await expect(() => uploadFile({} as any, 'modelId', 'mockFileName', 'mime', new Readable() as any)).rejects.toThrow(
+      /^Could not upload mockFileName as it is an empty file./,
+    )
   })
 
   test('startUploadMultipartFile > success', async () => {
@@ -237,8 +238,8 @@ describe('services > file', () => {
 
     const result = await startUploadMultipartFile(user, modelId, name, mime, size, tags)
 
-    expect(s3Mocks.startMultipartUpload).toBeCalled()
-    expect(FileModelMock.save).toBeCalled()
+    expect(s3Mocks.startMultipartUpload).toHaveBeenCalled()
+    expect(FileModelMock.save).toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
 
@@ -249,7 +250,7 @@ describe('services > file', () => {
       id: '',
     })
 
-    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
+    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrow(
       /^You do not have permission to upload a file to this model./,
     )
   })
@@ -257,7 +258,7 @@ describe('services > file', () => {
   test('startUploadMultipartFile > failed to get uploadId', async () => {
     vi.mocked(s3Mocks.startMultipartUpload).mockResolvedValueOnce({} as any)
 
-    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
+    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrow(
       /^Failed to get uploadId from startMultipartUpload./,
     )
   })
@@ -265,10 +266,65 @@ describe('services > file', () => {
   test('startUploadMultipartFile > should throw an error when attempting to upload a file to a mirrored model', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({ kind: 'mirrored-model' })
 
-    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
+    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrow(
       /^Cannot upload files to a mirrored model./,
     )
-    expect(FileModelMock.save).not.toBeCalled()
+    expect(FileModelMock.save).not.toHaveBeenCalled()
+  })
+
+  test('uploadMultipartFilePart > success', async () => {
+    const modelId = 'testModelId'
+    const uploadId = 'testUploadId'
+    const partNumber = 1
+    const stream = new Readable() as any
+    const bodySize = 1024
+    const path = 'test/path'
+    FileModelMock.aggregate.mockResolvedValueOnce([
+      {
+        id: testFileId,
+        modelId,
+        path,
+        scanResults: [],
+      },
+    ])
+
+    const result = await uploadMultipartFilePart({} as any, modelId, testFileId, uploadId, partNumber, stream, bodySize)
+
+    expect(s3Mocks.putObjectPartStream).toHaveBeenCalledWith(path, uploadId, partNumber, stream, bodySize)
+    expect(result).toMatchSnapshot()
+  })
+
+  test('uploadMultipartFilePart > no permission', async () => {
+    const modelId = 'testModelId'
+    FileModelMock.aggregate.mockResolvedValueOnce([
+      {
+        id: testFileId,
+        modelId,
+        path: 'test/path',
+        scanResults: [],
+      },
+    ])
+    vi.mocked(authorisation.file).mockResolvedValueOnce({
+      info: 'You do not have permission to upload a file to this model.',
+      success: false,
+      id: '',
+    })
+
+    await expect(() =>
+      uploadMultipartFilePart({} as any, modelId, testFileId, 'testUploadId', 1, new Readable() as any, 1024),
+    ).rejects.toThrowError(/^You do not have permission to upload a file to this model./)
+
+    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
+  })
+
+  test('uploadMultipartFilePart > no file', async () => {
+    FileModelMock.aggregate.mockResolvedValueOnce([])
+
+    await expect(() =>
+      uploadMultipartFilePart({} as any, 'testModelId', testFileId, 'testUploadId', 1, new Readable() as any, 1024),
+    ).rejects.toThrowError(/^The requested file was not found./)
+
+    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
   })
 
   test('finishUploadMultipartFile > success', async () => {
@@ -285,9 +341,9 @@ describe('services > file', () => {
 
     const result = await finishUploadMultipartFile(user, modelId, fileId, uploadId, parts, tags)
 
-    expect(s3Mocks.completeMultipartUpload).toBeCalled()
-    expect(s3Mocks.headObject).toBeCalled()
-    expect(FileModelMock.save).toBeCalled()
+    expect(s3Mocks.completeMultipartUpload).toHaveBeenCalled()
+    expect(s3Mocks.headObject).toHaveBeenCalled()
+    expect(FileModelMock.save).toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
 
@@ -298,7 +354,7 @@ describe('services > file', () => {
       id: '',
     })
 
-    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
+    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrow(
       /^You do not have permission to upload a file to this model./,
     )
   })
@@ -306,7 +362,7 @@ describe('services > file', () => {
   test('finishUploadMultipartFile > no file', async () => {
     FileModelMock.findById.mockResolvedValueOnce(undefined)
 
-    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
+    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrow(
       /^The requested file was not found./,
     )
   })
@@ -314,7 +370,7 @@ describe('services > file', () => {
   test('finishUploadMultipartFile > no metadata ContentLength', async () => {
     vi.mocked(s3Mocks.headObject).mockResolvedValueOnce({} as any)
 
-    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
+    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrow(
       /^Could not determine uploaded file size./,
     )
   })
@@ -323,15 +379,13 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
 
-    FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
-    ])
+    FileModelMock.aggregate.mockResolvedValueOnce([{ modelId: 'testModel', id: testFileId }])
 
     const result = await removeFile(user, modelId, testFileId)
 
-    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledWith({ fileId: { $eq: testFileId } }, undefined)
-    expect(FileModelMock.findOneAndDelete).toBeCalled()
+    expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledWith({ fileId: { $eq: testFileId } }, undefined)
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
 
@@ -345,11 +399,11 @@ describe('services > file', () => {
 
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed])
 
-    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
-    expect(s3Mocks.deleteObject).not.toBeCalled()
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
+    expect(s3Mocks.deleteObject).not.toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
 
@@ -363,11 +417,11 @@ describe('services > file', () => {
 
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], undefined, true)
 
-    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
-    expect(s3Mocks.deleteObject).toBeCalledTimes(2)
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
+    expect(s3Mocks.deleteObject).toHaveBeenCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
 
@@ -383,8 +437,8 @@ describe('services > file', () => {
 
     const result = removeFiles(user, modelId, [testFileId])
 
-    await expect(result).rejects.toThrowError(/^Cannot update releases/)
-    expect(FileModelMock.delete).not.toBeCalled()
+    await expect(result).rejects.toThrow(/^Cannot update releases/)
+    expect(FileModelMock.delete).not.toHaveBeenCalled()
   })
 
   test('removeFiles > no file permission', async () => {
@@ -405,10 +459,10 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
 
-    await expect(() => removeFiles(user, modelId, [testFileId])).rejects.toThrowError(
+    await expect(() => removeFiles(user, modelId, [testFileId])).rejects.toThrow(
       /^You do not have permission to delete a file from this model./,
     )
-    expect(FileModelMock.delete).not.toBeCalled()
+    expect(FileModelMock.delete).not.toHaveBeenCalled()
   })
 
   test('removeFiles > success bypass mirrored model check', async () => {
@@ -424,10 +478,10 @@ describe('services > file', () => {
 
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], true)
 
-    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
-    expect(ScanModelMock.deleteMany).toBeCalledTimes(2)
+    expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toBeCalledTimes(2)
+    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
 
@@ -436,10 +490,10 @@ describe('services > file', () => {
       kind: 'mirrored-model',
     } as any)
 
-    await expect(() => removeFiles({} as any, 'modelId', [testFileId])).rejects.toThrowError(
+    await expect(() => removeFiles({} as any, 'modelId', [testFileId])).rejects.toThrow(
       /^Cannot remove file from a mirrored model./,
     )
-    expect(FileModelMock.delete).not.toBeCalled()
+    expect(FileModelMock.delete).not.toHaveBeenCalled()
   })
 
   test('getFilesByModel > success', async () => {
@@ -533,7 +587,7 @@ describe('services > file', () => {
 
     const files = getFilesByIds(user, modelId, fileIds)
 
-    await expect(files).rejects.toThrowError(/^The requested files were not found./)
+    await expect(files).rejects.toThrow(/^The requested files were not found./)
   })
 
   test('getFilesByIds > no permission', async () => {
@@ -587,7 +641,7 @@ describe('services > file', () => {
       return { success: false, info: 'Unknown action.', id: '' }
     })
 
-    await expect(downloadFile(user, testFileId, range)).rejects.toThrowError(
+    await expect(downloadFile(user, testFileId, range)).rejects.toThrow(
       /^You do not have permission to download this model./,
     )
   })
@@ -597,46 +651,6 @@ describe('services > file', () => {
     const size = await getTotalFileSize(['1', '2', '3'])
 
     expect(size).toBe(42)
-  })
-
-  test('isFileInterfaceDoc > success', async () => {
-    const result = isFileInterfaceDoc({
-      modelId: '',
-      name: '',
-      size: 1,
-      mime: '',
-      bucket: '',
-      path: '',
-      complete: true,
-      deleted: false,
-      createdAt: '',
-      updatedAt: '',
-      _id: '',
-    })
-
-    expect(result).toBe(true)
-  })
-
-  test('isFileInterfaceDoc > missing property', async () => {
-    const result = isFileInterfaceDoc({
-      modelId: '',
-      name: '',
-      mime: '',
-      path: '',
-      complete: true,
-      deleted: false,
-      createdAt: '',
-      updatedAt: '',
-      _id: '',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isFileInterfaceDoc > wrong type', async () => {
-    const result = isFileInterfaceDoc(null)
-
-    expect(result).toBe(false)
   })
 
   test('updateFile > success', async () => {
@@ -684,8 +698,8 @@ describe('services > file', () => {
 
     const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
-    await expect(promise).rejects.toThrowError(/^Cannot find requested file/)
-    expect(FileModelMock.findOneAndUpdate).not.toBeCalled()
+    await expect(promise).rejects.toThrow(/^Cannot find requested file/)
+    expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 
   test('updateFile > model missing', async () => {
@@ -699,8 +713,8 @@ describe('services > file', () => {
 
     const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
-    await expect(promise).rejects.toThrowError(/^Cannot find requested model/)
-    expect(FileModelMock.findOneAndUpdate).not.toBeCalled()
+    await expect(promise).rejects.toThrow(/^Cannot find requested model/)
+    expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 
   test('updateFile > no permission', async () => {
@@ -718,8 +732,8 @@ describe('services > file', () => {
 
     const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
-    await expect(promise).rejects.toThrowError(/^You do not have permission to upload a file to this model./)
-    expect(FileModelMock.findOneAndUpdate).not.toBeCalled()
+    await expect(promise).rejects.toThrow(/^You do not have permission to upload a file to this model./)
+    expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 
   test('updateFile > problem updating file', async () => {
@@ -733,7 +747,7 @@ describe('services > file', () => {
 
     const promise = updateFile(user, modelId, testFileId, { tags: ['test1'], name: 'this-will-break.txt' })
 
-    await expect(promise).rejects.toThrowError(/^There was a problem updating the file/)
+    await expect(promise).rejects.toThrow(/^There was a problem updating the file/)
     expect(FileModelMock.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 })

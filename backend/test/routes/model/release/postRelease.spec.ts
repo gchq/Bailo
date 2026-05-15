@@ -24,7 +24,7 @@ describe('routes > release > postRelease', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/releases`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateRelease).toBeCalled()
+    expect(audit.onCreateRelease).toHaveBeenCalled()
     expect(audit.onCreateRelease.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

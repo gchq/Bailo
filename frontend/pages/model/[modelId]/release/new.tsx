@@ -14,7 +14,6 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
-  EntryKind,
   FileInterface,
   FileWithMetadataAndTags,
   FlattenedModelImage,
@@ -43,11 +42,7 @@ export default function NewRelease() {
   const router = useRouter()
 
   const { modelId }: { modelId?: string } = router.query
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const updateModelCardVersionEffectEvent = useEffectEvent((cardVersion: number) => {
     setModelCardVersion(cardVersion)

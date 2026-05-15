@@ -6,7 +6,7 @@ import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
-import { ModelDoc } from '../models/Model.js'
+import { EntryKind, ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -32,6 +32,11 @@ export async function createAccessRequest(
 ) {
   // Check the model exists and the user can view it before creating an access request
   const model = await getModelById(user, modelId)
+
+  // Untrusted models cannot have access requests
+  if (model.kind === EntryKind.UntrustedModel) {
+    throw BadReq('Cannot create an access request for an untrusted model.', { modelId })
+  }
 
   // Ensure that the AR meets the schema
   const schema = await getSchemaById(accessRequestInfo.schemaId)
@@ -106,8 +111,9 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
 
     await accessRequest.delete(session)
     await removeAccessRequestReviews(accessRequestId, session)
+    // do NOT use `accessRequest.id` as this (usually mongoose) property is overridden by a custom ID
     await removeResponsesByParentIds(
-      [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest['_id']] as string[],
+      [...reviewsForAccessRequest.map((review) => review.id), accessRequest._id.toString()],
       session,
     )
   }

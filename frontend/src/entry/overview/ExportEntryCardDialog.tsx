@@ -60,12 +60,15 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
   }, [splitSchema.steps])
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' TransitionComponent={Transition}>
+    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' slotProps={{ transition: Transition }}>
       <DialogContent ref={modelCardContentRef}>
         <Stack spacing={2} divider={<Divider />}>
-          <Stack direction='row' sx={{
-            alignItems: 'center'
-          }}>
+          <Stack
+            direction='row'
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <Image src={logo} alt='podman-icon' width={180} height={70} />
             <Typography
               variant='h4'
@@ -73,8 +76,9 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
               color={theme.palette.secondary.main}
               sx={{
                 fontWeight: 'bold',
-                pl: 1
-              }}>
+                pl: 1,
+              }}
+            >
               {entry.name}
             </Typography>
           </Stack>
@@ -90,5 +94,5 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

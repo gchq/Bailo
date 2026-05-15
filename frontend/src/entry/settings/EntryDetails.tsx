@@ -8,7 +8,7 @@ import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
 import EntryStateInput from 'src/entry/EntryStateInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKindLabel, UpdateEntryForm } from 'types/types'
+import { EntryInterface, EntryKind, EntryKindLabel, UpdateEntryForm } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -113,37 +113,49 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
         <>
           <Typography variant='h6' component='h2' color='primary'>
-            {`${toSentenceCase(EntryKindLabel[entry.kind])} details`}
+            {`Details`}
           </Typography>
           <Divider />
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
-          <EntryStateInput value={state} onChange={(value) => setState(value)} />
+          {entry.kind === EntryKind.UNTRUSTED_MODEL ? (
+            <Stack>
+              <Typography fontWeight='bold'>State</Typography>
+              <Typography>{entry.state}</Typography>
+            </Stack>
+          ) : (
+            <EntryStateInput value={state} onChange={(value) => setState(value)} />
+          )}
         </>
         <Divider />
         <>
           <Typography variant='h6' component='h2'>
             Access control
           </Typography>
-          <RadioGroup
-            defaultValue='public'
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
-          >
-            <FormControlLabel
-              value='public'
-              control={<Radio />}
-              label={publicLabel()}
-              data-test='publicButtonSelector'
-            />
-            <FormControlLabel
-              value='private'
-              control={<Radio />}
-              label={privateLabel()}
-              data-test='privateButtonSelector'
-            />
-          </RadioGroup>
+          {entry.kind === EntryKind.UNTRUSTED_MODEL && (
+            <Typography color='warning'>Untrusted models can only be private.</Typography>
+          )}
+          {entry.kind !== EntryKind.UNTRUSTED_MODEL && (
+            <RadioGroup
+              defaultValue='public'
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
+            >
+              <FormControlLabel
+                value='public'
+                control={<Radio />}
+                label={publicLabel()}
+                data-test='publicButtonSelector'
+              />
+              <FormControlLabel
+                value='private'
+                control={<Radio />}
+                label={privateLabel()}
+                data-test='privateButtonSelector'
+              />
+            </RadioGroup>
+          )}
         </>
         <div>
           <Tooltip title={saveButtonTooltip}>
