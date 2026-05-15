@@ -92,7 +92,10 @@ export class FileImporter extends BaseImporter {
   }
 
   // Type resolve
-  async handleStreamCompletion(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
+  async handleStreamCompletion(
+    resolve: (reason?: FileMirrorInformation) => void,
+    _reject: (reason?: unknown) => void,
+  ): Promise<void> {
     await updateArtefactTransferStatus(
       this.metadata.exportId,
       this.metadata.filePath,

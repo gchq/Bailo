@@ -176,30 +176,32 @@ export async function extractTarGzStream(
     })
 
     // Successful completion of the tar stream
-    untarStream.once('finish', async () => {
-      if (settled) {
-        return
-      }
+    untarStream.once('finish', () => {
+      ;(async () => {
+        if (settled) {
+          return
+        }
 
-      if (!importer) {
-        fail(
-          InternalError('Tarball finished before importer initialisation.', {
-            ...logData,
-          }),
-        )
-        return
-      }
+        if (!importer) {
+          fail(
+            InternalError('Tarball finished before importer initialisation.', {
+              ...logData,
+            }),
+          )
+          return
+        }
 
-      try {
-        await importer.handleStreamCompletion(resolve, reject)
-        settled = true
-      } catch (err) {
-        fail(err)
-      }
+        try {
+          await importer.handleStreamCompletion(resolve, reject)
+          settled = true
+        } catch (err) {
+          fail(err)
+        }
+      })().catch((err) => fail(err))
     })
 
     // Handle each tar entry.
-    untarStream.on('entry', async (entry, entryStream, next) => {
+    untarStream.on('entry', (entry, entryStream, next) => {
       // This callback must remain synchronous, so all async work is wrapped in an IIFE and explicitly routed to `fail` on error.
       // See https://github.com/gchq/Bailo/pull/3115/changes#r2713416899 for more details.
       ;(async () => {
