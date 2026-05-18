@@ -2,7 +2,7 @@ import { Delete, Edit, FileCopy, ImportExport, Key, ManageAccounts } from '@mui/
 import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
@@ -51,6 +51,12 @@ function isSettingsCategory(
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.DELETION
       )
+    case EntryKind.UNTRUSTED_MODEL:
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.DELETION
+      )
     default:
       return false
   }
@@ -67,13 +73,17 @@ export default function Settings({ entry }: SettingsProps) {
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const selectedCategory = useMemo<SettingsCategoryKeys>(
-    () => (isSettingsCategory(category, entry) ? category : SettingsCategory.DETAILS),
-    [category, entry],
-  )
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
+
+  const onSelectedCategoryChange = useEffectEvent((category: SettingsCategoryKeys) => {
+    setSelectedCategory(category)
+  })
 
   useEffect(() => {
-    if (category && !isSettingsCategory(category, entry)) {
+    if (isSettingsCategory(category, entry)) {
+      onSelectedCategoryChange(category)
+    } else if (category) {
+      onSelectedCategoryChange(SettingsCategory.DETAILS)
       router.replace({
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })
@@ -81,6 +91,7 @@ export default function Settings({ entry }: SettingsProps) {
   }, [category, entry, router])
 
   const handleListItemClick = (category: SettingsCategoryKeys) => {
+    setSelectedCategory(category)
     router.replace({
       query: { ...router.query, category },
     })
