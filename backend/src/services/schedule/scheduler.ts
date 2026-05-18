@@ -26,17 +26,17 @@ export async function startScheduler(jobRegistrars: JobRegistrar[] = []) {
     log.error({ err }, 'Agenda error')
   })
 
-  for (const registerJob of jobRegistrars) {
-    await registerJob(agenda)
-  }
-
   try {
     await agenda.start()
     started = true
     log.info('Scheduler started')
   } catch (err) {
     log.error({ err }, 'Failed to start the scheduler')
+    throw err
   }
+
+  // Assign jobs after agenda has started so that they can use `getScheduler`
+  await Promise.all(jobRegistrars.map((registerJob) => registerJob(agenda)))
 
   return agenda
 }
