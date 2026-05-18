@@ -8,6 +8,7 @@ import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
+import ModelTransferModel, { TransferStatus } from '../../../models/ModelTransfer.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
@@ -16,6 +17,7 @@ import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
 import log from '../../log.js'
 import { getModelByIdNoAuth, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
+import { updateArtefactsTransferStatus } from '../../modelTransfer.js'
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
@@ -148,6 +150,24 @@ export class DocumentsImporter extends BaseImporter {
     }
   }
 
+  async handleStreamError(
+    error: unknown,
+    _resolve: (reason?: any) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    await ModelTransferModel.findOneAndUpdate(
+      {
+        exportId: this.metadata.exportId,
+        'artefactStatus.key': 'documents',
+        'artefactStatus.kind': MirrorKind.Documents,
+      },
+      {
+        $set: { 'artefactStatus.$.status': TransferStatus.Failed },
+      },
+    )
+    await super.handleStreamError(error, _resolve, reject)
+  }
+
   async handleStreamCompletion(
     resolve: (reason?: MongoDocumentMirrorInformation) => void,
     _reject: (reason?: unknown) => void,
@@ -175,6 +195,7 @@ export class DocumentsImporter extends BaseImporter {
       },
       'Finished importing the collection of model documents.',
     )
+    await updateArtefactsTransferStatus(this.metadata.exportId, this.imageIds, this.fileIds)
 
     resolve({
       metadata: this.metadata,
