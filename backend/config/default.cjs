@@ -69,7 +69,7 @@ module.exports = {
 
   smtp: {
     // Enable / disable all email sending
-    enabled: false,
+    enabled: true,
     transporter: 'smtp',
 
     // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
@@ -232,12 +232,12 @@ module.exports = {
     },
     modelMirror: {
       import: {
-        enabled: false,
+        enabled: true,
         additionalInfoHeading: 'Additional information',
         originalAnswerHeading: 'Original answer',
       },
       export: {
-        enabled: false,
+        enabled: true,
         disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
       },
     },

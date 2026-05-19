@@ -193,7 +193,7 @@ export async function handleStartEmail(exportId: string, modelId: string, create
   }
 }
 
-function filterArtefactsByKindAndStatus(
+export function filterArtefactsByKindAndStatus(
   artefactStatus: TransferArtefactStatus[],
   kind: MirrorKindKeys,
   status: TransferStatusKeys,
@@ -201,7 +201,7 @@ function filterArtefactsByKindAndStatus(
   return artefactStatus.filter((item) => item.kind === kind && item.status === status).map((item) => item.key)
 }
 
-async function handleCompleteEmail(exportId: string) {
+export async function handleCompleteEmail(exportId: string) {
   const transfer = await ModelTransferModel.findOne({
     exportId,
   })
@@ -237,10 +237,8 @@ async function handleCompleteEmail(exportId: string) {
   )
   if (updated) {
     await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
-    if (transfer.completed) {
-      sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
-        transfer,
-      })
-    }
+    sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
+      transfer,
+    })
   }
 }

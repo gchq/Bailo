@@ -52,6 +52,23 @@ module.exports = {
     },
   },
 
+  smtp: {
+    enabled: true,
+    transporter: 'smtp',
+
+    connection: {
+      host: 'mailcrab',
+      port: 1025,
+      secure: false,
+      auth: undefined,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    },
+
+    from: '"Bailo 📝" <bailo@example.org>',
+  },
+
   ses: {
     endpoint: 'ignored',
     region: 'ignored',
