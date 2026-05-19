@@ -111,7 +111,8 @@ export interface ScanResultInterface {
   _id: string
   state: ArtefactScanStateKeys
   scannerVersion?: string
-  summary?: Array<ModelScanSummary | ClamAVScanSummary | string>
+  summary?: ScanSummary
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
   platform?: string
   toolName: string
   lastRunAt: string
@@ -119,9 +120,6 @@ export interface ScanResultInterface {
   createdAt: Date
   updatedAt: Date
 }
-
-export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescription: string }
-export type ClamAVScanSummary = { virus: string }
 
 export const SeverityLevel = {
   UNKNOWN: 'unknown',
@@ -751,27 +749,17 @@ export interface ModelFormStats extends FormStats {
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
 
-export type ScanInterface = {
-  toolName: string
-  scannerVersion?: string
-  state: ArtefactScanStateKeys
-  summary?: ScanSummary
-  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
-
-  lastRunAt: string
-
-  createdAt: string
-  updatedAt: string
-} & (
-  | {
-      artefactKind: typeof ArtefactKind.FILE
-      fileId: string
-    }
-  | {
-      artefactKind: typeof ArtefactKind.IMAGE
-      layerDigest: string
-    }
-)
+export type ScanInterface = ScanResultInterface &
+  (
+    | {
+        artefactKind: typeof ArtefactKind.FILE
+        fileId: string
+      }
+    | {
+        artefactKind: typeof ArtefactKind.IMAGE
+        layerDigest: string
+      }
+  )
 
 export type ScanInfoInterface = {
   toolName: string
@@ -826,9 +814,9 @@ export type ModelScanResponse = {
   }
 }
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary | string)[]
+export type ScanSummary = (ModelScanSummary | ClamAVSummary | string)[]
 
-export type ArtefactScanSummary = {
+export type ModelScanSummary = {
   severity: SeverityLevelKeys
   vulnerabilityDescription: string
 }
