@@ -22,25 +22,31 @@ def extract_supported_file_types(settings: dict[str, Any]) -> set[str]:
     supported: set[str] = set()
 
     # Top-level zip extensions
-    supported.update(settings.get("supported_zip_extensions", []) or [])
+    supported.update(settings.get("supported_zip_extensions", []))
 
     # Extensions from each scanner
-    scanners = settings.get("scanners") or {}
+    scanners = settings.get("scanners", {})
     if isinstance(scanners, dict):
         for scanner in scanners.values():
-            if isinstance(scanner, dict):
-                supported.update(scanner.get("supported_extensions", []) or [])
+            if not isinstance(scanner, dict):
+                continue
+            supported.update(scanner.get("supported_extensions", []))
 
     # Extensions from each middleware's format map
-    middlewares = settings.get("middlewares") or {}
+    middlewares = settings.get("middlewares", {})
     if isinstance(middlewares, dict):
         for middleware in middlewares.values():
-            if isinstance(middleware, dict):
-                formats = middleware.get("formats") or {}
-                if isinstance(formats, dict):
-                    for extensions in formats.values():
-                        if isinstance(extensions, (list, set, tuple)):
-                            supported.update(extensions)
+            if not isinstance(middleware, dict):
+                continue
+
+            formats = middleware.get("formats", {})
+            if not isinstance(formats, dict):
+                continue
+
+            for extensions in formats.values():
+                if not isinstance(extensions, (list, set, tuple)):
+                    continue
+                supported.update(extensions)
 
     # Normalise all extensions to lowercase before returning
     return {ext.lower() for ext in supported}
