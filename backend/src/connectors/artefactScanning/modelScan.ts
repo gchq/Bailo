@@ -34,18 +34,18 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     this.maxSize = artefactScanInfo.maxFileSizeBytes ?? this.maxSize
   }
 
-  protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
-    const scannerInfo = this.info()
+  protected async executeScan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
+    const scannerInfo = this.getConnectorInfo()
 
     if (file.size > this.maxSize) {
-      return this.skipContentTooLarge(file, file.size)
+      return this.buildSizeExceededResult(file, file.size)
     }
 
     const lowerFileName = file.name.toLowerCase()
     // Do not use `path.extname` as it will not handle compound extensions e.g. `.tar.gz`
     const isSupported = this.supportedExtensions.some((ext) => lowerFileName.endsWith(ext.toLowerCase()))
     if (this.supportedExtensions.length > 0 && !isSupported) {
-      return this.skipUnsupportedFileType()
+      return this.buildUnsupportedFileType()
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -54,7 +54,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       const scanResults = await scanFileStream(s3Stream, file.name)
 
       if (scanResults.errors.length !== 0) {
-        return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+        return this.buildErrorResult(`This file could not be scanned due to an error caused by ${this.toolName}`, {
           errors: scanResults.errors,
           file,
           ...scannerInfo,
@@ -62,7 +62,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       }
 
       if (scanResults.summary.skipped.total_skipped > 0) {
-        return this.skipUnsupportedFileType()
+        return this.buildUnsupportedFileType()
       }
 
       const summary: ArtefactScanSummary[] = scanResults.issues.map(
@@ -84,9 +84,9 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     } catch (error) {
       // Content too large
       if (isBailoError(error) && error.code === 413) {
-        return this.skipContentTooLarge(file, file.size)
+        return this.buildSizeExceededResult(file, file.size)
       }
-      return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+      return this.buildErrorResult(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error,
         file,
       })
@@ -99,7 +99,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     }
   }
 
-  protected skipUnsupportedFileType(): ArtefactScanResult {
-    return this.scanSkip([UNSUPPORTED_FILE_TYPE_MESSAGE])
+  protected buildUnsupportedFileType(): ArtefactScanResult {
+    return this.buildSkipResult([UNSUPPORTED_FILE_TYPE_MESSAGE])
   }
 }

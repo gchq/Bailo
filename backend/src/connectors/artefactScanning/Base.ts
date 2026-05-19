@@ -33,34 +33,34 @@ export abstract class BaseArtefactScanningConnector {
   protected version?: string
   protected maxSize: number = Infinity
 
-  info(): ArtefactScanningConnectorInfo {
+  getConnectorInfo(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version, artefactKind: this.artefactType }
   }
 
   abstract init(): Promise<void>
 
-  protected abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
+  protected abstract executeScan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
 
   async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult> {
     if (!this.version) {
-      return this.scanError(`${this.toolName} used before initialisation`, { artefact })
+      return this.buildErrorResult(`${this.toolName} used before initialisation`, { artefact })
     }
 
-    log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
+    log.debug({ artefact, ...this.getConnectorInfo(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResult = await this.queue
-      .add(() => this._scan(artefact))
+      .add(() => this.executeScan(artefact))
       .catch((error) => {
-        return this.scanError('Queued scan threw an error.', { error, artefact })
+        return this.buildErrorResult('Queued scan threw an error.', { error, artefact })
       })
     // return type of `queue.add()` is Promise<void | ...> so reject void responses
     if (scanResult === null || typeof scanResult !== 'object') {
-      return this.scanError('Queued scan failed to correctly return.', { artefact })
+      return this.buildErrorResult('Queued scan failed to correctly return.', { artefact })
     }
     return scanResult
   }
 
-  protected scanError(message: string, context?: Record<string, unknown>): ArtefactScanResult {
-    const scannerInfo = this.info()
+  protected buildErrorResult(message: string, context?: Record<string, unknown>): ArtefactScanResult {
+    const scannerInfo = this.getConnectorInfo()
     log.error({ ...context, ...scannerInfo }, message)
     return {
       ...scannerInfo,
@@ -70,8 +70,8 @@ export abstract class BaseArtefactScanningConnector {
     }
   }
 
-  protected scanSkip(reason: string | string[]): ArtefactScanResult {
-    const scannerInfo = this.info()
+  protected buildSkipResult(reason: string | string[]): ArtefactScanResult {
+    const scannerInfo = this.getConnectorInfo()
     return {
       ...scannerInfo,
       summary: typeof reason === 'string' ? [reason] : reason,
@@ -80,8 +80,8 @@ export abstract class BaseArtefactScanningConnector {
     }
   }
 
-  protected skipContentTooLarge(artefact: ArtefactInterface, artefactSize: number): ArtefactScanResult {
-    return this.scanError('Artefact exceeds configured scanner size limit.', {
+  protected buildSizeExceededResult(artefact: ArtefactInterface, artefactSize: number): ArtefactScanResult {
+    return this.buildErrorResult('Artefact exceeds configured scanner size limit.', {
       artefact,
       artefactSize: bytes.format(artefactSize),
       maxSize: bytes.format(this.maxSize),

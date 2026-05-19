@@ -16,14 +16,14 @@ class TestConnector extends BaseArtefactScanningConnector {
 
   init = vi.fn()
 
-  _scan = vi.fn()
+  executeScan = vi.fn()
 }
 
 describe('connectors > artefactScanning > Base', () => {
-  test('info() returns scanner metadata', () => {
+  test('getConnectorInfo() returns scanner metadata', () => {
     const connector = new TestConnector()
 
-    expect(connector.info()).toEqual({
+    expect(connector.getConnectorInfo()).toEqual({
       toolName: 'TestScanner',
       scannerVersion: '1.2.3',
       artefactKind: ArtefactKind.FILE,
@@ -34,7 +34,7 @@ describe('connectors > artefactScanning > Base', () => {
     const connector = new TestConnector()
     const artefact = { id: 'file1' } as any
 
-    connector._scan.mockResolvedValueOnce({
+    connector.executeScan.mockResolvedValueOnce({
       toolName: 'TestScanner',
       scannerVersion: '1.2.3',
       artefactKind: ArtefactKind.FILE,
@@ -44,7 +44,7 @@ describe('connectors > artefactScanning > Base', () => {
 
     const result = await connector.scan(artefact)
 
-    expect(connector._scan).toHaveBeenCalledWith(artefact)
+    expect(connector.executeScan).toHaveBeenCalledWith(artefact)
     expect(result.state).toBe(ArtefactScanState.Complete)
   })
 
@@ -52,7 +52,7 @@ describe('connectors > artefactScanning > Base', () => {
     const connector = new TestConnector()
     const artefact = { id: 'file1' } as any
 
-    connector._scan.mockRejectedValueOnce(new Error('boom'))
+    connector.executeScan.mockRejectedValueOnce(new Error('boom'))
 
     const result = await connector.scan(artefact)
 
@@ -64,18 +64,18 @@ describe('connectors > artefactScanning > Base', () => {
     const connector = new TestConnector()
     const artefact = { id: 'file1' } as any
 
-    connector._scan.mockResolvedValueOnce(undefined as any)
+    connector.executeScan.mockResolvedValueOnce(undefined as any)
 
     const result = await connector.scan(artefact)
 
     expect(result.state).toBe(ArtefactScanState.Error)
   })
 
-  test('scanError() returns minimal error ArtefactScanResult', async () => {
+  test('buildErrorResult() returns minimal error ArtefactScanResult', async () => {
     const connector = new TestConnector()
 
     // @ts-expect-ignore accessing protected property
-    const result = connector['scanError']('failure')
+    const result = connector['buildErrorResult']('failure')
 
     expect(result).toMatchObject({
       toolName: 'TestScanner',
@@ -86,11 +86,11 @@ describe('connectors > artefactScanning > Base', () => {
     expect(result.lastRunAt).toBeInstanceOf(Date)
   })
 
-  test('scanSkip() returns minimal error ArtefactScanResult', async () => {
+  test('buildSkipResult() returns minimal error ArtefactScanResult', async () => {
     const connector = new TestConnector()
 
     // @ts-expect-ignore accessing protected property
-    const result = connector['scanSkip']('message')
+    const result = connector['buildSkipResult']('message')
 
     expect(result).toMatchObject({
       toolName: 'TestScanner',
@@ -102,11 +102,11 @@ describe('connectors > artefactScanning > Base', () => {
     expect(result.lastRunAt).toBeInstanceOf(Date)
   })
 
-  test('skipContentTooLarge() returns minimal error ArtefactScanResult', async () => {
+  test('buildSizeExceededResult() returns minimal error ArtefactScanResult', async () => {
     const connector = new TestConnector()
 
     // @ts-expect-ignore accessing protected property
-    const result = connector['skipContentTooLarge']({} as any, 456)
+    const result = connector['buildSizeExceededResult']({} as any, 456)
 
     expect(result).toMatchObject({
       toolName: 'TestScanner',

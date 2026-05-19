@@ -42,19 +42,19 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
       throw InternalError('Invalid ClamAV size value.', { sizeString })
     }
     this.maxSize = streamMaxLength
-    log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
+    log.debug({ ...this.getConnectorInfo() }, 'Initialised Clam AV scanner')
   }
 
-  protected async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
-    const scannerInfo = this.info()
+  protected async executeScan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
+    const scannerInfo = this.getConnectorInfo()
     if (!this.av) {
-      return this.scanError(`Could not use ${this.toolName} as it has not been correctly initialised.`, {
+      return this.buildErrorResult(`Could not use ${this.toolName} as it has not been correctly initialised.`, {
         ...scannerInfo,
       })
     }
 
     if (file.size > this.maxSize) {
-      return this.skipContentTooLarge(file, file.size)
+      return this.buildSizeExceededResult(file, file.size)
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -73,9 +73,9 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     } catch (error) {
       // Content too large
       if (isBailoError(error) && error.code === 413) {
-        return this.skipContentTooLarge(file, file.size)
+        return this.buildSizeExceededResult(file, file.size)
       }
-      return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+      return this.buildErrorResult(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
         file,
         ...scannerInfo,

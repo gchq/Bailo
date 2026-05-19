@@ -26,8 +26,8 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
     this.maxSize = artefactScanInfo.maxFileSizeBytes ?? this.maxSize
   }
 
-  protected async _scan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
-    const scannerInfo = this.info()
+  protected async executeScan(layer: LayerRefInterface): Promise<ArtefactScanResult> {
+    const scannerInfo = this.getConnectorInfo()
     let layerSize: number | undefined = undefined
 
     try {
@@ -45,7 +45,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
         if (layerSize > this.maxSize) {
-          return this.skipContentTooLarge(layer, layerSize)
+          return this.buildSizeExceededResult(layer, layerSize)
         }
       }
 
@@ -97,9 +97,9 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
     } catch (error) {
       // Content too large
       if (isBailoError(error) && error.code === 413 && layerSize !== undefined) {
-        return this.skipContentTooLarge(layer, layerSize)
+        return this.buildSizeExceededResult(layer, layerSize)
       }
-      return this.scanError(`This image layer could not be scanned due to an error caused by ${this.toolName}`, {
+      return this.buildErrorResult(`This image layer could not be scanned due to an error caused by ${this.toolName}`, {
         error,
         layer,
       })

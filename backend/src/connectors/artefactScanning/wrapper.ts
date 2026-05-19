@@ -45,7 +45,7 @@ export class ArtefactScanningWrapper {
 
   scannersInfo(): ArtefactScanningConnectorInfo[] {
     return Array.from(this.scanners).map((scanner) => {
-      return scanner.info()
+      return scanner.getConnectorInfo()
     })
   }
 
