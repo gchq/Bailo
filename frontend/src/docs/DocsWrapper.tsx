@@ -96,7 +96,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
-                      primary: { fontWeight: doc.slug ? 'normal' : 'bold' },
+                      primary: { fontWeight: doc.slug ? 'normal' : 'bold', fontSize: doc.header ? headerFontSize : '' },
                     }}
                   />
                 </ListItemButton>
@@ -109,6 +109,10 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     },
     [pathname, theme.typography.body2.fontSize, theme.typography.h6.fontSize, theme.typography.subtitle1.fontSize],
   )
+
+  const docList = () => {
+    return <StyledList>{createDocElement(directory)}</StyledList>
+  }
 
   const currentIndex = useMemo(
     () => flatDirectory.findIndex((item) => item.slug === pathname.replace(/^(\/docs\/)/, '')),
@@ -151,7 +155,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           position={{ xs: 'relative', sm: 'fixed' }}
           height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
         >
-          <StyledList>{createDocElement(directory)}</StyledList>
+          {docList()}
         </Box>
         <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
           <Box display='flex' flexDirection='column'>
