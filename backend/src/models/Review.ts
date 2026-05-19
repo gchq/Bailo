@@ -15,6 +15,7 @@ export interface ReviewInterface {
 
   kind: ReviewKindKeys
   role: string
+  dueDate?: Date
 
   createdAt: Date
   updatedAt: Date
@@ -53,7 +54,12 @@ const ReviewSchema = new Schema<ReviewDoc>(
     },
     modelId: { type: String, required: true },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
-
+    dueDate: {
+      type: Schema.Types.Date,
+      required: function (this: ReviewInterface): boolean {
+        return this.kind === ReviewKind.Lifecycle
+      },
+    },
     role: { type: String, required: true },
   },
   {
