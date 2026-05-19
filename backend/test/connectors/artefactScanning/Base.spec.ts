@@ -5,6 +5,7 @@ import { ArtefactScanState, BaseArtefactScanningConnector } from '../../../src/c
 import { ArtefactKind } from '../../../src/models/Scan.js'
 
 vi.mock('../../../src/services/log.js')
+vi.mock('bytes')
 
 class TestConnector extends BaseArtefactScanningConnector {
   toolName = 'TestScanner'

@@ -1,4 +1,4 @@
-import prettyBytes from 'pretty-bytes'
+import bytes from 'bytes'
 
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
@@ -51,7 +51,7 @@ export class DocumentsExporter extends BaseExporter {
         }
         const totalFileSize = await getTotalFileSize(fileIds)
         log.debug(
-          { modelId: this.model.id, semvers, size: prettyBytes(totalFileSize) },
+          { modelId: this.model.id, semvers, size: bytes.format(totalFileSize) },
           'Calculated estimated total file size included in export.',
         )
         if (totalFileSize > config.modelMirror.export.maxSize) {

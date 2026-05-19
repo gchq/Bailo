@@ -1,5 +1,5 @@
+import bytes from 'bytes'
 import PQueue from 'p-queue'
-import prettyBytes from 'pretty-bytes'
 
 import { FileInterface } from '../../models/File.js'
 import { ImageRef } from '../../models/Release.js'
@@ -83,8 +83,8 @@ export abstract class BaseArtefactScanningConnector {
   protected skipContentTooLarge(artefact: ArtefactInterface, artefactSize: number): ArtefactScanResult {
     return this.scanError('Artefact exceeds configured scanner size limit.', {
       artefact,
-      artefactSize: prettyBytes(artefactSize),
-      maxSize: prettyBytes(this.maxSize),
+      artefactSize: bytes.format(artefactSize),
+      maxSize: bytes.format(this.maxSize),
     })
   }
 }

@@ -18,7 +18,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
-import prettyBytes from 'pretty-bytes'
+import bytes from 'bytes'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -61,8 +61,8 @@ export async function putObjectStream(
       log.debug(
         {
           ...progress,
-          ...(progress.loaded && { loaded: prettyBytes(progress.loaded), loadedBytes: progress.loaded }),
-          ...(progress.total && { total: prettyBytes(progress.total), totalBytes: progress.total }),
+          ...(progress.loaded && { loaded: bytes.format(progress.loaded), loadedBytes: progress.loaded }),
+          ...(progress.total && { total: bytes.format(progress.total), totalBytes: progress.total }),
         },
         'Object upload is in progress',
       )

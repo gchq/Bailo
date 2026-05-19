@@ -1,3 +1,4 @@
+import bytes from 'bytes'
 import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
 
@@ -19,32 +20,6 @@ function safeParseVersion(versionStr: string): string {
   return versionStr
 }
 
-function safeParseSize(sizeStr: string): number {
-  // Match a string for any number of digits followed by their units (e.g. KB)
-  // Then extract digits to capture group 1, and units to capture group 2
-  const match = sizeStr.trim().match(/^(\d+)\s*([KMG])?B?$/i)
-  if (!match) {
-    throw InternalError('Invalid ClamAV size value.', { sizeStr })
-  }
-
-  const amount = Number(match[1])
-  const unit = match[2]?.toUpperCase()
-
-  if (amount === 0) {
-    return Infinity
-  }
-  switch (unit) {
-    case 'G':
-      return amount * 1024 ** 3
-    case 'M':
-      return amount * 1024 ** 2
-    case 'K':
-      return amount * 1024
-    default:
-      return amount
-  }
-}
-
 export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.clamdscan.concurrency })
   readonly artefactType: ArtefactKindKeys = ArtefactKind.FILE
@@ -59,7 +34,13 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
-    this.maxSize = safeParseSize(config.artefactScanning.clamdscan.streamMaxLength)
+    const streamMaxLength = bytes.parse(config.artefactScanning.clamdscan.streamMaxLength)
+    if (streamMaxLength === null) {
+      throw InternalError('Invalid ClamAV size value.', {
+        sizeString: config.artefactScanning.clamdscan.streamMaxLength,
+      })
+    }
+    this.maxSize = streamMaxLength
     log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
   }
 
