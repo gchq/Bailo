@@ -98,7 +98,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         // TODO - use "theme.applyStyles" when implementing dark mode
         background: '#242424',
         ...theme.applyStyles('light', {
-          background: 'linear-gradient(276deg, rgba(181, 73, 125,1) 0%,#4d3075 100%)',
+          background: `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`,
         }),
       })}
     >
