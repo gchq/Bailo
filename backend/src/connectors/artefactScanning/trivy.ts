@@ -37,11 +37,11 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
       ])
 
       if (this.maxSize != Infinity) {
-        const layerHeadDetails = await headLayer(
-          repositoryToken,
-          { repository: layer.repository, name: layer.name },
-          layer.layerDigest,
-        )
+        const layerHeadDetails = await headLayer(repositoryToken, {
+          repository: layer.repository,
+          name: layer.name,
+          digest: layer.layerDigest,
+        })
         layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
         if (layerSize != Infinity && layerSize > this.maxSize) {
