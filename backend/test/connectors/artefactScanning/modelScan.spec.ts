@@ -181,7 +181,7 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
       toolName: 'ModelScan',
       scannerVersion: '1.0.0',
       artefactKind: ArtefactKind.FILE,
-      summary: ['File type is not compatible with this scanner.', 'model.bin not covered in [.txt, .pdf].'],
+      summary: ['File type is not compatible with this scanner.'],
       state: ArtefactScanState.Skipped,
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)

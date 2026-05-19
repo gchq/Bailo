@@ -44,7 +44,7 @@ export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
         })
         layerSize = parseInt(layerHeadDetails.headers['content-length'] || '') || Infinity
 
-        if (layerSize != Infinity && layerSize > this.maxSize) {
+        if (layerSize > this.maxSize) {
           return this.skipContentTooLarge(layer, layerSize)
         }
       }

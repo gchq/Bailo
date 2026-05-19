@@ -38,7 +38,7 @@ export class ArtefactScanningWrapper {
           log.warn({ attempt, toolName: scanner.toolName, error }, 'Could not initialise scanner, retrying.')
         }
 
-        await new Promise((r) => setTimeout(r, config.connectors.artefactScanners.initRetryDelay))
+        await new Promise((callback) => setTimeout(callback, config.connectors.artefactScanners.initRetryDelay))
       }
     }
   }

@@ -45,7 +45,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     // Do not use `path.extname` as it will not handle compound extensions e.g. `.tar.gz`
     const isSupported = this.supportedExtensions.some((ext) => lowerFileName.endsWith(ext.toLowerCase()))
     if (this.supportedExtensions.length > 0 && !isSupported) {
-      return this.skipUnsupportedFileType(file.name)
+      return this.skipUnsupportedFileType()
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -62,7 +62,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       }
 
       if (scanResults.summary.skipped.total_skipped > 0) {
-        return this.skipUnsupportedFileType(file.name)
+        return this.skipUnsupportedFileType()
       }
 
       const summary: ArtefactScanSummary[] = scanResults.issues.map(
@@ -99,10 +99,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     }
   }
 
-  protected skipUnsupportedFileType(fileName: string): ArtefactScanResult {
-    return this.scanSkip([
-      UNSUPPORTED_FILE_TYPE_MESSAGE,
-      `${fileName} not covered in [${this.supportedExtensions.join(', ')}].`,
-    ])
+  protected skipUnsupportedFileType(): ArtefactScanResult {
+    return this.scanSkip([UNSUPPORTED_FILE_TYPE_MESSAGE])
   }
 }
