@@ -9,7 +9,7 @@ export default function Accessibility() {
       title: 'Statement',
       path: 'statement',
       view: (
-        <Container maxWidth='xl'>
+        <Container maxWidth='lg'>
           <StatementPage />
         </Container>
       ),
@@ -18,7 +18,7 @@ export default function Accessibility() {
       title: 'Report',
       path: 'report',
       view: (
-        <Container maxWidth='xl'>
+        <Container maxWidth='lg'>
           <ReportPage />
         </Container>
       ),
