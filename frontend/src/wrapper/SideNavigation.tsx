@@ -171,15 +171,6 @@ export default function SideNavigation({
               icon={<PythonIcon />}
               openLinkInNewTab
             />
-            <NavMenuItem
-              href='/help'
-              selectedPage={page}
-              primaryText='Support'
-              drawerOpen={drawerOpen}
-              menuPage='help'
-              title='Help & Support'
-              icon={<ContactSupportIcon />}
-            />
             <Divider aria-hidden='true' />
             {currentUser.isAdmin && (
               <>
@@ -219,6 +210,15 @@ export default function SideNavigation({
           </StyledList>
           <StyledList>
             <Divider aria-hidden='true' />
+            <NavMenuItem
+              href='/help'
+              selectedPage={page}
+              primaryText='Support'
+              drawerOpen={drawerOpen}
+              menuPage='help'
+              title='Help & Support'
+              icon={<ContactSupportIcon />}
+            />
             <NavMenuItem
               href='/accessibility'
               selectedPage={page}
