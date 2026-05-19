@@ -23,7 +23,7 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
           <>
             <BlockOutlined color='action' />
             <Typography>
-              <span style={{ fontWeight: 'bold' }}>{toolName}</span> was skipped:
+              <span style={{ fontWeight: 'bold' }}>{toolName}</span> was skipped
             </Typography>
           </>
         )
@@ -32,7 +32,7 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
         <>
           <ErrorIcon color='error' />
           <Typography>
-            <span style={{ fontWeight: 'bold' }}>{toolName}</span> found the following:
+            <span style={{ fontWeight: 'bold' }}>{toolName}</span> found the following
           </Typography>
         </>
       )
@@ -71,7 +71,7 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
       <>
         <Icon color={color} />
         <Typography>
-          <strong>{toolName}</strong> {text}
+          <span style={{ fontWeight: 'bold' }}>{toolName}</span> {text}
         </Typography>
       </>
     )
