@@ -1,8 +1,8 @@
 import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
-import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/entry'
-import { CSSProperties, useMemo } from 'react'
+import { CSSProperties, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
 import { EntryKind, PeerConfigStatus } from 'types/types'
@@ -26,6 +26,8 @@ interface EntryListRowProps {
   peers?: Map<string, PeerConfigStatus>
 }
 
+const descriptionTextLimit = 170
+
 export default function EntryListRow({
   selectedChips,
   onSelectedChipsChange,
@@ -43,6 +45,7 @@ export default function EntryListRow({
   peers,
 }: EntryListRowProps) {
   const theme = useTheme()
+  const [expanded, setExpanded] = useState(false)
 
   const label = useMemo(() => {
     switch (entry.kind) {
@@ -122,9 +125,16 @@ export default function EntryListRow({
             />
           )}
         </Link>
-        <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-          {entry.description}
-        </Typography>
+        <>
+          {!expanded &&
+            `${entry.description.slice(0, descriptionTextLimit)}${entry.description.length > descriptionTextLimit ? '...' : ''}`}
+          {expanded && entry.description}
+          {entry.description.length > descriptionTextLimit && (
+            <Button sx={{ width: 'max-content' }} onClick={() => setExpanded(!expanded)}>
+              {expanded ? 'Show less' : 'Show more...'}
+            </Button>
+          )}
+        </>
         <Stack
           direction='row'
           spacing={1}

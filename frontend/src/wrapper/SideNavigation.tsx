@@ -220,7 +220,7 @@ export default function SideNavigation({
           <StyledList>
             <Divider aria-hidden='true' />
             <NavMenuItem
-              href='/accessibility/statement'
+              href='/accessibility'
               selectedPage={page}
               primaryText='Accessibility'
               drawerOpen={drawerOpen}

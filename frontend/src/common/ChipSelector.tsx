@@ -104,7 +104,7 @@ export default function ChipSelector({
             <Typography variant='caption'>{subheading ? subheading : ''}</Typography>
           </Stack>
         </AccordionSummary>
-        <AccordionDetails sx={{ p: 0 }}>
+        <AccordionDetails sx={{ p: 0, pb: 1 }}>
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
             {allOptions.length === 0 && (
