@@ -1,5 +1,5 @@
 import { BlockOutlined, Done, Error as ErrorIcon, HourglassTop, Warning } from '@mui/icons-material'
-import { Chip, Stack, Typography } from '@mui/material'
+import { Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
 import { ReactElement } from 'react'
 import { ArtefactScanState, ClamAVSummary, ModelScanSummary, ScanResultInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
@@ -38,46 +38,76 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
       )
     }
 
-    switch (state) {
-      case ArtefactScanState.InProgress:
-        return (
-          <>
-            <HourglassTop color='warning' />
-            <Typography>
-              <span style={{ fontWeight: 'bold' }}>{toolName}</span> is currently running
-            </Typography>
-          </>
-        )
-      case ArtefactScanState.NotScanned:
-      case ArtefactScanState.Error:
-        return (
-          <>
-            <Warning color='warning' />
-            <Typography>
-              <span style={{ fontWeight: 'bold' }}>{toolName}</span> could not be run
-            </Typography>
-          </>
-        )
-      case ArtefactScanState.Skipped:
-        return (
-          <>
-            <BlockOutlined color='action' />
-            <Typography>
-              <span style={{ fontWeight: 'bold' }}>{toolName}</span> was skipped
-            </Typography>
-          </>
-        )
-      case ArtefactScanState.Complete:
-      default:
-        return (
-          <>
-            <Done color='success' />
-            <Typography>
-              <span style={{ fontWeight: 'bold' }}>{toolName}</span> found no issues
-            </Typography>
-          </>
-        )
+    const stateMap = {
+      [ArtefactScanState.InProgress]: {
+        Icon: HourglassTop,
+        color: 'warning',
+        text: 'is currently running',
+      },
+      [ArtefactScanState.NotScanned]: {
+        Icon: Warning,
+        color: 'warning',
+        text: 'could not be run',
+      },
+      [ArtefactScanState.Error]: {
+        Icon: Warning,
+        color: 'warning',
+        text: 'could not be run',
+      },
+      [ArtefactScanState.Skipped]: {
+        Icon: BlockOutlined,
+        color: 'action',
+        text: 'was skipped',
+      },
+      [ArtefactScanState.Complete]: {
+        Icon: Done,
+        color: 'success',
+        text: 'found no issues',
+      },
+    } as const
+    const { Icon, color, text } = stateMap[state] ?? stateMap[ArtefactScanState.Complete]
+
+    return (
+      <>
+        <Icon color={color} />
+        <Typography>
+          <strong>{toolName}</strong> {text}
+        </Typography>
+      </>
+    )
+  }
+
+  const renderFindingItem = (vulnerability: ModelScanSummary | ClamAVSummary | string): ReactElement => {
+    if (typeof vulnerability === 'string') {
+      return (
+        <ListItem key={vulnerability} sx={{ display: 'list-item', py: 0 }}>
+          <ListItemText primary={vulnerability} />
+        </ListItem>
+      )
     }
+
+    if (toolName === 'ModelScan') {
+      const v = vulnerability as ModelScanSummary
+      return (
+        <ListItem key={v.vulnerabilityDescription} sx={{ display: 'list-item', py: 0 }}>
+          <ListItemText
+            primary={
+              <>
+                <span style={{ fontWeight: 'bold' }}>{`${String(v.severity).toUpperCase()}:`}</span>{' '}
+                {v.vulnerabilityDescription}
+              </>
+            }
+          />
+        </ListItem>
+      )
+    }
+
+    const v = vulnerability as ClamAVSummary
+    return (
+      <ListItem key={v.virus} sx={{ display: 'list-item', py: 0 }}>
+        <ListItemText primary={`Virus found: ${v.virus}`} />
+      </ListItem>
+    )
   }
 
   return (
@@ -95,24 +125,9 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
       )}
       <Typography>Last ran at: {formatDateTimeString(lastRunAt)}</Typography>
       {hasFindings && summary && (
-        <ul>
-          {summary.map((vulnerability) => {
-            if (typeof vulnerability === 'string') {
-              return <li key={vulnerability}>{vulnerability}</li>
-            }
-            if (toolName === 'ModelScan') {
-              const v = vulnerability as ModelScanSummary
-              return (
-                <li key={v.vulnerabilityDescription}>
-                  <span style={{ fontWeight: 'bold' }}>{`${String(v.severity).toUpperCase()}:`}</span>{' '}
-                  {v.vulnerabilityDescription}
-                </li>
-              )
-            }
-            const v = vulnerability as ClamAVSummary
-            return <li key={v.virus}>{`Virus found: ${v.virus}`}</li>
-          })}
-        </ul>
+        <List sx={{ listStyleType: 'disc', pl: 2, py: 0 }}>
+          {summary.map((vulnerability) => renderFindingItem(vulnerability))}
+        </List>
       )}
     </Stack>
   )
