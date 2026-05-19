@@ -19,6 +19,7 @@ vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({
   default: logMocks,
@@ -130,12 +131,12 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
     )
   })
 
-  test('finishListener > success calls BaseImporter behaviour', () => {
+  test('finishListener > success calls BaseImporter behaviour', async () => {
     const importer = new FileImporter(mockMetadata, mockLogData)
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.handleStreamCompletion(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

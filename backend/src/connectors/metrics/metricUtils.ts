@@ -48,7 +48,6 @@ export function buildModelMatchStage(filter: ModelFilter): PipelineStage.Match {
 
 export type SchemaRoleMap = {
   schemaRoleMap: Record<string, string[]>
-  defaultRoles: string[]
   roleMeta: Record<string, { roleId: string; roleName: string }>
 }
 
@@ -57,14 +56,13 @@ export type SchemaRoleMap = {
  * with additional review roles, then include them.
  */
 export function getApplicableRoleSet(
-  defaultRoles: string[],
   schemaRoleMap: Record<string, string[]>,
   schemaId: string | undefined,
 ): Set<string> {
-  let applicableRoles = [...defaultRoles]
+  let applicableRoles: string[] = []
 
   if (schemaId && schemaRoleMap[schemaId]) {
-    applicableRoles = [...defaultRoles, ...schemaRoleMap[schemaId]]
+    applicableRoles = [...schemaRoleMap[schemaId]]
   }
 
   return new Set(applicableRoles)

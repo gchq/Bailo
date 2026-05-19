@@ -1,10 +1,10 @@
 import { GppBad } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
-import { CSSProperties } from 'react'
+import { CSSProperties, ReactElement } from 'react'
 import Link from 'src/Link'
 
 interface ForbiddenProps {
-  errorMessage?: string
+  errorMessage?: string | ReactElement
   noMargin?: boolean
   hideNavButton?: boolean
   additionalStyling?: CSSProperties
