@@ -8,7 +8,7 @@ import { imageTagWithScanResultsSchema, PathConfig, registerPath } from '../../.
 import { ImageTagResult } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
-const getImageParams = z.object({
+const getImageByDigestParams = z.object({
   modelId: z.string({
     required_error: 'Must specify model id as param',
   }),
@@ -18,9 +18,6 @@ const getImageParams = z.object({
   tag: z.string({
     required_error: 'Must specify image tag as param',
   }),
-})
-
-const getImageByDigestParams = getImageParams.extend({
   digest: z.string({
     required_error: 'Must specify image digest as param',
   }),
