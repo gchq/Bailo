@@ -1,4 +1,4 @@
-import prettyBytes from 'pretty-bytes'
+import bytes from 'bytes'
 
 import FileModel from '../models/File.js'
 import log from '../services/log.js'
@@ -22,7 +22,7 @@ async function main() {
   }
   // Copy of totalBytes with human readable values
   const totalFormattedBytes = Object.fromEntries(
-    Object.entries(totalBytes).map(([key, value]) => [key, prettyBytes(value)]),
+    Object.entries(totalBytes).map(([key, value]) => [key, bytes.format(value)]),
   )
 
   // Print results

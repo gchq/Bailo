@@ -13,7 +13,6 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
 vi.mock('../../src/utils/transactions.js')
-vi.mock('pretty-bytes')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
 

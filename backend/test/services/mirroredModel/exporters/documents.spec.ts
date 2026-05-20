@@ -7,6 +7,8 @@ import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/B
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
 import { BadReq, InternalError } from '../../../../src/utils/error.js'
 
+vi.mock('bytes')
+
 const tarballMocks = vi.hoisted(() => ({
   initialiseTarGzUpload: vi.fn(),
   addEntryToTarGzUpload: vi.fn(),
