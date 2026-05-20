@@ -1,0 +1,118 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+
+import personalAccessTokens from 'public/docs/bailo_personal_access_tokens.png'
+import createPersonalAccessToken from 'public/docs/bailo_create_personal_access_token.png'
+
+# Personal Access Tokens
+
+Personal Access Tokens (PATs) allow you to authenticate with Bailo's API and container registry programmatically. Each
+token can be scoped to specific models and actions, giving you fine-grained control over what the token can do.
+
+## Creating a Token
+
+1. Navigate to **User (top right) > Settings > Authentication**
+2. Click **Add Token**
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='Authentication tab listing personal access tokens and add token button' src={personalAccessTokens} />
+</Box>
+
+3. Fill in the form:
+   - **Description** - a name to help you identify this token (e.g. "CI/CD pipeline", "Local development")
+   - **Models** - choose **All models** or select specific models
+   - **Actions** - select the permitted actions this token can perform
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='generate personal token form' src={createPersonalAccessToken} />
+</Box>
+
+4. Click **Generate Token**
+5. **Copy both the Access Key and Secret Key immediately** - the secret key is only shown once and cannot be retrieved
+   later
+
+## Available Permissions
+
+| Permission             | Description                                     |
+| ---------------------- | ----------------------------------------------- |
+| `model:read`           | View model and data card settings               |
+| `model:write`          | Create and update model and data card settings  |
+| `model:export`         | Export model and data card settings             |
+| `release:read`         | View release information                        |
+| `release:write`        | Create and update releases                      |
+| `release:export`       | Export release information                      |
+| `access_request:read`  | View and list access requests                   |
+| `access_request:write` | Create, approve, and comment on access requests |
+| `file:read`            | Download and view files                         |
+| `file:write`           | Upload and delete files                         |
+| `image:read`           | List and pull container (Docker) images         |
+| `image:write`          | Push and delete container images                |
+| `schema:write`         | Upload and modify schemas (administrators only) |
+| `reviewRole:read`      | View review roles                               |
+| `reviewRole:write`     | Create and update review roles                  |
+
+> **Note**: Selecting a write permission automatically includes the corresponding read permission.
+
+## Token Scoping
+
+- **All models** - the token works with every model in Bailo
+- **Specific models** - the token only works with the models you select
+
+Use specific model scoping when possible to follow the principle of least privilege.
+
+## Managing Tokens
+
+To view or delete existing tokens:
+
+1. Navigate to **User > Settings > Authentication**
+2. Your existing tokens are listed with their description and access key
+3. Click the delete button next to a token to revoke it
+
+> **Important**: Deleting a token is immediate and permanent. Any scripts or applications using that token will stop
+> working.
+
+## Using Tokens
+
+Tokens use HTTP Basic Authentication:
+
+- **Username**: the access key
+- **Password**: the secret key
+
+### With the Python Client
+
+```python
+from bailo import TokenAgent, Client
+
+agent = TokenAgent(access_key="your-access-key", secret_key="your-secret-key")
+client = Client("https://your-bailo-instance.com", agent=agent)
+```
+
+### With curl
+
+```bash
+curl -u "your-access-key:your-secret-key" \
+     https://your-bailo-instance.com/api/v2/models/search
+```
+
+### With the Container Registry
+
+```bash
+docker login your-registry-host -u "your-access-key" -p "your-secret-key"
+```
+
+## Security Best Practices
+
+- **Store secret keys securely** - use environment variables or a secrets manager, not source code
+- **Use minimum permissions** - only grant the actions your workflow needs
+- **Scope to specific models** when possible
+- **Rotate tokens regularly** - delete old tokens and create new ones
+- **Use separate tokens** for different purposes (CI/CD, local dev, etc.)
+
+## Related Pages
+
+- [Authentication](/docs/users/programmatically-using-bailo/authentication) - Overview of authentication methods
+- [Python Client](/docs/users/programmatically-using-bailo/python-client) - Using tokens with the Python client
+- [API Reference Overview](/docs/api-reference/overview) - All available API endpoints
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

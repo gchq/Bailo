@@ -1,0 +1,73 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Review Outcomes
+
+This page explains what happens after a release or access request has been reviewed, including the different outcomes
+and what to do when changes are requested.
+
+## Release Review Outcomes
+
+### Approved
+
+When all required review roles have approved a release, it is marked as approved and moves to the **Your archived
+reviews** tab on the Reviews page. Approved releases are considered final and ready for use.
+
+Both the **Model Technical Reviewer** and the **Model Senior Responsible Officer** (or equivalent review roles
+configured for the schema) must approve before a release is fully approved.
+
+### Changes Requested
+
+If any reviewer requests changes, the model owner is notified. The model owner should:
+
+1. Review the feedback provided in the reviewer's comments
+2. Make the necessary changes to the model card, files, or release notes
+3. The reviewer can then re-evaluate and approve
+
+### Who Can Create Releases?
+
+Only the **Owner** and **Contributors** of a model can create releases. See
+[Roles & Permissions](/docs/reference/roles-and-permissions) for details.
+
+## Access Request Review Outcomes
+
+### Approved
+
+When the required reviewer approves an access request, the requesting user gains permission to download files and pull
+container images from the model. Approved access requests move to the **Your archived reviews** tab.
+
+### Changes Requested
+
+If the reviewer requests changes, the requesting user is notified. They should review the feedback and update their
+access request accordingly.
+
+### Who Reviews Access Requests?
+
+Access requests are typically reviewed by the **Model Senior Responsible Officer** (or equivalent). The specific review
+role depends on your schema configuration.
+
+## Viewing Review History
+
+To see the history of reviews for a model:
+
+- **Releases**: Open the model page and navigate to the **Releases** tab. Each release shows its review status.
+- **Access requests**: Open the model page and navigate to the **Access Requests** tab.
+
+To see all your completed reviews:
+
+1. Click **Reviews** in the navigation bar
+2. Select the **Your archived reviews** tab
+
+## Python Client Examples
+
+Detailed Python examples for working with releases and access requests are available:
+
+- [Models and Releases demo](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html)
+- [Access Requests demo](/docs/python/notebooks/access_requests_demo/index.html)
+
+## Related Pages
+
+- [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works
+- [Reviewing a Release](/docs/users/reviews/reviewing/releases) - Guide for reviewers
+- [Reviewing an Access Request](/docs/users/reviews/reviewing/access) - Reviewing access requests
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -6,13 +6,68 @@ import bailoSwaggerDocs from 'public/docs/bailo_swagger_docs.png'
 
 # OpenAPI Documentation
 
-Bailo provides an OpenAPI specification for all Bailo endpoints viewable [here](/api/v2/docs/) on a running Bailo
-instance.
+Bailo provides a full OpenAPI specification for all API endpoints, viewable through an interactive Swagger UI.
+
+## Accessing the Documentation
+
+The interactive API documentation is available at [`/api/v2/docs/`](/api/v2/docs/) on any running Bailo instance.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='open api documentation page with example request parameters' src={bailoSwaggerDocs} />
 </Box>
 
-For guidance on using Swagger UI, see the [official documentation](https://swagger.io/tools/swagger-ui/).
+## Using Swagger UI
+
+The Swagger UI lets you browse, understand, and test API endpoints directly in your browser.
+
+### Browsing Endpoints
+
+Endpoints are grouped by category (Models, Releases, Files, Schemas, etc.). Click on a group to expand it and see all
+available endpoints. Each endpoint shows:
+
+- The HTTP method and path
+- A description of what it does
+- Required and optional parameters
+- Request body schema (for POST/PUT/PATCH)
+- Response schema and status codes
+
+### Making Test Requests
+
+You can test endpoints directly from the Swagger UI:
+
+1. Click on an endpoint to expand it
+2. Click **Try it out**
+3. Fill in the required parameters and request body
+4. Click **Execute**
+5. View the response below
+
+> **Note**: You must be authenticated to make requests. If you're logged into Bailo in the same browser, your session
+> credentials will be used automatically.
+
+## Downloading the OpenAPI Specification
+
+To download the raw OpenAPI specification (useful for code generation or importing into API tools):
+
+- Navigate to `/api/v2/specification` on your Bailo instance
+- The response is the full OpenAPI JSON specification
+
+You can use this specification with tools like:
+
+- [OpenAPI Generator](https://openapi-generator.tech/) to generate client libraries
+- [Postman](https://www.postman.com/) to import all endpoints as a collection
+- [Insomnia](https://insomnia.rest/) for API testing
+
+## Endpoint Summary
+
+For a complete list of all API endpoints organised by domain, see the
+[API Reference Overview](/docs/api-reference/overview).
+
+For guidance on Swagger UI itself, see the [official Swagger documentation](https://swagger.io/tools/swagger-ui/).
+
+## Related Pages
+
+- [API Reference Overview](/docs/api-reference/overview) - Structured list of all endpoints
+- [Authentication](/docs/users/programmatically-using-bailo/authentication) - Setting up API authentication
+- [Python Client](/docs/users/programmatically-using-bailo/python-client) - Python wrapper for the API
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

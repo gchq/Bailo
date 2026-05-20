@@ -39,19 +39,17 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Managing Data Cards', slug: 'users/data-cards/managing-data-cards' },
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Browsing the Marketplace', slug: 'users/using-a-model/browsing-the-marketplace' },
   { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
-  { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
-  { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
+  { title: 'Downloading Files', slug: 'users/using-a-model/downloading-files' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
   { title: 'Understanding Reviews', slug: 'users/reviews/understanding-reviews' },
-  { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
+  { title: 'Reviewing', slug: 'users/reviews/reviewing', header: true },
   { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
   { title: 'Reviewing an Access Request', slug: 'users/reviews/reviewing/access' },
-  { title: 'Reviewed Releases and Access Requests', slug: 'users/reviews/reviewed', header: true },
-  { title: 'Releases', slug: 'users/reviews/reviewed/releases' },
-  { title: 'Access Requests', slug: 'users/reviews/reviewed/access-request' },
+  { title: 'Review Outcomes', slug: 'users/reviews/review-outcomes' },
 
   { title: 'Security Scanning', slug: 'users/using-scanners', header: true },
   { title: 'File Scanning', slug: 'users/using-scanners/file-scanning' },
@@ -61,6 +59,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },
   { title: 'Editing a Mirrored Model Card', slug: 'users/model-mirroring/editing-a-mirrored-model-card' },
 
+  { title: 'Untrusted Models', slug: 'users/untrusted-models', header: true },
+  { title: 'Untrusted Models', slug: 'users/untrusted-models/untrusted-models' },
+
   { title: 'Deletion', slug: 'users/deletion', header: true },
   { title: 'Deleting a File', slug: 'users/deletion/file-deletion' },
   { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
@@ -68,8 +69,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   { title: 'Programmatic Access', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
-  { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
+  { title: 'Personal Access Tokens', slug: 'users/programmatically-using-bailo/personal-access-tokens' },
   { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
+  { title: 'OpenAPI Reference', slug: 'users/programmatically-using-bailo/open-api' },
   { title: 'Webhooks', slug: 'users/programmatically-using-bailo/webhooks' },
 
   // Administration
@@ -106,10 +108,15 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
   { title: 'DataBase Scripts', slug: 'administration/migrations/scripts' },
 
+  // API Reference
+  { title: 'API Reference', slug: 'api-reference', header: true },
+  { title: 'Overview', slug: 'api-reference/overview' },
+
   // Reference
   { title: 'Reference', slug: 'reference', header: true },
   { title: 'Glossary', slug: 'reference/glossary' },
   { title: 'Roles & Permissions', slug: 'reference/roles-and-permissions' },
+  { title: 'Troubleshooting & FAQ', slug: 'reference/troubleshooting' },
 ]
 
 export interface DirectoryTree {

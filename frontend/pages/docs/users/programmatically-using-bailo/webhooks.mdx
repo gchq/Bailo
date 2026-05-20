@@ -2,27 +2,57 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Webhooks
 
-Bailo provides webhooks for programmatic, event-driven interactions with individual models for interfacing with external
-applications.
+Bailo provides webhooks for programmatic, event-driven interactions with individual models. When certain events occur on
+a model, Bailo sends an HTTP POST request to a URL you specify, allowing you to integrate with external applications and
+workflows.
+
+## Setting Up a Webhook
+
+Webhooks are managed through the API. To create a webhook for a model:
+
+```bash
+curl -X POST https://your-bailo-instance.com/api/v2/model/{modelId}/webhooks \
+  -H "Content-Type: application/json" \
+  -u "your-access-key:your-secret-key" \
+  -d '{
+    "name": "My CI/CD webhook",
+    "uri": "https://your-service.com/webhook",
+    "token": "your-bearer-token",
+    "events": ["createRelease", "updateRelease"],
+    "active": true,
+    "insecureSSL": false
+  }'
+```
+
+### Webhook Configuration Options
+
+| Field           | Description                                                               | Required               |
+| --------------- | ------------------------------------------------------------------------- | ---------------------- |
+| **name**        | A descriptive name for the webhook                                        | Yes                    |
+| **uri**         | The URL that will receive the POST requests                               | Yes                    |
+| **token**       | A bearer token included in the `Authorization` header of webhook requests | No                     |
+| **events**      | Which events trigger this webhook (see below)                             | No (defaults to all)   |
+| **active**      | Whether the webhook is enabled                                            | No (defaults to true)  |
+| **insecureSSL** | Skip SSL verification for the target URL                                  | No (defaults to false) |
 
 ## Events
 
-A Bailo model's webhook events are:
+A Bailo model's webhook can be triggered by the following events:
 
-- `createRelease`
-- `updateRelease`
-- `createReviewResponse`
-- `createAccessRequest`
-
-To view and configure webhooks for a given model, refer to the Webhook section of our [api docs](./open-api).
+| Event                  | When It Fires                                              |
+| ---------------------- | ---------------------------------------------------------- |
+| `createRelease`        | A new release is created on the model                      |
+| `updateRelease`        | An existing release is updated                             |
+| `createReviewResponse` | A reviewer submits a response (approval or change request) |
+| `createAccessRequest`  | A user submits an access request for the model             |
 
 ## Request Format
 
-When a webhook is triggered, it will send a `POST` request to the webhook's URI.
+When a webhook is triggered, it sends a `POST` request to the webhook's URI.
 
-The webhook will include `"Authorization": "Bearer <token>"` in the request `headers` if the webhook has a token.
+The webhook includes `"Authorization": "Bearer <token>"` in the request `headers` if the webhook has a token configured.
 
-The body of the webhook's request will vary depending on the type of hook.
+The body of the webhook's request varies depending on the type of event.
 
 ### createRelease / updateRelease
 
@@ -60,7 +90,7 @@ The body of the webhook's request will vary depending on the type of hook.
   "semver": "0.0.1",
   "accessRequestId": "123456789abcdef012345678",
   "modelId": "abc123",
-  "kind": "{release|access}"
+  "kind": "{release|access}",
   "role": "mtr",
   "createdAt": "2025-01-21T12:00:00.000Z",
   "updatedAt": "2025-01-21T12:00:00.000Z"
@@ -89,5 +119,47 @@ The body of the webhook's request will vary depending on the type of hook.
   "updatedAt": "2025-01-21T12:00:00.000Z"
 }
 ```
+
+## Managing Webhooks
+
+### Listing Webhooks
+
+```bash
+curl https://your-bailo-instance.com/api/v2/model/{modelId}/webhooks \
+  -u "your-access-key:your-secret-key"
+```
+
+### Updating a Webhook
+
+```bash
+curl -X PUT https://your-bailo-instance.com/api/v2/model/{modelId}/webhook/{webhookId} \
+  -H "Content-Type: application/json" \
+  -u "your-access-key:your-secret-key" \
+  -d '{
+    "name": "Updated webhook name",
+    "uri": "https://your-service.com/webhook",
+    "events": ["createRelease"],
+    "active": true
+  }'
+```
+
+### Deleting a Webhook
+
+```bash
+curl -X DELETE https://your-bailo-instance.com/api/v2/model/{modelId}/webhook/{webhookId} \
+  -u "your-access-key:your-secret-key"
+```
+
+## Security Considerations
+
+- **Use the token field** to include a bearer token in webhook requests, so your receiving service can verify the
+  request came from Bailo
+- **Use HTTPS** for your webhook URI to prevent eavesdropping on the request payloads
+- **Avoid `insecureSSL: true`** in production - only use it for testing with self-signed certificates
+
+## Related Pages
+
+- [Authentication](/docs/users/programmatically-using-bailo/authentication) - Setting up API authentication
+- [API Reference Overview](/docs/api-reference/overview) - All available API endpoints
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
