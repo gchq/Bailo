@@ -1,4 +1,3 @@
-import ArticleIcon from '@mui/icons-material/Article'
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import { Container, Paper } from '@mui/material'
@@ -10,7 +9,6 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { useGetUiConfig } from 'actions/uiConfig'
-import Link from 'next/link'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -37,7 +35,7 @@ export default function Help() {
             </Typography>
           </Box>
           <Grid container spacing={4}>
-            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 6 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ minHeight: '320px' }}>
                   <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
@@ -60,27 +58,7 @@ export default function Help() {
                 </CardActions>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ minHeight: '320px' }}>
-                  <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
-                    Documentation
-                  </Typography>
-                  <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
-                    To find out more about Bailo please see our documentation pages.
-                  </Typography>
-                </CardContent>
-                <CardActions sx={{ justifyContent: 'center' }}>
-                  <Link passHref href='/docs'>
-                    <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }} data-test='documentationLink'>
-                      View documentation
-                    </Button>
-                  </Link>
-                </CardActions>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 6 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ minHeight: '320px' }}>
                   <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />

@@ -77,36 +77,38 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Typography>
         <Stack spacing={1}>
           {schema && (
-            <Stack direction='row' alignItems='center' spacing={1}>
+            <Stack>
               <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
                 Schema:
               </Typography>
-              <Typography>{schema.name}</Typography>
-              <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                <Info color='primary' fontSize='small' />
-              </IconButton>
-              <InformationDialog
-                open={SchemaInformationOpen}
-                schema={schema}
-                onClose={() => setSchemaInformationOpen(false)}
-              />
+              <Stack direction='row' alignItems='center'>
+                <Typography>{schema.name}</Typography>
+                <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                  <Info color='primary' fontSize='small' />
+                </IconButton>
+                <InformationDialog
+                  open={SchemaInformationOpen}
+                  schema={schema}
+                  onClose={() => setSchemaInformationOpen(false)}
+                />
+              </Stack>
             </Stack>
           )}
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
-            <Box>
-              <Typography>
-                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Organisation: </span>
-                {entry.organisation || <span style={{ fontStyle: 'italic' }}>Unset</span>}
+            <Stack>
+              <Typography fontWeight='bold' color='primary'>
+                Organisation:
               </Typography>
-            </Box>
+              <Typography>{entry.organisation || <span style={{ fontStyle: 'italic' }}>Unset</span>}</Typography>
+            </Stack>
           )}
           {uiConfig && uiConfig.modelDetails.states.length > 0 && (
-            <Box>
-              <Typography>
-                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>State: </span>
-                {entry.state || <span style={{ fontStyle: 'italic' }}>Unset</span>}
+            <Stack>
+              <Typography fontWeight='bold' color='primary'>
+                State:
               </Typography>
-            </Box>
+              <Typography>{entry.state || <span style={{ fontStyle: 'italic' }}>Unset</span>}</Typography>
+            </Stack>
           )}
         </Stack>
         <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>

@@ -18,6 +18,6 @@
     "baseUrl": ".",
     "noImplicitAny": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "vitest.config.mts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "vitest.config.mts", "**/*.mdx"],
   "exclude": ["node_modules"]
 }

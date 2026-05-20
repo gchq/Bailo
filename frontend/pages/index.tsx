@@ -383,11 +383,11 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left'>
+              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
                 <Typography component='h2' variant='h5' fontWeight='bold'>
                   Filters
                 </Typography>
-                <HelpDialog title='Search Info' content={<SearchInfo />} />
+                <HelpDialog title='Search Information' content={<SearchInfo />} />
               </Stack>
               <FormControl
                 sx={{
@@ -424,7 +424,7 @@ export default function Marketplace() {
                   </Typography>
                 )}
               </FormControl>
-              <Stack divider={<Divider flexItem />}>
+              <Stack divider={<Divider flexItem />} spacing={0}>
                 {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
                   <Box>
                     <ChipSelector
