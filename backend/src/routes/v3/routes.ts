@@ -17,6 +17,6 @@ router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance', ...getComplianceMetrics)
 router.get('/metrics/entryVolume', ...getEntryVolume)
 
-router.post('/review/response/:reviewId', ...postReviewResponse)
+router.post('/review/:reviewId/response/', ...postReviewResponse)
 
 export default router

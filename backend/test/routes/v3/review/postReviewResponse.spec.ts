@@ -22,7 +22,7 @@ describe('routes > review > postReviewResponse', () => {
     decision: Decision.Approve,
     kind: ReviewKind.Lifecycle,
     modelId: 'model-123',
-    dueDate: new Date(),
+    dueDate: new Date().toISOString(),
   } as any
 
   const releaseReviewBody = {
@@ -35,7 +35,7 @@ describe('routes > review > postReviewResponse', () => {
   test('successfully respond to a review', async () => {
     const fixture = createFixture(postReviewResponseSchema)
     fixture.body = lifecycleReviewBody
-    const res = await testPost(`/api/v3/review/response/test-123`, fixture)
+    const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -44,7 +44,7 @@ describe('routes > review > postReviewResponse', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(postReviewResponseSchema)
     fixture.body = lifecycleReviewBody
-    const res = await testPost(`/api/v3/review/response/test-123`, fixture)
+    const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateReviewResponse).toHaveBeenCalled()
@@ -54,7 +54,7 @@ describe('routes > review > postReviewResponse', () => {
   test('missing review decision', async () => {
     const fixture = createFixture(postReviewResponseSchema)
     fixture.body = releaseReviewBody
-    const res = await testPost(`/api/v3/review/response/test-123`, fixture)
+    const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
@@ -63,7 +63,7 @@ describe('routes > review > postReviewResponse', () => {
   test('successfully respond to a review without a comment', async () => {
     const fixture = createFixture(postReviewResponseSchema)
     fixture.body = lifecycleReviewBody
-    const res = await testPost(`/api/v3/review/response/test-123`, fixture)
+    const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

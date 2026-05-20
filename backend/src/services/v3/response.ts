@@ -3,8 +3,9 @@ import ReviewModel from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
-import { ReviewKind, ReviewKindKeys } from '../../types/enums.js'
+import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
+import { BadReq } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
 import { findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
@@ -14,11 +15,14 @@ export async function respondToReview(
   reviewId: string,
   modelId: string,
   role: string,
-  kind: ReviewKindKeys,
   response: ReviewResponseParams,
-  dueDate?: string,
+  dueDate?: Date,
 ) {
   const review = await findReviewById(user, modelId, reviewId, role)
+
+  if (review.kind === ReviewKind.Lifecycle && !dueDate) {
+    throw BadReq('Lifecycle review responses should have a due date')
+  }
   // Store the response
   const reviewResponse = new ResponseModel({
     entity: toEntity('user', user.dn),
@@ -39,10 +43,10 @@ export async function respondToReview(
   )
 
   // v3 When approving a model card review we need to create a new review using the supplied due date
-  if (kind === ReviewKind.Lifecycle && response.decision === Decision.Approve) {
+  if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve) {
     const newReview = new ReviewModel({
       modelId,
-      kind,
+      kind: review.kind,
       role,
       dueDate,
     })

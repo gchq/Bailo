@@ -26,12 +26,12 @@ const mandatoryComment = z.object({
 })
 
 const mandatoryDueDate = z.object({
-  dueDate: z.string(),
-  kind: z.enum([ReviewKind.Lifecycle]),
+  dueDate: z.coerce.date(),
+  kind: z.literal(ReviewKind.Lifecycle),
 })
 
 const optionalDueDate = z.object({
-  dueDate: z.string().optional(),
+  dueDate: z.coerce.date().optional(),
   kind: z.enum([ReviewKind.Release, ReviewKind.Access]),
 })
 
@@ -50,7 +50,7 @@ export const postReviewResponseSchema = z.object({
 
 registerPath({
   method: 'post',
-  path: '/api/v3/review/response/{reviewId}',
+  path: '/api/v3/review/{reviewId}/response/',
   tags: ['review'],
   description: 'Respond to a review',
   schema: postReviewResponseSchema,
@@ -85,7 +85,6 @@ export const postReviewResponse = [
       reviewId,
       modelId,
       role,
-      body.kind,
       { decision: body.decision, comment: body.comment },
       body.dueDate,
     )
