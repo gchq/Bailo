@@ -10,8 +10,9 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { DISMISSED_COOKIE_NAME } from 'utils/constants'
 
-import { useGetCurrentUser } from '../actions/user'
+import { useGetCurrentUser, useGetCurrentUserV3 } from '../actions/user'
 import Banner from './Banner'
+import CurrentUserContext from './contexts/currentUserContext'
 import Copyright from './Copyright'
 import SideNavigation from './wrapper/SideNavigation'
 import TopNavigation from './wrapper/TopNavigation'
@@ -29,6 +30,11 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const router = useRouter()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const {
+    currentUser: currentUserV3,
+    isCurrentUserLoading: isCurrentUserV3Loading,
+    isCurrentUserError: isCurrentUserV3Error,
+  } = useGetCurrentUserV3()
 
   const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
@@ -93,57 +99,67 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isCurrentUserV3Error) {
+    return <MessageAlert message={isCurrentUserV3Error.info.message} severity='error' />
+  }
+
+  if (isCurrentUserV3Loading || !currentUserV3) {
+    return <Loading />
+  }
+
   return (
-    <>
-      <Banner />
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && uiConfig && (
-          <>
-            <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
-            <SideNavigation
-              page={page}
-              bannerVisible={uiConfig.banner.enabled}
-              currentUser={currentUser}
-              drawerOpen={open}
-              pageTopStyling={pageTopStyling}
-              toggleDrawer={toggleDrawer}
-              onError={handleSideNavigationError}
-              onResetErrorMessage={resetErrorMessage}
-            />
-          </>
-        )}
-        <Box
-          component='main'
-          sx={(theme) => ({
-            // TODO Set this for dark mode only in the future
-            backgroundColor: theme.palette.grey[900],
-            flexGrow: 1,
-            ...theme.applyStyles('light', {
-              backgroundColor: theme.palette.grey[100],
-            }),
-          })}
-        >
-          <Toolbar />
-          <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
-            {isDocsPage ? (
-              children
-            ) : (
-              <>
-                {isCurrentUserLoading && <Loading />}
-                {uiConfig && announcementBannerOpen && (
-                  <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
-                )}
-                <Box paddingTop={4}>
-                  <MessageAlert message={errorMessage} severity='error' />
-                  {children}
-                  <Copyright sx={{ p: 2 }} />
-                </Box>
-              </>
-            )}
+    <CurrentUserContext.Provider value={currentUserV3}>
+      <>
+        <Banner />
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+          {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
+          {currentUser && uiConfig && (
+            <>
+              <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
+              <SideNavigation
+                page={page}
+                bannerVisible={uiConfig.banner.enabled}
+                currentUser={currentUser}
+                drawerOpen={open}
+                pageTopStyling={pageTopStyling}
+                toggleDrawer={toggleDrawer}
+                onError={handleSideNavigationError}
+                onResetErrorMessage={resetErrorMessage}
+              />
+            </>
+          )}
+          <Box
+            component='main'
+            sx={(theme) => ({
+              // TODO Set this for dark mode only in the future
+              backgroundColor: theme.palette.grey[900],
+              flexGrow: 1,
+              ...theme.applyStyles('light', {
+                backgroundColor: theme.palette.grey[100],
+              }),
+            })}
+          >
+            <Toolbar />
+            <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
+              {isDocsPage ? (
+                children
+              ) : (
+                <>
+                  {isCurrentUserLoading && <Loading />}
+                  {uiConfig && announcementBannerOpen && (
+                    <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
+                  )}
+                  <Box paddingTop={4}>
+                    <MessageAlert message={errorMessage} severity='error' />
+                    {children}
+                    <Copyright sx={{ p: 2 }} />
+                  </Box>
+                </>
+              )}
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </>
+      </>
+    </CurrentUserContext.Provider>
   )
 }

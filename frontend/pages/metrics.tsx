@@ -1,28 +1,16 @@
-import { useGetCurrentUserV3 } from 'actions/user'
+import { useContext } from 'react'
 import Forbidden from 'src/common/Forbidden'
-import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
 import OverviewMetrics from 'src/metrics/OverviewMetrics'
 import PolicyMetrics from 'src/metrics/PolicyMetrics'
 
 export default function Metrics() {
-  const result = useGetCurrentUserV3()
+  const currentUser = useContext(CurrentUserContext)
 
-  if (result.isCurrentUserLoading) {
-    return <Loading />
-  }
-
-  if (result.isCurrentUserError) {
-    const error = MultipleErrorWrapper(`Unable to load schema page`, {
-      isCurrentUserError: result.isCurrentUserError,
-    })
-    return error
-  }
-
-  if (!result.currentUser.systemRoles.includes('compliance')) {
+  if (!currentUser.systemRoles.includes('compliance')) {
     return (
       <Forbidden
         errorMessage={
