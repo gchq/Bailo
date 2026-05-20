@@ -98,6 +98,7 @@ import { postUserToken } from './routes/v2/user/postUserToken.js'
 import { getComplianceMetrics } from './routes/v3/metrics/getComplianceMetrics.js'
 import { getEntryVolume } from './routes/v3/metrics/getEntryVolume.js'
 import { getUsageMetrics } from './routes/v3/metrics/getUsageMetrics.js'
+import { postReviewResponse } from './routes/v3/review/postReviewResponse.js'
 import { httpLog } from './services/log.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
@@ -259,6 +260,8 @@ server.get('/api/v2/models/tags', getPopularTags)
 server.get('/api/v3/metrics/usage', ...getUsageMetrics)
 server.get('/api/v3/metrics/compliance', ...getComplianceMetrics)
 server.get('/api/v3/metrics/entryVolume', ...getEntryVolume)
+
+server.post('/api/v3/review/response/:reviewId', ...postReviewResponse)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

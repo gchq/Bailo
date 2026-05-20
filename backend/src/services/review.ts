@@ -1,4 +1,4 @@
-import { ClientSession, PipelineStage } from 'mongoose'
+import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -213,6 +213,33 @@ export async function findReviewForResponse(
   ).at(0)
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
+  }
+
+  return review
+}
+
+// v3 function for retrieving a review using the id
+export async function findReviewById(user: UserInterface, modelId: string, reviewId: string, role: string) {
+  // Authorisation check to make sure the user can access a model
+  await getModelById(user, modelId)
+
+  const review: ReviewDoc = (
+    await ReviewModel.aggregate()
+      .match({
+        modelId,
+        _id: new Types.ObjectId(reviewId),
+        role,
+      })
+      .sort({ createdAt: -1 })
+      // Populate model entries
+      .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
+      // Populate model as value instead of array
+      .unwind({ path: '$model' })
+      .match(await findUserInCollaborators(user))
+      .limit(1)
+  ).at(0)
+  if (!review) {
+    throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewId, role })
   }
 
   return review

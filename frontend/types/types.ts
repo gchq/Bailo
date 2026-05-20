@@ -571,7 +571,7 @@ type PartialSemverReviewRequestInterface =
 type PartialDueDateReviewRequestInterface =
   | {
       kind: 'release' | 'access'
-      dueDate?: Date
+      dueDate?: never
     }
   | {
       kind: 'lifecycle'
