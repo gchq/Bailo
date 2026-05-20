@@ -1,4 +1,4 @@
-import { useGetCurrentUser } from 'actions/user'
+import { useGetCurrentUserV3 } from 'actions/user'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
@@ -9,9 +9,20 @@ import OverviewMetrics from 'src/metrics/OverviewMetrics'
 import PolicyMetrics from 'src/metrics/PolicyMetrics'
 
 export default function Metrics() {
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const result = useGetCurrentUserV3()
 
-  if (!currentUser || !currentUser.isAdmin) {
+  if (result.isCurrentUserLoading) {
+    return <Loading />
+  }
+
+  if (result.isCurrentUserError) {
+    const error = MultipleErrorWrapper(`Unable to load schema page`, {
+      isCurrentUserError: result.isCurrentUserError,
+    })
+    return error
+  }
+
+  if (!result.currentUser.systemRoles.includes('compliance')) {
     return (
       <Forbidden
         errorMessage={
@@ -33,17 +44,6 @@ export default function Metrics() {
       view: <PolicyMetrics />,
     },
   ]
-
-  const error = MultipleErrorWrapper(`Unable to load schema page`, {
-    isCurrentUserError,
-  })
-  if (error) {
-    return error
-  }
-
-  if (isCurrentUserLoading) {
-    return <Loading />
-  }
 
   return (
     <>
