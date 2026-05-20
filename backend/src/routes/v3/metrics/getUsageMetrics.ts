@@ -41,23 +41,26 @@ export const GetUsageMetricsResponseSchema = z.object({
   byOrganisation: z.array(OrganisationMetricsSchema),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/metrics/usage',
-  tags: ['metrics'],
-  description: 'Retrieve current point-in-time system and usage metrics.',
-  schema: getUsageMetricsSchema,
-  responses: {
-    200: {
-      description: 'Current snapshot of system metrics.',
-      content: {
-        'application/json': {
-          schema: GetUsageMetricsResponseSchema,
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/metrics/usage',
+    tags: ['metrics'],
+    description: 'Retrieve current point-in-time system and usage metrics.',
+    schema: getUsageMetricsSchema,
+    responses: {
+      200: {
+        description: 'Current snapshot of system metrics.',
+        content: {
+          'application/json': {
+            schema: GetUsageMetricsResponseSchema,
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 export type SchemaInfo = z.infer<typeof SchemaInfoSchema>
 export type StateInfo = z.infer<typeof StateInfoSchema>

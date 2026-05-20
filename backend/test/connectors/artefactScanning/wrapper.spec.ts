@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import {
   ArtefactScanState,
@@ -14,7 +14,7 @@ vi.mock('../../../src/services/log.js')
 const configMock = vi.hoisted(() => ({
   connectors: {
     artefactScanners: {
-      maxInitRetries: 1,
+      maxInitRetries: 2,
       initRetryDelay: 0,
     },
   },
@@ -31,7 +31,7 @@ class TestFileScanner extends BaseArtefactScanningConnector {
   queue = { size: 0, add: vi.fn((fn) => fn()) } as any
 
   init = vi.fn()
-  _scan = vi.fn(async () => ({
+  executeScan = vi.fn(async () => ({
     toolName: this.toolName,
     scannerVersion: this.version,
     artefactKind: this.artefactType,
@@ -47,7 +47,7 @@ class TestImageScanner extends BaseArtefactScanningConnector {
   queue = { size: 0, add: vi.fn((fn) => fn()) } as any
 
   init = vi.fn()
-  _scan = vi.fn(async () => ({
+  executeScan = vi.fn(async () => ({
     toolName: this.toolName,
     scannerVersion: this.version,
     artefactKind: this.artefactType,
@@ -57,10 +57,6 @@ class TestImageScanner extends BaseArtefactScanningConnector {
 }
 
 describe('connectors > artefactScanning > wrapper', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('initialiseScanners() initialises all scanners', async () => {
     const scanner = new TestFileScanner()
     const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
@@ -112,8 +108,8 @@ describe('connectors > artefactScanning > wrapper', () => {
 
     const results = await wrapper.startScans({ file: artefact })
 
-    expect(fileScanner._scan).toHaveBeenCalled()
-    expect(imageScanner._scan).not.toHaveBeenCalled()
+    expect(fileScanner.executeScan).toHaveBeenCalled()
+    expect(imageScanner.executeScan).not.toHaveBeenCalled()
     expect(results).toHaveLength(1)
   })
 
@@ -132,8 +128,8 @@ describe('connectors > artefactScanning > wrapper', () => {
 
     const results = await wrapper.startScans({ layerRef: artefact })
 
-    expect(fileScanner._scan).not.toHaveBeenCalled()
-    expect(imageScanner._scan).toHaveBeenCalled()
+    expect(fileScanner.executeScan).not.toHaveBeenCalled()
+    expect(imageScanner.executeScan).toHaveBeenCalled()
     expect(results).toHaveLength(1)
   })
 })
