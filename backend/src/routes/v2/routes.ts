@@ -204,7 +204,7 @@ router.get('/entities', ...getEntities)
 router.get('/entities/me', ...getCurrentUser)
 router.get('/entity/:dn/lookup', ...getEntityLookup)
 
-router.get('/transfer/:transferId', ...getModelTransfer)
+router.get('/transfer/:exportId', ...getModelTransfer)
 router.get('/model/:modelId/transfers', ...getModelTransfers)
 
 router.get('/config/ui', ...getUiConfig)

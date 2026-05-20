@@ -12,8 +12,8 @@ router.get('/api-docs/swagger.json', (req, res) => res.json(generateV3SwaggerSpe
 
 router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
-router.get('/api/v3/metrics/usage', ...getUsageMetrics)
-router.get('/api/v3/metrics/compliance', ...getComplianceMetrics)
-router.get('/api/v3/metrics/entryVolume', ...getEntryVolume)
+router.get('/metrics/usage', ...getUsageMetrics)
+router.get('/metrics/compliance', ...getComplianceMetrics)
+router.get('/metrics/entryVolume', ...getEntryVolume)
 
 export default router
