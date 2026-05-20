@@ -259,7 +259,10 @@ export default function ReleaseForm({
                 <>
                   <Select
                     size='small'
-                    value={formData.modelCardVersion.toString()}
+                    defaultValue={model.card.version.toString()}
+                    value={
+                      formData.modelCardVersion ? formData.modelCardVersion.toString() : model.card.version.toString()
+                    }
                     onChange={handleModelCardVersionChange}
                     inputProps={{
                       id: 'model-card-version-input',

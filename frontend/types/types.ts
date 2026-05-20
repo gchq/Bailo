@@ -77,6 +77,11 @@ export interface UiConfig {
     contributor: string
     consumer: string
   }
+
+  untrustedModel: {
+    enabled: boolean
+    untrustedModelDescription: string
+  }
 }
 
 export interface FileInterface {
@@ -417,6 +422,7 @@ export const EntryCardKindLabel = {
   model: 'model card',
   'data-card': 'data card',
   'mirrored-model': 'mirrored model',
+  'untrusted-model': 'untrusted model',
 } as const
 export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
 
@@ -444,6 +450,7 @@ export const EntryKindLabel = {
   model: 'model',
   'data-card': 'data card',
   'mirrored-model': 'mirrored model',
+  'untrusted-model': 'untrusted model',
 } as const
 export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
@@ -451,6 +458,7 @@ export const EntryKind = {
   MODEL: 'model',
   DATA_CARD: 'data-card',
   MIRRORED_MODEL: 'mirrored-model',
+  UNTRUSTED_MODEL: 'untrusted-model',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
@@ -921,3 +929,79 @@ export type ImageScanResults = {
 }
 
 export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
+
+export type ModelVolumeData = {
+  startDate: string
+  endDate: string
+  count: number
+  organisations: Record<string, number>
+}
+
+export type ModelVolume = {
+  data: ModelVolumeData[]
+  bucket: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  startDate: string
+  endDate: string
+}
+
+export interface SchemaBreakDownMetrics {
+  schemaId: string
+  schemaName: string
+  count: number
+}
+
+export interface ModelStateMetrics {
+  state: string
+  count: number
+}
+
+export interface OverviewBaseMetrics {
+  users: number
+  entries: number
+  schemaBreakdown: SchemaBreakDownMetrics[]
+  entryState: ModelStateMetrics[]
+  withReleases: number
+  withAccessRequest: number
+}
+
+export interface OrganisationOverviewMetrics extends OverviewBaseMetrics {
+  organisation: string
+}
+
+export interface OverviewMetrics {
+  global: OverviewBaseMetrics
+  byOrganisation: OrganisationOverviewMetrics[]
+  lastUpdated: string
+}
+
+export interface PolicySummaryMetrics {
+  roleId: string
+  roleName: string
+  count: number
+}
+
+export interface PolicyRoleMetric {
+  roleId: string
+  roleName: string
+}
+
+export interface PolicyModelMetrics {
+  entryId: string
+  missingRoles: PolicyRoleMetric[]
+  modelOwners: string[]
+}
+
+export interface PolicyBaseMetrics {
+  summary: PolicySummaryMetrics[]
+  entries: PolicyModelMetrics[]
+}
+
+export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
+  organisation: string
+}
+
+export interface PolicyMetrics {
+  global: PolicyBaseMetrics
+  byOrganisation: OrganisationPolicyMetrics[]
+  lastUpdated: string
+}

@@ -14,7 +14,12 @@ import {
 } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import FileModel, {
+  FileInterface,
+  FileInterfaceDoc,
+  FileWithScanResultsAggregate,
+  FileWithScanResultsInterface,
+} from '../models/File.js'
 import { EntryKind, ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
@@ -26,7 +31,7 @@ import { longId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
-import { scanFile } from './scan.js'
+import { runScans } from './scan.js'
 
 export async function uploadFile(
   user: UserInterface,
@@ -35,7 +40,7 @@ export async function uploadFile(
   mime: string,
   stream: Readable,
   tags?: string[],
-) {
+): Promise<FileWithScanResultsInterface> {
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
@@ -64,7 +69,12 @@ export async function uploadFile(
 
   await file.save()
 
-  return await scanFile(file)
+  runScans({ file }).catch((error) => {
+    log.error({ file, error }, 'Unable to set failure state after failing to run file scans. Safely aborted.')
+  })
+
+  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults: [] })
+  return ret
 }
 
 export async function saveImportedFile(file: FileInterface) {
@@ -172,9 +182,14 @@ export async function finishUploadMultipartFile(
     file.tags = tags
   }
 
-  file.save()
+  await file.save()
 
-  return await scanFile(file)
+  runScans({ file }).catch((error) => {
+    log.error({ file, error }, 'Unable to set failure state after failing to run file scans. Safely aborted.')
+  })
+
+  const ret: FileWithScanResultsInterface = Object.assign(file, { scanResults: [] })
+  return ret
 }
 
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {
@@ -239,8 +254,8 @@ export async function getFileById(
   user: UserInterface,
   fileId: string,
   model?: ModelDoc,
-): Promise<FileWithScanResultsInterface> {
-  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
+): Promise<FileWithScanResultsAggregate> {
+  const files = await FileModel.aggregate<FileWithScanResultsAggregate>([
     { $match: { _id: new Types.ObjectId(fileId) } },
     { $limit: 1 },
     { $addFields: { id: { $toString: '$_id' } } },
@@ -257,7 +272,7 @@ export async function getFileById(
   if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
-  const file: FileWithScanResultsInterface = { ...files[0], id: files[0].id }
+  const file: FileWithScanResultsAggregate = { ...files[0], id: files[0].id }
 
   if (!model) {
     model = await getModelById(user, file.modelId)
@@ -272,7 +287,7 @@ export async function getFileById(
 
 export async function getFilesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
-  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
+  const files = await FileModel.aggregate<FileWithScanResultsAggregate>([
     { $match: { modelId } },
     { $addFields: { id: { $toString: '$_id' } } },
     {
@@ -293,12 +308,12 @@ export async function getFilesByIds(
   user: UserInterface,
   modelId: string,
   fileIds: string[],
-): Promise<FileWithScanResultsInterface[]> {
+): Promise<FileWithScanResultsAggregate[]> {
   const model = await getModelById(user, modelId)
   if (fileIds.length === 0) {
     return []
   }
-  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
+  const files = await FileModel.aggregate<FileWithScanResultsAggregate>([
     { $match: { _id: { $in: fileIds } } },
     { $addFields: { id: { $toString: '$_id' } } },
     {
@@ -332,7 +347,7 @@ export async function removeFiles(
   if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot remove file from a mirrored model.')
   }
-  const allFiles: FileWithScanResultsInterface[] = []
+  const allFiles: FileWithScanResultsAggregate[] = []
 
   for (const fileId of fileIds) {
     const file = await getFileById(user, fileId)
@@ -400,7 +415,7 @@ export async function updateFile(
   fileId: string,
   patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
 ) {
-  let file: FileWithScanResultsInterface
+  let file: FileWithScanResultsAggregate
   try {
     file = await getFileById(user, fileId)
   } catch {
@@ -424,7 +439,7 @@ export async function updateFile(
     throw BadReq('There was a problem updating the file', { modelId, fileId, patchFileParams })
   }
 
-  // return the full FileWithScanResultsInterface and not just the FileInterface
+  // return the full FileWithScanResultsAggregate and not just the FileInterface
   file = await getFileById(user, fileId)
 
   return file

@@ -47,6 +47,7 @@ def test_lifespan_downloads_db_on_start(mocker):
 
 
 def test_shutdown_waits_for_db_lock(mocker):
+    mocker.patch("bailo_artefactscan_api.trivy.download_database")
     lock = mocker.patch("bailo_artefactscan_api.trivy._DB_LOCK")
     rm = mocker.patch("shutil.rmtree")
 

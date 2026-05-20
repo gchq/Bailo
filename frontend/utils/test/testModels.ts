@@ -255,6 +255,11 @@ export const testUiConfig: UiConfig = {
     },
   },
 
+  untrustedModel: {
+    untrustedModelDescription: '',
+    enabled: true,
+  },
+
   announcement: {
     enabled: false,
     text: '',

@@ -68,8 +68,16 @@ export const systemStatusSchema = z.object({
 
 export const modelTransferSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
-  modelId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
-  peerId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  modelId: z.string().openapi({ example: 'model-123456' }),
+  peerId: z.string().openapi({ example: 'bailo' }),
+  completedNotificationSent: z.boolean().openapi({ example: false }),
+  artefactStatus: z.array(
+    z.object({
+      key: z.string().openapi({ example: '69fa066b3f64c06f027b4921' }),
+      status: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.Completed }),
+      kind: z.nativeEnum(MirrorKind).openapi({ example: MirrorKind.File }),
+    }),
+  ),
   status: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
   createdBy: z.string().openapi({ example: 'bob' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),

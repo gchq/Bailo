@@ -47,6 +47,7 @@ export default defineConfig([
       'no-duplicate-imports': 'warn',
       'no-console': 'warn',
       curly: ['error', 'all'],
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {

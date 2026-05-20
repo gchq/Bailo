@@ -8,7 +8,7 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
 const fileUtilsMocks = vi.hoisted(() => ({
-  isFileInterfaceDoc: vi.fn(() => true),
+  isFileWithScanResultsInterface: vi.fn(() => true),
   createFilePath: vi.fn(() => 'beta/model/modelId/files/fileId'),
 }))
 vi.mock('../../../src/utils/fileUtils.js', () => fileUtilsMocks)
@@ -135,7 +135,7 @@ describe('services > parsers > modelParser', () => {
   })
 
   test('parseFile > data not a file', async () => {
-    fileUtilsMocks.isFileInterfaceDoc.mockReturnValueOnce(false)
+    fileUtilsMocks.isFileWithScanResultsInterface.mockReturnValueOnce(false)
     await expect(() => parseFile({}, '', '', mockLogData)).rejects.toThrow('Data cannot be converted into a file.')
   })
 

@@ -1,9 +1,7 @@
 import { Router } from 'express'
 
-import { Roles } from '../../connectors/authentication/constants.js'
 import { generateSwaggerSpec } from '../../services/specification.js'
 import config from '../../utils/config.js'
-import { requireRole } from '../middleware/requireRoles.js'
 import { escalateUser } from '../middleware/userEscalation.js'
 import { getArtefactScanningInfo } from './artefactScanning/getArtefactScanningInfo.js'
 import { putFileScan } from './artefactScanning/putFileScan.js'
@@ -11,7 +9,6 @@ import { putImageScan } from './artefactScanning/putImageScan.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntities } from './entities/getEntities.js'
 import { getEntityLookup } from './entities/getEntityLookup.js'
-import { getModelVolume } from './metrics/getModelVolume.js'
 import { deleteAccessRequest } from './model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -228,5 +225,4 @@ router.put('/review/role/:shortName', ...putReviewRole)
 
 router.get('/models/tags', getPopularTags)
 
-router.get('/metrics/modelVolume', requireRole(Roles.Admin), ...getModelVolume)
 export default router

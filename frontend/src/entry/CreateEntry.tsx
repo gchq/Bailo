@@ -55,7 +55,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
-  const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
+  const [visibility, setVisibility] = useState<EntryForm['visibility']>(
+    createEntryKind !== EntryKind.UNTRUSTED_MODEL ? EntryVisibility.Public : EntryVisibility.Private,
+  )
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
@@ -76,7 +78,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   }, [])
 
   const entryKindForRedirect = useMemo(() => {
-    return createEntryKind === EntryKind.MODEL || createEntryKind === EntryKind.MIRRORED_MODEL
+    return createEntryKind === EntryKind.MODEL ||
+      createEntryKind === EntryKind.MIRRORED_MODEL ||
+      createEntryKind === EntryKind.UNTRUSTED_MODEL
       ? EntryKind.MODEL
       : createEntryKind
   }, [createEntryKind])
@@ -217,24 +221,29 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               <Typography component='h3' variant='h6'>
                 Access control
               </Typography>
-              <RadioGroup
-                defaultValue='public'
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
-              >
-                <FormControlLabel
-                  value='public'
-                  control={<Radio />}
-                  label={publicLabel}
-                  data-test='publicButtonSelector'
-                />
-                <FormControlLabel
-                  value='private'
-                  control={<Radio />}
-                  label={privateLabel}
-                  data-test='privateButtonSelector'
-                />
-              </RadioGroup>
+              {createEntryKind === EntryKind.UNTRUSTED_MODEL && (
+                <Typography color='warning'>Untrusted models can only be private.</Typography>
+              )}
+              {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (
+                <RadioGroup
+                  defaultValue='public'
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+                >
+                  <FormControlLabel
+                    value='public'
+                    control={<Radio />}
+                    label={publicLabel}
+                    data-test='publicButtonSelector'
+                  />
+                  <FormControlLabel
+                    value='private'
+                    control={<Radio />}
+                    label={privateLabel}
+                    data-test='privateButtonSelector'
+                  />
+                </RadioGroup>
+              )}
             </>
             <Accordion sx={{ borderTop: 'none' }}>
               <AccordionSummary
@@ -282,31 +291,33 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       formContext={{ editMode: true }}
                     />
                   </Stack>
-                  <Stack spacing={2}>
-                    <Typography variant='h6' component='h2'>
-                      Additional settings
-                    </Typography>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          onChange={(e) => setUngovernedAccess(e.target.checked)}
-                          checked={ungovernedAccess}
-                          size='small'
-                        />
-                      }
-                      label={ungovernedAccessLabel}
-                    />
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          onChange={(event) => setAllowTemplating(event.target.checked)}
-                          checked={allowTemplating}
-                          size='small'
-                        />
-                      }
-                      label={allowTemplatingLabel}
-                    />
-                  </Stack>
+                  {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (
+                    <Stack spacing={2}>
+                      <Typography variant='h6' component='h2'>
+                        Additional settings
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={(e) => setUngovernedAccess(e.target.checked)}
+                            checked={ungovernedAccess}
+                            size='small'
+                          />
+                        }
+                        label={ungovernedAccessLabel}
+                      />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={(event) => setAllowTemplating(event.target.checked)}
+                            checked={allowTemplating}
+                            size='small'
+                          />
+                        }
+                        label={allowTemplatingLabel}
+                      />
+                    </Stack>
+                  )}
                 </Stack>
               </AccordionDetails>
             </Accordion>

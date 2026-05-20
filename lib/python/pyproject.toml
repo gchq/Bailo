@@ -22,7 +22,7 @@ classifiers = [
 requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = [
-    "requests==2.33.1",
+    "requests==2.34.2",
     "semantic-version==2.10.0",
     "tqdm==4.67.3"
 ]
@@ -32,7 +32,7 @@ mlflow = [
     "mlflow-skinny[mlserver]==3.10.1"
 ]
 test = [
-    "black==26.3.1",
+    "black==26.5.1",
     "check-manifest==0.51",
     "pre-commit==4.6.0",
     "pylint==4.0.5",

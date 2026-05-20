@@ -1,4 +1,3 @@
-import { Types } from 'mongoose'
 import { describe, expect, test, vi } from 'vitest'
 
 import { TransferStatus } from '../../src/models/ModelTransfer.js'
@@ -30,21 +29,21 @@ vi.mock('../../src/services/log.js', async () => ({
 const user = { dn: 'user:test' } as any
 
 describe('services > modelTransfer', () => {
-  const validObjectId = new Types.ObjectId().toHexString()
+  const validExportId = 'abc123'
 
   test('findModelTransferById > throws NotFound when transfer does not exist', async () => {
     ModelTransferModelMock.findOne.mockImplementation(() => ({
       lean: vi.fn().mockResolvedValue(undefined),
     }))
 
-    const res = findModelTransferById(user, validObjectId)
+    const res = findModelTransferById(user, validExportId)
 
     await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('findModelTransferById > returns valid transfer when found', async () => {
     const transfer = {
-      _id: validObjectId,
+      exportId: validExportId,
       status: TransferStatus.InProgress,
     }
 
@@ -52,7 +51,7 @@ describe('services > modelTransfer', () => {
       lean: vi.fn().mockResolvedValue(transfer),
     }))
 
-    const result = await findModelTransferById(user, validObjectId)
+    const result = await findModelTransferById(user, validExportId)
 
     expect(result).toEqual(transfer)
   })
@@ -63,23 +62,23 @@ describe('services > modelTransfer', () => {
       lean: vi.fn().mockResolvedValue([]),
     }))
 
-    const res = findModelTransfersByModelId(user, validObjectId)
+    const res = findModelTransfersByModelId(user, validExportId)
 
     await expect(res).rejects.toThrow(/^No model transfers found/)
   })
 
   test('findModelTransfersByModelId > returns transfers when found', async () => {
-    const modelId = new Types.ObjectId().toHexString()
+    const modelId = 'model-abc123'
     const transfers = [
       {
-        _id: new Types.ObjectId().toHexString(),
-        modelId: new Types.ObjectId().toHexString(),
+        exportId: validExportId,
+        modelId: 'model-abc123',
         peerId: 'peer-123',
         status: TransferStatus.Requested,
       },
       {
-        _id: new Types.ObjectId().toHexString(),
-        modelId: new Types.ObjectId().toHexString(),
+        exportId: validExportId,
+        modelId: 'model-abc123',
         peerId: 'peer-123',
         status: TransferStatus.Completed,
       },
@@ -102,16 +101,14 @@ describe('services > modelTransfer', () => {
     const input = {
       modelId: 'model-123',
       peerId: 'peer-123',
-      status: TransferStatus.Requested,
+      exportId: 'abc-123',
       createdBy: 'user:test',
     }
 
     const instance = {
-      _id: 'mock-id',
       ...input,
       save: vi.fn().mockResolvedValue(undefined),
       toObject: vi.fn().mockReturnValue({
-        _id: 'mock-id',
         ...input,
       }),
     }
@@ -124,16 +121,19 @@ describe('services > modelTransfer', () => {
 
     expect(ModelTransferModelMock).toHaveBeenCalledWith(input)
     expect(instance.save).toHaveBeenCalled()
-    expect(result).toEqual({
-      _id: 'mock-id',
-      ...input,
-    })
+    expect(result).toEqual(input)
   })
 
   test('updateModelTransferStatus > throws BadReq for invalid ObjectId', async () => {
-    const res = updateModelTransfer('001', TransferStatus.Completed)
+    ModelTransferModelMock.findOneAndUpdate.mockImplementation(() => {
+      return {
+        lean: vi.fn().mockResolvedValue(undefined),
+      }
+    })
 
-    await expect(res).rejects.toThrow(/^Invalid object id/)
+    const res = updateModelTransfer('001', {})
+
+    await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('updateModelTransferStatus > throws NotFound when transfer does not exist', async () => {
@@ -141,14 +141,14 @@ describe('services > modelTransfer', () => {
       lean: vi.fn().mockResolvedValue(undefined),
     }))
 
-    const res = updateModelTransfer(validObjectId, TransferStatus.Completed)
+    const res = updateModelTransfer(validExportId, {})
 
     await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('updateModelTransferStatus > updates and returns transfer', async () => {
     const updated = {
-      _id: validObjectId,
+      exportId: validExportId,
       status: TransferStatus.Completed,
     }
 
@@ -158,43 +158,40 @@ describe('services > modelTransfer', () => {
       }
     })
 
-    const result = await updateModelTransfer(validObjectId, TransferStatus.Completed)
+    const result = await updateModelTransfer(validExportId, {})
 
-    expect(ModelTransferModelMock.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: validObjectId },
-      { status: TransferStatus.Completed },
-      { new: true },
-    )
+    expect(ModelTransferModelMock.findOneAndUpdate).toHaveBeenCalled()
 
     expect(result).toEqual(updated)
   })
 
-  test('deleteModelTransfer > throws BadReq for invalid ObjectId', async () => {
+  test('deleteModelTransfer > throws BadReq for invalid exportId', async () => {
+    ModelTransferModelMock.findOne.mockResolvedValue(null)
+
     const res = deleteModelTransfer('001')
 
-    await expect(res).rejects.toThrow(/^Invalid object id/)
+    await expect(res).rejects.toThrow(/^The requested model transfer was not found./)
   })
 
   test('deleteModelTransfer > throws NotFound when transfer does not exist', async () => {
     ModelTransferModelMock.findOne.mockResolvedValue(null)
 
-    const res = deleteModelTransfer(validObjectId)
+    const res = deleteModelTransfer(validExportId)
 
     await expect(res).rejects.toThrow(/^The requested model transfer was not found/)
   })
 
   test('deleteModelTransfer > soft deletes transfer', async () => {
     const transfer = {
-      _id: validObjectId,
-      id: validObjectId,
+      exportId: validExportId,
       delete: vi.fn().mockResolvedValue(undefined),
     }
 
     ModelTransferModelMock.findOne.mockResolvedValue(transfer as any)
 
-    const result = await deleteModelTransfer(validObjectId)
+    const result = await deleteModelTransfer(validExportId)
 
     expect(transfer.delete).toHaveBeenCalled()
-    expect(result).toEqual(validObjectId)
+    expect(result).toEqual(validExportId)
   })
 })

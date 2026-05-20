@@ -2,11 +2,18 @@ import { Router } from 'express'
 
 import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
+import { getComplianceMetrics } from './metrics/getComplianceMetrics.js'
+import { getEntryVolume } from './metrics/getEntryVolume.js'
+import { getUsageMetrics } from './metrics/getUsageMetrics.js'
 
 const router = Router()
 
 router.get('/api-docs/swagger.json', (req, res) => res.json(generateV3SwaggerSpec()))
 
 router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
+
+router.get('/api/v3/metrics/usage', ...getUsageMetrics)
+router.get('/api/v3/metrics/compliance', ...getComplianceMetrics)
+router.get('/api/v3/metrics/entryVolume', ...getEntryVolume)
 
 export default router
