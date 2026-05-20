@@ -1,4 +1,4 @@
-import { ClientSession, PipelineStage, Types } from 'mongoose'
+import { ClientSession, PipelineStage } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -218,33 +218,6 @@ export async function findReviewForResponse(
   return review
 }
 
-// v3 function for retrieving a review using the id
-export async function findReviewById(user: UserInterface, modelId: string, reviewId: string, role: string) {
-  // Authorisation check to make sure the user can access a model
-  await getModelById(user, modelId)
-
-  const review: ReviewDoc = (
-    await ReviewModel.aggregate()
-      .match({
-        modelId,
-        _id: new Types.ObjectId(reviewId),
-        role,
-      })
-      .sort({ createdAt: -1 })
-      // Populate model entries
-      .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-      // Populate model as value instead of array
-      .unwind({ path: '$model' })
-      .match(await findUserInCollaborators(user))
-      .limit(1)
-  ).at(0)
-  if (!review) {
-    throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewId, role })
-  }
-
-  return review
-}
-
 //TODO This won't work for response refactor
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   return await ReviewModel.find({
@@ -266,7 +239,7 @@ export function getRoleEntities(roles: string[], collaborators: CollaboratorEntr
  * Return the models where one of the user's entities is in the model's collaborators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
-async function findUserInCollaborators(user: UserInterface) {
+export async function findUserInCollaborators(user: UserInterface) {
   return {
     $expr: {
       $gt: [

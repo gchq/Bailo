@@ -5,7 +5,7 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { Decision, ResponseInterface } from '../../../models/Response.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
-import { responseToReview } from '../../../services/v3/response.js'
+import { respondToReview } from '../../../services/v3/response.js'
 import { ReviewKind } from '../../../types/enums.js'
 import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
@@ -80,7 +80,7 @@ export const postReviewResponse = [
       body: { role, modelId, ...body },
     } = parse(req, postReviewResponseSchema)
 
-    const response = await responseToReview(
+    const response = await respondToReview(
       req.user,
       reviewId,
       modelId,

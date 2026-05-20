@@ -6,10 +6,10 @@ import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { ReviewResponseParams } from '../response.js'
-import { findReviewById } from '../review.js'
+import { findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
 
-export async function responseToReview(
+export async function respondToReview(
   user: UserInterface,
   reviewId: string,
   modelId: string,

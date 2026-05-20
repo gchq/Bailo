@@ -14,6 +14,7 @@ const CHAINABLE_METHODS = [
   'findOneAndDelete',
   'findOneAndUpdate',
   'group',
+  'limit',
   'lookup',
   'match',
   'save',
@@ -26,6 +27,7 @@ const CHAINABLE_METHODS = [
 
 const QUERY_LIKE_METHODS = [
   'aggregate',
+  'at',
   'exec',
   'bulkWrite',
   'find',
@@ -33,6 +35,7 @@ const QUERY_LIKE_METHODS = [
   'filter',
   'group',
   'lean',
+  'limit',
   'lookup',
   'map',
   'match',
