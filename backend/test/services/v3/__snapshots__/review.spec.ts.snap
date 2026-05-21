@@ -1,3 +1,139 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > review > findReviewById > can find a review using a given reviewId 1`] = `undefined`;
+exports[`services > review > findReviewById > can find a review using a given reviewId 1`] = `
+{
+  "aggregate": [MockFunction] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "append": [MockFunction],
+  "at": [MockFunction] {
+    "calls": [
+      [
+        0,
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "bulkWrite": [MockFunction],
+  "exec": [MockFunction],
+  "filter": [MockFunction],
+  "find": [MockFunction],
+  "group": [MockFunction],
+  "lean": [MockFunction],
+  "limit": [MockFunction] {
+    "calls": [
+      [
+        1,
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "lookup": [MockFunction] {
+    "calls": [
+      [
+        {
+          "as": "model",
+          "foreignField": "id",
+          "from": "v2_models",
+          "localField": "modelId",
+        },
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "map": [MockFunction],
+  "match": [MockFunction] {
+    "calls": [
+      [
+        {
+          "_id": "6a058a8a125dba342f0034a4",
+        },
+      ],
+      [
+        {
+          "$expr": {
+            "$gt": [
+              {
+                "$size": {
+                  "$filter": {
+                    "as": "item",
+                    "cond": {
+                      "$and": [
+                        {
+                          "$in": [
+                            "$$item.entity",
+                            [
+                              "user:test",
+                            ],
+                          ],
+                        },
+                        {
+                          "$in": [
+                            "$role",
+                            "$$item.roles",
+                          ],
+                        },
+                      ],
+                    },
+                    "input": "$model.collaborators",
+                  },
+                },
+              },
+              0,
+            ],
+          },
+        },
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "sort": [MockFunction],
+  "unwind": [MockFunction] {
+    "calls": [
+      [
+        {
+          "path": "$model",
+        },
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+}
+`;

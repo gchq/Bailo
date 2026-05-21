@@ -5,6 +5,10 @@ import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
 
+vi.mock('../../../src/connectors/authentication/index.js', async () => ({
+  default: { getEntities: vi.fn(() => ['user:test']) },
+}))
+
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
@@ -14,12 +18,18 @@ describe('services > review', () => {
   const user: any = { dn: 'test' }
 
   test('findReviewById > can find a review using a given reviewId', async () => {
-    modelMock.getModelById.mockResolvedValueOnce({
-      id: 'test-1234',
-      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
-      save: vi.fn(),
+    modelMock.getModelById.mockResolvedValueOnce([
+      {
+        id: 'test-1234',
+        collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+        save: vi.fn(),
+      },
+    ])
+    ReviewRoleModelMock.aggregate.mockResolvedValueOnce({
+      modelId: 'test-1234',
+      role: 'owner',
     })
-    await findReviewById(user, 'test-1234', '6a058a8a125dba342f0034a4', 'owner')
-    expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    const review = await findReviewById(user, '6a058a8a125dba342f0034a4')
+    expect(review).toMatchSnapshot()
   })
 })

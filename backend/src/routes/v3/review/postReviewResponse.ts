@@ -10,11 +10,6 @@ import { ReviewKind } from '../../../types/enums.js'
 import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
-const staticProperties = z.object({
-  role: z.string(),
-  modelId: z.string(),
-})
-
 const optionalComment = z.object({
   comment: z.string().optional(),
   decision: z.enum(getEnumValues(Decision)).exclude([Decision.RequestChanges]),
@@ -40,10 +35,7 @@ export const postReviewResponseSchema = z.object({
     reviewId: z.string(),
   }),
   body: z.intersection(
-    z.discriminatedUnion('decision', [
-      staticProperties.merge(optionalComment),
-      staticProperties.merge(mandatoryComment),
-    ]),
+    z.discriminatedUnion('decision', [optionalComment, mandatoryComment]),
     z.union([mandatoryDueDate, optionalDueDate]),
   ),
 })
@@ -77,14 +69,12 @@ export const postReviewResponse = [
     req.audit = AuditInfo.CreateReviewResponse
     const {
       params: { reviewId },
-      body: { role, modelId, ...body },
+      body: { ...body },
     } = parse(req, postReviewResponseSchema)
 
     const response = await respondToReview(
       req.user,
       reviewId,
-      modelId,
-      role,
       { decision: body.decision, comment: body.comment },
       body.dueDate,
     )

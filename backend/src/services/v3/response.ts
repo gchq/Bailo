@@ -13,21 +13,27 @@ import { sendWebhooks } from '../webhook.js'
 export async function respondToReview(
   user: UserInterface,
   reviewId: string,
-  modelId: string,
-  role: string,
   response: ReviewResponseParams,
   dueDate?: Date,
 ) {
-  const review = await findReviewById(user, modelId, reviewId, role)
+  const review = await findReviewById(user, reviewId)
 
-  if (review.kind === ReviewKind.Lifecycle && !dueDate) {
-    throw BadReq('Lifecycle review responses should have a due date')
+  if (review.kind === ReviewKind.Lifecycle) {
+    if (!dueDate) {
+      throw BadReq('Lifecycle review responses should have a due date')
+    } else {
+      const currentDate = new Date()
+      if (review.kind === ReviewKind.Lifecycle && currentDate > dueDate) {
+        throw BadReq('Due date of next review cannot be in the past.')
+      }
+    }
   }
+
   // Store the response
   const reviewResponse = new ResponseModel({
     entity: toEntity('user', user.dn),
     kind: ResponseKind.Review,
-    role,
+    role: review.role,
     parentId: review._id,
     ...response,
   })
@@ -42,12 +48,12 @@ export async function respondToReview(
     { review: review },
   )
 
-  // v3 When approving a model card review we need to create a new review using the supplied due date
+  // When approving a model card review we need to create a new review using the supplied due date
   if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve) {
     const newReview = new ReviewModel({
-      modelId,
+      modelId: review.modelId,
       kind: review.kind,
-      role,
+      role: review.role,
       dueDate,
     })
     await newReview.save()

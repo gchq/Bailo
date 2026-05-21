@@ -40,7 +40,7 @@ describe('services > v3 > response', () => {
 
   test('respondToReview > successful', async () => {
     reviewV3Mock.findReviewById.mockReturnValue(testReleaseReview as any)
-    await respondToReview(user, '6a058ab4db7a3be341fb3cca', 'modelId', 'msro', {
+    await respondToReview(user, '6a058ab4db7a3be341fb3cca', {
       decision: Decision.RequestChanges,
       comment: 'Do better!',
     })
