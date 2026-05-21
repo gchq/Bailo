@@ -1,15 +1,24 @@
 import { Types } from 'mongoose'
 
 import authentication from '../../connectors/authentication/index.js'
+import { ModelInterface } from '../../models/Model.js'
 import ReviewModel, { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
-import { NotFound } from '../../utils/error.js'
+import { BadReq, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
 
+type ReviewWithModel = ReviewDoc & {
+  model: ModelInterface
+}
+
 // v3 function for retrieving a review using the id
-export async function findReviewById(user: UserInterface, reviewId: string) {
-  const review: ReviewDoc = (
-    await ReviewModel.aggregate()
+export async function findReviewById(user: UserInterface, reviewId: string): Promise<ReviewWithModel> {
+  if (!Types.ObjectId.isValid(reviewId)) {
+    throw BadReq('Invalid reviewId', { reviewId })
+  }
+
+  const review: ReviewWithModel | undefined = (
+    await ReviewModel.aggregate<ReviewWithModel>()
       .match({
         _id: new Types.ObjectId(reviewId),
       })

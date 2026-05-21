@@ -1,5 +1,5 @@
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
-import ReviewModel from '../../models/Review.js'
+import ReviewModel, { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
@@ -10,6 +10,19 @@ import { ReviewResponseParams } from '../response.js'
 import { findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
 
+function validateLifecycleReview(review: ReviewDoc, dueDate?: Date) {
+  if (review.kind === ReviewKind.Lifecycle) {
+    if (!dueDate) {
+      throw BadReq('Lifecycle review responses should have a due date')
+    }
+
+    const currentDate = new Date()
+    if (currentDate > dueDate) {
+      throw BadReq('Due date of next review cannot be in the past.')
+    }
+  }
+}
+
 export async function respondToReview(
   user: UserInterface,
   reviewId: string,
@@ -17,17 +30,7 @@ export async function respondToReview(
   dueDate?: Date,
 ) {
   const review = await findReviewById(user, reviewId)
-
-  if (review.kind === ReviewKind.Lifecycle) {
-    if (!dueDate) {
-      throw BadReq('Lifecycle review responses should have a due date')
-    } else {
-      const currentDate = new Date()
-      if (review.kind === ReviewKind.Lifecycle && currentDate > dueDate) {
-        throw BadReq('Due date of next review cannot be in the past.')
-      }
-    }
-  }
+  validateLifecycleReview(review, dueDate)
 
   // Store the response
   const reviewResponse = new ResponseModel({
