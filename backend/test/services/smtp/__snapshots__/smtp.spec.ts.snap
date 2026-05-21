@@ -26,6 +26,54 @@ exports[`services > smtp > smtp > that an email is sent after a response for a r
 ]
 `;
 
+exports[`services > smtp > smtp > that an email is sent after an import has begun 1`] = `
+[
+  {
+    "attachments": undefined,
+    "from": ""Bailo 📝" <bailo@example.org>",
+    "html": "html",
+    "subject": "subject",
+    "text": "text",
+    "to": [
+      "user@example.com",
+      "user2@example.com",
+    ],
+  },
+]
+`;
+
+exports[`services > smtp > smtp > that an email is sent after an import has complete 1`] = `
+[
+  {
+    "attachments": undefined,
+    "from": ""Bailo 📝" <bailo@example.org>",
+    "html": "html",
+    "subject": "subject",
+    "text": "text",
+    "to": [
+      "user@example.com",
+      "user2@example.com",
+    ],
+  },
+]
+`;
+
+exports[`services > smtp > smtp > that an email is sent after an import has failed 1`] = `
+[
+  {
+    "attachments": undefined,
+    "from": ""Bailo 📝" <bailo@example.org>",
+    "html": "html",
+    "subject": "subject",
+    "text": "text",
+    "to": [
+      "user@example.com",
+      "user2@example.com",
+    ],
+  },
+]
+`;
+
 exports[`services > smtp > smtp > that an email is sent for Access Request Reviews 1`] = `
 [
   {
@@ -49,6 +97,24 @@ exports[`services > smtp > smtp > that an email is sent for Release Reviews 1`] 
     "text": "text",
     "to": "email@email.com",
   },
+]
+`;
+
+exports[`services > smtp > smtp > that email is sent to model owners 1`] = `
+[
+  [
+    {
+      "attachments": undefined,
+      "from": ""Bailo 📝" <bailo@example.org>",
+      "html": "",
+      "subject": "",
+      "text": "",
+      "to": [
+        "user@example.com",
+        "user2@example.com",
+      ],
+    },
+  ],
 ]
 `;
 

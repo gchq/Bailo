@@ -1,4 +1,9 @@
-import { documentGetInitialProps, DocumentHeadTags, DocumentHeadTagsProps } from '@mui/material-nextjs/v13-pagesRouter'
+import {
+  createEmotionCache,
+  documentGetInitialProps,
+  DocumentHeadTags,
+  DocumentHeadTagsProps,
+} from '@mui/material-nextjs/v15-pagesRouter'
 import { DocumentProps, Head, Html, Main, NextScript } from 'next/document'
 
 import { lightTheme } from '../src/theme'
@@ -23,6 +28,8 @@ export default function MyDocument(props: DocumentProps & DocumentHeadTagsProps)
 }
 
 MyDocument.getInitialProps = async (ctx) => {
-  const finalProps = await documentGetInitialProps(ctx)
+  const finalProps = await documentGetInitialProps(ctx, {
+    emotionCache: createEmotionCache({ key: 'css' }),
+  })
   return finalProps
 }

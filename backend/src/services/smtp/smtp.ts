@@ -11,9 +11,11 @@ import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { sanitiseEmail } from '../../utils/smtp.js'
 import log from '../log.js'
-import { buildEmail, EmailContent } from './emailBuilder.js'
+import { getModelByIdNoAuth } from '../model.js'
+import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const transporter = await generateTransporter(config.smtp.transporter)
+const LINE_BREAK = '<br />'
 
 /**
  * Generates a Node Mailer Transporter.
@@ -40,7 +42,7 @@ export async function generateTransporter(transportOption: TransportOption): Pro
   }
 }
 
-async function dispatchEmail(entity: string, emailContent: EmailContent) {
+export async function dispatchEmail(entity: string, emailContent: EmailContent) {
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
@@ -54,6 +56,17 @@ async function dispatchEmail(entity: string, emailContent: EmailContent) {
       }),
   )
   await Promise.all(sendEmailResponses)
+}
+
+export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent) {
+  const model = await getModelByIdNoAuth(modelId)
+  const entities = await Promise.all(
+    model.collaborators
+      .filter((collaborator) => collaborator.roles.includes(role))
+      .map((collaborator) => authentication.getUserInformation(collaborator.entity)),
+  )
+  const emails = entities.map((entry) => entry.email).filter((email): email is string => email !== undefined)
+  await sendEmail({ to: emails, ...emailContent })
 }
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -214,6 +227,62 @@ async function sendEmail(email: Mail.Options) {
     log.warn({ content, error }, `Unable to send email`)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
+}
+
+export async function startImportNotification(modelId: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+  const emailContent = buildEmail(
+    `${mirroredModel.name} has begun importing`,
+    [],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+    ],
+  )
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+}
+
+export async function transferCompleteNotification(
+  modelId: string,
+  failed: boolean,
+  artefacts: Record<string, string[]>,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+
+  const title = failed
+    ? `Oh no there was a problem with importing ${mirroredModel.name}!`
+    : `${mirroredModel.name} has finished importing`
+
+  const infoArray: Info[] = []
+  for (const [key, values] of Object.entries(artefacts)) {
+    if (values.length > 0) {
+      infoArray.push({ title: key, data: values.join(LINE_BREAK) })
+    }
+  }
+
+  const actions = [
+    { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+    { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+  ]
+
+  if (failed) {
+    actions.push({ name: 'Contact Support', url: config.ui.issues.contactHref })
+  }
+
+  const emailContent = buildEmail(title, infoArray, actions)
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }
 
 function getReleaseUrl(release: ReleaseDoc) {

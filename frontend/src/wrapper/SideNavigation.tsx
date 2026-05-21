@@ -1,5 +1,6 @@
 import {
   AccessibilityNew,
+  Equalizer,
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
   SupervisorAccount,
@@ -140,7 +141,7 @@ export default function SideNavigation({
             />
             <Divider aria-hidden='true' />
             <NavMenuItem
-              href='/api/v2/docs'
+              href='/api/docs'
               selectedPage={page}
               primaryText='API'
               drawerOpen={drawerOpen}
@@ -191,6 +192,17 @@ export default function SideNavigation({
                 menuPage='reviewRoles'
                 title='Review Roles'
                 icon={<SupervisorAccount />}
+              />
+            )}
+            {currentUser.isAdmin && (
+              <NavMenuItem
+                href='/metrics'
+                selectedPage={page}
+                primaryText='Metrics'
+                drawerOpen={drawerOpen}
+                menuPage='metrics'
+                title='Metrics'
+                icon={<Equalizer />}
               />
             )}
           </StyledList>

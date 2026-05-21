@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
 import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
@@ -34,6 +34,7 @@ vi.mock('../../../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
   warn: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({
@@ -63,10 +64,6 @@ const mockMetadata: ImageMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > ImageImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     expect(importer).toMatchSnapshot()

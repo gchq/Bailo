@@ -29,15 +29,18 @@ def get_settings_override():
     return Settings(maximum_filesize=MAXIMUM_FILESIZE_OVERRIDE)
 
 
-app.dependency_overrides[get_settings] = get_settings_override
-# Override maximum_filesize as middlewares aren't covered by FastAPI's TestClient
-app.user_middleware.clear()
-app.add_middleware(
-    ContentSizeLimitMiddleware,
-    max_content_size=get_settings_override().maximum_filesize,
-    exception_cls=CustomMiddlewareHTTPExceptionWrapper,
-)
-client = TestClient(app)
+@pytest.fixture(scope="module")
+def client():
+    # Override maximum_filesize as middlewares aren't covered by FastAPI's TestClient
+    app.user_middleware.clear()
+    app.add_middleware(
+        ContentSizeLimitMiddleware,
+        max_content_size=get_settings_override().maximum_filesize,
+        exception_cls=CustomMiddlewareHTTPExceptionWrapper,
+    )
+    with TestClient(app) as test_app:
+        yield test_app
+    app.dependency_overrides = {}
 
 
 BIG_CONTENTS = b"\0" * (MAXIMUM_FILESIZE_OVERRIDE + 1)
@@ -47,7 +50,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
 
 
 @pytest.fixture()
-def trivy_env(monkeypatch):
+def trivy_env(monkeypatch: pytest.MonkeyPatch):
     with TemporaryDirectory() as tmp:
         original_settings = trivy.get_settings()
 
@@ -244,10 +247,7 @@ def trivy_env(monkeypatch):
     ],
 )
 def test_scan_file(
-    file_name: str,
-    file_content: Path | bytes,
-    file_mime_type: str,
-    expected_response: dict,
+    file_name: str, file_content: Path | bytes, file_mime_type: str, expected_response: dict, client: TestClient
 ) -> None:
     # allow passing in a Path to read the file's contents for specific data types
     if isinstance(file_content, Path):
@@ -267,7 +267,7 @@ def test_scan_file(
     ("file_name", "file_content", "file_mime_type"),
     [("foo.h5", BIG_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_too_large(file_name: str, file_content: Any, file_mime_type: str):
+def test_scan_file_too_large(file_name: str, file_content: Any, file_mime_type: str, client: TestClient):
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)

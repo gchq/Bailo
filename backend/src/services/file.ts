@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream'
 
+import bytes from 'bytes'
 import { ClientSession, Types } from 'mongoose'
-import prettyBytes from 'pretty-bytes'
 
 import {
   completeMultipartUpload,
@@ -204,7 +204,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   const stream = await getObjectStream(file.path, undefined, range)
 
   const totalBytes = file.size
-  const totalPretty = prettyBytes(totalBytes)
+  const totalPretty = bytes.format(totalBytes)
   let progress = 0
   let lastLoggedAt = 0
   stream.on('data', function (chunk) {
@@ -220,7 +220,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     lastLoggedAt = now
     log.debug(
       {
-        loaded: prettyBytes(progress),
+        loaded: bytes.format(progress),
         loadedBytes: progress,
         total: totalPretty,
         totalBytes,
@@ -234,9 +234,9 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   stream.on('close', () => {
     log.debug(
       {
-        loaded: prettyBytes(progress),
+        loaded: bytes.format(progress),
         loadedBytes: progress,
-        total: prettyBytes(file.size),
+        total: bytes.format(file.size),
         totalBytes: file.size,
         fileId,
         modelId: model.id,

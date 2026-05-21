@@ -70,7 +70,11 @@ export abstract class BaseImporter {
    * The type parameters use `any` due to Node.js stream callback API constraints — actual implementations
    * may use more specific types but are not subtypes of `unknown`.
    */
-  handleStreamError(error: unknown, _resolve: (reason?: any) => void, reject: (reason?: unknown) => void): void {
+  async handleStreamError(
+    error: unknown,
+    _resolve: (reason?: any) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
     if (isBailoError(error)) {
       reject(error)
     } else {
@@ -89,7 +93,7 @@ export abstract class BaseImporter {
    * @remarks
    * The type parameters use `any` due to Node.js stream callback API constraints.
    */
-  handleStreamCompletion(resolve: (reason?: any) => void, _reject: (reason?: unknown) => void): void {
+  async handleStreamCompletion(resolve: (reason?: any) => void, _reject: (reason?: unknown) => void): Promise<void> {
     resolve({ metadata: this.metadata })
   }
 }
