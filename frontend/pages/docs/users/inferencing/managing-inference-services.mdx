@@ -4,21 +4,27 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 Once an inference service has been created, you can view its details, update its configuration, or delete it.
 
+> **Common questions this page answers:**
+>
+> - How do I view my inference services?
+> - How do I update an inference service?
+> - Can I change the container image on an inference service?
+
 ## Viewing Inference Services
 
-To see all inference services for a model:
+View all active inference services for a model from the Inferencing tab:
 
 1. Open the model page
-2. Navigate to the **Inferencing** tab
+2. Navigate to the **Inferencing** tab - this is where all services are managed
 3. All active inference services are listed with their image, description, and status
 
 ## Updating a Service
 
-To update an inference service's configuration:
+Update an inference service's configuration from the service's settings panel:
 
 1. Navigate to the **Inferencing** tab on the model page
-2. Select the service you want to update
-3. Click **View Settings**
+2. Select the service you want to update - this opens the service detail view
+3. Click **View Settings** to open the configuration panel
 4. Modify the fields as needed:
    - **Description**
    - **Port**
@@ -41,7 +47,7 @@ Deleting a service stops it and removes the deployment. This action cannot be un
 
 ## Programmatic Access
 
-You can also manage inference services [via the API](/api/v2/docs/#/inference).
+Inference services can also be managed [via the API](/api/v2/docs/#/inference).
 
 ## Related Pages
 

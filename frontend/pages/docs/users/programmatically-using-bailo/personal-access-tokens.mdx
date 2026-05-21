@@ -10,7 +10,16 @@ import createPersonalAccessToken from 'public/docs/bailo_create_personal_access_
 Personal Access Tokens (PATs) allow you to authenticate with Bailo's API and container registry programmatically. Each
 token can be scoped to specific models and actions, giving you fine-grained control over what the token can do.
 
+> **Common questions this page answers:**
+>
+> - How do I create a Personal Access Token (PAT)?
+> - What permissions can I assign to a token?
+> - How do I use a token with curl or the Python client?
+> - How do I revoke a token?
+
 ## Creating a Token
+
+Create tokens from the Authentication tab in your user settings.
 
 1. Navigate to **User (top right) > Settings > Authentication**
 2. Click **Add Token**
@@ -18,6 +27,9 @@ token can be scoped to specific models and actions, giving you fine-grained cont
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='Authentication tab listing personal access tokens and add token button' src={personalAccessTokens} />
 </Box>
+
+The screenshot above shows the Authentication tab listing existing personal access tokens with their descriptions,
+access keys, and a delete button for each.
 
 3. Fill in the form:
    - **Description** - a name to help you identify this token (e.g. "CI/CD pipeline", "Local development")
@@ -28,33 +40,37 @@ token can be scoped to specific models and actions, giving you fine-grained cont
   <Image alt='generate personal token form' src={createPersonalAccessToken} />
 </Box>
 
+The screenshot above shows the token creation form with fields for description, model scope, and action permissions.
+
 4. Click **Generate Token**
 5. **Copy both the Access Key and Secret Key immediately** - the secret key is only shown once and cannot be retrieved
    later
 
 ## Available Permissions
 
-| Permission             | Description                                     |
-| ---------------------- | ----------------------------------------------- |
-| `model:read`           | View model and data card settings               |
-| `model:write`          | Create and update model and data card settings  |
-| `model:export`         | Export model and data card settings             |
-| `release:read`         | View release information                        |
-| `release:write`        | Create and update releases                      |
-| `release:export`       | Export release information                      |
-| `access_request:read`  | View and list access requests                   |
-| `access_request:write` | Create, approve, and comment on access requests |
-| `file:read`            | Download and view files                         |
-| `file:write`           | Upload and delete files                         |
-| `image:read`           | List and pull container (Docker) images         |
-| `image:write`          | Push and delete container images                |
-| `schema:write`         | Upload and modify schemas (administrators only) |
-| `reviewRole:read`      | View review roles                               |
-| `reviewRole:write`     | Create and update review roles                  |
+Each token can be scoped to specific actions using these permission types.
+
+- **model:read** - View model and data card settings
+- **model:write** - Create and update model and data card settings
+- **model:export** - Export model and data card settings
+- **release:read** - View release information
+- **release:write** - Create and update releases
+- **release:export** - Export release information
+- **access_request:read** - View and list access requests
+- **access_request:write** - Create, approve, and comment on access requests
+- **file:read** - Download and view files
+- **file:write** - Upload and delete files
+- **image:read** - List and pull container (Docker) images
+- **image:write** - Push and delete container images
+- **schema:write** - Upload and modify schemas (administrators only)
+- **reviewRole:read** - View review roles
+- **reviewRole:write** - Create and update review roles
 
 > **Note**: Selecting a write permission automatically includes the corresponding read permission.
 
 ## Token Scoping
+
+Tokens can be scoped to all models or restricted to specific models.
 
 - **All models** - the token works with every model in Bailo
 - **Specific models** - the token only works with the models you select
@@ -63,7 +79,7 @@ Use specific model scoping when possible to follow the principle of least privil
 
 ## Managing Tokens
 
-To view or delete existing tokens:
+View and delete existing tokens from the Authentication tab:
 
 1. Navigate to **User > Settings > Authentication**
 2. Your existing tokens are listed with their description and access key
@@ -74,7 +90,7 @@ To view or delete existing tokens:
 
 ## Using Tokens
 
-Tokens use HTTP Basic Authentication:
+Tokens use HTTP Basic Authentication with the access key as the username and the secret key as the password.
 
 - **Username**: the access key
 - **Password**: the secret key
@@ -102,6 +118,8 @@ docker login your-registry-host -u "your-access-key" -p "your-secret-key"
 ```
 
 ## Security Best Practices
+
+Follow these practices to keep your tokens secure.
 
 - **Store secret keys securely** - use environment variables or a secrets manager, not source code
 - **Use minimum permissions** - only grant the actions your workflow needs

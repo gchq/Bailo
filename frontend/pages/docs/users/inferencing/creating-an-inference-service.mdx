@@ -5,6 +5,12 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 An inference service deploys a model's container (Docker) image as a live endpoint, allowing you to make predictions
 without downloading the model locally. This feature must be enabled by your administrator.
 
+> **Common questions this page answers:**
+>
+> - How do I deploy a model as an inference service?
+> - What processor types are available for inference?
+> - How do I authenticate requests to an inference service?
+
 ## Prerequisites
 
 Before creating an inference service, you need:
@@ -15,20 +21,18 @@ Before creating an inference service, you need:
 
 ## Creating a Service
 
+Create an inference service from the Inferencing tab on your model page.
+
 1. Open your model page
 2. Navigate to the **Inferencing** tab
 3. Click **Create a new Inferencing Service**
-4. Fill in the form:
-
-| Field              | Description                                                  | Required  |
-| ------------------ | ------------------------------------------------------------ | --------- |
-| **Description**    | What this inference service does                             | Yes       |
-| **Image**          | Select from the model's available container images           | Yes       |
-| **Port**           | The port your model exposes for inference requests (1-65535) | Yes       |
-| **Processor Type** | Choose CPU or an available GPU type                          | Yes       |
-| **Memory**         | Memory allocation in GB (1-8 GB, shown for CPU only)         | Yes (CPU) |
-
-5. Click **Create Inferencing Service**
+4. Populate the following required fields:
+   - **Description**: What this inference service does. Required.
+   - **Image**: Select from the model's available container images. Required.
+   - **Port**: The port your model exposes for inference requests (1-65535). Required.
+   - **Processor Type**: Choose CPU or an available GPU type. Required.
+   - **Memory**: Memory allocation in GB (1-8 GB, shown for CPU only). Required for CPU.
+5. Once all fields are filled in, click **Create Inferencing Service**
 
 ### Choosing a Processor Type
 
@@ -47,13 +51,15 @@ Check your model's container configuration if you're unsure which port to use.
 
 ## After Creation
 
-Once created, the inference service will be provisioned. You can:
+Once created, the service is provisioned and accessible via an endpoint on the Inferencing tab. You can:
 
 - View the service status on the model's **Inferencing** tab
 - Access the service endpoint to make prediction requests
 - Generate a personal access token for authenticating inference requests
 
 ## Authenticating Requests
+
+Use a Personal Access Token (PAT) to authenticate requests to the inference service endpoint.
 
 To make authenticated requests to an inference service, you'll need a personal access token. See
 [Personal Access Tokens](/docs/users/programmatically-using-bailo/personal-access-tokens) for instructions on creating
