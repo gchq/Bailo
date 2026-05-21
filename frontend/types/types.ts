@@ -557,26 +557,21 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-type PartialSemverReviewRequestInterface =
+type PartialRequestInterface =
   | {
       accessRequestId: string
       semver?: never
+      dueDate?: never
     }
   | {
       accessRequestId?: never
       semver: string
-    }
-
-type PartialDueDateReviewRequestInterface =
-  | {
-      kind: 'release' | 'access'
       dueDate?: never
     }
   | {
-      kind: 'lifecycle'
-      dueDate: Date
-      semver?: never
       accessRequestId?: never
+      semver: never
+      dueDate?: Date
     }
 
 export const ReviewKind = {
@@ -593,8 +588,7 @@ export type ReviewRequestInterface = {
   kind: ReviewKindKeys
   createdAt: string
   updatedAt: string
-} & PartialSemverReviewRequestInterface &
-  PartialDueDateReviewRequestInterface
+} & PartialRequestInterface
 
 export interface InferenceInterface {
   modelId: string
