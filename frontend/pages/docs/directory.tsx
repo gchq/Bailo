@@ -55,6 +55,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'File Scanning', slug: 'users/using-scanners/file-scanning' },
   { title: 'Image Scanning', slug: 'users/using-scanners/image-scanning' },
 
+  { title: 'Inferencing', slug: 'users/inferencing', header: true },
+  { title: 'Creating an Inference Service', slug: 'users/inferencing/creating-an-inference-service' },
+  { title: 'Managing Inference Services', slug: 'users/inferencing/managing-inference-services' },
+
   { title: 'Model Mirroring', slug: 'users/model-mirroring', header: true },
   { title: 'Creating a Mirrored Model', slug: 'users/model-mirroring/creating-a-mirrored-model' },
   { title: 'Editing a Mirrored Model Card', slug: 'users/model-mirroring/editing-a-mirrored-model-card' },

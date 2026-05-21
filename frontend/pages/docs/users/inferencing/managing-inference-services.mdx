@@ -1,0 +1,51 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Managing Inference Services
+
+Once an inference service has been created, you can view its details, update its configuration, or delete it.
+
+## Viewing Inference Services
+
+To see all inference services for a model:
+
+1. Open the model page
+2. Navigate to the **Inferencing** tab
+3. All active inference services are listed with their image, description, and status
+
+## Updating a Service
+
+To update an inference service's configuration:
+
+1. Navigate to the **Inferencing** tab on the model page
+2. Select the service you want to update
+3. Click **View Settings**
+4. Modify the fields as needed:
+   - **Description**
+   - **Port**
+   - **Processor Type**
+   - **Memory** (CPU only)
+5. Save your changes
+
+> **Note**: You cannot change the container image of an existing inference service. To use a different image, delete the
+> current service and create a new one.
+
+## Deleting a Service
+
+Deleting an inference service can only be done via the API:
+
+```
+DELETE /api/v2/model/{modelId}/inference/{image}/{tag}
+```
+
+Deleting a service stops it and removes the deployment. This action cannot be undone.
+
+## Programmatic Access
+
+You can also manage inference services [via the API](/api/v2/docs/#/inference).
+
+## Related Pages
+
+- [Creating an Inference Service](/docs/users/inferencing/creating-an-inference-service) - Setting up a new service
+- [OpenAPI Reference](/docs/users/programmatically-using-bailo/open-api) - Full API documentation
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
