@@ -10,6 +10,12 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 When a release is created on a model, it enters the review process. If you have been assigned a review role on that
 model, you will be notified and the release will appear in your review queue.
 
+> **Common questions this page answers:**
+>
+> - How do I review a release in Bailo?
+> - What should I look for when reviewing a release?
+> - Where do I find releases to review?
+
 ## Who Sees Release Reviews?
 
 Release reviews are visible to users who have been assigned a **review role** on the model (e.g. Model Technical
@@ -24,7 +30,11 @@ reviews** tab, under the **Releases** heading.
   <Image alt='open release reviews page with a list of unreviewed releases' src={bailoReviewPage} />
 </Box>
 
+The screenshot above shows the Reviews page with a list of open release reviews waiting for action.
+
 ## Reviewing a Release
+
+Open a release from the Reviews page or the model's Releases tab, examine the submission, and submit your decision:
 
 1. Either:
    - Select a review from the **Reviews** page
@@ -34,11 +44,14 @@ reviews** tab, under the **Releases** heading.
   <Image alt='releases page showing release with review banner visually attached' src={bailoReview} />
 </Box>
 
+The screenshot above shows a release on the model's Releases page with a review banner attached.
+
 2. Click **View full release** to examine the release:
    - Review the **model card** for completeness and accuracy
    - Check the **release notes** describe what is included
    - Verify that appropriate **files** and **container images** are attached
-3. Add a **comment** explaining your decision (especially important if requesting changes)
+3. After examining the release details, add a **comment** explaining your decision (especially important if requesting
+   changes)
 4. Choose your decision:
    - **Approve** - you are satisfied with the release
    - **Request changes** - something needs to be addressed
@@ -47,7 +60,11 @@ reviews** tab, under the **Releases** heading.
   <Image alt='release review approval popup' src={bailoReviewForm} />
 </Box>
 
+The screenshot above shows the release review form with options to approve or request changes, and a comment field.
+
 ## After Submitting Your Review
+
+After submitting, the model owner is notified and other reviewers can see your response.
 
 - An **email notification** is sent to the model owner with your decision
 - If you approved, the release moves closer to full approval (all required roles must approve)
@@ -55,6 +72,8 @@ reviews** tab, under the **Releases** heading.
 - Your response is visible to other reviewers and the model owner
 
 ## What to Look For
+
+Different reviewer roles focus on different aspects of the release.
 
 Depending on your review role, consider checking:
 

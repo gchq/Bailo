@@ -5,6 +5,13 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 Reviews are Bailo's governance mechanism. They ensure that models and access requests are examined by the right people
 before they are approved. This page explains how the review system works end-to-end.
 
+> **Common questions this page answers:**
+>
+> - How do reviews work in Bailo?
+> - Who reviews my release?
+> - What triggers a review?
+> - What happens when a reviewer requests changes?
+
 ## What Triggers a Review?
 
 Reviews are created automatically when:
@@ -16,16 +23,21 @@ You do not need to manually create a review. The system handles this based on th
 
 ## Who Reviews What?
 
-Review assignments are determined by three things:
+Review assignments depend on the schema's review roles, the model owner's reviewer assignments, and the type of
+submission:
 
 1. **The schema** attached to the model defines which review roles are required (e.g. "Model Technical Reviewer", "Model
    Senior Responsible Officer")
 2. **The model owner** assigns specific people or groups to each review role in the model's Settings tab
 3. **The type of submission** determines which roles participate:
    - **Release reviews**: All assigned review roles participate
-   - **Access request reviews**: Typically only specific roles (commonly the MSRO) participate
+   - **Access request reviews**: Typically only specific roles (commonly the Model Senior Responsible Officer, or MSRO)
+     participate
 
 ## The Review Lifecycle
+
+The review lifecycle follows a structured flow from submission through reviewer evaluation to approval or change
+requests.
 
 ### For Releases
 
@@ -47,7 +59,7 @@ Review assignments are determined by three things:
 
 ## Checking Your Reviews
 
-To see reviews assigned to you:
+You can see all reviews assigned to you from the Reviews page in the navigation bar:
 
 1. Click **Review** in the navigation bar
 2. The **Your open reviews** tab shows reviews waiting for your action, with a count badge
@@ -55,7 +67,7 @@ To see reviews assigned to you:
 
 ## Responding to a Review
 
-When reviewing a release or access request:
+Reviewers examine the submission, add comments, and choose to approve or request changes:
 
 1. Open the review from the Reviews page or from the model's release/access request page
 2. Examine the submission - for releases, review the model card and attached artefacts
@@ -69,13 +81,15 @@ You can also react to other reviewers' comments to indicate agreement or add fur
 
 ## Review Outcomes
 
-| Outcome               | What It Means                                                                             |
-| --------------------- | ----------------------------------------------------------------------------------------- |
-| **Approved**          | All required review roles have approved. The release or access request is finalised.      |
-| **Changes requested** | One or more reviewers need something addressed. The submitter should update and resubmit. |
-| **Pending**           | The review is still in progress - not all required roles have responded yet.              |
+A review can result in one of three outcomes.
+
+- **Approved** - All required review roles have approved. The release or access request is finalised.
+- **Changes requested** - One or more reviewers need something addressed. The submitter should update and resubmit.
+- **Pending** - The review is still in progress. Not all required roles have responded yet.
 
 ## Tips for Model Owners
+
+These tips help model owners prepare for smoother reviews.
 
 - **Assign reviewers early** - set up review role assignments in your model's Settings tab before creating your first
   release
