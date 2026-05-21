@@ -1,31 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > review > postAccessRequestReviewResponse > missing review decision 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_union_discriminator",
-          "message": "Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
-          "options": [
-            "approve",
-            "undo",
-            "request_changes",
-          ],
-          "path": [
-            "body",
-            "decision",
-          ],
-        },
-      ],
-    },
-    "message": "Path: body.decision - Message: Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
-    "name": "Bailo Error",
-  },
-}
-`;
-
 exports[`routes > review > postReviewResponse > audit > expected call 1`] = `
 {
   "comment": "test comment",
