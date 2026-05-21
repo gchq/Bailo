@@ -11,9 +11,15 @@ import bailoUploadFile from 'public/docs/bailo_file_upload.png'
 Files represent any artefacts related to a model, such as binaries, configuration files, or supporting documentation.
 These files allow others to build, evaluate, and use your model.
 
+> **Common questions this page answers:**
+>
+> - How do I upload files to a model in Bailo?
+> - How do I attach files to a release?
+> - How do I upload files programmatically?
+
 ## Adding Files to a Model
 
-Files are uploaded from the **File Management** tab of a model.
+Upload files from the **File Management** tab on your model page:
 
 1. Click **Add new files**
 2. Select files to upload
@@ -22,6 +28,8 @@ Files are uploaded from the **File Management** tab of a model.
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view of files being uploaded' src={bailoUploadFile} />
 </Box>
+
+The screenshot above shows the file upload interface with file selection, tag assignment, and an Upload files button.
 
 4. Click **Upload files**
 
@@ -33,17 +41,21 @@ When creating a new release, you can attach both newly uploaded files and files 
   <Image alt='new release form with file attached' src={bailoUploadFileRelease} />
 </Box>
 
+The screenshot above shows the new release form with a file already attached.
+
 ## Adding Files to an Existing Release
 
-Existing releases can be edited to add or remove files.
+You can edit existing releases to add or remove file attachments.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view of existing release with edit release button' src={bailoUploadedFileRelease} />
 </Box>
 
+The screenshot above shows an existing release with an Edit release button for adding or removing files.
+
 ## Uploading Files Programmatically
 
-To upload or download files programmatically, use the Bailo Python Client. Examples are available
+Use the Bailo Python Client to upload or download files via code. Examples are available
 [here](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html).
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

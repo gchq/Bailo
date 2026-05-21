@@ -7,13 +7,19 @@ import bailoDeleteConfirm from 'public/docs/bailo_delete_model_confirm.png'
 
 # Soft deletion
 
+> **Common questions this page answers:**
+>
+> - What is soft deletion in Bailo?
+> - Can I recover a deleted model or file?
+> - Is deletion permanent?
+
 Soft deletion is how Bailo safely removes models and files without immediately destroying them behind the scenes.
 
-From a user point of view, a soft‑deleted item should be considered **deleted**.
+From a user point of view, a soft-deleted item should be considered **deleted**.
 
 ## What you will see
 
-When something is soft deleted:
+From a user's perspective, soft-deleted items are completely removed from the interface:
 
 - It disappears from the Marketplace and search
 - It can no longer be accessed, downloaded, or used
@@ -33,6 +39,8 @@ This approach protects the platform, not individual workflows.
 
 ## About recovery
 
+Recovery is not a standard feature and should not be relied upon.
+
 Soft deletion **does not mean undo**.
 
 While platform administrators may technically be able to restore a deleted item, this is:
@@ -45,7 +53,7 @@ Users should **not rely on recovery** and should avoid requesting restoration af
 
 ## What you should do before deleting
 
-Before deleting anything, check:
+Check that the item is no longer needed before proceeding with deletion:
 
 - Whether it is still used by any releases
 - Whether other users depend on it
@@ -55,6 +63,6 @@ If in doubt, consider keeping the item or creating a new version instead.
 
 ## Key takeaway
 
-If you delete something in Bailo, assume it is **gone for good**.
+Treat deleted items as **permanently gone**.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

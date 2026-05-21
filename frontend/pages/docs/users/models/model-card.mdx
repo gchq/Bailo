@@ -9,6 +9,13 @@ The model card is the structured documentation that describes your model. It cap
 training methodology, performance metrics, and known limitations. The questions you see come from the schema you
 selected when creating the model.
 
+> **Common questions this page answers:**
+>
+> - How do I fill in a model card?
+> - How do I add collaborators to a model?
+> - How do I assign review roles?
+> - What is the model card version history?
+
 ## What is a Model Card?
 
 A model card serves as the authoritative documentation for a machine learning model. It helps:
@@ -19,8 +26,8 @@ A model card serves as the authoritative documentation for a machine learning mo
 
 ## Filling In the Form
 
-The model card form is divided into sections (displayed as tabs). Work through each section, providing as much detail as
-you can.
+The model card form is divided into sections displayed as tabs, where you answer questions defined by the selected
+schema.
 
 - **Required fields** are marked and must be completed
 - Your progress is saved only when you click **Save**
@@ -30,7 +37,7 @@ Each edit creates a **new version** of the model card. You can view previous ver
 
 ## Configuring Model Access
 
-Once your model card is filled in, configure who can access the model and who will review it.
+After documenting your model, configure who can access the model and who will review releases and access requests.
 
 1. Open the model and navigate to the **Settings** tab
 2. Select **Access** from the side menu
@@ -42,17 +49,18 @@ Once your model card is filled in, configure who can access the model and who wi
   <Image alt='selecting user model roles' src={bailoModelAccess} />
 </Box>
 
+The screenshot above shows the model Settings tab with the Access section, where users and groups can be added as
+collaborators and assigned entry roles and review roles.
+
 The selected roles will be notified when the model or its releases require review.
 
 ### Entry Roles
 
 When adding collaborators, assign one of:
 
-| Role            | Allows                                                        |
-| --------------- | ------------------------------------------------------------- |
-| **Owner**       | Full control over the model                                   |
-| **Contributor** | Edit model card, upload files, create releases                |
-| **Consumer**    | Download files and pull images (with approved access request) |
+- **Owner** - Full control over the model
+- **Contributor** - Edit model card, upload files, create releases
+- **Consumer** - Download files and pull images (with approved access request)
 
 ### Review Roles
 
@@ -61,7 +69,7 @@ Responsible Officer). These people will review releases and access requests.
 
 ## Version History
 
-Every edit to the model card creates a new version. To view the history:
+Every edit to the model card creates a new version that is preserved in the model's history:
 
 1. Open the model page
 2. Navigate to the version history

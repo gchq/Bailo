@@ -11,24 +11,36 @@ Bailo uses a container (Docker) registry to store container images associated wi
 images are **model-specific**: you push an image to a model first, and then explicitly attach it to one or more
 releases.
 
+> **Common questions this page answers:**
+>
+> - How do I push a container (Docker) image to Bailo?
+> - How do I add a container image to a release?
+> - What is a container image?
+
 ## Pushing an Image to a Model
 
-To push a container image to Bailo, navigate to your model and open the **Registry** tab. This tab provides step-by-step
-instructions tailored to your model and registry.
+Push container images to the Bailo registry from the **Registry** tab on your model page.
+
+This tab provides step-by-step instructions tailored to your model and registry.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='instructions on how to push image to model' src={bailoPushImage} />
 </Box>
 
+The screenshot above shows the Registry tab with step-by-step instructions for logging in, tagging, and pushing a
+container image.
+
 ## Adding an Image to a Release
 
-Once the image has been successfully pushed to Bailo's registry, it becomes available to attach to a release.
+Once pushed, container images can be attached to new or existing releases.
 
 Edit an existing release or create a new one, then select the image from the available list.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='release being edited with new image attached' src={bailoImageRelease} />
 </Box>
+
+The screenshot above shows a release being edited with a container image attached from the available list.
 
 ## What is a Container?
 

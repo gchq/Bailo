@@ -6,9 +6,15 @@ Model templating allows you to create a new model based on an existing model's s
 when you want to create models that share a similar model card layout or when your organisation has a standard model
 card format.
 
+> **Common questions this page answers:**
+>
+> - How do I create a model from a template?
+> - How do I enable templating on my model?
+> - Can I copy a model card from an existing model?
+
 ## How Templating Works
 
-When you create a model from a template:
+Templating copies the model card structure and content from an existing model to a new model:
 
 1. A new model is created with your specified name and description
 2. The template model's model card structure and content are copied to the new model
@@ -18,10 +24,14 @@ The template model is not affected - it remains unchanged.
 
 ## Prerequisites
 
+Both the template model and the destination model must meet certain requirements:
+
 - The template model must have **Allow templating** enabled in its settings
 - You must have already created the new model (templating is applied to an existing model)
 
 ## Using a Template
+
+Apply a template when setting up the model card for a newly created model:
 
 1. Create a new model (see [Creating a Model](/docs/users/models/creating-a-model))
 2. When prompted to set up the model card, choose **Create from template**
@@ -32,7 +42,7 @@ The template model is not affected - it remains unchanged.
 
 ## Enabling Templating on a Model
 
-If you want other users to be able to use your model as a template:
+Model owners can allow their model to be used as a template by other users:
 
 1. Open your model page
 2. Navigate to the **Settings** tab
@@ -43,7 +53,7 @@ Once enabled, your model will appear in the template selection dropdown for othe
 
 ## Programmatic Access
 
-You can also create a model from a template using the API or Python client:
+You can also create a model from a template using the API or the Python client:
 
 **API:**
 

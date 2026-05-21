@@ -6,6 +6,12 @@ A **Data Card** documents a dataset used in machine learning - its provenance, s
 relationship to models. Data cards help your organisation track what data is being used, where it comes from, and how it
 should be handled.
 
+> **Common questions this page answers:**
+>
+> - How do I create a data card in Bailo?
+> - When should I use a data card instead of a model?
+> - How do I document a dataset?
+
 ## When to Use a Data Card
 
 Create a data card when you want to:
@@ -18,13 +24,15 @@ Create a data card when you want to:
 
 ## Creating a Data Card
 
+Create a data card from the navigation bar by selecting the Data Card entry type:
+
 1. Click the **+ Create** button in the navigation bar
 2. Select **Data Card** as the entry type
-3. Fill in the required fields:
+3. Provide the basic information about your dataset through the required fields:
    - **Data Card Name**: A clear, descriptive name for the dataset
    - **Description**: What the dataset contains and its intended use
    - **Access control**: Choose **Public** (visible to all users) or **Private** (visible only to collaborators)
-4. Click **Create data card**
+4. Once you have filled in these details, click **Create data card**
 
 ## Selecting a Schema
 
@@ -42,6 +50,8 @@ Common fields in a data card schema might include:
 
 ## Filling In the Data Card
 
+Work through the form sections to document your dataset, then save to create a versioned record.
+
 Once you've selected a schema, the data card form appears. Click **Edit data card** then work through each section,
 providing as much detail as you can. The form is divided into tabs based on the schema structure.
 
@@ -50,7 +60,7 @@ anyone viewing the data card.
 
 ## Using the Python Client
 
-You can also create and manage data cards programmatically using the Python client:
+You can also create and manage data cards programmatically using the Bailo Python client:
 
 ```python
 from bailo import Client, Datacard
