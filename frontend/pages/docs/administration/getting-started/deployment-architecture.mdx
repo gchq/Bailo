@@ -1,0 +1,78 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Deployment Architecture
+
+Bailo is composed of several services that work together. Understanding this architecture helps when configuring,
+deploying, and troubleshooting a Bailo instance.
+
+## Core Services
+
+| Service                | Technology            | Purpose                                                                |
+| ---------------------- | --------------------- | ---------------------------------------------------------------------- |
+| **Frontend**           | Next.js (Node.js)     | Serves the web application UI                                          |
+| **Backend**            | Node.js               | API server handling all business logic and data access                 |
+| **NGINX**              | NGINX                 | Reverse proxy routing requests to frontend, backend, and registry      |
+| **MongoDB**            | MongoDB               | Stores all metadata: models, releases, schemas, reviews, users, tokens |
+| **Object Storage**     | MinIO (S3-compatible) | Stores model files and registry blobs                                  |
+| **Container Registry** | Docker Registry       | Hosts container (Docker) images pushed to models                       |
+
+## Optional Services
+
+| Service          | Technology       | Purpose                                                        |
+| ---------------- | ---------------- | -------------------------------------------------------------- |
+| **ArtefactScan** | FastAPI (Python) | Security scanning microservice wrapping ModelScan and Trivy    |
+| **ClamD**        | ClamAV           | Antivirus daemon used to scan uploaded files for malware       |
+| **Mail Service** | SMTP-compatible  | Sends email notifications for reviews and access requests      |
+| **Webhook**      | Webhook Tester   | Development tool for receiving and inspecting webhook requests |
+
+## How Requests Flow
+
+1. Users access Bailo through the **NGINX** reverse proxy (default port 8080)
+2. NGINX routes requests:
+   - UI page requests go to the **Frontend**
+   - API requests (`/api/...`) go to the **Backend**
+   - Container registry requests (`/v2/...`) go to the **Container Registry**
+3. The **Backend** reads and writes metadata to **MongoDB**
+4. File uploads and downloads go through the **Backend** to **Object Storage** (MinIO)
+5. Container image push/pull operations go through the **Container Registry**, which also uses **Object Storage**
+6. When files or images are uploaded, the **Backend** triggers scans via the **ClamD** and **ArtefactScan** service (if
+   configured)
+
+## Deployment Options
+
+### Docker Compose (Development & Small Deployments)
+
+The repository includes a `compose.yaml` that runs the core services locally. This is the simplest way to get started.
+There is also ``compose.prod.yaml` to run all services locally. This is also used in the repository's GitHub workflows
+for testing.
+
+### Helm (Production & Kubernetes)
+
+For production deployments, Bailo provides Helm charts for deploying to Kubernetes. See:
+
+- [Helm Basic Usage](/docs/administration/helm/basic-usage)
+- [Helm Configuration](/docs/administration/helm/configuration)
+- [Isolated Environments](/docs/administration/helm/isolated-environments)
+
+## Data Storage
+
+Bailo stores data in two places:
+
+- **MongoDB** holds all structured metadata (models, schemas, reviews, tokens, etc.)
+- **Object Storage (MinIO/S3)** holds binary artefacts (model files, container image layers)
+
+Both need to be backed up to prevent data loss.
+
+## Configuration
+
+Bailo uses [node-config](https://github.com/node-config/node-config) for backend configuration. Configuration files can
+be overridden via environment variables or Helm values. See
+[App Configuration](/docs/administration/getting-started/app-configuration) for details.
+
+## Related Pages
+
+- [App Configuration](/docs/administration/getting-started/app-configuration) - Configuring the backend
+- [Helm Basic Usage](/docs/administration/helm/basic-usage) - Deploying with Helm
+- [Artefact Scanners](/docs/administration/microservices/artefact-scanners) - Configuring security scanning
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

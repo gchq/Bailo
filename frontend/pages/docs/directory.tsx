@@ -79,6 +79,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   /// Getting Started
   { title: 'Getting Started', slug: 'administration/getting-started', header: true },
+  { title: 'Deployment Architecture', slug: 'administration/getting-started/deployment-architecture' },
   { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
 
   /// Schema Management
@@ -91,6 +92,11 @@ export const flatDirectory: Array<DirectoryEntry> = [
   /// Review Roles
   { title: 'Review Roles', slug: 'administration/review-roles', header: true },
   { title: 'Managing Review Roles', slug: 'administration/review-roles/managing-review-roles' },
+  { title: 'Assigning Roles to Schemas', slug: 'administration/review-roles/assigning-roles-to-schemas' },
+
+  /// Federation
+  { title: 'Federation', slug: 'administration/federation', header: true },
+  { title: 'Peer Integration', slug: 'administration/federation/peer-integration' },
 
   /// Microservices
   { title: 'Microservices', slug: 'administration/microservices', header: true },
@@ -107,10 +113,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
   { title: 'DataBase Scripts', slug: 'administration/migrations/scripts' },
-
-  // API Reference
-  { title: 'API Reference', slug: 'api-reference', header: true },
-  { title: 'Overview', slug: 'api-reference/overview' },
 
   // Reference
   { title: 'Reference', slug: 'reference', header: true },
