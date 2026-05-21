@@ -5,22 +5,28 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 This page explains the key building blocks of Bailo and how they relate to each other. Understanding these concepts will
 help you navigate the platform and make the most of its features.
 
+> **Common questions this page answers:**
+>
+> - What is a model card?
+> - What is the difference between a release and a model?
+> - What roles exist in Bailo?
+> - How does the review process work?
+
 ## Entry Types
 
-Everything in Bailo starts with an **Entry**. There are four types:
+Bailo organises content into four entry types, each serving a different purpose:
 
-| Entry Type          | Description                                                                                                 |
-| ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Model**           | A machine learning model with full lifecycle management - model card, releases, access control, and reviews |
-| **Data Card**       | Documentation for a dataset, tracking its provenance, storage, and relationship to models                   |
-| **Mirrored Model**  | A read-only copy of a model from another Bailo instance or external source                                  |
-| **Untrusted Model** | A model flagged for additional scrutiny, with restricted capabilities                                       |
+- **Model** - A machine learning model with full lifecycle management - model card, releases, access control, and
+  reviews
+- **Data Card** - Documentation for a dataset, tracking its provenance, storage, and relationship to models
+- **Mirrored Model** - A read-only copy of a model from another Bailo instance or external source
+- **Untrusted Model** - A model flagged for additional scrutiny, with restricted capabilities
 
 Some Entry types must be enabled by your Bailo administrator before they can be used.
 
 ## The Lifecycle of a Model
 
-A model in Bailo follows a structured lifecycle:
+A model follows a structured lifecycle from creation through review to consumer access:
 
 ```
 Create Model → Select Schema → Fill In Model Card → Add Collaborators
@@ -79,17 +85,15 @@ access request process.
 
 ## Roles and Permissions
 
-Bailo uses two systems of roles:
+Bailo uses two complementary role systems to control access and governance.
 
 ### Entry Roles
 
 These are assigned per-model and control what actions a user can take:
 
-| Role            | What It Allows                                                                                       |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| **Owner**       | Full control: edit model, manage collaborators, create releases, delete the model                    |
-| **Contributor** | Edit the model card, upload files and images, create releases                                        |
-| **Consumer**    | Download files and pull images (requires an approved access request, unless ungoverned access is on) |
+- **Owner** - Full control: edit model, manage collaborators, create releases, delete the model
+- **Contributor** - Edit the model card, upload files and images, create releases
+- **Consumer** - Download files and pull images (requires an approved access request, unless ungoverned access is on)
 
 ### Review Roles
 
@@ -103,7 +107,7 @@ For a full reference, see [Roles & Permissions](/docs/reference/roles-and-permis
 
 ## Visibility
 
-Models can be **Public** or **Private**:
+Model visibility controls who can discover and browse a model:
 
 - **Public** models appear in the Marketplace and can be found by any user
 - **Private** models are only visible to users who have been explicitly added as collaborators
@@ -112,7 +116,7 @@ Even for public models, downloading artefacts typically requires an approved acc
 
 ## Security Scanning
 
-Files and container images uploaded to Bailo are automatically scanned for security issues:
+Bailo automatically scans uploaded files and container images for security issues:
 
 - **Files** are scanned by ClamAV (malware detection) and ModelScan (serialisation attack detection)
 - **Container images** are scanned by Trivy (vulnerability detection with CVE reporting)
@@ -120,6 +124,8 @@ Files and container images uploaded to Bailo are automatically scanned for secur
 Scan results are displayed alongside each file and image, with severity ratings.
 
 ## Federation
+
+Federation allows multiple Bailo instances to share models across organisational boundaries.
 
 Bailo instances can be connected through **Federation**, allowing models from one instance to appear in another. This is
 useful for organisations with multiple deployments or for integrating with external model repositories like HuggingFace

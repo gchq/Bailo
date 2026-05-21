@@ -2,6 +2,13 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Understanding Schemas
 
+> **Common questions this page answers:**
+>
+> - What is a schema in Bailo?
+> - What types of schemas exist?
+> - Why do schemas matter?
+> - What is RJSF?
+
 Schemas are the foundation of Bailo's governance model. They define the questions and structure of model cards and
 access request forms, ensuring that every model in your organisation is documented consistently.
 
@@ -10,7 +17,8 @@ This page explains what schemas are and how they work. For step-by-step instruct
 
 ## What is a Schema?
 
-A schema is a template that defines:
+A schema is a template that defines the questions, structure, and validation rules for model card and access request
+forms:
 
 - What **questions** appear when someone fills in a model card or access request form
 - How those questions are **organised** into sections and tabs
@@ -22,15 +30,18 @@ fill in.
 
 ## Schema Types
 
-There are three types of schema:
+Bailo supports three types of schema, each serving a different purpose:
 
-| Type               | Purpose                                                                                                                     |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **Model Card**     | Defines the structure of model documentation - intended use, training details, performance metrics, limitations, etc.       |
-| **Data Card**      | Defines the fields for the information about the dataset - size, format, data source, known limitations or biases etc.      |
-| **Access Request** | Defines the form users fill in when requesting access to a model - who is requesting, why, what permissions they need, etc. |
+- **Model Card** - Defines the structure of model documentation: intended use, training details, performance metrics,
+  limitations, etc.
+- **Data Card** - Defines the fields for dataset information: size, format, data source, known limitations or biases,
+  etc.
+- **Access Request** - Defines the form users fill in when requesting access to a model: who is requesting, why, what
+  permissions they need, etc.
 
 ## How Schemas Relate to Other Concepts
+
+Schemas connect to models, review roles, and forms in a structured relationship.
 
 ```
 Schema ──defines──> Model Card Form
@@ -46,7 +57,7 @@ be assigned and to approve releases and access requests.
 
 ## Active vs Inactive Schemas
 
-Schemas can be **active** or **inactive**:
+Schemas can be toggled between active and inactive states without breaking existing models:
 
 - **Active** schemas appear in the selection list when users create new models or access requests
 - **Inactive** schemas are hidden from the selection list but continue to work for models that already use them
@@ -67,6 +78,8 @@ form to fill in.
 
 ## Schema Versioning and Migrations
 
+Schema migrations allow model card data to be transformed when schemas are updated.
+
 As your organisation's requirements evolve, you may need to update schemas. Rather than forcing model owners to re-enter
 all their information, Bailo supports **Schema Migrations** - plans that transform model card data from one schema
 version to another.
@@ -75,8 +88,7 @@ See [Schema Migrations](/docs/administration/schemas/schema-migrations) for deta
 
 ## Technical Details
 
-Schemas are built using [JSON Schema](https://json-schema.org/) and rendered using
-[React JSON Schema Form (RJSF)](https://rjsf-team.github.io/react-jsonschema-form/). This means schemas support:
+Schemas are built using JSON Schema and rendered using RJSF (React JSON Schema Form). This means schemas support:
 
 - Simple text fields, numbers, and dates
 - Dropdown selections and radio buttons

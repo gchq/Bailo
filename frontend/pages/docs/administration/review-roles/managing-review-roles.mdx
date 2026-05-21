@@ -2,12 +2,20 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Managing Review Roles
 
+> **Common questions this page answers:**
+>
+> - How do I create a review role in Bailo?
+> - What is a system role on a review role?
+> - How do I set up Model Technical Reviewer (MTR) and Model Senior Responsible Officer (MSRO)?
+
 Review roles define who must approve releases and access requests for models in your organisation. As an administrator,
 you can create, edit, and delete review roles to match your governance requirements.
 
 Only administrators will have the following options available to them.
 
 ## Viewing Existing Roles
+
+View all configured review roles from the Review Roles navigation item.
 
 To see all review roles configured in your Bailo instance, select **Review Roles** from the navigation sidebar.
 
@@ -19,16 +27,15 @@ To create a new review role:
 
 1. Navigate to **Review Roles** from the navigation sidebar
 2. Click **Create new review role**
-3. Fill in the following fields:
-
-| Field                     | Description                                                                                                             | Example                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| **Name**                  | The display name for the role                                                                                           | Model Technical Reviewer                                        |
-| **Short Name**            | A brief identifier used internally                                                                                      | `mtr`                                                           |
-| **Description**           | What this role is responsible for reviewing                                                                             | Reviews the technical quality and fitness for purpose of models |
-| **System Role**           | The minimum entry role a user must have to be assigned this review role. Options: Owner, Contributor, Consumer, or none | `Contributor`                                                   |
-| **Default collaborators** | Users or groups automatically assigned to this role when new models are created                                         | `team-leads`                                                    |
-
+3. Populate the following fields:
+   - **Name** - The display name for the role. Example: "Model Technical Reviewer".
+   - **Short Name** - A brief identifier used internally. Example: "mtr".
+   - **Description** - What this role is responsible for reviewing. Example: "Reviews the technical quality and fitness
+     for purpose of models".
+   - **System Role** - The minimum entry role a user must have to be assigned this review role. Options: Owner,
+     Contributor, Consumer, or none. Example: "Contributor".
+   - **Default collaborators** - Users or groups automatically assigned to this role when new models are created.
+     Example: "team-leads".
 4. Click **Submit**
 
 ### Choosing a System Role
@@ -58,7 +65,7 @@ Changes to review roles apply to all schemas that use the role and all models th
 
 ## Deleting a Review Role
 
-To delete a review role:
+Deleting a review role removes it from all schemas that reference it:
 
 1. Navigate to **Review Roles**
 2. Click on the role you want to delete
@@ -70,7 +77,7 @@ To delete a review role:
 
 ## Connecting Roles to Schemas
 
-After creating review roles, you need to attach them to schemas. This is done when creating or editing a schema:
+After creating review roles, attach them to schemas so that models using those schemas require the roles:
 
 1. Navigate to **Schemas** from the navigation sidebar
 2. Create or edit a schema
@@ -81,6 +88,8 @@ Every model that uses this schema will then require all attached review roles to
 finalised.
 
 ## Common Configurations
+
+These examples show typical governance setups using review roles.
 
 ### Two-role governance (MTR + MSRO)
 

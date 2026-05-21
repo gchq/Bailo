@@ -5,9 +5,17 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 This guide walks you through the essential steps of using Bailo, from browsing models to creating your own. It should
 take around 15 minutes to complete.
 
+> **Common questions this page answers:**
+>
+> - How do I create my first model in Bailo?
+> - How do I get started with Bailo?
+> - What is the basic workflow for publishing a model?
+
 Before you begin, make sure you have access to your organisation's Bailo instance and can log in.
 
 ## Step 1: Browse the Marketplace
+
+The Marketplace is Bailo's home page where you can search and filter all public models and data cards.
 
 When you first log in, you'll see the **Marketplace**. This is where all public models and data cards are listed. You
 can:
@@ -21,15 +29,15 @@ or scroll through the list.
 
 ## Step 2: Create a Model
 
-To add a new model to Bailo:
+Register a new model entry in Bailo by providing its name, description, and visibility settings:
 
 1. Click the **+ Create** button in the top navigation bar or in the Marketplace
 2. Select **Model** as the entry type
-3. Fill in the required fields:
+3. Next, provide the basic information about your model by filling in the required fields:
    - **Model Name**: A clear, descriptive name for your model
    - **Description**: What the model does and its intended use
    - **Access control**: Choose **Public** (visible to all users) or **Private** (visible only to collaborators)
-4. Click **Create Model**
+4. Once you have filled in these details:, click **Create Model**
 
 Your model is now created and visible in the Marketplace (if public).
 
@@ -48,11 +56,11 @@ and how it should be used.
 
 ## Step 4: Add Collaborators and Reviewers
 
-Before creating a release, set up who can work with your model and who will review it:
+Control who can contribute to your model and who is responsible for reviewing releases:
 
 1. Navigate to the **Settings** tab on your model page
 2. Under **Access**, add users or groups as collaborators
-3. Assign roles:
+3. Assign the appropriate level of access to each collaborator via roles:
    - **Owner**: Full control over the model
    - **Contributor**: Can edit the model card and upload files
    - **Consumer**: Can download files and images (after access approval)
@@ -61,7 +69,10 @@ Before creating a release, set up who can work with your model and who will revi
 
 ## Step 5: Upload Model Files
 
-You can upload model artefacts (weights, configurations, data files) at any time:
+Upload the actual model artefacts such as weights, configuration files, and training data so they can be attached to a
+release.
+
+You can upload model artefacts at any time:
 
 1. Go to the **File management** tab
 2. Click **Add new files** and select a file from your computer
@@ -72,12 +83,13 @@ If enabled, files are automatically scanned for security issues after upload.
 
 ## Step 6: Upload Container Images
 
-You can upload container images (e.g. Docker images) to the Bailo registry at any time:
+If your model includes a containerised application (e.g. a Docker image for inference), you can push it to the Bailo
+registry so it can be included in releases::
 
 1. Go to the **Registry** tab on your model page
 2. Click **Push image**
 3. If you do not already have a user authentication token, click **Manage user tokens** and create one
-4. Log in to the registry using Docker:
+4. Authenticate your local Docker client using:
    - Use your access key as the username
    - Use your user token as the password
 5. Tag your local image using the command shown in the dialog:
@@ -91,14 +103,15 @@ If enabled, images are automatically scanned for vulnerabilities after upload.
 
 ## Step 7: Create a Release
 
-A release is a versioned snapshot of your model, including its files and documentation.
+A release bundles a specific version of your model card together with its uploaded files and images, and triggers the
+review workflow:
 
 1. Go to the **Releases** tab on your model page
 2. Click **Draft new release**
-3. Fill in:
+3. Describe this version of the model:
    - **Version**: Use semantic versioning (e.g. `1.0.0`)
    - **Release notes**: Describe what's included in this release
-4. Attach any files and/or container images you've uploaded
+4. Include the artefacts you uploaded earlier e.g. any files and/or container images you've uploaded
 5. Click **Create Release**
 
 Creating a release triggers the review process. Your assigned reviewers will be notified.

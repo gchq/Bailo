@@ -4,10 +4,17 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 Schemas define the structure of model card and access request forms in Bailo. They are built using
 [JSON Schema](https://json-schema.org/) and rendered using
-[RJSF](https://react-jsonschema-form.readthedocs.io/en/latest/) (React JSON Schema Form).
+[RJSF (React JSON Schema Form)](https://react-jsonschema-form.readthedocs.io/en/latest/).
 
 If you're new to schemas, read [Understanding Schemas](/docs/administration/schemas/understanding-schemas) first for a
 non-technical overview.
+
+> **Common questions this page answers:**
+>
+> - How do I create a schema in Bailo?
+> - What question types are available in schemas?
+> - How do I add conditional fields to a schema?
+> - How do I test a schema?
 
 ## Before You Start
 
@@ -84,6 +91,8 @@ Within each page, you can create sub-sections using nested objects:
 ```
 
 ## Question Types
+
+Schemas support several question types including text, dates, booleans, and dropdowns.
 
 ### Simple Text Questions
 
@@ -223,6 +232,8 @@ but it can be cleared by the user if needed.
 
 ## Testing Your Schema
 
+Always test a schema by uploading it, creating a test model, and working through every form page.
+
 Before deploying a schema to production:
 
 1. Create the schema as a JSON file following the structure above
@@ -237,7 +248,7 @@ Before deploying a schema to production:
 
 ## Complete Example
 
-Here is a minimal but complete schema with two pages, a required field, and a dependency:
+A minimal but complete schema with two pages, required fields, and basic structure:
 
 ```json
 {

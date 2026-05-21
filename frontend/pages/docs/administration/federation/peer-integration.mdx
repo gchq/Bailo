@@ -2,29 +2,31 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Federation and Peer Integration
 
+> **Common questions this page answers:**
+>
+> - How do I connect Bailo to other instances?
+> - What is federation in Bailo?
+> - What federation states are available?
+
 Federation connects your Bailo instance to other Bailo instances or external model repositories, allowing users to
 discover and mirror models from external sources.
 
 ## Federation States
 
-Your Bailo instance can be in one of three federation states:
+Your Bailo instance can operate in one of three federation states, controlled by the administrator:
 
-| State         | Description                                                                                         |
-| ------------- | --------------------------------------------------------------------------------------------------- |
-| **Disabled**  | Federation is turned off. No external sources are visible.                                          |
-| **Read Only** | Your instance can browse and mirror models from connected peers, but does not share its own models. |
-| **Enabled**   | Full federation: your instance both reads from and shares models with connected peers.              |
+- **Disabled** - Federation is turned off. No external sources are visible.
+- **Read Only** - Your instance can browse and mirror models from connected peers, but does not share its own models.
+- **Enabled** - Full federation: your instance both reads from and shares models with connected peers.
 
 The federation state is configured by your administrator in the application configuration.
 
 ## Peer Types
 
-Bailo supports connecting to different types of external sources:
+Bailo supports connecting to different types of external model sources.
 
-| Peer Kind           | Description                      |
-| ------------------- | -------------------------------- |
-| **Bailo**           | Another Bailo instance           |
-| **HuggingFace Hub** | The HuggingFace model repository |
+- **Bailo** - Another Bailo instance
+- **HuggingFace Hub** - The HuggingFace model repository
 
 Additional sources can be set up by your Bailo administrator.
 
@@ -42,6 +44,8 @@ Peer configuration is done through the app configuration file - see
 
 ## How Federation Appears to Users
 
+Users see external models alongside local models in the Marketplace, with filtering by external source.
+
 When federation is enabled and peers are configured:
 
 - Users see a **filter by external sources** option in the Marketplace
@@ -51,11 +55,15 @@ When federation is enabled and peers are configured:
 
 ## Checking Peer Status
 
+Check the reachability of connected peers through the API.
+
 You can check the status of connected peers [via the API](/api/v2/docs/#/system).
 
 Each peer has a reachability status indicating whether Bailo can communicate with it.
 
 ## Model Mirroring via Federation
+
+Users can create read-only mirrored models from federated external sources.
 
 When federation is enabled, users can create **Mirrored Models** from external sources. These are read-only copies that
 require periodic updates to stay in sync with the source. See
