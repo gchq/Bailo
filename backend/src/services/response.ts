@@ -182,6 +182,7 @@ export async function sendReviewResponseNotification(
       break
     }
     case ReviewKind.Lifecycle: {
+      // We don't need to notify anyone as this action is done by the person who would receive the notification.
       return
     }
     default:
