@@ -6,7 +6,7 @@ import Loading from 'src/common/Loading'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MessageAlert from 'src/MessageAlert'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
-import { ReviewRequestInterface } from 'types/types'
+import { ReviewKind, ReviewRequestInterface } from 'types/types'
 import { timeDifference } from 'utils/dateUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -20,12 +20,19 @@ export default function ReviewItem({ review }: ReviewItemProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
+  const determineReviewPath = () => {
+    switch (review.kind) {
+      case ReviewKind.RELEASE:
+        return `release/${review.semver}`
+      case ReviewKind.ACCESS:
+        return `access-request/${review.accessRequestId}`
+      case ReviewKind.LIFECYCLE:
+        return `lifecycle/${review._id}`
+    }
+  }
+
   function handleListItemClick() {
-    router.push(
-      `/model/${review.model.id}/${
-        review.kind === 'release' ? `release/${review.semver}` : `access-request/${review.accessRequestId}`
-      }/review?role=${review.role}`,
-    )
+    router.push(`/model/${review.model.id}/${determineReviewPath()}/review?role=${review.role}`)
   }
 
   function editedAdornment() {

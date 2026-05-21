@@ -1,4 +1,4 @@
-import { ClientSession, PipelineStage } from 'mongoose'
+import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -33,6 +33,7 @@ export async function findReviews(
   open?: boolean,
   modelId?: string,
   semver?: string,
+  reviewId?: string,
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
@@ -42,6 +43,7 @@ export async function findReviews(
         ...(modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
+        ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
         ...(kind && { kind }),
       },
     },

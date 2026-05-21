@@ -1,0 +1,113 @@
+import { ArrowBack } from '@mui/icons-material'
+import { Button, Container, Dialog, DialogContent, Divider, Paper, Stack, Typography } from '@mui/material'
+import { useGetEntry } from 'actions/entry'
+import { postGenericReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
+import { useGetUiConfig } from 'actions/uiConfig'
+import { Dayjs } from 'dayjs'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import Loading from 'src/common/Loading'
+import ReviewWithComment from 'src/common/ReviewWithComment'
+import Title from 'src/common/Title'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
+import { DecisionKeys } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
+
+export default function LifecycleReview() {
+  const router = useRouter()
+  const { modelId, reviewId }: { modelId?: string; reviewId?: string } = router.query
+
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
+  const [isModelCardDialogOpen, setIsModelCardDialogOpen] = useState(false)
+
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
+    modelId,
+    reviewId: `${reviewId}`,
+  })
+
+  async function handleSubmit(decision: DecisionKeys, comment: string, _role: string, dueDate: Dayjs | null) {
+    setErrorMessage('')
+    if (!modelId) {
+      return setErrorMessage('Could not find model ID')
+    }
+    if (!reviewId) {
+      return setErrorMessage('Could not find review ID')
+    }
+
+    setIsReviewButtonLoading(true)
+    const res = await postGenericReviewResponse({
+      kind: 'lifecycle',
+      comment,
+      decision,
+      reviewId,
+      dueDate,
+    })
+
+    if (!res.ok) {
+      setIsReviewButtonLoading(false)
+      setErrorMessage(await getErrorMessage(res))
+    } else {
+      mutateReviews()
+      router.push(`/model/${modelId}`)
+    }
+  }
+
+  const error = MultipleErrorWrapper('Unable to load release review page', {
+    isModelError,
+    isUiConfigError,
+    isReviewsError,
+  })
+  if (error) {
+    return error
+  }
+
+  if (!reviews || !model || !uiConfig || isReviewsLoading || isModelLoading || isUiConfigLoading) {
+    return <Loading />
+  }
+
+  return (
+    <>
+      <Title text={reviewId ? `Lifecycle review for ${model.name}` : 'Loading...'} />
+      <Container maxWidth='md' sx={{ my: 4 }}>
+        <Paper sx={{ p: 2 }}>
+          <Stack spacing={2}>
+            <Stack
+              direction={{ sm: 'row', xs: 'column' }}
+              spacing={2}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              <Link href={`/model/${modelId}?tab=releases`}>
+                <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                  Back to model
+                </Button>
+              </Link>
+              <Typography variant='h6' component='h1' color='primary'>
+                {model ? `Reviewing ${model.name}` : 'Loading...'}
+              </Typography>
+              <Button onClick={() => setIsModelCardDialogOpen(true)}>View full model card</Button>
+            </Stack>
+            <ReviewWithComment
+              onSubmit={handleSubmit}
+              reviews={reviews}
+              loading={isReviewButtonLoading}
+              modelId={modelId as string}
+              includeDueDate
+            />
+            <MessageAlert message={errorMessage} severity='error' />
+            <Divider />
+          </Stack>
+          <Dialog open={isModelCardDialogOpen} onClose={() => setIsModelCardDialogOpen(false)} maxWidth='md' fullWidth>
+            <DialogContent sx={{ p: 4 }}>
+              <></>
+            </DialogContent>
+          </Dialog>
+        </Paper>
+      </Container>
+    </>
+  )
+}

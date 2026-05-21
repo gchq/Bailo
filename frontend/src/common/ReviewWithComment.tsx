@@ -1,63 +1,40 @@
 import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
+import { Dayjs } from 'dayjs'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useEffectEvent, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
-import { useGetReviewRequestsForModel } from '../../actions/review'
-import {
-  AccessRequestInterface,
-  Decision,
-  DecisionKeys,
-  ReleaseInterface,
-  ReviewRequestInterface,
-} from '../../types/types'
+import { Decision, DecisionKeys, ReviewRequestInterface } from '../../types/types'
 import { getRoleDisplayName } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
 
-type PartialReviewWithCommentProps =
-  | {
-      release: ReleaseInterface
-      accessRequest?: never
-    }
-  | {
-      release?: never
-      accessRequest: AccessRequestInterface
-    }
-
 type ReviewWithCommentProps = {
-  onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string) => void
+  onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate: Dayjs | null) => void
   loading?: boolean
-} & PartialReviewWithCommentProps
+  reviews: ReviewRequestInterface[]
+  modelId: string
+  includeDueDate?: boolean
+}
 
 export default function ReviewWithComment({
   onSubmit,
   loading = false,
-  release,
-  accessRequest,
+  reviews,
+  modelId,
+  includeDueDate = false,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
   const [reviewComment, setReviewComment] = useState('')
+  const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
   const [showUndoButton, setShowUndoButton] = useState(false)
-
-  const [modelId, semverOrAccessRequestIdObject] = useMemo(
-    () =>
-      release
-        ? [release.modelId, { semver: release.semver }]
-        : [accessRequest.modelId, { accessRequestId: accessRequest.id }],
-    [release, accessRequest],
-  )
-
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId,
-    ...semverOrAccessRequestIdObject,
-  })
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
@@ -104,7 +81,7 @@ export default function ReviewWithComment({
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
-      onSubmit(decision, reviewComment, reviewRequest.role)
+      onSubmit(decision, reviewComment, reviewRequest.role, dueDate)
     }
   }
 
@@ -112,10 +89,6 @@ export default function ReviewWithComment({
     if (newValue) {
       setReviewRequest(newValue)
     }
-  }
-
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
   if (isEntryRolesError) {
@@ -128,7 +101,7 @@ export default function ReviewWithComment({
 
   return (
     <>
-      {(isReviewsLoading || isEntryRolesLoading || isResponsesLoading) && <Loading />}
+      {(isEntryRolesLoading || isResponsesLoading) && <Loading />}
       <div data-test='reviewWithCommentContent'>
         {entryRoles.length === 0 && (
           <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
@@ -165,6 +138,17 @@ export default function ReviewWithComment({
               error={errorText.length > 0}
               helperText={errorText}
             />
+            {includeDueDate && (
+              <Stack spacing={0.5}>
+                <Typography fontWeight='bold'>Next review date</Typography>
+                <DatePicker
+                  value={dueDate}
+                  onChange={(newValue) => {
+                    setDueDate(newValue)
+                  }}
+                />
+              </Stack>
+            )}
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
