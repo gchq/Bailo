@@ -15,9 +15,7 @@ function validateLifecycleReview(review: ReviewDoc, dueDate?: Date) {
     if (!dueDate) {
       throw BadReq('Lifecycle review responses should have a due date')
     }
-
-    const currentDate = new Date()
-    if (currentDate > dueDate) {
+    if (dueDate.getTime() <= Date.now()) {
       throw BadReq('Due date of next review cannot be in the past.')
     }
   }

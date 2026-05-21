@@ -46,7 +46,7 @@ registerPath({
   schema: postReviewResponseSchema,
   responses: {
     200: {
-      description: 'The created review instance.',
+      description: 'The create review response.',
       content: {
         'application/json': {
           schema: z.object({

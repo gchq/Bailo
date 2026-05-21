@@ -45,6 +45,7 @@ export async function findReviewById(user: UserInterface, reviewId: string): Pro
  * and the role in the review is in the list of roles in that collaborator entry.
  */
 export async function findUserInCollaborators(user: UserInterface) {
+  const entities = await authentication.getEntities(user)
   return {
     $expr: {
       $gt: [
@@ -56,7 +57,7 @@ export async function findUserInCollaborators(user: UserInterface) {
               cond: {
                 $and: [
                   {
-                    $in: ['$$item.entity', await authentication.getEntities(user)],
+                    $in: ['$$item.entity', entities],
                   },
                   {
                     $in: ['$role', '$$item.roles'],
