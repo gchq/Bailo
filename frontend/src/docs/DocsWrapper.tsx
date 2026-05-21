@@ -69,6 +69,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       const path = `/docs/${doc.slug}`
       const isSelected = pathname === path
 
+      const headerFontSize =
+        {
+          1: theme.typography.h6.fontSize,
+          2: theme.typography.subtitle1.fontSize,
+        }[doc.level] ?? theme.typography.body2.fontSize
+
       return (
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
@@ -76,7 +82,10 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <ListItemText
                 primary={doc.title}
                 slotProps={{
-                  primary: { fontWeight: 'bold' },
+                  primary: {
+                    fontWeight: 'bold',
+                    fontSize: headerFontSize,
+                  },
                 }}
               />
             </ListItem>
@@ -87,7 +96,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
-                      primary: { fontWeight: doc.slug ? 'normal' : 'bold' },
+                      primary: { fontWeight: doc.slug ? 'normal' : 'bold', fontSize: doc.header ? headerFontSize : '' },
                     }}
                   />
                 </ListItemButton>
@@ -98,7 +107,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         </Fragment>
       )
     },
-    [pathname],
+    [pathname, theme.typography.body2.fontSize, theme.typography.h6.fontSize, theme.typography.subtitle1.fontSize],
   )
 
   const docList = () => {
