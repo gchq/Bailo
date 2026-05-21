@@ -308,7 +308,7 @@ data:
         xmlns: '{{ .Values.stroom.xmlns }}',
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
-      }
+      },
 
       untrustedModels: {
         defaultState: '{{ .Values.untrustedModels.defaultState }}'
