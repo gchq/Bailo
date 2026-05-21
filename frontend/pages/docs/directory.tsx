@@ -26,13 +26,13 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Users
   { title: 'Users', slug: 'users', header: true },
 
-  { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
-  { title: 'Uploading Artifacts', slug: 'users/managing-models-and-releases/upload-to-bailo', header: true },
-  { title: 'Creating a Model', slug: 'users/managing-models-and-releases/upload-to-bailo/creating-a-model' },
-  { title: 'Completing the Model', slug: 'users/managing-models-and-releases/upload-to-bailo/completing-the-model' },
-  { title: 'Creating a Release', slug: 'users/managing-models-and-releases/upload-to-bailo/create-a-release' },
-  { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
-  { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
+  { title: 'Models', slug: 'users/models', header: true },
+  { title: 'Creating a Model', slug: 'users/models/creating-a-model' },
+  { title: 'Model Card', slug: 'users/models/model-card' },
+  { title: 'Creating a Release', slug: 'users/models/creating-a-release' },
+  { title: 'Uploading Files', slug: 'users/models/uploading-files' },
+  { title: 'Uploading Images', slug: 'users/models/uploading-images' },
+  { title: 'Model Templating', slug: 'users/models/model-templating' },
 
   { title: 'Data Cards', slug: 'users/data-cards', header: true },
   { title: 'Creating a Data Card', slug: 'users/data-cards/creating-a-data-card' },

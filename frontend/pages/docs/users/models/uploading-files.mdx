@@ -6,16 +6,16 @@ import bailoUploadFileRelease from 'public/docs/bailo_release_file_upload.png'
 import bailoUploadedFileRelease from 'public/docs/bailo_created_release_upload_file.png'
 import bailoUploadFile from 'public/docs/bailo_file_upload.png'
 
-# Uploading files
+# Uploading Files
 
 Files represent any artefacts related to a model, such as binaries, configuration files, or supporting documentation.
 These files allow others to build, evaluate, and use your model.
 
-## Adding files to a model
+## Adding Files to a Model
 
 Files are uploaded from the **File Management** tab of a model.
 
-1. Click **Add New Files**
+1. Click **Add new files**
 2. Select files to upload
 3. Optionally assign tags to each file
 
@@ -23,17 +23,17 @@ Files are uploaded from the **File Management** tab of a model.
   <Image alt='view of files being uploaded' src={bailoUploadFile} />
 </Box>
 
-## Adding files to a new release
+4. Click **Upload files**
+
+## Adding Files to a New Release
 
 When creating a new release, you can attach both newly uploaded files and files that already exist on the model.
-
-<br />
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='new release form with file attached' src={bailoUploadFileRelease} />
 </Box>
 
-## Adding files to an existing release
+## Adding Files to an Existing Release
 
 Existing releases can be edited to add or remove files.
 
@@ -41,7 +41,7 @@ Existing releases can be edited to add or remove files.
   <Image alt='view of existing release with edit release button' src={bailoUploadedFileRelease} />
 </Box>
 
-## Uploading files programmatically
+## Uploading Files Programmatically
 
 To upload or download files programmatically, use the Bailo Python Client. Examples are available
 [here](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html).

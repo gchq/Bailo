@@ -5,23 +5,24 @@ import Image from 'next/legacy/image'
 import bailoPushImage from 'public/docs/bailo_push_image_to_docker_container.png'
 import bailoImageRelease from 'public/docs/bailo_add_image_to_release.png'
 
-# Uploading docker images
+# Uploading Container Images
 
-Bailo uses a Docker registry to store container images associated with models. Unlike files, Docker images are
-**model‑specific**: you push an image to a model first, and then explicitly attach it to one or more releases.
+Bailo uses a container (Docker) registry to store container images associated with models. Unlike files, container
+images are **model-specific**: you push an image to a model first, and then explicitly attach it to one or more
+releases.
 
-## Pushing an image to a model
+## Pushing an Image to a Model
 
-To push a Docker image to Bailo, navigate to your model and open the **Registry** tab. This tab provides step‑by‑step
+To push a container image to Bailo, navigate to your model and open the **Registry** tab. This tab provides step-by-step
 instructions tailored to your model and registry.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='instructions on how to push image to model' src={bailoPushImage} />
 </Box>
 
-## Adding an image to a release
+## Adding an Image to a Release
 
-Once the image has been successfully pushed to Bailo’s registry, it becomes available to attach to a release.
+Once the image has been successfully pushed to Bailo's registry, it becomes available to attach to a release.
 
 Edit an existing release or create a new one, then select the image from the available list.
 
@@ -29,9 +30,9 @@ Edit an existing release or create a new one, then select the image from the ava
   <Image alt='release being edited with new image attached' src={bailoImageRelease} />
 </Box>
 
-## What is a Docker container?
+## What is a Container?
 
-In the context of Bailo, a Docker container is an isolated, self‑contained application environment used to run a model.
+In the context of Bailo, a container is an isolated, self-contained application environment used to run a model.
 Packaging models as containers allows them to be started quickly, run consistently across environments, and used for
 inference without additional setup.
 
