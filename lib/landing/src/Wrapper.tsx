@@ -1,7 +1,6 @@
-import React, { ReactElement, ReactNode, useMemo } from 'react'
+import { ReactElement, ReactNode, useMemo } from 'react'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import GitHubIcon from '@mui/icons-material/GitHub'
 import CssBaseline from '@mui/material/CssBaseline'
 import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
@@ -9,7 +8,7 @@ import Head from 'next/head'
 import Image from 'next/legacy/image'
 import Link from './Link'
 import imageLoader from './imageLoader'
-import { Button, IconButton, Tooltip } from '@mui/material'
+import { Button } from '@mui/material'
 import bailoLogo from '../public/logo-horizontal-light.png'
 
 const drawerWidth = 240
@@ -67,6 +66,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </Box>
             <Link href='/docs'>
               <Button sx={{ color: 'white' }}>Documentation</Button>
+            </Link>
+            <Link href='/api/docs'>
+              <Button sx={{ color: 'white' }}>Swagger API</Button>
             </Link>
             <Link href='/accessibility/statement'>
               <Button sx={{ color: 'white' }}>Accessibility</Button>

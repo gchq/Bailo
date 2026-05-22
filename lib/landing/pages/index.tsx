@@ -1,12 +1,10 @@
 import { Button, Box, Divider, Grid, Stack, Typography } from '@mui/material'
 import imageLoader from '../src/imageLoader'
 import Image from 'next/image'
-import localFont from '@next/font/local'
 import Link from '../src/Link'
 import { createRef } from 'react'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import Slideshow from '../src/Slideshow'
-import React from 'react'
 
 import bailoLogo from '../public/vertical-white.png'
 
@@ -59,6 +57,11 @@ export default function Home() {
             <Link href='/docs'>
               <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
                 Documentation
+              </Button>
+            </Link>
+            <Link href='/api/docs'>
+              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
+                Swagger API
               </Button>
             </Link>
             <Link href='/accessibility/statement'>
