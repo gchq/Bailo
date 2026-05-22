@@ -35,6 +35,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "4.0.1",
     "shelljs": "^0.10.0",
+    "swagger-ui-dist": "^5.31.2",
     "styled-components": "^6.3.12",
     "swiper": "^12.1.4"
   },
