@@ -1,5 +1,6 @@
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
+import { isScanAllowedSkip } from '../../../connectors/artefactScanning/modelScan.js'
 import { FileAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
 import { FileWithScanResultsAggregate } from '../../../models/File.js'
@@ -35,12 +36,20 @@ export class FileExporter extends BaseExporter {
     if (scanners.scannersInfo().length > 0) {
       if (!this.file.scanResults || this.file.scanResults.length === 0) {
         throw BadReq('The file is missing vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+      } else if (
+        this.file.scanResults.some(
+          (scanResult) => scanResult.state !== ArtefactScanState.Complete && !isScanAllowedSkip(scanResult),
+        )
+      ) {
         throw BadReq('The file has incomplete vulnerability scan(s).', {
           filename: this.file.name,
           fileId: this.file.id,
         })
-      } else if (this.file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary.length > 0)) {
+      } else if (
+        this.file.scanResults.some(
+          (scanResult) => scanResult.summary && scanResult.summary.length > 0 && !isScanAllowedSkip(scanResult),
+        )
+      ) {
         throw BadReq('The file has failed vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }

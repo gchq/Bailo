@@ -89,6 +89,7 @@ data:
       artefactScanning: {
         clamdscan: {
           concurrency: {{ .Values.clamav.concurrency }},
+          streamMaxLength: '{{ .Values.clamav.streamMaxLength }}',
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
         },
@@ -307,7 +308,7 @@ data:
         xmlns: '{{ .Values.stroom.xmlns }}',
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
-      }
+      },
 
       untrustedModels: {
         defaultState: '{{ .Values.untrustedModels.defaultState }}'

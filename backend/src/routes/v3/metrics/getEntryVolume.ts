@@ -49,23 +49,26 @@ const GetEntryVolumeResponseSchema = z.object({
   data: z.array(EntryVolumeDataPointSchema),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/metrics/entryVolume',
-  tags: ['metrics'],
-  description: 'Returns the count of models created over time, aggregated by the specified period.',
-  schema: getEntryVolumeSchema,
-  responses: {
-    200: {
-      description: 'Details about the historic model volumes.',
-      content: {
-        'application/json': {
-          schema: GetEntryVolumeResponseSchema,
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/metrics/entryVolume',
+    tags: ['metrics'],
+    description: 'Returns the count of models created over time, aggregated by the specified period.',
+    schema: getEntryVolumeSchema,
+    responses: {
+      200: {
+        description: 'Details about the historic model volumes.',
+        content: {
+          'application/json': {
+            schema: GetEntryVolumeResponseSchema,
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 export type GetEntryVolumeResponse = z.infer<typeof GetEntryVolumeResponseSchema>
 
