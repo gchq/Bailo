@@ -1,54 +1,35 @@
 import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
-import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { ReviewKind } from '../types/enums.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
-// This interface stores information about the properties on the base object.
-// It should be used for plain object representations, e.g. for sending to the
-// client.
-// export interface ReviewInterface {
-//   _id: ObjectId
-
-//   semver?: string
-//   accessRequestId?: string
-//   modelId: string
-
-//   kind: ReviewKindKeys
-//   role: string
-//   dueDate?: Date
-
-//   createdAt: Date
-//   updatedAt: Date
-// }
-
-type PartialReviewInterface =
-  | {
+export type ReviewInterface =
+  | ({
       kind: 'access'
       dueDate?: never
       semver?: never
       accessRequestId: string
-    }
-  | {
+    } & PartialReviewInterface)
+  | ({
       kind: 'release'
       dueDate?: never
       semver: string
       accessRequestId: never
-    }
-  | {
+    } & PartialReviewInterface)
+  | ({
       kind: 'lifecycle'
       dueDate: Date
       semver?: never
       accessRequestId?: never
-    }
+    } & PartialReviewInterface)
 
-export type ReviewInterface = {
+type PartialReviewInterface = {
   _id: ObjectId
   modelId: string
   role: string
-  kind: ReviewKindKeys
   createdAt: string
   updatedAt: string
-} & PartialReviewInterface
+}
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
