@@ -62,7 +62,7 @@ export default function Home() {
               Read more
             </Button>
             {navigationLinks
-              .filter((link) => link.showInHero)
+              .filter((link) => link.primary)
               .map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>

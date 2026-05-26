@@ -1,4 +1,4 @@
-import { Button } from '@mui/material'
+import { Button, Stack } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -69,11 +69,13 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={142} height={60} priority />
               </Link>
             </Box>
-            {navigationLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <Button sx={{ color: 'white' }}>{link.label}</Button>
-              </Link>
-            ))}
+            {navigationLinks
+              .filter((link) => link.primary)
+              .map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button sx={{ color: 'white' }}>{link.label}</Button>
+                </Link>
+              ))}
           </Toolbar>
         </AppBar>
         <Box
@@ -89,9 +91,19 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               children
             ) : (
               <>
-                <Box>
-                  {children}
-                  <Copyright sx={{ p: 2 }} />
+                <Box>{children}</Box>
+                <Box
+                  component='footer'
+                  sx={{ borderTop: 1, borderColor: 'divider', py: 3, px: 2, textAlign: 'center' }}
+                >
+                  <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+                    {navigationLinks.map((link) => (
+                      <Link key={link.href} href={link.href}>
+                        {link.label}
+                      </Link>
+                    ))}
+                  </Stack>
+                  <Copyright />
                 </Box>
               </>
             )}
