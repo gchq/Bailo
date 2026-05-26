@@ -25,7 +25,7 @@ export default function Loading(): ReactElement {
       height: '10px',
       borderRadius: '5px',
       backgroundColor: '#9880ff',
-      color: ' #54278e',
+      color: ' #4d3075',
     },
 
     '&:before': {

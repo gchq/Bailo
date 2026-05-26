@@ -94,7 +94,7 @@ async function emailHtml(title, reviewMetadata, reviewActions) {
     <mj-section background-color="#9e60f2" padding-bottom="15px">
       ${htmlMetadata(reviewMetadata)}
     </mj-section>
-    <mj-section background-color="#54278e" padding-bottom="20px" padding-top="20px">
+    <mj-section background-color="#4d3075" padding-bottom="20px" padding-top="20px">
       ${htmlActions(reviewActions)}
     </mj-section>
   `),
@@ -120,7 +120,7 @@ function htmlActions(actionsList: actions[]) {
     .map(
       (action) => `
     <mj-column width="50%">
-      <mj-button background-color="#54278e" border="solid 2px white" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${action.url}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">${action.name}</mj-button>
+      <mj-button background-color="#4d3075" border="solid 2px white" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${action.url}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">${action.name}</mj-button>
     </mj-column>
   `,
     )
