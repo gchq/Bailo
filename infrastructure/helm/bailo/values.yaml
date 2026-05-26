@@ -274,7 +274,7 @@ config:
       contributor: 'Contributor'
 
     untrustedModel:
-      enabled: true
+      enabled: false
       untrustedModelDescription: 'These are private only models.'
 
   smtp:
