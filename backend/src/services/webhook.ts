@@ -73,7 +73,7 @@ export async function removeWebhook(user: UserInterface, modelId: string, webhoo
   }
 }
 
-type ContentType =
+type WebhookContent =
   | { release: ReleaseDoc }
   | { review: ReviewInterface }
   | { accessRequest: AccessRequestDoc }
@@ -83,7 +83,7 @@ export async function sendWebhooks(
   modelId: string,
   eventKind: WebhookEventKeys,
   eventTitle: string,
-  content: ContentType,
+  content: WebhookContent,
 ) {
   const webhooks = await WebhookModel.find({ modelId, events: eventKind })
 
