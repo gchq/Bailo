@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Bailo API Documentation</title>
     <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
     <link rel="stylesheet" type="text/css" href="./index.css" />
@@ -10,9 +11,13 @@
   </head>
 
   <body>
+    <nav style="background: #54278e; padding: 12px 24px; display: flex; align-items: center; gap: 16px">
+      <a href="../../" style="color: #fff; font: bold 20px/1 sans-serif; text-decoration: none">Bailo</a>
+      <span style="color: rgba(255, 255, 255, 0.6); font: 14px/1 sans-serif">API Documentation</span>
+    </nav>
     <div id="swagger-ui"></div>
-    <script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
-    <script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+    <script src="./swagger-ui-bundle.js" charset="UTF-8"></script>
+    <script src="./swagger-ui-standalone-preset.js" charset="UTF-8"></script>
     <script>
       window.onload = function () {
         window.ui = SwaggerUIBundle({
@@ -22,13 +27,8 @@
           ],
           dom_id: '#swagger-ui',
           deepLinking: true,
-          presets: [
-            SwaggerUIBundle.presets.apis,
-            SwaggerUIStandalonePreset,
-          ],
-          plugins: [
-            SwaggerUIBundle.plugins.DownloadUrl,
-          ],
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          plugins: [SwaggerUIBundle.plugins.DownloadUrl],
           layout: 'StandaloneLayout',
           supportedSubmitMethods: [],
         })
