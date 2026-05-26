@@ -6,11 +6,12 @@ import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
 import OverviewMetrics from 'src/metrics/OverviewMetrics'
 import PolicyMetrics from 'src/metrics/PolicyMetrics'
+import { Roles } from 'types/types'
 
 export default function Metrics() {
   const currentUser = useContext(CurrentUserContext)
 
-  if (!currentUser.systemRoles.includes('compliance')) {
+  if (!currentUser.systemRoles.includes(Roles.Compliance)) {
     return (
       <Forbidden
         errorMessage={

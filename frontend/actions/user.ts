@@ -73,8 +73,14 @@ export function useGetCurrentUserV3(): UseGetCurrentUserV3Result {
   if (error) {
     return { isCurrentUserError: error }
   }
-  if (!data?.user) {
-    return { isCurrentUserError: { ...new Error(), info: { message: '' }, status: 500 } }
+  if (!data || !data.user) {
+    return {
+      isCurrentUserError: {
+        ...new Error('Unable to get data for the current user'),
+        info: { message: 'Unable to get data for the current user' },
+        status: 500,
+      },
+    }
   }
 
   return {
