@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { TransferStatus } from '../../src/models/ModelTransfer.js'
-import * as modelTransferModule from '../../src/services/modelTransfer.js'
 import {
   createModelTransfer,
   deleteModelTransfer,
+  filterArtefactsByKindAndStatus,
   findModelTransferById,
   findModelTransfersByModelId,
   handleCompleteEmail,
@@ -232,7 +232,7 @@ describe('services > modelTransfer', () => {
   })
 
   test('handleCompleteEmail > transfer not complete', async () => {
-    const spy = vi.spyOn(modelTransferModule, 'filterArtefactsByKindAndStatus')
+    const spy = vi.spyOn({ filterArtefactsByKindAndStatus }, 'filterArtefactsByKindAndStatus')
     ModelTransferModelMock.findOne.mockResolvedValue({
       completed: false,
     })
