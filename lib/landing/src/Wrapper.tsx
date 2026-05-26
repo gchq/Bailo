@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useMemo } from 'react'
+import { Button } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -6,10 +6,13 @@ import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
-import Link from './Link'
-import imageLoader from './imageLoader'
-import { Button } from '@mui/material'
+import { ReactElement, ReactNode, useMemo } from 'react'
 import bailoLogo from '../public/logo-horizontal-light.png'
+import Copyright from './Copyright'
+import imageLoader from './imageLoader'
+import Link from './Link'
+import navigationLinks from './navigationLinks'
+import { useRouter } from 'next/router'
 
 const drawerWidth = 240
 
@@ -42,7 +45,9 @@ type WrapperProps = {
 }
 
 export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
-  const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
+  const router = useRouter()
+
+  const isDocsPage = router.pathname === '/docs' || router.pathname.startsWith('/docs/')
 
   const theme = useTheme()
 
@@ -51,9 +56,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Head>
         <title>{`${title} · Bailo`}</title>
       </Head>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         <CssBaseline />
-        <AppBar position='absolute' data-test='appBar' sx={{ top: 'unset', boxShadow: 'none' }}>
+        <AppBar position='static' data-test='appBar' sx={{ boxShadow: 'none', flexShrink: 0 }}>
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -64,18 +69,11 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={142} height={60} priority />
               </Link>
             </Box>
-            <Link href='/docs'>
-              <Button sx={{ color: 'white' }}>Documentation</Button>
-            </Link>
-            <Link href='/api/docs'>
-              <Button sx={{ color: 'white' }}>Swagger API</Button>
-            </Link>
-            <Link href='/accessibility/statement'>
-              <Button sx={{ color: 'white' }}>Accessibility</Button>
-            </Link>
-            <Link href='https://github.com/gchq/bailo'>
-              <Button sx={{ color: 'white' }}>Github</Button>
-            </Link>
+            {navigationLinks.map((link) => (
+              <Link key={link.href} href={link.href}>
+                <Button sx={{ color: 'white' }}>{link.label}</Button>
+              </Link>
+            ))}
           </Toolbar>
         </AppBar>
         <Box
@@ -83,12 +81,21 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           sx={{
             backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
-            height: '100vh',
             overflow: 'auto',
           }}
         >
-          <Toolbar />
-          <Box>{isDocsPage ? children : <>{children}</>}</Box>
+          <Box>
+            {isDocsPage ? (
+              children
+            ) : (
+              <>
+                <Box>
+                  {children}
+                  <Copyright sx={{ p: 2 }} />
+                </Box>
+              </>
+            )}
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

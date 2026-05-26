@@ -7,6 +7,7 @@ import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import Slideshow from '../src/Slideshow'
 
 import bailoLogo from '../public/vertical-white.png'
+import navigationLinks from '../src/navigationLinks'
 
 export default function Home() {
   const ref = createRef<HTMLDivElement>()
@@ -44,7 +45,13 @@ export default function Home() {
               Making it easy to compliantly manage the machine learning lifecycle
             </Typography>
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ p: 4 }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            justifyContent='center'
+            alignItems='center'
+            spacing={2}
+            sx={{ p: 4, maxWidth: '100%' }}
+          >
             <Button
               onClick={scrollToContent}
               sx={{ minWidth: '200px', color: 'white' }}
@@ -54,21 +61,15 @@ export default function Home() {
             >
               Read more
             </Button>
-            <Link href='/docs'>
-              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
-                Documentation
-              </Button>
-            </Link>
-            <Link href='/api/docs'>
-              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
-                Swagger API
-              </Button>
-            </Link>
-            <Link href='/accessibility/statement'>
-              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
-                Accessibility
-              </Button>
-            </Link>
+            {navigationLinks
+              .filter((link) => link.showInHero)
+              .map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
+                    {link.label}
+                  </Button>
+                </Link>
+              ))}
           </Stack>
         </Stack>
       </Box>
