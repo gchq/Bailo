@@ -11,9 +11,33 @@
   </head>
 
   <body>
-    <nav style="background: #54278e; padding: 12px 24px; display: flex; align-items: center; gap: 16px">
-      <a href="../../" style="color: #fff; font: bold 20px/1 sans-serif; text-decoration: none">Bailo</a>
-      <span style="color: rgba(255, 255, 255, 0.6); font: 14px/1 sans-serif">API Documentation</span>
+    <!-- Plain HTML as a close-enough approximation of the AppBar in `lib/landing/src/Wrapper.tsx` -->
+    <nav
+      style="
+        background: #54278e;
+        display: flex;
+        align-items: center;
+        padding: 0px 24px;
+        min-height: 64px;
+        position: sticky;
+        top: 0;
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        z-index: 1;
+        font-size: 0.875rem;
+        letter-spacing: 0.4px;
+      "
+    >
+      <a href="../../">
+        <img src="../../logo-horizontal-light.png" alt="Bailo" height="60" width="142" />
+      </a>
+      <a href="../../docs/" style="color: #fff; text-decoration: none; padding: 6px 8px; margin-left: 8px"
+        >Documentation</a
+      >
+      <a href="./" style="color: #fff; text-decoration: none; padding: 6px 8px">Swagger API</a>
+      <a href="../../accessibility/statement/" style="color: #fff; text-decoration: none; padding: 6px 8px"
+        >Accessibility</a
+      >
+      <a href="https://github.com/gchq/bailo" style="color: #fff; text-decoration: none; padding: 6px 8px">Github</a>
     </nav>
     <div id="swagger-ui"></div>
     <script src="./swagger-ui-bundle.js" charset="UTF-8"></script>
