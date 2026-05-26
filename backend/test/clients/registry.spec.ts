@@ -682,7 +682,7 @@ describe('clients > registry', () => {
       headers: mockHeaders,
     })
 
-    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
+    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image', digest: 'digest' })
 
     expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -698,7 +698,7 @@ describe('clients > registry', () => {
       text: vi.fn(),
     })
 
-    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
+    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image', digest: 'digest' })
 
     expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -708,7 +708,7 @@ describe('clients > registry', () => {
   test('doesLayerExist > rethrow error', async () => {
     fetchMock.mockRejectedValueOnce('Error')
 
-    const response = doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
+    const response = doesLayerExist('token', { repository: 'modelId', name: 'image', digest: 'digest' })
 
     await expect(response).rejects.toThrow('Unable to communicate with the registry.')
     expect(fetchMock).toHaveBeenCalled()

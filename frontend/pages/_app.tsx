@@ -3,9 +3,10 @@ import '../public/css/layouting.css'
 import '../public/css/table.css'
 import '../public/css/highlight.css'
 
+import { EmotionCache } from '@emotion/cache'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
-import { AppCacheProvider } from '@mui/material-nextjs/v13-pagesRouter'
+import { AppCacheProvider, createEmotionCache } from '@mui/material-nextjs/v15-pagesRouter'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AppProps } from 'next/app'
@@ -21,7 +22,9 @@ import UnsavedChangesContext from '../src/contexts/unsavedChangesContext'
 import useThemeMode from '../src/hooks/useThemeMode'
 import useUnsavedChanges from '../src/hooks/useUnsavedChanges'
 
-export default function MyApp(props: AppProps) {
+const clientCache = createEmotionCache({ key: 'css' })
+
+export default function MyApp(props: AppProps, emotionCache: EmotionCache = clientCache) {
   const { Component, pageProps } = props
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
@@ -35,7 +38,7 @@ export default function MyApp(props: AppProps) {
   }, [themeModeValue])
 
   return (
-    <AppCacheProvider {...props}>
+    <AppCacheProvider {...props} emotionCache={emotionCache}>
       <Head>
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>

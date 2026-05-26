@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from ssl import SSLContext
 from typing import Any
 
-from httpx._types import CertTypes
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

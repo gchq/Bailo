@@ -92,11 +92,11 @@ export class ImageImporter extends BaseImporter {
 
         try {
           if (
-            await doesLayerExist(
-              repositoryPullToken,
-              { repository: this.metadata.mirroredModelId, name: this.imageName },
-              layerDigest,
-            )
+            await doesLayerExist(repositoryPullToken, {
+              repository: this.metadata.mirroredModelId,
+              name: this.imageName,
+              digest: layerDigest,
+            })
           ) {
             log.debug(
               {
