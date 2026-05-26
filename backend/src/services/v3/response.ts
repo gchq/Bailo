@@ -10,7 +10,7 @@ import { ReviewResponseParams } from '../response.js'
 import { findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
 
-function validateLifecycleReview(review: ReviewDoc, dueDate?: Date) {
+function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | null) {
   if (review.kind === ReviewKind.Lifecycle) {
     if (!dueDate) {
       throw BadReq('Lifecycle review responses should have a due date')
@@ -25,7 +25,7 @@ export async function respondToReview(
   user: UserInterface,
   reviewId: string,
   response: ReviewResponseParams,
-  dueDate?: Date,
+  dueDate?: Date | null,
 ) {
   const review = await findReviewById(user, reviewId)
   validateLifecycleReview(review, dueDate)

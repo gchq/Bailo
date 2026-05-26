@@ -38,25 +38,28 @@ export const postReviewResponseSchema = z.object({
   ),
 })
 
-registerPath({
-  method: 'post',
-  path: '/api/v3/review/{reviewId}/response',
-  tags: ['review'],
-  description: 'Respond to a review',
-  schema: postReviewResponseSchema,
-  responses: {
-    200: {
-      description: 'The create review response.',
-      content: {
-        'application/json': {
-          schema: z.object({
-            response: responseInterfaceSchema,
-          }),
+registerPath(
+  {
+    method: 'post',
+    path: '/api/v3/review/{reviewId}/response',
+    tags: ['review'],
+    description: 'Respond to a review',
+    schema: postReviewResponseSchema,
+    responses: {
+      200: {
+        description: 'The create review response.',
+        content: {
+          'application/json': {
+            schema: z.object({
+              response: responseInterfaceSchema,
+            }),
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 interface PostReviewResponse {
   response: ResponseInterface
