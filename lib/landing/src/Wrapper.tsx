@@ -6,13 +6,13 @@ import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
+import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useMemo } from 'react'
 import bailoLogo from '../public/logo-horizontal-light.png'
 import Copyright from './Copyright'
 import imageLoader from './imageLoader'
 import Link from './Link'
 import navigationLinks from './navigationLinks'
-import { useRouter } from 'next/router'
 
 const drawerWidth = 240
 
