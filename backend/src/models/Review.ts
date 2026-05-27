@@ -1,24 +1,34 @@
 import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
 
-import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { ReviewKind } from '../types/enums.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
-// This interface stores information about the properties on the base object.
-// It should be used for plain object representations, e.g. for sending to the
-// client.
-export interface ReviewInterface {
+export type ReviewInterface =
+  | ({
+      kind: 'access'
+      dueDate?: never
+      semver?: never
+      accessRequestId: string
+    } & PartialReviewInterface)
+  | ({
+      kind: 'release'
+      dueDate?: never
+      semver: string
+      accessRequestId: never
+    } & PartialReviewInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: never
+      accessRequestId?: never
+    } & PartialReviewInterface)
+
+type PartialReviewInterface = {
   _id: ObjectId
-
-  semver?: string
-  accessRequestId?: string
   modelId: string
-
-  kind: ReviewKindKeys
   role: string
-  dueDate?: Date
-
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 // The doc type includes all values in the plain interface, as well as all the

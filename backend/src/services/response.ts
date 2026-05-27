@@ -186,10 +186,10 @@ export async function sendReviewResponseNotification(
       return
     }
     default:
-      throw InternalError('Review Kind not recognised', {
-        reviewId: review.id,
-        modelId: review.modelId,
-        kind: review.kind,
+      throw InternalError('Review kind not recognised', {
+        reviewId: review['id'],
+        modelId: review['modelId'],
+        kind: review['kind'],
       })
   }
 }

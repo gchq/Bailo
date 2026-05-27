@@ -557,22 +557,33 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-type PartialRequestInterface =
-  | {
-      accessRequestId: string
+export type ReviewInterface =
+  | ({
+      kind: 'access'
+      dueDate?: never
       semver?: never
+      accessRequestId: string
+    } & PartialReviewInterface)
+  | ({
+      kind: 'release'
       dueDate?: never
-    }
-  | {
-      accessRequestId?: never
       semver: string
-      dueDate?: never
-    }
-  | {
       accessRequestId?: never
-      semver: never
-      dueDate?: Date
-    }
+    } & PartialReviewInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: never
+      accessRequestId?: never
+    } & PartialReviewInterface)
+
+type PartialReviewInterface = {
+  _id: string
+  modelId: string
+  role: string
+  createdAt: string
+  updatedAt: string
+}
 
 export const ReviewKind = {
   ACCESS: 'access',
@@ -581,14 +592,33 @@ export const ReviewKind = {
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
-export type ReviewRequestInterface = {
+export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
-  kind: ReviewKindKeys
   createdAt: string
   updatedAt: string
-} & PartialRequestInterface
+}
+
+export type ReviewRequestInterface =
+  | ({
+      kind: 'access'
+      dueDate?: never
+      semver?: never
+      accessRequestId: string
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'release'
+      dueDate?: never
+      semver: string
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: never
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {
   modelId: string
