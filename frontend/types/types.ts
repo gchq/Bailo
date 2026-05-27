@@ -568,7 +568,7 @@ export type ReviewInterface =
       kind: 'release'
       dueDate?: never
       semver: string
-      accessRequestId: never
+      accessRequestId?: never
     } & PartialReviewInterface)
   | ({
       kind: 'lifecycle'
@@ -611,7 +611,7 @@ export type ReviewRequestInterface =
       kind: 'release'
       dueDate?: never
       semver: string
-      accessRequestId: never
+      accessRequestId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'lifecycle'
