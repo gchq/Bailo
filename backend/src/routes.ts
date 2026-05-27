@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import authentication from './connectors/authentication/index.js'
 import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
+import { tooBusy } from './routes/middleware/tooBusy.js'
 import v1Router from './routes/v1/routes.js'
 import v2Router from './routes/v2/routes.js'
 import v3Router from './routes/v3/routes.js'
@@ -14,7 +15,7 @@ import { httpLog } from './services/log.js'
 
 export const server = express()
 
-server.use([bodyParser.json(), httpLog])
+server.use([bodyParser.json(), httpLog, tooBusy])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
