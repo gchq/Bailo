@@ -592,13 +592,33 @@ export const ReviewKind = {
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
-export type ReviewRequestInterface = {
+export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
   createdAt: string
   updatedAt: string
 }
+
+export type ReviewRequestInterface =
+  | ({
+      kind: 'access'
+      dueDate?: never
+      semver?: never
+      accessRequestId: string
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'release'
+      dueDate?: never
+      semver: string
+      accessRequestId: never
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: never
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {
   modelId: string
