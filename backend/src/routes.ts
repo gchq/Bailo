@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser'
 import express from 'express'
+import helmet from 'helmet'
 import path from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
@@ -14,7 +15,7 @@ import { httpLog } from './services/log.js'
 
 export const server = express()
 
-server.use([bodyParser.json(), httpLog])
+server.use([bodyParser.json(), httpLog, helmet()])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
