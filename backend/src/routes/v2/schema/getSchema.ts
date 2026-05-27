@@ -12,6 +12,9 @@ export const getSchemaSchema = z.object({
   params: z.object({
     schemaId: z.string(),
   }),
+  query: z.object({
+    modelState: z.string().optional(),
+  }),
 })
 
 registerPath({
@@ -41,9 +44,12 @@ interface GetSchemaResponse {
 export const getSchema = [
   async (req: Request, res: Response<GetSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchema
-    const { params } = parse(req, getSchemaSchema)
+    const {
+      query: { modelState },
+      params: { schemaId },
+    } = parse(req, getSchemaSchema)
 
-    const schema = await getSchemaById(params.schemaId)
+    const schema = await getSchemaById(schemaId, modelState)
     await audit.onViewSchema(req, schema)
 
     res.json({

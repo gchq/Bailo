@@ -1,3 +1,4 @@
+import traverse from 'json-schema-traverse'
 import { Schema as JsonSchema } from 'jsonschema'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
@@ -8,7 +9,7 @@ import SchemaModel, { SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
-import { Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
@@ -29,7 +30,7 @@ export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Pr
   return schemas
 }
 
-export async function getSchemaById(schemaId: string) {
+export async function getSchemaById(schemaId: string, modelState?: string) {
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -38,7 +39,40 @@ export async function getSchemaById(schemaId: string) {
     throw NotFound(`The requested schema was not found.`, { schemaId })
   }
 
+  if (modelState) {
+    const jsonSchema = enforceModelStateFields(schema.jsonSchema, modelState)
+    schema.jsonSchema = jsonSchema
+  }
+
   return schema
+}
+
+function enforceModelStateFields(schema: object, targetState: string) {
+  const validStates = config.ui.modelDetails.states
+  if (!validStates.includes(targetState)) {
+    throw BadReq('The value for modelState is not a valid', { validStates, modelState: targetState })
+  }
+  const jsonSchema = schema
+  traverse(jsonSchema, { allKeys: true }, (subschema, pointer, root, parentPointer, parentKeyword, parentSchema) => {
+    if (!subschema || typeof subschema !== 'object') {
+      return
+    }
+
+    if (Array.isArray(subschema.state) && subschema.state.includes(targetState)) {
+      if (parentKeyword === 'properties' && parentSchema) {
+        const propertyName = pointer.split('/').pop()
+
+        if (!parentSchema.required) {
+          parentSchema.required = []
+        }
+
+        if (!parentSchema.required.includes(propertyName)) {
+          parentSchema.required.push(propertyName)
+        }
+      }
+    }
+  })
+  return jsonSchema
 }
 
 export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<string> {
