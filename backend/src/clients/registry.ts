@@ -92,8 +92,12 @@ async function readBody(res: Response, expectStream: boolean): Promise<{ body?: 
     }
   }
 
-  if (isJsonContentType(res.headers.get('content-type'))) {
-    return { body: await res.json() }
+  try {
+    if (isJsonContentType(res.headers.get('content-type'))) {
+      return { body: await res.json() }
+    }
+  } catch {
+    // NOOP because sometimes the header doesn't suggest this is JSON
   }
 
   return { body: await res.text() }
