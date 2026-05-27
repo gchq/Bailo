@@ -13,10 +13,11 @@ import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'
 import config from '../utils/config.js'
 
-export const registry = new OpenAPIRegistry()
+export const registryv2 = new OpenAPIRegistry()
+export const registryv3 = new OpenAPIRegistry()
 
 export type PathConfig = RouteConfig & { schema: AnyZodObject }
-export function registerPath(config: PathConfig) {
+export function registerPath(config: PathConfig, version?: string) {
   const routeConfig: RouteConfig = {
     ...config,
   }
@@ -39,7 +40,11 @@ export function registerPath(config: PathConfig) {
   }
 
   delete (routeConfig as any).schema
-  registry.registerPath(routeConfig)
+  if (version && version === 'v3') {
+    registryv3.registerPath(routeConfig)
+  } else {
+    registryv2.registerPath(routeConfig)
+  }
 }
 
 export const errorSchemaContent = {
@@ -514,7 +519,7 @@ export const reviewRoleSchema = z.object({
 })
 
 export const generateSwaggerSpec = () => {
-  const generator = new OpenApiGeneratorV3(registry.definitions)
+  const generator = new OpenApiGeneratorV3(registryv2.definitions)
   const tags = [
     {
       name: 'model',
@@ -587,5 +592,17 @@ export const generateSwaggerSpec = () => {
       title: 'Bailo API',
     },
     tags: tags,
+  })
+}
+
+export function generateV3SwaggerSpec() {
+  const generator = new OpenApiGeneratorV3(registryv3.definitions)
+  return generator.generateDocument({
+    openapi: '3.0.0',
+    info: {
+      version: '3.0.0-beta',
+      title: 'Bailo API',
+      description: 'Bailo API V3 is in active development and may change.',
+    },
   })
 }

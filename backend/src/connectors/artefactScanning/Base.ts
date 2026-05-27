@@ -1,3 +1,4 @@
+import bytes from 'bytes'
 import PQueue from 'p-queue'
 
 import { FileInterface } from '../../models/File.js'
@@ -17,6 +18,7 @@ export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',
   Complete: 'complete',
+  Skipped: 'skipped',
   Error: 'error',
 } as const
 export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
@@ -26,39 +28,63 @@ export type ArtefactScanningConnectorInfo = Pick<ArtefactScanResult, 'toolName' 
 export abstract class BaseArtefactScanningConnector {
   abstract readonly toolName: string
   abstract readonly artefactType: ArtefactKindKeys
-  version: string | undefined = undefined
-
   abstract readonly queue: PQueue
 
-  info(): ArtefactScanningConnectorInfo {
+  protected version?: string
+  protected maxSize: number = Infinity
+
+  getConnectorInfo(): ArtefactScanningConnectorInfo {
     return { toolName: this.toolName, scannerVersion: this.version, artefactKind: this.artefactType }
   }
 
-  abstract init()
+  abstract init(): Promise<void>
 
-  abstract _scan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
+  protected abstract executeScan(artefact: ArtefactInterface): Promise<ArtefactScanResult>
 
   async scan(artefact: ArtefactInterface): Promise<ArtefactScanResult> {
-    log.debug({ artefact, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
+    if (!this.version) {
+      return this.buildErrorResult(`${this.toolName} used before initialisation`, { artefact })
+    }
+
+    log.debug({ artefact, ...this.getConnectorInfo(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResult = await this.queue
-      .add(() => this._scan(artefact))
+      .add(() => this.executeScan(artefact))
       .catch((error) => {
-        return this.scanError('Queued scan threw an error.', { error, artefact })
+        return this.buildErrorResult('Queued scan threw an error.', { error, artefact })
       })
     // return type of `queue.add()` is Promise<void | ...> so reject void responses
     if (scanResult === null || typeof scanResult !== 'object') {
-      return this.scanError('Queued scan failed to correctly return.', { artefact })
+      return this.buildErrorResult('Queued scan failed to correctly return.', { artefact })
     }
     return scanResult
   }
 
-  async scanError(message: string, context?: object): Promise<ArtefactScanResult> {
-    const scannerInfo = this.info()
+  protected buildErrorResult(message: string, context?: Record<string, unknown>): ArtefactScanResult {
+    const scannerInfo = this.getConnectorInfo()
     log.error({ ...context, ...scannerInfo }, message)
     return {
       ...scannerInfo,
+      summary: [message],
       state: ArtefactScanState.Error,
       lastRunAt: new Date(),
     }
+  }
+
+  protected buildSkipResult(reason: string | string[]): ArtefactScanResult {
+    const scannerInfo = this.getConnectorInfo()
+    return {
+      ...scannerInfo,
+      summary: typeof reason === 'string' ? [reason] : reason,
+      state: ArtefactScanState.Skipped,
+      lastRunAt: new Date(),
+    }
+  }
+
+  protected buildSizeExceededResult(artefact: ArtefactInterface, artefactSize: number): ArtefactScanResult {
+    return this.buildErrorResult('Artefact exceeds configured scanner size limit.', {
+      artefact,
+      artefactSize: bytes.format(artefactSize),
+      maxSize: bytes.format(this.maxSize),
+    })
   }
 }

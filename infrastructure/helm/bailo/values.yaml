@@ -274,7 +274,7 @@ config:
       contributor: 'Contributor'
 
     untrustedModel:
-      enabled: true
+      enabled: false
       untrustedModelDescription: 'These are private only models.'
 
   smtp:
@@ -380,6 +380,7 @@ clamav:
   runAsUser: 1002
   image: clamav/clamav:1.4.3_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   concurrency: 2
+  streamMaxLength: 2G
   port: 3310
   accessModes:
     - ReadWriteOnce

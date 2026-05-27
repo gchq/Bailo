@@ -254,7 +254,6 @@ vi.mock('p-queue', () => ({
 describe('services > mirroredModel', () => {
   beforeEach(() => {
     pendingJobs = []
-    vi.clearAllMocks()
   })
 
   describe('exportModel', () => {

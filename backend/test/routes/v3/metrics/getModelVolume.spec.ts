@@ -1,11 +1,11 @@
 import qs from 'qs'
 import { describe, expect, test, vi } from 'vitest'
 
-import audit from '../../../src/connectors/audit/__mocks__/index.js'
-import { getEntryVolumeSchema } from '../../../src/routes/v3/metrics/getEntryVolume.js'
-import { createFixture, testGet } from '../../testUtils/routes.js'
+import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+import { getEntryVolumeSchema } from '../../../../src/routes/v3/metrics/getEntryVolume.js'
+import { createFixture, testGet } from '../../../testUtils/routes.js'
 
-vi.mock('../../../src/connectors/audit/index.js')
+vi.mock('../../../../src/connectors/audit/index.js')
 
 const mockMetricsConnector = vi.hoisted(() => ({
   calculateEntryVolume: vi.fn(() => ({
@@ -16,7 +16,7 @@ const mockMetricsConnector = vi.hoisted(() => ({
   })),
 }))
 
-vi.mock('../../../src/connectors/metrics/index.js', () => ({
+vi.mock('../../../../src/connectors/metrics/index.js', () => ({
   default: mockMetricsConnector,
 }))
 

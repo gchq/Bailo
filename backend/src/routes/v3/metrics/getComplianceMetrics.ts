@@ -40,23 +40,26 @@ export const GetComplianceMetricsResponseSchema = z.object({
   byOrganisation: z.array(ComplianceOrganisationMetricsSchema),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/metrics/compliance',
-  tags: ['metrics'],
-  description: 'Retrieve current point-in-time system and usage metrics.',
-  schema: getUsageMetricsSchema,
-  responses: {
-    200: {
-      description: 'Current snapshot of system metrics.',
-      content: {
-        'application/json': {
-          schema: GetComplianceMetricsResponseSchema,
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/metrics/compliance',
+    tags: ['metrics'],
+    description: 'Retrieve current point-in-time system and usage metrics.',
+    schema: getUsageMetricsSchema,
+    responses: {
+      200: {
+        description: 'Current snapshot of system metrics.',
+        content: {
+          'application/json': {
+            schema: GetComplianceMetricsResponseSchema,
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 export type GetComplianceMetricsResponse = z.infer<typeof GetComplianceMetricsResponseSchema>
 
