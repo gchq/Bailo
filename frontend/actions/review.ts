@@ -14,6 +14,11 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
 
+const REVIEW_ID_PATTERN = /^[A-Za-z0-9_-]+$/
+function isValidReviewId(reviewId: string) {
+  return REVIEW_ID_PATTERN.test(reviewId)
+}
+
 export function useHeadReviewRequestsForUser(open?: boolean, kind?: ReviewKindKeys) {
   const queryParams = { ...(open !== undefined && { open }), ...(kind !== undefined && { kind }) }
 
@@ -141,6 +146,10 @@ export async function postGenericReviewResponse({
   decision,
   dueDate,
 }: PostGenericReviewResponseParams) {
+  if (!isValidReviewId(reviewId)) {
+    throw new Error('Invalid review ID')
+  }
+
   return fetch(`/api/v3/review/${reviewId}/response`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
