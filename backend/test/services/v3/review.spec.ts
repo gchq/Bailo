@@ -64,8 +64,6 @@ describe('services > review', () => {
     const newReview = await createReview({} as any, 'test-1234', {
       kind: ReviewKind.Lifecycle,
       dueDate: new Date('2026-05-28T12:54:03.780Z'),
-      semver: undefined,
-      accessRequestId: undefined,
     })
     expect(newReview).toMatchSnapshot()
   })
