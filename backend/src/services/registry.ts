@@ -330,9 +330,9 @@ async function getTagDigestReferenceMap(
         refs.add(rootDigest)
       }
       if (body && 'manifests' in body) {
-        for (const m of body.manifests) {
-          if (m.digest) {
-            refs.add(m.digest)
+        for (const manifest of body.manifests) {
+          if (manifest.digest) {
+            refs.add(manifest.digest)
           }
         }
       }
@@ -429,8 +429,8 @@ async function renameMultiManifest(
   allRefsMap.delete(source.tag)
   const otherRefs = new Set<string>()
   for (const refs of allRefsMap.values()) {
-    for (const d of refs) {
-      otherRefs.add(d)
+    for (const digest of refs) {
+      otherRefs.add(digest)
     }
   }
   const listIsOrphaned = !otherRefs.has(sourceDigest)
