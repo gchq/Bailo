@@ -40,11 +40,10 @@ const AppBar = styled(MuiAppBar, {
 
 type WrapperProps = {
   title: string
-  page: string
   children?: ReactNode
 }
 
-export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
+export default function Wrapper({ title, children }: WrapperProps): ReactElement {
   const router = useRouter()
 
   const isDocsPage = useMemo(() => router.pathname === '/docs' || router.route.startsWith('/docs/'), [router])
