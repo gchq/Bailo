@@ -18,26 +18,26 @@ const ModelTransferModelMock = getTypedModelMock('ModelTransferModel')
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/model.js', async () => modelMock)
+vi.mock('../../src/services/model.js', () => modelMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/log.js', async () => ({
+vi.mock('../../src/services/log.js', () => ({
   default: logMock,
 }))
 
 const smtpMock = vi.hoisted(() => ({
   transferCompleteNotification: vi.fn(),
 }))
-vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
+vi.mock('../../src/services/smtp/smtp.js', () => smtpMock)
 
 const webhookMock = vi.hoisted(() => ({
   sendWebhooks: vi.fn(),
 }))
-vi.mock('../../src/services/webhook.ts', async () => webhookMock)
+vi.mock('../../src/services/webhook.ts', () => webhookMock)
 
 const user = { dn: 'user:test' } as any
 
