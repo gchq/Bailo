@@ -32,7 +32,6 @@ export const postReviewResponseSchema = z.object({
       }),
       z.object({
         kind: z.enum([ReviewKind.Release, ReviewKind.Access]),
-        dueDate: z.undefined(),
       }),
     ]),
   ),
@@ -77,7 +76,7 @@ export const postReviewResponse = [
       req.user,
       reviewId,
       { decision: body.decision, comment: body.comment },
-      body.dueDate,
+      body.kind === ReviewKind.Lifecycle ? body.dueDate : undefined,
     )
 
     await audit.onCreateReviewResponse(req, response)
