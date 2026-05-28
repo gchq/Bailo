@@ -200,7 +200,7 @@ minio:
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 3.0.0
+  tag: 3.1.1
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name
@@ -274,7 +274,7 @@ config:
       contributor: 'Contributor'
 
     untrustedModel:
-      enabled: true
+      enabled: false
       untrustedModelDescription: 'These are private only models.'
 
   smtp:
