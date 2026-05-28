@@ -81,7 +81,7 @@ export default function LifecycleReview() {
               spacing={2}
               divider={<Divider flexItem orientation='vertical' />}
             >
-              <Link href={`/model/${modelId}?tab=releases`}>
+              <Link href={`/model/${modelId}`}>
                 <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                   Back to model
                 </Button>

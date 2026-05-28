@@ -9,11 +9,9 @@ import { testReviewResponse } from '../../../testUtils/testModels.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
-const mockResponseService = vi.hoisted(() => {
-  return {
-    respondToReview: vi.fn(() => testReviewResponse),
-  }
-})
+const mockResponseService = vi.hoisted(() => ({
+  respondToReview: vi.fn(() => testReviewResponse),
+}))
 vi.mock('../../../../src/services/v3/response.js', () => mockResponseService)
 
 describe('routes > review > postReviewResponse', () => {

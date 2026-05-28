@@ -6,21 +6,21 @@ import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlug
 export type ReviewInterface =
   | ({
       kind: 'access'
-      dueDate?: never
-      semver?: never
+      dueDate?: undefined
+      semver?: undefined
       accessRequestId: string
     } & PartialReviewInterface)
   | ({
       kind: 'release'
-      dueDate?: never
+      dueDate?: undefined
       semver: string
-      accessRequestId: never
+      accessRequestId: undefined
     } & PartialReviewInterface)
   | ({
       kind: 'lifecycle'
       dueDate: Date
-      semver?: never
-      accessRequestId?: never
+      semver?: undefined
+      accessRequestId?: undefined
     } & PartialReviewInterface)
 
 type PartialReviewInterface = {

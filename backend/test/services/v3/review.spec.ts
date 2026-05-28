@@ -21,7 +21,7 @@ const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
   getModelSystemRoles: vi.fn(),
 }))
-vi.mock('../../../src/services/model.js', async () => modelMock)
+vi.mock('../../../src/services/model.js', () => modelMock)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
