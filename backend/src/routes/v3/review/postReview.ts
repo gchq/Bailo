@@ -17,20 +17,14 @@ export const postReviewSchema = z.object({
     z.object({
       kind: z.literal(ReviewKind.Lifecycle),
       dueDate: z.coerce.date(),
-      accessRequestId: z.undefined(),
-      semver: z.undefined(),
     }),
     z.object({
       kind: z.literal(ReviewKind.Release),
-      dueDate: z.undefined(),
-      accessRequestId: z.undefined(),
       semver: z.string(),
     }),
     z.object({
       kind: z.literal(ReviewKind.Access),
-      dueDate: z.undefined(),
       accessRequestId: z.string(),
-      semver: z.undefined(),
     }),
   ]),
 })

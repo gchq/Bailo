@@ -76,30 +76,24 @@ export async function findUserInCollaborators(user: UserInterface) {
   }
 }
 
-type CreateReviewContent =
-  | ({
-      accessRequestId: undefined
-      semver: undefined
-    } & CreateLifecycleReviewContent)
-  | {
-      kind: 'release'
-      dueDate: undefined
-      accessRequestId: undefined
-      semver: string
-    }
-  | {
-      kind: 'access'
-      dueDate: undefined
-      accessRequestId: string
-      semver: undefined
-    }
-
 type CreateLifecycleReviewContent = {
   kind: 'lifecycle'
   dueDate: Date
 }
+type CreateReleaseReviewContent = {
+  kind: 'release'
+  semver: string
+}
+type CreateAccessReviewContent = {
+  kind: 'access'
+  accessRequestId: string
+}
 
-export async function createReview(user: UserInterface, modelId: string, reviewContent: CreateReviewContent) {
+export async function createReview(
+  user: UserInterface,
+  modelId: string,
+  reviewContent: CreateLifecycleReviewContent | CreateReleaseReviewContent | CreateAccessReviewContent,
+) {
   switch (reviewContent.kind) {
     case ReviewKind.Lifecycle:
       return await createLifecycleReview(user, modelId, reviewContent.dueDate)
