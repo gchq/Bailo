@@ -25,7 +25,7 @@ export async function respondToReview(
   user: UserInterface,
   reviewId: string,
   response: ReviewResponseParams,
-  dueDate?: Date | undefined,
+  dueDate?: Date,
 ) {
   const review = await findReviewById(user, reviewId)
   validateLifecycleReview(review, dueDate)
