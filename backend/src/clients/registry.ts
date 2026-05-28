@@ -422,7 +422,6 @@ export async function uploadLayerMonolithic(
   uploadURL: string,
   digest: string,
   blob: Readable | ReadableStream,
-  size: string,
 ) {
   const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
     headersSchema: BlobUploadResponseHeadersSchema,
@@ -435,7 +434,6 @@ export async function uploadLayerMonolithic(
       redirect: 'error',
     },
     extraHeaders: {
-      'content-length': size,
       'content-type': 'application/octet-stream',
     },
   })
@@ -457,7 +455,6 @@ export async function mountBlob(
       extraFetchOptions: {
         method: 'POST',
       },
-      extraHeaders: { 'Content-Length': '0' },
     },
   )
 
