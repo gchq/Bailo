@@ -134,7 +134,6 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const entry: Headers = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
       type: 'file',
-      size: 20,
     } as Headers
     const stream = new PassThrough()
 
@@ -144,9 +143,8 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     expect(registryClientMocks.uploadLayerMonolithic).toHaveBeenCalledWith(
       undefined,
       'upload-location',
-      expect.stringContaining('sha256:'),
+      'sha256:' + 'b'.repeat(64),
       stream,
-      String(entry.size),
     )
   })
 

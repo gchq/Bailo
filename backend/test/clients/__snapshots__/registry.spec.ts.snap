@@ -379,7 +379,6 @@ exports[`clients > registry > mountBlob > success 1`] = `
       "dispatcher": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
-        "Content-Length": "0",
       },
       "method": "POST",
       "signal": {
@@ -450,7 +449,6 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
       "duplex": "half",
       "headers": {
         "Authorization": "Bearer token",
-        "content-length": "size",
         "content-type": "application/octet-stream",
       },
       "method": "PUT",
