@@ -31,19 +31,9 @@ exports[`routes > review > postReviewResponse > missing review decision 1`] = `
             "decision",
           ],
         },
-        {
-          "code": "invalid_type",
-          "expected": "null",
-          "message": "Required",
-          "path": [
-            "body",
-            "dueDate",
-          ],
-          "received": "undefined",
-        },
       ],
     },
-    "message": "Path: body.decision - Message: Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes' | Path: body.dueDate - Message: Required",
+    "message": "Path: body.decision - Message: Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
     "name": "Bailo Error",
   },
 }
