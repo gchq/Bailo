@@ -47,7 +47,7 @@ type WrapperProps = {
 export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
   const router = useRouter()
 
-  const isDocsPage = router.pathname === '/docs' || router.pathname.startsWith('/docs/')
+  const isDocsPage = useMemo(() => router.pathname === '/docs' || router.route.startsWith('/docs/'), [router])
 
   const theme = useTheme()
 
