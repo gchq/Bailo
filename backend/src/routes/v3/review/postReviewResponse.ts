@@ -32,7 +32,7 @@ export const postReviewResponseSchema = z.object({
       }),
       z.object({
         kind: z.enum([ReviewKind.Release, ReviewKind.Access]),
-        dueDate: z.null(),
+        dueDate: z.undefined(),
       }),
     ]),
   ),

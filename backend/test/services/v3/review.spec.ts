@@ -3,16 +3,16 @@ import { describe, expect, test, vi } from 'vitest'
 import { findReviewById } from '../../../src/services/v3/review.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 
-const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
+const ReviewModel = getTypedModelMock('ReviewModel')
 
-vi.mock('../../../src/connectors/authentication/index.js', async () => ({
+vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
 
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../../src/services/model.js', async () => modelMock)
+vi.mock('../../../src/services/model.js', () => modelMock)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
@@ -25,7 +25,7 @@ describe('services > review', () => {
         save: vi.fn(),
       },
     ])
-    ReviewRoleModelMock.aggregate.mockResolvedValueOnce({
+    ReviewModel.at.mockResolvedValue({
       modelId: 'test-1234',
       role: 'owner',
     })

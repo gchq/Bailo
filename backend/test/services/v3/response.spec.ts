@@ -6,7 +6,7 @@ import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 import { testReleaseReview } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/connectors/authorisation/index.js')
-vi.mock('../../../src/connectors/authentication/index.js', async () => ({
+vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: {
     getEntities: vi.fn(function () {
       return ['user:test']
@@ -21,18 +21,16 @@ const reviewV3Mock = vi.hoisted(() => ({
     return [testReleaseReview]
   }),
 }))
-vi.mock('../../../src/services/v3/review.js', async () => reviewV3Mock)
+vi.mock('../../../src/services/v3/review.js', () => reviewV3Mock)
 
 const responseV2Mock = vi.hoisted(() => ({
   sendReviewResponseNotification: vi.fn(),
 }))
-vi.mock('../../../src/services/response.js', async () => responseV2Mock)
+vi.mock('../../../src/services/response.js', () => responseV2Mock)
 
-const mockWebhookService = vi.hoisted(() => {
-  return {
-    sendWebhooks: vi.fn(),
-  }
-})
+const mockWebhookService = vi.hoisted(() => ({
+  sendWebhooks: vi.fn(),
+}))
 vi.mock('../../../src/services/webhook.js', () => mockWebhookService)
 
 describe('services > v3 > response', () => {
