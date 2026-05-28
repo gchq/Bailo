@@ -426,6 +426,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onCreateReview(req: Request, modelId: string) {
+    this.checkEventType(AuditInfo.CreateReview, req)
+    const event = this.generateEvent(req, { modelId })
+    req.log.info(event, req.audit.description)
+  }
+
   async onError(req: Request, error: BailoError) {
     if (!req.audit) {
       // No audit information has been attached to the request

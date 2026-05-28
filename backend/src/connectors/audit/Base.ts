@@ -417,6 +417,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Metric,
   },
+  CreateReview: {
+    typeId: 'CreateReview',
+    description: 'Review created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Review,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -500,6 +506,8 @@ export abstract class BaseAuditConnector {
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
 
   abstract onViewMetric(req: Request): Promise<void>
+
+  abstract onCreateReview(req: Request, modelId: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

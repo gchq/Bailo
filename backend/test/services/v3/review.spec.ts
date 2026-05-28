@@ -1,16 +1,25 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { findReviewById } from '../../../src/services/v3/review.js'
+import { createReview, findReviewById } from '../../../src/services/v3/review.js'
+import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 
-const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
+const ReviewModel = getTypedModelMock('ReviewModel')
 
-vi.mock('../../../src/connectors/authentication/index.js', async () => ({
+vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
 
+const authMocks = vi.hoisted(() => ({
+  default: {
+    models: vi.fn(),
+  },
+}))
+vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
+
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
+  getModelSystemRoles: vi.fn(),
 }))
 vi.mock('../../../src/services/model.js', async () => modelMock)
 
@@ -25,11 +34,39 @@ describe('services > review', () => {
         save: vi.fn(),
       },
     ])
-    ReviewRoleModelMock.aggregate.mockResolvedValueOnce({
+    ReviewModel.at.mockResolvedValue({
       modelId: 'test-1234',
       role: 'owner',
     })
     const review = await findReviewById(user, '6a058a8a125dba342f0034a4')
     expect(review).toMatchSnapshot()
+  })
+
+  test('createReview > create lifecycle review', async () => {
+    modelMock.getModelById.mockResolvedValueOnce({
+      id: 'test-1234',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+      save: vi.fn(),
+    })
+    modelMock.getModelSystemRoles.mockReturnValue(['owner'])
+    ReviewModel.aggregate.mockResolvedValue([
+      {
+        modelId: 'test-1234',
+        role: 'owner',
+      },
+    ])
+    ReviewModel.findOne.mockResolvedValueOnce({
+      modelId: 'test-1234',
+      role: 'owner',
+      delete: vi.fn(),
+    })
+    authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
+    const newReview = await createReview({} as any, 'test-1234', {
+      kind: ReviewKind.Lifecycle,
+      dueDate: new Date('2026-05-28T12:54:03.780Z'),
+      semver: undefined,
+      accessRequestId: undefined,
+    })
+    expect(newReview).toMatchSnapshot()
   })
 })

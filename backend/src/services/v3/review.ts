@@ -1,9 +1,12 @@
-import { Types } from 'mongoose'
+import { PipelineStage, Types } from 'mongoose'
 
 import authentication from '../../connectors/authentication/index.js'
-import { ModelInterface } from '../../models/Model.js'
-import ReviewModel, { ReviewDoc } from '../../models/Review.js'
+import { ModelAction } from '../../connectors/authorisation/actions.js'
+import authorisation from '../../connectors/authorisation/index.js'
+import { ModelInterface, SystemRoles } from '../../models/Model.js'
+import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
+import { ReviewKind } from '../../types/enums.js'
 import { BadReq, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
 
@@ -71,4 +74,82 @@ export async function findUserInCollaborators(user: UserInterface) {
       ],
     },
   }
+}
+
+type CreateReviewContent =
+  | ({
+      accessRequestId: undefined
+      semver: undefined
+    } & CreateLifecycleReviewContent)
+  | {
+      kind: 'release'
+      dueDate: undefined
+      accessRequestId: undefined
+      semver: string
+    }
+  | {
+      kind: 'access'
+      dueDate: undefined
+      accessRequestId: string
+      semver: undefined
+    }
+
+type CreateLifecycleReviewContent = {
+  kind: 'lifecycle'
+  dueDate: Date
+}
+
+export async function createReview(user: UserInterface, modelId: string, reviewContent: CreateReviewContent) {
+  switch (reviewContent.kind) {
+    case ReviewKind.Lifecycle:
+      return await createLifecycleReview(user, modelId, reviewContent.dueDate)
+    default:
+    // TODO add functionality to create reviews for other review kinds
+  }
+}
+
+async function createLifecycleReview(user: UserInterface, modelId: string, dueDate: Date): Promise<ReviewInterface> {
+  const stages: PipelineStage[] = [
+    {
+      $match: {
+        ...(modelId && { modelId }),
+        kind: ReviewKind.Lifecycle,
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+    { $lookup: { from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' } },
+    { $unwind: { path: '$model' } },
+  ]
+
+  stages.push({ $lookup: { from: 'v2_responses', localField: '_id', foreignField: 'parentId', as: 'responses' } })
+  stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
+  stages.push({ $match: { responseCount: 0 } })
+  stages.push({ $unset: ['responses', 'responseCount'] })
+  stages.push({ $set: { deleted: true } })
+  let existingReviews = await ReviewModel.aggregate(stages)
+
+  const auths = await authorisation.models(
+    user,
+    existingReviews.map((review) => review.model),
+    ModelAction.Update,
+  )
+  existingReviews = existingReviews.filter((_, i) => auths[i].success)
+  if (existingReviews) {
+    for (const existingReview of existingReviews) {
+      const reviewToDelete = await ReviewModel.findOne({ _id: existingReview._id })
+      if (reviewToDelete) {
+        reviewToDelete.delete()
+      }
+    }
+  }
+  const newReview = new ReviewModel({
+    modelId,
+    role: SystemRoles.Owner,
+    kind: ReviewKind.Lifecycle,
+    dueDate,
+  })
+  await newReview.save()
+  return newReview
 }

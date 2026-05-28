@@ -2,7 +2,7 @@ import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useEffectEvent, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -146,6 +146,7 @@ export default function ReviewWithComment({
                   onChange={(newValue) => {
                     setDueDate(newValue)
                   }}
+                  minDate={dayjs(new Date())}
                 />
               </Stack>
             )}

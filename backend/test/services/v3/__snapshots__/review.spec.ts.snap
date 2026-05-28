@@ -1,8 +1,33 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > review > findReviewById > can find a review using a given reviewId 1`] = `
+exports[`services > review > createReview > create lifecycle review 1`] = `
 {
-  "aggregate": [MockFunction] {
+  "_id": {
+    "toString": [Function],
+  },
+  "aggregate": [MockFunction],
+  "append": [MockFunction],
+  "at": [MockFunction],
+  "bulkWrite": [MockFunction],
+  "delete": [MockFunction],
+  "deleteMany": [MockFunction],
+  "deleteOne": [MockFunction],
+  "dueDate": 2026-05-28T12:54:03.780Z,
+  "find": [MockFunction],
+  "findById": [MockFunction],
+  "findByIdAndDelete": [MockFunction],
+  "findOne": [MockFunction],
+  "findOneAndDelete": [MockFunction],
+  "findOneAndUpdate": [MockFunction],
+  "group": [MockFunction],
+  "id": "mock-id",
+  "kind": "lifecycle",
+  "lookup": [MockFunction],
+  "markModified": [MockFunction],
+  "match": [MockFunction],
+  "modelId": "test-1234",
+  "role": "owner",
+  "save": [MockFunction] {
     "calls": [
       [],
     ],
@@ -13,127 +38,17 @@ exports[`services > review > findReviewById > can find a review using a given re
       },
     ],
   },
-  "append": [MockFunction],
-  "at": [MockFunction] {
-    "calls": [
-      [
-        0,
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
-  },
-  "bulkWrite": [MockFunction],
-  "exec": [MockFunction],
-  "filter": [MockFunction],
-  "find": [MockFunction],
-  "group": [MockFunction],
-  "lean": [MockFunction],
-  "limit": [MockFunction] {
-    "calls": [
-      [
-        1,
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
-  },
-  "lookup": [MockFunction] {
-    "calls": [
-      [
-        {
-          "as": "model",
-          "foreignField": "id",
-          "from": "v2_models",
-          "localField": "modelId",
-        },
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
-  },
-  "map": [MockFunction],
-  "match": [MockFunction] {
-    "calls": [
-      [
-        {
-          "_id": "6a058a8a125dba342f0034a4",
-        },
-      ],
-      [
-        {
-          "$expr": {
-            "$gt": [
-              {
-                "$size": {
-                  "$filter": {
-                    "as": "item",
-                    "cond": {
-                      "$and": [
-                        {
-                          "$in": [
-                            "$$item.entity",
-                            [
-                              "user:test",
-                            ],
-                          ],
-                        },
-                        {
-                          "$in": [
-                            "$role",
-                            "$$item.roles",
-                          ],
-                        },
-                      ],
-                    },
-                    "input": "$model.collaborators",
-                  },
-                },
-              },
-              0,
-            ],
-          },
-        },
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
-  },
   "sort": [MockFunction],
-  "unwind": [MockFunction] {
-    "calls": [
-      [
-        {
-          "path": "$model",
-        },
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
-  },
+  "toObject": [MockFunction],
+  "update": [MockFunction],
+  "updateMany": [MockFunction],
+  "updateOne": [MockFunction],
+}
+`;
+
+exports[`services > review > findReviewById > can find a review using a given reviewId 1`] = `
+{
+  "modelId": "test-1234",
+  "role": "owner",
 }
 `;

@@ -73,6 +73,8 @@ type additionalParameters =
 
 type GetReviewRequestsForModelQuery = {
   modelId?: EntryInterface['id']
+  kind?: ReviewKindKeys
+  open?: boolean
 } & additionalParameters
 
 export function useGetReviewRequestsForModel({
@@ -80,6 +82,8 @@ export function useGetReviewRequestsForModel({
   semver,
   accessRequestId,
   reviewId,
+  kind,
+  open,
 }: GetReviewRequestsForModelQuery) {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -87,13 +91,15 @@ export function useGetReviewRequestsForModel({
     },
     ErrorInfo
   >(
-    (modelId && semver) || (modelId && accessRequestId) || (modelId && reviewId)
+    modelId
       ? `/api/v2/reviews?${qs.stringify({
           mine: false,
           modelId,
           ...(semver && { semver }),
           ...(accessRequestId && { accessRequestId }),
           ...(reviewId && { reviewId }),
+          ...(kind && { kind }),
+          ...(open && { open }),
         })}`
       : null,
     fetcher,
@@ -154,5 +160,20 @@ export async function postGenericReviewResponse({
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment, decision, dueDate, kind }),
+  })
+}
+
+type PostReviewParams = {
+  modelId: string
+  kind: ReviewKindKeys
+  dueDate?: Dayjs | null
+  semver?: string
+  accessRequestId?: string
+}
+export async function postReview({ modelId, kind, dueDate, semver, accessRequestId }: PostReviewParams) {
+  return fetch(`/api/v3/review/${modelId}`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind, dueDate, semver, accessRequestId }),
   })
 }
