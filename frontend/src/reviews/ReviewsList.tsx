@@ -7,7 +7,7 @@ import ReviewItem from 'src/reviews/ReviewItem'
 import { ReviewListStatusKeys } from 'types/types'
 
 type ReviewsListProps = {
-  kind: 'release' | 'access'
+  kind: 'release' | 'access' | 'lifecycle'
   status: ReviewListStatusKeys
 }
 
