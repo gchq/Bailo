@@ -15,7 +15,6 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { EntryKind } from 'types/types'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function AccessRequest() {
@@ -34,11 +33,7 @@ export default function AccessRequest() {
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
-  const {
-    entry: model,
-    isEntryLoading: isModelLoading,
-    isEntryError: isModelError,
-  } = useGetEntry(modelId, EntryKind.MODEL)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(
     accessRequest ? accessRequest.schemaId : undefined,

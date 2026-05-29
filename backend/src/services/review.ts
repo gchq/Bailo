@@ -161,28 +161,17 @@ export async function removeReleaseReviews(
   semver: string,
   session?: ClientSession,
 ): Promise<ReviewDoc[]> {
-  // finding and then calling potentially multiple deletes is inefficient but our soft delete
-  // plugin doesn't cover bulkDelete
-  const reviews: ReviewDoc[] = await ReviewModel.find({
-    modelId,
-    semver,
-  })
+  const reviews = await ReviewModel.find({ modelId, semver }, undefined, { session })
 
-  const reviewDeletions: ReviewDoc[] = []
+  await ReviewModel.deleteMany(
+    {
+      modelId,
+      semver,
+    },
+    session,
+  )
 
-  for (const review of reviews) {
-    try {
-      reviewDeletions.push(await review.delete(session))
-    } catch (error) {
-      throw InternalError('The requested release review could not be deleted.', {
-        modelId,
-        semver,
-        error,
-      })
-    }
-  }
-
-  return reviewDeletions
+  return reviews
 }
 
 export async function findReviewForResponse(
@@ -250,7 +239,7 @@ export function getRoleEntities(roles: string[], collaborators: CollaboratorEntr
  * Return the models where one of the user's entities is in the model's collaborators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
-async function findUserInCollaborators(user: UserInterface) {
+export async function findUserInCollaborators(user: UserInterface) {
   return {
     $expr: {
       $gt: [

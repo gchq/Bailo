@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { FileWithScanResultsInterface } from '../../../../models/File.js'
+import { FileWithScanResultsAggregate } from '../../../../models/File.js'
 import { getFilesByModel } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
@@ -37,7 +37,7 @@ registerPath({
 })
 
 interface GetFilesResponse {
-  files: Array<FileWithScanResultsInterface>
+  files: Array<FileWithScanResultsAggregate>
 }
 
 export const getFiles = [

@@ -100,3 +100,7 @@ bug:
 tech debt:
   - head-branch:
       - "^(tech|debt|tech-?debt|chore|refactor|maintenance|cleanup)(/|-)"
+
+dependencies:
+  - head-branch:
+      - "^(dep|deps|dependency|dependencies|dependabot|bump|bumps)(/|-)"

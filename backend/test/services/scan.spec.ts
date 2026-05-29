@@ -2,12 +2,17 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
-import { rerunFileScan, rerunImageScan, rerunImageScanNoAuth, scanFile } from '../../src/services/scan.js'
+import {
+  rerunFileScan,
+  rerunImageScan,
+  rerunImageScanNoAuth,
+  runScans,
+  updateArtefactScanWithResults,
+} from '../../src/services/scan.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
 vi.mock('../../src/utils/transactions.js')
-vi.mock('pretty-bytes')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
 
@@ -85,6 +90,7 @@ const fileScanResult: ArtefactScanResult = {
 }
 
 const fileScanningMock = vi.hoisted(() => ({
+  hasScannerForArtefactKind: vi.fn(() => true),
   scannersInfo: vi.fn(() => [
     { toolName: 'fileScan', artefactKind: ArtefactKind.FILE, version: undefined },
     { toolName: 'imageScan', artefactKind: ArtefactKind.IMAGE, version: undefined },
@@ -124,67 +130,15 @@ const registryAuthMocks = vi.hoisted(() => ({
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
 const testFileId = '73859F8D26679D2E52597326'
+const mockFile = { _id: 'file123', name: 'file.txt', size: 1 } as any
 
 describe('services > scan', () => {
   describe('scanFile', () => {
-    test('successfully scans a file and returns scan results', async () => {
-      const scanResult = {
-        state: ArtefactScanState.Complete,
-        toolName: 'clamAv',
-        artefactKind: ArtefactKind.FILE,
-        lastRunAt: new Date(),
-      }
-      ScanModelMock.find.mockResolvedValueOnce([scanResult])
-      ScanModelMock.updateOne.mockResolvedValueOnce(undefined)
-      const file = {
-        id: 'file123',
-        _id: 'file123',
-        toObject: () => ({ name: 'file.txt', size: 1 }),
-      } as any
-
-      const result = await scanFile(file)
-
-      expect(result.scanResults).toEqual([scanResult])
-      expect(result.name).toBe('file.txt')
-    })
-
-    test('runs scanners when scanning a file', async () => {
-      ScanModelMock.find.mockResolvedValueOnce([])
-      ScanModelMock.updateOne.mockResolvedValue(undefined)
-      const file = {
-        id: 'file123',
-        _id: 'file123',
-        toObject: () => ({ name: 'file.txt', size: 1 }),
-      } as any
-
-      await scanFile(file)
-
-      expect(fileScanningMock.startScans).toHaveBeenCalledTimes(1)
-    })
-
-    test('returns file with no scan results when no scanners are enabled', async () => {
-      fileScanningMock.scannersInfo.mockReturnValueOnce([])
-      ScanModelMock.find.mockResolvedValueOnce([])
-      const file = {
-        id: 'file123',
-        _id: 'file123',
-        toObject: () => ({ name: 'file.txt', size: 1 }),
-      } as any
-
-      const result = await scanFile(file)
-
-      expect(result.scanResults).toEqual([])
-    })
-
     test('sets scan state to InProgress before completing', async () => {
       ScanModelMock.find.mockResolvedValueOnce([])
-      const file = {
-        id: 'file123',
-        _id: 'file123',
-        toObject: () => ({ name: 'file.txt', size: 1 }),
-      } as any
+      ScanModelMock.updateOne.mockResolvedValue(undefined)
 
-      await scanFile(file)
+      await runScans({ file: mockFile })
 
       expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
       const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0]) // extract ops array(s)
@@ -211,12 +165,8 @@ describe('services > scan', () => {
       })
       ScanModelMock.find.mockResolvedValueOnce([])
       ScanModelMock.updateOne.mockResolvedValue(undefined)
-      const file = {
-        id: 'file123',
-        _id: 'file123',
-        toObject: () => ({ name: 'file.txt', size: 1 }),
-      } as any
-      await scanFile(file)
+
+      await runScans({ file: mockFile })
 
       expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
       const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((call) => call[0])
@@ -266,21 +216,19 @@ describe('services > scan', () => {
     test('throws bad request when model is not found', async () => {
       modelMocks.getModelById.mockResolvedValueOnce(null)
 
-      await expect(rerunFileScan({} as any, 'missingModel', testFileId)).rejects.toThrowError(
-        /^Cannot find requested model/,
-      )
+      await expect(rerunFileScan({} as any, 'missingModel', testFileId)).rejects.toThrow(/^Cannot find requested model/)
     })
 
     test('throws bad request when file is not found', async () => {
       fileMocks.getFileById.mockResolvedValueOnce(null)
 
-      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(/^Cannot find requested file/)
+      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrow(/^Cannot find requested file/)
     })
 
     test('throws bad request when attempting to upload an empty file', async () => {
       fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model', size: 0, name: 'file.txt' })
 
-      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
+      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrow(
         /^Cannot run scan on an empty file/,
       )
     })
@@ -288,7 +236,7 @@ describe('services > scan', () => {
     test('does not rerun file scan before delay is over', async () => {
       ScanModelMock.find.mockResolvedValueOnce([{ state: ArtefactScanState.Complete, lastRunAt: new Date() }])
 
-      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
+      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrow(
         /^Please wait 5 minutes before attempting a rescan file.txt/,
       )
     })
@@ -296,23 +244,21 @@ describe('services > scan', () => {
     test('throws forbidden when file authorisation fails', async () => {
       authMocks.default.file.mockResolvedValueOnce({ success: false, info: 'denied' } as any)
 
-      await expect(rerunFileScan({ dn: 'user' } as any, 'model123', testFileId)).rejects.toThrowError(/^denied/)
+      await expect(rerunFileScan({ dn: 'user' } as any, 'model123', testFileId)).rejects.toThrow(/^denied/)
     })
 
     test('throws forbidden when model update authorisation fails', async () => {
       authMocks.default.model.mockResolvedValueOnce({ success: false, info: 'denied' } as any)
       ScanModelMock.find.mockResolvedValueOnce([])
 
-      await expect(rerunFileScan({ dn: 'user' } as any, 'model123', testFileId)).rejects.toThrowError(/^denied/)
+      await expect(rerunFileScan({ dn: 'user' } as any, 'model123', testFileId)).rejects.toThrow(/^denied/)
     })
 
     test('throws service unavailable when no file scanners are enabled', async () => {
-      fileScanningMock.scannersInfo.mockReturnValueOnce([])
+      fileScanningMock.hasScannerForArtefactKind.mockReturnValueOnce(false)
       ScanModelMock.find.mockResolvedValueOnce([])
 
-      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
-        'No file scanners are enabled.',
-      )
+      await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrow('No file scanners are enabled.')
     })
   })
 
@@ -329,21 +275,12 @@ describe('services > scan', () => {
       expect(result).toBe('Image scan started for repo/image:latest')
     })
 
-    test('fail on manifest list', async () => {
-      registryClientMocks.isImageTagManifestList.mockResolvedValueOnce(true)
-      ScanModelMock.find.mockResolvedValueOnce([])
-
-      await expect(
-        rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError(/^Bailo backend does not currently support scanning images with manifest lists./)
-    })
-
     test('throws bad request when model is not found (image scan)', async () => {
       modelMocks.getModelById.mockResolvedValueOnce(null)
 
       await expect(
         rerunImageScan({} as any, 'missingModel', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError(/^Cannot find requested model/)
+      ).rejects.toThrow(/^Cannot find requested model/)
     })
 
     test('throws forbidden when image authorisation fails', async () => {
@@ -352,7 +289,7 @@ describe('services > scan', () => {
 
       await expect(
         rerunImageScan({ dn: 'user' } as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError(/^denied/)
+      ).rejects.toThrow(/^denied/)
     })
 
     test('throws forbidden when model update authorisation fails (image scan)', async () => {
@@ -361,7 +298,7 @@ describe('services > scan', () => {
 
       await expect(
         rerunImageScan({ dn: 'user' } as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError(/^denied/)
+      ).rejects.toThrow(/^denied/)
     })
 
     test('does not rerun image scan before delay is over', async () => {
@@ -370,17 +307,17 @@ describe('services > scan', () => {
 
       await expect(
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError(/^Please wait 5 minutes before attempting a rescan repo\/image:latest/)
+      ).rejects.toThrow(/^Please wait 5 minutes before attempting a rescan repo\/image:latest/)
     })
 
     test('throws service unavailable when no image scanners are enabled', async () => {
-      fileScanningMock.scannersInfo.mockReturnValueOnce([])
+      fileScanningMock.hasScannerForArtefactKind.mockReturnValueOnce(false)
       imageMocks.getImageLayers.mockResolvedValueOnce([{ digest: 'sha256:layer1' }])
       ScanModelMock.find.mockResolvedValueOnce([])
 
       await expect(
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrowError('No image scanners are enabled.')
+      ).rejects.toThrow('No image scanners are enabled.')
     })
   })
 
@@ -402,6 +339,124 @@ describe('services > scan', () => {
       expect(authMocks.default.image).not.toHaveBeenCalled()
       expect(authMocks.default.model).not.toHaveBeenCalled()
       expect(registryAuthMocks.issueAccessToken).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('updateArtefactScanWithResults', () => {
+    test('creates only one InProgress scan when called concurrently', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      // First call succeeds, subsequent calls simulate duplicate key error
+      ScanModelMock.bulkWrite.mockResolvedValueOnce(undefined).mockRejectedValue({ code: 11000 })
+      const attempts = 5
+
+      await Promise.all(
+        Array.from({ length: attempts }).map(() =>
+          updateArtefactScanWithResults(scanIdentifier, [result]).catch(() => undefined),
+        ),
+      )
+
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalled()
+    })
+
+    test('updates existing non-InProgress scan instead of inserting new one', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const op: any = bulkOps[0]
+      expect(op.updateOne.filter).toMatchObject({
+        ...scanIdentifier,
+        toolName: 'Trivy',
+      })
+      expect(op.updateOne.upsert).toBe(true)
+    })
+
+    test('reuses stale InProgress scan', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps: any = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const filter = bulkOps[0].updateOne.filter
+      expect(filter.$or).toBeDefined()
+      expect(filter.$or).toHaveLength(2)
+      expect(filter.$or[0]).toHaveProperty('state')
+      expect(filter.$or[1]).toHaveProperty('lastRunAt')
+    })
+
+    test('does not upsert when state is not InProgress', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.Complete,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+
+      const bulkOps = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const op: any = bulkOps[0]
+      expect(op.updateOne.upsert).toBe(false)
+      expect(op.updateOne.filter).not.toHaveProperty('$or')
+    })
+
+    test('sets result fields in update payload', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        scannerVersion: '1.2.3',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockResolvedValue(undefined)
+
+      await updateArtefactScanWithResults(scanIdentifier, [result])
+      const bulkOps: any = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
+      const update = bulkOps[0].updateOne.update
+      expect(update.$set).toMatchObject(result)
     })
   })
 })

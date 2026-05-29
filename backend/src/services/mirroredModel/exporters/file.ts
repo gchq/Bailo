@@ -1,8 +1,9 @@
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
+import { isScanAllowedSkip } from '../../../connectors/artefactScanning/modelScan.js'
 import { FileAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { FileWithScanResultsInterface } from '../../../models/File.js'
+import { FileWithScanResultsAggregate } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
@@ -13,9 +14,9 @@ import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter } from './base.js'
 
 export class FileExporter extends BaseExporter {
-  protected readonly file: FileWithScanResultsInterface
+  protected readonly file: FileWithScanResultsAggregate
 
-  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsInterface, logData: MirrorExportLogData) {
+  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsAggregate, logData: MirrorExportLogData) {
     super(user, model, logData)
     this.file = file
   }
@@ -35,12 +36,20 @@ export class FileExporter extends BaseExporter {
     if (scanners.scannersInfo().length > 0) {
       if (!this.file.scanResults || this.file.scanResults.length === 0) {
         throw BadReq('The file is missing vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
-      } else if (this.file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+      } else if (
+        this.file.scanResults.some(
+          (scanResult) => scanResult.state !== ArtefactScanState.Complete && !isScanAllowedSkip(scanResult),
+        )
+      ) {
         throw BadReq('The file has incomplete vulnerability scan(s).', {
           filename: this.file.name,
           fileId: this.file.id,
         })
-      } else if (this.file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary.length > 0)) {
+      } else if (
+        this.file.scanResults.some(
+          (scanResult) => scanResult.summary && scanResult.summary.length > 0 && !isScanAllowedSkip(scanResult),
+        )
+      ) {
         throw BadReq('The file has failed vulnerability scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }

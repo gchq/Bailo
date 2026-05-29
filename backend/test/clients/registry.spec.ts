@@ -7,9 +7,9 @@ import {
   doesLayerExist,
   getApiVersion,
   getImageTagManifest,
+  getImageTagManifests,
   getRegistryLayerStream,
   initialiseUpload,
-  isImageTagManifestList,
   listImageTags,
   listModelRepos,
   mountBlob,
@@ -38,11 +38,20 @@ global.fetch = vi.fn()
 const fetchMock: Mock = global.fetch as Mock
 
 class AbortControllerMock {
-  signal: { aborted: boolean; onabort: ((...args: any[]) => void) | null }
+  signal: {
+    aborted: boolean
+    onabort: ((...args: any[]) => void) | null
+    addEventListener: (type: string, listener: (...args: any[]) => void) => void
+  }
   constructor() {
     this.signal = {
       aborted: false,
       onabort: null,
+      addEventListener: (type, listener) => {
+        if (type === 'abort' && typeof listener === 'function') {
+          this.signal.onabort = listener
+        }
+      },
     }
   }
   abort() {
@@ -70,7 +79,7 @@ describe('clients > registry', () => {
 
     const response = await getApiVersion('token')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual('registry/2.0')
   })
@@ -85,12 +94,12 @@ describe('clients > registry', () => {
 
     const response = getApiVersion('token')
 
-    await expect(response).rejects.toThrowError('Registry returned invalid headers.')
-    expect(fetchMock).toBeCalled()
+    await expect(response).rejects.toThrow('Registry returned invalid headers.')
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
   })
 
-  test('getImageTagManifest > success Docker spec', async () => {
+  test('getImageTagManifest > success Docker spec using tag reference', async () => {
     const mockManifest = {
       schemaVersion: 2,
       mediaType: DockerManifestMediaType,
@@ -116,7 +125,7 @@ describe('clients > registry', () => {
 
     const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual({
       body: mockManifest,
@@ -177,7 +186,7 @@ describe('clients > registry', () => {
         'com.example.key2': 'value2',
       },
     },
-  ])('getImageTagManifest > success OCI spec', async (mockManifest) => {
+  ])('getImageTagManifest > success OCI spec using tag reference', async (mockManifest) => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => mockManifest),
@@ -186,7 +195,7 @@ describe('clients > registry', () => {
 
     const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual({
       body: mockManifest,
@@ -194,11 +203,48 @@ describe('clients > registry', () => {
     })
   })
 
+  test('getImageTagManifest > success using digest reference', async () => {
+    const mockManifest = {
+      schemaVersion: 2,
+      mediaType: DockerManifestMediaType,
+      config: {
+        mediaType: 'application/vnd.docker.container.image.v1+json',
+        size: 1,
+        digest: 'sha256:config',
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.docker.container.image.v1+json',
+          size: 1,
+          digest: 'sha256:layer',
+        },
+      ],
+    }
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => mockManifest),
+      headers: new Headers({
+        'content-type': 'application/json',
+        'docker-content-digest': 'sha256:digest',
+      }),
+    })
+
+    const response = await getImageTagManifest('token', {
+      repository: 'modelId',
+      name: 'image',
+      digest: 'sha256:digest',
+    })
+
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response.body).toStrictEqual(mockManifest)
+  })
+
   test('getImageTagManifest > cannot reach registry', async () => {
     fetchMock.mockRejectedValueOnce('Error')
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('getImageTagManifest > invalid headers response', async () => {
@@ -209,7 +255,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Registry returned invalid headers.')
+    await expect(response).rejects.toThrow('Registry returned invalid headers.')
   })
 
   test('getImageTagManifest > unrecognised error response', async () => {
@@ -221,7 +267,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Unrecognised registry error response.')
+    await expect(response).rejects.toThrow('Unrecognised registry error response.')
   })
 
   test('getImageTagManifest > registry error response', async () => {
@@ -241,7 +287,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('getImageTagManifest > throw all errors apart from unknown name', async () => {
@@ -261,7 +307,140 @@ describe('clients > registry', () => {
 
     const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
+  })
+
+  test('getImageTagManifests > success manifest list', async () => {
+    const mockManifestList = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          digest: 'sha256:digest1',
+          size: 123,
+          platform: { architecture: 'amd64', os: 'linux' },
+        },
+      ],
+    }
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => mockManifestList),
+      headers: new Headers({
+        'content-type': 'application/json',
+        'docker-content-digest': 'sha256:listdigest',
+      }),
+    })
+
+    const response = await getImageTagManifests('token', {
+      repository: 'modelId',
+      name: 'image',
+      tag: 'tag1',
+    })
+
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual({
+      body: mockManifestList,
+      headers: {
+        'content-type': 'application/json',
+        'docker-content-digest': 'sha256:listdigest',
+      },
+    })
+  })
+
+  test('getImageTagManifests > success image manifest', async () => {
+    const mockManifest = {
+      schemaVersion: 2,
+      mediaType: DockerManifestMediaType,
+      config: {
+        mediaType: 'application/vnd.docker.container.image.v1+json',
+        size: 1,
+        digest: 'sha256:config',
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.docker.container.image.v1+json',
+          size: 1,
+          digest: 'sha256:layer',
+        },
+      ],
+    }
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => mockManifest),
+      headers: new Headers({
+        'content-type': 'application/json',
+        'docker-content-digest': 'sha256:digest',
+      }),
+    })
+
+    const response = await getImageTagManifests('token', {
+      repository: 'modelId',
+      name: 'image',
+      tag: 'tag1',
+    })
+
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response.body).toStrictEqual(mockManifest)
+  })
+
+  test('getImageTagManifests > success using digest reference', async () => {
+    const mockManifestList = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.index.v1+json',
+      manifests: [],
+    }
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => mockManifestList),
+      headers: new Headers({
+        'content-type': 'application/json',
+        'docker-content-digest': 'sha256:digest',
+      }),
+    })
+
+    const response = await getImageTagManifests('token', {
+      repository: 'modelId',
+      name: 'image',
+      digest: 'sha256:digest',
+    })
+
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response.body).toStrictEqual(mockManifestList)
+  })
+
+  test('getImageTagManifests > invalid response body', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      json: vi.fn(() => ({ invalid: true })),
+      headers: new Headers({
+        'content-type': 'application/json',
+        'docker-content-digest': 'sha256:digest',
+      }),
+    })
+
+    const response = getImageTagManifests('token', {
+      repository: 'modelId',
+      name: 'image',
+      tag: 'tag1',
+    })
+
+    await expect(response).rejects.toThrow('Registry response body validation failed.')
+  })
+
+  test('getImageTagManifests > cannot reach registry', async () => {
+    fetchMock.mockRejectedValueOnce('Error')
+
+    const response = getImageTagManifests('token', {
+      repository: 'modelId',
+      name: 'image',
+      tag: 'tag1',
+    })
+
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('getRegistryLayerStream > success', async () => {
@@ -273,7 +452,7 @@ describe('clients > registry', () => {
 
     const response = await getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response.stream).toBeInstanceOf(Readable)
     expect(response.abort).toBeTypeOf('function')
@@ -283,18 +462,20 @@ describe('clients > registry', () => {
     fetchMock.mockRejectedValueOnce('Error')
     const response = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('getRegistryLayerStream > unrecognised error response', async () => {
     fetchMock.mockReturnValueOnce({
       ok: false,
+      status: 400,
       text: vi.fn(() => 'Unrecognised response'),
+      json: vi.fn(),
       headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
     })
     const response = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    await expect(response).rejects.toThrowError('Unrecognised registry error response.')
+    await expect(response).rejects.toThrow('Unrecognised registry error response.')
   })
 
   test('getRegistryLayerStream > malformed response', async () => {
@@ -307,7 +488,7 @@ describe('clients > registry', () => {
 
     const response = getRegistryLayerStream('token', { repository: 'modelId', name: 'image' }, 'sha256:digest1')
 
-    await expect(response).rejects.toThrowError('Unrecognised response stream when getting image layer blob.')
+    await expect(response).rejects.toThrow('Unrecognised response stream when getting image layer blob.')
   })
 
   test('listModelRepos > only returns model repos', async () => {
@@ -319,7 +500,7 @@ describe('clients > registry', () => {
     })
     const response = await listModelRepos('token', modelId)
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual([`${modelId}/repo`])
   })
@@ -328,7 +509,7 @@ describe('clients > registry', () => {
     fetchMock.mockRejectedValueOnce('Error')
     const response = listModelRepos('token', 'modelId')
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('listModelRepos > unrecognised error response', async () => {
@@ -348,7 +529,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('listModelRepos > missing repositories in response', async () => {
@@ -359,7 +540,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    await expect(response).rejects.toThrowError('Registry response body validation failed.')
+    await expect(response).rejects.toThrow('Registry response body validation failed.')
   })
 
   test('listModelRepos > paginated link sets paginateParameter', async () => {
@@ -393,7 +574,7 @@ describe('clients > registry', () => {
 
     const response = await listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(tags)
   })
@@ -423,7 +604,7 @@ describe('clients > registry', () => {
 
     const response = await listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(['tag1', 'tag2', 'tag3'])
   })
@@ -442,8 +623,8 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    await expect(response).rejects.toThrowError('Registry pagination limit exceeded.')
-    expect(fetchMock).toBeCalledTimes(100)
+    await expect(response).rejects.toThrow('Registry pagination limit exceeded.')
+    expect(fetchMock).toHaveBeenCalledTimes(100)
   })
 
   test('listImageTags > unknown name return empty list', async () => {
@@ -483,127 +664,7 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { repository: 'modelId', name: 'image' })
 
-    await expect(response).rejects.toThrowError('Error response received from registry.')
-  })
-
-  test('isImageTagManifestList > true for manifest list media type', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      headers: new Headers({
-        'content-type': 'application/vnd.docker.distribution.manifest.list.v2+json',
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const result = await isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    expect(result).toBe(true)
-  })
-
-  test('isImageTagManifestList > false for single image manifest media type', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      headers: new Headers({
-        'content-type': DockerManifestMediaType,
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const result = await isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isImageTagManifestList > supports OCI image manifest media type', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      headers: new Headers({
-        'content-type': OCIManifestMediaType,
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const result = await isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isImageTagManifestList > missing content-type header throws error', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      text: vi.fn(() => 'text'),
-      headers: new Headers({
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const response = isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    await expect(response).rejects.toThrowError('Registry response missing Content-Type header.')
-  })
-
-  test('isImageTagManifestList > unrecognised content-type throws error', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      json: vi.fn(() => ({})),
-      text: vi.fn(() => 'text'),
-      headers: new Headers({
-        'content-type': 'application/unknown',
-        'docker-content-digest': 'digest',
-      }),
-    })
-
-    const response = isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    await expect(response).rejects.toThrowError('Unrecognised manifest media type.')
-  })
-
-  test('isImageTagManifestList > registry error response is propagated', async () => {
-    fetchMock.mockReturnValueOnce({
-      ok: false,
-      json: vi.fn(() => ({
-        errors: [
-          {
-            code: 'NAME_UNKNOWN',
-            message: 'repository name not known to registry',
-            detail: [],
-          },
-        ],
-      })),
-      headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
-    })
-
-    const response = isImageTagManifestList('token', {
-      repository: 'modelId',
-      name: 'image',
-      tag: 'tag',
-    })
-
-    await expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('doesLayerExist > success true', async () => {
@@ -621,9 +682,9 @@ describe('clients > registry', () => {
       headers: mockHeaders,
     })
 
-    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
+    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image', digest: 'digest' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(true)
   })
@@ -634,11 +695,12 @@ describe('clients > registry', () => {
       status: 404,
       statusText: '',
       headers: new Headers({}),
+      text: vi.fn(),
     })
 
-    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
+    const response = await doesLayerExist('token', { repository: 'modelId', name: 'image', digest: 'digest' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(false)
   })
@@ -646,10 +708,10 @@ describe('clients > registry', () => {
   test('doesLayerExist > rethrow error', async () => {
     fetchMock.mockRejectedValueOnce('Error')
 
-    const response = doesLayerExist('token', { repository: 'modelId', name: 'image' }, 'digest')
+    const response = doesLayerExist('token', { repository: 'modelId', name: 'image', digest: 'digest' })
 
-    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
-    expect(fetchMock).toBeCalled()
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
+    expect(fetchMock).toHaveBeenCalled()
   })
 
   test('initialiseUpload > success', async () => {
@@ -668,12 +730,33 @@ describe('clients > registry', () => {
 
     const response = await initialiseUpload('token', { repository: 'modelId', name: 'image' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
 
-  test('putManifest > success', async () => {
+  test('initialiseUpload > registry error response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'error'),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'UNAUTHORIZED',
+            message: 'Not allowed',
+            detail: [],
+          },
+        ],
+      })),
+      headers: new Headers({ 'content-type': 'application/json' }),
+    })
+
+    const response = initialiseUpload('token', { repository: 'modelId', name: 'image' })
+
+    await expect(response).rejects.toThrow('Error response received from registry.')
+  })
+
+  test('putManifest > success using tag reference', async () => {
     const mockHeaders = new Headers({
       'content-length': 'string',
       date: 'string',
@@ -688,9 +771,61 @@ describe('clients > registry', () => {
 
     const response = await putManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' }, null, '')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('putManifest > success using digest reference', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      location: 'string',
+    })
+
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await putManifest(
+      'token',
+      { repository: 'modelId', name: 'image', digest: 'sha256:digest' } as any,
+      '{}',
+      DockerManifestMediaType,
+    )
+
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('putManifest > registry error response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'error'),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'UNAUTHORIZED',
+            message: 'Not allowed',
+            detail: [],
+          },
+        ],
+      })),
+      headers: new Headers({ 'content-type': 'application/json' }),
+    })
+
+    const response = putManifest(
+      'token',
+      { repository: 'modelId', name: 'image', tag: 'tag' },
+      '{}',
+      DockerManifestMediaType,
+    )
+
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 
   test('uploadLayerMonolithic > success', async () => {
@@ -708,9 +843,17 @@ describe('clients > registry', () => {
 
     const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('uploadLayerMonolithic > cannot reach registry', async () => {
+    fetchMock.mockRejectedValueOnce('Error')
+
+    const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
+
+    await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
 
   test('mountBlob > success', async () => {
@@ -734,12 +877,38 @@ describe('clients > registry', () => {
       'blob',
     )
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
   })
 
-  test('deleteManifest > success', async () => {
+  test('mountBlob > registry error response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'error'),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'UNAUTHORIZED',
+            message: 'Not allowed',
+            detail: [],
+          },
+        ],
+      })),
+      headers: new Headers({ 'content-type': 'application/json' }),
+    })
+
+    const response = mountBlob(
+      'token',
+      { repository: 'modelId', name: 'image' },
+      { repository: 'modelId', name: 'image2' },
+      'digest',
+    )
+
+    await expect(response).rejects.toThrow('Error response received from registry.')
+  })
+
+  test('deleteManifest > success using tag reference', async () => {
     const mockHeaders = new Headers({
       'content-length': 'string',
       date: 'string',
@@ -753,8 +922,56 @@ describe('clients > registry', () => {
 
     const response = await deleteManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' })
 
-    expect(fetchMock).toBeCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('deleteManifest > success using digest reference', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-distribution-api-version': 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      headers: mockHeaders,
+    })
+
+    const response = await deleteManifest('token', {
+      repository: 'modelId',
+      name: 'image',
+      digest: 'sha256:digest',
+    })
+
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('deleteManifest > registry error response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'error'),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'UNAUTHORIZED',
+            message: 'Not allowed',
+            detail: [],
+          },
+        ],
+      })),
+      headers: new Headers({ 'content-type': 'application/json' }),
+    })
+
+    const response = deleteManifest('token', {
+      repository: 'modelId',
+      name: 'image',
+      tag: 'tag',
+    })
+
+    await expect(response).rejects.toThrow('Error response received from registry.')
   })
 })

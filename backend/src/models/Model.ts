@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -13,6 +13,7 @@ export const EntryKind = {
   Model: 'model',
   DataCard: 'data-card',
   MirroredModel: 'mirrored-model',
+  UntrustedModel: 'untrusted-model',
 } as const
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
@@ -83,7 +84,7 @@ export interface ModelInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ModelDoc = ModelInterface & SoftDeleteDocument
+export type ModelDoc = HydratedDocument<ModelInterface> & SoftDeleteDocument
 
 const ModelSchema = new Schema<ModelDoc>(
   {

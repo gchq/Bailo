@@ -40,6 +40,9 @@ const config: PartialDeep<Config> = {
     artefactScanners: {
       kinds: [],
     },
+    metrics: {
+      kind: 'simple',
+    },
   },
   smtp: {
     enabled: true,
@@ -110,6 +113,7 @@ const config: PartialDeep<Config> = {
       host: '127.0.0.1',
       port: 8080,
       concurrency: 1,
+      streamMaxLength: '10M',
     },
 
     artefactscan: {
@@ -133,6 +137,10 @@ const config: PartialDeep<Config> = {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
+    untrustedModel: {
+      enabled: false,
+      untrustedModelDescription: 'tbd',
+    },
   },
   modelMirror: {
     export: {
@@ -140,6 +148,9 @@ const config: PartialDeep<Config> = {
     },
     contentDirectory: 'content-dir',
     metadataFile: 'meta.json',
+  },
+  untrustedModels: {
+    defaultState: 'Production',
   },
 }
 

@@ -12,6 +12,8 @@ import {
   startMultipartUpload,
 } from '../../src/clients/s3.js'
 
+vi.mock('bytes')
+
 const s3Mocks = vi.hoisted(() => {
   const send = vi.fn(function () {
     return 'response'
@@ -92,7 +94,7 @@ describe('clients > s3', () => {
 
     const response = putObjectStream(key, body, bucket)
 
-    await expect(response).rejects.toThrowError('Unable to upload the object to the S3 service.')
+    await expect(response).rejects.toThrow('Unable to upload the object to the S3 service.')
   })
 
   test('putObjectPartStream > success', async () => {
@@ -129,7 +131,7 @@ describe('clients > s3', () => {
 
     const response = putObjectPartStream(key, uploadId, partNumber, body, bodySize, bucket)
 
-    await expect(response).rejects.toThrowError('Unable to upload the multipart object to the S3 service.')
+    await expect(response).rejects.toThrow('Unable to upload the multipart object to the S3 service.')
   })
 
   test('getObjectStream > success', async () => {
@@ -157,7 +159,7 @@ describe('clients > s3', () => {
 
     const response = getObjectStream(bucket, key, range)
 
-    await expect(response).rejects.toThrowError('Unable to retrieve the object from the S3 service.')
+    await expect(response).rejects.toThrow('Unable to retrieve the object from the S3 service.')
   })
 
   test('startMultipartUpload > success', async () => {
@@ -185,7 +187,7 @@ describe('clients > s3', () => {
 
     const response = startMultipartUpload(key, contentType, bucket)
 
-    await expect(response).rejects.toThrowError()
+    await expect(response).rejects.toThrow()
   })
 
   test('completeMultipartUpload > success', async () => {
@@ -226,7 +228,7 @@ describe('clients > s3', () => {
 
     const response = completeMultipartUpload(key, uploadId, parts, bucket)
 
-    await expect(response).rejects.toThrowError()
+    await expect(response).rejects.toThrow()
   })
 
   test('deleteObject > success', async () => {
@@ -255,7 +257,7 @@ describe('clients > s3', () => {
 
     const response = deleteObject(key, bucket)
 
-    await expect(response).rejects.toThrowError()
+    await expect(response).rejects.toThrow()
   })
 
   test('objectExists > success', async () => {
@@ -294,7 +296,7 @@ describe('clients > s3', () => {
 
     const response = objectExists(key, bucket)
 
-    await expect(response).rejects.toThrowError('Unable to get object metadata from the S3 service.')
+    await expect(response).rejects.toThrow('Unable to get object metadata from the S3 service.')
   })
 
   test('ensureBucketExists > create new bucket', async () => {
@@ -319,7 +321,7 @@ describe('clients > s3', () => {
 
     const response = ensureBucketExists(bucket)
 
-    await expect(response).rejects.toThrowError('There was a problem ensuring this bucket exists.')
+    await expect(response).rejects.toThrow('There was a problem ensuring this bucket exists.')
   })
 
   test('ensureBucketExists > create bucket error', async () => {
@@ -329,7 +331,7 @@ describe('clients > s3', () => {
 
     const response = ensureBucketExists(bucket)
 
-    await expect(response).rejects.toThrowError('Unable to create a new bucket.')
+    await expect(response).rejects.toThrow('Unable to create a new bucket.')
   })
 
   test('headObject > success', async () => {
@@ -353,7 +355,7 @@ describe('clients > s3', () => {
 
     const response = headObject(key, bucket)
 
-    await expect(response).rejects.toThrowError()
+    await expect(response).rejects.toThrow()
     expect(s3Mocks.HeadObjectCommand).toHaveBeenCalledWith({
       Bucket: bucket,
       Key: key,

@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
 import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
@@ -34,6 +34,7 @@ vi.mock('../../../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
   warn: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({
@@ -63,10 +64,6 @@ const mockMetadata: ImageMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > ImageImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     expect(importer).toMatchSnapshot()
@@ -74,14 +71,14 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('constructor > error when importKind is not Image', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
-    expect(() => new ImageImporter(mockUser, badMetadata, mockLogData)).toThrowError(
+    expect(() => new ImageImporter(mockUser, badMetadata, mockLogData)).toThrow(
       /^Cannot parse compressed Image: incorrect metadata specified\./,
     )
   })
 
   test('constructor > error when splitDistributionPackageName result has no tag', () => {
     registryServiceMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'imageName' } as any)
-    expect(() => new ImageImporter(mockUser, mockMetadata, mockLogData)).toThrowError(
+    expect(() => new ImageImporter(mockUser, mockMetadata, mockLogData)).toThrow(
       /^Distribution Package Name must include a tag\./,
     )
   })
@@ -137,7 +134,6 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const entry: Headers = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
       type: 'file',
-      size: 20,
     } as Headers
     const stream = new PassThrough()
 
@@ -147,9 +143,8 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     expect(registryClientMocks.uploadLayerMonolithic).toHaveBeenCalledWith(
       undefined,
       'upload-location',
-      expect.stringContaining('sha256:'),
+      'sha256:' + 'b'.repeat(64),
       stream,
-      String(entry.size),
     )
   })
 
@@ -166,7 +161,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     } as Headers
     const stream = new PassThrough()
 
-    await expect(importer.processEntry(entry, stream)).rejects.toThrowError(/^Failed to upload blob to registry\./)
+    await expect(importer.processEntry(entry, stream)).rejects.toThrow(/^Failed to upload blob to registry\./)
   })
 
   test('processEntry > error for unrecognised file path', async () => {
@@ -174,7 +169,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const entry: Headers = { name: 'content-dir/invalid.json', type: 'file' } as Headers
     const stream = new PassThrough()
 
-    await expect(importer.processEntry(entry, stream)).rejects.toThrowError(
+    await expect(importer.processEntry(entry, stream)).rejects.toThrow(
       /^Cannot parse compressed image: unrecognised contents\./,
     )
   })

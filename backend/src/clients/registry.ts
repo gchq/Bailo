@@ -3,13 +3,14 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 import type { ZodSchema } from 'zod'
 
-import { ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
+import { ImageDigestRef, ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
+  AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
   BaseApiCheckResponseBodySchema,
   BaseApiCheckResponseHeadersSchema,
@@ -21,8 +22,7 @@ import {
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
   ImageManifestV2Schema,
-  ManifestListMediaTypeSchema,
-  ManifestMediaTypeSchema,
+  ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
   TagsListResponseBodySchema,
@@ -92,8 +92,12 @@ async function readBody(res: Response, expectStream: boolean): Promise<{ body?: 
     }
   }
 
-  if (isJsonContentType(res.headers.get('content-type'))) {
-    return { body: await res.json() }
+  try {
+    if (isJsonContentType(res.headers.get('content-type'))) {
+      return { body: await res.json() }
+    }
+  } catch {
+    // NOOP because sometimes the header doesn't suggest this is JSON
   }
 
   return { body: await res.text() }
@@ -145,7 +149,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    const { body: rawBody, stream } = await readBody(res, expectStream)
+    const { body: rawBody, stream } = await readBody(res, expectStream && res.ok)
     const context = {
       url: res.url,
       status: res.status,
@@ -157,6 +161,11 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       controller.abort()
       if (rawBody && RegistryErrorResponseBodySchema.safeParse(rawBody).success) {
         throw RegistryError(RegistryErrorResponseBodySchema.parse(rawBody), context)
+      }
+
+      // allow callers to handle plain 404s without registry error body
+      if (res.status === 404) {
+        throw RegistryError({ errors: [{ code: 'NAME_UNKNOWN', message: 'Not found', detail: [] }] }, context)
       }
 
       throw InternalError('Unrecognised registry error response.', {
@@ -229,6 +238,10 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
   }
 }
 
+function getImageRefId(imageRef: ImageRef): string {
+  return 'tag' in imageRef ? imageRef.tag : imageRef.digest
+}
+
 export async function getApiVersion(token: string) {
   const result = await registryRequest(token, '', {
     bodySchema: BaseApiCheckResponseBodySchema,
@@ -277,48 +290,37 @@ export async function listImageTags(token: string, repoRef: ImageNameRef) {
   }
 }
 
-export async function isImageTagManifestList(token: string, imageRef: ImageRef): Promise<boolean> {
-  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
-    // do not validate the body here as we only care about Content-Type
-    headersSchema: ManifestResponseHeadersSchema,
-    extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+/**
+ * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
+ */
+export async function getImageTagManifest(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      bodySchema: ImageManifestV2Schema,
+      headersSchema: ManifestResponseHeadersSchema,
+      extraHeaders: {
+        Accept: AcceptManifestMediaTypeHeaderValue,
+      },
     },
-  })
+  )
 
-  const rawContentType = result.headers['content-type']
-  const contentType = rawContentType?.split(';')[0]?.trim()
-
-  if (!contentType) {
-    throw InternalError('Registry response missing Content-Type header.', {
-      imageRef,
-    })
-  }
-
-  if ((ManifestListMediaTypeSchema.options as string[]).includes(contentType)) {
-    return true
-  }
-  if ((ManifestMediaTypeSchema.options as string[]).includes(contentType)) {
-    return false
-  }
-
-  throw InternalError('Unrecognised manifest media type.', {
-    imageRef,
-    contentType,
-  })
+  return { body: result.body, headers: result.headers }
 }
 
-export async function getImageTagManifest(token: string, imageRef: ImageRef) {
-  const reference = 'tag' in imageRef ? imageRef.tag : imageRef.digest
-  // TODO: handle multi-platform images
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${reference}`, {
-    bodySchema: ImageManifestV2Schema,
-    headersSchema: ManifestResponseHeadersSchema,
-    extraHeaders: {
-      Accept: AcceptManifestMediaTypeHeaderValue,
+export async function getImageTagManifests(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      bodySchema: ManifestResponseBodySchema,
+      headersSchema: ManifestResponseHeadersSchema,
+      extraHeaders: {
+        Accept: AcceptManifestListMediaTypeHeaderValue,
+      },
     },
-  })
+  )
 
   return { body: result.body, headers: result.headers }
 }
@@ -348,17 +350,39 @@ export async function getRegistryLayerStream(
   return { stream: result.stream, abort: result.abort }
 }
 
-export async function doesLayerExist(token: string, repoRef: ImageNameRef, digest: string) {
+/**
+ * Checks for the existence of a blob in the registry via a `HEAD` request.
+ * A 200 response indicates the layer exists. No response body is returned.
+ * See https://distribution.github.io/distribution/spec/api/#existing-layers
+ *
+ * @param token {string} Registry authentication token.
+ * @param digestRef {ImageDigestRef} Repository, name, and digest of the blob to check.
+ * @returns The response from the registry request.
+ */
+export async function headLayer(token: string, digestRef: ImageDigestRef) {
+  return await registryRequest(token, `${digestRef.repository}/${digestRef.name}/blobs/${digestRef.digest}`, {
+    expectStream: true,
+    extraFetchOptions: {
+      method: 'HEAD',
+    },
+  })
+}
+
+/**
+ * Determines whether a blob exists in the registry by issuing a `HEAD` request.
+ * Returns `true` if the layer is present, or `false` on a 404 response.
+ * Any other error is rethrown.
+ *
+ * @param token {string} Registry authentication token.
+ * @param digestRef {ImageDigestRef} Repository, name, and digest of the blob to check.
+ * @returns {Promise<boolean>} `true` if the layer exists, `false` if not found.
+ */
+export async function doesLayerExist(token: string, digestRef: ImageDigestRef): Promise<boolean> {
   try {
-    await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
-      expectStream: true,
-      extraFetchOptions: {
-        method: 'HEAD',
-      },
-    })
+    await headLayer(token, digestRef)
     return true
   } catch (error) {
-    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
+    if (error && isRegistryError(error) && error?.context?.status === 404) {
       // 404 response indicates that the layer does not exist
       return false
     } else {
@@ -402,7 +426,6 @@ export async function uploadLayerMonolithic(
   uploadURL: string,
   digest: string,
   blob: Readable | ReadableStream,
-  size: string,
 ) {
   const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
     headersSchema: BlobUploadResponseHeadersSchema,
@@ -415,7 +438,6 @@ export async function uploadLayerMonolithic(
       redirect: 'error',
     },
     extraHeaders: {
-      'content-length': size,
       'content-type': 'application/octet-stream',
     },
   })
@@ -437,22 +459,25 @@ export async function mountBlob(
       extraFetchOptions: {
         method: 'POST',
       },
-      extraHeaders: { 'Content-Length': '0' },
     },
   )
 
   return result.headers
 }
 
-export async function deleteManifest(token: string, imageRef: ImageTagRef) {
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    headersSchema: DeleteManifestResponseHeadersSchema,
-    expectStream: true,
-    extraFetchOptions: {
-      method: 'DELETE',
+export async function deleteManifest(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      headersSchema: DeleteManifestResponseHeadersSchema,
+      expectStream: true,
+      extraFetchOptions: {
+        method: 'DELETE',
+      },
+      extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
     },
-    extraHeaders: { Accept: AcceptManifestMediaTypeHeaderValue },
-  })
+  )
 
   return result.headers
 }

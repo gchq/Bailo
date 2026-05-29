@@ -164,6 +164,7 @@ module.exports = {
   artefactScanning: {
     clamdscan: {
       concurrency: 2,
+      streamMaxLength: '2G',
       host: '127.0.0.1',
       port: 3310,
     },
@@ -234,6 +235,11 @@ module.exports = {
       contributor: 'Contributor',
       consumer: 'Consumer',
     },
+
+    untrustedModel: {
+      enabled: false,
+      untrustedModelDescription: 'These are private only models.',
+    },
   },
 
   connectors: {
@@ -254,6 +260,10 @@ module.exports = {
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
+    },
+
+    metrics: {
+      kind: 'simple',
     },
   },
 
@@ -321,5 +331,9 @@ module.exports = {
 
   inference: {
     authorisationToken: '',
+  },
+
+  untrustedModels: {
+    defaultState: 'Production',
   },
 }

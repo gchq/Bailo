@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
 import config from '../../../../src/utils/__mocks__/config.js'
@@ -19,6 +19,7 @@ vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({
   default: logMocks,
@@ -57,10 +58,6 @@ const mockMetadata: FileMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > FileImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new FileImporter(mockMetadata, mockLogData)
 
@@ -70,7 +67,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   test('constructor > error importKind not File', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
 
-    expect(() => new FileImporter(badMetadata, mockLogData)).toThrowError(
+    expect(() => new FileImporter(badMetadata, mockLogData)).toThrow(
       /^Cannot parse compressed File: incorrect metadata specified./,
     )
   })
@@ -116,7 +113,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    await expect(importer.processEntry(entry, stream2)).rejects.toThrowError(
+    await expect(importer.processEntry(entry, stream2)).rejects.toThrow(
       /^Cannot parse compressed file: multiple files found./,
     )
   })
@@ -134,12 +131,12 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
     )
   })
 
-  test('finishListener > success calls BaseImporter behaviour', () => {
+  test('finishListener > success calls BaseImporter behaviour', async () => {
     const importer = new FileImporter(mockMetadata, mockLogData)
     const resolve = vi.fn()
     const reject = vi.fn()
 
-    importer.handleStreamCompletion(resolve, reject)
+    await importer.handleStreamCompletion(resolve, reject)
 
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

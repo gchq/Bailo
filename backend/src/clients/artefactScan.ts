@@ -6,12 +6,14 @@ import fetch, { Response as FetchResponse } from 'node-fetch'
 
 import { z } from '../lib/zod.js'
 import config from '../utils/config.js'
-import { BadReq, InternalError } from '../utils/error.js'
+import { GenericError, InternalError } from '../utils/error.js'
 
 const ArtefactScanInfoResponseSchema = z.object({
   apiName: z.string(),
   apiVersion: z.string(),
+  maxFileSizeBytes: z.number().int().positive().optional(),
   modelscanScannerName: z.string(),
+  modelscanSupportedExtensions: z.array(z.string()).optional(),
   modelscanVersion: z.string(),
   trivyScannerName: z.string(),
   trivyVersion: z.string(),
@@ -191,6 +193,24 @@ export const TrivyScanResultResponseSchema = z
   .passthrough()
 export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponseSchema>
 
+async function handleBadResponse(res: FetchResponse, context?: Record<string, unknown>) {
+  const contentType = res.headers.get('content-type') ?? ''
+  let responseBody: unknown
+
+  try {
+    responseBody = contentType.includes('application/json') ? await res.json() : await res.text()
+  } catch {
+    responseBody = '<unable to parse response body>'
+  }
+
+  throw GenericError(res.status, 'Unrecognised response returned by the ArtefactScan service.', {
+    ...context,
+    status: res.status,
+    statusText: res.statusText,
+    responseBody,
+  })
+}
+
 async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
   let res: FetchResponse
@@ -204,7 +224,7 @@ async function getArtefactScanInfo() {
     throw InternalError('Unable to communicate with the ArtefactScan service.', { err })
   }
   if (!res.ok) {
-    throw BadReq('Unrecognised response returned by the ArtefactScan service.')
+    await handleBadResponse(res, { url })
   }
 
   return ArtefactScanInfoResponseSchema.parse(await res.json())
@@ -231,9 +251,7 @@ async function scanStream(stream: Readable, fileName: string, endpoint: 'file' |
     throw InternalError('Unable to communicate with the ArtefactScan service.', { err })
   }
   if (!res.ok) {
-    throw BadReq('Unrecognised response returned by the ArtefactScan service.', {
-      body: JSON.stringify(await res.text()),
-    })
+    await handleBadResponse(res, { endpoint, fileName })
   }
 
   return await res.json()

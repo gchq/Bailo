@@ -1,4 +1,4 @@
-import { model, type ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, type ObjectId, Schema } from 'mongoose'
 
 import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
@@ -28,7 +28,7 @@ export type ScanInterface = {
     }
 )
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary | string)[]
 
 export type ArtefactScanSummary = {
   severity: SeverityLevelKeys
@@ -54,7 +54,7 @@ export const ArtefactKind = {
 } as const
 export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
-export type ScanInterfaceDoc = ScanInterface & SoftDeleteDocument
+export type ScanInterfaceDoc = HydratedDocument<ScanInterface> & SoftDeleteDocument
 
 const ScanSchema = new Schema<ScanInterfaceDoc>(
   {
@@ -83,12 +83,12 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
 ScanSchema.plugin(softDeletionPlugin)
 // Image index
 ScanSchema.index(
-  { artefactKind: 1, layerDigest: 1, toolName: 1, state: 1 },
+  { artefactKind: 1, layerDigest: 1, toolName: 1 },
   { unique: true, partialFilterExpression: { artefactKind: 'image', state: 'InProgress' } },
 )
 // File index
 ScanSchema.index(
-  { artefactKind: 1, fileId: 1, toolName: 1, state: 1 },
+  { artefactKind: 1, fileId: 1, toolName: 1 },
   { unique: true, partialFilterExpression: { artefactKind: 'file', state: 'InProgress' } },
 )
 

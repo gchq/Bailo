@@ -37,7 +37,7 @@ describe('routes', () => {
       )
 
       expect(res.statusCode).toBe(200)
-      expect(audit.onUpdateImage).toBeCalled()
+      expect(audit.onUpdateImage).toHaveBeenCalled()
       expect(audit.onUpdateImage.mock.calls.at(0)?.at(1)).toMatchSnapshot()
       expect(audit.onUpdateImage.mock.calls.at(0)?.at(2)).toMatchSnapshot()
     })

@@ -52,19 +52,24 @@ export default function Model() {
                 />
               ),
               disabled: !entry.card,
-              disabledText: 'Select a schema to view this tab',
+              disabledText: 'Select a schema to view this tab.',
             },
             {
               title: 'Access requests',
               path: 'access',
               view: <AccessRequests model={entry} currentUserRoles={currentUserRoles} />,
               datatest: 'accessRequestTab',
-              disabled: !entry.card,
-              disabledText: 'Select a schema to view this tab',
+              disabled: !entry.card || entry.kind === EntryKind.UNTRUSTED_MODEL,
+              disabledText:
+                entry.kind === EntryKind.UNTRUSTED_MODEL
+                  ? 'Access requests are not available for untrusted models.'
+                  : 'Select a schema to view this tab.',
             },
             {
               title: 'Registry',
               path: 'registry',
+              disabled: entry.kind === EntryKind.UNTRUSTED_MODEL,
+              disabledText: 'The registry is not available for untrusted models.',
               view: <ModelImages model={entry} readOnly={entry.kind === EntryKind.MIRRORED_MODEL} />,
             },
             {
@@ -115,22 +120,25 @@ export default function Model() {
           subheading={`ID: ${entry.id}`}
           additionalInfo={entry.description}
           tabs={tabs}
-          displayActionButton={entry.card !== undefined}
+          displayActionButton={entry.card !== undefined && entry.kind !== EntryKind.UNTRUSTED_MODEL}
           actionButtonTitle='Request access'
           actionButtonOnClick={requestAccess}
           requiredUrlParams={{ modelId: entry.id }}
           titleToCopy={entry.name}
           subheadingToCopy={entry.id}
           additionalHeaderDisplay={
-            entry.kind === EntryKind.MIRRORED_MODEL ? (
-              <MessageAlert
-                message={`This is a mirrored model, some sections will be read-only.`}
-                subHeading={`Source model ID: ${entry.settings.mirror?.sourceModelId}`}
-                severity='info'
-              />
-            ) : (
-              <></>
-            )
+            <>
+              {entry.kind === EntryKind.MIRRORED_MODEL && (
+                <MessageAlert
+                  message={`This is a mirrored model, some sections will be read-only.`}
+                  subHeading={`Source model ID: ${entry.settings.mirror?.sourceModelId}`}
+                  severity='info'
+                />
+              )}
+              {entry.kind === EntryKind.UNTRUSTED_MODEL && (
+                <MessageAlert message={'This is an untrusted model.'} severity='warning' />
+              )}
+            </>
           }
         />
       )}

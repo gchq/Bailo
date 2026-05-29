@@ -7,7 +7,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { type FileWithScanResultsInterface } from '../../../../models/File.js'
+import { type FileWithScanResultsAggregate } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import log from '../../../../services/log.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
@@ -116,14 +116,14 @@ export const getDownloadFile = [
   async (req: Request, res: Response): Promise<void> => {
     req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)
-    let file: FileWithScanResultsInterface
+    let file: FileWithScanResultsAggregate
     if ('semver' in params) {
       file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
     } else {
       file = await getFileById(req.user, params.fileId)
     }
 
-    const fileId = file._id.toString()
+    const fileId = file.id
 
     // Naive approach to generating an ETag - this is needed for some download tools to consider a file resumable
     const etag = createHash('sha256').update(`${fileId}/${file.updatedAt.getTime()}`).digest('hex')

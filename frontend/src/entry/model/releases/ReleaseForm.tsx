@@ -41,6 +41,7 @@ import MessageAlert from 'src/MessageAlert'
 import {
   ArtefactKind,
   EntryInterface,
+  EntryKind,
   FileInterface,
   FileWithMetadataAndTags,
   FlattenedModelImage,
@@ -245,7 +246,9 @@ export default function ReleaseForm({
           {isReadOnly ? (
             <Typography>
               {formData.modelCardVersion} -{' '}
-              <Link href={`/${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
+              <Link
+                href={`/model/${model.id}/history/${formData.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`}
+              >
                 <Button size='small'>View Model card</Button>
               </Link>
             </Typography>
@@ -256,7 +259,10 @@ export default function ReleaseForm({
                 <>
                   <Select
                     size='small'
-                    value={formData.modelCardVersion.toString()}
+                    defaultValue={model.card.version.toString()}
+                    value={
+                      formData.modelCardVersion ? formData.modelCardVersion.toString() : model.card.version.toString()
+                    }
                     onChange={handleModelCardVersionChange}
                     inputProps={{
                       id: 'model-card-version-input',

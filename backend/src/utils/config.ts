@@ -10,6 +10,7 @@ import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
+import { MetricsKindKeys } from '../connectors/metrics/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
@@ -109,6 +110,10 @@ export interface Config {
       maxInitRetries: number
       /** Retry delay between initialisation attempts (minutes) */
       initRetryDelay: number
+    }
+
+    metrics: {
+      kind: MetricsKindKeys
     }
   }
 
@@ -364,6 +369,8 @@ export interface Config {
     clamdscan: {
       /** Number of files scanned at one time */
       concurrency: number
+      /** Maximum bytes allowed in a stream from clamd.conf (example format: '2G') */
+      streamMaxLength: string
       /** Internal address to model scan API */
       host: string
       /** Port number for model scan api */
@@ -427,6 +434,10 @@ export interface Config {
   inference: {
     /** Shared authorisation token for inference backends */
     authorisationToken: string
+  }
+
+  untrustedModels: {
+    defaultState: string
   }
 }
 

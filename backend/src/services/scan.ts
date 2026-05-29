@@ -1,23 +1,17 @@
 import { ClientSession } from 'mongoose'
 
-import { isImageTagManifestList } from '../clients/registry.js'
-import {
-  ArtefactInterface,
-  ArtefactScanningConnectorInfo,
-  ArtefactScanResult,
-  ArtefactScanState,
-} from '../connectors/artefactScanning/Base.js'
+import { ArtefactScanResult, ArtefactScanState, LayerRefInterface } from '../connectors/artefactScanning/Base.js'
 import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { FileInterface } from '../models/File.js'
 import { ImageRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
-import { dedupe } from '../utils/array.js'
+import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
-import { BadReq, Conflict, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Conflict, Forbidden, UnprocessableContent } from '../utils/error.js'
 import { plural } from '../utils/string.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getFileById } from './file.js'
@@ -35,7 +29,7 @@ type ArtefactScanIdentifier =
       layerDigest: string
     }
 
-async function updateArtefactScanWithResults(
+export async function updateArtefactScanWithResults(
   scanIdentifier: ArtefactScanIdentifier,
   results: ArtefactScanResult[],
   session?: ClientSession,
@@ -65,7 +59,7 @@ async function updateArtefactScanWithResults(
   })
 
   try {
-    return await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
+    await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
   } catch (err: any) {
     if (err.code === 11000) {
       throw Conflict('Scan already in progress', { scanIdentifier })
@@ -74,38 +68,50 @@ async function updateArtefactScanWithResults(
   }
 }
 
-async function runScans(
-  scannersInfo: ArtefactScanningConnectorInfo[],
-  scanIdentifier: ArtefactScanIdentifier,
-  artefact: ArtefactInterface,
-) {
+type RunScansParams = { file: FileInterface; layerRef?: never } | { file?: never; layerRef: LayerRefInterface }
+/**
+ * Only await if you want to wait for the scans to complete.
+ */
+export async function runScans({ file, layerRef }: RunScansParams) {
+  const requiredScannerType: ArtefactKindKeys = file ? ArtefactKind.FILE : ArtefactKind.IMAGE
+  const scannersInfo = scanners.scannersInfo()
+  const activeScanners = scannersInfo.filter((scannerInfo) => scannerInfo.artefactKind === requiredScannerType)
+  let scanIdentifier: ArtefactScanIdentifier
+  if (file) {
+    scanIdentifier = {
+      artefactKind: ArtefactKind.FILE,
+      fileId: file._id.toString(),
+    }
+  } else if (layerRef) {
+    scanIdentifier = {
+      artefactKind: ArtefactKind.IMAGE,
+      layerDigest: layerRef.layerDigest,
+    }
+  }
+
   await useTransaction([
     async (session) => {
-      if (scannersInfo && scannersInfo.length > 0) {
-        const activeScanners = scannersInfo.filter((s) => s.artefactKind === scanIdentifier.artefactKind)
+      try {
+        const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
+          ...scannerInfo,
+          state: ArtefactScanState.InProgress,
+          lastRunAt: new Date(),
+        }))
 
-        try {
-          const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
-            ...scannerInfo,
-            state: ArtefactScanState.InProgress,
-            lastRunAt: new Date(),
-          }))
+        await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, session)
 
-          await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, session)
+        const resultsArray = await scanners.startScans({ ...(file ? { file } : { layerRef }) })
+        await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
+      } catch (error) {
+        log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
+        const failedResults = activeScanners.map((scannerInfo) => ({
+          ...scannerInfo,
+          state: ArtefactScanState.Error,
+          lastRunAt: new Date(),
+        }))
 
-          const resultsArray = await scanners.startScans(artefact)
-          await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
-        } catch (error) {
-          log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
-          const failedResults = activeScanners.map((scannerInfo) => ({
-            ...scannerInfo,
-            state: ArtefactScanState.Error,
-            lastRunAt: new Date(),
-          }))
-
-          // This will always release the lock by setting results to no longer be in progress
-          await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
-        }
+        // This will always release the lock by setting results to no longer be in progress
+        await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
       }
     },
   ])
@@ -128,21 +134,6 @@ async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promis
     }
   }
   return Math.round(minutesBeforeRetrying / 60000)
-}
-
-export async function scanFile(file: FileInterfaceDoc) {
-  const scannersInfo = scanners.scannersInfo()
-  const fileIdentifier = { artefactKind: ArtefactKind.FILE, fileId: file.id }
-  await runScans(scannersInfo, fileIdentifier, file)
-
-  const scanResults = await ScanModel.find(fileIdentifier)
-  const ret: FileWithScanResultsInterface = {
-    ...file.toObject(),
-    scanResults,
-    id: file._id.toString(),
-  }
-
-  return ret
 }
 
 export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string) {
@@ -176,13 +167,14 @@ export async function rerunFileScan(user: UserInterface, modelId: string, fileId
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  const scannersInfo = scanners.scannersInfo()
-  throwIfNoScanners(scannersInfo, ArtefactKind.FILE)
+  if (!scanners.hasScannerForArtefactKind(ArtefactKind.FILE)) {
+    throw UnprocessableContent('No file scanners are enabled.')
+  }
 
   // Do not await so that the endpoint can return early (fire-and-forget)
-  runScans(scannersInfo, fileIdentifier, file).catch((error) => {
+  runScans({ file }).catch((error) => {
     log.error(
-      { scannersInfo, scanIdentifier: fileIdentifier, file, error },
+      { scanIdentifier: fileIdentifier, file, error },
       'Unable to set failure state after failing to run file scans. Safely aborted.',
     )
   })
@@ -208,6 +200,10 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
+  if (!scanners.hasScannerForArtefactKind(ArtefactKind.IMAGE)) {
+    throw UnprocessableContent('No image scanners are enabled.')
+  }
+
   const repositoryToken = await issueAccessToken({ dn: user.dn }, [
     { type: 'repository', name: `${image.repository}/${image.name}`, actions: ['pull'] },
   ])
@@ -222,14 +218,7 @@ export async function rerunImageScan(user: UserInterface, modelId: string, image
  * _Only_ use this function when an auth check would break expected functionality, otherwise use `rerunImageScan`.
  */
 export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: string) {
-  const scannersInfo = scanners.scannersInfo()
-  throwIfNoScanners(scannersInfo, ArtefactKind.IMAGE)
-
-  if (await isImageTagManifestList(repositoryToken, image)) {
-    // TODO: add support for manifest lists/fat manifests
-    throw InternalError('Bailo backend does not currently support scanning images with manifest lists.', { image })
-  }
-  const imageLayers = dedupe(await getImageLayers(repositoryToken, image))
+  const imageLayers = dedupeByKey(await getImageLayers(repositoryToken, image), (d) => d.digest)
   const imageName = `${image.repository}/${image.name}${'tag' in image ? ':' + image.tag : '@' + image.digest}`
 
   // Only check timing for the config (which is effectively unique per manifest)
@@ -243,18 +232,12 @@ export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: str
   for (const imageLayer of imageLayers) {
     const layerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayer.digest }
     // Do not await so that the endpoint can return early (fire-and-forget)
-    runScans(scannersInfo, layerIdentifier, { ...image, layerDigest: imageLayer.digest }).catch((error) => {
+    runScans({ layerRef: { ...image, layerDigest: imageLayer.digest } }).catch((error) => {
       log.error(
-        { scannersInfo, scanIdentifier: layerIdentifier, image, imageName, error },
+        { scanIdentifier: layerIdentifier, image, imageName, error },
         'Unable to set failure state after failing to run image scans. Safely aborted.',
       )
     })
   }
   return `Image scan started for ${imageName}`
-}
-
-function throwIfNoScanners(scannersInfo: ArtefactScanningConnectorInfo[], artefactKind: ArtefactKindKeys) {
-  if (!scannersInfo.some((scannerInfo) => scannerInfo.artefactKind === artefactKind)) {
-    throw NotFound(`No ${artefactKind} scanners are enabled.`)
-  }
 }

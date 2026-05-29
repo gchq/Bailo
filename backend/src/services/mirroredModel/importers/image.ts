@@ -6,6 +6,7 @@ import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
+import { TransferStatus } from '../../../models/ModelTransfer.js'
 import { UserInterface } from '../../../models/User.js'
 import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
@@ -13,6 +14,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
 import log from '../../log.js'
+import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -90,11 +92,11 @@ export class ImageImporter extends BaseImporter {
 
         try {
           if (
-            await doesLayerExist(
-              repositoryPullToken,
-              { repository: this.metadata.mirroredModelId, name: this.imageName },
-              layerDigest,
-            )
+            await doesLayerExist(repositoryPullToken, {
+              repository: this.metadata.mirroredModelId,
+              name: this.imageName,
+              digest: layerDigest,
+            })
           ) {
             log.debug(
               {
@@ -129,7 +131,7 @@ export class ImageImporter extends BaseImporter {
               },
               'Putting image blob.',
             )
-            await uploadLayerMonolithic(repositoryPushPullToken, res.location!, layerDigest, stream, String(entry.size))
+            await uploadLayerMonolithic(repositoryPushPullToken, res.location!, layerDigest, stream)
             await finished(stream)
           }
         } catch (err) {
@@ -151,6 +153,20 @@ export class ImageImporter extends BaseImporter {
       // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
       log.warn({ name: entry.name, type: entry.type, ...this.logData }, 'Skipping non-file entry.')
     }
+  }
+
+  async handleStreamError(
+    error: unknown,
+    _resolve: (reason?: any) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    await updateArtefactTransferStatus(
+      this.metadata.exportId,
+      this.metadata.distributionPackageName,
+      MirrorKind.Image,
+      TransferStatus.Failed,
+    )
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
@@ -179,12 +195,23 @@ export class ImageImporter extends BaseImporter {
         },
         'Completed registry upload',
       )
-
+      await updateArtefactTransferStatus(
+        this.metadata.exportId,
+        this.metadata.distributionPackageName,
+        MirrorKind.Image,
+        TransferStatus.Completed,
+      )
       resolve({
         metadata: this.metadata,
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
+      await updateArtefactTransferStatus(
+        this.metadata.exportId,
+        this.metadata.distributionPackageName,
+        MirrorKind.Image,
+        TransferStatus.Failed,
+      )
       reject(
         InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.', {
           metadata: this.metadata,
