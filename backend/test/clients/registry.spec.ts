@@ -841,7 +841,7 @@ describe('clients > registry', () => {
       headers: mockHeaders,
     })
 
-    const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
+    const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable)
 
     expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -851,7 +851,7 @@ describe('clients > registry', () => {
   test('uploadLayerMonolithic > cannot reach registry', async () => {
     fetchMock.mockRejectedValueOnce('Error')
 
-    const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
+    const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable)
 
     await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
