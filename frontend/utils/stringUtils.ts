@@ -39,7 +39,7 @@ export const isValidPortNumber = (portNumber: string) => {
 }
 
 export const isValidNumber = (numberOrString: string) => {
-  return numberOrString.length > 0 && !isNaN(Number(numberOrString))
+  return !(isNaN(Number(numberOrString)) || isNaN(parseFloat(numberOrString)))
 }
 
 export const toKebabCase = (value: string): string => {
