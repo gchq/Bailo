@@ -12,7 +12,8 @@
     "check-style": "prettier --check .",
     "script": "tsx src/scripts/runScript.ts",
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && tsx src/scripts/generateJWKS.ts",
-    "seed": "tsx src/seeds/index.ts"
+    "seed": "tsx src/seeds/index.ts",
+    "generate-config-docs": "npx tsx src/scripts/generateConfigDocs.ts"
   },
   "keywords": [],
   "author": "",
