@@ -2,18 +2,21 @@ import { ArrowBack } from '@mui/icons-material'
 import { Button, Container, Dialog, DialogContent, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntry } from 'actions/entry'
 import { postGenericReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
+import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { Dayjs } from 'dayjs'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys } from 'types/types'
+import { DecisionKeys, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getStepsFromSchema } from 'utils/formUtils'
 
 export default function LifecycleReview() {
   const router = useRouter()
@@ -22,6 +25,7 @@ export default function LifecycleReview() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isModelCardDialogOpen, setIsModelCardDialogOpen] = useState(false)
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -29,6 +33,28 @@ export default function LifecycleReview() {
     modelId,
     reviewId: `${reviewId}`,
   })
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.card.schemaId || '')
+
+  const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
+    setSplitSchema(newSplitSchema)
+  })
+
+  useEffect(() => {
+    if (!model || !schema) {
+      return
+    }
+    const steps = getStepsFromSchema(
+      schema,
+      {},
+      ['properties.contacts'],
+      model.card.metadata,
+      model.mirroredCard?.metadata || {},
+    )
+    for (const step of steps) {
+      step.steps = steps
+    }
+    onSplitSchemaChange({ reference: schema.id, steps })
+  }, [schema, model])
 
   async function handleSubmit(decision: DecisionKeys, comment: string, _role: string, dueDate: Dayjs | null) {
     setErrorMessage('')
@@ -61,12 +87,22 @@ export default function LifecycleReview() {
     isModelError,
     isUiConfigError,
     isReviewsError,
+    isSchemaError,
   })
   if (error) {
     return error
   }
 
-  if (!reviews || !model || !uiConfig || isReviewsLoading || isModelLoading || isUiConfigLoading) {
+  if (
+    !reviews ||
+    !model ||
+    !uiConfig ||
+    !schema ||
+    isReviewsLoading ||
+    isModelLoading ||
+    isUiConfigLoading ||
+    isSchemaLoading
+  ) {
     return <Loading />
   }
 
@@ -103,7 +139,7 @@ export default function LifecycleReview() {
           </Stack>
           <Dialog open={isModelCardDialogOpen} onClose={() => setIsModelCardDialogOpen(false)} maxWidth='md' fullWidth>
             <DialogContent sx={{ p: 4 }}>
-              <></>
+              <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
             </DialogContent>
           </Dialog>
         </Paper>
