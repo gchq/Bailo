@@ -97,12 +97,18 @@ export async function createReview(
   switch (reviewContent.kind) {
     case ReviewKind.Lifecycle:
       return await createLifecycleReview(user, modelId, reviewContent.dueDate)
+    case ReviewKind.Release:
+    case ReviewKind.Access:
+      throw BadReq(`Creating ${reviewContent.kind} reviews is not supported yet in V3.`)
+
     default:
-    // TODO add functionality to create reviews for other review kinds
+      throw BadReq('Unknown review kind')
   }
 }
 
 async function createLifecycleReview(user: UserInterface, modelId: string, dueDate: Date): Promise<ReviewInterface> {
+  // Authorisation check to make sure the user can access a model
+  await getModelById(user, modelId)
   const stages: PipelineStage[] = [
     {
       $match: {
@@ -121,7 +127,6 @@ async function createLifecycleReview(user: UserInterface, modelId: string, dueDa
   stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
   stages.push({ $match: { responseCount: 0 } })
   stages.push({ $unset: ['responses', 'responseCount'] })
-  stages.push({ $set: { deleted: true } })
   let existingReviews = await ReviewModel.aggregate(stages)
 
   const auths = await authorisation.models(

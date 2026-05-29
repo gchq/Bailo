@@ -43,7 +43,10 @@ export async function findReviews(
         ...(modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
-        ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
+        ...(reviewId &&
+          Types.ObjectId.isValid(reviewId) && {
+            _id: new Types.ObjectId(reviewId),
+          }),
         ...(kind && { kind }),
       },
     },

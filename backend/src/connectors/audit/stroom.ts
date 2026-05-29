@@ -483,7 +483,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateReview(req: Request, modelId: string) {
-    this.auditGenericEvent(req, modelId)
+    this.auditGenericEvent(req, `Review created for ${modelId}`)
   }
 
   async onError(req: Request, error: BailoError) {
