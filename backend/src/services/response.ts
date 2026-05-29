@@ -151,7 +151,7 @@ export async function respondToReview(
   return reviewResponse
 }
 
-async function sendReviewResponseNotification(
+export async function sendReviewResponseNotification(
   review: ReviewDoc,
   reviewResponse: ResponseInterface,
   user: UserInterface,
@@ -181,11 +181,15 @@ async function sendReviewResponseNotification(
       )
       break
     }
+    case ReviewKind.Lifecycle: {
+      // We don't need to notify anyone as this action is done by the person who would receive the notification.
+      return
+    }
     default:
-      throw InternalError('Review Kind not recognised', {
-        reviewId: review.id,
-        modelId: review.modelId,
-        kind: review.kind,
+      throw InternalError('Review kind not recognised', {
+        reviewId: review['id'],
+        modelId: review['modelId'],
+        kind: review['kind'],
       })
   }
 }
