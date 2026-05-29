@@ -174,7 +174,7 @@ export default function ReviewWithComment({
                     <Divider flexItem orientation='vertical' />
                   </>
                 )}
-                {hideRequestChangesButton && (
+                {!hideRequestChangesButton && (
                   <Button
                     variant='outlined'
                     onClick={() => submitForm(Decision.RequestChanges)}

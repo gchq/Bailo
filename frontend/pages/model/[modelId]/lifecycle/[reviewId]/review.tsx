@@ -136,6 +136,7 @@ export default function LifecycleReview() {
               loading={isReviewButtonLoading}
               modelId={modelId as string}
               includeDueDate
+              hideRequestChangesButton
             />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
