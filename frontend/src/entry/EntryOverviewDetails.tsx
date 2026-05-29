@@ -150,22 +150,33 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           </Button>
           {collaboratorList}
         </Stack>
-        <Stack spacing={1}>
-          <Typography fontWeight='bold' color='primary'>
-            Next review due:
-          </Typography>
-          {updateReviewDatePermission && (
-            <DatePicker
-              value={reviews && reviews[0] ? dayjs(reviews[0].dueDate) : undefined}
-              sx={{ backgroundColor: 'unset', borderRadius: 1 }}
-              onChange={(newValue) => {
-                handleDueDateOnChange(newValue)
-              }}
-              minDate={dayjs(new Date())}
-            />
-          )}
-          {!updateReviewDatePermission && <Typography>1/11/1029</Typography>}
-        </Stack>
+        {entry.card && (
+          <Stack spacing={1}>
+            <Typography fontWeight='bold' color='primary'>
+              Next review due:
+            </Typography>
+            {updateReviewDatePermission && (
+              <DatePicker
+                value={reviews && reviews[0] ? dayjs(reviews[0].dueDate) : undefined}
+                sx={{ backgroundColor: 'unset', borderRadius: 1 }}
+                onChange={(newValue) => {
+                  handleDueDateOnChange(newValue)
+                }}
+                minDate={dayjs(new Date())}
+              />
+            )}
+            {updateReviewDatePermission && reviews[0] && (
+              <Button
+                variant='outlined'
+                size='small'
+                href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
+              >
+                Review
+              </Button>
+            )}
+            {!updateReviewDatePermission && <Typography>1/11/1029</Typography>}
+          </Stack>
+        )}
         <Box>
           <Restricted action='editEntry' fallback={<></>}>
             <Button

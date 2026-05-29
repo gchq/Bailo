@@ -95,8 +95,8 @@ export default function ReviewDisplay({
                       <HourglassEmpty color='warning' fontSize='small' />
                       <Typography variant='caption'>
                         {showCurrentUserResponses
-                          ? `You have requested changes as a ${roleName}`
-                          : `Changes requested by  ${roleName}`}
+                          ? `You have requested changes as a ${roleNameDisplay(response)}`
+                          : `Changes requested by  ${roleNameDisplay(response)}`}
                       </Typography>
                     </Stack>
                   )

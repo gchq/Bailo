@@ -19,6 +19,7 @@ type ReviewWithCommentProps = {
   reviews: ReviewRequestInterface[]
   modelId: string
   includeDueDate?: boolean
+  hideRequestChangesButton?: boolean
 }
 
 export default function ReviewWithComment({
@@ -27,6 +28,7 @@ export default function ReviewWithComment({
   reviews,
   modelId,
   includeDueDate = false,
+  hideRequestChangesButton = false,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
@@ -156,7 +158,7 @@ export default function ReviewWithComment({
               justifyContent='space-between'
               alignItems='center'
             >
-              <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
+              <Stack spacing={1} direction={{ sm: 'row', xs: 'column' }}>
                 {showUndoButton && (
                   <>
                     <Button
@@ -165,25 +167,30 @@ export default function ReviewWithComment({
                       variant='contained'
                       color='warning'
                       data-test='undoReviewButton'
+                      size='small'
                     >
-                      Undo Review
+                      Undo review
                     </Button>
                     <Divider flexItem orientation='vertical' />
                   </>
                 )}
-                <Button
-                  variant='outlined'
-                  onClick={() => submitForm(Decision.RequestChanges)}
-                  loading={loading}
-                  data-test='requestChangesReviewButton'
-                >
-                  Request Changes
-                </Button>
+                {hideRequestChangesButton && (
+                  <Button
+                    variant='outlined'
+                    onClick={() => submitForm(Decision.RequestChanges)}
+                    loading={loading}
+                    data-test='requestChangesReviewButton'
+                    size='small'
+                  >
+                    Request changes
+                  </Button>
+                )}
                 <Button
                   variant='contained'
                   onClick={() => submitForm(Decision.Approve)}
                   loading={loading}
                   data-test='approveReviewButton'
+                  size='small'
                 >
                   Approve
                 </Button>

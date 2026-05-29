@@ -7,7 +7,7 @@ import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MessageAlert from 'src/MessageAlert'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewKind, ReviewRequestInterface } from 'types/types'
-import { timeDifference } from 'utils/dateUtils'
+import { formatDateString, timeDifference } from 'utils/dateUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 type ReviewItemProps = {
@@ -61,6 +61,12 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               <Typography sx={{ wordBreak: 'break-all' }} color='primary' variant='h6' component='h2' fontWeight='bold'>
                 {review.model.name}
               </Typography>
+              {review.dueDate && (
+                <Typography>
+                  This review is due by{' '}
+                  <span style={{ fontWeight: 'bold' }}>{formatDateString(review.dueDate.toString())}</span>
+                </Typography>
+              )}
               {review.accessRequestId && (
                 <Typography sx={{ wordBreak: 'break-all' }}>
                   {toTitleCase(review.accessRequestId.substring(0, review.accessRequestId.lastIndexOf('-')))}
