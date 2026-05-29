@@ -145,7 +145,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        task: [unit, style]
+        task: [build, unit, style]
 
     steps:
       # Clone repository
@@ -165,6 +165,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run build
+        if: matrix.task == 'build'
+        run: npm run build
 
       - name: Create certs
         if: matrix.task == 'unit'
