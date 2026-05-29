@@ -46,7 +46,10 @@ type WrapperProps = {
 export default function Wrapper({ title, children }: WrapperProps): ReactElement {
   const router = useRouter()
 
-  const isDocsPage = useMemo(() => router.pathname === '/docs' || router.route.startsWith('/docs/'), [router])
+  const isDocsPage = useMemo(
+    () => router.pathname === '/docs' || router.route.startsWith('/docs/') || router.route.startsWith('/python-docs'),
+    [router],
+  )
 
   const theme = useTheme()
 
@@ -83,30 +86,27 @@ export default function Wrapper({ title, children }: WrapperProps): ReactElement
             backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <Box>
-            {isDocsPage ? (
-              children
-            ) : (
-              <>
-                <Box>{children}</Box>
-                <Box
-                  component='footer'
-                  sx={{ borderTop: 1, borderColor: 'divider', py: 3, px: 2, textAlign: 'center' }}
-                >
-                  <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ mb: 4 }}>
-                    {navigationLinks.map((link) => (
-                      <Link key={link.href} href={link.href}>
-                        {link.label}
-                      </Link>
-                    ))}
-                  </Stack>
-                  <Copyright />
-                </Box>
-              </>
-            )}
-          </Box>
+          {isDocsPage ? (
+            children
+          ) : (
+            <Box>
+              <Box>{children}</Box>
+              <Box component='footer' sx={{ borderTop: 1, borderColor: 'divider', py: 3, px: 2, textAlign: 'center' }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+                  {navigationLinks.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </Stack>
+                <Copyright />
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
     </ThemeProvider>
