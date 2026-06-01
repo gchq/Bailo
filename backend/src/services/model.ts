@@ -430,8 +430,9 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
   }
 
   // Always do a partial match on the model name
+  const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
   let results = await ModelModel.find(
-    opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query,
+    escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
     projection,
   ).sort({
     updatedAt: -1,

@@ -75,7 +75,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       onChange(
         updatedMetricArray.map((metric) => ({
           name: metric.name,
-          value: isValidNumber(metric.value as string) ? parseInt(metric.value as string) : metric.value,
+          value: isValidNumber(metric.value as string) ? Number(metric.value as string) : metric.value,
         })),
       )
     },

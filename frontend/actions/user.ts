@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKeys, User } from 'types/types'
+import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKeys, User, UserV3 } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -34,6 +34,25 @@ interface UserResponse {
   user: User
 }
 
+interface UserResponseV3 {
+  user: UserV3
+}
+
+export type UseGetCurrentUserV3Result =
+  | {
+      isCurrentUserLoading: true
+      currentUser?: undefined
+      mutateCurrentUser?: undefined
+      isCurrentUserError?: undefined
+    }
+  | {
+      isCurrentUserError: ErrorInfo
+      currentUser?: undefined
+      mutateCurrentUser?: undefined
+      isCurrentUserLoading?: false
+    }
+  | { currentUser: UserV3; mutateCurrentUser: () => void; isCurrentUserLoading?: false; isCurrentUserError?: undefined }
+
 export function useGetCurrentUser() {
   const { data, isLoading, error, mutate } = useSWR<UserResponse, ErrorInfo>('/api/v2/entities/me', fetcher)
 
@@ -42,6 +61,31 @@ export function useGetCurrentUser() {
     currentUser: data?.user || undefined,
     isCurrentUserLoading: isLoading,
     isCurrentUserError: error,
+  }
+}
+
+export function useGetCurrentUserV3(): UseGetCurrentUserV3Result {
+  const { data, isLoading, error, mutate } = useSWR<UserResponseV3, ErrorInfo>('/api/v3/entities/me', fetcher)
+
+  if (isLoading) {
+    return { isCurrentUserLoading: true }
+  }
+  if (error) {
+    return { isCurrentUserError: error }
+  }
+  if (!data || !data.user) {
+    return {
+      isCurrentUserError: {
+        ...new Error('Unable to get data for the current user'),
+        info: { message: 'Unable to get data for the current user' },
+        status: 500,
+      },
+    }
+  }
+
+  return {
+    currentUser: data.user,
+    mutateCurrentUser: mutate,
   }
 }
 

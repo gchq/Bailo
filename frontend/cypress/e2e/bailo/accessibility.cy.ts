@@ -13,6 +13,7 @@ describe('Check A11y violations', () => {
   })
 
   it('Check A11y violations, Front Page', () => {
+    cy.wait(500)
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
