@@ -13,18 +13,24 @@ export default function InferenceDisplay({ model, inference }: InferenceDisplayP
   const router = useRouter()
   return (
     <Card sx={{ width: '100%' }}>
-      <Stack spacing={1} sx={{
-        padding: 2
-      }}>
-        <Stack direction='row' sx={{
-          justifyContent: 'space-between'
-        }}>
+      <Stack
+        spacing={1}
+        sx={{
+          padding: 2,
+        }}
+      >
+        <Stack
+          direction='row'
+          sx={{
+            justifyContent: 'space-between',
+          }}
+        >
           <Stack
             direction='row'
             spacing={2}
             divider={<Divider orientation='vertical' flexItem variant='middle' />}
             sx={{
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
             <Link href={`/model/${model.id}/inference/${inference.image}/${inference.tag}`}>
@@ -32,9 +38,12 @@ export default function InferenceDisplay({ model, inference }: InferenceDisplayP
                 {inference.image}:{inference.tag}
               </Typography>
             </Link>
-            <Typography color='primary' sx={{
-              fontWeight: 'bold'
-            }}>
+            <Typography
+              color='primary'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {inference.settings.processorType}
             </Typography>
           </Stack>
@@ -46,14 +55,17 @@ export default function InferenceDisplay({ model, inference }: InferenceDisplayP
         </Stack>
         <Typography variant='caption' sx={{ mb: 2 }}>
           Created by {<UserDisplay dn={inference.createdBy} />} on
-          <Typography variant='caption' sx={{
-            fontWeight: 'bold'
-          }}>
+          <Typography
+            variant='caption'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {` ${formatDateString(inference.createdAt)}`}
           </Typography>
         </Typography>
         <Typography>{inference.description}</Typography>
       </Stack>
     </Card>
-  );
+  )
 }

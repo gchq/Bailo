@@ -113,8 +113,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           sx={{
             justifyContent: 'space-between',
             alignItems: 'center',
-            width: '100%'
-          }}>
+            width: '100%',
+          }}
+        >
           {!isSmOrLarger && (
             <Box>
               <IconButton onClick={handleNavMenuClicked}>
@@ -161,8 +162,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             <Stack
               sx={{
                 justifyContent: 'center',
-                alignItems: 'left'
-              }}>
+                alignItems: 'left',
+              }}
+            >
               <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
@@ -173,8 +175,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 spacing={1}
                 sx={{
                   justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
+                  alignItems: 'center',
+                }}
+              >
                 <ExpandableButton
                   label='Create'
                   icon={<Add />}
@@ -232,5 +235,5 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         </Stack>
       </Toolbar>
     </AppBar>
-  );
+  )
 }

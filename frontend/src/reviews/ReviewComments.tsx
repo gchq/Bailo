@@ -180,8 +180,9 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
           spacing={1}
           sx={{
             justifyContent: 'center',
-            alignItems: 'flex-end'
-          }}>
+            alignItems: 'flex-end',
+          }}
+        >
           <Box sx={{ width: '100%' }}>
             <RichTextEditor
               value={newReviewComment}
@@ -202,5 +203,5 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
         </Stack>
       )}
     </Stack>
-  );
+  )
 }

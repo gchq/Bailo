@@ -8,6 +8,7 @@ import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
+import ModelTransferModel, { TransferStatus } from '../../../models/ModelTransfer.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
@@ -16,6 +17,7 @@ import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
 import log from '../../log.js'
 import { getModelByIdNoAuth, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
+import { updateArtefactsTransferStatus } from '../../modelTransfer.js'
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
@@ -28,7 +30,7 @@ export type MongoDocumentMirrorInformation = {
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
   releaseSemvers: ReleaseDoc['semver'][]
   newReleases: Omit<ReleaseDoc, '_id'>[]
-  fileIds: ObjectId[]
+  fileIds: { key: ObjectId; name: string }[]
   imageIds: string[]
 }
 
@@ -39,7 +41,7 @@ export class DocumentsImporter extends BaseImporter {
 
   protected modelCardVersions: number[] = []
   protected releaseSemvers: string[] = []
-  protected fileIds: ObjectId[] = []
+  protected fileIds: { key: ObjectId; name: string }[] = []
   protected imageIds: string[] = []
   protected newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   protected newReleases: Omit<ReleaseDoc, '_id'>[] = []
@@ -111,7 +113,6 @@ export class DocumentsImporter extends BaseImporter {
         for (const image of release.images) {
           this.imageIds.push(
             joinDistributionPackageName({
-              domain: image.repository,
               path: image.name,
               tag: image.tag,
             } as DistributionPackageName),
@@ -131,7 +132,7 @@ export class DocumentsImporter extends BaseImporter {
           metadata: this.metadata,
           ...this.logData,
         })
-        this.fileIds.push(file._id)
+        this.fileIds.push({ key: file._id, name: file.name })
         await saveImportedFile(file)
       } else {
         throw InternalError('Cannot parse compressed file: unrecognised contents.', {
@@ -146,6 +147,24 @@ export class DocumentsImporter extends BaseImporter {
         'Skipping non-file entry.',
       )
     }
+  }
+
+  async handleStreamError(
+    error: unknown,
+    _resolve: (reason?: any) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    await ModelTransferModel.findOneAndUpdate(
+      {
+        exportId: this.metadata.exportId,
+        'artefactStatus.key': 'documents',
+        'artefactStatus.kind': MirrorKind.Documents,
+      },
+      {
+        $set: { 'artefactStatus.$.status': TransferStatus.Failed },
+      },
+    )
+    await super.handleStreamError(error, _resolve, reject)
   }
 
   async handleStreamCompletion(
@@ -175,6 +194,7 @@ export class DocumentsImporter extends BaseImporter {
       },
       'Finished importing the collection of model documents.',
     )
+    await updateArtefactsTransferStatus(this.metadata.exportId, this.imageIds, this.fileIds)
 
     resolve({
       metadata: this.metadata,

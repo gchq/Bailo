@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
 import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
@@ -34,6 +34,7 @@ vi.mock('../../../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
   warn: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({
@@ -63,10 +64,6 @@ const mockMetadata: ImageMirrorMetadata = {
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > ImageImporter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('constructor > success', () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     expect(importer).toMatchSnapshot()
@@ -137,7 +134,6 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const entry: Headers = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
       type: 'file',
-      size: 20,
     } as Headers
     const stream = new PassThrough()
 
@@ -147,9 +143,8 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     expect(registryClientMocks.uploadLayerMonolithic).toHaveBeenCalledWith(
       undefined,
       'upload-location',
-      expect.stringContaining('sha256:'),
+      'sha256:' + 'b'.repeat(64),
       stream,
-      String(entry.size),
     )
   })
 

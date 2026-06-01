@@ -50,17 +50,22 @@ export default function ReviewItem({ review }: ReviewItemProps) {
       <ListItem disablePadding>
         <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
           <Stack>
-            <Stack spacing={1} direction='column' sx={{
-              justifyContent: 'flex-start'
-            }}>
+            <Stack
+              spacing={1}
+              direction='column'
+              sx={{
+                justifyContent: 'flex-start',
+              }}
+            >
               <Typography
                 color='primary'
                 variant='h6'
                 component='h2'
                 sx={{
                   fontWeight: 'bold',
-                  wordBreak: 'break-all'
-                }}>
+                  wordBreak: 'break-all',
+                }}
+              >
                 {review.model.name}
               </Typography>
               {review.accessRequestId && (
@@ -75,8 +80,9 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               direction='row'
               sx={{
                 justifyContent: 'flex-start',
-                alignItems: 'center'
-              }}>
+                alignItems: 'center',
+              }}
+            >
               <Typography variant='caption'>{`Created ${timeDifference(
                 new Date(),
                 new Date(review.createdAt),
@@ -98,5 +104,5 @@ export default function ReviewItem({ review }: ReviewItemProps) {
         </ListItemButton>
       </ListItem>
     </>
-  );
+  )
 }

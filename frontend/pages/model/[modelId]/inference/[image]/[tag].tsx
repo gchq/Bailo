@@ -41,15 +41,23 @@ export default function InferenceApp() {
         <Paper sx={{ my: 4, p: 4 }}>
           {model && (
             <Stack spacing={2}>
-              <Typography component='h1' variant='h4' color='primary' sx={{
-                fontWeight: 'bold'
-              }}>
+              <Typography
+                component='h1'
+                variant='h4'
+                color='primary'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {model.name}
               </Typography>
               {image}:{tag}
-              <Stack direction='row' sx={{
-                justifyContent: 'space-between'
-              }}>
+              <Stack
+                direction='row'
+                sx={{
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Link href={`/model/${modelId}?tab=inferencing`}>
                   <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                     Back to model
@@ -65,11 +73,15 @@ export default function InferenceApp() {
                   spacing={3}
                   sx={{
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                  <Typography color='primary' sx={{
-                    fontWeight: 'bold'
-                  }}>
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography
+                    color='primary'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     Spinning up {image}
                   </Typography>
                   <Loading />
@@ -81,5 +93,5 @@ export default function InferenceApp() {
         </Paper>
       </Container>
     </>
-  );
+  )
 }

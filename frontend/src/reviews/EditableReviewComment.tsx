@@ -49,8 +49,9 @@ export default function EditableReviewComment({
             sx={{
               justifyContent: 'right',
               textAlign: 'right',
-              pt: 2
-            }}>
+              pt: 2,
+            }}
+          >
             <Button onClick={onCancel} startIcon={<Close />}>
               Cancel
             </Button>
@@ -61,5 +62,5 @@ export default function EditableReviewComment({
         </>
       )}
     </>
-  );
+  )
 }

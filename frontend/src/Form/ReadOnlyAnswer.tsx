@@ -12,8 +12,9 @@ export default function ReadOnlyAnswer({ value }: ReadOnlyAnswerProps) {
     <Typography
       sx={{
         overflow: 'hidden',
-        textOverflow: 'ellipsis'
-      }}>
+        textOverflow: 'ellipsis',
+      }}
+    >
       {value}
     </Typography>
   ) : (
@@ -25,5 +26,5 @@ export default function ReadOnlyAnswer({ value }: ReadOnlyAnswerProps) {
     >
       Unanswered
     </Typography>
-  );
+  )
 }

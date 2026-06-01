@@ -7,14 +7,18 @@ export default function Copyright(props: Record<string, unknown>) {
       variant='body2'
       align='center'
       {...props}
-      sx={[{
-        color: 'text.secondary'
-      }, ...(Array.isArray(props.sx) ? props.sx : [props.sx])]}>
+      sx={[
+        {
+          color: 'text.secondary',
+        },
+        ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+      ]}
+    >
       {'Copyright © '}
       <Link color='inherit' href='https://www.gchq.gov.uk/'>
         Crown Copyright
       </Link>
       {` ${new Date().getFullYear()}.`}
     </Typography>
-  );
+  )
 }

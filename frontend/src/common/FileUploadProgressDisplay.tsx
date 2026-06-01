@@ -29,24 +29,32 @@ export default function FileUploadProgressDisplay({
   }
   return currentFileUploadProgress.uploadProgress < 100 ? (
     <Stack direction='row' spacing={1}>
-      <Typography sx={{
-        fontWeight: 'bold'
-      }}>
+      <Typography
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         [File {uploadedFiles ? uploadedFiles + 1 : '1'} / {totalFilesToUpload}] -
       </Typography>
-      <Typography sx={{
-        fontWeight: 'bold'
-      }}>{currentFileUploadProgress.fileName}</Typography>
+      <Typography
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
+        {currentFileUploadProgress.fileName}
+      </Typography>
       <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
     </Stack>
   ) : (
     <Stack direction='row' spacing={1}>
-      <Typography sx={{
-        fontWeight: 'bold'
-      }}>
+      <Typography
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         File {uploadedFiles ? uploadedFiles + 1 : '1'} / {totalFilesToUpload} -{currentFileUploadProgress.fileName}
       </Typography>
       <Typography>received - waiting for response from server...</Typography>
     </Stack>
-  );
+  )
 }

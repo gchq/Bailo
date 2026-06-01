@@ -31,9 +31,13 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
     () =>
       schema.reviewRoles && (
         <Box>
-          <Typography sx={{
-            fontWeight: 'bold'
-          }}>This schema has the following default roles:</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            This schema has the following default roles:
+          </Typography>
           <List dense>
             {schema.reviewRoles.map((schemaRole) => (
               <ListItem key={schemaRole}>
@@ -58,9 +62,13 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <CardContent sx={{ pb: 0 }}>
           <Stack spacing={1}>
-            <Typography variant='button' color='primary' sx={{
-              fontWeight: 'bold'
-            }}>
+            <Typography
+              variant='button'
+              color='primary'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {schema.name}
             </Typography>
             <MarkdownDisplay>{schema.description}</MarkdownDisplay>
@@ -84,5 +92,5 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
         </CardActions>
       </Card>
     </Grid>
-  );
+  )
 }

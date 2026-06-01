@@ -81,9 +81,14 @@ export default function ReleaseReview() {
   const releaseFiles = useMemo(() => {
     if (release && model) {
       return release.files.map((file) => (
-        <Grid container spacing={1} key={file._id} sx={{
-          alignItems: 'center'
-        }}>
+        <Grid
+          container
+          spacing={1}
+          key={file._id}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Grid size='auto'>
             <Tooltip title={file.name}>
               <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
@@ -91,20 +96,24 @@ export default function ReleaseReview() {
                   noWrap
                   sx={{
                     textOverflow: 'ellipsis',
-                    display: 'inline'
-                  }}>
+                    display: 'inline',
+                  }}
+                >
                   {file.name}
                 </Typography>
               </Link>
             </Tooltip>
           </Grid>
-          <Grid size={{ xs: 1 }} sx={{
-            textAlign: 'right'
-          }}>
+          <Grid
+            size={{ xs: 1 }}
+            sx={{
+              textAlign: 'right',
+            }}
+          >
             <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
           </Grid>
         </Grid>
-      ));
+      ))
     }
   }, [model, release])
 
@@ -117,11 +126,12 @@ export default function ReleaseReview() {
           spacing={1}
           sx={{
             justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
+            alignItems: 'center',
+          }}
+        >
           {uiConfig && <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
         </Stack>
-      ));
+      ))
     }
   }, [release, model, uiConfig])
 
@@ -164,9 +174,12 @@ export default function ReleaseReview() {
             <Divider />
             <Typography variant='caption' sx={{ mb: 2 }}>
               Created by {<UserDisplay dn={release.createdBy} />} on
-              <Typography variant='caption' sx={{
-                fontWeight: 'bold'
-              }}>
+              <Typography
+                variant='caption'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {` ${formatDateString(release.createdAt)}`}
               </Typography>
             </Typography>
@@ -175,17 +188,25 @@ export default function ReleaseReview() {
             <Stack spacing={1}>
               {release.files.length > 0 && (
                 <>
-                  <Typography sx={{
-                    fontWeight: 'bold'
-                  }}>Files</Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Files
+                  </Typography>
                   {releaseFiles}
                 </>
               )}
               {release.images.length > 0 && (
                 <>
-                  <Typography sx={{
-                    fontWeight: 'bold'
-                  }}>Docker images</Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Docker images
+                  </Typography>
                   {releaseImages}
                 </>
               )}
@@ -199,5 +220,5 @@ export default function ReleaseReview() {
         </Paper>
       </Container>
     </>
-  );
+  )
 }

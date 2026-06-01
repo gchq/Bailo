@@ -69,12 +69,16 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             spacing={2}
             divider={<Divider flexItem orientation='vertical' />}
             sx={{
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
-            <Stack direction='row' spacing={2} sx={{
-              alignItems: 'center'
-            }}>
+            <Stack
+              direction='row'
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <TextField
                 size='small'
                 value={newTag}
@@ -124,5 +128,5 @@ export default function TagSelector({ onChange, value, label, formContext, requi
         </Stack>
       )}
     </AdditionalInformation>
-  );
+  )
 }

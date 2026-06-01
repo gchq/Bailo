@@ -171,21 +171,29 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
       key={`${modelImage.repository}-${modelImage.name}-${tag}`}
       sx={{
         width: '100%',
-        py: 0.5
-      }}>
+        py: 0.5,
+      }}
+    >
       <Stack
         direction={{ sm: 'column', md: 'row' }}
         spacing={2}
         sx={{
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-        <Stack spacing={2} direction='row' sx={{
-          alignItems: 'center'
-        }}>
-          <Box sx={{
-            width: 'fit-content'
-          }}>
+          alignItems: 'center',
+        }}
+      >
+        <Stack
+          spacing={2}
+          direction='row'
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              width: 'fit-content',
+            }}
+          >
             <CodeLine
               line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
             />
@@ -198,9 +206,13 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
             </Tooltip>
           )}
         </Stack>
-        <Stack direction='row' spacing={2} sx={{
-          alignItems: 'center'
-        }}>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           {reportDisplay(tag)}
           <IconButton aria-label='toggle image options menu' onClick={(event) => setAnchorElMore(event.currentTarget)}>
             <MoreVert color='primary' />
@@ -276,5 +288,5 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
         </Stack>
       </Stack>
     </Box>
-  );
+  )
 }

@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
-from pickletools import genops
 from tempfile import NamedTemporaryFile
 from typing import Annotated, Any
 
@@ -17,14 +16,15 @@ import uvicorn
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
-from pydantic import BaseModel
 
 # isort: split
 
 import bailo_artefactscan_api.trivy as trivy
 from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.modelscan import extract_supported_file_types, is_valid_pickle
 from bailo_artefactscan_api.openapi.scan_file_responses import SCAN_FILE_RESPONSES
 from bailo_artefactscan_api.openapi.scan_image_responses import SCAN_IMAGE_RESPONSES
+from bailo_artefactscan_api.schemas import ApiInformation
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -72,32 +72,17 @@ app.add_middleware(
 )
 
 
-class ApiInformation(BaseModel):
-    """Minimal typed information about the API endpoint.
-
-    :param BaseModel: Pydantic super class
-    """
-
-    apiName: str
-    apiVersion: str
-    modelscanScannerName: str
-    modelscanVersion: str
-    trivyScannerName: str
-    trivyVersion: str
-
-
 @app.get(
     "/info",
-    summary="Retrieve API metadata",
-    description="Returns basic information about the ArtefactScan API, including configuration and service metadata.",
+    summary="Get API metadata",
+    description="Return service-level metadata including API version and underlying scanner versions.",
+    tags=["Metadata"],
     status_code=HTTPStatus.OK.value,
-    response_description="A populated ApiInformation object",
+    response_model=ApiInformation,
+    response_model_exclude_none=True,
 )
 async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
-    """Information about the API.
-
-    :return: a JSON representable object with keys from ApiInformation
-    """
+    modelscan_file_types = extract_supported_file_types(settings.modelscan_settings)
     return ApiInformation(
         apiName=settings.app_name,
         apiVersion=settings.app_version,
@@ -105,6 +90,8 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
         modelscanVersion=modelscan.__version__,
         trivyScannerName=trivy.__name__.split(".")[-1],
         trivyVersion=trivy.get_trivy_version(),
+        modelscanSupportedExtensions=sorted(modelscan_file_types),
+        maxFileSizeBytes=settings.maximum_filesize,
     )
 
 
@@ -112,6 +99,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
     "/scan/file",
     summary="Scan a file for security threats",
     description="Upload a file to be analysed using ProtectAI ModelScan. The endpoint returns the results of the threat detection scan.",
+    tags=["Scan"],
     status_code=HTTPStatus.OK.value,
     response_description="The result from ModelScan",
     response_model=dict[str, Any],
@@ -203,6 +191,7 @@ def scan_file(
     "/scan/image",
     summary="Scan a container image layer for vulnerabilities",
     description="Upload a container image layer to be scanned against the Trivy vulnerability database. The endpoint returns detected vulnerabilities and metadata.",
+    tags=["Scan"],
     status_code=HTTPStatus.OK.value,
     response_description="The result from Trivy",
     responses=SCAN_IMAGE_RESPONSES,
@@ -217,31 +206,9 @@ def scan_image(
     Blobs have to be compressed tarballs with an overlay file system
 
     """
-    logger.info("Upload started")
+    logger.info("Called the API endpoint to scan uploaded image %s", in_file.filename)
     res = trivy.scan(in_file, background_tasks, settings.block_size)
     return res
-
-
-def is_valid_pickle(file_path: Path, max_bytes: int = 2 * 1024 * 1024) -> bool:
-    """Safely checks if a given file is a valid Pickle file.
-
-    :param file_path: file path to be scanned
-    :param max_bytes: maximum number of bytes to read in, defaults to 2*1024*1024
-    :return: whether the read bytes are a Pickle file (or not)
-    """
-    with open(file_path, "rb") as f:
-        data = f.read(max_bytes)
-
-    if not data:
-        return False
-
-    try:
-        # Attempt to iterate through all opcodes
-        for _ in genops(data):
-            pass
-        return True
-    except ValueError:
-        return False
 
 
 if __name__ == "__main__":

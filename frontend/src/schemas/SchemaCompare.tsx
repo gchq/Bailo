@@ -59,8 +59,9 @@ export default function SchemaCompare() {
           spacing={{ xs: 2, sm: 6 }}
           sx={{
             justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+            alignItems: 'center',
+          }}
+        >
           <Autocomplete
             disablePortal
             options={schemas}
@@ -88,5 +89,5 @@ export default function SchemaCompare() {
         {schemaDiff}
       </Stack>
     </Box>
-  );
+  )
 }

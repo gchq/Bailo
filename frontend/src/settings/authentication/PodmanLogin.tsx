@@ -22,14 +22,18 @@ export default function PodmanLogin({ token }: PodmanLoginProps) {
 
   return (
     <Stack spacing={2}>
-      <Typography sx={{
-        fontWeight: 'bold'
-      }}>1. Run Podman login:</Typography>
+      <Typography
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
+        1. Run Podman login:
+      </Typography>
       <Typography>Enter the following command on the command line:</Typography>
       <TokenCommand
         token={token}
         command={`podman login -u="<access-key>" -p="<secret-key>" ${uiConfig.registry.host}`}
       />
     </Stack>
-  );
+  )
 }

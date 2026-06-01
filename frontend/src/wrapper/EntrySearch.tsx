@@ -116,8 +116,9 @@ export default function EntrySearch() {
           spacing={1}
           sx={{
             justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+            alignItems: 'center',
+          }}
+        >
           <SearchIcon />
           <StyledInputBase
             placeholder='Search'
@@ -164,5 +165,5 @@ export default function EntrySearch() {
         </Popover>
       )}
     </Stack>
-  );
+  )
 }

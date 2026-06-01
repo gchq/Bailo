@@ -104,16 +104,18 @@ export default function Release() {
                   direction='row'
                   sx={{
                     overflow: 'hidden',
-                    alignItems: 'center'
-                  }}>
+                    alignItems: 'center',
+                  }}
+                >
                   <Typography
                     variant='h6'
                     component='h1'
                     color='primary'
                     sx={{
                       overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
                     {release ? release.semver : 'Loading...'}
                   </Typography>
                   <CopyToClipboardButton
@@ -137,5 +139,5 @@ export default function Release() {
         </Paper>
       </Container>
     </>
-  );
+  )
 }

@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 import type { ZodSchema } from 'zod'
 
-import { ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
+import { ImageDigestRef, ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -92,8 +92,12 @@ async function readBody(res: Response, expectStream: boolean): Promise<{ body?: 
     }
   }
 
-  if (isJsonContentType(res.headers.get('content-type'))) {
-    return { body: await res.json() }
+  try {
+    if (isJsonContentType(res.headers.get('content-type'))) {
+      return { body: await res.json() }
+    }
+  } catch {
+    // NOOP because sometimes the header doesn't suggest this is JSON
   }
 
   return { body: await res.text() }
@@ -346,14 +350,36 @@ export async function getRegistryLayerStream(
   return { stream: result.stream, abort: result.abort }
 }
 
-export async function doesLayerExist(token: string, repoRef: ImageNameRef, digest: string) {
+/**
+ * Checks for the existence of a blob in the registry via a `HEAD` request.
+ * A 200 response indicates the layer exists. No response body is returned.
+ * See https://distribution.github.io/distribution/spec/api/#existing-layers
+ *
+ * @param token {string} Registry authentication token.
+ * @param digestRef {ImageDigestRef} Repository, name, and digest of the blob to check.
+ * @returns The response from the registry request.
+ */
+export async function headLayer(token: string, digestRef: ImageDigestRef) {
+  return await registryRequest(token, `${digestRef.repository}/${digestRef.name}/blobs/${digestRef.digest}`, {
+    expectStream: true,
+    extraFetchOptions: {
+      method: 'HEAD',
+    },
+  })
+}
+
+/**
+ * Determines whether a blob exists in the registry by issuing a `HEAD` request.
+ * Returns `true` if the layer is present, or `false` on a 404 response.
+ * Any other error is rethrown.
+ *
+ * @param token {string} Registry authentication token.
+ * @param digestRef {ImageDigestRef} Repository, name, and digest of the blob to check.
+ * @returns {Promise<boolean>} `true` if the layer exists, `false` if not found.
+ */
+export async function doesLayerExist(token: string, digestRef: ImageDigestRef): Promise<boolean> {
   try {
-    await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, {
-      expectStream: true,
-      extraFetchOptions: {
-        method: 'HEAD',
-      },
-    })
+    await headLayer(token, digestRef)
     return true
   } catch (error) {
     if (error && isRegistryError(error) && error?.context?.status === 404) {
@@ -400,7 +426,6 @@ export async function uploadLayerMonolithic(
   uploadURL: string,
   digest: string,
   blob: Readable | ReadableStream,
-  size: string,
 ) {
   const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
     headersSchema: BlobUploadResponseHeadersSchema,
@@ -413,7 +438,6 @@ export async function uploadLayerMonolithic(
       redirect: 'error',
     },
     extraHeaders: {
-      'content-length': size,
       'content-type': 'application/octet-stream',
     },
   })
@@ -435,7 +459,6 @@ export async function mountBlob(
       extraFetchOptions: {
         method: 'POST',
       },
-      extraHeaders: { 'Content-Length': '0' },
     },
   )
 

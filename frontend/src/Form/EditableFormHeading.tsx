@@ -47,8 +47,9 @@ export default function EditableFormHeading({
         spacing={2}
         sx={{
           justifyContent: { xs: 'center', sm: 'space-between' },
-          alignItems: 'center'
-        }}>
+          alignItems: 'center',
+        }}
+      >
         {heading}
         {!isEdit && !readOnly && (
           <Stack
@@ -57,8 +58,9 @@ export default function EditableFormHeading({
             sx={{
               justifyContent: 'flex-end',
               alignItems: 'center',
-              mb: { xs: 2 }
-            }}>
+              mb: { xs: 2 },
+            }}
+          >
             <Restricted action={editAction} fallback={<Button disabled>{editButtonText}</Button>}>
               <Button
                 variant='outlined'
@@ -93,8 +95,9 @@ export default function EditableFormHeading({
             sx={{
               justifyContent: 'flex-end',
               alignItems: 'center',
-              mb: { xs: 2 }
-            }}>
+              mb: { xs: 2 },
+            }}
+          >
             <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton' startIcon={<Close />}>
               Cancel
             </Button>
@@ -113,5 +116,5 @@ export default function EditableFormHeading({
       </Stack>
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
-  );
+  )
 }

@@ -8,27 +8,37 @@ export default function NotFound() {
       sx={{
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh'
-      }}>
+        height: '100vh',
+      }}
+    >
       <Box sx={{ m: 5, p: 2, width: 'fit-content' }}>
-        <Stack spacing={2} sx={{
-          alignItems: 'center'
-        }}>
+        <Stack
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Stack
             direction='row'
             spacing={2}
             sx={{
               justifyContent: 'center',
-              alignItems: 'center'
-            }}>
+              alignItems: 'center',
+            }}
+          >
             <SentimentVeryDissatisfied color='secondary' sx={{ fontSize: 75 }} />
             <Typography color='secondary' sx={{ fontSize: 75 }}>
               404
             </Typography>
           </Stack>
-          <Typography component='h3' variant='h5' color='primary' sx={{
-            fontWeight: 'bold'
-          }}>
+          <Typography
+            component='h3'
+            variant='h5'
+            color='primary'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {`Hmm... We're having trouble finding this page.`}
           </Typography>
           <Link href='/'>
@@ -37,5 +47,5 @@ export default function NotFound() {
         </Stack>
       </Box>
     </Stack>
-  );
+  )
 }

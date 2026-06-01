@@ -1,10 +1,10 @@
 import { GppBad } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
-import { CSSProperties } from 'react'
+import { CSSProperties, ReactElement } from 'react'
 import Link from 'src/Link'
 
 interface ForbiddenProps {
-  errorMessage?: string
+  errorMessage?: string | ReactElement
   noMargin?: boolean
   hideNavButton?: boolean
   additionalStyling?: CSSProperties
@@ -18,10 +18,14 @@ export default function Forbidden({
 }: ForbiddenProps) {
   return (
     <Stack
-      sx={[{
-        justifyContent: 'center',
-        alignItems: 'center'
-      }, ...(Array.isArray(additionalStyling) ? additionalStyling : [additionalStyling])]}>
+      sx={[
+        {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        ...(Array.isArray(additionalStyling) ? additionalStyling : [additionalStyling]),
+      ]}
+    >
       <Box
         sx={{
           p: 2,
@@ -33,23 +37,30 @@ export default function Forbidden({
           spacing={2}
           sx={{
             alignItems: 'center',
-            pt: 2
-          }}>
+            pt: 2,
+          }}
+        >
           <Stack
             direction='row'
             spacing={2}
             sx={{
               justifyContent: 'center',
-              alignItems: 'center'
-            }}>
+              alignItems: 'center',
+            }}
+          >
             <GppBad color='secondary' sx={{ fontSize: 75 }} />
             <Typography color='secondary' sx={{ fontSize: 75 }}>
               403
             </Typography>
           </Stack>
-          <Typography component='h3' variant='h5' color='primary' sx={{
-            fontWeight: 'bold'
-          }}>
+          <Typography
+            component='h3'
+            variant='h5'
+            color='primary'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             Uh oh! Looks like you don&apos;t have permission to view this content.
           </Typography>
           <Typography>{errorMessage}</Typography>
@@ -61,5 +72,5 @@ export default function Forbidden({
         </Stack>
       </Box>
     </Stack>
-  );
+  )
 }

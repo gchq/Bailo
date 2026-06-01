@@ -24,9 +24,12 @@ export default function Files({ model }: FilesProps) {
 
   const EntryListItem = ({ data }) => (
     <Box key={data._id} sx={{ width: '100%' }}>
-      <Stack spacing={1} sx={{
-        p: 2
-      }}>
+      <Stack
+        spacing={1}
+        sx={{
+          p: 2,
+        }}
+      >
         <FileDisplay
           showMenuItems={{ associatedReleases: true, deleteFile: model.kind == EntryKind.MODEL, rescanFile: true }}
           file={data}
@@ -56,8 +59,9 @@ export default function Files({ model }: FilesProps) {
           spacing={2}
           sx={{
             justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+            alignItems: 'center',
+          }}
+        >
           <Typography>
             Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
             that are no longer needed, and also manually retrigger file scanning (if file scanning is enabled).
@@ -69,8 +73,9 @@ export default function Files({ model }: FilesProps) {
               justifyContent: 'flex-end',
               py: 0.5,
               width: '100%',
-              px: 2
-            }}>
+              px: 2,
+            }}
+          >
             {model.kind !== EntryKind.MIRRORED_MODEL && (
               <Restricted
                 action='createRelease'
@@ -104,8 +109,9 @@ export default function Files({ model }: FilesProps) {
               sx={{
                 justifyContent: 'flex-start',
                 alignItems: 'center',
-                width: '100%'
-              }}>
+                width: '100%',
+              }}
+            >
               <Typography>Active filter:</Typography>
               <Chip label={activeFileTag} onDelete={() => setActiveFileTag('')} />
             </Stack>
@@ -130,5 +136,5 @@ export default function Files({ model }: FilesProps) {
         </Stack>
       </Container>
     </>
-  );
+  )
 }

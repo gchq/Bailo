@@ -62,8 +62,9 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
           spacing={2}
           sx={{
             alignItems: 'start',
-            justifyContent: 'start'
-          }}>
+            justifyContent: 'start',
+          }}
+        >
           <Stack
             spacing={2}
             sx={{ borderStyle: 'solid', borderWidth: 1, borderColor: theme.palette.divider, p: 2, maxWidth: '730px' }}
@@ -90,5 +91,5 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
         </Stack>
       </Box>
     </>
-  );
+  )
 }

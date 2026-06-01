@@ -32,9 +32,14 @@ export default function Help() {
       {uiConfig && (
         <Paper sx={{ py: 5, px: 5 }}>
           <Box sx={{ mb: 5 }}>
-            <Typography variant='h6' component='h1' color='primary' sx={{
-              textAlign: 'center'
-            }}>
+            <Typography
+              variant='h6'
+              component='h1'
+              color='primary'
+              sx={{
+                textAlign: 'center',
+              }}
+            >
               Contact us
             </Typography>
           </Box>
@@ -108,5 +113,5 @@ export default function Help() {
         </Paper>
       )}
     </Container>
-  );
+  )
 }

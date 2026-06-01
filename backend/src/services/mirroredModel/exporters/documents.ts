@@ -1,7 +1,8 @@
-import prettyBytes from 'pretty-bytes'
+import bytes from 'bytes'
 
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
+import { isScanAllowedSkip } from '../../../connectors/artefactScanning/modelScan.js'
 import { FileWithScanResultsAggregate } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
@@ -50,7 +51,7 @@ export class DocumentsExporter extends BaseExporter {
         }
         const totalFileSize = await getTotalFileSize(fileIds)
         log.debug(
-          { modelId: this.model.id, semvers, size: prettyBytes(totalFileSize) },
+          { modelId: this.model.id, semvers, size: bytes.format(totalFileSize) },
           'Calculated estimated total file size included in export.',
         )
         if (totalFileSize > config.modelMirror.export.maxSize) {
@@ -70,9 +71,17 @@ export class DocumentsExporter extends BaseExporter {
         for (const file of this.files) {
           if (!file.scanResults || file.scanResults.length === 0) {
             scanErrors.missingScan.push({ name: file.name, id: file.id })
-          } else if (file.scanResults.some((scanResult) => scanResult.state !== ArtefactScanState.Complete)) {
+          } else if (
+            file.scanResults.some(
+              (scanResult) => scanResult.state !== ArtefactScanState.Complete && !isScanAllowedSkip(scanResult),
+            )
+          ) {
             scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-          } else if (file.scanResults.some((scanResult) => scanResult.summary && scanResult.summary?.length > 0)) {
+          } else if (
+            file.scanResults.some(
+              (scanResult) => scanResult.summary && scanResult.summary?.length > 0 && !isScanAllowedSkip(scanResult),
+            )
+          ) {
             scanErrors.failedScan.push({ name: file.name, id: file.id })
           }
         }

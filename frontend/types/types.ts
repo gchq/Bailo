@@ -109,9 +109,10 @@ export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanRe
 
 export interface ScanResultInterface {
   _id: string
-  state: ScanStateKeys
+  state: ArtefactScanStateKeys
   scannerVersion?: string
-  summary?: Array<ModelScanSummary | ClamAVScanSummary>
+  summary?: ScanSummary
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
   platform?: string
   toolName: string
   lastRunAt: string
@@ -119,9 +120,6 @@ export interface ScanResultInterface {
   createdAt: Date
   updatedAt: Date
 }
-
-export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescription: string }
-export type ClamAVScanSummary = { virus: string }
 
 export const SeverityLevel = {
   UNKNOWN: 'unknown',
@@ -132,13 +130,14 @@ export const SeverityLevel = {
 } as const
 export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
-export const ScanState = {
+export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',
   Complete: 'complete',
+  Skipped: 'skipped',
   Error: 'error',
 } as const
-export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type AvScanResult = ScanResultInterface &
   (
@@ -558,30 +557,68 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-type PartialReviewRequestInterface =
-  | {
+export type ReviewInterface =
+  | ({
+      kind: 'access'
+      dueDate?: undefined
+      semver?: undefined
       accessRequestId: string
-      semver?: never
-    }
-  | {
-      accessRequestId?: never
+    } & PartialReviewInterface)
+  | ({
+      kind: 'release'
+      dueDate?: undefined
       semver: string
-    }
+      accessRequestId?: undefined
+    } & PartialReviewInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: undefined
+      accessRequestId?: undefined
+    } & PartialReviewInterface)
+
+type PartialReviewInterface = {
+  _id: string
+  modelId: string
+  role: string
+  createdAt: string
+  updatedAt: string
+}
 
 export const ReviewKind = {
   ACCESS: 'access',
   RELEASE: 'release',
+  LIFECYCLE: 'lifecycle',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
-export type ReviewRequestInterface = {
+export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
-  kind: 'release' | 'access'
   createdAt: string
   updatedAt: string
-} & PartialReviewRequestInterface
+}
+
+export type ReviewRequestInterface =
+  | ({
+      kind: 'access'
+      dueDate?: never
+      semver?: never
+      accessRequestId: string
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'release'
+      dueDate?: never
+      semver: string
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: never
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {
   modelId: string
@@ -750,41 +787,23 @@ export interface ModelFormStats extends FormStats {
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
 
-export type ScanInterface = {
-  toolName: string
-  scannerVersion?: string
-  state: ArtefactScanStateKeys
-  summary?: ScanSummary
-  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
-
-  lastRunAt: string
-
-  createdAt: string
-  updatedAt: string
-} & (
-  | {
-      artefactKind: typeof ArtefactKind.FILE
-      fileId: string
-    }
-  | {
-      artefactKind: typeof ArtefactKind.IMAGE
-      layerDigest: string
-    }
-)
+export type ScanInterface = ScanResultInterface &
+  (
+    | {
+        artefactKind: typeof ArtefactKind.FILE
+        fileId: string
+      }
+    | {
+        artefactKind: typeof ArtefactKind.IMAGE
+        layerDigest: string
+      }
+  )
 
 export type ScanInfoInterface = {
   toolName: string
   scannerVersion: string
   artefactKind: ArtefactKindKeys
 }
-
-export const ArtefactScanState = {
-  NotScanned: 'notScanned',
-  InProgress: 'inProgress',
-  Complete: 'complete',
-  Error: 'error',
-} as const
-export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type ModelScanResponse = {
   summary: {
@@ -833,9 +852,9 @@ export type ModelScanResponse = {
   }
 }
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ModelScanSummary | ClamAVSummary | string)[]
 
-export type ArtefactScanSummary = {
+export type ModelScanSummary = {
   severity: SeverityLevelKeys
   vulnerabilityDescription: string
 }
@@ -929,3 +948,79 @@ export type ImageScanResults = {
 }
 
 export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
+
+export type ModelVolumeData = {
+  startDate: string
+  endDate: string
+  count: number
+  organisations: Record<string, number>
+}
+
+export type ModelVolume = {
+  data: ModelVolumeData[]
+  bucket: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  startDate: string
+  endDate: string
+}
+
+export interface SchemaBreakDownMetrics {
+  schemaId: string
+  schemaName: string
+  count: number
+}
+
+export interface ModelStateMetrics {
+  state: string
+  count: number
+}
+
+export interface OverviewBaseMetrics {
+  users: number
+  entries: number
+  schemaBreakdown: SchemaBreakDownMetrics[]
+  entryState: ModelStateMetrics[]
+  withReleases: number
+  withAccessRequest: number
+}
+
+export interface OrganisationOverviewMetrics extends OverviewBaseMetrics {
+  organisation: string
+}
+
+export interface OverviewMetrics {
+  global: OverviewBaseMetrics
+  byOrganisation: OrganisationOverviewMetrics[]
+  lastUpdated: string
+}
+
+export interface PolicySummaryMetrics {
+  roleId: string
+  roleName: string
+  count: number
+}
+
+export interface PolicyRoleMetric {
+  roleId: string
+  roleName: string
+}
+
+export interface PolicyModelMetrics {
+  entryId: string
+  missingRoles: PolicyRoleMetric[]
+  modelOwners: string[]
+}
+
+export interface PolicyBaseMetrics {
+  summary: PolicySummaryMetrics[]
+  entries: PolicyModelMetrics[]
+}
+
+export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
+  organisation: string
+}
+
+export interface PolicyMetrics {
+  global: PolicyBaseMetrics
+  byOrganisation: OrganisationPolicyMetrics[]
+  lastUpdated: string
+}

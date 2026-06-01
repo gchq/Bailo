@@ -94,9 +94,14 @@ export default function SchemaMigrator({
     return questionMigrations.map((migrationAction) => {
       if (migrationAction.kind === MigrationKind.MOVE) {
         return (
-          <Stack direction='row' spacing={1} key={migrationAction.id} sx={{
-            alignItems: 'center'
-          }}>
+          <Stack
+            direction='row'
+            spacing={1}
+            key={migrationAction.id}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <Tooltip title='Remove action'>
               <IconButton
                 onClick={() => handleRemoveActionItem(migrationAction)}
@@ -110,13 +115,18 @@ export default function SchemaMigrator({
               field <span style={{ fontWeight: 'bold' }}>{migrationAction.targetPath}</span>
             </Typography>
           </Stack>
-        );
+        )
       }
       if (migrationAction.kind === MigrationKind.DELETE) {
         return (
-          <Stack direction='row' spacing={1} key={migrationAction.id} sx={{
-            alignItems: 'center'
-          }}>
+          <Stack
+            direction='row'
+            spacing={1}
+            key={migrationAction.id}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <IconButton
               onClick={() => handleRemoveActionItem(migrationAction)}
               aria-label={`Remove action ${migrationAction.id}`}
@@ -127,9 +137,9 @@ export default function SchemaMigrator({
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> deleted
             </Typography>
           </Stack>
-        );
+        )
       }
-    });
+    })
   }, [questionMigrations, handleRemoveActionItem])
 
   const checkObjectsMatch = (...objects) => {
@@ -240,16 +250,20 @@ export default function SchemaMigrator({
               variant='h6'
               sx={{
                 fontWeight: 'bold',
-                px: 2
-              }}>
+                px: 2,
+              }}
+            >
               Actions
             </Typography>
             <Divider />
             <Stack sx={{ p: 2 }} spacing={2}>
               <Stack spacing={1}>
-                <Typography id='schema-action-type' sx={{
-                  fontWeight: 'bold'
-                }}>
+                <Typography
+                  id='schema-action-type'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Action type
                 </Typography>
                 <Select
@@ -265,9 +279,13 @@ export default function SchemaMigrator({
                 </Select>
               </Stack>
               <Stack spacing={1}>
-                <Typography sx={{
-                  fontWeight: 'bold'
-                }}>Source question</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Source question
+                </Typography>
                 <Button
                   size='small'
                   sx={{
@@ -281,9 +299,13 @@ export default function SchemaMigrator({
               </Stack>
               {questionMigrationKind !== MigrationKind.DELETE && (
                 <Stack spacing={1}>
-                  <Typography sx={{
-                    fontWeight: 'bold'
-                  }}>Target question</Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Target question
+                  </Typography>
                   <Button
                     size='small'
                     sx={{ width: '100%' }}
@@ -302,9 +324,11 @@ export default function SchemaMigrator({
                 <Divider />
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                    <Typography sx={{
-                      fontWeight: 'bold'
-                    }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       View Actions {questionMigrations.length > 0 ? `(${questionMigrations.length})` : ''}
                     </Typography>
                   </AccordionSummary>
@@ -318,9 +342,13 @@ export default function SchemaMigrator({
               <Divider />
               <Stack spacing={2}>
                 <Stack spacing={1}>
-                  <Typography sx={{
-                    fontWeight: 'bold'
-                  }}>Migration name</Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Migration name
+                  </Typography>
                   <TextField
                     size='small'
                     value={migrationName}
@@ -329,9 +357,13 @@ export default function SchemaMigrator({
                   />
                 </Stack>
                 <Stack spacing={1}>
-                  <Typography sx={{
-                    fontWeight: 'bold'
-                  }}>Migration description (optional)</Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Migration description (optional)
+                  </Typography>
                   <TextField
                     size='small'
                     multiline
@@ -381,9 +413,12 @@ export default function SchemaMigrator({
               sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
             >
               <Box sx={{ px: 2 }}>
-                <Typography variant='h6' sx={{
-                  fontWeight: 'bold'
-                }}>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Source Schema
                 </Typography>
                 <Typography variant='caption'>{sourceSchema.splitSchema.reference}</Typography>
@@ -403,9 +438,12 @@ export default function SchemaMigrator({
               sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
             >
               <Box sx={{ px: 2 }}>
-                <Typography variant='h6' sx={{
-                  fontWeight: 'bold'
-                }}>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Target Schema
                 </Typography>
                 <Typography variant='caption'>{targetSchema.splitSchema.reference}</Typography>
@@ -424,16 +462,19 @@ export default function SchemaMigrator({
               sx={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '100%'
-              }}>
+                height: '100%',
+              }}
+            >
               <em>Select source or target question on the actions menu to view the schema</em>
             </Stack>
           )}
         </Grid>
       </Grid>
-      <Box sx={{
-        paddingTop: 2
-      }}></Box>
+      <Box
+        sx={{
+          paddingTop: 2,
+        }}
+      ></Box>
     </>
-  );
+  )
 }

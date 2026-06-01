@@ -7,8 +7,9 @@ export default function MirrorInfo() {
         <Typography
           sx={{
             fontSize: 16,
-            fontWeight: 'bold'
-          }}>
+            fontWeight: 'bold',
+          }}
+        >
           Model export
         </Typography>
         <Typography>
@@ -17,8 +18,9 @@ export default function MirrorInfo() {
         <Typography
           sx={{
             fontSize: 16,
-            fontWeight: 'bold'
-          }}>
+            fontWeight: 'bold',
+          }}
+        >
           Releases
         </Typography>
         <Typography>
@@ -31,8 +33,9 @@ export default function MirrorInfo() {
         <Typography
           sx={{
             fontSize: 16,
-            fontWeight: 'bold'
-          }}>
+            fontWeight: 'bold',
+          }}
+        >
           Model artefacts
         </Typography>
         <Typography>
@@ -45,5 +48,5 @@ export default function MirrorInfo() {
         </Typography>
       </Stack>
     </>
-  );
+  )
 }

@@ -28,8 +28,9 @@ export default function ReviewRolesForm() {
       sx={{
         alignItems: 'center',
         justifyContent: 'center',
-        mb: 4
-      }}>
+        mb: 4,
+      }}
+    >
       <Typography variant='h6' component='h1'>
         Create new Role
       </Typography>

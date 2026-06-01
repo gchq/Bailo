@@ -22,8 +22,9 @@ export default function SearchInfo() {
       <Typography
         sx={{
           fontSize: 16,
-          fontWeight: 'bold'
-        }}>
+          fontWeight: 'bold',
+        }}
+      >
         Marketplace search
       </Typography>
       <List sx={{ listStyleType: 'disc', px: 3 }}>
@@ -54,8 +55,9 @@ export default function SearchInfo() {
       <Typography
         sx={{
           fontSize: 16,
-          fontWeight: 'bold'
-        }}>
+          fontWeight: 'bold',
+        }}
+      >
         Top-right search
       </Typography>
       <List sx={{ listStyleType: 'disc', px: 3 }}>
@@ -69,5 +71,5 @@ export default function SearchInfo() {
         </ListItem>
       </List>
     </>
-  );
+  )
 }

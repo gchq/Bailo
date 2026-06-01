@@ -27,8 +27,8 @@ export function NavMenuItem({
 }: NavMenuItemProps) {
   const theme = useTheme()
   return (
-    <ListItem disablePadding dense={drawerOpen}>
-      <Link href={href} newTab={openLinkInNewTab} noLinkStyle>
+    <ListItem disablePadding>
+      <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%', textDecoration: 'none' }}>
         <ListItemButton selected={selectedPage === menuPage}>
           <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (

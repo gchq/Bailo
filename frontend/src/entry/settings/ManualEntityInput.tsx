@@ -42,9 +42,13 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
       <AccordionDetails sx={{ p: 0 }}>
         {isUiConfigLoading && <Loading />}
         {!isUiConfigLoading && uiConfig && (
-          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{
-            alignItems: 'center'
-          }}>
+          <Stack
+            spacing={2}
+            direction={{ xs: 'column', sm: 'row' }}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <TextField
               size='small'
               fullWidth
@@ -63,5 +67,5 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
         <MessageAlert message={errorMessage} severity='error' />
       </AccordionDetails>
     </Accordion>
-  );
+  )
 }

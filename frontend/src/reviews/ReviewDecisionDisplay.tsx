@@ -96,9 +96,13 @@ export default function ReviewDecisionDisplay({
 
   return (
     <>
-      <Stack direction='row' spacing={2} sx={{
-        alignItems: 'flex-start'
-      }}>
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
         <Box sx={{ pt: 2, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
@@ -114,18 +118,24 @@ export default function ReviewDecisionDisplay({
             sx={{
               alignItems: 'center',
               justifyContent: 'space-between',
-              width: '100%'
-            }}>
+              width: '100%',
+            }}
+          >
             <Stack
               direction='row'
               spacing={1}
               sx={{
                 alignItems: 'center',
-                width: '100%'
-              }}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{
-                alignItems: 'center'
-              }}>
+                width: '100%',
+              }}
+            >
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
                 <UserDisplay dn={username} />
                 <span data-test='reviewDecisionDisplayApproved'>
                   {response.decision === Decision.Approve && 'has approved'}
@@ -151,12 +161,20 @@ export default function ReviewDecisionDisplay({
                 )}
               </span>
             </Stack>
-            <Stack direction='row' spacing={1} sx={{
-              alignItems: 'center'
-            }}>
-              <Typography sx={{
-                fontWeight: 'bold'
-              }}>{formatDateString(response.createdAt)}</Typography>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {formatDateString(response.createdAt)}
+              </Typography>
               <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
                 <MoreHorizIcon />
               </IconButton>
@@ -181,5 +199,5 @@ export default function ReviewDecisionDisplay({
         {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
       </Menu>
     </>
-  );
+  )
 }

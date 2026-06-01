@@ -83,8 +83,9 @@ export default function ModelTemplateSelect() {
                 spacing={2}
                 sx={{
                   justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
+                  alignItems: 'center',
+                }}
+              >
                 <Typography variant='h5' component='h1' color='primary'>
                   Select a model to use as a template
                 </Typography>
@@ -112,5 +113,5 @@ export default function ModelTemplateSelect() {
         </Paper>
       </Container>
     </>
-  );
+  )
 }

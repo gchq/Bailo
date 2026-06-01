@@ -19,26 +19,36 @@ export default function InformationDialog({ open = false, onClose, schema }: Sch
       <DialogContent>
         <Stack spacing={2} divider={<Divider flexItem />}>
           <Stack spacing={1}>
-            <Stack direction='row' spacing={1} sx={{
-              alignItems: 'center'
-            }}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Typography
                 sx={{
                   fontWeight: 'bold',
-                  color: theme.palette.primary.main
-                }}>
+                  color: theme.palette.primary.main,
+                }}
+              >
                 ID:
               </Typography>
               <Typography>{schema.id}</Typography>
             </Stack>
-            <Stack direction='row' spacing={1} sx={{
-              alignItems: 'center'
-            }}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Typography
                 sx={{
                   fontWeight: 'bold',
-                  color: theme.palette.primary.main
-                }}>
+                  color: theme.palette.primary.main,
+                }}
+              >
                 Name:
               </Typography>
               <Typography>{schema.name}</Typography>
@@ -53,5 +63,5 @@ export default function InformationDialog({ open = false, onClose, schema }: Sch
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

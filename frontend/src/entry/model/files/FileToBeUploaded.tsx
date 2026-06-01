@@ -48,12 +48,19 @@ export default function FileToBeUploaded({
   )
 
   return (
-    <Grid container spacing={1} sx={{
-      alignItems: 'center'
-    }}>
-      <Grid size={{ xs: 9 }} sx={{
-        textOverflow: 'ellipsis'
-      }}>
+    <Grid
+      container
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
+      <Grid
+        size={{ xs: 9 }}
+        sx={{
+          textOverflow: 'ellipsis',
+        }}
+      >
         <Tooltip title={fileWithMetadata.file.name}>
           <Chip
             color='primary'
@@ -84,11 +91,14 @@ export default function FileToBeUploaded({
           <TextField size='small' value={fileWithMetadata.metadata?.text} onChange={handleMetadataTextOnChange} />
         )}
       </Grid>
-      <Grid size={{ xs: 1 }} sx={{
-        textAlign: 'right'
-      }}>
+      <Grid
+        size={{ xs: 1 }}
+        sx={{
+          textAlign: 'right',
+        }}
+      >
         <Typography variant='caption'>{prettyBytes(fileWithMetadata.file.size)}</Typography>
       </Grid>
     </Grid>
-  );
+  )
 }

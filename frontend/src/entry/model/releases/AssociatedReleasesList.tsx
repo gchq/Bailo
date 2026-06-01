@@ -30,9 +30,13 @@ export default function AssociatedReleasesList({ releases, modelId, latestReleas
                           {associatedRelease.semver}
                         </Typography>
                         {latestRelease === associatedRelease.semver && (
-                          <Typography color='secondary' component='span' sx={{
-                            pl: 1
-                          }}>
+                          <Typography
+                            color='secondary'
+                            component='span'
+                            sx={{
+                              pl: 1,
+                            }}
+                          >
                             (Latest)
                           </Typography>
                         )}

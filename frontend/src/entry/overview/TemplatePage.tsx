@@ -28,8 +28,9 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
         spacing={4}
         sx={{
           justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+          alignItems: 'center',
+        }}
+      >
         <Typography component='h2' variant='h6' color='primary' data-test='createEntryCardOverview'>
           {`Create ${toTitleCase(EntryCardKindLabel[entry.kind])}`}
         </Typography>
@@ -41,8 +42,9 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
           divider={<Divider orientation='vertical' flexItem />}
           sx={{
             justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+            alignItems: 'center',
+          }}
+        >
           <Card
             sx={{
               width: '300px',
@@ -97,5 +99,5 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
         </Stack>
       </Stack>
     </Box>
-  );
+  )
 }

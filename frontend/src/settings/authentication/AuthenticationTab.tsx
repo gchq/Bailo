@@ -38,19 +38,28 @@ export default function AuthenticationTab() {
                 direction='row'
                 sx={{
                   alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography>{token.description}</Typography>
-                <Box sx={{
-                  pl: 1
-                }}>
-                  <Typography variant='caption' sx={{
-                    mr: 1
-                  }}>
+                <Box
+                  sx={{
+                    pl: 1,
+                  }}
+                >
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      mr: 1,
+                    }}
+                  >
                     Created on
-                    <Typography variant='caption' sx={{
-                      fontWeight: 'bold'
-                    }}>
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       {` ${formatDateString(token.createdAt)}`}
                     </Typography>
                   </Typography>
@@ -103,13 +112,15 @@ export default function AuthenticationTab() {
         sx={{
           justifyContent: { xs: 'center', sm: 'space-between' },
           alignItems: 'center',
-          pb: 2
-        }}>
+          pb: 2,
+        }}
+      >
         <Typography
           sx={{
             fontWeight: 'bold',
-            mb: 1
-          }}>
+            mb: 1,
+          }}
+        >
           Personal access tokens
         </Typography>
         <Button
@@ -133,5 +144,5 @@ export default function AuthenticationTab() {
         onCancel={handleCloseDialog}
       />
     </Box>
-  );
+  )
 }

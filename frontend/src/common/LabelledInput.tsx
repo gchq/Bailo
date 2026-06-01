@@ -23,9 +23,13 @@ export default function LabelledInput({
 
   return (
     <Stack {...stackProps}>
-      <Typography component='label' htmlFor={htmlFor} sx={{
-        fontWeight: 'bold'
-      }}>
+      <Typography
+        component='label'
+        htmlFor={htmlFor}
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         {label}
         {required && (
           <Box
@@ -33,13 +37,14 @@ export default function LabelledInput({
             style={{ color: theme.palette.primary.main }}
             sx={{
               ml: 0.5,
-              color: theme.palette.primary.main
-            }}>
+              color: theme.palette.primary.main,
+            }}
+          >
             *
           </Box>
         )}
       </Typography>
       {children}
     </Stack>
-  );
+  )
 }

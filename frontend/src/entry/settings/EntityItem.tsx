@@ -38,9 +38,13 @@ export default function EntityItem({
   return (
     <TableRow>
       <TableCell>
-        <Stack direction='row' spacing={1} sx={{
-          alignItems: 'center'
-        }}>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <EntityNameDisplay entryCollaborator={entity} />
         </Stack>
       </TableCell>
@@ -76,5 +80,5 @@ export default function EntityItem({
         </Tooltip>
       </TableCell>
     </TableRow>
-  );
+  )
 }

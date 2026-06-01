@@ -58,8 +58,9 @@ export default function CodeSnippet({
             justifyContent: 'space-between',
             pl: 2,
             pr: 1,
-            py: 1
-          }}>
+            py: 1,
+          }}
+        >
           <Typography variant='caption'>{fileName}</Typography>
           <CodeSnippetActions
             disableVisibilityButton={disableVisibilityButton}
@@ -77,8 +78,9 @@ export default function CodeSnippet({
           alignItems: 'flex-start',
           justifyContent: 'space-between',
           px: 2,
-          py: 1
-        }}>
+          py: 1,
+        }}
+      >
         <Typography
           sx={{
             whiteSpace: 'pre-wrap',
@@ -98,5 +100,5 @@ export default function CodeSnippet({
         )}
       </Stack>
     </Stack>
-  );
+  )
 }

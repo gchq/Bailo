@@ -24,7 +24,7 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/artefactScanning/index.js')
 vi.mock('../../src/utils/transactions.js')
-vi.mock('pretty-bytes')
+vi.mock('bytes')
 
 const FileModelMock = getTypedModelMock('FileModel')
 const ScanModelMock = getTypedModelMock('ScanModel')

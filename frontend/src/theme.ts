@@ -1,5 +1,6 @@
 import { green, red, yellow } from '@mui/material/colors'
 import { createTheme, PaletteColor, PaletteColorOptions, ThemeOptions } from '@mui/material/styles'
+import type {} from '@mui/x-date-pickers/themeAugmentation'
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -80,6 +81,14 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
     styleOverrides: {
       root: {
         marginTop: 4,
+      },
+    },
+  },
+  MuiPickersOutlinedInput: {
+    styleOverrides: {
+      sectionsContainer: {
+        paddingTop: 10,
+        paddingBottom: 10,
       },
     },
   },

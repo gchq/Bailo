@@ -131,9 +131,12 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     () =>
       failedFileUploads.map((file) => (
         <div key={file.fileName}>
-          <Box component='span' sx={{
-            fontWeight: 'bold'
-          }}>
+          <Box
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {file.fileName}
           </Box>
           {` - ${file.error}`}
@@ -152,9 +155,15 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
             </Button>
           </label>
           <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
-          {filesToBeUploaded.length > 0 && <Typography sx={{
-            fontWeight: 'bold'
-          }}>Files to upload</Typography>}
+          {filesToBeUploaded.length > 0 && (
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Files to upload
+            </Typography>
+          )}
           <Stack divider={<Divider />} spacing={1}>
             {fileListToUpload}
           </Stack>
@@ -193,5 +202,5 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
         </Stack>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

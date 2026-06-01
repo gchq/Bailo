@@ -76,8 +76,9 @@ export default function MultiFileInputFileDisplay({
       spacing={1}
       sx={{
         alignItems: 'center',
-        width: '100%'
-      }}>
+        width: '100%',
+      }}
+    >
       <Grid size={{ xs: 4 }}>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
@@ -109,11 +110,14 @@ export default function MultiFileInputFileDisplay({
           onChange={handleMetadataChange}
         />
       </Grid>
-      <Grid size={{ xs: 1 }} sx={{
-        textAlign: 'right'
-      }}>
+      <Grid
+        size={{ xs: 1 }}
+        sx={{
+          textAlign: 'right',
+        }}
+      >
         <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
       </Grid>
     </Grid>
-  );
+  )
 }

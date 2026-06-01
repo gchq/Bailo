@@ -28,7 +28,7 @@ export type ScanInterface = {
     }
 )
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary | string)[]
 
 export type ArtefactScanSummary = {
   severity: SeverityLevelKeys

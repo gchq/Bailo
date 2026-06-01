@@ -25,8 +25,9 @@ export default function SaveAndCancelButtons({
       divider={<Divider orientation='vertical' flexItem />}
       sx={{
         justifyContent: 'flex-end',
-        mb: { xs: 2 }
-      }}>
+        mb: { xs: 2 },
+      }}
+    >
       <Button
         variant='contained'
         startIcon={<Code />}
@@ -43,5 +44,5 @@ export default function SaveAndCancelButtons({
         Save
       </Button>
     </Stack>
-  );
+  )
 }

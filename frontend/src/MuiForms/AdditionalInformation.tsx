@@ -56,7 +56,7 @@ export default function AdditionalInformation({
           component='label'
           htmlFor={id}
           sx={{
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
         >
           {label}
@@ -65,7 +65,7 @@ export default function AdditionalInformation({
         {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
         {children}
       </Stack>
-    );
+    )
   }
 
   const mirroredStateDisplay = () => {
@@ -90,7 +90,7 @@ export default function AdditionalInformation({
           component='label'
           htmlFor={id}
           sx={{
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
         >
           {label}
@@ -109,7 +109,7 @@ export default function AdditionalInformation({
           </Typography>
         )}
       </>
-    );
+    )
   }
 
   return (
@@ -138,7 +138,7 @@ export default function AdditionalInformation({
                 component='label'
                 htmlFor={id}
                 sx={{
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
                 }}
               >
                 {label}
@@ -152,9 +152,12 @@ export default function AdditionalInformation({
             </Stack>
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
-              <Typography variant='caption' sx={{
-                fontWeight: 'bold'
-              }}>
+              <Typography
+                variant='caption'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {uiConfig ? uiConfig.modelMirror.import.originalAnswerHeading : 'Original answer'}
               </Typography>
               <Box>
@@ -175,8 +178,9 @@ export default function AdditionalInformation({
                 variant='caption'
                 sx={{
                   fontWeight: 'bold',
-                  pl: 4
-                }}>
+                  pl: 4,
+                }}
+              >
                 {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
               </Typography>
               {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
@@ -193,7 +197,7 @@ export default function AdditionalInformation({
               component='label'
               htmlFor={id}
               sx={{
-                fontWeight: 'bold'
+                fontWeight: 'bold',
               }}
             >
               {label}
@@ -228,9 +232,12 @@ export default function AdditionalInformation({
                 }}
               >
                 <Stack spacing={1}>
-                  <Typography variant='caption' sx={{
-                    fontWeight: 'bold'
-                  }}>
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
                   </Typography>
                   {children}
@@ -241,5 +248,5 @@ export default function AdditionalInformation({
         </Stack>
       )}
     </Stack>
-  );
+  )
 }

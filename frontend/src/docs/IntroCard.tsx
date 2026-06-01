@@ -24,8 +24,9 @@ export default function IntroCard({ title, user, url, children }: IntroCardProps
           component='div'
           sx={{
             color: 'text.secondary',
-            mb: 1.5
-          }}>
+            mb: 1.5,
+          }}
+        >
           {user}
         </Typography>
         <Typography variant='body2' component='div'>
@@ -38,5 +39,5 @@ export default function IntroCard({ title, user, url, children }: IntroCardProps
         </Link>
       </CardActions>
     </Card>
-  );
+  )
 }

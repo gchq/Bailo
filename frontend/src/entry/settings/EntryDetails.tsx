@@ -71,19 +71,24 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         spacing={1}
         sx={{
           justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+          alignItems: 'center',
+        }}
+      >
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{
-            fontWeight: 'bold'
-          }}>Private</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Private
+          </Typography>
           <Typography variant='caption'>{`Only named individuals will be able to view this ${
             EntryKindLabel[entry.kind]
           }`}</Typography>
         </Stack>
       </Stack>
-    );
+    )
   }
 
   const publicLabel = () => {
@@ -93,19 +98,24 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         spacing={1}
         sx={{
           justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+          alignItems: 'center',
+        }}
+      >
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{
-            fontWeight: 'bold'
-          }}>Public</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Public
+          </Typography>
           <Typography variant='caption'>{`Any authorised user will be able to see this ${
             EntryKindLabel[entry.kind]
           }`}</Typography>
         </Stack>
       </Stack>
-    );
+    )
   }
 
   return (

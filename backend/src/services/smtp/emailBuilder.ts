@@ -1,5 +1,6 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
+import sanitizeHtml from 'sanitize-html'
 
 export type EmailContent = {
   subject: string
@@ -17,12 +18,39 @@ export type actions = {
   url: string
 }
 
+function sanitizeInput<T>(input: T) {
+  if (input === null) {
+    return null
+  }
+
+  if (typeof input === 'string') {
+    return sanitizeHtml(input)
+  }
+
+  if (Array.isArray(input)) {
+    return input.map(sanitizeInput)
+  }
+
+  if (typeof input === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [key, val] of Object.entries(input)) {
+      result[key] = sanitizeInput(val)
+    }
+    return result
+  }
+
+  return input
+}
 export async function buildEmail(
   title: string,
   metadata: Info[],
   actions: actions[],
   actionRequired?: boolean,
 ): Promise<EmailContent> {
+  title = sanitizeInput(title)
+  metadata = sanitizeInput(metadata)
+  actions = sanitizeInput(actions)
+
   return {
     subject: actionRequired ? `ACTION REQUIRED: ${title}` : title,
     text: emailText(title, metadata, actions),

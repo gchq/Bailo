@@ -45,12 +45,16 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
         <Stack spacing={4}>
           {!readOnly && (
             <>
-              <Box sx={{
-                display: 'flex'
-              }}>
-                <Box sx={{
-                  ml: 'auto'
-                }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                <Box
+                  sx={{
+                    ml: 'auto',
+                  }}
+                >
                   <Restricted action='pushModelImage' fallback={<Button disabled>Push image</Button>}>
                     <Button
                       variant='outlined'
@@ -89,5 +93,5 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
         </Stack>
       </Container>
     </>
-  );
+  )
 }

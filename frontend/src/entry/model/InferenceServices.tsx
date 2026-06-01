@@ -114,12 +114,16 @@ export default function InferenceServices({ model }: InferenceProps) {
     <Container sx={{ my: 2 }}>
       {healthCheck ? (
         <Stack spacing={4}>
-          <Box sx={{
-            display: 'flex'
-          }}>
-            <Box sx={{
-              ml: 'auto'
-            }}>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <Box
+              sx={{
+                ml: 'auto',
+              }}
+            >
               <Restricted action='createInferenceService' fallback={<Button disabled>Create Service</Button>}>
                 <Button variant='outlined' onClick={handleCreateNewInferenceService}>
                   Create Service
@@ -144,5 +148,5 @@ export default function InferenceServices({ model }: InferenceProps) {
       )}
       <MessageAlert message={errorMessage} severity='error' />
     </Container>
-  );
+  )
 }

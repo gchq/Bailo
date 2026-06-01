@@ -92,8 +92,9 @@ export default function JsonSchemaViewer({
                   <Typography
                     sx={{
                       width: '100%',
-                      wordBreak: 'break-word'
-                    }}>
+                      wordBreak: 'break-word',
+                    }}
+                  >
                     {step.schema.title}
                   </Typography>
                   {displayLabelValidation && <ValidationErrorIcon step={step} />}
@@ -133,5 +134,5 @@ export default function JsonSchemaViewer({
         </Form>
       </Grid>
     </Grid>
-  );
+  )
 }

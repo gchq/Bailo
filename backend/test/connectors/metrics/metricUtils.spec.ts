@@ -77,27 +77,21 @@ describe('connectors > metrics > metricUtils > getApplicableRoleSet', () => {
   })
 
   test('returns only default roles when schemaId is undefined', () => {
-    const result = getApplicableRoleSet(['msro', 'mtr'], { schema1: ['md'] }, undefined)
+    const result = getApplicableRoleSet({ schema1: ['owner'] }, undefined)
 
-    expect(Array.from(result)).toEqual(['msro', 'mtr'])
+    expect(Array.from(result)).toEqual([])
   })
 
   test('includes schema roles when schemaId exists in schemaRoleMap', () => {
-    const result = getApplicableRoleSet(['msro', 'mtr'], { schema1: ['md'] }, 'schema1')
+    const result = getApplicableRoleSet({ schema1: ['msro', 'mtr'] }, 'schema1')
 
-    expect(new Set(result)).toEqual(new Set(['msro', 'mtr', 'md']))
-  })
-
-  test('falls back to default roles when schemaId not found in schemaRoleMap', () => {
-    const result = getApplicableRoleSet(['msro', 'mtr'], { schema1: ['md'] }, 'unknown')
-
-    expect(Array.from(result)).toEqual(['msro', 'mtr'])
+    expect(new Set(result)).toEqual(new Set(['msro', 'mtr']))
   })
 
   test('removes duplicates via Set', () => {
-    const result = getApplicableRoleSet(['msro', 'mtr'], { schema1: ['mtr', 'md'] }, 'schema1')
+    const result = getApplicableRoleSet({ schema1: ['mtr', 'mtr', 'owner'] }, 'schema1')
 
-    expect(new Set(result)).toEqual(new Set(['msro', 'mtr', 'md']))
+    expect(new Set(result)).toEqual(new Set(['mtr', 'owner']))
   })
 })
 

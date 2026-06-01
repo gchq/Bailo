@@ -2,7 +2,7 @@ import { PassThrough, pipeline, Readable } from 'node:stream'
 import zlib from 'node:zlib'
 
 import { extract, pack } from 'tar-stream'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import {
   addEntryToTarGzUpload,
@@ -48,6 +48,7 @@ const mirroredModelMocks = vi.hoisted(() => {
     processEntry: processEntrySpy,
     handleStreamCompletion: handleStreamCompletionSpy,
     handleStreamError: handleStreamErrorSpy,
+    getMetadata: vi.fn(() => dummyMetadata),
   }))
 
   return {
@@ -63,6 +64,12 @@ const mirroredModelMocks = vi.hoisted(() => {
   }
 })
 vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+
+const modelTransferMocks = vi.hoisted(() => ({
+  handleStartEmail: vi.fn(),
+  handleCompleteEmail: vi.fn(),
+}))
+vi.mock('../../../src/services/modelTransfer.js', () => modelTransferMocks)
 
 const dummyMetadata = {
   schemaVersion: 1,
@@ -82,10 +89,6 @@ function setUpExtractTarGzStreams() {
 }
 
 describe('service > mirroredModel > tarball', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('initialiseTarGzUpload > success', async () => {
     const meta = { mirroredModelId: 'mid', importKind: mirroredModelMocks.MirrorKind.File }
 

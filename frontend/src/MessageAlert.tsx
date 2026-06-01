@@ -106,20 +106,39 @@ export default function MessageAlert({
       }
     >
       <Stack spacing={1}>
-        <Stack direction='row' spacing={1} sx={{
-          alignItems: 'center'
-        }}>
-          {id && <Typography sx={{
-            fontWeight: 'bold'
-          }}>{id}</Typography>}
-          {statusCode > 0 && <Typography sx={{
-            fontWeight: 'bold'
-          }}>{statusCode}</Typography>}
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          {id && (
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              {id}
+            </Typography>
+          )}
+          {statusCode > 0 && (
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              {statusCode}
+            </Typography>
+          )}
           <Stack>
             <Typography>{message}</Typography>
-            <Typography variant='caption' sx={{
-              fontWeight: 'bold'
-            }}>
+            <Typography
+              variant='caption'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {subHeading}
             </Typography>
           </Stack>
@@ -157,5 +176,5 @@ export default function MessageAlert({
         )}
       </Stack>
     </Alert>
-  );
+  )
 }

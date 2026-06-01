@@ -114,22 +114,30 @@ export default function AccessRequestReview() {
               direction='row'
               sx={{
                 justifyContent: 'space-between',
-                mb: 2
-              }}>
+                mb: 2,
+              }}
+            >
               <Typography variant='caption'>
                 Created by {<UserDisplay dn={accessRequest.createdBy} />} on
-                <Typography variant='caption' sx={{
-                  fontWeight: 'bold'
-                }}>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
               </Typography>
               {accessRequest.metadata.overview.endDate && (
                 <Typography variant='caption'>
                   End Date:
-                  <Typography variant='caption' data-test='accessRequestEndDate' sx={{
-                    fontWeight: 'bold'
-                  }}>
+                  <Typography
+                    variant='caption'
+                    data-test='accessRequestEndDate'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
                   </Typography>
                 </Typography>
@@ -140,8 +148,9 @@ export default function AccessRequestReview() {
               spacing={4}
               sx={{
                 alignItems: 'flex-end',
-                justifyContent: 'space-between'
-              }}>
+                justifyContent: 'space-between',
+              }}
+            >
               <Card
                 sx={{
                   px: 2,
@@ -150,9 +159,13 @@ export default function AccessRequestReview() {
                   width: '100%',
                 }}
               >
-                <Typography variant='subtitle2' component='h3' sx={{
-                  mb: 1
-                }}>
+                <Typography
+                  variant='subtitle2'
+                  component='h3'
+                  sx={{
+                    mb: 1,
+                  }}
+                >
                   Users
                 </Typography>
                 <Grid container>{accessRequestEntities}</Grid>
@@ -177,5 +190,5 @@ export default function AccessRequestReview() {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }
