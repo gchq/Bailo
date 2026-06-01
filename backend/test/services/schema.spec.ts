@@ -20,6 +20,20 @@ const mockMongoUtils = vi.hoisted(() => {
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 
+const cognitoMock = vi.hoisted(() => ({
+  get: vi.fn(),
+  set: vi.fn(),
+}))
+vi.mock('node-cache', () => ({
+  __esModule: true,
+  default: vi.fn(
+    class {
+      get = cognitoMock.get
+      set = cognitoMock.set
+    },
+  ),
+}))
+
 describe('services > schema', () => {
   const testUser = { dn: 'user' } as any
 
@@ -75,7 +89,10 @@ describe('services > schema', () => {
   })
 
   test('that a schema can be retrieved by ID', async () => {
-    SchemaModelModelMock.findOne.mockResolvedValueOnce(testModelSchema)
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
+      toObject: vi.fn().mockReturnValue(testModelSchema),
+    })
     const result = await getSchemaById(testModelSchema.id)
     expect(result).toEqual(testModelSchema)
   })
@@ -84,28 +101,153 @@ describe('services > schema', () => {
     SchemaModelModelMock.findOne.mockResolvedValueOnce(undefined)
     await expect(() => getSchemaById(testModelSchema.id)).rejects.toThrow(/^The requested schema was not found/)
   })
-})
 
-test('that we update review roles if they are changed on a schema', async () => {
-  const testReviewer = 'reviewer2'
-  const diff = {
-    reviewRoles: [testReviewer],
-  }
-  SchemaModelModelMock.findOne.mockResolvedValueOnce({
-    ...testModelSchema,
-    save: vi.fn(),
+  test('that a schema retrieved with a valid modelState has matching fields added to required', async () => {
+    const jsonSchema = {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          requiredByModelSates: ['Development'],
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'schema-with-state',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'schema-with-state', jsonSchema }),
+    })
+
+    const result = await getSchemaById('schema-with-state', 'Development')
+
+    expect(result.jsonSchema.required).toContain('name')
   })
-  ModelModelMock.find.mockResolvedValueOnce([
-    {
-      id: 'test-model',
-      card: { schemaId: 'schema-123' },
-      collaborators: [{ entity: 'user:user', roles: [testReviewer] }],
+
+  test('that an invalid modelState throws a BadReq error', async () => {
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'schema-bad-state',
+      jsonSchema: { type: 'object', properties: {} },
+      toObject: vi.fn().mockReturnValue({ id: 'schema-bad-state', jsonSchema: {} }),
+    })
+
+    await expect(() => getSchemaById('schema-bad-state', 'InvalidState')).rejects.toThrow(
+      /The value for modelState is not a valid/,
+    )
+  })
+
+  test('that a non-matching modelState does not add fields to required', async () => {
+    const jsonSchema = {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          requiredByModelSates: ['Production'],
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'schema-no-match',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'schema-no-match', jsonSchema }),
+    })
+
+    const result = await getSchemaById('schema-no-match', 'Development')
+
+    expect(result.jsonSchema.required).toBeUndefined()
+  })
+
+  test('that a field is not duplicated in required when it already exists', async () => {
+    const jsonSchema = {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+          type: 'string',
+          requiredByModelSates: ['Development'],
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'schema-no-dup',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'schema-no-dup', jsonSchema }),
+    })
+
+    const result = await getSchemaById('schema-no-dup', 'Development')
+
+    expect(result.jsonSchema.required).toEqual(['name'])
+    expect(result.jsonSchema.required).toHaveLength(1)
+  })
+
+  test('that a cached schema is returned when the cache is populated', async () => {
+    const cachedSchema = { id: 'cached-schema', jsonSchema: { type: 'object' } } as any
+
+    cognitoMock.get.mockReturnValueOnce(cachedSchema)
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
+      toObject: vi.fn().mockReturnValue(testModelSchema),
+    })
+
+    const result = await getSchemaById(testModelSchema.id, 'Development')
+
+    expect(result).toBe(cachedSchema)
+    expect(cognitoMock.get).toHaveBeenCalledWith({ schemaId: testModelSchema.id, modelState: 'Development' }.toString())
+    expect(cognitoMock.set).not.toHaveBeenCalled()
+  })
+
+  test('that a schema is stored in cache on a cache miss', async () => {
+    const jsonSchema = { type: 'object', properties: {} }
+
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: testModelSchema.id,
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: testModelSchema.id, jsonSchema }),
+    })
+
+    await getSchemaById(testModelSchema.id, 'Development')
+
+    expect(cognitoMock.get).toHaveBeenCalledWith({ schemaId: testModelSchema.id, modelState: 'Development' }.toString())
+    expect(cognitoMock.set).toHaveBeenCalledWith(
+      { schemaId: testModelSchema.id, modelState: 'Development' }.toString(),
+      expect.objectContaining({ id: testModelSchema.id }),
+    )
+  })
+
+  test('that the cache is not consulted when no modelState is provided', async () => {
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
+      toObject: vi.fn().mockReturnValue(testModelSchema),
+    })
+
+    await getSchemaById(testModelSchema.id)
+
+    expect(cognitoMock.get).not.toHaveBeenCalled()
+    expect(cognitoMock.set).not.toHaveBeenCalled()
+  })
+
+  test('that we update review roles if they are changed on a schema', async () => {
+    const testReviewer = 'reviewer2'
+    const diff = {
+      reviewRoles: [testReviewer],
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
       save: vi.fn(),
-    },
-  ])
-  ReviewRoleModelMock.find.mockResolvedValueOnce([{ shortName: testReviewer, name: testReviewer, toObject: () => {} }])
+    })
+    ModelModelMock.find.mockResolvedValueOnce([
+      {
+        id: 'test-model',
+        card: { schemaId: 'schema-123' },
+        collaborators: [{ entity: 'user:user', roles: [testReviewer] }],
+        save: vi.fn(),
+      },
+    ])
+    ReviewRoleModelMock.find.mockResolvedValueOnce([
+      { shortName: testReviewer, name: testReviewer, toObject: () => {} },
+    ])
 
-  const updatedSchema = await updateSchema({} as any, 'schema-123', diff)
+    const updatedSchema = await updateSchema({} as any, 'schema-123', diff)
 
-  expect(updatedSchema.reviewRoles.includes(testReviewer))
+    expect(updatedSchema.reviewRoles.includes(testReviewer))
+  })
 })
