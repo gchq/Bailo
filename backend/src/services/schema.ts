@@ -1,5 +1,6 @@
 import traverse from 'json-schema-traverse'
 import { Schema as JsonSchema } from 'jsonschema'
+import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -14,6 +15,7 @@ import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
+const schemaCache = new NodeCache()
 export interface DefaultSchema {
   name: string
   id: string
@@ -30,7 +32,7 @@ export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Pr
   return schemas
 }
 
-export async function getSchemaById(schemaId: string, modelState?: string) {
+export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -39,12 +41,19 @@ export async function getSchemaById(schemaId: string, modelState?: string) {
     throw NotFound(`The requested schema was not found.`, { schemaId })
   }
 
+  const schemaObject = schema.toObject()
+
   if (modelState) {
+    const cachedSchema = schemaCache.get<SchemaInterface>({ schemaId, modelState }.toString())
+    if (cachedSchema) {
+      return cachedSchema
+    }
     const jsonSchema = enforceModelStateFields(schema.jsonSchema, modelState)
-    schema.jsonSchema = jsonSchema
+    schemaObject.jsonSchema = jsonSchema
+    schemaCache.set({ schemaId, modelState }.toString(), schemaObject)
   }
 
-  return schema
+  return schemaObject
 }
 
 function enforceModelStateFields(schema: object, targetState: string) {
@@ -125,7 +134,13 @@ export type UpdateSchemaParams = Partial<
 >
 
 export async function updateSchema(user: UserInterface, schemaId: string, diff: UpdateSchemaParams) {
-  const schema = await getSchemaById(schemaId)
+  const schema = await SchemaModel.findOne({
+    id: schemaId,
+  })
+
+  if (!schema) {
+    throw NotFound(`The requested schema was not found.`, { schemaId })
+  }
 
   const auth = await authorisation.schema(user, schema, SchemaAction.Update)
   if (!auth.success) {
