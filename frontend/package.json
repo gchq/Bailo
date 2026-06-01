@@ -95,7 +95,7 @@
     "@next/swc-linux-x64-musl": "^16.2.6",
     "@next/swc-linux-arm64-gnu": "^16.2.6",
     "@next/swc-linux-arm64-musl": "^16.2.6",
-    "@next/swc-wind32-x64-msvc": "^16.2.6",
-    "@next/swc-wind32-arm64-msvc": "^16.2.6"
+    "@next/swc-win32-x64-msvc": "^16.2.6",
+    "@next/swc-win32-arm64-msvc": "^16.2.6"
   }
 }
