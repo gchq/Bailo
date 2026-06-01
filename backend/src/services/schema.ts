@@ -40,6 +40,10 @@ export async function searchSchemas(
 }
 
 export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
+  const cachedSchema = schemaCache.get<SchemaInterface>(JSON.stringify({ schemaId, modelState }))
+  if (cachedSchema) {
+    return cachedSchema
+  }
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -49,17 +53,12 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   }
 
   const schemaObject = schema.toObject()
+  schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
 
   if (modelState) {
-    const cachedSchema = schemaCache.get<SchemaInterface>({ schemaId, modelState }.toString())
-    if (cachedSchema) {
-      return cachedSchema
-    }
-    const jsonSchema = enforceModelStateFields(schema.jsonSchema, modelState)
-    schemaObject.jsonSchema = jsonSchema
-    schemaCache.set({ schemaId, modelState }.toString(), schemaObject)
+    schemaObject.jsonSchema = enforceModelStateFields(schemaObject.jsonSchema, modelState)
   }
-
+  schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject
 }
 
@@ -68,7 +67,7 @@ function enforceModelStateFields(schema: object, targetState: string) {
   if (!validStates.includes(targetState)) {
     throw BadReq('The value for modelState is not a valid', { validStates, modelState: targetState })
   }
-  const jsonSchema = schema
+  const jsonSchema = structuredClone(schema)
   traverse(jsonSchema, { allKeys: true }, (subschema, pointer, root, parentPointer, parentKeyword, parentSchema) => {
     if (!subschema || typeof subschema !== 'object') {
       return
