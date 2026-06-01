@@ -104,7 +104,6 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             <SideNavigation
               page={page}
               bannerVisible={uiConfig.banner.enabled}
-              currentUser={currentUser}
               drawerOpen={open}
               pageTopStyling={pageTopStyling}
               toggleDrawer={toggleDrawer}

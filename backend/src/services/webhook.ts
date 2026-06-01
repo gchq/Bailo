@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
+import { ModelTransferDoc } from '../models/ModelTransfer.js'
 import { ReleaseDoc } from '../models/Release.js'
 import { ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -72,11 +73,17 @@ export async function removeWebhook(user: UserInterface, modelId: string, webhoo
   }
 }
 
+type WebhookContent =
+  | { release: ReleaseDoc }
+  | { review: ReviewInterface }
+  | { accessRequest: AccessRequestDoc }
+  | { transfer: ModelTransferDoc }
+
 export async function sendWebhooks(
   modelId: string,
   eventKind: WebhookEventKeys,
   eventTitle: string,
-  content: { release: ReleaseDoc } | { review: ReviewInterface } | { accessRequest: AccessRequestDoc },
+  content: WebhookContent,
 ) {
   const webhooks = await WebhookModel.find({ modelId, events: eventKind })
 
