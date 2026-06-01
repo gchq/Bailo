@@ -20,7 +20,7 @@ import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { ReviewKind, User } from 'types/types'
+import { ReviewKind, Roles } from 'types/types'
 
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
@@ -66,7 +66,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 export interface SideNavigationProps {
   page: string
   bannerVisible: boolean
-  currentUser: User
   toggleDrawer: () => void
   onError: (errorMessage: string) => void
   onResetErrorMessage: () => void
@@ -77,7 +76,6 @@ export interface SideNavigationProps {
 export default function SideNavigation({
   page,
   bannerVisible,
-  currentUser,
   toggleDrawer,
   onResetErrorMessage,
   drawerOpen = false,
@@ -104,7 +102,7 @@ export default function SideNavigation({
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, responses, currentUser.dn, releaseReviewCountHeader, accessRequestReviewCountHeader])
+  }, [accessRequestReviewCountHeader, onResetErrorMessage, releaseReviewCountHeader, responses])
 
   if (isReleaseReviewsError) {
     return <MessageAlert message={isReleaseReviewsError.info.message} severity='error' />
@@ -183,41 +181,38 @@ export default function SideNavigation({
               icon={<ContactSupportIcon />}
             />
             <Divider aria-hidden='true' />
-            {currentUser.isAdmin && (
-              <>
-                <NavMenuItem
-                  href='/schemas/list'
-                  selectedPage={page}
-                  primaryText='Schemas'
-                  drawerOpen={drawerOpen}
-                  menuPage='schemas'
-                  title='Schemas'
-                  icon={<SchemaIcon />}
-                />
-              </>
-            )}
-            {currentUser.isAdmin && (
+            <>
               <NavMenuItem
-                href='/reviewRoles/view'
+                href='/schemas/list'
                 selectedPage={page}
-                primaryText='Review Roles'
+                primaryText='Schemas'
                 drawerOpen={drawerOpen}
-                menuPage='reviewRoles'
-                title='Review Roles'
-                icon={<SupervisorAccount />}
+                menuPage='schemas'
+                title='Schemas'
+                icon={<SchemaIcon />}
+                requiredRole={Roles.Admin}
               />
-            )}
-            {currentUser.isAdmin && (
-              <NavMenuItem
-                href='/metrics'
-                selectedPage={page}
-                primaryText='Metrics'
-                drawerOpen={drawerOpen}
-                menuPage='metrics'
-                title='Metrics'
-                icon={<Equalizer />}
-              />
-            )}
+            </>
+            <NavMenuItem
+              href='/reviewRoles/view'
+              selectedPage={page}
+              primaryText='Review Roles'
+              drawerOpen={drawerOpen}
+              menuPage='reviewRoles'
+              title='Review Roles'
+              icon={<SupervisorAccount />}
+              requiredRole={Roles.Admin}
+            />
+            <NavMenuItem
+              href='/metrics'
+              selectedPage={page}
+              primaryText='Metrics'
+              drawerOpen={drawerOpen}
+              menuPage='metrics'
+              title='Metrics'
+              icon={<Equalizer />}
+              requiredRole={Roles.Compliance}
+            />
           </StyledList>
           <StyledList>
             <Divider aria-hidden='true' />

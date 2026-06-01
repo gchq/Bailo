@@ -11,6 +11,7 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
+import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
@@ -85,5 +86,6 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
   async onViewMetric(_req: Request): Promise<void> {}
   async onCreateReview(_req: Request, _modelId: string) {}
+  async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
   async onError(_req: Request, _error: BailoError) {}
 }

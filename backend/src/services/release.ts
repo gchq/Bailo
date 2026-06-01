@@ -195,7 +195,6 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
       log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
     }
   }
-
   sendWebhooks(
     release.modelId,
     WebhookEvent.CreateRelease,

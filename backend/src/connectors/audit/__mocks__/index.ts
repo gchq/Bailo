@@ -77,6 +77,8 @@ const audit = {
 
   onCreateReview: vi.fn(),
 
+  onViewCurrentUserInformation: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit
