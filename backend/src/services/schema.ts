@@ -6,7 +6,7 @@ import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import SchemaModel, { SchemaInterface } from '../models/Schema.js'
+import SchemaModel, { SchemaDoc, SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
@@ -24,10 +24,17 @@ export interface DefaultSchema {
   reviewRoles?: string[]
 }
 
-export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {
+export async function searchSchemas(
+  kind?: SchemaKindKeys,
+  hidden?: boolean,
+  reviewRoles?: string,
+  ids?: string[],
+): Promise<SchemaDoc[]> {
   const schemas = await SchemaModel.find({
     ...(kind && { kind }),
     ...(hidden != undefined && { hidden }),
+    ...(reviewRoles && { reviewRoles }),
+    ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
   return schemas
 }
