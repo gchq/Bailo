@@ -97,6 +97,59 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/registry.js', () => registryMocks)
 
+const compressedLayerMediaType = 'application/vnd.docker.image.rootfs.diff.tar.gzip'
+
+const registryClientMocks = vi.hoisted(() => ({
+  getImageTagManifests: vi.fn(function () {
+    return Promise.resolve({
+      body: {
+        config: { digest: 'sha256:config123', size: 1000, mediaType: 'application/vnd.docker.container.image.v1+json' },
+        layers: [{ digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType }],
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      },
+      headers: {
+        'docker-content-digest': 'sha256:manifest123',
+        'content-type': 'application/vnd.docker.distribution.manifest.v2+json',
+      },
+    })
+  }),
+  getImageTagManifestsRaw: vi.fn(function () {
+    return Promise.resolve({
+      body: JSON.stringify({
+        config: { digest: 'sha256:config123', size: 1000, mediaType: 'application/vnd.docker.container.image.v1+json' },
+        layers: [{ digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType }],
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      }),
+      headers: {
+        'docker-content-digest': 'sha256:manifest123',
+        'content-type': 'application/vnd.docker.distribution.manifest.v2+json',
+      },
+    })
+  }),
+}))
+vi.mock('../../../src/clients/registry.js', () => registryClientMocks)
+
+const issueAccessTokenMock = vi.hoisted(() =>
+  vi.fn(function () {
+    return Promise.resolve('mock-token')
+  }),
+)
+vi.mock('../../../src/routes/v1/registryAuth.js', () => ({
+  issueAccessToken: issueAccessTokenMock,
+}))
+
+const getImageLayersMock = vi.hoisted(() =>
+  vi.fn(function () {
+    return Promise.resolve([
+      { digest: 'sha256:config123', size: 1000, mediaType: 'application/vnd.docker.container.image.v1+json' },
+      { digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType },
+    ])
+  }),
+)
+vi.mock('../../../src/services/images/getImageLayers.js', () => ({
+  getImageLayers: getImageLayersMock,
+}))
+
 const releaseMocks = vi.hoisted(() => ({
   getReleasesForExport: vi.fn(function () {
     return Promise.resolve([{ id: 'rel1', semver: '1.0.0', images: [] }])
@@ -256,6 +309,33 @@ describe('services > mirroredModel', () => {
     pendingJobs = []
   })
 
+  const createManifestBody = (layers: any[] = []) => ({
+    config: {
+      digest: 'sha256:config123',
+      size: 1000,
+      mediaType: 'application/vnd.docker.container.image.v1+json',
+    },
+    layers,
+    mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+  })
+
+  const createManifestHeaders = () => ({
+    'docker-content-digest': 'sha256:manifest123',
+    'content-type': 'application/vnd.docker.distribution.manifest.v2+json',
+  })
+
+  const mockRegistryManifests = (layers: any[] = []) => {
+    const body = createManifestBody(layers)
+    registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+      body,
+      headers: createManifestHeaders(),
+    })
+    registryClientMocks.getImageTagManifestsRaw.mockResolvedValueOnce({
+      body: JSON.stringify(body),
+      headers: createManifestHeaders(),
+    })
+  }
+
   describe('exportModel', () => {
     test('disabled export throws', async () => {
       config.ui.modelMirror.export.enabled = false
@@ -403,26 +483,27 @@ describe('services > mirroredModel', () => {
     })
 
     test('export compressed image layers', async () => {
-      registryMocks.getImageManifest.mockResolvedValue({
-        body: {
-          config: { digest: 'sha256:0', size: 1, mediaType: 'text/json' },
-          layers: [{ digest: 'sha256:1', size: 1, mediaType: 'text/json' }],
-          mediaType: 'manifest',
-        },
-      })
+      mockRegistryManifests([{ digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType }])
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['x']), abort: vi.fn() })
       await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any)
       expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalled()
     })
 
     test('missing digest throws', async () => {
-      registryMocks.getImageManifest.mockResolvedValue({
-        body: {
-          config: { digest: '', size: 1, mediaType: '' },
-          layers: [],
-          mediaType: 'm',
-        },
+      const emptyBody = {
+        config: { digest: '', size: 1, mediaType: '' },
+        layers: [],
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      }
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: emptyBody,
+        headers: createManifestHeaders(),
       })
+      registryClientMocks.getImageTagManifestsRaw.mockResolvedValueOnce({
+        body: JSON.stringify(emptyBody),
+        headers: createManifestHeaders(),
+      })
+      getImageLayersMock.mockResolvedValueOnce([{ digest: '', size: 1, mediaType: '' }])
       await expect(
         addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
       ).rejects.toThrow(/Could not extract layer digest/)
@@ -430,15 +511,12 @@ describe('services > mirroredModel', () => {
 
     test('addEntry error aborts', async () => {
       const abortMock = vi.fn()
-      registryMocks.getImageManifest.mockResolvedValue({
-        body: {
-          config: { digest: 'sha256:0', size: 1, mediaType: '' },
-          layers: [],
-          mediaType: 'm',
-        },
-      })
+      mockRegistryManifests([])
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['']), abort: abortMock })
-      tarballMocks.addEntryToTarGzUpload.mockResolvedValueOnce({}).mockRejectedValueOnce('err')
+      tarballMocks.addEntryToTarGzUpload
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce('err')
       await expect(
         addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
       ).rejects.toThrow('err')
@@ -496,6 +574,41 @@ describe('services > mirroredModel', () => {
       })
 
       await expect(generateDigest(unreadableFile)).rejects.toThrow('Error generating SHA256 digest for stream.')
+    })
+  })
+
+  describe('exportImageLayers', () => {
+    const mockImageLayers = [
+      {
+        digest: 'sha256:config123',
+        size: 1000,
+        mediaType: 'application/vnd.docker.container.image.v1+json',
+      },
+      { digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType },
+      { digest: 'sha256:layer2', size: 3000, mediaType: compressedLayerMediaType },
+    ]
+
+    test('success all layers added', async () => {
+      mockRegistryManifests([{ digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType }])
+      getImageLayersMock.mockResolvedValueOnce(mockImageLayers)
+      registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['data']), abort: vi.fn() })
+
+      await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any)
+
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledTimes(5)
+    })
+
+    test('error with tar stream add', async () => {
+      const abortMock = vi.fn()
+      mockRegistryManifests([{ digest: 'sha256:layer1', size: 2000, mediaType: compressedLayerMediaType }])
+      getImageLayersMock.mockResolvedValueOnce(mockImageLayers)
+      registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['data']), abort: abortMock })
+
+      tarballMocks.addEntryToTarGzUpload.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('tar error'))
+
+      await expect(
+        addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
+      ).rejects.toThrow('tar error')
     })
   })
 })

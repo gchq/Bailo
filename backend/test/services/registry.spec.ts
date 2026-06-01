@@ -4,7 +4,6 @@ import { ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js
 import {
   checkUserAuth,
   getImageBlob,
-  getImageManifest,
   getModelImageWithScanResults,
   joinDistributionPackageName,
   listModelImages,
@@ -360,21 +359,6 @@ describe('services > registry', () => {
         { _id: 'test' },
         { type: 'repository', name: 'modelId', actions: ['list'] },
       )
-    })
-
-    test('getImageManifest > success', async () => {
-      await getImageManifest({} as any, {} as any)
-
-      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
-      expect(registryClientMocks.getImageTagManifest).toHaveBeenCalled()
-    })
-
-    test('getImageManifest > bad response', async () => {
-      registryClientMocks.getImageTagManifest.mockRejectedValue('Error')
-
-      await expect(getImageManifest({} as any, {} as any)).rejects.toThrow('Error')
-
-      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
     })
 
     test('renameImage > source manifest not found', async () => {

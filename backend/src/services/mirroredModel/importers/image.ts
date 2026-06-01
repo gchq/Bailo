@@ -200,10 +200,7 @@ export class ImageImporter extends BaseImporter {
         },
       ])
 
-      // Check if the main manifest is a fat manifest (manifest list)
-      const isFatManifest = 'manifests' in this.manifestBody
-
-      if (isFatManifest && 'manifests' in this.manifestBody) {
+      if ('manifests' in this.manifestBody) {
         // For fat manifests, upload platform-specific manifests first (by digest)
         log.debug(
           { ...this.logData, manifestCount: this.manifestBody.manifests.length },
@@ -261,7 +258,7 @@ export class ImageImporter extends BaseImporter {
       log.debug(
         {
           image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
-          isFatManifest,
+          isFatManifest: 'manifests' in this.manifestBody,
           ...this.logData,
         },
         'Completed registry upload',

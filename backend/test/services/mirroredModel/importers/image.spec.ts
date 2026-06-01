@@ -210,6 +210,31 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     })
   })
 
+  test('finishListener > success upload fat manifest successfully when valid', async () => {
+    typeguardMocks.hasKeysOfType.mockReturnValue(true)
+    const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
+    // @ts-expect-error accessing protected property
+    importer.manifestBody = { mediaType: 'mt' }
+    // @ts-expect-error accessing protected property
+    importer.manifestsToUpload.set('abc123', JSON.stringify({ mediaType: 'mt' }))
+    const resolve = vi.fn()
+    const reject = vi.fn()
+
+    await importer.handleStreamCompletion(resolve, reject)
+
+    expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', tag: 'tag' },
+      // @ts-expect-error accessing protected property
+      JSON.stringify(importer.manifestBody),
+      'mt',
+    )
+    expect(resolve).toHaveBeenCalledWith({
+      metadata: mockMetadata,
+      image: { modelId: mockMetadata.mirroredModelId, imageName: 'imageName', imageTag: 'tag' },
+    })
+  })
+
   test('finishListener > error when manifest invalid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
