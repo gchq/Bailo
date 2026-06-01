@@ -1,16 +1,18 @@
-import React, { ReactElement, ReactNode, useMemo } from 'react'
+import { Button, Stack } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import GitHubIcon from '@mui/icons-material/GitHub'
 import CssBaseline from '@mui/material/CssBaseline'
 import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
-import Link from './Link'
-import imageLoader from './imageLoader'
-import { Button, IconButton, Tooltip } from '@mui/material'
+import { useRouter } from 'next/router'
+import { ReactElement, ReactNode, useMemo } from 'react'
 import bailoLogo from '../public/logo-horizontal-light.png'
+import Copyright from './Copyright'
+import imageLoader from './imageLoader'
+import Link from './Link'
+import navigationLinks from './navigationLinks'
 
 const drawerWidth = 240
 
@@ -38,12 +40,16 @@ const AppBar = styled(MuiAppBar, {
 
 type WrapperProps = {
   title: string
-  page: string
   children?: ReactNode
 }
 
-export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
-  const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
+export default function Wrapper({ title, children }: WrapperProps): ReactElement {
+  const router = useRouter()
+
+  const isDocsPage = useMemo(
+    () => router.pathname === '/docs' || router.route.startsWith('/docs/') || router.route.startsWith('/python-docs'),
+    [router],
+  )
 
   const theme = useTheme()
 
@@ -52,9 +58,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Head>
         <title>{`${title} · Bailo`}</title>
       </Head>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         <CssBaseline />
-        <AppBar position='absolute' data-test='appBar' sx={{ top: 'unset', boxShadow: 'none' }}>
+        <AppBar position='static' data-test='appBar' sx={{ boxShadow: 'none', flexShrink: 0 }}>
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -65,15 +71,13 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={142} height={60} priority />
               </Link>
             </Box>
-            <Link href='/docs'>
-              <Button sx={{ color: 'white' }}>Documentation</Button>
-            </Link>
-            <Link href='/accessibility/statement'>
-              <Button sx={{ color: 'white' }}>Accessibility</Button>
-            </Link>
-            <Link href='https://github.com/gchq/bailo'>
-              <Button sx={{ color: 'white' }}>Github</Button>
-            </Link>
+            {navigationLinks
+              .filter((link) => link.primary)
+              .map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button sx={{ color: 'white' }}>{link.label}</Button>
+                </Link>
+              ))}
           </Toolbar>
         </AppBar>
         <Box
@@ -81,12 +85,28 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           sx={{
             backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
-            height: '100vh',
             overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <Toolbar />
-          <Box>{isDocsPage ? children : <>{children}</>}</Box>
+          {isDocsPage ? (
+            children
+          ) : (
+            <Box>
+              <Box>{children}</Box>
+              <Box component='footer' sx={{ borderTop: 1, borderColor: 'divider', py: 3, px: 2, textAlign: 'center' }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+                  {navigationLinks.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </Stack>
+                <Copyright />
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
     </ThemeProvider>

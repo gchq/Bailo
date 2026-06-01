@@ -92,8 +92,12 @@ async function readBody(res: Response, expectStream: boolean): Promise<{ body?: 
     }
   }
 
-  if (isJsonContentType(res.headers.get('content-type'))) {
-    return { body: await res.json() }
+  try {
+    if (isJsonContentType(res.headers.get('content-type'))) {
+      return { body: await res.json() }
+    }
+  } catch {
+    // NOOP because sometimes the header doesn't suggest this is JSON
   }
 
   return { body: await res.text() }
@@ -422,7 +426,6 @@ export async function uploadLayerMonolithic(
   uploadURL: string,
   digest: string,
   blob: Readable | ReadableStream,
-  size: string,
 ) {
   const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
     headersSchema: BlobUploadResponseHeadersSchema,
@@ -435,7 +438,6 @@ export async function uploadLayerMonolithic(
       redirect: 'error',
     },
     extraHeaders: {
-      'content-length': size,
       'content-type': 'application/octet-stream',
     },
   })
@@ -457,7 +459,6 @@ export async function mountBlob(
       extraFetchOptions: {
         method: 'POST',
       },
-      extraHeaders: { 'Content-Length': '0' },
     },
   )
 

@@ -1,5 +1,6 @@
 import { PassThrough } from 'node:stream'
 
+import { ObjectId } from 'mongodb'
 import { Headers } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
@@ -53,17 +54,29 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
-const mirroredModelMocks = vi.hoisted(() => ({
+const modelTransferMocks = vi.hoisted(() => ({
+  updateArtefactsTransferStatus: vi.fn(),
+}))
+vi.mock('../../../../src/services/modelTransfer.js', () => modelTransferMocks)
+
+const typesMocks = vi.hoisted(() => ({
   MirrorKind: { Documents: 'documents' },
 }))
-vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+vi.mock('../../../../src/types/types.js', async (importOriginal) => {
+  const actual: any = await importOriginal()
+  return {
+    ...actual,
+    MirrorKind: typesMocks.MirrorKind,
+  }
+})
 
 const mockUser = { dn: 'user' }
 const mockMetadata: DocumentsMirrorMetadata = {
-  importKind: mirroredModelMocks.MirrorKind.Documents,
+  importKind: typesMocks.MirrorKind.Documents,
   mirroredModelId: 'mirroredModelId',
   sourceModelId: 'sourceModelId',
   exporter: 'exporter',
+  exportId: 'exportId',
 } as DocumentsMirrorMetadata
 const mockLogData = { extra: 'info', importId: 'importId' }
 
@@ -191,7 +204,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     // @ts-expect-error accessing protected property
     importer.newReleases.push({} as any)
     // @ts-expect-error accessing protected property
-    importer.fileIds.push('fid' as any)
+    importer.fileIds.push({ key: new ObjectId('507f1f77bcf86cd799439011'), name: 'file' })
     // @ts-expect-error accessing protected property
     importer.imageIds.push('iid')
 
@@ -200,13 +213,18 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
     await importer.handleStreamCompletion(resolve, reject)
     expect(modelMocks.setLatestImportedModelCard).toHaveBeenCalledWith(mockMetadata.mirroredModelId)
+    expect(modelTransferMocks.updateArtefactsTransferStatus).toHaveBeenCalledWith(
+      mockMetadata.exportId,
+      ['iid'],
+      [{ key: new ObjectId('507f1f77bcf86cd799439011'), name: 'file' }],
+    )
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,
       modelCardVersions: [1],
       newModelCards: [{}],
       releaseSemvers: ['1.0.0'],
       newReleases: [{}],
-      fileIds: ['fid'],
+      fileIds: [{ key: new ObjectId('507f1f77bcf86cd799439011'), name: 'file' }],
       imageIds: ['iid'],
     })
   })
