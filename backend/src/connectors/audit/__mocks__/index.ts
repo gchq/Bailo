@@ -75,6 +75,8 @@ const audit = {
 
   onViewMetric: vi.fn(),
 
+  onViewCurrentUserInformation: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit

@@ -32,6 +32,9 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     if (role === Roles.Admin) {
       return true
     }
+    if (role === Roles.Compliance) {
+      return true
+    }
     return false
   }
 
