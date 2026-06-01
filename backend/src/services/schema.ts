@@ -67,9 +67,9 @@ function enforceModelStateFields(schema: object, targetState: string) {
       return
     }
 
-    if (Array.isArray(subschema.state) && subschema.state.includes(targetState)) {
+    if (Array.isArray(subschema.state) && subschema.requiredByModelSates.includes(targetState)) {
       if (parentKeyword === 'properties' && parentSchema) {
-        const propertyName = pointer.split('/').pop()
+        const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
 
         if (!parentSchema.required) {
           parentSchema.required = []
