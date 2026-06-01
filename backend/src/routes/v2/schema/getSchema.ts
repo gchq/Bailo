@@ -6,6 +6,7 @@ import { z } from '../../../lib/zod.js'
 import { SchemaInterface } from '../../../models/Schema.js'
 import { getSchemaById } from '../../../services/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/specification.js'
+import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getSchemaSchema = z.object({
@@ -13,7 +14,7 @@ export const getSchemaSchema = z.object({
     schemaId: z.string(),
   }),
   query: z.object({
-    modelState: z.string().optional(),
+    modelState: z.enum(config.ui.modelDetails.states as [string, ...string[]]).optional(),
   }),
 })
 
