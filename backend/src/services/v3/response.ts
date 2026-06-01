@@ -81,12 +81,10 @@ export async function respondToReview(
     ModelAction.Update,
   )
   existingReviews = existingReviews.filter((_, i) => auths[i].success)
-  if (existingReviews) {
-    for (const existingReview of existingReviews) {
-      const reviewToDelete = await ReviewModel.findOne({ _id: existingReview._id })
-      if (reviewToDelete) {
-        reviewToDelete.delete()
-      }
+  for (const existingReview of existingReviews) {
+    const reviewToDelete = await ReviewModel.findOne({ _id: existingReview._id })
+    if (reviewToDelete) {
+      await reviewToDelete.delete()
     }
   }
 

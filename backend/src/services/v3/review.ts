@@ -139,7 +139,7 @@ async function createLifecycleReview(user: UserInterface, modelId: string, dueDa
     for (const existingReview of existingReviews) {
       const reviewToDelete = await ReviewModel.findOne({ _id: existingReview._id })
       if (reviewToDelete) {
-        reviewToDelete.delete()
+        await reviewToDelete.delete()
       }
     }
   }
