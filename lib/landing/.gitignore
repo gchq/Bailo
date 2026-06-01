@@ -11,6 +11,7 @@
 # next.js
 /.next/
 /out/
+next-env.d.ts
 
 # production
 /build
@@ -43,3 +44,4 @@ src/common/Title.tsx
 
 pages/docs
 public
+pages/accessibility
