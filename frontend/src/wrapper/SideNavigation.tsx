@@ -18,6 +18,7 @@ import { useGetUserResponses } from 'actions/response'
 import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
+import PythonIcon from 'src/common/PythonIcon'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
 import { Roles } from 'types/types'
@@ -149,23 +150,24 @@ export default function SideNavigation({
               openLinkInNewTab
             />
             <NavMenuItem
-              href='/docs/python/index.html'
+              href='/docs'
               selectedPage={page}
-              primaryText='Python Client Docs'
+              primaryText='User docs'
               drawerOpen={drawerOpen}
-              menuPage='pythonDocs'
-              title='Python Client Docs'
+              menuPage='userDocs'
+              title='User documentation'
               icon={<DescriptionIcon />}
               openLinkInNewTab
             />
             <NavMenuItem
-              href='/help'
+              href='/docs/python/index.html'
               selectedPage={page}
-              primaryText='Support'
+              primaryText='Python client docs'
               drawerOpen={drawerOpen}
-              menuPage='help'
-              title='Help & Support'
-              icon={<ContactSupportIcon />}
+              menuPage='pythonDocs'
+              title='Python cient docs'
+              icon={<PythonIcon />}
+              openLinkInNewTab
             />
             <Divider aria-hidden='true' />
             <>
@@ -203,6 +205,15 @@ export default function SideNavigation({
           </StyledList>
           <StyledList>
             <Divider aria-hidden='true' />
+            <NavMenuItem
+              href='/help'
+              selectedPage={page}
+              primaryText='Support'
+              drawerOpen={drawerOpen}
+              menuPage='help'
+              title='Help & Support'
+              icon={<ContactSupportIcon />}
+            />
             <NavMenuItem
               href='/accessibility/statement'
               selectedPage={page}
