@@ -14,7 +14,7 @@ type ReviewsListProps = {
 export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(status === 'open')
 
-  const ReviewListItem = memoize(({ data }) => <ReviewItem review={data} key={`${data._id}`} />)
+  const ReviewListItem = memoize(({ data }) => <ReviewItem review={data} key={`${data._id}`} status={status} />)
 
   const determineSearchFilterProperty = () => {
     switch (kind) {
