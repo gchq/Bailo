@@ -127,7 +127,7 @@ exports[`clients > registry > getImageTagManifest > success Docker spec using ta
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -147,7 +147,7 @@ exports[`clients > registry > getImageTagManifest > success OCI spec using tag r
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -167,7 +167,7 @@ exports[`clients > registry > getImageTagManifest > success OCI spec using tag r
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -187,7 +187,7 @@ exports[`clients > registry > getImageTagManifest > success using digest referen
     {
       "dispatcher": "mock agent",
       "headers": {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
+        "Accept": "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json",
         "Authorization": "Bearer token",
       },
       "signal": {
@@ -394,7 +394,7 @@ exports[`clients > registry > mountBlob > success 1`] = `
 exports[`clients > registry > putManifest > success using digest reference 1`] = `
 [
   [
-    "https://localhost:5000/v2/modelId/image/manifests/undefined",
+    "https://localhost:5000/v2/modelId/image/manifests/sha256:digest",
     {
       "body": "{}",
       "dispatcher": "mock agent",
@@ -402,7 +402,7 @@ exports[`clients > registry > putManifest > success using digest reference 1`] =
         "Authorization": "Bearer token",
         "Content-Type": "application/vnd.docker.distribution.manifest.v2+json",
         "name": "modelId/image",
-        "reference": undefined,
+        "reference": "sha256:digest",
       },
       "method": "PUT",
       "signal": {
