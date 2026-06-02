@@ -2,7 +2,13 @@ import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { createSchema, getSchemaById, searchSchemas, updateSchema } from '../../src/services/schema.js'
+import {
+  createSchema,
+  getSchemaById,
+  searchSchemas,
+  updateSchema,
+  validateContentAgainstSchema,
+} from '../../src/services/schema.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
@@ -19,6 +25,18 @@ const mockMongoUtils = vi.hoisted(() => {
   }
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
+
+const validatorMock = vi.hoisted(() => ({ validate: vi.fn() }))
+vi.mock('jsonschema', () => ({
+  Validator: vi.fn(function () {
+    return validatorMock
+  }),
+}))
+
+const validatorResultErrorMock = vi.hoisted(() => ({
+  isValidatorResultError: vi.fn(() => false),
+}))
+vi.mock('../../src/types/ValidatorResultError.js', async () => validatorResultErrorMock)
 
 const cacheGetSetMock = vi.hoisted(() => ({
   get: vi.fn(),
@@ -215,6 +233,54 @@ describe('services > schema', () => {
       JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
       expect.objectContaining({ id: testModelSchema.id }),
     )
+  })
+
+  test('validateContentAgainstSchema > should resolve when content is valid', async () => {
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
+      toObject: vi.fn().mockReturnValue(testModelSchema),
+    })
+
+    await expect(validateContentAgainstSchema(testModelSchema.id, { key: 'value' })).resolves.toBeUndefined()
+    expect(validatorMock.validate).toHaveBeenCalled()
+  })
+
+  test('validateContentAgainstSchema > should throw NotFound when schema does not exist', async () => {
+    SchemaModelModelMock.findOne.mockResolvedValueOnce(undefined)
+
+    await expect(validateContentAgainstSchema('non-existent-schema', {})).rejects.toThrow(
+      /^The requested schema was not found/,
+    )
+  })
+
+  test('validateContentAgainstSchema > should throw UnprocessableContent when content fails schema validation', async () => {
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
+      toObject: vi.fn().mockReturnValue(testModelSchema),
+    })
+    const validationError = { errors: [{ message: 'field is required' }] }
+    validatorMock.validate.mockImplementationOnce(() => {
+      throw validationError
+    })
+    validatorResultErrorMock.isValidatorResultError.mockReturnValueOnce(true)
+
+    await expect(validateContentAgainstSchema(testModelSchema.id, {})).rejects.toThrow(
+      /^Content could not be validated against the schema/,
+    )
+  })
+
+  test('validateContentAgainstSchema > should re-throw non-validation errors', async () => {
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      ...testModelSchema,
+      toObject: vi.fn().mockReturnValue(testModelSchema),
+    })
+    const unexpectedError = new Error('Unexpected error')
+    validatorMock.validate.mockImplementationOnce(() => {
+      throw unexpectedError
+    })
+    validatorResultErrorMock.isValidatorResultError.mockReturnValueOnce(false)
+
+    await expect(validateContentAgainstSchema(testModelSchema.id, {})).rejects.toThrow('Unexpected error')
   })
 
   test('that we update review roles if they are changed on a schema', async () => {
