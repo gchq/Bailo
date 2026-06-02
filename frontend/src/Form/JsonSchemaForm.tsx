@@ -70,6 +70,8 @@ export default function JsonSchemaForm({
     [splitSchema, calculateStats, mirroredModel],
   )
 
+  // const requiredStatesUsed = useMemo(() => {}, [])
+
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
   })

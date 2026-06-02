@@ -49,7 +49,7 @@ export default function AdditionalInformation({
 
   if (!mirroredModel) {
     return (
-      <Stack spacing={1}>
+      <Stack spacing={1} border={required && editMode ? 2 : 0} borderColor={'red'} padding={required ? 1 : 0}>
         <Typography
           fontWeight='bold'
           id={`${id}-label`}
@@ -58,7 +58,7 @@ export default function AdditionalInformation({
           htmlFor={id}
         >
           {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          {required && <span style={{ color: theme.palette.error.main }}>{' * Required'}</span>}
         </Typography>
         {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
         {children}
