@@ -8,7 +8,6 @@ import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../mode
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
-import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
@@ -16,7 +15,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { getSchemaById } from './schema.js'
+import { getSchemaById, searchSchemas } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export interface DefaultReviewRole {
@@ -106,7 +105,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const accessRequestSchema = await SchemaModel.findOne({ id: accessRequest.schemaId })
+  const accessRequestSchema = await getSchemaById(accessRequest.schemaId)
   if (!accessRequestSchema) {
     throw BadReq('Cannot find schema for associated model', { modelId: model._id })
   }
@@ -327,23 +326,15 @@ export async function findReviewRole(user: UserInterface, shortName: string) {
   return reviewRole
 }
 
-export async function findReviewRoles(schemaId?: string | string[]): Promise<ReviewRoleInterface[]> {
-  let reviewRoles: ReviewRoleDoc[] = []
-  let schemaIds: string[] = []
-  if (schemaId) {
-    if (typeof schemaId === 'string') {
-      schemaIds.push(schemaId)
-    } else {
-      schemaIds = schemaId
-    }
-    const schemas = await SchemaModel.find({ id: schemaIds })
+export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleInterface[]> {
+  let reviewRoles: ReviewRoleDoc[]
+  if (schemaIds) {
+    const schemas = await searchSchemas(undefined, undefined, undefined, schemaIds)
     if (!schemas || schemas.length === 0) {
       throw BadReq('Unable to find schemas', { schemaIds })
     }
-    if (schemas.length > 0) {
-      const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
-      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
-    }
+    const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
+    reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
   } else {
     reviewRoles = await ReviewRoleModel.find()
   }
@@ -374,7 +365,7 @@ export async function removeReviewRole(user: UserInterface, reviewRoleShortName:
     })
   }
 
-  const schemas = await SchemaModel.find({ reviewRoles: reviewRole.shortName })
+  const schemas = await searchSchemas(undefined, undefined, reviewRole.shortName)
 
   for (const schema of schemas) {
     // Remove role from schemas

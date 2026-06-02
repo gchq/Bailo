@@ -570,7 +570,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await getSchemaById(model.card.schemaId)
+  const schema = await getSchemaById(model.card.schemaId, model.state)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
