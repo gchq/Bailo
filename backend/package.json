@@ -41,7 +41,7 @@
     "clamscan": "^2.4.0",
     "config": "^4.4.0",
     "connect-mongo": "6.0.0",
-    "content-disposition": "^1.1.0",
+    "content-disposition": "^2.0.1",
     "dedent-js": "^1.0.1",
     "dev-null": "^0.1.1",
     "express": "5.2.1",
