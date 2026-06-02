@@ -1,5 +1,5 @@
 import traverse from 'json-schema-traverse'
-import { Schema as JsonSchema } from 'jsonschema'
+import { Schema as JsonSchema, Validator } from 'jsonschema'
 import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
@@ -9,8 +9,9 @@ import ReviewRoleModel from '../models/ReviewRole.js'
 import SchemaModel, { SchemaDoc, SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound, UnprocessableContent } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
@@ -73,7 +74,7 @@ function enforceModelStateFields(schema: object, targetState: string) {
       return
     }
 
-    if (Array.isArray(subschema.requiredByModelSates) && subschema.requiredByModelSates.includes(targetState)) {
+    if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
       if (parentKeyword === 'properties' && parentSchema) {
         const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
 
@@ -258,5 +259,20 @@ export async function addDefaultSchemas() {
     })
     await SchemaModel.deleteOne({ id: schema.id })
     await modelSchema.save()
+  }
+}
+
+export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {
+  const schema = await getSchemaById(schemaId, modelState)
+  try {
+    new Validator().validate(content, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw UnprocessableContent('Content could not be validated against the schema.', {
+        schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
   }
 }
