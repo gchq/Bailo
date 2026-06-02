@@ -32,7 +32,10 @@ export default function ReviewItem({ review }: ReviewItemProps) {
   }
 
   function handleListItemClick() {
-    router.push(`/model/${review.model.id}/${determineReviewPath()}/review?role=${review.role}`)
+    // Lifecycle reviews cannot be re-reviewed
+    if (review.kind !== ReviewKind.LIFECYCLE) {
+      router.push(`/model/${review.model.id}/${determineReviewPath()}/review?role=${review.role}`)
+    }
   }
 
   function editedAdornment() {

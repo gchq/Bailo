@@ -13,6 +13,7 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({
 const authMocks = vi.hoisted(() => ({
   default: {
     models: vi.fn(),
+    model: vi.fn(),
   },
 }))
 vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
@@ -49,6 +50,24 @@ describe('services > review', () => {
       save: vi.fn(),
     })
     modelMock.getModelSystemRoles.mockReturnValue(['owner'])
+    ReviewModel.aggregate.mockResolvedValue([])
+    ReviewModel.findOne.mockResolvedValueOnce(undefined)
+    authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
+    authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
+    const newReview = await createReview({} as any, 'test-1234', {
+      kind: ReviewKind.Lifecycle,
+      dueDate: new Date('2026-05-28T12:54:03.780Z'),
+    })
+    expect(newReview).toMatchSnapshot()
+  })
+
+  test('createReview > cannot create lifecycle review if existing review is open', async () => {
+    modelMock.getModelById.mockResolvedValueOnce({
+      id: 'test-1234',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+      save: vi.fn(),
+    })
+    modelMock.getModelSystemRoles.mockReturnValue(['owner'])
     ReviewModel.aggregate.mockResolvedValue([
       {
         modelId: 'test-1234',
@@ -61,10 +80,13 @@ describe('services > review', () => {
       delete: vi.fn(),
     })
     authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
-    const newReview = await createReview({} as any, 'test-1234', {
-      kind: ReviewKind.Lifecycle,
-      dueDate: new Date('2026-05-28T12:54:03.780Z'),
-    })
-    expect(newReview).toMatchSnapshot()
+    authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
+
+    await expect(() =>
+      createReview({} as any, 'test-1234', {
+        kind: ReviewKind.Lifecycle,
+        dueDate: new Date('2026-05-28T12:54:03.780Z'),
+      }),
+    ).rejects.toThrow(/^This model has an open lifecycle review./)
   })
 })
