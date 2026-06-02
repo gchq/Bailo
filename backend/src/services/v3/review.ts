@@ -117,24 +117,31 @@ export async function createLifecycleReview(
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
+
   const stages: PipelineStage[] = [
     {
       $match: {
-        ...(modelId && { modelId }),
+        modelId,
         kind: ReviewKind.Lifecycle,
       },
     },
     {
-      $sort: { createdAt: -1 },
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'responses',
+      },
     },
-    { $lookup: { from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' } },
-    { $unwind: { path: '$model' } },
+    {
+      $match: {
+        responses: { $size: 0 },
+      },
+    },
+    {
+      $limit: 1,
+    },
   ]
-
-  stages.push({ $lookup: { from: 'v2_responses', localField: '_id', foreignField: 'parentId', as: 'responses' } })
-  stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
-  stages.push({ $match: { responseCount: 0 } })
-  stages.push({ $unset: ['responses', 'responseCount'] })
 
   // If there any existing open reviews then we throw a 400
   const existingReviews = await ReviewModel.aggregate(stages)

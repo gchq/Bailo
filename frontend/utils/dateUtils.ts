@@ -27,7 +27,7 @@ export const formatDateStringAsMonthAndYear = (value: string) => {
   return dayjs(value).format('MMM YYYY')
 }
 
-export const formatSDateStringAsDayMonthAndYear = (value: string) => {
+export const formatDateStringAsDayMonthAndYear = (value: string) => {
   return dayjs(value).format('DD/MM/YYYY')
 }
 

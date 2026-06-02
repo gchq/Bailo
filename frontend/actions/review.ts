@@ -72,7 +72,7 @@ type additionalParameters =
     }
 
 type GetReviewRequestsForModelQuery = {
-  modelId?: EntryInterface['id']
+  modelId: EntryInterface['id']
   kind?: ReviewKindKeys
   open?: boolean
 } & additionalParameters
@@ -91,17 +91,15 @@ export function useGetReviewRequestsForModel({
     },
     ErrorInfo
   >(
-    modelId
-      ? `/api/v2/reviews?${qs.stringify({
-          mine: false,
-          modelId,
-          ...(semver && { semver }),
-          ...(accessRequestId && { accessRequestId }),
-          ...(reviewId && { reviewId }),
-          ...(kind && { kind }),
-          ...(open && { open }),
-        })}`
-      : null,
+    `/api/v2/reviews?${qs.stringify({
+      mine: false,
+      modelId,
+      ...(semver && { semver }),
+      ...(accessRequestId && { accessRequestId }),
+      ...(reviewId && { reviewId }),
+      ...(kind && { kind }),
+      ...(open !== undefined && { open }),
+    })}`,
     fetcher,
   )
 

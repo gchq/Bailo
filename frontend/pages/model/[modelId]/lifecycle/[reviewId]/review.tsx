@@ -30,7 +30,7 @@ export default function LifecycleReview() {
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: modelId as string,
     reviewId: `${reviewId}`,
   })
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.card.schemaId || '')

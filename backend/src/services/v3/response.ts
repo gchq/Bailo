@@ -52,7 +52,7 @@ export async function respondToReview(
   )
 
   if (review.kind === ReviewKind.Lifecycle && dueDate) {
-    createLifecycleReview(user, review.modelId, dueDate)
+    await createLifecycleReview(user, review.modelId, dueDate)
   }
   return reviewResponse
 }

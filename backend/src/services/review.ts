@@ -37,16 +37,16 @@ export async function findReviews(
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
+  if (reviewId && !Types.ObjectId.isValid(reviewId)) {
+    throw BadReq('Review ID is not a valid object ID')
+  }
   const stages: PipelineStage[] = [
     {
       $match: {
         ...(modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
-        ...(reviewId &&
-          Types.ObjectId.isValid(reviewId) && {
-            _id: new Types.ObjectId(reviewId),
-          }),
+        ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
         ...(kind && { kind }),
       },
     },

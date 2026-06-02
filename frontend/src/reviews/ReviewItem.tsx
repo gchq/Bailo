@@ -8,7 +8,7 @@ import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MessageAlert from 'src/MessageAlert'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewKind, ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
-import { formatSDateStringAsDayMonthAndYear, timeDifference } from 'utils/dateUtils'
+import { formatDateStringAsDayMonthAndYear, timeDifference } from 'utils/dateUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 type ReviewItemProps = {
@@ -57,9 +57,7 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
           {review.dueDate && (
             <Typography>
               This review {isArchivedLifecycleReview ? 'was' : 'is'} due by{' '}
-              <span style={{ fontWeight: 'bold' }}>
-                {formatSDateStringAsDayMonthAndYear(review.dueDate.toString())}
-              </span>
+              <span style={{ fontWeight: 'bold' }}>{formatDateStringAsDayMonthAndYear(review.dueDate.toString())}</span>
             </Typography>
           )}
           {review.accessRequestId && (

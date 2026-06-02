@@ -29,7 +29,7 @@ export default function AccessRequestReview() {
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: modelId as string,
     accessRequestId: `${accessRequestId}`,
   })
 

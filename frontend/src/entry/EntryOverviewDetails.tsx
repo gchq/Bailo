@@ -19,7 +19,7 @@ import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
-import { formatSDateStringAsDayMonthAndYear } from 'utils/dateUtils'
+import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -177,7 +177,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               {(!updateReviewDatePermission || reviews.length > 0) && (
                 <Typography>
                   {reviews[0].dueDate
-                    ? formatSDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
+                    ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
                     : 'Invalid date'}
                 </Typography>
               )}

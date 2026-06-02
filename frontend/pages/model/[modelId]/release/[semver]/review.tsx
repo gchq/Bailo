@@ -46,7 +46,7 @@ export default function ReleaseReview() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: modelId as string,
     semver: `${semver}`,
   })
 

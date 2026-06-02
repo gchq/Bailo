@@ -97,9 +97,9 @@ export default function SideNavigation({
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (releaseReviewCountHeader) {
-        setReviewCount(releaseReviewCountHeader + accessRequestReviewCountHeader)
-      }
+      const releaseCount = releaseReviewCountHeader ?? 0
+      const accessCount = accessRequestReviewCountHeader ?? 0
+      setReviewCount(releaseCount + accessCount)
     }
     fetchReviewCount()
   }, [accessRequestReviewCountHeader, onResetErrorMessage, releaseReviewCountHeader, responses])
