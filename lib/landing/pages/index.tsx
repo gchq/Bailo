@@ -22,7 +22,7 @@ export default function Home() {
       <Box
         sx={{
           backgroundColor: '#f8e6dc',
-          background: 'linear-gradient(#4d3075, #d62560)',
+          background: 'linear-gradient(#4d3075, #b5497d)',
           backgroundSize: '400% 400%',
           minHeight: '100vh',
         }}

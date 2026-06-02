@@ -123,7 +123,7 @@ export const lightTheme = createTheme({
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#d62560',
+            borderColor: '#b5497d',
           },
         },
       },
@@ -267,7 +267,7 @@ export const darkTheme = createTheme({
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#d62560',
+            borderColor: '#b5497d',
           },
         },
       },
