@@ -74,6 +74,7 @@ oauth:
     callback: "" # example /
     subdomain: "cognito domain"
     adminGroupName: ''
+    complianceGroupName: ''
   identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"
