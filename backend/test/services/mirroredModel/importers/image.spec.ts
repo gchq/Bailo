@@ -210,6 +210,58 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     })
   })
 
+  test('finishListener > success upload fat manifest successfully when valid', async () => {
+    const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
+    const platformDigest = 'sha256:' + 'a'.repeat(64)
+    // @ts-expect-error accessing protected property
+    importer.manifestBody = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          digest: platformDigest,
+          size: 123,
+          platform: {
+            architecture: 'amd64',
+            os: 'linux',
+          },
+        },
+      ],
+    }
+    // @ts-expect-error accessing protected property
+    importer.manifestsToUpload.set(
+      platformDigest,
+      JSON.stringify({
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { digest: 'sha256:config', size: 1, mediaType: 'application/json' },
+        layers: [],
+      }),
+    )
+    const resolve = vi.fn()
+    const reject = vi.fn()
+    await importer.handleStreamCompletion(resolve, reject)
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      1,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', digest: platformDigest },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.v2+json',
+    )
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      2,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', tag: 'tag' },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.list.v2+json',
+    )
+    expect(resolve).toHaveBeenCalledWith({
+      metadata: mockMetadata,
+      image: { modelId: mockMetadata.mirroredModelId, imageName: 'imageName', imageTag: 'tag' },
+    })
+  })
+
   test('finishListener > error when manifest invalid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
