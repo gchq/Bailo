@@ -52,10 +52,3 @@ exports[`services > review > findReviewById > can find a review using a given re
   "role": "owner",
 }
 `;
-
-exports[`services > review > findReviewById > canot make a new lifecycle review if existing lifecylce review exists 1`] = `
-{
-  "modelId": "test-1234",
-  "role": "owner",
-}
-`;
