@@ -14,7 +14,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { Decision, DecisionKeys, SplitSchemaNoRender } from 'types/types'
+import { Decision, DecisionKeys, ReviewKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
 
@@ -70,7 +70,7 @@ export default function LifecycleReview() {
 
     setIsReviewButtonLoading(true)
     const res = await postGenericReviewResponse({
-      kind: 'lifecycle',
+      kind: ReviewKind.LIFECYCLE,
       comment,
       decision,
       reviewId,
@@ -139,7 +139,6 @@ export default function LifecycleReview() {
               hideRequestChangesButton
             />
             <MessageAlert message={errorMessage} severity='error' />
-            <Divider />
           </Stack>
           <Dialog open={isModelCardDialogOpen} onClose={() => setIsModelCardDialogOpen(false)} maxWidth='md' fullWidth>
             <DialogContent sx={{ p: 4 }}>
