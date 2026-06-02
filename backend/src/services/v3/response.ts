@@ -1,9 +1,5 @@
-import { PipelineStage } from 'mongoose'
-
-import { ModelAction } from '../../connectors/authorisation/actions.js'
-import authorisation from '../../connectors/authorisation/index.js'
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
-import ReviewModel, { ReviewDoc } from '../../models/Review.js'
+import { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
@@ -11,7 +7,7 @@ import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
-import { findReviewById } from '../v3/review.js'
+import { createLifecycleReview, findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
 
 function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | undefined) {
@@ -55,49 +51,8 @@ export async function respondToReview(
     { review: review },
   )
 
-  const stages: PipelineStage[] = [
-    {
-      $match: {
-        ...(review.modelId && { modelId: review.modelId }),
-        kind: ReviewKind.Lifecycle,
-      },
-    },
-    {
-      $sort: { createdAt: -1 },
-    },
-    { $lookup: { from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' } },
-    { $unwind: { path: '$model' } },
-  ]
-  stages.push({ $lookup: { from: 'v2_responses', localField: '_id', foreignField: 'parentId', as: 'responses' } })
-  stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
-  stages.push({ $match: { responseCount: 0 } })
-  stages.push({ $unset: ['responses', 'responseCount'] })
-
-  let existingReviews = await ReviewModel.aggregate(stages)
-
-  const auths = await authorisation.models(
-    user,
-    existingReviews.map((review) => review.model),
-    ModelAction.Update,
-  )
-  existingReviews = existingReviews.filter((_, i) => auths[i].success)
-  for (const existingReview of existingReviews) {
-    const reviewToDelete = await ReviewModel.findOne({ _id: existingReview._id })
-    if (reviewToDelete) {
-      await reviewToDelete.delete()
-    }
+  if (review.kind === ReviewKind.Lifecycle && dueDate) {
+    createLifecycleReview(user, review.modelId, dueDate)
   }
-
-  // When approving a model card review we need to create a new review using the supplied due date
-  if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve) {
-    const newReview = new ReviewModel({
-      modelId: review.modelId,
-      kind: review.kind,
-      role: review.role,
-      dueDate,
-    })
-    await newReview.save()
-  }
-
   return reviewResponse
 }

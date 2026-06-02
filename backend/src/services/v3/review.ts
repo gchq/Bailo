@@ -7,7 +7,7 @@ import { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
-import { BadReq, NotFound } from '../../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
 
 type ReviewWithModel = ReviewDoc & {
@@ -106,9 +106,17 @@ export async function createReview(
   }
 }
 
-async function createLifecycleReview(user: UserInterface, modelId: string, dueDate: Date): Promise<ReviewInterface> {
+export async function createLifecycleReview(
+  user: UserInterface,
+  modelId: string,
+  dueDate: Date,
+): Promise<ReviewInterface> {
   // Authorisation check to make sure the user can access a model
-  await getModelById(user, modelId)
+  const model = await getModelById(user, modelId)
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
   const stages: PipelineStage[] = [
     {
       $match: {
@@ -127,22 +135,14 @@ async function createLifecycleReview(user: UserInterface, modelId: string, dueDa
   stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
   stages.push({ $match: { responseCount: 0 } })
   stages.push({ $unset: ['responses', 'responseCount'] })
-  let existingReviews = await ReviewModel.aggregate(stages)
 
-  const auths = await authorisation.models(
-    user,
-    existingReviews.map((review) => review.model),
-    ModelAction.Update,
-  )
-  existingReviews = existingReviews.filter((_, i) => auths[i].success)
-  if (existingReviews) {
-    for (const existingReview of existingReviews) {
-      const reviewToDelete = await ReviewModel.findOne({ _id: existingReview._id })
-      if (reviewToDelete) {
-        await reviewToDelete.delete()
-      }
-    }
+  // If there any existing open reviews then we throw a 400
+  const existingReviews = await ReviewModel.aggregate(stages)
+
+  if (existingReviews.length > 0) {
+    throw BadReq('This model has an open lifecycle review.', { modelId })
   }
+
   const newReview = new ReviewModel({
     modelId,
     role: SystemRoles.Owner,

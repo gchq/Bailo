@@ -19,6 +19,7 @@ import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
+import { formatSDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -75,6 +76,8 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
       if (res.ok) {
         sendNotification({ msg: `Next review due date set to ${newReviewDate}`, variant: 'success' })
         mutateReviews()
+      } else {
+        sendNotification({ msg: await getErrorMessage(res), variant: 'error' })
       }
     },
     [entry.id, mutateReviews, sendNotification],
@@ -155,7 +158,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             <Typography fontWeight='bold' color='primary'>
               Next review due:
             </Typography>
-            {updateReviewDatePermission && (
+            {updateReviewDatePermission && reviews.length === 0 && (
               <DatePicker
                 value={reviews && reviews[0] ? dayjs(reviews[0].dueDate) : undefined}
                 sx={{ backgroundColor: 'unset', borderRadius: 1 }}
@@ -165,16 +168,30 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                 minDate={dayjs(new Date())}
               />
             )}
-            {updateReviewDatePermission && reviews[0] && (
-              <Button
-                variant='outlined'
-                size='small'
-                href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
-              >
-                Review
-              </Button>
-            )}
-            {!updateReviewDatePermission && <Typography>1/11/1029</Typography>}
+            <Stack
+              direction='row'
+              spacing={2}
+              sx={{ alignItems: 'center' }}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              {(!updateReviewDatePermission || reviews.length > 0) && (
+                <Typography>
+                  {reviews[0].dueDate
+                    ? formatSDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
+                    : 'Invalid date'}
+                </Typography>
+              )}
+              {updateReviewDatePermission && reviews[0] && (
+                <Button
+                  variant='outlined'
+                  size='small'
+                  sx={{ width: 'fit-content' }}
+                  href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
+                >
+                  Review
+                </Button>
+              )}
+            </Stack>
           </Stack>
         )}
         <Box>
