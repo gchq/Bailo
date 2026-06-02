@@ -108,7 +108,7 @@ describe('services > schema', () => {
       properties: {
         name: {
           type: 'string',
-          requiredByModelSates: ['Development'],
+          requiredByModelStates: ['Development'],
         },
       },
     }
@@ -141,7 +141,7 @@ describe('services > schema', () => {
       properties: {
         name: {
           type: 'string',
-          requiredByModelSates: ['Production'],
+          requiredByModelStates: ['Production'],
         },
       },
     }
@@ -163,7 +163,7 @@ describe('services > schema', () => {
       properties: {
         name: {
           type: 'string',
-          requiredByModelSates: ['Development'],
+          requiredByModelStates: ['Development'],
         },
       },
     }

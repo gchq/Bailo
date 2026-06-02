@@ -124,7 +124,7 @@ Note: This will only hide it from the model page, the data will still persist in
 #### Required fields for model states
 
 Bailo supports conditional required fields based on the state that has been set on a model. This can be used by adding
-the property `requiredByModelSates` to the schema and specifying the list of model states that require that question.
+the property `requiredByModelStates` to the schema and specifying the list of model states that require that question.
 For example:
 
 ```json
@@ -134,7 +134,7 @@ For example:
   "type": "string",
   "minLength": 1,
   "maxLength": 5000,
-  "requiredByModelSates": ["Development"]
+  "requiredByModelStates": ["Development"]
 }
 ```
 
