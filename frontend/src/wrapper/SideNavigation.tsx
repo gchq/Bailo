@@ -215,7 +215,7 @@ export default function SideNavigation({
               icon={<ContactSupportIcon />}
             />
             <NavMenuItem
-              href='/accessibility'
+              href='/accessibility/statement'
               selectedPage={page}
               primaryText='Accessibility'
               drawerOpen={drawerOpen}
