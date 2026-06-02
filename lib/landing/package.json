@@ -37,7 +37,7 @@
     "shelljs": "^0.10.0",
     "styled-components": "^6.3.12",
     "swagger-ui-dist": "^5.31.2",
-    "swiper": "^12.1.4"
+    "swiper": "^12.2.0"
   },
   "devDependencies": {
     "@types/node": "24.12.2",
