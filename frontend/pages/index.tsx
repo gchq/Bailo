@@ -339,14 +339,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (
-    isReviewRolesLoading ||
-    isUiConfigLoading ||
-    isTagsLoading ||
-    isPeersLoading ||
-    isStatusLoading ||
-    isUntrustedModelsLoading
-  ) {
+  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
 
@@ -548,7 +541,7 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {(isModelsLoading || isMirroredModelsLoading) && <Loading />}
+              {(isModelsLoading || isMirroredModelsLoading || isUntrustedModelsLoading) && <Loading />}
               {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
