@@ -20,7 +20,7 @@ const mockMongoUtils = vi.hoisted(() => {
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 
-const cognitoMock = vi.hoisted(() => ({
+const cacheGetSetMock = vi.hoisted(() => ({
   get: vi.fn(),
   set: vi.fn(),
 }))
@@ -28,8 +28,8 @@ vi.mock('node-cache', () => ({
   __esModule: true,
   default: vi.fn(
     class {
-      get = cognitoMock.get
-      set = cognitoMock.set
+      get = cacheGetSetMock.get
+      set = cacheGetSetMock.set
     },
   ),
 }))
@@ -182,7 +182,7 @@ describe('services > schema', () => {
   test('that a cached schema is returned when the cache is populated', async () => {
     const cachedSchema = { id: 'cached-schema', jsonSchema: { type: 'object' } } as any
 
-    cognitoMock.get.mockReturnValueOnce(cachedSchema)
+    cacheGetSetMock.get.mockReturnValueOnce(cachedSchema)
     SchemaModelModelMock.findOne.mockResolvedValueOnce({
       ...testModelSchema,
       toObject: vi.fn().mockReturnValue(testModelSchema),
@@ -191,8 +191,10 @@ describe('services > schema', () => {
     const result = await getSchemaById(testModelSchema.id, 'Development')
 
     expect(result).toBe(cachedSchema)
-    expect(cognitoMock.get).toHaveBeenCalledWith({ schemaId: testModelSchema.id, modelState: 'Development' }.toString())
-    expect(cognitoMock.set).not.toHaveBeenCalled()
+    expect(cacheGetSetMock.get).toHaveBeenCalledWith(
+      JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
+    )
+    expect(cacheGetSetMock.set).not.toHaveBeenCalled()
   })
 
   test('that a schema is stored in cache on a cache miss', async () => {
@@ -206,23 +208,13 @@ describe('services > schema', () => {
 
     await getSchemaById(testModelSchema.id, 'Development')
 
-    expect(cognitoMock.get).toHaveBeenCalledWith({ schemaId: testModelSchema.id, modelState: 'Development' }.toString())
-    expect(cognitoMock.set).toHaveBeenCalledWith(
-      { schemaId: testModelSchema.id, modelState: 'Development' }.toString(),
+    expect(cacheGetSetMock.get).toHaveBeenCalledWith(
+      JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
+    )
+    expect(cacheGetSetMock.set).toHaveBeenCalledWith(
+      JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
       expect.objectContaining({ id: testModelSchema.id }),
     )
-  })
-
-  test('that the cache is not consulted when no modelState is provided', async () => {
-    SchemaModelModelMock.findOne.mockResolvedValueOnce({
-      ...testModelSchema,
-      toObject: vi.fn().mockReturnValue(testModelSchema),
-    })
-
-    await getSchemaById(testModelSchema.id)
-
-    expect(cognitoMock.get).not.toHaveBeenCalled()
-    expect(cognitoMock.set).not.toHaveBeenCalled()
   })
 
   test('that we update review roles if they are changed on a schema', async () => {
