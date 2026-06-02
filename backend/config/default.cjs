@@ -182,6 +182,7 @@ module.exports = {
       userPoolId: '',
       userIdAttribute: '',
       adminGroupName: '',
+      complianceGroupName: '',
     },
   },
 

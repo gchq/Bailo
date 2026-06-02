@@ -10,8 +10,8 @@ export default function SwaggerApi() {
       if (containerRef.current) {
         SwaggerUIBundle({
           urls: [
-            { url: './swagger-v2.json', name: 'v2.0.0' },
-            { url: './swagger-v3.json', name: 'v3.0.0(beta)' },
+            { url: './docs/swagger-v2.json', name: 'v2.0.0' },
+            { url: './docs/swagger-v3.json', name: 'v3.0.0(beta)' },
           ],
           domNode: containerRef.current,
           deepLinking: true,
