@@ -68,7 +68,7 @@
     "proxy-agent": "^8.0.1",
     "qs": "^6.15.2",
     "sanitize-html": "^2.17.4",
-    "semver": "^7.7.4",
+    "semver": "^7.8.1",
     "shelljs": "^0.10.0",
     "showdown": "^2.1.0",
     "swagger-ui-express": "^5.0.1",
