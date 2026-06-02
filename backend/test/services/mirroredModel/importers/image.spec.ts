@@ -211,23 +211,50 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   })
 
   test('finishListener > success upload fat manifest successfully when valid', async () => {
-    typeguardMocks.hasKeysOfType.mockReturnValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
+    const platformDigest = 'sha256:' + 'a'.repeat(64)
     // @ts-expect-error accessing protected property
-    importer.manifestBody = { mediaType: 'mt' }
+    importer.manifestBody = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          digest: platformDigest,
+          size: 123,
+          platform: {
+            architecture: 'amd64',
+            os: 'linux',
+          },
+        },
+      ],
+    }
     // @ts-expect-error accessing protected property
-    importer.manifestsToUpload.set('abc123', JSON.stringify({ mediaType: 'mt' }))
+    importer.manifestsToUpload.set(
+      platformDigest,
+      JSON.stringify({
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { digest: 'sha256:config', size: 1, mediaType: 'application/json' },
+        layers: [],
+      }),
+    )
     const resolve = vi.fn()
     const reject = vi.fn()
-
     await importer.handleStreamCompletion(resolve, reject)
-
-    expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      1,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', digest: platformDigest },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.v2+json',
+    )
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      2,
       undefined,
       { repository: mockMetadata.mirroredModelId, name: 'imageName', tag: 'tag' },
-      // @ts-expect-error accessing protected property
-      JSON.stringify(importer.manifestBody),
-      'mt',
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.list.v2+json',
     )
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

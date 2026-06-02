@@ -18,6 +18,7 @@ import { dedupeByKey } from '../../utils/array.js'
 import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
+import { ManifestListV2 } from '../../utils/registryResponses.js'
 import { getHttpsAgent } from '../http.js'
 import { getImageLayers } from '../images/getImageLayers.js'
 import log from '../log.js'
@@ -238,7 +239,7 @@ async function exportPlatformManifests(
   modelId: string,
   imageName: string,
   imageTag: string,
-  manifests: any[],
+  manifests: ManifestListV2['manifests'],
   tarStream: Pack,
   logData: MirrorExportLogData,
 ) {

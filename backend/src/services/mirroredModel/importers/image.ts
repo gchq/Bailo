@@ -84,7 +84,7 @@ export class ImageImporter extends BaseImporter {
         this.manifestBody = ManifestResponseBodySchema.parse(await json(stream))
       } else if (ImageImporter.blobsManifestRegex.test(entry.name)) {
         // Extract manifests from blobs/manifests/ directory
-        const manifestDigest = `sha256:${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/manifests\/)`), '')}`
+        const manifestDigest = `sha256:${entry.name.replace(new RegExp(String.raw`^(${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/manifests\/)`), '')}`
         log.debug({ ...this.logData, manifestDigest }, 'Extracting manifest from blobs/manifests.')
         // Store the raw JSON string to preserve exact bytes for digest calculation
         const manifestJsonString = await text(stream)

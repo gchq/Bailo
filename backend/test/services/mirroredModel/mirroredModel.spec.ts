@@ -610,5 +610,171 @@ describe('services > mirroredModel', () => {
         addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
       ).rejects.toThrow('tar error')
     })
+
+    test('export compressed multi-platform image writes root index and child manifests to tar', async () => {
+      const rootDigest = `sha256:${'a'.repeat(64)}`
+      const amd64Digest = `sha256:${'b'.repeat(64)}`
+      const arm64Digest = `sha256:${'c'.repeat(64)}`
+      const rootIndex = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          {
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            digest: amd64Digest,
+            size: 123,
+            platform: { os: 'linux', architecture: 'amd64' },
+          },
+          {
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            digest: arm64Digest,
+            size: 456,
+            platform: { os: 'linux', architecture: 'arm64' },
+          },
+        ],
+      }
+      const amd64Manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { digest: `sha256:${'d'.repeat(64)}`, size: 1, mediaType: 'application/json' },
+        layers: [{ digest: `sha256:${'e'.repeat(64)}`, size: 1, mediaType: compressedLayerMediaType }],
+      }
+      const arm64Manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { digest: `sha256:${'f'.repeat(64)}`, size: 1, mediaType: 'application/json' },
+        layers: [{ digest: `sha256:${'1'.repeat(64)}`, size: 1, mediaType: compressedLayerMediaType }],
+      }
+      const rootIndexRaw = JSON.stringify(rootIndex)
+      const amd64ManifestRaw = JSON.stringify(amd64Manifest)
+      const arm64ManifestRaw = JSON.stringify(arm64Manifest)
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: rootIndex as any,
+        headers: {
+          'docker-content-digest': rootDigest,
+          'content-type': 'application/vnd.docker.distribution.manifest.list.v2+json',
+        },
+      })
+      registryClientMocks.getImageTagManifestsRaw
+        .mockResolvedValueOnce({
+          body: rootIndexRaw,
+          headers: {
+            'docker-content-digest': rootDigest,
+            'content-type': 'application/vnd.docker.distribution.manifest.list.v2+json',
+          },
+        })
+        .mockResolvedValueOnce({
+          body: amd64ManifestRaw,
+          headers: {
+            'docker-content-digest': amd64Digest,
+            'content-type': 'application/vnd.docker.distribution.manifest.v2+json',
+          },
+        })
+        .mockResolvedValueOnce({
+          body: arm64ManifestRaw,
+          headers: {
+            'docker-content-digest': arm64Digest,
+            'content-type': 'application/vnd.docker.distribution.manifest.v2+json',
+          },
+        })
+      getImageLayersMock
+        .mockResolvedValueOnce([amd64Manifest.config, ...amd64Manifest.layers])
+        .mockResolvedValueOnce([arm64Manifest.config, ...arm64Manifest.layers])
+      registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['layer']), abort: vi.fn() })
+      await addCompressedRegistryImageComponents({ dn: 'user-dn' } as any, 'modelId', 'img:tag', {} as any, {} as any)
+      expect(registryClientMocks.getImageTagManifestsRaw).toHaveBeenCalledWith('mock-token', {
+        repository: 'modelId',
+        name: 'img',
+        tag: 'tag',
+      })
+      expect(registryClientMocks.getImageTagManifestsRaw).toHaveBeenCalledWith('mock-token', {
+        repository: 'modelId',
+        name: 'img',
+        digest: amd64Digest,
+      })
+      expect(registryClientMocks.getImageTagManifestsRaw).toHaveBeenCalledWith('mock-token', {
+        repository: 'modelId',
+        name: 'img',
+        digest: arm64Digest,
+      })
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          type: 'text',
+          filename: 'manifest.json',
+          content: rootIndexRaw,
+        }),
+        expect.anything(),
+      )
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          type: 'text',
+          filename: `blobs/manifests/${rootDigest.replace(/^sha256:/, '')}`,
+          content: rootIndexRaw,
+        }),
+        expect.anything(),
+      )
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          type: 'text',
+          filename: `blobs/manifests/${amd64Digest.replace(/^sha256:/, '')}`,
+          content: amd64ManifestRaw,
+        }),
+        expect.anything(),
+      )
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          type: 'text',
+          filename: `blobs/manifests/${arm64Digest.replace(/^sha256:/, '')}`,
+          content: arm64ManifestRaw,
+        }),
+        expect.anything(),
+      )
+    })
+
+    test('export compressed multi-platform image propagates child manifest fetch failures', async () => {
+      const rootDigest = `sha256:${'a'.repeat(64)}`
+      const amd64Digest = `sha256:${'b'.repeat(64)}`
+      const rootIndex = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          {
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            digest: amd64Digest,
+            size: 123,
+            platform: { os: 'linux', architecture: 'amd64' },
+          },
+        ],
+      }
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: rootIndex as any,
+        headers: {
+          'docker-content-digest': rootDigest,
+          'content-type': 'application/vnd.docker.distribution.manifest.list.v2+json',
+        },
+      })
+      registryClientMocks.getImageTagManifestsRaw
+        .mockResolvedValueOnce({
+          body: JSON.stringify(rootIndex),
+          headers: {
+            'docker-content-digest': rootDigest,
+            'content-type': 'application/vnd.docker.distribution.manifest.list.v2+json',
+          },
+        })
+        .mockRejectedValueOnce(new Error('child manifest fetch failed'))
+      await expect(
+        addCompressedRegistryImageComponents({ dn: 'user-dn' } as any, 'modelId', 'img:tag', {} as any, {} as any),
+      ).rejects.toThrow('child manifest fetch failed')
+      expect(registryClientMocks.getImageTagManifestsRaw).toHaveBeenCalledWith('mock-token', {
+        repository: 'modelId',
+        name: 'img',
+        digest: amd64Digest,
+      })
+      expect(registryMocks.getImageBlob).not.toHaveBeenCalled()
+    })
   })
 })
