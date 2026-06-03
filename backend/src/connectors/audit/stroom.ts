@@ -483,6 +483,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, 'Viewing metric')
   }
 
+  async onCreateReview(req: Request, modelId: string) {
+    this.auditGenericEvent(req, `Review created for ${modelId}`)
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.auditGenericEvent(req, userInformation.user.dn)
   }

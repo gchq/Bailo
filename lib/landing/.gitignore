@@ -43,5 +43,5 @@ src/docs
 src/common/Title.tsx
 
 pages/docs
-public
 pages/accessibility
+public
