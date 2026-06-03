@@ -21,7 +21,7 @@ import Loading from 'src/common/Loading'
 import PythonIcon from 'src/common/PythonIcon'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { Roles } from 'types/types'
+import { ReviewKind, Roles } from 'types/types'
 
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
@@ -83,21 +83,34 @@ export default function SideNavigation({
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForUser(true)
+  const {
+    reviewCountHeader: releaseReviewCountHeader,
+    isReviewsLoading: isReleaseReviewsLoading,
+    isReviewsError: isReleaseReviewsError,
+  } = useHeadReviewRequestsForUser(true, ReviewKind.RELEASE)
+  const {
+    reviewCountHeader: accessRequestReviewCountHeader,
+    isReviewsLoading: isAccessRequestReviewsLoading,
+    isReviewsError: isAccessRequestReviewsError,
+  } = useHeadReviewRequestsForUser(true, ReviewKind.ACCESS)
   const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (reviewCountHeader) {
-        setReviewCount(reviewCountHeader)
-      }
+      const releaseCount = releaseReviewCountHeader ?? 0
+      const accessCount = accessRequestReviewCountHeader ?? 0
+      setReviewCount(releaseCount + accessCount)
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, responses, reviewCountHeader])
+  }, [accessRequestReviewCountHeader, onResetErrorMessage, releaseReviewCountHeader, responses])
 
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  if (isReleaseReviewsError) {
+    return <MessageAlert message={isReleaseReviewsError.info.message} severity='error' />
+  }
+
+  if (isAccessRequestReviewsError) {
+    return <MessageAlert message={isAccessRequestReviewsError.info.message} severity='error' />
   }
 
   if (isResponsesError) {
@@ -106,7 +119,7 @@ export default function SideNavigation({
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
-      {(isReviewsLoading || isResponsesLoading) && <Loading />}
+      {(isReleaseReviewsLoading || isAccessRequestReviewsLoading || isResponsesLoading) && <Loading />}
       <Toolbar
         sx={(theme) => ({
           marginTop: bannerVisible ? 4 : 0,

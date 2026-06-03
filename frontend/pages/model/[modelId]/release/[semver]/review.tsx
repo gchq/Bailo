@@ -45,8 +45,8 @@ export default function ReleaseReview() {
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)
-  const { mutateReviews } = useGetReviewRequestsForModel({
-    modelId,
+  const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
+    modelId: modelId as string,
     semver: `${semver}`,
   })
 
@@ -119,12 +119,22 @@ export default function ReleaseReview() {
     isReleaseError,
     isModelError,
     isUiConfigError,
+    isReviewsError,
   })
   if (error) {
     return error
   }
 
-  if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
+  if (
+    !release ||
+    !model ||
+    !uiConfig ||
+    !reviews ||
+    isReviewsLoading ||
+    isReleaseLoading ||
+    isModelLoading ||
+    isUiConfigLoading
+  ) {
     return <Loading />
   }
 
@@ -149,7 +159,12 @@ export default function ReleaseReview() {
               </Typography>
               <Button onClick={() => setIsReleaseDialogOpen(true)}>View full release</Button>
             </Stack>
-            <ReviewWithComment onSubmit={handleSubmit} release={release} loading={isReviewButtonLoading} />
+            <ReviewWithComment
+              onSubmit={handleSubmit}
+              reviews={reviews}
+              loading={isReviewButtonLoading}
+              modelId={modelId as string}
+            />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
             <Typography variant='caption' sx={{ mb: 2 }}>

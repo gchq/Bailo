@@ -1,10 +1,13 @@
-import { Types } from 'mongoose'
+import { PipelineStage, Types } from 'mongoose'
 
 import authentication from '../../connectors/authentication/index.js'
-import { ModelInterface } from '../../models/Model.js'
-import ReviewModel, { ReviewDoc } from '../../models/Review.js'
+import { ModelAction } from '../../connectors/authorisation/actions.js'
+import authorisation from '../../connectors/authorisation/index.js'
+import { ModelInterface, SystemRoles } from '../../models/Model.js'
+import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
-import { BadReq, NotFound } from '../../utils/error.js'
+import { ReviewKind } from '../../types/enums.js'
+import { BadReq, Forbidden, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
 
 type ReviewWithModel = ReviewDoc & {
@@ -71,4 +74,88 @@ export async function findUserInCollaborators(user: UserInterface) {
       ],
     },
   }
+}
+
+type CreateLifecycleReviewContent = {
+  kind: 'lifecycle'
+  dueDate: Date
+}
+type CreateReleaseReviewContent = {
+  kind: 'release'
+  semver: string
+}
+type CreateAccessReviewContent = {
+  kind: 'access'
+  accessRequestId: string
+}
+
+export async function createReview(
+  user: UserInterface,
+  modelId: string,
+  reviewContent: CreateLifecycleReviewContent | CreateReleaseReviewContent | CreateAccessReviewContent,
+) {
+  switch (reviewContent.kind) {
+    case ReviewKind.Lifecycle:
+      return await createLifecycleReview(user, modelId, reviewContent.dueDate)
+    case ReviewKind.Release:
+    case ReviewKind.Access:
+      throw BadReq(`Creating ${reviewContent.kind} reviews is not supported yet in V3.`)
+
+    default:
+      throw BadReq('Unknown review kind')
+  }
+}
+
+export async function createLifecycleReview(
+  user: UserInterface,
+  modelId: string,
+  dueDate: Date,
+): Promise<ReviewInterface> {
+  // Authorisation check to make sure the user can access a model
+  const model = await getModelById(user, modelId)
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const stages: PipelineStage[] = [
+    {
+      $match: {
+        modelId,
+        kind: ReviewKind.Lifecycle,
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'responses',
+      },
+    },
+    {
+      $match: {
+        responses: { $size: 0 },
+      },
+    },
+    {
+      $limit: 1,
+    },
+  ]
+
+  // If there any existing open reviews then we throw a 400
+  const existingReviews = await ReviewModel.aggregate(stages)
+
+  if (existingReviews.length > 0) {
+    throw BadReq('This model has an open lifecycle review.', { modelId })
+  }
+
+  const newReview = new ReviewModel({
+    modelId,
+    role: SystemRoles.Owner,
+    kind: ReviewKind.Lifecycle,
+    dueDate,
+  })
+  await newReview.save()
+  return newReview
 }

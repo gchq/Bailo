@@ -1,18 +1,25 @@
 import { Info, LocalOffer } from '@mui/icons-material'
 import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { DatePicker } from '@mui/x-date-pickers'
+import { PickerValue } from '@mui/x-date-pickers/internals'
 import { patchEntry, useGetEntry } from 'actions/entry'
+import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
+import dayjs from 'dayjs'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { EntryCardKindLabel, EntryInterface } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
+import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -28,9 +35,17 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const { mutateEntry } = useGetEntry(entry.id)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card ? entry.card.schemaId : '')
-
-  const theme = useTheme()
+  const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
+    modelId: entry.id,
+    kind: ReviewKind.LIFECYCLE,
+    open: true,
+  })
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  const { userPermissions } = useContext(UserPermissionsContext)
+
+  const sendNotification = useNotification()
+  const theme = useTheme()
 
   const collaboratorList = useMemo(() => {
     return (
@@ -43,6 +58,8 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     )
   }, [entry])
 
+  const updateReviewDatePermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
+
   const handleEntryTagOnChange = async (newTags: string[]) => {
     setEntryTagUpdateErrorMessage('')
     const response = await patchEntry(entry.id, { tags: newTags })
@@ -53,7 +70,20 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     }
   }
 
-  if (isUiConfigLoading || isSchemaLoading) {
+  const handleDueDateOnChange = useCallback(
+    async (newReviewDate: PickerValue) => {
+      const res = await postReview({ modelId: entry.id, kind: ReviewKind.LIFECYCLE, dueDate: newReviewDate })
+      if (res.ok) {
+        sendNotification({ msg: `Next review due date set to ${newReviewDate}`, variant: 'success' })
+        mutateReviews()
+      } else {
+        sendNotification({ msg: await getErrorMessage(res), variant: 'error' })
+      }
+    },
+    [entry.id, mutateReviews, sendNotification],
+  )
+
+  if (isUiConfigLoading || isSchemaLoading || isReviewsLoading) {
     return <Loading />
   }
 
@@ -63,6 +93,10 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   if (isSchemaError) {
     return <ErrorWrapper message={isSchemaError.info.message} />
+  }
+
+  if (isReviewsError) {
+    return <ErrorWrapper message={isReviewsError.info.message} />
   }
 
   return (
@@ -121,6 +155,47 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           </Button>
           {collaboratorList}
         </Stack>
+        {entry.card && (
+          <Stack spacing={1}>
+            <Typography fontWeight='bold' color='primary'>
+              Next review due:
+            </Typography>
+            {updateReviewDatePermission && reviews.length === 0 && (
+              <DatePicker
+                value={reviews && reviews[0] ? dayjs(reviews[0].dueDate) : undefined}
+                sx={{ backgroundColor: 'unset', borderRadius: 1 }}
+                onChange={(newValue) => {
+                  handleDueDateOnChange(newValue)
+                }}
+                minDate={dayjs(new Date())}
+              />
+            )}
+            <Stack
+              direction='row'
+              spacing={2}
+              sx={{ alignItems: 'center' }}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              {(!updateReviewDatePermission || reviews.length > 0) && (
+                <Typography>
+                  {reviews[0].dueDate
+                    ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
+                    : 'Invalid date'}
+                </Typography>
+              )}
+              {updateReviewDatePermission && reviews[0] && (
+                <Button
+                  variant='outlined'
+                  size='small'
+                  sx={{ width: 'fit-content' }}
+                  href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
+                >
+                  Review
+                </Button>
+              )}
+            </Stack>
+          </Stack>
+        )}
         <Box>
           <Restricted action='editEntry' fallback={<></>}>
             <Button
