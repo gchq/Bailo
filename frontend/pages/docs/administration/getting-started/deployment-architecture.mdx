@@ -1,4 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import Alert from '@mui/material/Alert'
 
 # Deployment Architecture
 
@@ -65,6 +66,48 @@ For production deployments, Bailo provides Helm charts for deploying to Kubernet
 - [Helm Basic Usage](/docs/administration/helm/basic-usage)
 - [Helm Configuration](/docs/administration/helm/configuration)
 - [Isolated Environments](/docs/administration/helm/isolated-environments)
+
+### Standalone Dockerfile
+
+<Alert sx={{ my: '20px', '& .MuiAlert-message p': { margin: 0 } }} severity='warning'>
+  `Dockerfile.standalone` is intended for local testing and secondary-instance scenarios. It should **not** be used as
+  the recommended production deployment model. Use Helm for production Kubernetes deployments.
+</Alert>
+
+`Dockerfile.standalone` builds a single container that runs a self-contained Bailo instance. It packages the frontend,
+backend, NGINX, MongoDB, MinIO, the container registry, and Mailcrab into one image using `supervisord`.
+
+This is not the normal development path. For day-to-day local development, use `compose.yaml`, because it runs each
+service separately and supports rebuilding, inspecting, and restarting individual services more easily.
+
+Use the standalone Dockerfile when you need an additional Bailo instance alongside your main Docker Compose instance,
+for example:
+
+- Testing cross-instance functionality, such as searching for models in another Bailo instance
+- Running a second local instance without starting another full Compose project
+- Creating a compact demo or smoke-test instance
+- Checking behaviour where one Bailo deployment needs to communicate with another
+
+To use it, first start your main Bailo instance with Docker Compose:
+
+```bash
+docker compose build --parallel
+docker compose up -d
+```
+
+The main instance is then available at `http://localhost:8080`.
+
+Build and run the standalone image from the repository root:
+
+```bash
+docker build . -t second-bailo -f Dockerfile.standalone
+docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
+```
+
+The standalone instance is then available at `http://localhost:4318`.
+
+If your Compose instance uses a different `INSTANCE_NAME`, replace `dev_internal` with the matching internal network
+name, for example `<INSTANCE_NAME>_internal`.
 
 ## Data Storage
 
