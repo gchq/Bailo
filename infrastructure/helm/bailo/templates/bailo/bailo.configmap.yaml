@@ -163,7 +163,8 @@ data:
           },
           userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
-          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}'
+          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}',
+          complianceGroupName: '{{ .Values.oauth.cognito.complianceGroupName }}',
         },
       },
 

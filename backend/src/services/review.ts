@@ -1,4 +1,4 @@
-import { ClientSession, PipelineStage } from 'mongoose'
+import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -33,15 +33,20 @@ export async function findReviews(
   open?: boolean,
   modelId?: string,
   semver?: string,
+  reviewId?: string,
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
+  if (reviewId && !Types.ObjectId.isValid(reviewId)) {
+    throw BadReq('Review ID is not a valid object ID')
+  }
   const stages: PipelineStage[] = [
     {
       $match: {
         ...(modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
+        ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
         ...(kind && { kind }),
       },
     },
@@ -239,7 +244,7 @@ export function getRoleEntities(roles: string[], collaborators: CollaboratorEntr
  * Return the models where one of the user's entities is in the model's collaborators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
-async function findUserInCollaborators(user: UserInterface) {
+export async function findUserInCollaborators(user: UserInterface) {
   return {
     $expr: {
       $gt: [

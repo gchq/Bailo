@@ -49,6 +49,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Reviewing', slug: 'users/reviews/reviewing', header: true },
   { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
   { title: 'Reviewing an Access Request', slug: 'users/reviews/reviewing/access' },
+  { title: 'Reviewing a Model Card Lifecycle', slug: 'users/reviews/reviewing/model-lifecycle' },
   { title: 'Review Outcomes', slug: 'users/reviews/review-outcomes' },
 
   { title: 'Security Scanning', slug: 'users/using-scanners', header: true },

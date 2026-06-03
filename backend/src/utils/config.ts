@@ -156,6 +156,7 @@ export interface Config {
       userPoolId: string
       userIdAttribute: string
       adminGroupName: string
+      complianceGroupName: string
     }
   }
 

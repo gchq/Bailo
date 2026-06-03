@@ -53,7 +53,6 @@ export class ImageExporter extends BaseExporter {
     // update the distributionPackageName to use the mirroredModelId
     const modelIdRe = new RegExp(String.raw`^${this.model.id}`)
     this.distributionPackageName = joinDistributionPackageName({
-      domain: '',
       path: this.image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
       tag: this.image.tag,
     })
