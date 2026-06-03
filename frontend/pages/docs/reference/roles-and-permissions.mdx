@@ -2,20 +2,20 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Roles and Permissions
 
-Bailo uses two complementary role systems: **Entry Roles** that control what actions a user can take on a model, and
+Bailo uses two complementary role systems: **System Roles** that control what actions a user can take on a model, and
 **Review Roles** that determine who must approve releases and access requests.
 
 > **Common questions this page answers:**
 >
 > - What can an Owner do in Bailo?
-> - What is the difference between entry roles and review roles?
+> - What is the difference between system roles and review roles?
 > - Who can delete a model?
 > - Who can upload files?
 > - What is a Model Technical Reviewer (MTR)?
 
-## Entry Roles
+## System Roles
 
-Every collaborator on a model is assigned one of three entry roles that govern day-to-day interactions.
+Every collaborator on a model is assigned one of three system roles that govern day-to-day interactions.
 
 ### Owner
 
@@ -91,7 +91,7 @@ This reference lists every action in Bailo and which roles can perform it.
 
 ## Review Roles
 
-Review roles are created by administrators and attached to schemas. Unlike entry roles, review roles are not fixed -
+Review roles are created by administrators and attached to schemas. Unlike system roles, review roles are not fixed -
 your organisation can define whatever roles make sense for your governance process.
 
 ### How Review Roles Work
@@ -118,7 +118,7 @@ Each review role has:
 - **Name** - Display name (e.g. "Model Technical Reviewer")
 - **Short Name** - Abbreviated identifier (e.g. "mtr")
 - **Description** - Explanation of the role's purpose
-- **System Role** - The minimum entry role needed (owner, contributor, consumer, or none)
+- **System Role** - The minimum system role needed (owner, contributor, consumer, or none)
 - **Default Entities** - Users or groups automatically assigned to this role on new models
 
 ### Who Can Review What?
@@ -127,6 +127,10 @@ Each review role has:
 - **Access request reviews** are typically restricted to specific review roles (commonly MSRO)
 
 The exact review requirements depend on how your administrator has configured the schemas and review roles.
+
+## Entry Roles
+
+The collective term for all system roles and review roles.
 
 ## Assigning Roles
 

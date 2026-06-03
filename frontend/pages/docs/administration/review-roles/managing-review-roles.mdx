@@ -32,7 +32,7 @@ To create a new review role:
    - **Short Name** - A brief identifier used internally. Example: "mtr".
    - **Description** - What this role is responsible for reviewing. Example: "Reviews the technical quality and fitness
      for purpose of models".
-   - **System Role** - The minimum entry role a user must have to be assigned this review role. Options: Owner,
+   - **System Role** - The minimum system role a user must have to be assigned this review role. Options: Owner,
      Contributor, Consumer, or none. Example: "Contributor".
    - **Default collaborators** - Users or groups automatically assigned to this role when new models are created.
      Example: "team-leads".
@@ -40,11 +40,11 @@ To create a new review role:
 
 ### Choosing a System Role
 
-The **System Role** field links a review role to an entry role. This means:
+The **System Role** field links a review role to an system role. This means:
 
 - If set to **Contributor**, only users who are at least contributors on a model can be assigned this review role
 - If set to **Owner**, only owners can be assigned
-- If left empty, any user can be assigned regardless of their entry role
+- If left empty, any user can be assigned regardless of their system role
 
 ### Default collaborators
 
@@ -116,7 +116,7 @@ For strict compliance requirements:
 ## Related Pages
 
 - [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works
-- [Roles & Permissions](/docs/reference/roles-and-permissions) - Entry roles vs review roles
+- [Roles & Permissions](/docs/reference/roles-and-permissions) - System roles vs review roles
 - [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - How schemas and review roles connect
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

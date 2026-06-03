@@ -24,13 +24,13 @@ configuration files, training data, and container images.
 
 **Collaborator** - A user or group that has been granted a role (Owner, Contributor, or Consumer) on a specific model.
 
-**Consumer** - An entry role that allows a user to download files and pull container images from a model, provided they
+**Consumer** - A system role that allows a user to download files and pull container images from a model, provided they
 have an approved access request or the model has ungoverned access enabled.
 
 **Container image** (e.g. a Docker image) is a standalone, executable artefact used to create a container. This
 container image contains all the libraries, dependencies, and files that the container needs to run.
 
-**Contributor** - An entry role that allows a user to edit the model card, upload files and images, and create releases
+**Contributor** - A system role that allows a user to edit the model card, upload files and images, and create releases
 for a model.
 
 **Data Card** - An entry type for documenting datasets. Data cards capture information about data provenance, storage,
@@ -38,6 +38,8 @@ and relationships to models.
 
 **Entry** - The top-level entity in Bailo. Models, Data Cards, Mirrored Models, and Untrusted Models are all types of
 entry.
+
+**Entry Role** - The collective term for all system roles and review roles.
 
 **Federation** - A feature that connects multiple Bailo instances (or external sources like HuggingFace Hub), allowing
 models from one to be browsed and mirrored in another.
@@ -67,7 +69,7 @@ technical quality of a model. This is a configurable review role, not a fixed sy
 **ModelScan** - A security scanning tool used by Bailo to detect serialisation attacks in uploaded model files (e.g.
 malicious pickle files).
 
-**Owner** - An entry role that grants full control over a model: editing, managing collaborators, creating releases, and
+**Owner** - A system role that grants full control over a model: editing, managing collaborators, creating releases, and
 deleting the model.
 
 **Peer** - Another Bailo instance or external model repository connected through federation.
@@ -99,6 +101,10 @@ versions indicate breaking changes, minor versions add functionality, and patch 
 
 **Soft Deletion** - Bailo's deletion model where deleted items are marked as removed but not immediately destroyed.
 Administrators can recover soft-deleted items in exceptional circumstances.
+
+**System Role** - A system role (e.g. Owner, Contributor, Consumer) that is built into Bailo and determines what actions
+a user or group can perform on a model, such as editing metadata, uploading files, creating releases, or downloading
+artefacts.
 
 **Trivy** - An open-source vulnerability scanner used by Bailo to scan container images for known security
 vulnerabilities (CVEs).
