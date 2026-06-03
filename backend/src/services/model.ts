@@ -614,14 +614,6 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  if (modelDiff.state && model.card) {
-    try {
-      await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
-    } catch (error) {
-      throw BadReq('Model card does not meet requirements to be in the model state.', { state: modelDiff.state, error })
-    }
-  }
-
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
 
   // Re-check the authorisation after model has updated
