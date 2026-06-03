@@ -8,3 +8,11 @@
 export const plural = (value: number, phrase: string) => {
   return `${value} ${phrase}${value === 1 ? '' : phrase.endsWith('s') ? 'es' : 's'}`
 }
+
+export const toTitleCase = (value: string, delimiter: string = ' '): string => {
+  return value
+    .replace(/[-_]/g, ' ')
+    .split(delimiter)
+    .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
+    .join(' ')
+}

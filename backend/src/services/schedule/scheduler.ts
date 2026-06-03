@@ -1,10 +1,21 @@
 import { MongoBackend } from '@agendajs/mongo-backend'
 import { Agenda } from 'agenda'
+import humanInterval from 'human-interval'
 
+import config from '../../utils/config.js'
 import { getConnectionURI } from '../../utils/database.js'
 import log from '../log.js'
+import { notifyLifeCycleReview } from '../smtp/smtp.js'
 
 export type JobRegistrar = (agenda: Agenda) => Promise<void> | void
+
+export type LifecycleReviewJobData = {
+  modelId: string
+  reviewId: string
+  dueIn?: string
+}
+
+const LIFECYCLE_REVIEW_EMAIL_JOB = 'sendLifeCycleReviewEmail'
 
 log.info('Scheduler initialising...')
 const agenda = new Agenda({
@@ -39,6 +50,44 @@ export async function startScheduler(jobRegistrars: JobRegistrar[] = []) {
   await Promise.all(jobRegistrars.map((registerJob) => registerJob(agenda)))
 
   return agenda
+}
+
+export function registerLifecycleReviewJob(agenda: Agenda) {
+  agenda.define<LifecycleReviewJobData>(LIFECYCLE_REVIEW_EMAIL_JOB, async (job) => {
+    const { modelId, reviewId, dueIn } = job.attrs.data
+    await notifyLifeCycleReview(modelId, reviewId, dueIn)
+  })
+}
+
+export async function cancelLifecycleReviewJobs(modelId: string, reviewId: string) {
+  const scheduler = getScheduler()
+  await scheduler.cancel({ name: LIFECYCLE_REVIEW_EMAIL_JOB, data: { modelId, reviewId } })
+}
+
+export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: string, dueDate: Date) {
+  const scheduler = getScheduler()
+  const preReminderIntervals = config.smtp.lifecycle.preReminderIntervals
+    .map(humanInterval)
+    .filter((interval) => interval !== undefined)
+
+  const now = new Date()
+  const dueTimeStamp = new Date(dueDate)
+  for (const dueIn of preReminderIntervals) {
+    dueTimeStamp.setDate(dueTimeStamp.getDate() - dueIn)
+    if (dueTimeStamp > now) {
+      await scheduler.schedule(dueTimeStamp, LIFECYCLE_REVIEW_EMAIL_JOB, { modelId, reviewId, dueIn })
+    }
+  }
+
+  const postReminderInterval = humanInterval(config.smtp.lifecycle.postReminderInterval)
+  if (postReminderInterval) {
+    await scheduler.every(
+      postReminderInterval,
+      LIFECYCLE_REVIEW_EMAIL_JOB,
+      { modelId, reviewId },
+      { startDate: dueTimeStamp },
+    )
+  }
 }
 
 export function getScheduler(): Agenda {
