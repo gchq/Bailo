@@ -116,12 +116,14 @@ Even for public models, downloading artefacts typically requires an approved acc
 
 ## Security Scanning
 
-Bailo automatically scans uploaded files and container images for security issues:
+Depending on configuration, Bailo automatically scans uploaded files and container images for security issues:
 
 - **Files** are scanned by ClamAV (malware detection) and ModelScan (serialisation attack detection)
 - **Container images** are scanned by Trivy (vulnerability detection with CVE reporting)
 
 Scan results are displayed alongside each file and image, with severity ratings.
+
+Your Bailo administrator may change what scanners are enabled and used.
 
 ## Federation
 

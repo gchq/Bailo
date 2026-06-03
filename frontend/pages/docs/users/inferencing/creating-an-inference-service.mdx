@@ -9,7 +9,7 @@ without downloading the model locally. This feature must be enabled by your admi
 >
 > - How do I deploy a model as an inference service?
 > - What processor types are available for inference?
-> - How do I authenticate requests to an inference service?
+> - How are requests to an inference service authenticated?
 
 ## Prerequisites
 
@@ -55,21 +55,24 @@ Once created, the service is provisioned and accessible via an endpoint on the I
 
 - View the service status on the model's **Inferencing** tab
 - Access the service endpoint to make prediction requests
-- Generate a personal access token for authenticating inference requests
+- Use your existing Bailo access to authenticate to the service
 
 ## Authenticating Requests
 
-Use a Personal Access Token (PAT) to authenticate requests to the inference service endpoint.
+Authentication is handled automatically by the platform. Inference services sit behind an authentication proxy in the
+service mesh. When a request is made to an inference service, the proxy checks with Bailo to confirm that the user has
+the required access for the relevant model scope, similar to how container registry authentication works.
 
-To make authenticated requests to an inference service, you'll need a personal access token. See
-[Personal Access Tokens](/docs/users/programmatically-using-bailo/personal-access-tokens) for instructions on creating
-one.
+You do not normally need to create or provide a Personal Access Token (PAT) for inference service requests. Access is
+tied to the permissions you already have in Bailo for the model. If you do not have the required model access, the
+request is denied.
+
+CORS is enabled on inference services so that Bailo can embed an externally hosted service interface in an `iframe`.
 
 ## Related Pages
 
 - [Managing Inference Services](/docs/users/inferencing/managing-inference-services) - Updating and deleting services
 - [Uploading Images](/docs/users/models/uploading-images) - How to push container images
-- [Personal Access Tokens](/docs/users/programmatically-using-bailo/personal-access-tokens) - Authentication for
-  inference
+- [Requesting Access](/docs/users/using-a-model/requesting-access) - How to request access to a model
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
