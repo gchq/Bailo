@@ -71,8 +71,8 @@ export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: s
     .filter((interval) => interval !== undefined)
 
   const now = new Date()
-  const dueTimeStamp = new Date(dueDate)
   for (const dueIn of preReminderIntervals) {
+    const dueTimeStamp = new Date(dueDate)
     dueTimeStamp.setDate(dueTimeStamp.getDate() - dueIn)
     if (dueTimeStamp > now) {
       await scheduler.schedule(dueTimeStamp, LIFECYCLE_REVIEW_EMAIL_JOB, { modelId, reviewId, dueIn })
@@ -85,7 +85,7 @@ export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: s
       postReminderInterval,
       LIFECYCLE_REVIEW_EMAIL_JOB,
       { modelId, reviewId },
-      { startDate: dueTimeStamp },
+      { startDate: new Date(dueDate) },
     )
   }
 }
@@ -94,5 +94,6 @@ export function getScheduler(): Agenda {
   if (!started) {
     throw new Error('Scheduler has not been started')
   }
+  registerLifecycleReviewJob(agenda)
   return agenda
 }
