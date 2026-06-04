@@ -73,10 +73,11 @@ describe('scheduler', () => {
   })
 
   test('startScheduler initialises and starts agenda', async () => {
-    const agenda = await startScheduler()
+    const agenda = await startScheduler([registerLifecycleReviewJob])
     expect(agenda).toBeDefined()
     expect(agenda.start).toHaveBeenCalledOnce()
     expect(getScheduler()).toBe(agenda)
+    expect(agendaMethods.define).toHaveBeenCalledWith(LIFECYCLE_REVIEW_EMAIL_JOB, expect.anything())
   })
 })
 
@@ -84,7 +85,7 @@ const ELEVEN_WEEKS = 6_652_800_000
 
 describe('scheduler > lifecycle jobs', () => {
   beforeAll(async () => {
-    await startScheduler()
+    await startScheduler([registerLifecycleReviewJob])
   })
 
   const dueDate = new Date(Date.now() + ELEVEN_WEEKS)
@@ -137,10 +138,5 @@ describe('scheduler > lifecycle jobs', () => {
 
     expect(agendaMethods.every).not.toHaveBeenCalled()
     expect(logMock.warn).toHaveBeenCalled()
-  })
-
-  test('getScheduler registers the lifecycle review job on every call', () => {
-    getScheduler()
-    expect(agendaMethods.define).toHaveBeenCalledWith(LIFECYCLE_REVIEW_EMAIL_JOB, expect.anything())
   })
 })

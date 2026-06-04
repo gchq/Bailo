@@ -101,6 +101,5 @@ export function getScheduler(): Agenda {
   if (!started) {
     throw new Error('Scheduler has not been started')
   }
-  registerLifecycleReviewJob(agenda)
   return agenda
 }
