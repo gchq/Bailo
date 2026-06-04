@@ -57,7 +57,7 @@ vi.mock('../../src/services/smtp/smtp.js', () => ({
 const configMock = vi.hoisted(() => ({
   smtp: {
     lifecycle: {
-      preReminderIntervals: ['1 hour', '2 weeks', '10 weeks'],
+      preReminderIntervals: ['1 day', '2 weeks', '10 weeks'],
       postReminderInterval: '1 day',
     },
   },

@@ -10,7 +10,7 @@ import { ReviewDoc } from '../../models/Review.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { sanitiseEmail } from '../../utils/smtp.js'
-import { toTitleCase } from '../../utils/string.js'
+import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth } from '../model.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
@@ -188,7 +188,7 @@ export async function notifyLifeCycleReview(modelId: string, reviewId: string, d
       : `A lifecycle review for ${model.name} has past it's due date`,
     [],
     [
-      { name: `See ${toTitleCase(model.kind, '-')}`, url: `${appBaseUrl}/${model.kind}/${modelId}` },
+      { name: `See ${toTitleCase(model.kind, '-')}`, url: `${appBaseUrl}/${resolveKindToUrl(model.kind)}/${modelId}` },
       {
         name: 'Review Lifecycle',
         url: `${appBaseUrl}/${model.kind}/${modelId}/lifecycle/${reviewId}/review?role=owner`,

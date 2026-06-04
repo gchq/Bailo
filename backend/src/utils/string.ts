@@ -1,3 +1,5 @@
+import { EntryKind, EntryKindKeys } from '../models/Model.js'
+
 /**
  * Naive utility to pluralise a word. Only covers +s and +es grammar rules.
  *
@@ -16,3 +18,6 @@ export const toTitleCase = (value: string, delimiter: string = ' '): string => {
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
     .join(' ')
 }
+
+export const resolveKindToUrl = (kind: EntryKindKeys): string =>
+  kind === EntryKind.DataCard ? EntryKind.DataCard : EntryKind.Model
