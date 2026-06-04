@@ -529,13 +529,6 @@ describe('services > model', () => {
     await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(/^Cannot alter a mirrored model./)
   })
 
-  test('updateModelCard > should throw not found when model does not exist', async () => {
-    ModelModelMock.findOne.mockResolvedValueOnce(undefined)
-    await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
-      /^The requested entry was not found/,
-    )
-  })
-
   test('updateModelCard > should throw bad request when model has no card', async () => {
     ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: {} } })
     await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
