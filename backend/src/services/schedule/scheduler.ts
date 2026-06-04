@@ -15,7 +15,7 @@ export type LifecycleReviewJobData = {
   dueIn?: string
 }
 
-const LIFECYCLE_REVIEW_EMAIL_JOB = 'sendLifeCycleReviewEmail'
+export const LIFECYCLE_REVIEW_EMAIL_JOB = 'sendLifeCycleReviewEmail'
 
 log.info('Scheduler initialising...')
 const agenda = new Agenda({
