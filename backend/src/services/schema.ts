@@ -66,10 +66,10 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
 function enforceModelStateFields(schema: object, targetState: string) {
   const validStates = config.ui.modelDetails.states
   if (!validStates.includes(targetState)) {
-    throw BadReq('The value for modelState is not a valid', { validStates, modelState: targetState })
+    throw BadReq('The value for modelState is not a valid model state', { validStates, modelState: targetState })
   }
   const jsonSchema = structuredClone(schema)
-  traverse(jsonSchema, { allKeys: true }, (subschema, pointer, root, parentPointer, parentKeyword, parentSchema) => {
+  traverse(jsonSchema, { allKeys: true }, (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
     if (!subschema || typeof subschema !== 'object') {
       return
     }
