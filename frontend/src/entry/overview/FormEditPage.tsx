@@ -229,7 +229,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction='row' justifyContent='space-between' spacing={1}>
+            <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' spacing={1}>
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}

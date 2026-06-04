@@ -6,6 +6,7 @@ import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getComplianceMetrics } from './metrics/getComplianceMetrics.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
 import { getUsageMetrics } from './metrics/getUsageMetrics.js'
+import { postReview } from './review/postReview.js'
 import { postReviewResponse } from './review/postReviewResponse.js'
 
 const router = Router()
@@ -19,6 +20,7 @@ router.get('/metrics/compliance', ...getComplianceMetrics)
 router.get('/metrics/entryVolume', ...getEntryVolume)
 
 router.post('/review/:reviewId/response', ...postReviewResponse)
+router.post('/review/:modelId', ...postReview)
 
 router.get('/entities/me', ...getCurrentUser)
 

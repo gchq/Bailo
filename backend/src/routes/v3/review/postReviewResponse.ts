@@ -28,7 +28,10 @@ export const postReviewResponseSchema = z.object({
     z.discriminatedUnion('kind', [
       z.object({
         kind: z.literal(ReviewKind.Lifecycle),
-        dueDate: z.coerce.date(),
+        dueDate: z.coerce.date({
+          required_error: 'Please provide a next review due date when submitting this review.',
+        }),
+        decision: z.literal(Decision.Approve),
       }),
       z.object({
         kind: z.enum([ReviewKind.Release, ReviewKind.Access]),

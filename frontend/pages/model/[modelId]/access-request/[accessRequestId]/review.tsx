@@ -28,8 +28,8 @@ export default function AccessRequestReview() {
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
-  const { mutateReviews } = useGetReviewRequestsForModel({
-    modelId,
+  const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
+    modelId: modelId as string,
     accessRequestId: `${accessRequestId}`,
   })
 
@@ -71,13 +71,14 @@ export default function AccessRequestReview() {
     }
   }, [accessRequest])
 
-  if (!accessRequest || !model || isAccessRequestLoading || isModelLoading) {
+  if (!accessRequest || !model || !reviews || isReviewsLoading || isAccessRequestLoading || isModelLoading) {
     return <Loading />
   }
 
   const error = MultipleErrorWrapper(`Unable to load release review page`, {
     isAccessRequestError,
     isModelError,
+    isReviewsError,
   })
   if (error) {
     return error
@@ -106,7 +107,12 @@ export default function AccessRequestReview() {
               </Typography>
               <Button onClick={() => setIsOpenAccessRequestDialogOpen(true)}>View access request</Button>
             </Stack>
-            <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} loading={isReviewButtonLoading} />
+            <ReviewWithComment
+              onSubmit={handleSubmit}
+              reviews={reviews}
+              loading={isReviewButtonLoading}
+              modelId={modelId as string}
+            />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>

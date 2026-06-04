@@ -15,6 +15,7 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({
 }))
 
 const ResponseModelMock = getTypedModelMock('ResponseModel')
+const ReviewModel = getTypedModelMock('ReviewModel')
 
 const reviewV3Mock = vi.hoisted(() => ({
   findReviewById: vi.fn(function () {
@@ -38,6 +39,12 @@ describe('services > v3 > response', () => {
 
   test('respondToReview > successful', async () => {
     reviewV3Mock.findReviewById.mockReturnValue(testReleaseReview as any)
+    ReviewModel.aggregate.mockResolvedValue([
+      {
+        modelId: 'test-1234',
+        role: 'owner',
+      },
+    ])
     await respondToReview(user, '6a058ab4db7a3be341fb3cca', {
       decision: Decision.RequestChanges,
       comment: 'Do better!',
