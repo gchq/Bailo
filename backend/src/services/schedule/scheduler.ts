@@ -72,8 +72,7 @@ export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: s
 
   const now = new Date()
   for (const dueIn of preReminderIntervals) {
-    const dueTimeStamp = new Date(dueDate)
-    dueTimeStamp.setDate(dueTimeStamp.getDate() - dueIn)
+    const dueTimeStamp = new Date(dueDate.getTime() - dueIn)
     if (dueTimeStamp > now) {
       await scheduler.schedule(dueTimeStamp, LIFECYCLE_REVIEW_EMAIL_JOB, { modelId, reviewId, dueIn })
     }
