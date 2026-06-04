@@ -188,7 +188,7 @@ export default function JsonSchemaForm({
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
               {canEdit && (
-                <Typography paddingTop={1}>
+                <Typography sx={{ pt: 1 }}>
                   Required fields for this state are marked with an asterisk
                   <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
