@@ -8,7 +8,7 @@ custom widgets that have been created specifically for Bailo.
 
 ## Example / minimal schemas
 
-Bailo includes both an example schema for uploads and for deployments. You can find them in
+Bailo includes both an example schema for models and for access requests. You can find them in
 `backend/src/scripts/example_schemas`. It is important to note that these schemas contain all of mandatory fields that
 the application needs in order to run. These fields are hard-coded in various places in the source code.
 
@@ -120,6 +120,27 @@ model card, then add the following property:
 ```
 
 Note: This will only hide it from the model page, the data will still persist in the version metadata.
+
+#### Required fields for model states
+
+Bailo supports conditional required fields based on the state that has been set on a model. This can be used by adding
+the property `requiredByModelStates` to the schema and specifying the list of model states that require that question.
+For example:
+
+```json
+"modelSummary": {
+  "title": "What does the model do?",
+  "description": "A description of what the model does.",
+  "type": "string",
+  "minLength": 1,
+  "maxLength": 5000,
+  "requiredByModelStates": ["Development"]
+}
+```
+
+When a schema is retrieved by a user they can specify a model state as well as the schema ID and the backend will
+automatically set the necessary
+[required properties](https://json-schema.org/understanding-json-schema/reference/object#required).
 
 ### Dependencies
 
