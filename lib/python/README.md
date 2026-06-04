@@ -132,7 +132,7 @@ To run the mlflow integration tests (requires Bailo running on `https://localhos
 
 ```bash
 docker run -p 5050:5000 \
-    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow | awk '/Version:/ {print $2}')" \
+    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow-skinny | awk '/Version:/ {print $2}')" \
     mlflow server --host 0.0.0.0 --port 5000
 
 pytest -m mlflow
