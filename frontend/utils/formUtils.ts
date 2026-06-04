@@ -377,13 +377,6 @@ export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?:
   }
 }
 
-// export function getUniqueStatuses(steps: StepNoRender[]) : string[] {
-//   let states : string[] = []
-//   steps.forEach((step) => {
-//     step.schema
-//   })
-// }
-
 /**
  * Recursively iterate over an object to set all non array/object properties to undefined. This means that we retain the structure of the JSON with empty fields.
  *
