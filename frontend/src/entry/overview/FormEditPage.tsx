@@ -63,7 +63,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations(
     entry.card.schemaId,
   )
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId, 'Development')
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId, entry.state)
   const sendNotification = useNotification()
   const { mutateEntryCardRevisions } = useGetEntryCardRevisions(entry.id)
 
