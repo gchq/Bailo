@@ -183,11 +183,16 @@ export async function notifyLifeCycleReview(modelId: string, reviewId: string, d
 
   const model = await getModelByIdNoAuth(modelId)
   const emailContent = buildEmail(
-    dueIn ? `A lifecycle review is due in ${dueIn}` : `A lifecycle review has past it's due date`,
+    dueIn
+      ? `A lifecycle review for ${model.name} is due in ${dueIn}`
+      : `A lifecycle review for ${model.name} has past it's due date`,
     [],
     [
       { name: `See ${toTitleCase(model.kind, '-')}`, url: `${appBaseUrl}/${model.kind}/${modelId}` },
-      { name: 'Review Lifecycle', url: `${appBaseUrl}/${modelId}/lifecycle/${reviewId}/review?role=owner` },
+      {
+        name: 'Review Lifecycle',
+        url: `${appBaseUrl}/${model.kind}/${modelId}/lifecycle/${reviewId}/review?role=owner`,
+      },
     ],
   )
 

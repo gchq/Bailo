@@ -67,24 +67,32 @@ export async function cancelLifecycleReviewJobs(modelId: string, reviewId: strin
 export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: string, dueDate: Date) {
   const scheduler = getScheduler()
   const preReminderIntervals = config.smtp.lifecycle.preReminderIntervals
-    .map(humanInterval)
-    .filter((interval) => interval !== undefined)
 
   const now = new Date()
   for (const dueIn of preReminderIntervals) {
-    const dueTimeStamp = new Date(dueDate.getTime() - dueIn)
+    const interval = humanInterval(dueIn)
+    if (!interval) {
+      log.warn({ dueIn }, 'The time interval provided could not be converted to a numerical value.')
+      continue
+    }
+    const dueTimeStamp = new Date(dueDate.getTime() - interval)
     if (dueTimeStamp > now) {
       await scheduler.schedule(dueTimeStamp, LIFECYCLE_REVIEW_EMAIL_JOB, { modelId, reviewId, dueIn })
     }
   }
 
-  const postReminderInterval = humanInterval(config.smtp.lifecycle.postReminderInterval)
-  if (postReminderInterval) {
+  const interval = humanInterval(config.smtp.lifecycle.postReminderInterval)
+  if (interval) {
     await scheduler.every(
-      postReminderInterval,
+      config.smtp.lifecycle.postReminderInterval,
       LIFECYCLE_REVIEW_EMAIL_JOB,
       { modelId, reviewId },
       { startDate: new Date(dueDate) },
+    )
+  } else {
+    log.warn(
+      { reminderInterval: config.smtp.lifecycle.postReminderInterval },
+      'The time interval provided could not be converted to a numerical value.',
     )
   }
 }
