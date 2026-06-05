@@ -99,10 +99,8 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
       kind: ReviewKind.Release,
       role: roleInfo.role,
     })
-    roleInfo.entities.forEach((entity) =>
-      requestReviewForRelease(entity, review, release).catch((error) =>
-        log.warn({ error }, 'Error when sending notifications requesting review for release.'),
-      ),
+    requestReviewForRelease(roleInfo.entities, review, release).catch((error) =>
+      log.warn({ error, roleInfo }, 'Error when sending notifications requesting review for release.'),
     )
     return review.save()
   })
@@ -131,10 +129,8 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
       kind: ReviewKind.Access,
       role: roleInfo.role,
     })
-    roleInfo.entities.forEach((entity) =>
-      requestReviewForAccessRequest(entity, review, accessRequest).catch((error) =>
-        log.warn({ error }, 'Error when sending notifications requesting review for Access Request.'),
-      ),
+    requestReviewForAccessRequest(roleInfo.entities, review, accessRequest).catch((error) =>
+      log.warn({ error, roleInfo }, 'Error when sending notifications requesting review for Access Request.'),
     )
     return review.save()
   })
