@@ -3,11 +3,11 @@ import Dialog from '@mui/material/Dialog'
 import { DatePicker } from '@mui/x-date-pickers'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { postReview } from 'actions/review'
-import dayjs from 'dayjs'
 import { useCallback, useState } from 'react'
 import { Transition } from 'src/common/Transition'
 import useNotification from 'src/hooks/useNotification'
 import { ReviewKind } from 'types/types'
+import { increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EntryRolesDialogProps = {
@@ -45,7 +45,7 @@ export default function ReviewDateDialog({ open, onClose, entryId }: EntryRolesD
           onChange={(newValue) => {
             setReviewDate(newValue)
           }}
-          minDate={dayjs(new Date())}
+          minDate={increaseCurrentDateInDays(1)}
         />
       </DialogContent>
       <DialogActions>

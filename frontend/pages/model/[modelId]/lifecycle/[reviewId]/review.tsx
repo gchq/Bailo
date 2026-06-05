@@ -1,6 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
 import { Button, Container, Dialog, DialogContent, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntry } from 'actions/entry'
+import { useGetResponses } from 'actions/response'
 import { postGenericReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -10,11 +11,13 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
+import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, DecisionKeys, ReviewKind, SplitSchemaNoRender } from 'types/types'
+import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
 
@@ -34,6 +37,7 @@ export default function LifecycleReview() {
     reviewId: `${reviewId}`,
   })
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.card.schemaId || '')
+  const { responses, isResponsesLoading, isResponsesError } = useGetResponses([reviewId as string])
 
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
     setSplitSchema(newSplitSchema)
@@ -91,6 +95,7 @@ export default function LifecycleReview() {
     isUiConfigError,
     isReviewsError,
     isSchemaError,
+    isResponsesError,
   })
   if (error) {
     return error
@@ -101,10 +106,12 @@ export default function LifecycleReview() {
     !model ||
     !uiConfig ||
     !schema ||
+    !responses ||
     isReviewsLoading ||
     isModelLoading ||
     isUiConfigLoading ||
-    isSchemaLoading
+    isSchemaLoading ||
+    isResponsesLoading
   ) {
     return <Loading />
   }
@@ -130,15 +137,30 @@ export default function LifecycleReview() {
               </Typography>
               <Button onClick={() => setIsModelCardDialogOpen(true)}>View full model card</Button>
             </Stack>
-            <ReviewWithComment
-              onSubmit={handleSubmit}
-              reviews={reviews}
-              loading={isReviewButtonLoading}
-              modelId={modelId as string}
-              includeDueDate
-              hideRequestChangesButton
-            />
-            <MessageAlert message={errorMessage} severity='error' />
+            {responses.length === 0 && (
+              <>
+                <ReviewWithComment
+                  onSubmit={handleSubmit}
+                  reviews={reviews}
+                  loading={isReviewButtonLoading}
+                  modelId={modelId as string}
+                  includeDueDate
+                  hideRequestChangesButton
+                />
+                <MessageAlert message={errorMessage} severity='error' />
+              </>
+            )}
+            {responses.length > 0 && (
+              <>
+                <Stack direction='row' spacing={1}>
+                  <Typography>This lifecycle review has already been approved by</Typography>
+                  <UserDisplay dn={responses[0].entity} />
+                </Stack>
+                <Typography variant='caption'>
+                  Reviewed at: {formatDateStringAsDayMonthAndYear(responses[0].createdAt)}
+                </Typography>
+              </>
+            )}
           </Stack>
           <Dialog open={isModelCardDialogOpen} onClose={() => setIsModelCardDialogOpen(false)} maxWidth='md' fullWidth>
             <DialogContent sx={{ p: 4 }}>
