@@ -47,6 +47,11 @@ vi.mock('../../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
+const reviewMock = vi.hoisted(() => ({
+  getRoleEntities: vi.fn(() => [{ role: 'owner', entities: ['user:user'] }]),
+}))
+vi.mock('../../../src/services/review.js', async () => reviewMock)
+
 const transporterMock = vi.hoisted(() => {
   return {
     sendMail: vi.fn(function () {
