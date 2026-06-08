@@ -7,7 +7,7 @@ import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { Dayjs } from 'dayjs'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
@@ -90,6 +90,20 @@ export default function LifecycleReview() {
     }
   }
 
+  const responseList = useMemo(() => {
+    return responses.map((response) => (
+      <Stack key={response._id} spacing={1}>
+        <Stack direction='row' spacing={1}>
+          <UserDisplay dn={responses[0].entity} showIcon />
+          <Typography variant='caption'>
+            Reviewed at: {formatDateStringAsDayMonthAndYear(response.createdAt)}
+          </Typography>
+        </Stack>
+        <Typography>{response.comment}</Typography>
+      </Stack>
+    ))
+  }, [responses])
+
   const error = MultipleErrorWrapper('Unable to load release review page', {
     isModelError,
     isUiConfigError,
@@ -137,7 +151,7 @@ export default function LifecycleReview() {
               </Typography>
               <Button onClick={() => setIsModelCardDialogOpen(true)}>View full model card</Button>
             </Stack>
-            {responses.length === 0 && (
+            {responses.length === 0 ? (
               <>
                 <ReviewWithComment
                   onSubmit={handleSubmit}
@@ -149,16 +163,10 @@ export default function LifecycleReview() {
                 />
                 <MessageAlert message={errorMessage} severity='error' />
               </>
-            )}
-            {responses.length > 0 && (
+            ) : (
               <>
-                <Stack direction='row' spacing={1}>
-                  <Typography>This lifecycle review has already been approved by</Typography>
-                  <UserDisplay dn={responses[0].entity} />
-                </Stack>
-                <Typography variant='caption'>
-                  Reviewed at: {formatDateStringAsDayMonthAndYear(responses[0].createdAt)}
-                </Typography>
+                <Typography>This lifecycle review has already been approved.</Typography>
+                {responseList}
               </>
             )}
           </Stack>

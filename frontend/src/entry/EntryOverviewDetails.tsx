@@ -2,7 +2,6 @@ import { Info, LocalOffer } from '@mui/icons-material'
 import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchEntry, useGetEntry } from 'actions/entry'
-import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -11,6 +10,7 @@ import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewDateDialog from 'src/entry/overview/ReviewDateDialog'
@@ -49,9 +49,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     kind: ReviewKind.LIFECYCLE,
     open: false,
   })
-  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(
-    archivedReviews[0] ? [archivedReviews[0]._id] : [],
-  )
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const { userPermissions } = useContext(UserPermissionsContext)
@@ -86,7 +83,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     mutateArchivedREviews()
   }
 
-  if (isUiConfigLoading || isSchemaLoading || isReviewsLoading || isArchivedReviewsLoading || isResponsesLoading) {
+  if (isUiConfigLoading || isSchemaLoading || isReviewsLoading || isArchivedReviewsLoading) {
     return <Loading />
   }
 
@@ -104,10 +101,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   if (isArchivedReviewsError) {
     return <ErrorWrapper message={isArchivedReviewsError.info.message} />
-  }
-
-  if (isResponsesError) {
-    return <ErrorWrapper message={isResponsesError.info.message} />
   }
 
   return (
@@ -200,20 +193,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                 </Button>
               )}
             </Stack>
-            {archivedReviews.length > 0 && (
-              <>
-                <Typography fontWeight='bold' color='primary'>
-                  Last reviewed:
-                </Typography>
-                <Typography>
-                  {responses[0] ? formatDateStringAsDayMonthAndYear(responses[0].createdAt.toString()) : 'Invalid date'}
-                </Typography>
-                <Typography fontWeight='bold' color='primary'>
-                  Last reviewed by:
-                </Typography>
-                {responses[0] ? <UserDisplay dn={responses[0].entity} /> : <Typography>Invalid user</Typography>}
-              </>
-            )}
+            {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
           </Stack>
         )}
         <Box>

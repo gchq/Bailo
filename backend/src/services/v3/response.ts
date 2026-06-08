@@ -1,3 +1,5 @@
+import { Schema } from 'mongoose'
+
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
@@ -5,7 +7,7 @@ import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
-import { BadReq } from '../../utils/error.js'
+import { BadReq, NotFound } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
@@ -55,4 +57,16 @@ export async function respondToReview(
     await createLifecycleReview(user, review.modelId, dueDate)
   }
   return reviewResponse
+}
+
+export async function getLatestResponseForReview(reviewId: string) {
+  const response = await ResponseModel.find({ parentId: reviewId as unknown as Schema.Types.ObjectId })
+    .sort({ createdAt: -1 })
+    .limit(1)
+
+  if (response.length === 0) {
+    throw NotFound(`The requested response was not found.`, { reviewId })
+  }
+
+  return response[0]
 }
