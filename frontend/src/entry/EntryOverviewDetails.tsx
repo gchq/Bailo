@@ -169,6 +169,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                 Set review date
               </Button>
             )}
+            {!updateReviewDatePermission.hasPermission && reviews.length === 0 && <em>Unset</em>}
             <Stack
               direction='row'
               spacing={2}
