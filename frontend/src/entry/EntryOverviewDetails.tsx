@@ -164,7 +164,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             <Typography fontWeight='bold' color='primary'>
               Next review due:
             </Typography>
-            {updateReviewDatePermission && reviews.length === 0 && (
+            {updateReviewDatePermission.hasPermission && reviews.length === 0 && (
               <Button size='small' onClick={() => setIsReviewDateInputOpen(true)} variant='outlined'>
                 Set review date
               </Button>
@@ -175,14 +175,14 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
             >
-              {(!updateReviewDatePermission || reviews.length > 0) && (
+              {!updateReviewDatePermission.hasPermission && reviews.length > 0 && (
                 <Typography>
                   {reviews[0].dueDate
                     ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
                     : 'Invalid date'}
                 </Typography>
               )}
-              {updateReviewDatePermission && reviews[0] && (
+              {updateReviewDatePermission.hasPermission && reviews[0] && (
                 <Button
                   variant='outlined'
                   size='small'
