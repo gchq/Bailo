@@ -22,6 +22,7 @@ exports[`services > review > createReview > create lifecycle review 1`] = `
   "group": [MockFunction],
   "id": "mock-id",
   "kind": "lifecycle",
+  "limit": [MockFunction],
   "lookup": [MockFunction],
   "markModified": [MockFunction],
   "match": [MockFunction],
