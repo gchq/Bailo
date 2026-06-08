@@ -16,7 +16,7 @@ non-technical overview.
 > - How do I add conditional fields to a schema?
 > - How do I test a schema?
 
-## Before You Start
+## Before you start
 
 Bailo includes example schemas in `backend/src/scripts/example_schemas`. These contain all mandatory fields the
 application needs to run. Use them as a starting point for your own schemas.
@@ -24,7 +24,7 @@ application needs to run. Use them as a starting point for your own schemas.
 > **Important**: Some fields are required by the application and are referenced in the source code. Always start from an
 > example schema rather than building from scratch.
 
-## Schema Structure
+## Schema structure
 
 A schema is a JSON object with a `properties` field containing pages, sections, and questions.
 
@@ -90,11 +90,11 @@ Within each page, you can create sub-sections using nested objects:
 }
 ```
 
-## Question Types
+## Question types
 
 Schemas support several question types including text, dates, booleans, and dropdowns.
 
-### Simple Text Questions
+### Simple text questions
 
 ```json
 "firstName": {
@@ -122,7 +122,7 @@ If you omit the `title` property, the library uses the property name (e.g. `firs
 }
 ```
 
-### Boolean Questions
+### Boolean questions
 
 ```json
 "isPublic": {
@@ -131,7 +131,7 @@ If you omit the `title` property, the library uses the property name (e.g. `firs
 }
 ```
 
-### Dropdown Selections
+### Dropdown selections
 
 ```json
 "category": {
@@ -141,7 +141,7 @@ If you omit the `title` property, the library uses the property name (e.g. `firs
 }
 ```
 
-## Hiding Sections from the Model Card
+## Hiding sections from the model card
 
 By default, all sections are displayed on the model card page. To hide a section from the model card view while still
 collecting the data in the form:
@@ -217,7 +217,7 @@ To avoid validation errors, Bailo schemas handle dependencies differently from t
 }
 ```
 
-### Why This Pattern?
+### Why this pattern?
 
 The standard RJSF dependency approach can cause validation errors when users change their answers. The issue is:
 
@@ -230,7 +230,7 @@ Our approach sets additional questions to **read-only** instead of hiding them e
 they change their mind, while avoiding schema validation failures. The trade-off is that some unused data may persist,
 but it can be cleared by the user if needed.
 
-## Testing Your Schema
+## Testing your schema
 
 Always test a schema by uploading it, creating a test model, and working through every form page.
 
@@ -246,7 +246,7 @@ Before deploying a schema to production:
    - Section titles and descriptions are clear
 5. Check the model card view to confirm the right sections are displayed
 
-## Complete Example
+## Complete example
 
 A minimal but complete schema with two pages, required fields, and basic structure:
 
@@ -295,7 +295,7 @@ A minimal but complete schema with two pages, required fields, and basic structu
 }
 ```
 
-## Related Pages
+## Related pages
 
 - [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - Non-technical overview
 - [Uploading a Schema](/docs/administration/schemas/upload-a-schema) - How to upload your schema to Bailo

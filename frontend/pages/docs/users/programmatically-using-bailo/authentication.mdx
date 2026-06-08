@@ -17,7 +17,7 @@ personal access tokens. Choose the method that suits your environment.
 > - How do I use the Python client with authentication?
 > - How do I use curl to call the Bailo API?
 
-## Which Method Should I Use?
+## Which method should I use?
 
 Choose between PKI certificate authentication and token-based authentication depending on your environment.
 
@@ -39,7 +39,7 @@ You will need:
 - A **private key** (`.pem` file)
 - A **certificate authority (CA) file** (`.pem` file)
 
-### Using PKI with the Python Client
+### Using PKI with the Python client
 
 ```python
 from bailo import PkiAgent, Client
@@ -69,7 +69,7 @@ Token-based authentication uses Personal Access Tokens (PATs) for fine-grained, 
 If you are not using PKI, Bailo allows the use of PATs for fine-grained access. Tokens grant access to specific models
 and specific actions.
 
-### Creating a Token
+### Creating a token
 
 1. Navigate to **User (top right) > Settings > Authentication**
 2. Click **Add token**
@@ -94,7 +94,7 @@ an 'Add token' button.
 
 The screenshot above shows the token creation confirmation dialog displaying the access key and secret key.
 
-### Using Tokens with the Python Client
+### Using tokens with the Python client
 
 ```python
 from bailo import TokenAgent, Client
@@ -107,7 +107,7 @@ agent = TokenAgent(
 client = Client("https://your-bailo-instance.com", agent=agent)
 ```
 
-### Using Tokens with curl
+### Using tokens with curl
 
 Tokens use HTTP Basic Authentication with the access key as the username and secret key as the password:
 
@@ -116,7 +116,7 @@ curl -u "your-access-key:your-secret-key" \
      https://your-bailo-instance.com/api/v2/models/search
 ```
 
-## Security Best Practices
+## Security best practices
 
 Follow these practices to keep your API credentials secure.
 
@@ -126,7 +126,7 @@ Follow these practices to keep your API credentials secure.
 - **Rotate tokens regularly** - delete old tokens and create new ones periodically
 - **Store secret keys securely** - they cannot be retrieved after creation
 
-## Base Agent
+## Base agent
 
 The full Python docs for the `Agent` class and subsequent child-classes is available
 [here](../../python/bailo.core.html#bailo.core.agent.Agent). It is possible to pass `kwargs` to the base `Agent` class
@@ -141,7 +141,7 @@ Common authentication errors and their solutions.
 - **Certificate errors** - Verify your certificate paths and that the CA certificate matches your Bailo instance
 - **Connection refused** - Check the Bailo URL is correct and the instance is running
 
-## Related Pages
+## Related pages
 
 - [Personal Access Tokens](/docs/users/programmatically-using-bailo/personal-access-tokens) - Detailed token management
 - [Python Client](/docs/users/programmatically-using-bailo/python-client) - Using the Python client library

@@ -14,7 +14,7 @@ Only administrators will have the following options available to them.
 > - What is a schema migration plan?
 > - What is the difference between draft and final migrations?
 
-## When to Use Schema Migrations
+## When to use schema migrations
 
 Use migrations when you've updated a schema and need to transform existing model card data to match.
 
@@ -24,7 +24,7 @@ Common scenarios:
 - You're reorganising the section structure of a schema
 - You're retiring an old schema and moving models to a newer version
 
-## How Migrations Work
+## How migrations work
 
 A migration plan maps each question from a source schema to either a new location in the target schema or marks it for
 deletion. For each question in the source, you specify one of two actions:
@@ -45,7 +45,7 @@ Compare two schemas side by side to identify differences before planning a migra
    - **Source Schema**: The schema you are migrating from
    - **Target Schema**: The schema you are migrating to
 
-## Creating a Migration Plan
+## Creating a migration plan
 
 Create a migration plan from the Schemas navigation item by mapping source questions to target locations.
 
@@ -65,14 +65,14 @@ Create a migration plan from the Schemas navigation item by mapping source quest
 8. Once all questions have been mapped, verify the intended actions under **View Actions**.
 9. Save as **Draft** (for testing) or **Final** (ready to use)
 
-### Draft vs Final
+### Draft vs final
 
 - **Draft** migrations can be edited and tested but cannot be applied to models
 - **Final** migrations are locked and can be applied to models
 
 It is recommended to save as a draft first, verify the mappings are correct, and then mark as final when ready.
 
-## Applying a Migration
+## Applying a migration
 
 Once finalised, a migration plan can be applied to individual models that use the source schema:
 
@@ -84,7 +84,7 @@ Once finalised, a migration plan can be applied to individual models that use th
 > **Note**: Applying a migration creates a new model card version. The previous version is preserved in the model's
 > history, so you can always see what the data looked like before the migration.
 
-## Best Practices
+## Best practices
 
 Test migrations as drafts, migrate incrementally, and communicate changes to model owners.
 
@@ -94,7 +94,7 @@ Test migrations as drafts, migrate incrementally, and communicate changes to mod
   fields that don't have mappings from the old schema
 - **Check after migration**: Verify that the migrated data appears correctly in the model card form
 
-## Viewing Existing Migrations
+## Viewing existing migrations
 
 View all migration plans and their status from the Schemas navigation item:
 
@@ -102,7 +102,7 @@ View all migration plans and their status from the Schemas navigation item:
 2. Select **Migrations**
 3. The list shows all migrations with their name, source schema, target schema, and draft/final status
 
-## Related Pages
+## Related pages
 
 - [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - What schemas are and how they work
 - [Creating a Schema](/docs/administration/schemas/create-a-schema) - How to author a new schema

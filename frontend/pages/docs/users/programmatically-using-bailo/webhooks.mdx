@@ -13,7 +13,7 @@ Bailo provides webhooks for programmatic, event-driven interactions with individ
 a model, Bailo sends an HTTP POST request to a URL you specify, allowing you to integrate with external applications and
 workflows.
 
-## Setting Up a Webhook
+## Setting up a webhook
 
 Create webhooks through the API by sending a POST request with the webhook configuration:
 
@@ -31,7 +31,7 @@ curl -X POST https://your-bailo-instance.com/api/v2/model/{modelId}/webhooks \
   }'
 ```
 
-### Webhook Configuration Options
+### Webhook configuration options
 
 - **name** - A descriptive name for the webhook. Required.
 - **uri** - The URI (Uniform Resource Identifier) that will receive the POST requests. Required.
@@ -49,7 +49,7 @@ A Bailo model's webhook can be triggered by the following events:
 - **createReviewResponse** - Fires when a reviewer submits a response (approval or change request)
 - **createAccessRequest** - Fires when a user submits an access request for the model
 
-## Request Format
+## Request format
 
 When triggered, Bailo sends a POST request to the webhook's URI (Uniform Resource Identifier) with event-specific data.
 
@@ -123,18 +123,18 @@ The body of the webhook's request varies depending on the type of event.
 }
 ```
 
-## Managing Webhooks
+## Managing webhooks
 
 List, update, and delete webhooks using the API.
 
-### Listing Webhooks
+### Listing webhooks
 
 ```bash
 curl https://your-bailo-instance.com/api/v2/model/{modelId}/webhooks \
   -u "your-access-key:your-secret-key"
 ```
 
-### Updating a Webhook
+### Updating a webhook
 
 ```bash
 curl -X PUT https://your-bailo-instance.com/api/v2/model/{modelId}/webhook/{webhookId} \
@@ -148,14 +148,14 @@ curl -X PUT https://your-bailo-instance.com/api/v2/model/{modelId}/webhook/{webh
   }'
 ```
 
-### Deleting a Webhook
+### Deleting a webhook
 
 ```bash
 curl -X DELETE https://your-bailo-instance.com/api/v2/model/{modelId}/webhook/{webhookId} \
   -u "your-access-key:your-secret-key"
 ```
 
-## Security Considerations
+## Security considerations
 
 Follow these practices to secure your webhook endpoints.
 
@@ -164,7 +164,7 @@ Follow these practices to secure your webhook endpoints.
 - **Use HTTPS** for your webhook URI to prevent eavesdropping on the request payloads
 - **Avoid `insecureSSL: true`** in production - only use it for testing with self-signed certificates
 
-## Related Pages
+## Related pages
 
 - [Authentication](/docs/users/programmatically-using-bailo/authentication) - Setting up API authentication
 - [Swagger API](/api/docs/) - All available API endpoints

@@ -10,7 +10,7 @@ Once an inference service has been created, you can view its details, update its
 > - How do I update an inference service?
 > - Can I change the container image on an inference service?
 
-## Viewing Inference Services
+## Viewing inference services
 
 View all active inference services for a model from the Inferencing tab:
 
@@ -18,7 +18,7 @@ View all active inference services for a model from the Inferencing tab:
 2. Navigate to the **Inferencing** tab - this is where all services are managed
 3. All active inference services are listed with their image, description, and status
 
-## Updating a Service
+## Updating a service
 
 Update an inference service's configuration from the service's settings panel:
 
@@ -35,7 +35,7 @@ Update an inference service's configuration from the service's settings panel:
 > **Note**: You cannot change the container image of an existing inference service. To use a different image, delete the
 > current service and create a new one.
 
-## Deleting a Service
+## Deleting a service
 
 Deleting an inference service can only be done via the API:
 
@@ -45,11 +45,11 @@ DELETE /api/v2/model/{modelId}/inference/{image}/{tag}
 
 Deleting a service stops it and removes the deployment. This action cannot be undone.
 
-## Programmatic Access
+## Programmatic access
 
 Inference services can also be managed [via the API](/api/docs//#/inference).
 
-## Related Pages
+## Related pages
 
 - [Creating an Inference Service](/docs/users/inferencing/creating-an-inference-service) - Setting up a new service
 - [OpenAPI Reference](/docs/users/programmatically-using-bailo/open-api) - Full API documentation

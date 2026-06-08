@@ -11,7 +11,7 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 Review roles and schemas work together to define your governance process. When you attach review roles to a schema,
 every model that uses that schema will require those roles to approve releases and access requests.
 
-## How the Connection Works
+## How the connection works
 
 Review roles are attached to schemas, and models inherit role requirements when they select a schema.
 
@@ -25,7 +25,7 @@ Review Role ──attached to──> Schema ──selected by──> Model
 3. When a model owner selects that schema, the model inherits the review role requirements
 4. The model owner then assigns specific people to each review role on their model
 
-## Attaching Roles During Schema Creation
+## Attaching roles during schema creation
 
 Select review roles during schema creation from the Default Review Roles section:
 
@@ -35,7 +35,7 @@ Select review roles during schema creation from the Default Review Roles section
 4. In the **Default Review Roles** section, select which roles this schema requires
 5. Upload the schema
 
-## Attaching Roles to an Existing Schema
+## Attaching roles to an existing schema
 
 Modify review role requirements on existing schemas from the schema's Actions menu:
 
@@ -45,7 +45,7 @@ Modify review role requirements on existing schemas from the schema's Actions me
 4. Make your selection
 5. **Save** your changes
 
-## What Happens When You Change Role Assignments
+## What happens when you change role assignments
 
 Changes to role assignments on a schema affect both existing and new models using that schema:
 
@@ -53,7 +53,7 @@ Changes to role assignments on a schema affect both existing and new models usin
 - **New models** created with the schema will inherit the current role requirements
 - Model owners may need to assign people to any newly added roles
 
-## Best Practices
+## Best practices
 
 Plan role assignments before creating schemas and use consistent roles across related schemas.
 
@@ -64,7 +64,7 @@ Plan role assignments before creating schemas and use consistent roles across re
 - **Document role expectations** - Use the review role description field to clearly explain what each reviewer should
   check
 
-## Example Configuration
+## Example configuration
 
 A typical governance setup:
 
@@ -79,7 +79,7 @@ This means:
 - Every release requires both technical and governance approval
 - Access requests only need governance approval
 
-## Related Pages
+## Related pages
 
 - [Managing Review Roles](/docs/administration/review-roles/managing-review-roles) - Creating and editing roles
 - [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - How schemas work

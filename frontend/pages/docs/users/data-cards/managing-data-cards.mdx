@@ -12,7 +12,7 @@ to models.
 > - Can I change the schema on a data card?
 > - How do I link a data card to a model?
 
-## Editing a Data Card
+## Editing a data card
 
 Edit a data card by navigating to it and using the Edit data card button:
 
@@ -21,7 +21,7 @@ Edit a data card by navigating to it and using the Edit data card button:
 3. Click **Edit data card** and edit any section of the data card form
 4. Click **Save** to create a new version
 
-## Viewing Version History
+## Viewing version history
 
 Every edit creates a new version, and you can view the full history to track changes over time:
 
@@ -31,7 +31,7 @@ Every edit creates a new version, and you can view the full history to track cha
 
 This is useful for tracking how documentation has evolved and understanding what changed between versions.
 
-## Managing Collaborators
+## Managing collaborators
 
 Add users or groups as collaborators with specific roles to control access to the data card:
 
@@ -42,7 +42,7 @@ Add users or groups as collaborators with specific roles to control access to th
    - **Contributor**: Can edit the data card content
    - **Consumer**: Can view the data card
 
-## Changing the Schema
+## Changing the schema
 
 Schema changes are managed through administrator-created migration plans rather than direct switching.
 
@@ -51,12 +51,12 @@ published by the Bailo administrators (for example, if your organisation has upd
 See [Schema Migrations](/docs/administration/schemas/schema-migrations) for further details. Note that changing schemas
 may require you to re-enter some information if the new schema has different fields.
 
-## Linking Data Cards to Models
+## Linking data cards to models
 
 Data cards and models can reference each other to maintain traceability between datasets and the models trained on them.
 When filling in a model card, look for fields that allow you to reference related data cards.
 
-## Using the Python Client
+## Using the Python client
 
 Use the Bailo Python client to retrieve and update data cards programmatically:
 
@@ -75,7 +75,7 @@ data_card.update_data_card(metadata={"overview": {"tags": ["updated"]}})
 card = data_card.data_card
 ```
 
-## Related Pages
+## Related pages
 
 - [Creating a Data Card](/docs/users/data-cards/creating-a-data-card) - How to create a new data card
 - [Roles & Permissions](/docs/reference/roles-and-permissions) - What each role allows

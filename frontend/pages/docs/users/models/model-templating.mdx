@@ -12,7 +12,7 @@ card format.
 > - How do I enable templating on my model?
 > - Can I copy a model card from an existing model?
 
-## How Templating Works
+## How templating works
 
 Templating copies the model card structure and content from an existing model to a new model:
 
@@ -29,7 +29,7 @@ Both the template model and the destination model must meet certain requirements
 - The template model must have **Allow templating** enabled in its settings
 - You must have already created the new model (templating is applied to an existing model)
 
-## Using a Template
+## Using a template
 
 Apply a template when setting up the model card for a newly created model:
 
@@ -40,7 +40,7 @@ Apply a template when setting up the model card for a newly created model:
 5. The model card content from the template is copied to your model
 6. Edit the content to reflect your specific model's details
 
-## Enabling Templating on a Model
+## Enabling templating on a model
 
 Model owners can allow their model to be used as a template by other users:
 
@@ -51,7 +51,7 @@ Model owners can allow their model to be used as a template by other users:
 
 Once enabled, your model will appear in the template selection dropdown for other users.
 
-## Programmatic Access
+## Programmatic access
 
 You can also create a model from a template using the API or the Python client:
 
@@ -67,7 +67,7 @@ POST /api/v2/model/{modelId}/setup/from-template
 model.card_from_template(template_id="source-model-id")
 ```
 
-## Related Pages
+## Related pages
 
 - [Creating a Model](/docs/users/models/creating-a-model) - Standard model creation
 - [Python Client](/docs/users/programmatically-using-bailo/python-client) - Programmatic workflows

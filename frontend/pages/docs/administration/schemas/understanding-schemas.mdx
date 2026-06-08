@@ -15,7 +15,7 @@ access request forms, ensuring that every model in your organisation is document
 This page explains what schemas are and how they work. For step-by-step instructions on creating a schema, see
 [Creating a Schema](/docs/administration/schemas/create-a-schema).
 
-## What is a Schema?
+## What is a schema?
 
 A schema is a template that defines the questions, structure, and validation rules for model card and access request
 forms:
@@ -28,7 +28,7 @@ forms:
 When a user creates a model or submits an access request, they select a schema. That schema then generates the form they
 fill in.
 
-## Schema Types
+## Schema types
 
 Bailo supports three types of schema, each serving a different purpose:
 
@@ -39,7 +39,7 @@ Bailo supports three types of schema, each serving a different purpose:
 - **Access Request** - Defines the form users fill in when requesting access to a model: who is requesting, why, what
   permissions they need, etc.
 
-## How Schemas Relate to Other Concepts
+## How schemas relate to other concepts
 
 Schemas connect to models, review roles, and forms in a structured relationship.
 
@@ -55,7 +55,7 @@ Data Card ──selects──> Schema (at setup time)
 When an administrator attaches review roles to a schema, every model that uses that schema will require those roles to
 be assigned and to approve releases and access requests.
 
-## Active vs Inactive Schemas
+## Active vs inactive schemas
 
 Schemas can be toggled between active and inactive states without breaking existing models:
 
@@ -64,7 +64,7 @@ Schemas can be toggled between active and inactive states without breaking exist
 
 This allows you to retire old schemas without breaking existing models.
 
-## Why Schemas Matter
+## Why schemas matter
 
 Without schemas, every model would be documented differently, making it difficult to:
 
@@ -76,7 +76,7 @@ Without schemas, every model would be documented differently, making it difficul
 Schemas give administrators control over what information is captured, while giving model owners a clear and structured
 form to fill in.
 
-## Schema Versioning and Migrations
+## Schema versioning and migrations
 
 Schema migrations allow model card data to be transformed when schemas are updated.
 
@@ -86,7 +86,7 @@ version to another.
 
 See [Schema Migrations](/docs/administration/schemas/schema-migrations) for details.
 
-## Technical Details
+## Technical details
 
 Schemas are built using JSON Schema and rendered using RJSF (React JSON Schema Form). This means schemas support:
 
@@ -99,7 +99,7 @@ Schemas are built using JSON Schema and rendered using RJSF (React JSON Schema F
 For technical instructions on writing schema JSON, see
 [Creating a Schema](/docs/administration/schemas/create-a-schema).
 
-## Related Pages
+## Related pages
 
 - [Creating a Schema](/docs/administration/schemas/create-a-schema) - Step-by-step schema authoring guide
 - [Uploading a Schema](/docs/administration/schemas/upload-a-schema) - How to upload a schema to Bailo

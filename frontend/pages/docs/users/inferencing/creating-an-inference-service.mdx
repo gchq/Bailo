@@ -19,7 +19,7 @@ Before creating an inference service, you need:
   [Uploading Images](/docs/users/models/uploading-images))
 - Appropriate permissions on the model (Owner or Contributor)
 
-## Creating a Service
+## Creating a service
 
 Create an inference service from the Inferencing tab on your model page.
 
@@ -34,13 +34,13 @@ Create an inference service from the Inferencing tab on your model page.
    - **Memory**: Memory allocation in GB (1-8 GB, shown for CPU only). Required for CPU.
 5. Once all fields are filled in, click **Create Inferencing Service**
 
-### Choosing a Processor Type
+### Choosing a processor type
 
 - **CPU**: Available on all deployments. You'll need to specify memory allocation (1-8 GB).
 - **GPU**: Available GPU types depend on your deployment's configuration. GPU options are configured by your
   administrator.
 
-### Choosing a Port
+### Choosing a port
 
 The port should match the port your model's container exposes for serving predictions. Common ports include:
 
@@ -49,7 +49,7 @@ The port should match the port your model's container exposes for serving predic
 
 Check your model's container configuration if you're unsure which port to use.
 
-## After Creation
+## After creation
 
 Once created, the service is provisioned and accessible via an endpoint on the Inferencing tab. You can:
 
@@ -57,7 +57,7 @@ Once created, the service is provisioned and accessible via an endpoint on the I
 - Access the service endpoint to make prediction requests
 - Use your existing Bailo access to authenticate to the service
 
-## Authenticating Requests
+## Authenticating requests
 
 Authentication is handled automatically by the platform. Inference services sit behind an authentication proxy in the
 service mesh. When a request is made to an inference service, the proxy checks with Bailo to confirm that the user has
@@ -69,7 +69,7 @@ request is denied.
 
 CORS is enabled on inference services so that Bailo can embed an externally hosted service interface in an `iframe`.
 
-## Related Pages
+## Related pages
 
 - [Managing Inference Services](/docs/users/inferencing/managing-inference-services) - Updating and deleting services
 - [Uploading Images](/docs/users/models/uploading-images) - How to push container images

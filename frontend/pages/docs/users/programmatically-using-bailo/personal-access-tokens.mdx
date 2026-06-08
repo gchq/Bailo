@@ -17,7 +17,7 @@ token can be scoped to specific models and actions, giving you fine-grained cont
 > - How do I use a token with curl or the Python client?
 > - How do I revoke a token?
 
-## Creating a Token
+## Creating a token
 
 Create tokens from the Authentication tab in your user settings.
 
@@ -46,7 +46,7 @@ The screenshot above shows the token creation form with fields for description, 
 5. **Copy both the Access Key and Secret Key immediately** - the secret key is only shown once and cannot be retrieved
    later
 
-## Available Permissions
+## Available permissions
 
 Each token can be scoped to specific actions using these permission types.
 
@@ -68,7 +68,7 @@ Each token can be scoped to specific actions using these permission types.
 
 > **Note**: Selecting a write permission automatically includes the corresponding read permission.
 
-## Token Scoping
+## Token scoping
 
 Tokens can be scoped to all models or restricted to specific models.
 
@@ -77,7 +77,7 @@ Tokens can be scoped to all models or restricted to specific models.
 
 Use specific model scoping when possible to follow the principle of least privilege.
 
-## Managing Tokens
+## Managing tokens
 
 View and delete existing tokens from the Authentication tab:
 
@@ -88,14 +88,14 @@ View and delete existing tokens from the Authentication tab:
 > **Important**: Deleting a token is immediate and permanent. Any scripts or applications using that token will stop
 > working.
 
-## Using Tokens
+## Using tokens
 
 Tokens use HTTP Basic Authentication with the access key as the username and the secret key as the password.
 
 - **Username**: the access key
 - **Password**: the secret key
 
-### With the Python Client
+### With the Python client
 
 ```python
 from bailo import TokenAgent, Client
@@ -111,13 +111,13 @@ curl -u "your-access-key:your-secret-key" \
      https://your-bailo-instance.com/api/v2/models/search
 ```
 
-### With the Container Registry
+### With the container registry
 
 ```bash
 docker login your-registry-host -u "your-access-key" -p "your-secret-key"
 ```
 
-## Security Best Practices
+## Security best practices
 
 Follow these practices to keep your tokens secure.
 
@@ -127,7 +127,7 @@ Follow these practices to keep your tokens secure.
 - **Rotate tokens regularly** - delete old tokens and create new ones
 - **Use separate tokens** for different purposes (CI/CD, local dev, etc.)
 
-## Related Pages
+## Related pages
 
 - [Authentication](/docs/users/programmatically-using-bailo/authentication) - Overview of authentication methods
 - [Python Client](/docs/users/programmatically-using-bailo/python-client) - Using tokens with the Python client

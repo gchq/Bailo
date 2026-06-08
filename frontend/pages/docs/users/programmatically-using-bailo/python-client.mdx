@@ -33,7 +33,7 @@ pip install bailo[mlflow]
 Before using the client, configure authentication using either PKI (Public Key Infrastructure) certificates or Personal
 Access Tokens.
 
-### PKI Certificate Authentication (Recommended)
+### PKI certificate authentication (Recommended)
 
 Use a client certificate for mutual TLS:
 
@@ -68,7 +68,7 @@ client = Client(
 )
 ```
 
-## Helper Classes
+## Helper classes
 
 The Python client provides high-level helper classes that simplify common workflows.
 
@@ -79,11 +79,11 @@ The Python client provides high-level helper classes that simplify common workfl
 - **Schema** - Create and retrieve schemas
 - **Experiment** - Track experiments and metrics
 
-## Common Workflows
+## Common workflows
 
 These examples show the most common tasks you can perform with the Python client.
 
-### Creating a Model
+### Creating a model
 
 ```python
 from bailo import Client, Model, TokenAgent
@@ -111,7 +111,7 @@ model.update_model_card(metadata={
 })
 ```
 
-### Creating a Release and Uploading Files
+### Creating a release and uploading files
 
 ```python
 from bailo import Release
@@ -138,7 +138,7 @@ release = Release.create(
 print(f"Release {release.version} created")
 ```
 
-### Downloading Files
+### Downloading files
 
 ```python
 # Download a specific file
@@ -148,7 +148,7 @@ release.download("model_weights.pt", output_dir="./downloads")
 release.download_all(output_dir="./downloads")
 ```
 
-### Managing Access Requests
+### Managing access requests
 
 ```python
 from bailo import AccessRequest
@@ -167,7 +167,7 @@ access_request = AccessRequest.create(
 )
 ```
 
-### Working with Data Cards
+### Working with data cards
 
 ```python
 from bailo import Datacard
@@ -183,7 +183,7 @@ data_card = Datacard.create(
 data_card.card_from_schema(schema_id="data-card-schema-id")
 ```
 
-### Working with Schemas
+### Working with schemas
 
 ```python
 from bailo import Schema
@@ -205,7 +205,7 @@ schema = Schema.create(
 )
 ```
 
-## Jupyter Notebook Examples
+## Jupyter notebook examples
 
 Detailed, runnable examples are available as Jupyter notebooks in the Bailo repository.
 
@@ -216,7 +216,7 @@ Detailed, runnable examples are available as Jupyter notebooks in the Bailo repo
 - [Schemas](/docs/python/notebooks/schemas_demo/index.html) - Schema creation and management
 - [Experiment Tracking](/docs/python/notebooks/experiment_tracking_demo/index.html) - Tracking experiments and metrics
 
-## MLflow Integration
+## MLflow integration
 
 The optional MLflow integration allows you to log models from MLflow directly to Bailo.
 
@@ -244,7 +244,7 @@ For advanced use cases, the `Client` class exposes lower-level methods that map 
 
 Refer to the [full API documentation](../../python/index.html) for detailed method signatures and parameters.
 
-## Related Pages
+## Related pages
 
 - [Authentication](/docs/users/programmatically-using-bailo/authentication) - Detailed authentication setup
 - [Personal Access Tokens](/docs/users/programmatically-using-bailo/personal-access-tokens) - Creating tokens for API

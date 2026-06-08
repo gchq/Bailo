@@ -13,7 +13,7 @@ you can create, edit, and delete review roles to match your governance requireme
 
 Only administrators will have the following options available to them.
 
-## Viewing Existing Roles
+## Viewing existing roles
 
 View all configured review roles from the Review Roles navigation item.
 
@@ -21,7 +21,7 @@ To see all review roles configured in your Bailo instance, select **Review Roles
 
 This page lists all review roles with their name, short name, description, and associated system role.
 
-## Creating a Review Role
+## Creating a review role
 
 To create a new review role:
 
@@ -38,7 +38,7 @@ To create a new review role:
      Example: "team-leads".
 4. Click **Submit**
 
-### Choosing a System Role
+### Choosing a system role
 
 The **System Role** field links a review role to an system role. This means:
 
@@ -51,7 +51,7 @@ The **System Role** field links a review role to an system role. This means:
 Default collaborators are pre-populated when a model owner sets up review roles on their model. This is useful for roles
 that should always be assigned to the same team or person across all models.
 
-## Editing a Review Role
+## Editing a review role
 
 To edit an existing role:
 
@@ -63,7 +63,7 @@ To edit an existing role:
 
 Changes to review roles apply to all schemas that use the role and all models that use those schemas.
 
-## Deleting a Review Role
+## Deleting a review role
 
 Deleting a review role removes it from all schemas that reference it:
 
@@ -75,7 +75,7 @@ Deleting a review role removes it from all schemas that reference it:
 > **Warning**: Deleting a review role removes it from all schemas that reference it. Models using those schemas will no
 > longer require approval from that role. Make sure this is intended before deleting.
 
-## Connecting Roles to Schemas
+## Connecting roles to schemas
 
 After creating review roles, attach them to schemas so that models using those schemas require the roles:
 
@@ -87,7 +87,7 @@ After creating review roles, attach them to schemas so that models using those s
 Every model that uses this schema will then require all attached review roles to approve releases before they are
 finalised.
 
-## Common Configurations
+## Common configurations
 
 These examples show typical governance setups using review roles.
 
@@ -113,7 +113,7 @@ For strict compliance requirements:
 - Create a role with **Default Entities** set to your compliance team
 - This ensures the same team always reviews every model
 
-## Related Pages
+## Related pages
 
 - [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works
 - [Roles & Permissions](/docs/reference/roles-and-permissions) - System roles vs review roles
