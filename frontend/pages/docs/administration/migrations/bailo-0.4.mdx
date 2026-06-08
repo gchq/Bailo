@@ -100,8 +100,8 @@ For more information about ESM, we recommend visiting:
 To support running two containers, minor changes have been made to our `helm` charts. These changes add a new 'frontend'
 container, which requires no environment variables / setup. All traffic should route to the frontend container EXCEPT:
 
-- `/api`, which should be sent to the backend container.
-- `/v2`, which should be sent to the Docker registry.
+- `/api`, which should be sent to the backend container
+- `/v2`, which should be sent to the Docker registry
 
 The backend environment variables / mount locations remain unchanged. The frontend serves static files, so requires
 minimal setup.
@@ -118,18 +118,18 @@ existing values. If you are using a service such as helm, you may not need to ma
 
 The configuration is now also labelled to help advise on what each setting changes. Some major changes:
 
-- `minio` connection options are now stored under `minio.connection` and passed directly to the `minio` library.
+- `minio` connection options are now stored under `minio.connection` and passed directly to the `minio` library
 - `minio.uploadBucket` is now called `minio.buckets.uploads`
 - `minio.registryBucket` is now called `minio.buckets.registry`
 - `minio.createBuckets` is now called `minio.automaticallyCreateBuckets`
 
-- `smtp` connection options are now stored under `smtp.connection` and passed directly to the `node-mailer` library.
+- `smtp` connection options are now stored under `smtp.connection` and passed directly to the `node-mailer` library
 
 - `s2i.builderImage` has been moved to `ui.seldonVersions` and is now an array of names and images. These are to allow
   users to select the correct Seldon version to build from
 
 - `openshift.appPublicRoute` is removed in favour of `app.protocol`, `app.host` and `app.port`
-- `openshift` is now under `build.openshift`.
+- `openshift` is now under `build.openshift`
 - `uiConfig` is now `ui`
 
 - `listen` has been split into `app.port` for the frontend and `api.port` for the backend

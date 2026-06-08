@@ -33,12 +33,12 @@ curl -X POST https://your-bailo-instance.com/api/v2/model/{modelId}/webhooks \
 
 ### Webhook configuration options
 
-- **name** - A descriptive name for the webhook. Required.
-- **uri** - The URI (Uniform Resource Identifier) that will receive the POST requests. Required.
-- **token** - A bearer token included in the `Authorization` header of webhook requests. Optional.
-- **events** - Which events trigger this webhook (see Events below). Optional, defaults to all events.
-- **active** - Whether the webhook is enabled. Optional, defaults to true.
-- **insecureSSL** - Skip SSL (Secure Sockets Layer) verification for the target URL. Optional, defaults to false.
+- **name** - A descriptive name for the webhook. Required
+- **uri** - The URI (Uniform Resource Identifier) that will receive the POST requests. Required
+- **token** - A bearer token included in the `Authorization` header of webhook requests. Optional
+- **events** - Which events trigger this webhook (see Events below). Optional, defaults to all events
+- **active** - Whether the webhook is enabled. Optional, defaults to true
+- **insecureSSL** - Skip SSL (Secure Sockets Layer) verification for the target URL. Optional, defaults to false
 
 ## Events
 
