@@ -32,7 +32,7 @@ export const postReviewResponseSchema = z.object({
           .date({
             required_error: 'Please provide a next review due date when submitting this review.',
           })
-          .refine((date) => date > new Date(), {
+          .refine((date) => date.getTime() > Date.now(), {
             message: 'Due date of next review cannot be in the past.',
           }),
         decision: z.literal(Decision.Approve),

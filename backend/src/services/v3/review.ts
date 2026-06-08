@@ -112,10 +112,7 @@ export async function createLifecycleReview(
   modelId: string,
   dueDate: Date,
 ): Promise<ReviewInterface> {
-  if (!dueDate || dueDate.getTime() === 0) {
-    throw BadReq('Lifecycle review responses should have a valid due date.')
-  }
-  if (dueDate.getTime() <= Date.now()) {
+  if (!dueDate || dueDate.getTime() <= Date.now()) {
     throw BadReq('Due date of next review cannot be in the past.')
   }
 

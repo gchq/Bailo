@@ -192,6 +192,7 @@ export default function ReviewWithComment({
                   loading={loading}
                   data-test='approveReviewButton'
                   size='small'
+                  disabled={includeDueDate && !dueDate}
                 >
                   Approve
                 </Button>

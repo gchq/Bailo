@@ -77,9 +77,11 @@ describe('services > v3 > response', () => {
   })
 
   test('find latest response for review > successful', async () => {
-    ResponseModelMock.limit.mockResolvedValue([testResponse])
+    ResponseModelMock.findOne.mockImplementation(() => ({
+      sort: vi.fn().mockResolvedValue(testResponse),
+    }))
     const latestResponse = await getLatestResponseForReview('6a058ab4db7a3be341fb3cca')
-    expect(ResponseModelMock.find).toHaveBeenCalledOnce()
+    expect(ResponseModelMock.findOne).toHaveBeenCalledOnce()
     expect(latestResponse.entity).toBe(testResponse.entity)
   })
 })

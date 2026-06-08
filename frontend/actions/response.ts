@@ -26,7 +26,7 @@ export function useGetResponses(parentIds: string[]) {
 
 export function useGetLatestResponseForReview(reviewId: string) {
   const { data, error, mutate, isLoading } = useSWR<{ response: ResponseInterface }, ErrorInfo>(
-    `/api/v3/review/${reviewId}/response/latest`,
+    `/api/v3/review/${reviewId}/responses/latest`,
     fetcher,
   )
 

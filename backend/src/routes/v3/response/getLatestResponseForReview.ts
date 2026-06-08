@@ -10,13 +10,13 @@ import { parse } from '../../../utils/validate.js'
 
 export const getLatestResponseSchema = z.object({
   params: z.object({
-    reviewId: z.string(),
+    reviewId: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid review id'),
   }),
 })
 
 registerPath({
   method: 'get',
-  path: '/api/v3/review/{reviewId}/response/latest',
+  path: '/api/v3/review/{reviewId}/responses/latest',
   tags: ['response'],
   description: 'Get the latest response for a review',
   schema: getLatestResponseSchema,

@@ -17,7 +17,7 @@ vi.mock('../../../../src/services/v3/response.js', () => mockResponseServices)
 describe('routes > response > getLatestReviewResponse', () => {
   test('successfully fetches the latest response for a review', async () => {
     const fixture = createFixture(getLatestResponseSchema)
-    const res = await testGet(`/api/v3/review/${fixture.params.reviewId}/response/latest`)
+    const res = await testGet(`/api/v3/review/${fixture.params.reviewId}/responses/latest`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -25,7 +25,7 @@ describe('routes > response > getLatestReviewResponse', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(getLatestResponseSchema)
-    const res = await testGet(`/api/v3/review/${fixture.params.reviewId}/response/latest`)
+    const res = await testGet(`/api/v3/review/${fixture.params.reviewId}/responses/latest`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewResponses).toHaveBeenCalled()

@@ -22,7 +22,7 @@ router.get('/metrics/entryVolume', ...getEntryVolume)
 
 router.post('/review/:reviewId/response', ...postReviewResponse)
 router.post('/review/:modelId', ...postReview)
-router.get('/review/:reviewId/response/latest', ...getLatestResponse)
+router.get('/review/:reviewId/responses/latest', ...getLatestResponse)
 
 router.get('/entities/me', ...getCurrentUser)
 

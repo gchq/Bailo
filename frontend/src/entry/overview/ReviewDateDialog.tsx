@@ -50,7 +50,9 @@ export default function ReviewDateDialog({ open, onClose, entryId }: EntryRolesD
       </DialogContent>
       <DialogActions>
         <Button onClick={() => handleOnClose()}>Cancel</Button>
-        <Button onClick={() => handleConfirmReviewDate()}>Set review date</Button>
+        <Button onClick={() => handleConfirmReviewDate()} disabled={!reviewDate}>
+          Set review date
+        </Button>
       </DialogActions>
     </Dialog>
   )

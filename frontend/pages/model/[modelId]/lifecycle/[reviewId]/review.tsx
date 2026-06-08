@@ -94,7 +94,7 @@ export default function LifecycleReview() {
     return responses.map((response) => (
       <Stack key={response._id} spacing={1}>
         <Stack direction='row' spacing={1}>
-          <UserDisplay dn={responses[0].entity} showIcon />
+          <UserDisplay dn={response.entity} showIcon />
           <Typography variant='caption'>
             Reviewed at: {formatDateStringAsDayMonthAndYear(response.createdAt)}
           </Typography>

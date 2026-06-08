@@ -14,13 +14,8 @@ import { createLifecycleReview, findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
 
 function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | undefined) {
-  if (review.kind === ReviewKind.Lifecycle) {
-    if (!dueDate || dueDate.getTime() === 0) {
-      throw BadReq('Lifecycle review responses should have a valid due date.')
-    }
-    if (dueDate.getTime() <= Date.now()) {
-      throw BadReq('Due date of next review cannot be in the past.')
-    }
+  if (!dueDate || dueDate.getTime() <= Date.now()) {
+    throw BadReq('Due date of next review cannot be in the past.')
   }
 }
 
@@ -62,13 +57,13 @@ export async function respondToReview(
 }
 
 export async function getLatestResponseForReview(reviewId: string) {
-  const response = await ResponseModel.find({ parentId: reviewId as unknown as Schema.Types.ObjectId })
-    .sort({ createdAt: -1 })
-    .limit(1)
+  const response = await ResponseModel.findOne({ parentId: reviewId as unknown as Schema.Types.ObjectId }).sort({
+    createdAt: -1,
+  })
 
-  if (response.length === 0) {
+  if (!response) {
     throw NotFound(`The requested response was not found.`, { reviewId })
   }
 
-  return response[0]
+  return response
 }
