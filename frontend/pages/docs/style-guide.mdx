@@ -1,0 +1,274 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Documentation Style Guide
+
+This guide defines the writing, formatting, and structural conventions for all documentation under
+`frontend/pages/docs`. Follow these guidelines when writing new pages or editing existing ones to ensure consistency
+across the documentation.
+
+---
+
+## File format
+
+All documentation pages are written in MDX (`.mdx`) and must:
+
+- Import and use `DocsWrapper` as the default export wrapper
+- End with the default export statement:
+
+  ```mdx
+  export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+  ```
+
+- Use the `next/legacy/image` `Image` component for all images (never standard Markdown image syntax for in-page
+  screenshots)
+- Import MUI components (e.g. `Box`) for layout wrapping where needed
+
+---
+
+## Page structure
+
+Every page must follow this order:
+
+1. **H1 title** (`#`) - one per page, at the top
+2. **Common questions callout** - immediately below the title
+3. **Body content** - sections using H2 (`##`) and H3 (`###`) headings
+4. **Related or next steps section** - at the bottom, before the export
+
+### H1 title
+
+- Title Case
+- Concise and descriptive
+- One per page only
+
+```mdx
+# Creating a Model
+```
+
+### Common questions callout
+
+Every page must include a blockquote immediately after the H1 that lists two to five questions the page answers.
+
+Use bold for the label:
+
+> Common questions this page answers:
+>
+> - What does this feature do?
+> - How do I configure it?
+> - Who can use it?
+
+---
+
+## Headings
+
+- Use `##` (H2) for major sections
+- Use `###` (H3) for subsections within a major section
+- Do not skip heading levels
+- Sentence case for H2 and below (Title Case for H1 only)
+- Do not use H4 or deeper - restructure the content instead
+
+```mdx
+## Security scanning
+
+### ClamAV
+```
+
+## Writing style
+
+- **Audience**: assume a technical but non-expert reader unless the page is explicitly under `administration/`
+- **Voice**: active voice, second person ("you", "your")
+- **Tone**: professional and direct; avoid filler phrases and unnecessary pleasantries
+- **UK English**: use UK spelling throughout (e.g. artefact, organise, colour)
+- **Sentence length**: prefer short, clear sentences; break long sentences into lists where appropriate
+- **Tense**: present tense throughout
+
+---
+
+## Lists
+
+Use unordered lists (`-`) for:
+
+- Features, options, or capabilities with no inherent order
+- Role or permission enumerations
+- Sets of related items
+
+Use ordered lists (`1.`) for:
+
+- Step-by-step instructions where sequence matters
+
+Nested lists are permitted up to one level of nesting. Avoid deeper nesting.
+
+Format list items consistently within the same list - either all fragments or all full sentences, not mixed.
+
+**Bold** the lead term for definition-style lists, followed by a dash and a description:
+
+```mdx
+- **Owner** - Full control: edit model, manage collaborators, create releases, delete the model
+- **Contributor** - Edit the model card, upload files and images, create releases
+```
+
+Avoid ending list items with punctuation (e.g. no full stops at the end of sentences).
+
+---
+
+## Code and technical terms
+
+- Use backticks for inline code, filenames, configuration keys, version strings, CLI commands, and technical identifiers
+- Use fenced code blocks for multi-line code or configuration, with a language identifier
+- Use semantic versioning examples consistently: `1.0.0`, `1.1.0`, `2.0.0`
+
+  ```mdx
+  - **connectors.artefactScanners.kinds** - List of enabled artefact scanner kinds. Default: `[]`
+  ```
+
+````mdx
+```
+Create Model → Select Schema → Fill In Model Card → Add Collaborators
+```
+````
+
+---
+
+## Emphasis
+
+- **Bold** (`**text**`): UI element names, key terms on first use, lead terms in definition lists
+- _Italic_: use sparingly, only for genuine emphasis or titles of external works
+- Do not use bold for general emphasis or decoration
+
+---
+
+## Links
+
+- Use descriptive link text that reflects the destination page title
+- Do not use "click here" or bare URLs as link text
+- Internal links use root-relative paths starting with `/docs/`
+- External links use full URLs
+
+```mdx
+[Quick Start Guide](/docs/getting-started/quick-start) [ClamAV](https://www.clamav.net/)
+```
+
+---
+
+## Images
+
+Wrap all images in a `Box` component to control width, centred using `margin: 'auto'`:
+
+```mdx
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='descriptive alt text' src={importedImageVariable} />
+</Box>
+```
+
+- Import images at the top of the file using static imports
+- Always provide descriptive `alt` text in lowercase (not title case)
+- Follow every image with a plain-text caption sentence on the line immediately below the closing `</Box>` tag,
+  describing what the screenshot shows
+
+  ```mdx
+  The screenshot above shows the file actions menu with a Delete File option.
+  ```
+
+## Callouts and notes
+
+Use blockquotes for callouts. Reserve them for:
+
+- The common questions block (required, at top of every page)
+- Quoted external definitions or descriptions of third-party tools
+
+Do not use blockquotes for general warnings or tips - integrate these into the body text instead.
+
+---
+
+## Section endings
+
+End pages with one of the following sections (or multiple if appropriate), using an H2 heading:
+
+### "What's Next?" (conceptual/overview pages)
+
+Use for pages that introduce concepts and naturally lead the reader forward:
+
+```mdx
+## What's Next?
+
+- [Quick Start Guide](/docs/getting-started/quick-start) - Walk through creating your first model
+- [Glossary](/docs/reference/glossary) - Definitions of all Bailo-specific terms
+```
+
+### "Next steps" (task/how-to pages)
+
+Use for pages that describe completing a task, showing what to do after:
+
+```mdx
+## Next steps
+
+After creating a model and selecting a schema:
+
+1. [Fill in the model card](/docs/users/models/model-card) - document your model
+2. [Upload files](/docs/users/models/uploading-files) - add model artefacts
+3. [Create a release](/docs/users/models/creating-a-release) - version your model for distribution
+```
+
+### "Related pages"
+
+Optionally included on any page to surface related documentation:
+
+```mdx
+## Related pages
+
+- [Model Card](/docs/users/models/model-card) - Filling in the model card and configuring access
+- [Core Concepts](/docs/getting-started/core-concepts) - Understanding the Bailo data model
+```
+
+---
+
+## Directory conventions
+
+| Path               | Content type                                       |
+| ------------------ | -------------------------------------------------- |
+| `getting-started/` | Onboarding guides and conceptual overviews         |
+| `users/`           | Task-based guides for day-to-day platform use      |
+| `administration/`  | Deployment, configuration, and platform management |
+| `reference/`       | Glossary, roles and permissions, troubleshooting   |
+
+Page filenames use kebab-case and match the H1 title of the page as closely as possible.
+
+---
+
+## AWS RAG writing best practices
+
+We also follow the
+[AWS documentation best practices for RAG applications](https://docs.aws.amazon.com/prescriptive-guidance/latest/writing-best-practices-rag/best-practices.html).
+The key practices are summarised below:
+
+- **Use headings and subheadings consistently** - Clear, hierarchical headings help RAG models understand document
+  structure and extract relevant information accurately
+- **Keep numbered lists sequential** - Do not skip numbers in ordered lists; gaps cause confusion for both human readers
+  and LLMs processing the content
+- **Add transitions between list items** - Where steps or items are related, use bridging phrases (e.g. "Once you have
+  completed the above...") to connect ideas and preserve logical flow
+- **Avoid tables** - Replace tabular content with multi-level bullet lists or flat-level syntax (items arranged at the
+  same hierarchical level, without nesting); this format is more reliably processed by LLMs
+- **Describe graphical content in text** - Summarise or describe the content of images and diagrams in accompanying
+  text; this preserves meaning for RAG models that may not process images, and avoids unnecessary token consumption
+- **Add session starters for common queries** - Where a section answers a predictable question, open with a short
+  sentence that frames the content (e.g. "If you are looking to configure X, follow the steps below"); this improves
+  semantic matching during retrieval
+- **Summarise each section** - Include a brief summary immediately after each heading; this reinforces key points,
+  improves embedding-space similarity search, and increases the likelihood of accurate retrieval
+- **Keep content focused and unambiguous** - Each page or section should cover one topic clearly; RAG models generate
+  responses from retrieved excerpts, so avoiding ambiguity leads to more accurate and useful outputs
+- **Define abbreviations and domain-specific terms** - LLMs do not have inherent knowledge of internal terminology;
+  define acronyms and Bailo-specific language on first use to reduce the risk of misinterpretation or hallucination
+- **Break large documents into smaller, self-contained pages** - Avoid pages that span multiple unrelated subtopics;
+  smaller, clearly titled documents improve indexing, tagging, and retrieval precision
+
+---
+
+## Contributing
+
+All documentation source files are in the
+[Bailo GitHub repository](https://github.com/gchq/Bailo/tree/main/frontend/pages/docs).
+
+Contributions and corrections are welcome via pull request.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
