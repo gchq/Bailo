@@ -9,6 +9,7 @@ import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
+import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
 import { sendWebhooks } from '../webhook.js'
 
@@ -44,6 +45,7 @@ export async function respondToReview(
   })
 
   await reviewResponse.save()
+  await cancelLifecycleReviewJobs(review.modelId, reviewId)
   await sendReviewResponseNotification(review, reviewResponse, user)
 
   sendWebhooks(

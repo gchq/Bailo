@@ -9,6 +9,7 @@ import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
+import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
 
 type ReviewWithModel = ReviewDoc & {
   model: ModelInterface
@@ -164,5 +165,8 @@ export async function createLifecycleReview(
     dueDate,
   })
   await newReview.save()
+
+  await scheduleLifeCycleReviewEmails(modelId, newReview._id.toString(), dueDate)
+
   return newReview
 }

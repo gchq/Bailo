@@ -24,6 +24,11 @@ const modelMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/model.js', () => modelMock)
 
+const mockSchedulerService = vi.hoisted(() => ({
+  scheduleLifeCycleReviewEmails: vi.fn(),
+}))
+vi.mock('../../../src/services/schedule/scheduler.js', () => mockSchedulerService)
+
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
@@ -59,6 +64,31 @@ describe('services > review', () => {
       dueDate: new Date('2050-05-28T12:54:03.780Z'),
     })
     expect(newReview).toMatchSnapshot()
+  })
+
+  test('createReview > schedules lifecycle review emails after creating a lifecycle review', async () => {
+    const dueDate = new Date('2026-05-28T12:54:03.780Z')
+    modelMock.getModelById.mockResolvedValueOnce({
+      id: 'test-1234',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+      save: vi.fn(),
+    })
+    modelMock.getModelSystemRoles.mockReturnValue(['owner'])
+    ReviewModel.aggregate.mockResolvedValue([])
+    ReviewModel.findOne.mockResolvedValueOnce(undefined)
+    authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
+    authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
+
+    await createReview({} as any, 'test-1234', {
+      kind: ReviewKind.Lifecycle,
+      dueDate,
+    })
+
+    expect(mockSchedulerService.scheduleLifeCycleReviewEmails).toHaveBeenCalledWith(
+      'test-1234',
+      expect.any(String),
+      dueDate,
+    )
   })
 
   test('createReview > cannot create lifecycle review if existing review is open', async () => {
