@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { Decision } from '../../../src/models/Response.js'
-import { respondToReview } from '../../../src/services/v3/response.js'
+import { getLatestResponseForReview, respondToReview } from '../../../src/services/v3/response.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
-import { testReleaseReview } from '../../testUtils/testModels.js'
+import { testReleaseReview, testResponse } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/connectors/authorisation/index.js')
 vi.mock('../../../src/connectors/authentication/index.js', () => ({
@@ -53,5 +53,12 @@ describe('services > v3 > response', () => {
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(responseV2Mock.sendReviewResponseNotification).toHaveBeenCalledOnce()
     expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+  })
+
+  test('find latest response for review > successful', async () => {
+    ResponseModelMock.limit.mockResolvedValue([testResponse])
+    const latestResponse = await getLatestResponseForReview('6a058ab4db7a3be341fb3cca')
+    expect(ResponseModelMock.find).toHaveBeenCalledOnce()
+    expect(latestResponse.entity).toBe(testResponse.user)
   })
 })
