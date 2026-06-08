@@ -87,6 +87,11 @@ export interface Config {
       }
     }
 
+    lifecycle: {
+      preReminderIntervals: string[]
+      postReminderInterval: string
+    }
+
     from: string
   }
 

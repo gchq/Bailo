@@ -36,7 +36,6 @@ const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
   checkperiod: METRICS_CACHE_TTL,
   useClones: false,
-  maxKeys: 5000,
 })
 
 type CachedMetrics<MetricsCache> = {

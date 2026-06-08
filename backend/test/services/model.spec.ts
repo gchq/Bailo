@@ -69,6 +69,7 @@ vi.mock('../../src/services/review.js', async () => reviewMock)
 
 const schemaMock = vi.hoisted(() => ({
   getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
+  validateContentAgainstSchema: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
@@ -83,21 +84,9 @@ const webhookMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/webhook.js', async () => webhookMock)
 
-const validatorType = vi.hoisted(() => ({
-  isValidatorResultError: vi.fn(() => true),
-}))
-vi.mock('../../src/types/ValidatorResultError.js', async () => validatorType)
-
 const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'model-id') }))
 vi.mock('../../src/utils/id.js', () => ({
   convertStringToId: idMocks.convertStringToId,
-}))
-
-const validator = vi.hoisted(() => ({ validate: vi.fn() }))
-vi.mock('jsonschema', () => ({
-  Validator: vi.fn(function () {
-    return validator
-  }),
 }))
 
 vi.mock('../../src/utils/database.js', async () => ({
@@ -531,13 +520,40 @@ describe('services > model', () => {
     expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
   })
 
-  test('updateModelCard > should throw a bad request when attempting to change mirrored model card', async () => {
+  test('updateModelCard > should throw forbidden when user does not have permission to view the model', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'Cannot alter a mirrored model.',
       success: false,
       id: '',
     })
     await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(/^Cannot alter a mirrored model./)
+  })
+
+  test('updateModelCard > should throw bad request when model has no card', async () => {
+    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: {} } })
+    await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
+      /^This model must first be instantiated/,
+    )
+  })
+
+  test('updateModelCard > should throw bad request when metadata fails schema validation', async () => {
+    const mockModel = { settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
+    ModelModelMock.findOne.mockResolvedValueOnce(mockModel)
+    schemaMock.validateContentAgainstSchema.mockRejectedValueOnce(new Error('Validation failed'))
+
+    await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
+      /^Model metadata could not be validated against the schema./,
+    )
+  })
+
+  test('updateModelCard > should successfully update model card', async () => {
+    const mockModel = { settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
+    ModelModelMock.findOne.mockResolvedValueOnce(mockModel).mockResolvedValueOnce(mockModel)
+
+    const result = await updateModelCard({} as any, '123', { key: 'value' })
+
+    expect(result).toBeDefined()
+    expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
   })
 
   test('updateModel > should throw bad request when attempting to change a standard model to be a mirrored model', async () => {
@@ -614,14 +630,13 @@ describe('services > model', () => {
 
   test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
     ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    validator.validate.mockImplementationOnce(() => {
+    schemaMock.validateContentAgainstSchema.mockImplementationOnce(() => {
       throw Error('Unable to validate.')
     })
-    validatorType.isValidatorResultError.mockReturnValueOnce(false)
 
     const result = saveImportedModelCard({} as any)
 
-    await expect(result).rejects.toThrow(/^Unable to validate./)
+    await expect(result).rejects.toThrow(/^Model metadata could not be validated against the schema./)
   })
 
   test('setLatestImportedModelCard > success', async () => {

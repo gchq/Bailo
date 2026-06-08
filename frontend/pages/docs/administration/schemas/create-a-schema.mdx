@@ -14,12 +14,13 @@ non-technical overview.
 > - How do I create a schema in Bailo?
 > - What question types are available in schemas?
 > - How do I add conditional fields to a schema?
-> - How do I test a schema?
+> - # How do I test a schema?
 
 ## Before you start
 
-Bailo includes example schemas in `backend/src/scripts/example_schemas`. These contain all mandatory fields the
-application needs to run. Use them as a starting point for your own schemas.
+Bailo includes example schemas for both model cards and access requests in `backend/src/scripts/example_schemas`. It is
+important to note that these schemas contain all of mandatory fields that the application needs in order to run. These
+fields are hard-coded in various places in the source code. Use them as a starting point for your own schemas.
 
 > **Important**: Some fields are required by the application and are referenced in the source code. Always start from an
 > example schema rather than building from scratch.
@@ -158,6 +159,25 @@ collecting the data in the form:
 ```
 
 > **Note**: This only hides the section from the model card display. The data still persists in the version metadata.
+
+## Required fields for model states
+
+Bailo supports conditional required fields based on the state set on a model. Add the `requiredByModelStates` property
+to a question and specify which model states require it:
+
+```json
+"modelSummary": {
+  "title": "What does the model do?",
+  "description": "A description of what the model does.",
+  "type": "string",
+  "minLength": 1,
+  "maxLength": 5000,
+  "requiredByModelStates": ["Development"]
+}
+```
+
+When a user retrieves a schema, they can supply a model state alongside the schema ID. The backend sets the appropriate
+[required properties](https://json-schema.org/understanding-json-schema/reference/object#required) for that state.
 
 ## Dependencies (Conditional Questions)
 

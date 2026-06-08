@@ -21,6 +21,7 @@ const reviewV3Mock = vi.hoisted(() => ({
   findReviewById: vi.fn(function () {
     return [testReleaseReview]
   }),
+  createLifecycleReview: vi.fn(),
 }))
 vi.mock('../../../src/services/v3/review.js', () => reviewV3Mock)
 
@@ -33,6 +34,11 @@ const mockWebhookService = vi.hoisted(() => ({
   sendWebhooks: vi.fn(),
 }))
 vi.mock('../../../src/services/webhook.js', () => mockWebhookService)
+
+const mockSchedulerService = vi.hoisted(() => ({
+  cancelLifecycleReviewJobs: vi.fn(),
+}))
+vi.mock('../../../src/services/schedule/scheduler.js', () => mockSchedulerService)
 
 describe('services > v3 > response', () => {
   const user: any = { dn: 'test' }
@@ -53,5 +59,20 @@ describe('services > v3 > response', () => {
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(responseV2Mock.sendReviewResponseNotification).toHaveBeenCalledOnce()
     expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+  })
+
+  test('respondToReview > cancels lifecycle review jobs after saving response', async () => {
+    reviewV3Mock.findReviewById.mockReturnValue(testReleaseReview as any)
+    ReviewModel.aggregate.mockResolvedValue([{ modelId: testReleaseReview.modelId, role: 'owner' }])
+
+    await respondToReview(user, '6a058ab4db7a3be341fb3cca', {
+      decision: Decision.RequestChanges,
+      comment: 'Do better!',
+    })
+
+    expect(mockSchedulerService.cancelLifecycleReviewJobs).toHaveBeenCalledWith(
+      testReleaseReview.modelId,
+      '6a058ab4db7a3be341fb3cca',
+    )
   })
 })
