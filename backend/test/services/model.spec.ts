@@ -84,6 +84,11 @@ const webhookMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/webhook.js', async () => webhookMock)
 
+const schedulerMock = vi.hoisted(() => ({
+  cancelLifecycleJobsForModel: vi.fn(() => {}),
+}))
+vi.mock('../../src/services/schedule/scheduler.js', async () => schedulerMock)
+
 const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'model-id') }))
 vi.mock('../../src/utils/id.js', () => ({
   convertStringToId: idMocks.convertStringToId,
