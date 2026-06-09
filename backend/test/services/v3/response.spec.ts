@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { Decision } from '../../../src/models/Response.js'
-import { respondToReview } from '../../../src/services/v3/response.js'
+import { getLatestResponseForReview, respondToReview } from '../../../src/services/v3/response.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
-import { testReleaseReview } from '../../testUtils/testModels.js'
+import { testReleaseReview, testResponse } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/connectors/authorisation/index.js')
 vi.mock('../../../src/connectors/authentication/index.js', () => ({
@@ -74,5 +74,14 @@ describe('services > v3 > response', () => {
       testReleaseReview.modelId,
       '6a058ab4db7a3be341fb3cca',
     )
+  })
+
+  test('find latest response for review > successful', async () => {
+    ResponseModelMock.findOne.mockImplementation(() => ({
+      sort: vi.fn().mockResolvedValue(testResponse),
+    }))
+    const latestResponse = await getLatestResponseForReview('6a058ab4db7a3be341fb3cca')
+    expect(ResponseModelMock.findOne).toHaveBeenCalledOnce()
+    expect(latestResponse.entity).toBe(testResponse.entity)
   })
 })
