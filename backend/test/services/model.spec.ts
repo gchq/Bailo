@@ -151,10 +151,8 @@ describe('services > model', () => {
       settings: { mirror: {}, ungovernedAccess: false, allowTemplating: false },
     }
 
-    await expect(() => createModel({} as any, testModel)).rejects.toThrowError(
-      /^Untrusted models cannot be made public./,
-    )
-    expect(ModelModelMock.save).not.toBeCalled()
+    await expect(() => createModel({} as any, testModel)).rejects.toThrow(/^Untrusted models cannot be made public./)
+    expect(ModelModelMock.save).not.toHaveBeenCalled()
   })
 
   test('getModelByIdNoAuth > good', async () => {
@@ -610,7 +608,7 @@ describe('services > model', () => {
     }
     ModelModelMock.findOne.mockResolvedValueOnce(testModel)
 
-    await expect(() => updateModel({} as any, 'test123', { visibility: EntryVisibility.Public })).rejects.toThrowError(
+    await expect(() => updateModel({} as any, 'test123', { visibility: EntryVisibility.Public })).rejects.toThrow(
       /^Untrusted models cannot be made public./,
     )
   })
