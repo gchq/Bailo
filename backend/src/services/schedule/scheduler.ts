@@ -64,6 +64,11 @@ export async function cancelLifecycleReviewJobs(modelId: string, reviewId: strin
   await scheduler.cancel({ name: LIFECYCLE_REVIEW_EMAIL_JOB, data: { modelId, reviewId } })
 }
 
+export async function cancelLifecycleJobsForModel(modelId: string) {
+  const scheduler = getScheduler()
+  await scheduler.cancel({ name: LIFECYCLE_REVIEW_EMAIL_JOB, data: { modelId } })
+}
+
 export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: string, dueDate: Date) {
   const scheduler = getScheduler()
   const preReminderIntervals = config.smtp.lifecycle.preReminderIntervals
