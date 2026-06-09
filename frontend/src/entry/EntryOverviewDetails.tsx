@@ -176,7 +176,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
             >
-              {!updateReviewDatePermission.hasPermission && reviews.length > 0 && (
+              {reviews.length > 0 && (
                 <Typography>
                   {reviews[0].dueDate
                     ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
