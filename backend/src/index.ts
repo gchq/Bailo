@@ -17,8 +17,9 @@ shelljs.exec('update-ca-certificates', { fatal: false, async: false })
 // that nobody should notice unless they want to upload an image
 // within the first few milliseconds of the _first_ time it's run
 if (config.s3.automaticallyCreateBuckets) {
-  ensureBucketExists(config.s3.buckets.uploads)
-  ensureBucketExists(config.s3.buckets.registry)
+  for (const bucket of [config.s3.buckets.uploads, config.s3.buckets.registry]) {
+    ensureBucketExists(bucket).catch((err) => log.error({ err, bucket }, 'Unable to automatically create bucket.'))
+  }
 }
 
 // connect to Mongo
