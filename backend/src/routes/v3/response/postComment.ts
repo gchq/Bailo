@@ -17,13 +17,13 @@ export const postCommentSchema = z.object({
     kind: z.enum(getEnumValues(ReviewKind)).openapi({ example: ReviewKind.Release }),
   }),
   body: z.object({
-    comment: z.string().openapi({ example: 'This is an example comment' }),
+    comment: z.string().min(1).max(10000).openapi({ example: 'This is an example comment' }),
   }),
 })
 
 registerPath({
   method: 'post',
-  path: '/api/v2/response/comment',
+  path: '/api/v3/response/comment',
   tags: ['release'],
   description: 'Add a comment to a model release.',
   schema: postCommentSchema,

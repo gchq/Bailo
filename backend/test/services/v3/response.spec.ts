@@ -31,6 +31,12 @@ const responseV2Mock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/response.js', () => responseV2Mock)
 
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+  getModelSystemRoles: vi.fn(),
+}))
+vi.mock('../../../src/services/model.js', () => modelMock)
+
 const mockWebhookService = vi.hoisted(() => ({
   sendWebhooks: vi.fn(),
 }))
@@ -87,6 +93,10 @@ describe('services > v3 > response', () => {
   })
 
   test('submit a comment on a release > successful', async () => {
+    modelMock.getModelById.mockResolvedValue({
+      id: 'test-1234',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    })
     ResponseModelMock.save.mockReturnValue(testResponse)
     const releaseComment = await newComment({} as any, 'test-123', ReviewKind.Release, 'This is a comment', '1.0.0')
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
@@ -94,6 +104,10 @@ describe('services > v3 > response', () => {
   })
 
   test('submit a comment on a release without a semver identifier > unsuccessful', async () => {
+    modelMock.getModelById.mockResolvedValue({
+      id: 'test-123',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    })
     ResponseModelMock.save.mockReturnValue(testResponse)
     await expect(newComment({} as any, 'test-123', ReviewKind.Release, 'This is a comment')).rejects.toThrow(
       /^A valid semver must be provided for release comments./,
@@ -101,6 +115,10 @@ describe('services > v3 > response', () => {
   })
 
   test('submit a model card comment > successful', async () => {
+    modelMock.getModelById.mockResolvedValue({
+      id: 'test-123',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    })
     ResponseModelMock.save.mockReturnValue(testResponse)
     const releaseComment = await newComment({} as any, 'test-123', ReviewKind.Lifecycle, 'This is a comment')
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()

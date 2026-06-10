@@ -1,5 +1,7 @@
 import { Schema } from 'mongoose'
 
+import { ModelAction } from '../../connectors/authorisation/actions.js'
+import authorisation from '../../connectors/authorisation/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
 import ReleaseModel from '../../models/Release.js'
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
@@ -9,7 +11,7 @@ import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
-import { BadReq, InternalError, NotFound } from '../../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
 import { semverStringToObject } from '../release.js'
 import { ReviewResponseParams } from '../response.js'
@@ -72,15 +74,7 @@ export async function getLatestResponseForReview(reviewId: string) {
   return response
 }
 
-export async function newComment(
-  user: UserInterface,
-  modelId: string,
-  kind: ReviewKindKeys,
-  comment: string,
-  identifier?: string,
-) {
-  let parentId
-
+async function resolveCommentParent(user: userInterface, modelId: string, kind: ReviewKindKeys, identifier?: string) {
   switch (kind) {
     case ReviewKind.Release: {
       if (!identifier) {
@@ -91,7 +85,7 @@ export async function newComment(
       if (!release) {
         throw NotFound(`The requested release was not found.`, { modelId, semver: identifier })
       }
-      parentId = release._id
+      return release._id
       break
     }
     case ReviewKind.Access: {
@@ -102,7 +96,7 @@ export async function newComment(
       if (!accessRequest) {
         throw NotFound(`The requested access request was not found.`, { modelId, accessRequestId: identifier })
       }
-      parentId = accessRequest._id
+      return accessRequest._id
       break
     }
     case ReviewKind.Lifecycle: {
@@ -110,10 +104,33 @@ export async function newComment(
       if (!model) {
         throw NotFound(`The requested model was not found.`, { modelId })
       }
-      parentId = model._id
+      return model._id
       break
     }
+    default: {
+      const exhaustiveCheck: never = kind
+      throw InternalError(`Unsupported review kind: ${exhaustiveCheck}`)
+    }
   }
+}
+
+export async function newComment(
+  user: UserInterface,
+  modelId: string,
+  kind: ReviewKindKeys,
+  comment: string,
+  identifier?: string,
+) {
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw NotFound('The requested model was not found', { modelId })
+  }
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+  }
+
+  const parentId = await resolveCommentParent(user, modelId, kind, identifier)
 
   // Store the response
   const commentResponse = new ResponseModel({
@@ -130,5 +147,5 @@ export async function newComment(
     throw InternalError('There was a problem saving this release comment')
   }
 
-  return commentResponse
+  return savedComment
 }

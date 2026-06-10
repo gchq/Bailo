@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Stack } from '@mui/material'
-import { postResponseComment, useGetResponses } from 'actions/response'
+import { postComment, useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
@@ -39,13 +39,15 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
   function getIdentifierFromKind() {
     switch (kind) {
       case ReviewKind.RELEASE:
-        return {
-          semver: identifier,
+        if (!identifier) {
+          return {}
         }
+        return { semver: identifier }
       case ReviewKind.ACCESS:
-        return {
-          accessRequestId: identifier,
+        if (!identifier) {
+          return {}
         }
+        return { accessRequestId: identifier }
     }
   }
 
@@ -113,7 +115,7 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
   async function submitReviewComment() {
     setCommentSubmissionError('')
     setSubmitButtonLoading(true)
-    const res = await postResponseComment(entryId, kind, newReviewComment, identifier)
+    const res = await postComment(entryId, kind, newReviewComment, identifier)
     if (res.ok) {
       mutator()
       mutateResponses()

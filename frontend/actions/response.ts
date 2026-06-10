@@ -69,7 +69,7 @@ export async function patchResponseReaction(id: string, kind: ReactionKindKeys) 
   })
 }
 
-export function postResponseComment(modelId: string, kind: ReviewKindKeys, comment: string, identifier?: string) {
+export function postComment(modelId: string, kind: ReviewKindKeys, comment: string, identifier?: string) {
   const queryParams = {
     modelId,
     kind,
