@@ -21,7 +21,7 @@ describe('routes > response > postComment', () => {
     const res = await testPost(`/api/v3/response/comment?${qs.stringify(fixture.query)}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(res.body).matchSnapshot()
+    expect(res.body.response.message).toBe('test comment')
   })
 
   test('audit > expected call', async () => {

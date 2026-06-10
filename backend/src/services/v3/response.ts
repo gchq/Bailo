@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose'
 
-import { ModelAction } from '../../connectors/authorisation/actions.js'
+import { AccessRequestAction, ModelAction, ReleaseAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
 import ReleaseModel from '../../models/Release.js'
@@ -74,38 +74,51 @@ export async function getLatestResponseForReview(reviewId: string) {
   return response
 }
 
-async function resolveCommentParent(user: userInterface, modelId: string, kind: ReviewKindKeys, identifier?: string) {
+async function resolveCommentParent(user: UserInterface, modelId: string, kind: ReviewKindKeys, identifier?: string) {
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw NotFound('The requested model was not found', { modelId })
+  }
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+  }
+
   switch (kind) {
     case ReviewKind.Release: {
       if (!identifier) {
         throw BadReq('A valid semver must be provided for release comments.')
       }
       const semverObj = semverStringToObject(identifier)
-      const release = await ReleaseModel.findOne({ modelId, semver: semverObj })
+      const release = await ReleaseModel.findOne({ modelId: model.id, semver: semverObj })
       if (!release) {
-        throw NotFound(`The requested release was not found.`, { modelId, semver: identifier })
+        throw NotFound(`The requested release was not found.`, { modelId: model.id, semver: identifier })
+      }
+      const auth = await authorisation.release(user, model, ReleaseAction.View, release)
+      if (!auth.success) {
+        throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id, semver: release.semver })
       }
       return release._id
-      break
     }
     case ReviewKind.Access: {
       if (!identifier) {
         throw BadReq('A valid ID must be provided for access request comments.')
       }
-      const accessRequest = await AccessRequestModel.findOne({ modelId, id: identifier })
+      const accessRequest = await AccessRequestModel.findOne({ modelId: model.id, id: identifier })
       if (!accessRequest) {
-        throw NotFound(`The requested access request was not found.`, { modelId, accessRequestId: identifier })
+        throw NotFound(`The requested access request was not found.`, {
+          modelId: model.id,
+          accessRequestId: identifier,
+        })
+      }
+      const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
+      if (!auth.success) {
+        throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id, accessRequestId: accessRequest.id })
       }
       return accessRequest._id
-      break
     }
     case ReviewKind.Lifecycle: {
-      const model = await getModelById(user, modelId)
-      if (!model) {
-        throw NotFound(`The requested model was not found.`, { modelId })
-      }
       return model._id
-      break
     }
     default: {
       const exhaustiveCheck: never = kind
@@ -121,15 +134,6 @@ export async function newComment(
   comment: string,
   identifier?: string,
 ) {
-  const model = await getModelById(user, modelId)
-  if (!model) {
-    throw NotFound('The requested model was not found', { modelId })
-  }
-  const auth = await authorisation.model(user, model, ModelAction.View)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
-  }
-
   const parentId = await resolveCommentParent(user, modelId, kind, identifier)
 
   // Store the response

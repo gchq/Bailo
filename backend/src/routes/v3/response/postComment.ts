@@ -17,7 +17,7 @@ export const postCommentSchema = z.object({
     kind: z.enum(getEnumValues(ReviewKind)).openapi({ example: ReviewKind.Release }),
   }),
   body: z.object({
-    comment: z.string().min(1).max(10000).openapi({ example: 'This is an example comment' }),
+    comment: z.string().trim().min(1).max(10000).openapi({ example: 'This is an example comment' }),
   }),
 })
 
@@ -25,15 +25,15 @@ registerPath({
   method: 'post',
   path: '/api/v3/response/comment',
   tags: ['release'],
-  description: 'Add a comment to a model release.',
+  description: 'Add a comment to a release, access request or model card.',
   schema: postCommentSchema,
   responses: {
     200: {
-      description: 'A release comment instance.',
+      description: 'A comment instance.',
       content: {
         'application/json': {
           schema: z.object({
-            release: responseInterfaceSchema,
+            response: responseInterfaceSchema,
           }),
         },
       },

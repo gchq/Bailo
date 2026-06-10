@@ -48,6 +48,8 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
           return {}
         }
         return { accessRequestId: identifier }
+      default:
+        return {}
     }
   }
 
