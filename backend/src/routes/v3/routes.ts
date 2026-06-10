@@ -7,7 +7,7 @@ import { getComplianceMetrics } from './metrics/getComplianceMetrics.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
 import { getUsageMetrics } from './metrics/getUsageMetrics.js'
 import { getLatestResponse } from './response/getLatestResponseForReview.js'
-import { postComment } from './response/postResponse.js'
+import { postComment } from './response/postComment.js'
 import { postReview } from './review/postReview.js'
 import { postReviewResponse } from './review/postReviewResponse.js'
 

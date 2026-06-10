@@ -12,12 +12,12 @@ import { parse } from '../../../utils/validate.js'
 
 export const postCommentSchema = z.object({
   query: z.object({
-    modelId: z.string(),
-    identifier: z.string().optional(),
-    kind: z.enum(getEnumValues(ReviewKind)),
+    modelId: z.string().openapi({ example: 'test-model-123' }),
+    identifier: z.string().optional().openapi({ example: '1.0.0' }),
+    kind: z.enum(getEnumValues(ReviewKind)).openapi({ example: ReviewKind.Release }),
   }),
   body: z.object({
-    comment: z.string(),
+    comment: z.string().openapi({ example: 'This is an example comment' }),
   }),
 })
 
@@ -53,12 +53,12 @@ export const postComment = [
       body,
     } = parse(req, postCommentSchema)
 
-    const releaseComment = await newComment(req.user, modelId, kind, body.comment, identifier)
+    const comment = await newComment(req.user, modelId, kind, body.comment, identifier)
 
-    await audit.onCreateCommentResponse(req, releaseComment)
+    await audit.onCreateCommentResponse(req, comment)
 
     res.json({
-      response: releaseComment,
+      response: comment,
     })
   },
 ]
