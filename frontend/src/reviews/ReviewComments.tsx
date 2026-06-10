@@ -1,7 +1,5 @@
 import { Box, Button, Divider, Stack } from '@mui/material'
-import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
-import { postReleaseComment, useGetRelease } from 'actions/release'
-import { useGetResponses } from 'actions/response'
+import { postResponseComment, useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
@@ -13,50 +11,51 @@ import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
-import { AccessRequestInterface, ReleaseInterface, ResponseInterface, ResponseKind } from 'types/types'
+import { ResponseInterface, ResponseKind, ReviewKind, ReviewKindKeys } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/arrayUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { reviewResponsesForEachUser } from 'utils/reviewUtils'
 
-type ReviewCommentsProps = {
+interface ReviewCommentsProps {
   isEdit: boolean
-} & (
-  | {
-      release: ReleaseInterface
-      accessRequest?: never
-    }
-  | {
-      release?: never
-      accessRequest: AccessRequestInterface
-    }
-)
+  // The identifier is used for specific releases and access requests
+  identifier?: string
+  parentId: string
+  entryId: string
+  kind: ReviewKindKeys
+  mutator: () => void
+}
 
-export default function ReviewComments({ release, accessRequest, isEdit }: ReviewCommentsProps) {
+export default function ReviewComments({ identifier, entryId, isEdit, mutator, kind, parentId }: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
-  const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const ref = useRef<HTMLDivElement>(null)
   const { asPath } = useRouter()
 
-  const [modelId, semverOrAccessRequestIdObject] = useMemo(
-    () =>
-      release
-        ? [release.modelId, { semver: release.semver }]
-        : [accessRequest.modelId, { accessRequestId: accessRequest.id }],
-    [release, accessRequest],
-  )
+  function getIdentifierFromKind() {
+    switch (kind) {
+      case ReviewKind.RELEASE:
+        return {
+          semver: identifier,
+        }
+      case ReviewKind.ACCESS:
+        return {
+          accessRequestId: identifier,
+        }
+    }
+  }
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId,
-    ...semverOrAccessRequestIdObject,
+    modelId: entryId,
+    kind,
+    ...getIdentifierFromKind(),
   })
   const { responses, isResponsesLoading, isResponsesError, mutateResponses } = useGetResponses([
-    release ? release._id : accessRequest._id,
+    parentId,
     ...reviews.map((review) => review._id),
   ])
 
@@ -79,20 +78,12 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       responses.filter((response) => response.kind === ResponseKind.Review),
     )
     decisionsAndComments.push(...groupedResponses)
-    if (release) {
-      decisionsAndComments = [
-        ...decisionsAndComments,
-        ...responses.filter((response) => response.kind === ResponseKind.Comment),
-      ]
-    }
-    if (accessRequest) {
-      decisionsAndComments = [
-        ...decisionsAndComments,
-        ...responses.filter((response) => response.kind === ResponseKind.Comment),
-      ]
-    }
+    decisionsAndComments = [
+      ...decisionsAndComments,
+      ...responses.filter((response) => response.kind === ResponseKind.Comment),
+    ]
     return decisionsAndComments.sort(sortByCreatedAtAscending)
-  }, [reviews, responses, release, accessRequest])
+  }, [reviews, responses])
 
   const ResponseListItem = memoize(({ data }) => {
     if (data.kind === ResponseKind.Review) {
@@ -100,7 +91,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
         <ReviewDecisionDisplay
           key={data._id}
           response={data}
-          modelId={modelId}
+          modelId={entryId}
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           currentUser={currentUser}
           mutateResponses={mutateResponses}
@@ -122,26 +113,13 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   async function submitReviewComment() {
     setCommentSubmissionError('')
     setSubmitButtonLoading(true)
-    if (release) {
-      const res = await postReleaseComment(modelId, release.semver, newReviewComment)
-      if (res.ok) {
-        mutateRelease()
-        mutateResponses()
-        setNewReviewComment('')
-      } else {
-        setCommentSubmissionError(await getErrorMessage(res))
-      }
-    } else if (accessRequest) {
-      const res = await postAccessRequestComment(accessRequest.modelId, accessRequest.id, newReviewComment)
-      if (res.ok) {
-        mutateAccessRequest()
-        mutateResponses()
-        setNewReviewComment('')
-      } else {
-        setCommentSubmissionError(await getErrorMessage(res))
-      }
+    const res = await postResponseComment(entryId, kind, newReviewComment, identifier)
+    if (res.ok) {
+      mutator()
+      mutateResponses()
+      setNewReviewComment('')
     } else {
-      setCommentSubmissionError('There was a problem submitting this comment, please try again later.')
+      setCommentSubmissionError(await getErrorMessage(res))
     }
     setSubmitButtonLoading(false)
   }

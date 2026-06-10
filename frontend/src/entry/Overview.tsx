@@ -4,8 +4,9 @@ import EntryOverviewDetails from 'src/entry/EntryOverviewDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
+import ReviewComments from 'src/reviews/ReviewComments'
 import { KeyedMutator } from 'swr'
-import { EntryInterface, EntryKind } from 'types/types'
+import { EntryInterface, EntryKind, ReviewKind } from 'types/types'
 
 const OverviewPage = {
   FORM: 'form',
@@ -50,6 +51,15 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
           </Container>
         </Box>
       </Grid>
+      <Box sx={{ maxWidth: 'xl', mx: 'auto', mt: 2 }}>
+        <ReviewComments
+          parentId={entry['_id']}
+          entryId={entry.id}
+          kind={ReviewKind.LIFECYCLE}
+          isEdit={false}
+          mutator={mutateEntry}
+        />
+      </Box>
     </Grid>
   )
 }
