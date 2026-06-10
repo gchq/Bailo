@@ -41,6 +41,7 @@ import log from './log.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
+import { cancelLifecycleJobsForModel } from './schedule/scheduler.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
@@ -269,6 +270,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
           ),
         ),
       ]),
+    // The Mongo implementations for this data is handled using a third-party library so we don't need to pass in the session.
+    () => cancelLifecycleJobsForModel(model.id),
     // Finally, delete the Model
     (session) => model.delete(session),
   ])
