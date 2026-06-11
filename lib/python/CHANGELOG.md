@@ -6,7 +6,7 @@ All dates are formatted dd/mm/yyyy.
 
 ### Changes
 
-- Display Bailo announcements in log, similar to tools like git. These will only be displayed once every 24 hours. This can be disabled with `Client(announcements=False)`.
+- Display Bailo announcements in logger `bailo.announcements`. These will only be displayed once every 24 hours per `Client`. This can be disabled with `Client(announcements=False)`.
 - Update package dependencies.
 
 ## 3.7.2 - 11/05/2026

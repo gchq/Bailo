@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import random
 
 import pytest
@@ -496,18 +497,18 @@ def test_get_ui_config(requests_mock):
     assert result["uiConfig"]["announcement"]["text"] == "Maintenance Saturday"
 
 
-def test_announcement_displayed_on_first_use(requests_mock, capsys):
+def test_announcement_displayed_on_first_use(requests_mock, caplog):
     requests_mock.get("https://example.com/api/v2/config/ui", json=MOCK_UI_CONFIG)
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
-    client.get_model(model_id="test_id")
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        client.get_model(model_id="test_id")
 
-    captured = capsys.readouterr()
-    assert "remote: Maintenance Saturday" in captured.err
+    assert "remote: Maintenance Saturday" in caplog.text
 
 
-def test_announcement_not_displayed_when_disabled(requests_mock, capsys):
+def test_announcement_not_displayed_when_disabled(requests_mock, caplog):
     config = {
         "uiConfig": {"announcement": {"enabled": False, "text": "Hidden", "startTimestamp": "1970-01-01T00:00:00Z"}}
     }
@@ -515,69 +516,67 @@ def test_announcement_not_displayed_when_disabled(requests_mock, capsys):
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
-    client.get_model(model_id="test_id")
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        client.get_model(model_id="test_id")
 
-    captured = capsys.readouterr()
-    assert "remote:" not in captured.err
+    assert "remote:" not in caplog.text
 
 
-def test_announcement_not_displayed_when_empty_text(requests_mock, capsys):
+def test_announcement_not_displayed_when_empty_text(requests_mock, caplog):
     config = {"uiConfig": {"announcement": {"enabled": True, "text": "", "startTimestamp": "1970-01-01T00:00:00Z"}}}
     requests_mock.get("https://example.com/api/v2/config/ui", json=config)
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
-    client.get_model(model_id="test_id")
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        client.get_model(model_id="test_id")
 
-    captured = capsys.readouterr()
-    assert "remote:" not in captured.err
+    assert "remote:" not in caplog.text
 
 
-def test_announcement_not_future_timestamp(requests_mock, capsys):
-    config = {"uiConfig": {"announcement": {"enabled": True, "text": "", "startTimestamp": "2099-01-01T00:00:00Z"}}}
+def test_announcement_not_future_timestamp(requests_mock, caplog):
+    config = {"uiConfig": {"announcement": {"enabled": True, "text": "text", "startTimestamp": "2099-01-01T00:00:00Z"}}}
     requests_mock.get("https://example.com/api/v2/config/ui", json=config)
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
-    client.get_model(model_id="test_id")
-    capsys.readouterr()
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        client.get_model(model_id="test_id")
 
-    client._last_announcement_check = None
-    client.get_model(model_id="test_id")
+        client._last_announcement_check = None
+        client.get_model(model_id="test_id")
 
-    captured = capsys.readouterr()
-    assert "remote:" not in captured.err
+    assert "remote:" not in caplog.text
 
 
-def test_announcement_redisplayed_on_new_timestamp(requests_mock, capsys):
+def test_announcement_redisplayed_on_new_timestamp(requests_mock, caplog):
     requests_mock.get("https://example.com/api/v2/config/ui", json=MOCK_UI_CONFIG)
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
     client.get_model(model_id="test_id")
-    capsys.readouterr()
 
     updated_config = {
         "uiConfig": {"announcement": {"enabled": True, "text": "V2 notice", "startTimestamp": "1970-06-01T00:00:00Z"}}
     }
     requests_mock.get("https://example.com/api/v2/config/ui", json=updated_config)
     client._last_announcement_check = None
-    client.get_model(model_id="test_id")
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        client.get_model(model_id="test_id")
 
-    captured = capsys.readouterr()
-    assert "remote: V2 notice" in captured.err
+    assert "remote: V2 notice" in caplog.text
 
 
-def test_announcement_failure_silent(requests_mock, capsys):
+def test_announcement_failure_silent(requests_mock, caplog):
     requests_mock.get("https://example.com/api/v2/config/ui", status_code=500)
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
-    result = client.get_model(model_id="test_id")
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        result = client.get_model(model_id="test_id")
 
     assert result == mock_result
-    captured = capsys.readouterr()
-    assert "remote:" not in captured.err
+    assert "remote:" not in caplog.text
 
 
 def test_announcement_opt_out(requests_mock):
@@ -590,7 +589,7 @@ def test_announcement_opt_out(requests_mock):
     assert not any("config/ui" in h.url for h in requests_mock.request_history)
 
 
-def test_announcement_multiline(requests_mock, capsys):
+def test_announcement_multiline(requests_mock, caplog):
     config = {
         "uiConfig": {
             "announcement": {
@@ -604,10 +603,12 @@ def test_announcement_multiline(requests_mock, capsys):
     requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
 
     client = Client("https://example.com")
-    client.get_model(model_id="test_id")
+    with caplog.at_level(logging.INFO, logger="bailo.announcements"):
+        client.get_model(model_id="test_id")
 
-    captured = capsys.readouterr()
-    assert "remote: Line 1\nremote: Line 2\nremote: Line 3\n" in captured.err
+    assert "remote: Line 1\n" in caplog.text
+    assert "remote: Line 2\n" in caplog.text
+    assert "remote: Line 3\n" in caplog.text
 
 
 def test_announcement_no_recheck_within_24h(requests_mock):

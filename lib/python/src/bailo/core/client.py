@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-import sys
+import threading
 import time
 from io import BytesIO
 from typing import Any
@@ -12,6 +12,8 @@ from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, Sche
 from bailo.core.utils import filter_none, normalise_query_params
 
 logger = logging.getLogger(__name__)
+# Give users a clean way to suppress/reformat announcements without affecting debug/error logs
+announcement_logger = logging.getLogger("bailo.announcements")
 
 
 class Client:
@@ -34,12 +36,12 @@ class Client:
         self._agent = agent or Agent()
         self._announcements_enabled = announcements
         self._last_announcement_check: float | None = None
-        self._checking_announcement = False
+        self._announcement_lock = threading.Lock()
 
     @property
     def agent(self) -> Agent:
         """Return the HTTP agent, checking for announcements periodically."""
-        if self._announcements_enabled and not self._checking_announcement:
+        if self._announcements_enabled:
             self._maybe_check_announcement()
         return self._agent
 
@@ -59,31 +61,29 @@ class Client:
 
     def _check_announcement(self) -> None:
         """Fetch the server announcement and print it to stderr if enabled and current."""
-        self._checking_announcement = True
-        try:
-            response = self._agent.get(f"{self.url}/v2/config/ui").json()
-            announcement = response.get("uiConfig", {}).get("announcement", {})
+        with self._announcement_lock:
+            try:
+                response = self._agent.get(f"{self.url}/v2/config/ui").json()
+                announcement = response.get("uiConfig", {}).get("announcement", {})
 
-            if not announcement.get("enabled", False):
-                return
+                if not announcement.get("enabled", False):
+                    return
 
-            text = announcement.get("text", "")
-            if not text:
-                return
+                text = announcement.get("text", "")
+                if not text:
+                    return
 
-            start_timestamp = announcement.get("startTimestamp", "")
-            # Python 3.10 support - see https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat for origin
-            start_timestamp = start_timestamp.replace("Z", "+00:00")
-            now = datetime.datetime.now(datetime.timezone.utc)
-            if not start_timestamp == "" and now < datetime.datetime.fromisoformat(start_timestamp):
-                return
+                start_timestamp = announcement.get("startTimestamp", "")
+                # Python 3.10 support - see https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat for origin
+                start_timestamp = start_timestamp.replace("Z", "+00:00")
+                now = datetime.datetime.now(datetime.timezone.utc)
+                if not start_timestamp == "" and now < datetime.datetime.fromisoformat(start_timestamp):
+                    return
 
-            for line in text.splitlines():
-                print(f"remote: {line}", file=sys.stderr)
-        except Exception:  # pylint: disable=broad-exception-caught
-            logger.debug("Failed to check for server announcements", exc_info=True)
-        finally:
-            self._checking_announcement = False
+                for line in text.splitlines():
+                    announcement_logger.info("remote: %s", line)
+            except Exception:  # pylint: disable=broad-exception-caught
+                logger.debug("Failed to check for server announcements", exc_info=True)
 
     def get_ui_config(self):
         """Retrieve the UI configuration from the server.
