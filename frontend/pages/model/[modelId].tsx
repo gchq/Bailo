@@ -8,7 +8,6 @@ import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
-import EntryDiscussion from 'src/entry/model/EntryDiscussion'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
@@ -41,11 +40,6 @@ export default function Model() {
               title: 'Overview',
               path: 'overview',
               view: <Overview entry={entry} mutateEntry={mutateEntry} />,
-            },
-            {
-              title: 'Discussion',
-              path: 'discussion',
-              view: <EntryDiscussion entry={entry} mutateEntry={mutateEntry} />,
             },
             {
               title: 'Releases',
