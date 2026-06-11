@@ -49,7 +49,7 @@ class Client:
 
     def _maybe_check_announcement(self) -> None:
         """Check for announcements if enough time has elapsed since the last check."""
-        now = time.monotonic()
+        now = time.time()
         if (
             self._last_announcement_check is None
             or (now - self._last_announcement_check) >= self._ANNOUNCEMENT_CHECK_INTERVAL
