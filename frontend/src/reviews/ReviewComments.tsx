@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Stack } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { postComment, useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
@@ -24,9 +24,18 @@ interface ReviewCommentsProps {
   entryId: string
   kind: ReviewKindKeys
   mutator: () => void
+  showComments?: boolean
 }
 
-export default function ReviewComments({ identifier, entryId, isEdit, mutator, kind, parentId }: ReviewCommentsProps) {
+export default function ReviewComments({
+  identifier,
+  entryId,
+  isEdit,
+  mutator,
+  kind,
+  parentId,
+  showComments = true,
+}: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
@@ -69,12 +78,6 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
     }
   }, [asPath, isResponsesLoading, ref])
 
-  const hasResponseOrComment = useMemo(() => {
-    const hasReviewResponse = !!responses.find((response) => response.kind === ResponseKind.Review)
-    const hasComment = !!responses.find((response) => response.kind === ResponseKind.Comment)
-    return hasReviewResponse || hasComment
-  }, [responses])
-
   const reviewDetails = useMemo(() => {
     let decisionsAndComments: Array<ResponseInterface> = []
     const groupedResponses = reviewResponsesForEachUser(
@@ -82,12 +85,14 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
       responses.filter((response) => response.kind === ResponseKind.Review),
     )
     decisionsAndComments.push(...groupedResponses)
-    decisionsAndComments = [
-      ...decisionsAndComments,
-      ...responses.filter((response) => response.kind === ResponseKind.Comment),
-    ]
+    if (showComments) {
+      decisionsAndComments = [
+        ...decisionsAndComments,
+        ...responses.filter((response) => response.kind === ResponseKind.Comment),
+      ]
+    }
     return decisionsAndComments.sort(sortByCreatedAtAscending)
-  }, [reviews, responses])
+  }, [reviews, responses, showComments])
 
   const ResponseListItem = memoize(({ data }) => {
     if (data.kind === ResponseKind.Review) {
@@ -142,7 +147,6 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
 
   return (
     <Stack spacing={2} ref={ref}>
-      {(hasResponseOrComment || !isEdit) && <Divider />}
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
       <Paginate
         list={reviewDetails}
@@ -157,7 +161,7 @@ export default function ReviewComments({ identifier, entryId, isEdit, mutator, k
       >
         {ResponseListItem}
       </Paginate>
-      {!isEdit && (
+      {!isEdit && showComments && (
         <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
           <Box sx={{ width: '100%' }}>
             <RichTextEditor
