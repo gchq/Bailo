@@ -102,7 +102,7 @@ describe('services > accessRequest', () => {
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.UntrustedModel } as any)
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
-    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       'Cannot create an access request for an untrusted model.',
     )
   })
