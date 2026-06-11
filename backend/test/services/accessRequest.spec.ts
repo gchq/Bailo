@@ -38,7 +38,7 @@ const mockAuthentication = vi.hoisted(() => ({
   hasRole: vi.fn(),
   getEntities: vi.fn(() => ['user:testUser']),
 }))
-vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
+vi.mock('../../src/connectors/authentication/index.js', () => ({ default: mockAuthentication }))
 
 const mockReviewService = vi.hoisted(() => ({
   createAccessRequestReviews: vi.fn(),
@@ -52,7 +52,7 @@ const mockResponseService = vi.hoisted(() => ({
 vi.mock('../../src/services/response.js', () => mockResponseService)
 
 const mockWebhookService = vi.hoisted(() => ({
-  sendWebhooks: vi.fn(),
+  dispatchWebhooks: vi.fn(),
 }))
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
@@ -74,7 +74,7 @@ describe('services > accessRequest', () => {
     expect(AccessRequestModelMock.save).toHaveBeenCalled()
     expect(AccessRequestModelMock).toHaveBeenCalled()
     expect(mockReviewService.createAccessRequestReviews).toHaveBeenCalled()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalled()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalled()
   })
 
   test('createAccessRequest > bad authorisation', async () => {

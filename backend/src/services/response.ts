@@ -19,7 +19,7 @@ import log from './log.js'
 import { getReleaseBySemver } from './release.js'
 import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
 import { notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export async function findResponseById(responseId: string) {
   const response = await ResponseModel.findOne({
@@ -71,7 +71,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
 
   response.comment = comment
   response.commentEditedAt = new Date().toISOString()
-  response.save()
+  await response.save()
 
   return response
 }
@@ -141,7 +141,7 @@ export async function respondToReview(
   await reviewResponse.save()
   await sendReviewResponseNotification(review, reviewResponse, user)
 
-  sendWebhooks(
+  dispatchWebhooks(
     review.modelId,
     WebhookEvent.CreateReviewResponse,
     `A new response has been added to a review requested for Model ${review.modelId}`,
