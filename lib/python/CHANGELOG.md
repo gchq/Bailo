@@ -2,10 +2,19 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.7.2 - dd/mm/2026
+## 3.8.0 - dd/mm/2026
+
+### Changes
+
+- Display Bailo announcements in log, similar to tools like git. These will only be displayed once every 24 hours. This can be disabled with `Client(announcements=False)`.
+- Update package dependencies.
+
+## 3.7.2 - 11/05/2026
+
+### Changes
 
 - Fix boolean to string conversion for API requests.
-- Extend unit & integration test coverage
+- Extend unit & integration test coverage.
 
 ## 3.7.1 - 27/04/2026
 

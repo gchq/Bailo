@@ -15,6 +15,16 @@ from example_schemas import METRICS_JSON_SCHEMA
 
 mock_result = {"success": True}
 
+MOCK_UI_CONFIG = {
+    "uiConfig": {
+        "announcement": {
+            "enabled": True,
+            "text": "Maintenance Saturday",
+            "startTimestamp": "1970-01-01T00:00:00Z",
+        }
+    }
+}
+
 
 def test_bailo_exception(requests_mock):
     requests_mock.get(
@@ -475,6 +485,145 @@ def test_put_image_scan(requests_mock):
     result = client.put_image_scan(model_id="test_model_id", image_name="test_image_name", image_tag="test_image_tag")
 
     assert result == {"status": "Scan started"}
+
+
+def test_get_ui_config(requests_mock):
+    requests_mock.get("https://example.com/api/v2/config/ui", json=MOCK_UI_CONFIG)
+
+    client = Client("https://example.com", announcements=False)
+    result = client.get_ui_config()
+
+    assert result["uiConfig"]["announcement"]["text"] == "Maintenance Saturday"
+
+
+def test_announcement_displayed_on_first_use(requests_mock, capsys):
+    requests_mock.get("https://example.com/api/v2/config/ui", json=MOCK_UI_CONFIG)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+
+    captured = capsys.readouterr()
+    assert "remote: Maintenance Saturday" in captured.err
+
+
+def test_announcement_not_displayed_when_disabled(requests_mock, capsys):
+    config = {
+        "uiConfig": {"announcement": {"enabled": False, "text": "Hidden", "startTimestamp": "1970-01-01T00:00:00Z"}}
+    }
+    requests_mock.get("https://example.com/api/v2/config/ui", json=config)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+
+    captured = capsys.readouterr()
+    assert "remote:" not in captured.err
+
+
+def test_announcement_not_displayed_when_empty_text(requests_mock, capsys):
+    config = {"uiConfig": {"announcement": {"enabled": True, "text": "", "startTimestamp": "1970-01-01T00:00:00Z"}}}
+    requests_mock.get("https://example.com/api/v2/config/ui", json=config)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+
+    captured = capsys.readouterr()
+    assert "remote:" not in captured.err
+
+
+def test_announcement_not_future_timestamp(requests_mock, capsys):
+    config = {"uiConfig": {"announcement": {"enabled": True, "text": "", "startTimestamp": "2099-01-01T00:00:00Z"}}}
+    requests_mock.get("https://example.com/api/v2/config/ui", json=config)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+    capsys.readouterr()
+
+    client._last_announcement_check = None
+    client.get_model(model_id="test_id")
+
+    captured = capsys.readouterr()
+    assert "remote:" not in captured.err
+
+
+def test_announcement_redisplayed_on_new_timestamp(requests_mock, capsys):
+    requests_mock.get("https://example.com/api/v2/config/ui", json=MOCK_UI_CONFIG)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+    capsys.readouterr()
+
+    updated_config = {
+        "uiConfig": {"announcement": {"enabled": True, "text": "V2 notice", "startTimestamp": "1970-06-01T00:00:00Z"}}
+    }
+    requests_mock.get("https://example.com/api/v2/config/ui", json=updated_config)
+    client._last_announcement_check = None
+    client.get_model(model_id="test_id")
+
+    captured = capsys.readouterr()
+    assert "remote: V2 notice" in captured.err
+
+
+def test_announcement_failure_silent(requests_mock, capsys):
+    requests_mock.get("https://example.com/api/v2/config/ui", status_code=500)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    result = client.get_model(model_id="test_id")
+
+    assert result == mock_result
+    captured = capsys.readouterr()
+    assert "remote:" not in captured.err
+
+
+def test_announcement_opt_out(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com", announcements=False)
+    result = client.get_model(model_id="test_id")
+
+    assert result == mock_result
+    assert not any("config/ui" in h.url for h in requests_mock.request_history)
+
+
+def test_announcement_multiline(requests_mock, capsys):
+    config = {
+        "uiConfig": {
+            "announcement": {
+                "enabled": True,
+                "text": "Line 1\nLine 2\nLine 3",
+                "startTimestamp": "1970-01-01T00:00:00Z",
+            }
+        }
+    }
+    requests_mock.get("https://example.com/api/v2/config/ui", json=config)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+
+    captured = capsys.readouterr()
+    assert "remote: Line 1\nremote: Line 2\nremote: Line 3\n" in captured.err
+
+
+def test_announcement_no_recheck_within_24h(requests_mock):
+    requests_mock.get("https://example.com/api/v2/config/ui", json=MOCK_UI_CONFIG)
+    requests_mock.get("https://example.com/api/v2/model/test_id", json=mock_result)
+
+    client = Client("https://example.com")
+    client.get_model(model_id="test_id")
+
+    config_calls = sum(1 for h in requests_mock.request_history if "config/ui" in h.url)
+    assert config_calls == 1
+
+    client.get_model(model_id="test_id")
+
+    config_calls = sum(1 for h in requests_mock.request_history if "config/ui" in h.url)
+    assert config_calls == 1
 
 
 @pytest.mark.integration
