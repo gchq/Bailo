@@ -72,6 +72,8 @@ class Client:
                 return
 
             start_timestamp = announcement.get("startTimestamp", "")
+            # Python 3.10 support - see https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat for origin
+            start_timestamp = start_timestamp.replace("Z", "+00:00")
             now = datetime.datetime.now(datetime.timezone.utc)
             if not start_timestamp == "" and now < datetime.datetime.fromisoformat(start_timestamp):
                 return
