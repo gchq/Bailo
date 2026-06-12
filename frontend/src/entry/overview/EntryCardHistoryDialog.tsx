@@ -48,7 +48,7 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
   return (
     <>
       {isEntryCardRevisionsLoading && <Loading />}
-      <Dialog open onClose={() => setOpen(false)} fullWidth maxWidth='sm' TransitionComponent={Transition}>
+      <Dialog open onClose={() => setOpen(false)} fullWidth maxWidth='sm' slots={{ transition: Transition }}>
         <DialogTitle>
           {`${toTitleCase(EntryCardKindLabel[entry.kind])} History - `}
           <span style={{ color: theme.palette.primary.main }}>{entry.name}</span>

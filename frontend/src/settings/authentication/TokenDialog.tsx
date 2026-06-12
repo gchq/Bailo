@@ -52,8 +52,8 @@ export default function TokenDialog({ token }: TokenDialogProps) {
       fullWidth
       maxWidth='xl'
       open={!!token}
-      PaperProps={{ sx: { height: '90vh' } }}
-      TransitionComponent={Transition}
+      slotProps={{ paper: { sx: { height: '90vh' } } }}
+      slots={{ transition: Transition }}
     >
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>

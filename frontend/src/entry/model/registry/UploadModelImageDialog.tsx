@@ -40,7 +40,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
     <>
       {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
       {uiConfig && currentUser && (
-        <Dialog open={open} onClose={handleClose} TransitionComponent={Transition}>
+        <Dialog open={open} onClose={handleClose} slots={{ transition: Transition }}>
           <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
           <DialogContent>
             <Stack spacing={2}>
