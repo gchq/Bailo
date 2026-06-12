@@ -1,0 +1,133 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Understanding the Review Process
+
+Reviews are Bailo's governance mechanism. They ensure that models, access requests, and model card lifecycle checks are
+examined by the right people before they are approved or completed. This page explains how the review system works
+end-to-end.
+
+> **Common questions this page answers:**
+>
+> - How do reviews work in Bailo?
+> - Who reviews my release?
+> - Who reviews my model card lifecycle review?
+> - What triggers a review?
+> - What happens when a reviewer requests changes?
+
+## What triggers a review?
+
+Reviews are created automatically when:
+
+- A **release** is created for a model - the release enters review and must be approved before it is considered final
+- An **access request** is submitted - the request must be approved before the user gains download or pull permissions
+- A **model card lifecycle review date** is set - the model owner is prompted to confirm that the model card remains
+  accurate and up to date
+
+You do not need to manually create release or access request reviews. The system handles these based on the review roles
+configured on the model. Lifecycle reviews are created from the review due date set on the model card.
+
+## Who reviews what?
+
+Review assignments depend on the schema's review roles, the model owner's reviewer assignments, and the type of
+submission:
+
+1. **The schema** attached to the model defines which review roles are required (e.g. "Model Technical Reviewer", "Model
+   Senior Responsible Officer")
+2. **The model owner** assigns specific people or groups to each review role in the model's Settings tab
+3. **The type of submission** determines which roles participate:
+   - **Release reviews**: All assigned review roles participate
+   - **Access request reviews**: Typically only specific roles (commonly the Model Senior Responsible Officer, or MSRO)
+     participate
+   - **Model card lifecycle reviews**: Model owners, or another user responsible for maintaining the model card,
+     complete the review
+
+## The review lifecycle
+
+The review lifecycle follows a structured flow from submission through reviewer evaluation to approval or change
+requests.
+
+### For releases
+
+1. A model owner or contributor creates a new release
+2. Bailo creates review tasks for each required review role
+3. Assigned reviewers are notified
+4. Each reviewer examines the release and the model card, then either:
+   - **Approves** - confirms the release meets their requirements
+   - **Requests changes** - explains what needs to be fixed
+5. If changes are requested, the model owner updates the release and the reviewer re-evaluates
+6. Once **all** required review roles have approved, the release is fully approved
+
+### For access requests
+
+1. A user submits an access request for a model
+2. Bailo creates a review task for the appropriate review role(s)
+3. The reviewer examines the request details and either approves or requests changes
+4. Once approved, the requesting user gains the permissions to download files and pull images
+
+### For model card lifecycle reviews
+
+1. A model owner sets a review due date in the model card **Details** section on the model's **Overview** tab
+2. Bailo creates a lifecycle review for the model card
+3. The model owner is notified nearer the review date
+4. The model owner checks that the model card is still accurate, complete, and up to date
+5. If information is missing or outdated, the model owner updates the model card
+6. The model owner approves the lifecycle review and sets a new review due date
+
+## Checking your reviews
+
+You can see all reviews assigned to you from the Reviews page in the navigation bar:
+
+1. Click **Review** in the navigation bar
+2. The **Your open reviews** tab shows reviews waiting for your action, with a count badge
+3. The **Your archived reviews** tab shows completed reviews
+
+Lifecycle reviews can also be opened from the model's **Overview** tab by using the **Review** button in the model card
+**Details** panel.
+
+## Responding to a review
+
+Reviewers examine the submission, add comments, and choose to approve or request changes:
+
+1. Open the review from the Reviews page or from the model's release, access request, or model card page
+2. Examine the submission - for releases, review the model card and attached artefacts; for lifecycle reviews, check
+   that the model card remains accurate and up to date
+3. Add a **comment** explaining your assessment
+4. Choose your decision:
+   - **Approve** - you are satisfied with the submission
+   - **Request changes** - something needs to be addressed before you can approve
+5. Submit your response
+
+You can also react to other reviewers' comments to indicate agreement or add further context.
+
+## Review outcomes
+
+A review can result in one of three outcomes.
+
+- **Approved** - All required review roles have approved. The release access request, or model card lifecycle review is
+  finalised.
+- **Changes requested** - One or more reviewers need something addressed. The submitter should update and resubmit
+- **Pending** - The review is still in progress. Not all required roles have responded yet
+
+## Tips for model owners
+
+These tips help model owners prepare for smoother reviews.
+
+- **Assign reviewers early** - set up review role assignments in your model's Settings tab before creating your first
+  release
+- **Provide thorough model cards** - the more detail you provide, the faster reviews will go
+- **Monitor your reviews** - check the Reviews page regularly or watch for email notifications
+- **Set lifecycle review dates** - use model card lifecycle reviews to periodically confirm that model documentation
+  remains accurate
+
+## Related pages
+
+- [Reviewing a Release](/docs/users/reviews/reviewing/releases) - Step-by-step guide for reviewers
+- [Reviewing an Access Request](/docs/users/reviews/reviewing/access) - How to review access requests
+- [Reviewing a Model Card Lifecycle Review](/docs/users/reviews/reviewing/model-lifecycle) - How to complete lifecycle
+  reviews
+- [Review Outcomes](/docs/users/reviews/review-outcomes) - What happens after reviews are approved or changed
+- [Roles & Permissions](/docs/reference/roles-and-permissions) - Understanding review roles and system roles
+- [Managing Review Roles](/docs/administration/review-roles/managing-review-roles) - Creating and configuring review
+  roles (administrators)
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

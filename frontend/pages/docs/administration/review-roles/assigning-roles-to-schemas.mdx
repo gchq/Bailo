@@ -1,0 +1,88 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Assigning Review Roles to Schemas
+
+> **Common questions this page answers:**
+>
+> - How do I attach review roles to a schema?
+> - What happens when I change role assignments on a schema?
+> - How do review roles propagate from schemas to models?
+
+Review roles and schemas work together to define your governance process. When you attach review roles to a schema,
+every model that uses that schema will require those roles to approve releases and access requests.
+
+## How the connection works
+
+Review roles are attached to schemas, and models inherit role requirements when they select a schema.
+
+```
+Review Role ──attached to──> Schema ──selected by──> Model
+```
+
+1. An administrator creates review roles (e.g. "Model Technical Reviewer (MTR)", "Model Senior Responsible Officer
+   (MSRO)")
+2. Those roles are attached to a schema when the schema is created or edited
+3. When a model owner selects that schema, the model inherits the review role requirements
+4. The model owner then assigns specific people to each review role on their model
+
+## Attaching roles during schema creation
+
+Select review roles during schema creation from the Default Review Roles section:
+
+1. Navigate to **Schemas** from the navigation sidebar
+2. Click **Upload a new schema**
+3. Fill in the schema details (ID, name, description, type, uploaded JSON schema file)
+4. In the **Default Review Roles** section, select which roles this schema requires
+5. Upload the schema
+
+## Attaching roles to an existing schema
+
+Modify review role requirements on existing schemas from the schema's Actions menu:
+
+1. Navigate to **Schemas** from the navigation sidebar
+2. Select the schema you want to edit
+3. In the **Actions** menu, click **Update review roles**
+4. Make your selection
+5. **Save** your changes
+
+## What happens when you change role assignments
+
+Changes to role assignments on a schema affect both existing and new models using that schema:
+
+- **Existing models** using that schema are affected - they will need the updated set of reviewers
+- **New models** created with the schema will inherit the current role requirements
+- Model owners may need to assign people to any newly added roles
+
+## Best practices
+
+Plan role assignments before creating schemas and use consistent roles across related schemas.
+
+- **Plan role assignments before creating schemas** - It's easier to set up roles correctly from the start than to
+  change them later
+- **Use consistent roles across related schemas** - If you have multiple model card schemas, using the same review roles
+  makes the governance process predictable
+- **Document role expectations** - Use the review role description field to clearly explain what each reviewer should
+  check
+
+## Example configuration
+
+A typical governance setup:
+
+1. Create two review roles:
+   - **Model Technical Reviewer (MTR)** - reviews technical quality
+   - **Model Senior Responsible Officer (MSRO)** - reviews governance and compliance
+2. Create a model card schema and attach both MTR and MSRO
+3. Create an access request schema and attach MSRO only
+
+This means:
+
+- Every release requires both technical and governance approval
+- Access requests only need governance approval
+
+## Related pages
+
+- [Managing Review Roles](/docs/administration/review-roles/managing-review-roles) - Creating and editing roles
+- [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - How schemas work
+- [Uploading a Schema](/docs/administration/schemas/upload-a-schema) - Uploading a schema to Bailo
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

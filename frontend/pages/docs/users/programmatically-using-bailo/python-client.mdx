@@ -2,35 +2,253 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Python Client
 
-Bailo provides a Python client that wraps key API endpoints. The package is published on
-[PyPI](https://pypi.org/project/bailo/).
+Bailo provides a Python client that wraps the API (Application Programming Interface) into high-level helper classes.
+The package is published on [PyPI (Python Package Index)](https://pypi.org/project/bailo/).
 
-**You can find the full Python documentation [here](../../python/index.html).**
+> **Common questions this page answers:**
+>
+> - How do I use the Bailo Python client?
+> - How do I create a model programmatically?
+> - How do I upload files and create releases with Python?
+> - How do I authenticate the Python client?
+
+**Full API documentation is available [here](../../python/index.html).**
 
 ## Installation
+
+Install the Bailo Python client from PyPI using pip.
 
 ```bash
 pip install bailo
 ```
 
-## Why use the Python Client?
-
-The Python client integrates cleanly with Python tooling and is ideal for:
-
-- Notebooks and experimentation
-- Automation and scripting
-- Integrating Bailo into ML workflows
-
-### Scripting and Automation
-
-This Python Client provides a better way to add additional Bailo functionality to projects.
-
-### Using Bailo with MLflow
-
-Optional extras are provided for integration with [MLflow](https://mlflow.org/docs/latest/ml/).
+For MLflow integration:
 
 ```bash
 pip install bailo[mlflow]
 ```
+
+## Authentication
+
+Before using the client, configure authentication using either PKI (Public Key Infrastructure) certificates or Personal
+Access Tokens.
+
+### PKI certificate authentication (Recommended)
+
+Use a client certificate for mutual TLS:
+
+```python
+from bailo import Client, PkiAgent
+
+agent = PkiAgent(
+    cert="path/to/client-cert.pem",
+    key="path/to/client-key.pem",
+    auth="path/to/ca-cert.pem",
+)
+client = Client(
+    url="https://your-bailo-instance.com",
+    agent=agent,
+)
+```
+
+### Token-based Authentication
+
+Use a Personal Access Token created in Bailo's Settings page:
+
+```python
+from bailo import Client, TokenAgent
+
+agent = TokenAgent(
+    access_key="your-access-key",
+    secret_key="your-secret-key",
+)
+client = Client(
+    url="https://your-bailo-instance.com",
+    agent=agent,
+)
+```
+
+## Helper classes
+
+The Python client provides high-level helper classes that simplify common workflows.
+
+- **Model** - Create, retrieve, and manage models
+- **Datacard** - Create and manage data cards
+- **Release** - Create versioned releases with files and images
+- **AccessRequest** - Submit and manage access requests
+- **Schema** - Create and retrieve schemas
+- **Experiment** - Track experiments and metrics
+
+## Common workflows
+
+These examples show the most common tasks you can perform with the Python client.
+
+### Creating a model
+
+```python
+from bailo import Client, Model, TokenAgent
+
+agent = TokenAgent(access_key="...", secret_key="...")
+client = Client(url="https://your-bailo-instance.com", agent=agent)
+
+# Create a new model
+model = Model.create(
+    client=client,
+    name="My Image Classifier",
+    description="A CNN for image classification",
+)
+
+print(f"Model created with ID: {model.model_id}")
+
+# Set up the model card from a schema
+model.card_from_schema(schema_id="your-schema-id")
+
+# Update the model card metadata
+model.update_model_card(metadata={
+    "overview": {
+        "tags": ["image-classification", "cnn"],
+    }
+})
+```
+
+### Creating a release and uploading files
+
+```python
+from bailo import Release
+
+# Upload a file to the model
+with open("model_weights.pt", "rb") as f:
+    model_file_id = client.simple_upload(
+        model_id=model.model_id,
+        name="model_weights.pt",
+        buffer=f,
+    )
+
+# Create a release
+release = Release.create(
+    client=client,
+    model_id=model.model_id,
+    version="1.0.0",
+    notes="Initial release with trained weights",
+    model_card_version=model.card_version,
+    files=[model_file_id],
+    draft=True,
+)
+
+print(f"Release {release.version} created")
+```
+
+### Downloading files
+
+```python
+# Download a specific file
+release.download("model_weights.pt", output_dir="./downloads")
+
+# Download all files from a release
+release.download_all(output_dir="./downloads")
+```
+
+### Managing access requests
+
+```python
+from bailo import AccessRequest
+
+# Create an access request
+access_request = AccessRequest.create(
+    client=client,
+    model_id="target-model-id",
+    schema_id="access-request-schema-id",
+    metadata={
+        "overview": {
+            "name": "Research access",
+            "entities": ["user:your-username"],
+        }
+    },
+)
+```
+
+### Working with data cards
+
+```python
+from bailo import Datacard
+
+# Create a data card
+data_card = Datacard.create(
+    client=client,
+    name="Training Dataset v2",
+    description="Curated training data for image classification",
+)
+
+# Set up data card from a schema
+data_card.card_from_schema(schema_id="data-card-schema-id")
+```
+
+### Working with schemas
+
+```python
+from bailo import Schema
+
+# Get all available model schemas
+schemas = Schema.get_all(client=client, kind="model")
+
+for schema in schemas:
+    print(f"{schema.name} (ID: {schema.schema_id})")
+
+# Create a new schema
+schema = Schema.create(
+    client=client,
+    schema_id="my-new-schema",
+    name="My Model Card Schema",
+    description="Custom schema for our team's models",
+    kind="model",
+    json_schema={"type": "object", "properties": {...}},
+)
+```
+
+## Jupyter notebook examples
+
+Detailed, runnable examples are available as Jupyter notebooks in the Bailo repository.
+
+- [Models and Releases (PyTorch)](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html) - End-to-end model
+  creation, file upload, and release management
+- [Access Requests](/docs/python/notebooks/access_requests_demo/index.html) - Submitting and managing access requests
+- [Data Cards](/docs/python/notebooks/datacards_demo/index.html) - Creating and updating data cards
+- [Schemas](/docs/python/notebooks/schemas_demo/index.html) - Schema creation and management
+- [Experiment Tracking](/docs/python/notebooks/experiment_tracking_demo/index.html) - Tracking experiments and metrics
+
+## MLflow integration
+
+The optional MLflow integration allows you to log models from MLflow directly to Bailo.
+
+```bash
+pip install bailo[mlflow]
+```
+
+This enables workflows where you train a model using MLflow's tracking capabilities and then publish the resulting
+artefacts to Bailo for governance and distribution.
+
+## Low-Level Client Methods
+
+For advanced use cases, the `Client` class exposes lower-level methods that map directly to API endpoints.
+
+- **Models** - `post_model`, `get_model`, `get_models`, `patch_model`, `delete_model`
+- **Model Cards** - `get_model_card`, `put_model_card`, `model_card_from_schema`, `model_card_from_template`
+- **Releases** - `post_release`, `get_release`, `get_all_releases`, `put_release`, `delete_release`
+- **Files** - `simple_upload`, `get_files`, `get_download_file`, `get_download_by_filename`, `delete_file`
+- **Access Requests** - `post_access_request`, `get_access_request`, `get_access_requests`, `patch_access_request`,
+  `delete_access_request`
+- **Schemas** - `get_all_schemas`, `get_schema`, `post_schema`
+- **Reviews** - `get_reviews`, `post_release_review`, `post_access_request_review`
+- **Scanning** - `put_file_scan`, `put_image_scan`
+- **Roles** - `get_model_roles`
+
+Refer to the [full API documentation](../../python/index.html) for detailed method signatures and parameters.
+
+## Related pages
+
+- [Authentication](/docs/users/programmatically-using-bailo/authentication) - Detailed authentication setup
+- [Personal Access Tokens](/docs/users/programmatically-using-bailo/personal-access-tokens) - Creating tokens for API
+  access
+- [OpenAPI Reference](/docs/users/programmatically-using-bailo/open-api) - REST API documentation
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -1,0 +1,88 @@
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+import bailoMarketIcon from 'public/docs/bailo_market_icon.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Creating a Model
+
+This guide walks you through creating a new model in Bailo, from the initial setup through to selecting a schema and
+filling in the model card.
+
+> **Common questions this page answers:**
+>
+> - How do I create a new model in Bailo?
+> - What entry types are available?
+> - How do I choose between public and private visibility?
+
+## Choosing an entry type
+
+Bailo supports four entry types. Select the one that matches your use case.
+
+Click the **+ Create** button in the navigation bar. You'll see the available entry types:
+
+- **Model** - A standard machine learning model with full lifecycle management
+- **Mirrored Model** - A read-only copy of a model from an external source (see
+  [Model Mirroring](/docs/users/model-mirroring/creating-a-mirrored-model))
+- **Untrusted Model** - A model requiring additional scrutiny (if enabled - see
+  [Untrusted Models](/docs/users/untrusted-models))
+- **Data Card** - Documentation for a dataset (see [Creating a Data Card](/docs/users/data-cards/creating-a-data-card))
+
+Select **Model** to create a standard model.
+
+## Basic details
+
+Every model requires a name, description, and visibility setting:
+
+- **Name** - a clear, descriptive name for your model
+- **Description** - what the model does and its intended use
+- **Visibility** - choose **Public** (visible in the Marketplace) or **Private** (visible only to collaborators)
+
+Public models are visible to all users. Private models are only visible to users with the appropriate permissions,
+configured in the model settings.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of the marketplace' src={bailoMarketIcon} />
+</Box>
+
+The screenshot above shows the marketplace with the model creation button.
+
+## Selecting a schema
+
+The schema determines the structure of your model card - the questions you will answer about your model.
+
+After creating the model, you must select a **schema**. You have two options:
+
+- **Create from schema** - select a schema from the available list and start with a blank form
+- **Create from template** - copy the model card structure and content from an existing model (see
+  [Model Templating](/docs/users/models/model-templating))
+
+The model card captures important information such as:
+
+- Intended use
+- Training and evaluation details
+- Performance metrics
+- Known limitations or biases
+
+## Next steps
+
+After creating a model and selecting a schema:
+
+1. [Fill in the model card](/docs/users/models/model-card) - document your model
+2. [Upload files](/docs/users/models/uploading-files) - add model artefacts
+3. [Create a release](/docs/users/models/creating-a-release) - version your model for distribution
+
+## Changing the model name or description
+
+To update the model name or description after creation:
+
+1. Open the model
+2. Navigate to **Settings**
+3. Edit the **Name** and/or **Description** fields
+
+## Related pages
+
+- [Model Card](/docs/users/models/model-card) - Filling in the model card and configuring access
+- [Core Concepts](/docs/getting-started/core-concepts) - Understanding the Bailo data model
+- [Python Client](/docs/users/programmatically-using-bailo/python-client) - Creating models programmatically
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

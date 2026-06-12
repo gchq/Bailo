@@ -1,23 +1,32 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-## Bailo Migration to v2.0
+# Bailo Migration to v2.0
+
+> **Common questions this page answers:**
+>
+> - What changed in Bailo v2.0?
+> - How do I migrate from Bailo v1 to v2?
+> - Can I run v1 and v2 simultaneously?
 
 Bailo v2 is a complete rewrite of all aspects of the model management platform in order to meet modern demands. To try
 to make the migration as easy as possible, Bailo can simultaneously run V1 and V2, allowing you to schedule the
 migration over time.
 
+Bailo v2 is a complete rewrite that maintains the same architecture, allowing v1 and v2 to run simultaneously for
+gradual migration.
+
 No architecture has significantly changed. We still require two application containers (frontend and backend), a
 registry container and an nginx routing container. We also continue to store all data in:
 
-- MongoDB for all metadata storage.
-- An S3 compatible platform for all binary storage.
+- MongoDB for all metadata storage
+- An S3 (Simple Storage Service) compatible platform for all binary storage
 
 Whilst storage methods remain the same, all tables and keys are unique between V1 and V2 which allows for simultaneously
 running multiple versions:
 
 - All MongoDB collections are now prefixed with `v2_`
-- The registry now uses `model_id` as a namespace, instead of either `internal` or `deployment_id`.
-- Models are now kept within the `beta` s3 path.
+- The registry now uses `model_id` as a namespace, instead of either `internal` or `deployment_id`
+- Models are now kept within the `beta` s3 path
 
 Bailo provides the `migrateV2` script, which can be run in order to convert existing models from the older format to the
 new system. Users who do not use the default schemas will have to implement their own conversion functions. See the

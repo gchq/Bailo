@@ -10,13 +10,21 @@ import multiPlatView from 'public/docs/bailo_image_multiplat_view.png'
 
 # Scanning Images
 
-## Using Scanner
+> **Common questions this page answers:**
+>
+> - How are container images scanned in Bailo?
+> - How do I view vulnerability details for a container image?
+> - What is a CVE?
+> - How do I rescan an image?
 
-When pushing images up to the Bailo container registry, your images are automatically scanned. By default, Bailo is
-configured to use Trivy. Trivy is packaged in
-[Bailo Artefact Scan](/docs/administration/microservices/artefact-scanners) Trivy is a static analysis tool focused on
-the security of containers, and informing users about potential issues. You can read more about the principles and scope
-of Trivy [here](https://trivy.dev/docs/latest/community/principles/).
+## Using scanner
+
+Container images pushed to the Bailo registry are automatically scanned using Trivy, a vulnerability scanner that
+detects known security issues called CVEs (Common Vulnerabilities and Exposures).
+
+Trivy is a static analysis tool focused on the security of containers, and informing users about potential issues,
+packaged in [Bailo ArtefactScan](/docs/administration/microservices/artefact-scanners). You can read more about the
+principles and scope of Trivy [here](https://trivy.dev/docs/latest/community/principles/).
 
 For scan results:
 
@@ -28,7 +36,10 @@ For scan results:
   <Image alt='view image scanning chip' src={chipView} />
 </Box>
 
-## Detailed View
+The screenshot above shows the scan status chip on a container image in the Registry tab, with vulnerability counts
+grouped by severity.
+
+## Detailed view
 
 To view more detail, click the 'See detailed results' button. This will take you to the vulnerability report page, which
 includes the following information:
@@ -36,7 +47,7 @@ includes the following information:
 - Compressed image size
 - Vulnerabilities
 - Scanner used
-- Detailed vulnerability report, containing CVE information.
+- Detailed vulnerability report, containing CVE information
 
 You can filter these results by Severity, using the tags at the top of the page.
 
@@ -44,24 +55,36 @@ You can filter these results by Severity, using the tags at the top of the page.
   <Image alt='view image scan results' src={detailedView} />
 </Box>
 
-## Rescan Image
+The screenshot above shows the detailed vulnerability report page with CVE information and severity filters.
 
-If you want to rescan, click the 3 dots to the right of the scan results chip and select the Rescan option.
+## Rescan image
+
+Trigger a rescan of a container image from the scan results menu.
+
+1. Click the 3 dots to the right of the scan results chip
+2. Click **Rerun image scan**
 
 <Box sx={{ maxWidth: '50%', margin: 'auto' }}>
   <Image alt='view rescan button' src={rescanView} />
 </Box>
 
-## Multiplatform Images
+The screenshot above shows the image actions menu with a Rescan option.
 
-<Alert severity='info'>A multiplatform image will appear with a purple tag next to the name</Alert>
+## Multiplatform images
+
+Bailo supports scanning multiplatform images, which target different architectures.
+
+<Alert sx={{ my: '20px', '& .MuiAlert-message p': { margin: 0 } }} severity='info'>
+  A multiplatform image will appear with a purple tag next to the name
+</Alert>
 
 Bailo also allows you to scan multiplatform images, which are images that point to a different set of layers based on
-your host architecture. You can also click the 'See detailed results' button, and view the platform-specific, detailed
-results page.
+your host architecture. Click the **See detailed results** button to view the platform-specific, detailed results page.
 
 <Box sx={{ maxWidth: '50%', margin: 'auto' }}>
   <Image alt='view multiplatform image summary' src={multiPlatView} />
 </Box>
+
+The screenshot above shows a multiplatform image summary with platform-specific vulnerability breakdowns.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -1,0 +1,75 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Creating a Model from a Template
+
+Model templating allows you to create a new model based on an existing model's structure and content. This is useful
+when you want to create models that share a similar model card layout or when your organisation has a standard model
+card format.
+
+> **Common questions this page answers:**
+>
+> - How do I create a model from a template?
+> - How do I enable templating on my model?
+> - Can I copy a model card from an existing model?
+
+## How templating works
+
+Templating copies the model card structure and content from an existing model to a new model:
+
+1. A new model is created with your specified name and description
+2. The template model's model card structure and content are copied to the new model
+3. You can then edit the copied content to reflect your specific model's details
+
+The template model is not affected - it remains unchanged.
+
+## Prerequisites
+
+Both the template model and the destination model must meet certain requirements:
+
+- The template model must have **Allow templating** enabled in its settings
+- You must have already created the new model (templating is applied to an existing model)
+
+## Using a template
+
+Apply a template when setting up the model card for a newly created model:
+
+1. Create a new model (see [Creating a Model](/docs/users/models/creating-a-model))
+2. When prompted to set up the model card, choose **Create from template**
+3. Select a template model from the dropdown (only models with templating enabled are shown)
+4. Click **Create from template**
+5. The model card content from the template is copied to your model
+6. Edit the content to reflect your specific model's details
+
+## Enabling templating on a model
+
+Model owners can allow their model to be used as a template by other users:
+
+1. Open your model page
+2. Navigate to the **Settings** tab
+3. Enable **Allow templating**
+4. Save your changes
+
+Once enabled, your model will appear in the template selection dropdown for other users.
+
+## Programmatic access
+
+You can also create a model from a template using the API or the Python client:
+
+**API:**
+
+```
+POST /api/v2/model/{modelId}/setup/from-template
+```
+
+**Python client:**
+
+```python
+model.card_from_template(template_id="source-model-id")
+```
+
+## Related pages
+
+- [Creating a Model](/docs/users/models/creating-a-model) - Standard model creation
+- [Python Client](/docs/users/programmatically-using-bailo/python-client) - Programmatic workflows
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

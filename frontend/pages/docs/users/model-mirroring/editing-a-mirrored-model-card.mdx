@@ -9,6 +9,12 @@ import tokens from 'public/docs/bailo_tokens.png'
 
 # Editing a mirrored model card
 
+> **Common questions this page answers:**
+>
+> - Can I edit a mirrored model card?
+> - How do I add local information to a mirrored model?
+> - Does editing a mirrored model overwrite the source data?
+
 Mirrored models are read-only with respect to information originating from the source model. This ensures the source
 model remains the authoritative version.
 
@@ -16,17 +22,23 @@ You cannot directly edit source content in a mirrored model, however, you can ad
 provide context that is specific to your environment or use case.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='access request schema selection' src={editMirroredModel} />
+  <Image alt='mirrored model card with read-only source content' src={editMirroredModel} />
 </Box>
 
+The screenshot above shows a mirrored model card with read-only source content and an Add additional information button.
+
 ## Adding additional information
+
+Add local context to a mirrored model without modifying the source data, using the Add additional information button.
 
 Instead of an **Edit** button, mirrored models display an **Add additional information** button. Selecting this option
 allows you to add local responses alongside the source content:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='access request schema selection' src={editMirroredModelForm} />
+  <Image alt='mirrored model additional information form' src={editMirroredModelForm} />
 </Box>
+
+The screenshot above shows the form for adding local information alongside the source model's content.
 
 Key points:
 
@@ -39,12 +51,13 @@ Key points:
 
 ## How additional information is displayed
 
-Once saved, your additional information is shown beneath the source answer. This makes it clear which content originates
-from the source model and which content is locally added.
+Local additions appear beneath the source content, making the origin of each piece of information clear.
 
 <Box sx={{ maxWidth: '40%', margin: 'auto' }}>
-  <Image alt='access request schema selection' src={editMirroredModelResult} />
+  <Image alt='mirrored model card showing source and local content' src={editMirroredModelResult} />
 </Box>
+
+The screenshot above shows the model card with source content and locally added information displayed separately.
 
 Additional information can be updated at any time and will persist across future synchronisations when the source model
 is re-exported.

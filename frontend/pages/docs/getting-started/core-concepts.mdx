@@ -1,0 +1,148 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Core Concepts
+
+This page explains the key building blocks of Bailo and how they relate to each other. Understanding these concepts will
+help you navigate the platform and make the most of its features.
+
+> **Common questions this page answers:**
+>
+> - What is a model card?
+> - What is the difference between a release and a model?
+> - What roles exist in Bailo?
+> - How does the review process work?
+
+## Entry types
+
+Bailo organises content into four entry types, each serving a different purpose:
+
+- **Model** - A machine learning model with full lifecycle management - model card, releases, access control, and
+  reviews
+- **Data Card** - Documentation for a dataset, tracking its provenance, storage, and relationship to models
+- **Mirrored Model** - A read-only copy of a model from another Bailo instance or external source
+- **Untrusted Model** - A model flagged for additional scrutiny, with restricted capabilities
+
+Some Entry types must be enabled by your Bailo administrator before they can be used.
+
+## The lifecycle of a model
+
+A model follows a structured lifecycle from creation through review to consumer access:
+
+```
+Create Model → Select Schema → Fill In Model Card → Add Collaborators
+  → Upload Files / Images → Create Release → Review & Approval
+  → Consumers Request Access → Download / Pull
+```
+
+### 1. Model
+
+A **Model** is the top-level container. It has a name, description, visibility (public or private), and a list of
+collaborators. Creating a model is the first step.
+
+### 2. Schema
+
+A **Schema** defines the structure of a model card - what questions must be answered about a model. Schemas are created
+by administrators and selected when setting up a model. There are two kinds:
+
+- **Model Card schemas** define the metadata form for models
+- **Access Request schemas** define the form users fill in when requesting access
+
+### 3. Model Card
+
+The **Model Card** is the structured documentation attached to a model. It captures information like intended use,
+training methodology, known limitations, and performance metrics. The questions come from the selected schema.
+
+Model cards are versioned - each edit creates a new version, and you can view the history to see how documentation has
+evolved.
+
+### 4. Release
+
+A **Release** is a versioned snapshot of a model at a point in time. Releases use
+[semantic versioning](https://semver.org/) (e.g. `1.0.0`, `1.1.0`, `2.0.0`) and include:
+
+- A reference to a specific model card version
+- Attached files (model weights, configuration files, etc.)
+- Attached container images (e.g. Docker images)
+- Release notes
+
+Creating a release triggers the review process.
+
+### 5. Review
+
+When a release or access request is created, it enters a **Review** process. Reviewers assigned to the model evaluate
+the submission and either approve it or request changes. Reviews are driven by **Review Roles** - named roles like
+"Model Technical Reviewer" or "Model Senior Responsible Officer" that an administrator configures.
+
+A release is only approved when all required review roles have given their approval.
+
+### 6. Access Request
+
+To download files or pull container images from a model, users must create an **Access Request**. This submission goes
+through its own review process. Once approved, the user gains the permissions specified in the request.
+
+Some models may have **ungoverned access** enabled, which allows any user to download files without going through the
+access request process.
+
+## Roles and permissions
+
+Bailo uses two complementary role systems to control access and governance.
+
+### <span id="system-roles" style={{scrollMarginTop: "104px"}}>System Roles</span>
+
+These are assigned per-model and control what actions a user can take:
+
+- **Owner** - Full control: edit model, manage collaborators, create releases, delete the model
+- **Contributor** - Edit the model card, upload files and images, create releases
+- **Consumer** - Download files and pull images (requires an approved access request, unless ungoverned access is on)
+
+### Review roles
+
+These are created by administrators and attached to schemas. When a model uses a schema with review roles, those roles
+must be assigned to specific people who will review releases and access requests. Common examples include:
+
+- **Model Technical Reviewer (MTR)** - reviews the technical quality of the model
+- **Model Senior Responsible Officer (MSRO)** - reviews governance and compliance aspects
+
+For a full reference, see [Roles & Permissions](/docs/reference/roles-and-permissions).
+
+### Entry roles
+
+The collective term for all system roles and review roles.
+
+## Visibility
+
+Model visibility controls who can discover and browse a model:
+
+- **Public** models appear in the Marketplace and can be found by any user
+- **Private** models are only visible to users who have been explicitly added as collaborators
+
+Even for public models, downloading artefacts typically requires an approved access request.
+
+## Security scanning
+
+Depending on configuration, Bailo automatically scans uploaded files and container images for security issues:
+
+- **Files** are scanned by ClamAV (malware detection) and ModelScan (serialisation attack detection)
+- **Container images** are scanned by Trivy (vulnerability detection with CVE reporting)
+
+Scan results are displayed alongside each file and image, with severity ratings.
+
+Your Bailo administrator may change what scanners are enabled and used.
+
+## Federation
+
+Federation allows multiple Bailo instances to share models across organisational boundaries.
+
+Bailo instances can be connected through **Federation**, allowing models from one instance to appear in another. This is
+useful for organisations with multiple deployments or for integrating with external model repositories like HuggingFace
+Hub.
+
+Federated models appear as **Mirrored Models** - read-only entries that stay in sync with their source.
+
+## What's Next?
+
+- [Quick Start Guide](/docs/getting-started/quick-start) - Walk through creating your first model
+- [Glossary](/docs/reference/glossary) - Definitions of all Bailo-specific terms
+- [Creating a Model](/docs/users/models/creating-a-model) - Detailed model creation guide
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -1,0 +1,122 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Managing Review Roles
+
+> **Common questions this page answers:**
+>
+> - How do I create a review role in Bailo?
+> - What is a system role on a review role?
+> - How do I set up Model Technical Reviewer (MTR) and Model Senior Responsible Officer (MSRO)?
+
+Review roles define who must approve releases and access requests for models in your organisation. As an administrator,
+you can create, edit, and delete review roles to match your governance requirements.
+
+Only administrators will have the following options available to them.
+
+## Viewing existing roles
+
+View all configured review roles from the Review Roles navigation item.
+
+To see all review roles configured in your Bailo instance, select **Review Roles** from the navigation sidebar.
+
+This page lists all review roles with their name, short name, description, and associated system role.
+
+## Creating a review role
+
+To create a new review role:
+
+1. Navigate to **Review Roles** from the navigation sidebar
+2. Click **Create new review role**
+3. Populate the following fields:
+   - **Name** - The display name for the role. Example: "Model Technical Reviewer".
+   - **Short Name** - A brief identifier used internally. Example: "mtr".
+   - **Description** - What this role is responsible for reviewing. Example: "Reviews the technical quality and fitness
+     for purpose of models".
+   - **System Role** - The minimum system role a user must have to be assigned this review role. Options: Owner,
+     Contributor, Consumer, or none. Example: "Contributor".
+   - **Default collaborators** - Users or groups automatically assigned to this role when new models are created.
+     Example: "team-leads".
+4. Click **Submit**
+
+### Choosing a system role
+
+The **System Role** field links a review role to an system role. This means:
+
+- If set to **Contributor**, only users who are at least contributors on a model can be assigned this review role
+- If set to **Owner**, only owners can be assigned
+- If left empty, any user can be assigned regardless of their system role
+
+### Default collaborators
+
+Default collaborators are pre-populated when a model owner sets up review roles on their model. This is useful for roles
+that should always be assigned to the same team or person across all models.
+
+## Editing a review role
+
+To edit an existing role:
+
+1. Navigate to **Review Roles**
+2. Click on the role you want to edit
+3. Click **Edit Role**
+4. Modify the fields as needed
+5. Click **Submit** to save your changes
+
+Changes to review roles apply to all schemas that use the role and all models that use those schemas.
+
+## Deleting a review role
+
+Deleting a review role removes it from all schemas that reference it:
+
+1. Navigate to **Review Roles**
+2. Click on the role you want to delete
+3. Click **Delete role**
+4. Click **Confirm** in the confirmation popup
+
+> **Warning**: Deleting a review role removes it from all schemas that reference it. Models using those schemas will no
+> longer require approval from that role. Make sure this is intended before deleting.
+
+## Connecting roles to schemas
+
+After creating review roles, attach them to schemas so that models using those schemas require the roles:
+
+1. Navigate to **Schemas** from the navigation sidebar
+2. Create or edit a schema
+3. In the **Review Roles** section, select which roles should be required for this schema
+4. Save the schema
+
+Every model that uses this schema will then require all attached review roles to approve releases before they are
+finalised.
+
+## Common configurations
+
+These examples show typical governance setups using review roles.
+
+### Two-role governance (MTR + MSRO)
+
+The most common setup uses two review roles:
+
+- **Model Technical Reviewer (MTR)**: Reviews technical quality. System role: Contributor
+- **Model Senior Responsible Officer (MSRO)**: Reviews governance and compliance. System role: Owner
+
+Both roles are attached to the model card schema. A release is only approved when both the MTR and MSRO approve it.
+
+### Single-role governance
+
+For simpler workflows, a single review role may be sufficient:
+
+- **Model Reviewer**: Reviews all aspects. System role: Contributor
+
+### Fixed reviewer
+
+For strict compliance requirements:
+
+- Create a role with **Default Entities** set to your compliance team
+- This ensures the same team always reviews every model
+
+## Related pages
+
+- [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works
+- [Roles & Permissions](/docs/reference/roles-and-permissions) - System roles vs review roles
+- [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - How schemas and review roles connect
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
