@@ -40,26 +40,48 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
     <>
       {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
       {uiConfig && currentUser && (
-        <Dialog open={open} onClose={handleClose} TransitionComponent={Transition}>
+        <Dialog open={open} onClose={handleClose} slots={{ transition: Transition }}>
           <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
           <DialogContent>
             <Stack spacing={2}>
-              <Typography fontWeight='bold'>User authentication tokens</Typography>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                User authentication tokens
+              </Typography>
               <Typography>
                 User tokens can be managed in your user settings. Use these tokens to authenticate when you run the
                 docker login command.
               </Typography>
-              <Box mb={1}>
+              <Box
+                sx={{
+                  mb: 1,
+                }}
+              >
                 <Link href={'/settings?tab=authentication'}>Manage user tokens</Link>
               </Box>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Logging in</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Logging in
+                </Typography>
                 <Stack spacing={2}>
                   <CodeLine line={`docker login ${uiConfig.registry.host} -u <accessKey>`} />
                 </Stack>
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Pushing an image to the registry</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Pushing an image to the registry
+                </Typography>
                 <Stack spacing={2}>
                   <CodeLine line={`docker tag <image> ${uiConfig.registry.host}/${model.id}/<name>:<tag>`} />
                   <CodeLine line={`docker push ${uiConfig.registry.host}/${model.id}/<name>:<tag>`} />
@@ -67,7 +89,11 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               </Stack>
             </Stack>
           </DialogContent>
-          <Box mx={3}>
+          <Box
+            sx={{
+              mx: 3,
+            }}
+          >
             <Divider />
           </Box>
           <DialogActions sx={{ p: 3 }}>

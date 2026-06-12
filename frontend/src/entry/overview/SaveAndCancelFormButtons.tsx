@@ -22,9 +22,11 @@ export default function SaveAndCancelButtons({
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       spacing={1}
-      justifyContent='flex-end'
       divider={<Divider orientation='vertical' flexItem />}
-      sx={{ mb: { xs: 2 } }}
+      sx={{
+        justifyContent: 'flex-end',
+        mb: { xs: 2 },
+      }}
     >
       <Button
         variant='contained'

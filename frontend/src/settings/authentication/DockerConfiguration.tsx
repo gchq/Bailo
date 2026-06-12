@@ -31,8 +31,19 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
 
   return (
     <Stack spacing={4}>
-      <Stack spacing={2} alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 1: Download credentials config
+        </Typography>
         <Typography>First, download the Docker credentials for the application token: </Typography>
         <SplitButton
           aria-label='download docker credentials'
@@ -53,8 +64,20 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
           </CodeSnippet>
         )}
       </Stack>
-      <Stack spacing={2} direction='column' alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 2: Write to disk:</Typography>
+      <Stack
+        spacing={2}
+        direction='column'
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 2: Write to disk:
+        </Typography>
         <Typography>Second, place the file in the Docker configuration Directory.</Typography>
         <MessageAlert message='Note: This will overwrite existing credentials.' severity='warning' />
         <TokenCommand disableVisibilityToggle token={token} command={`mv ${configFileName} ~/.docker/config.json`} />

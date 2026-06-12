@@ -19,18 +19,26 @@ export default function LabelledInput({
 }: LabelledInputProps) {
   const theme = useTheme()
 
-  const stackProps: StackProps = fullWidth ? { width: '100%' } : { alignItems: 'flex-start' }
+  const stackProps: StackProps = fullWidth ? { sx: { width: '100%' } } : { sx: { alignItems: 'flex-start' } }
 
   return (
     <Stack {...stackProps}>
-      <Typography component='label' fontWeight='bold' htmlFor={htmlFor}>
+      <Typography
+        component='label'
+        htmlFor={htmlFor}
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         {label}
         {required && (
           <Box
             component='span'
-            ml={0.5}
-            color={theme.palette.primary.main}
             style={{ color: theme.palette.primary.main }}
+            sx={{
+              ml: 0.5,
+              color: theme.palette.primary.main,
+            }}
           >
             *
           </Box>

@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import { useListEntries } from 'actions/entry'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
-import { MouseEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { MouseEvent, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -16,12 +16,6 @@ import { camelCaseToSentenceCase, camelCaseToTitleCase } from 'utils/stringUtils
 
 interface SchemaDisplayProps {
   schemaKind: SchemaKindKeys
-}
-
-interface ObjectToDelete {
-  primary: string
-  secondary: string
-  link: string
 }
 
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
@@ -46,31 +40,22 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     false,
     schemaToBeDeleted,
   )
-  const [objectsToDelete, setObjectsToDelete] = useState<ObjectToDelete[]>([])
   const [openMenuSchemaId, setOpenMenuSchemaId] = useState<SchemaInterface['id'] | null>(null)
 
-  const onObjectsToDeleteChange = useEffectEvent((updatedReviews: ObjectToDelete[]) => {
-    setObjectsToDelete(updatedReviews)
-  })
-
-  useEffect(() => {
+  const objectsToDelete = useCallback(() => {
     switch (schemaKind) {
       case SchemaKind.ACCESS_REQUEST:
-        return onObjectsToDeleteChange(
-          reviews.map((review) => {
-            return { primary: review.model.name, secondary: review.role, link: `/model/${review.model.id}?tab=access` }
-          }),
-        )
-
-      case SchemaKind.DATA_CARD:
+        return reviews.map((review) => {
+          return { primary: review.model.name, secondary: review.role, link: `/model/${review.model.id}?tab=access` }
+        })
       case SchemaKind.MODEL:
-        return onObjectsToDeleteChange(
-          entries.map((model) => {
-            return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
-          }),
-        )
+        return entries.map((model) => {
+          return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
+        })
+      default:
+        return []
     }
-  }, [reviews, entries, schemaKind])
+  }, [entries, reviews, schemaKind])
 
   const handleOpenMenu = useCallback(
     (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, schemaId: SchemaInterface['id']) => {
@@ -148,7 +133,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   )
 
   const objectsToDeleteList = useMemo(() => {
-    return objectsToDelete.map((object) => (
+    return objectsToDelete().map((object) => (
       <Link href={object.link} underline='none' key={object.link}>
         <ListItemButton>
           <ListItemText

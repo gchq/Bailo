@@ -67,10 +67,18 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           <Stack
             direction={{ md: 'row', sm: 'column' }}
             spacing={2}
-            alignItems='center'
             divider={<Divider flexItem orientation='vertical' />}
+            sx={{
+              alignItems: 'center',
+            }}
           >
-            <Stack direction='row' spacing={2} alignItems='center'>
+            <Stack
+              direction='row'
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <TextField
                 size='small'
                 value={newTag}

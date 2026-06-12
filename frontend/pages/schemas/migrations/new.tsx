@@ -139,7 +139,13 @@ export default function SchemaMigrationSelector() {
       ) : (
         <Container maxWidth='md'>
           <Paper sx={{ my: 4, p: 4 }}>
-            <Stack spacing={4} alignItems='center' sx={{ maxWidth: '750px' }}>
+            <Stack
+              spacing={4}
+              sx={{
+                alignItems: 'center',
+                maxWidth: '750px',
+              }}
+            >
               <Box sx={{ textAlign: 'left', width: '100%' }}>
                 <Link href={`/schemas/list?tab=migrations`}>
                   <Button
@@ -155,8 +161,10 @@ export default function SchemaMigrationSelector() {
               <Stack
                 direction={{ sm: 'column', md: 'row' }}
                 spacing={{ sm: 2, md: 6 }}
-                justifyContent='center'
-                alignItems='center'
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
                 <Autocomplete
                   disablePortal
@@ -182,7 +190,11 @@ export default function SchemaMigrationSelector() {
                   onChange={handleTargetSchemaChange}
                 />
               </Stack>
-              <Box textAlign='center'>
+              <Box
+                sx={{
+                  textAlign: 'center',
+                }}
+              >
                 <Button
                   variant='contained'
                   sx={{ width: 'max-content' }}
@@ -206,7 +218,13 @@ export default function SchemaMigrationSelector() {
                 }}
               >
                 <Stack spacing={2}>
-                  <Stack direction='row' alignItems='center' spacing={2}>
+                  <Stack
+                    direction='row'
+                    spacing={2}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <Box sx={{ textAlign: 'center' }}>
                       <InfoOutlined fontSize='large' color='primary' />
                     </Box>
@@ -216,14 +234,26 @@ export default function SchemaMigrationSelector() {
                     </Typography>
                   </Stack>
                   <Divider flexItem />
-                  <Stack direction='row' alignItems='center' spacing={2}>
+                  <Stack
+                    direction='row'
+                    spacing={2}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <MoveDown fontSize='large' color='primary' />
                     <Typography>
                       {`Questions on an older schema can be mapped to a new question (using the the "Move" action type) so that
                   existing data is not lost when a question is moved from one section on the form to another.`}
                     </Typography>
                   </Stack>
-                  <Stack direction='row' alignItems='center' spacing={2}>
+                  <Stack
+                    direction='row'
+                    spacing={2}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <Delete fontSize='large' color='primary' />
                     <Typography>
                       {`Questions can also be marked as deleted (using the "Delete" action type) so that data that is no longer needed on the new schema can be

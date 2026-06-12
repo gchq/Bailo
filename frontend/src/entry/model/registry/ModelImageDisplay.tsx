@@ -47,7 +47,11 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
           {modelImage.tags.length >= 10 ? (
             <Accordion expanded={expanded} onChange={toggleExpand}>
               <AccordionSummary expandIcon={expanded ? <ExpandLess /> : <ExpandMore />} sx={{ px: 0 }}>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   {expanded ? 'Hide' : 'Show'} {modelImage.tags.length} images
                 </Typography>
               </AccordionSummary>

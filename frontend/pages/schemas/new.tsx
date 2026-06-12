@@ -156,7 +156,14 @@ export default function NewSchema() {
               Back to schema list
             </Button>
           </Link>
-          <Stack spacing={2} alignItems='center' justifyContent='center' sx={{ mt: 2 }}>
+          <Stack
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              mt: 2,
+            }}
+          >
             <Typography variant='h6' component='h1' color='primary'>
               Upload a new Schema
             </Typography>
@@ -167,7 +174,11 @@ export default function NewSchema() {
             <Stack spacing={2} sx={{ mt: 2 }}>
               <Stack direction='row' spacing={2}>
                 <Stack>
-                  <Typography fontWeight='bold'>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     Id <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
                   <TextField
@@ -184,7 +195,11 @@ export default function NewSchema() {
                   <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
                 </Stack>
                 <Stack>
-                  <Typography fontWeight='bold'>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     Name <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
                   <TextField
@@ -199,7 +214,11 @@ export default function NewSchema() {
                 </Stack>
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Description <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <RichTextEditor
@@ -210,7 +229,13 @@ export default function NewSchema() {
                 <Typography variant='caption'>A short description describing the purpose of this schema</Typography>
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Default Review Roles</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Default Review Roles
+                </Typography>
                 <Autocomplete
                   multiple
                   size='small'
@@ -229,7 +254,12 @@ export default function NewSchema() {
                 />
               </Stack>
               <Stack>
-                <Typography fontWeight='bold' id='schema-type-label'>
+                <Typography
+                  id='schema-type-label'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Schema Type <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <Select
@@ -247,7 +277,11 @@ export default function NewSchema() {
                 {fileName !== '' ? fileName : 'Select schema'}
                 <VisuallyHiddenInput type='file' onChange={handleUploadChange} />
               </Button>
-              <Stack alignItems='flex-end'>
+              <Stack
+                sx={{
+                  alignItems: 'flex-end',
+                }}
+              >
                 <Button
                   variant='contained'
                   loading={loading}

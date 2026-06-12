@@ -176,7 +176,13 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
         {ResponseListItem}
       </Paginate>
       {!isEdit && (
-        <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
+        <Stack
+          spacing={1}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+          }}
+        >
           <Box sx={{ width: '100%' }}>
             <RichTextEditor
               value={newReviewComment}

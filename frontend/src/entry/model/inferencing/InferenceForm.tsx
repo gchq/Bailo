@@ -74,7 +74,11 @@ export default function InferenceForm({
   return (
     <Stack spacing={2}>
       <Stack>
-        <Typography fontWeight='bold'>
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Description {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>
         {isReadOnly ? (
@@ -85,11 +89,21 @@ export default function InferenceForm({
       </Stack>
       {!(isReadOnly || editable) && (
         <>
-          <Typography fontWeight='bold' color='primary' fontSize='medium'>
+          <Typography
+            color='primary'
+            sx={{
+              fontWeight: 'bold',
+              fontSize: 'medium',
+            }}
+          >
             Deployment Settings
             <HelpPopover>These help you configure how your image is deployed within Bailo</HelpPopover>
           </Typography>
-          <Typography fontWeight='bold'>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             Image
             {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
@@ -102,7 +116,11 @@ export default function InferenceForm({
         </>
       )}
       <Stack>
-        <Typography fontWeight='bold'>
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Port {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>
         {isReadOnly ? (
@@ -123,7 +141,11 @@ export default function InferenceForm({
         )}
       </Stack>
       <Stack>
-        <Typography fontWeight='bold'>
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Processor Type {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>
         {isReadOnly ? (
@@ -134,7 +156,13 @@ export default function InferenceForm({
       </Stack>
       <Stack>
         <Stack>
-          <Typography fontWeight='bold'>{'Memory'}</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            {'Memory'}
+          </Typography>
           <Typography>{formData.memory} GB</Typography>
         </Stack>
         {!isReadOnly && (

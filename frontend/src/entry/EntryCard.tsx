@@ -16,14 +16,14 @@ export default function EntryCard({ title, description, dataTest, handleClick, m
         width: '100%',
       }}
     >
-      <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center'>
+      <Stack direction='row' spacing={2} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
         <Stack spacing={1}>
           <Stack direction='row' spacing={1}>
-            <Typography component='h2' fontWeight='bold' color='primary'>
+            <Typography component='h2' sx={{ fontWeight: 'bold' }} color='primary'>
               {title}
             </Typography>
             {mostPopular && (
-              <Typography component='h2' fontWeight='bold' color='secondary'>
+              <Typography component='h2' sx={{ fontWeight: 'bold' }} color='secondary'>
                 (most popular)
               </Typography>
             )}

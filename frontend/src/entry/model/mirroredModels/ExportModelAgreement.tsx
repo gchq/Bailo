@@ -58,7 +58,13 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
         Request a model export
       </Typography>
       <Box component='form' onSubmit={handleSubmit}>
-        <Stack spacing={2} alignItems='start' justifyContent='start'>
+        <Stack
+          spacing={2}
+          sx={{
+            alignItems: 'start',
+            justifyContent: 'start',
+          }}
+        >
           <Stack
             spacing={2}
             sx={{ borderStyle: 'solid', borderWidth: 1, borderColor: theme.palette.divider, p: 2, maxWidth: '730px' }}

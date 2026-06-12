@@ -22,7 +22,13 @@ export default function PodmanLogin({ token }: PodmanLoginProps) {
 
   return (
     <Stack spacing={2}>
-      <Typography fontWeight='bold'>1. Run Podman login:</Typography>
+      <Typography
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
+        1. Run Podman login:
+      </Typography>
       <Typography>Enter the following command on the command line:</Typography>
       <TokenCommand
         token={token}

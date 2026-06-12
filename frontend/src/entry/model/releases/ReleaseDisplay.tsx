@@ -51,10 +51,22 @@ export default function ReleaseDisplay({
 
   return (
     <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={4}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Box sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
-          <Stack spacing={1} p={2}>
+          <Stack
+            spacing={1}
+            sx={{
+              p: 2,
+            }}
+          >
             <ReleaseAssetsMainText model={model} release={release} latestRelease={latestRelease} />
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>

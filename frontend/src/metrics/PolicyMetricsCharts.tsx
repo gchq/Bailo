@@ -74,7 +74,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
       .map((row) => (
         <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
           <TableCell component='th' scope='row'>
-            <Typography maxWidth='500px'>
+            <Typography sx={{ maxWidth: '500px' }}>
               <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
                 {row.entryId}
               </Link>
@@ -116,7 +116,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
         {displayMissingRoleCountChips}
       </Stack>
       <Stack spacing={2} sx={{ width: '100%' }}>
-        <Typography fontWeight='bold' variant='h6' color='primary'>
+        <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
           Entries missing review roles
         </Typography>
         <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>

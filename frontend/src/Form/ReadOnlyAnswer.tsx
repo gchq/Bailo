@@ -9,7 +9,12 @@ export default function ReadOnlyAnswer({ value }: ReadOnlyAnswerProps) {
   const theme = useTheme()
 
   return value ? (
-    <Typography overflow='hidden' textOverflow='ellipsis'>
+    <Typography
+      sx={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
       {value}
     </Typography>
   ) : (

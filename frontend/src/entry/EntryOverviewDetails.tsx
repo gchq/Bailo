@@ -56,9 +56,15 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const collaboratorList = useMemo(() => {
     return (
-      <Stack direction='row' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         {entry.collaborators.slice(0, 5).map((collaborator) => {
-          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar smallAvatars />
+          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar />
         })}
         {entry.collaborators.length > 5 && <Typography>...and {entry.collaborators.length - 5} more</Typography>}
       </Stack>
@@ -115,11 +121,22 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Typography>
         <Stack spacing={1}>
           {schema && (
-            <Stack>
-              <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main,
+                }}
+              >
                 Schema:
               </Typography>
-              <Stack direction='row' alignItems='center'>
+              <Stack direction='row' sx={{ alignItems: 'center' }}>
                 <Typography>{schema.name}</Typography>
                 <IconButton onClick={() => setSchemaInformationOpen(true)}>
                   <Info color='primary' fontSize='small' />
@@ -134,7 +151,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           )}
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <Stack>
-              <Typography fontWeight='bold' color='primary'>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+                color='primary'
+              >
                 Organisation:
               </Typography>
               <Typography>{entry.organisation || <span style={{ fontStyle: 'italic' }}>Unset</span>}</Typography>
@@ -142,7 +164,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           )}
           {uiConfig && uiConfig.modelDetails.states.length > 0 && (
             <Stack>
-              <Typography fontWeight='bold' color='primary'>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+                color='primary'
+              >
                 State:
               </Typography>
               <Typography>{entry.state || <span style={{ fontStyle: 'italic' }}>Unset</span>}</Typography>
@@ -161,7 +188,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Stack>
         {entry.card && (
           <Stack spacing={1}>
-            <Typography fontWeight='bold' color='primary'>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+              color='primary'
+            >
               Next review due:
             </Typography>
             {updateReviewDatePermission.hasPermission && reviews.length === 0 && (

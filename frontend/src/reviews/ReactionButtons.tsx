@@ -107,7 +107,12 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <IconButton aria-label='Add reaction' color='primary' onClick={(event) => setAnchorEl(event.currentTarget)}>
           <InsertEmoticon fontSize='small' />
         </IconButton>

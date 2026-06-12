@@ -22,13 +22,13 @@ export default function LastReviewOverviewDetails({ reviewId }: LastReviewOvervi
 
   return (
     <>
-      <Typography fontWeight='bold' color='primary'>
+      <Typography sx={{ fontWeight: 'bold' }} color='primary'>
         Last reviewed:
       </Typography>
       <Typography>
         {response ? formatDateStringAsDayMonthAndYear(response.createdAt.toString()) : 'Invalid date'}
       </Typography>
-      <Typography fontWeight='bold' color='primary'>
+      <Typography sx={{ fontWeight: 'bold' }} color='primary'>
         Last reviewed by:
       </Typography>
       {response ? <UserDisplay dn={response.entity} showIcon /> : <Typography>Invalid user</Typography>}

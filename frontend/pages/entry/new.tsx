@@ -74,7 +74,7 @@ export default function NewEntry() {
           <Paper sx={{ p: 4, mb: 4 }}>
             <Stack spacing={4}>
               <Card sx={{ p: 2 }}>
-                <Typography variant='h6' mb={2} color='primary' fontWeight='bold'>
+                <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold', mb: 2 }}>
                   Models
                 </Typography>
                 <Stack spacing={2} divider={<Divider flexItem />}>
@@ -84,7 +84,7 @@ export default function NewEntry() {
                 </Stack>
               </Card>
               <Card sx={{ p: 2 }}>
-                <Typography variant='h6' mb={2} color='primary' fontWeight='bold'>
+                <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold', mb: 2 }}>
                   Other
                 </Typography>
                 <Stack spacing={2} divider={<Divider flexItem />}>

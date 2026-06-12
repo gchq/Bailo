@@ -35,8 +35,19 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
 
   return (
     <Stack spacing={4}>
-      <Stack spacing={2} alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 1: Download Secret
+        </Typography>
         <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
         <SplitButton
           aria-label='download Kubernetes pull secret'
@@ -69,8 +80,20 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           </CodeSnippet>
         )}
       </Stack>
-      <Stack spacing={2} direction='column' alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 2: Submit</Typography>
+      <Stack
+        spacing={2}
+        direction='column'
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 2: Submit
+        </Typography>
         <Typography>Second, submit the secret to the cluster using this command:</Typography>
         <TokenCommand
           disableVisibilityToggle
@@ -78,11 +101,28 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           command={`kubectl create -f ${configFileName} --namespace=<namespace>`}
         />
       </Stack>
-      <Stack spacing={2} direction='column' alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
+      <Stack
+        spacing={2}
+        direction='column'
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 3: Update Kubernetes configuration
+        </Typography>
         <Typography>
           Finally, add a reference to the secret to your Kubernetes pod config via an
-          <Typography component='span' fontWeight='bold'>
+          <Typography
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {' imagePullSecrets '}
           </Typography>
           field. For example:

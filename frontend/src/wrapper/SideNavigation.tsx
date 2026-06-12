@@ -11,7 +11,7 @@ import DescriptionIcon from '@mui/icons-material/Description'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
+import { Divider, List, ListItem, ListItemButton, ListItemIcon, ListSubheader, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
 import { useGetUserResponses } from 'actions/response'
@@ -130,7 +130,12 @@ export default function SideNavigation({
         })}
       />
       {drawerOpen !== undefined && (
-        <Stack sx={{ height: '100%' }} justifyContent='space-between'>
+        <Stack
+          sx={{
+            justifyContent: 'space-between',
+            height: '100%',
+          }}
+        >
           <StyledList>
             <NavMenuItem
               href='/'
@@ -151,7 +156,8 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            <Divider aria-hidden='true' />
+            {!drawerOpen && <Divider aria-hidden='true' />}
+            {drawerOpen && <ListSubheader>Documentation & support</ListSubheader>}
             <NavMenuItem
               href='/api/docs'
               selectedPage={page}
@@ -224,7 +230,7 @@ export default function SideNavigation({
               primaryText='Support'
               drawerOpen={drawerOpen}
               menuPage='help'
-              title='Help & Support'
+              title='Help & support'
               icon={<ContactSupportIcon />}
             />
             <NavMenuItem

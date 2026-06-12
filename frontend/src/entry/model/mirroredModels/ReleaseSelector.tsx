@@ -90,7 +90,11 @@ export default function ReleaseSelector({
 
     return (
       <ListItem key={release.semver} disablePadding>
-        <Stack width='100%'>
+        <Stack
+          sx={{
+            width: '100%',
+          }}
+        >
           <ListItemButton dense disabled={isAlreadySelected} onClick={handleToggle(release)}>
             <ListItemIcon>
               <Checkbox edge='start' checked={isAlreadySelected || isChecked} tabIndex={-1} disableRipple />
@@ -115,7 +119,12 @@ export default function ReleaseSelector({
             />
           </ListItemButton>
           <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider variant='middle' />}</Box>
-          <Stack spacing={1} padding={2}>
+          <Stack
+            spacing={1}
+            sx={{
+              padding: 2,
+            }}
+          >
             <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
             <ReleaseAssetsResponses model={model} release={release} includeResponses={false} />
           </Stack>
@@ -133,9 +142,28 @@ export default function ReleaseSelector({
   }
 
   return (
-    <Stack spacing={2} width='100%'>
-      <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-        <Typography fontWeight='bold'>Releases to export</Typography>
+    <Stack
+      spacing={2}
+      sx={{
+        width: '100%',
+      }}
+    >
+      <Stack
+        direction='row'
+        spacing={0.5}
+        sx={{
+          marginBottom: 2,
+          justifyContent: 'left',
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Releases to export
+        </Typography>
         <HelpDialog title='Mirror Export Info' content={<MirrorInfo />} />
       </Stack>
       <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
@@ -168,7 +196,13 @@ export default function ReleaseSelector({
       {selectedReleases.length > 0 && (
         <Stack spacing={1}>
           <Typography variant='subtitle2'>Selected releases</Typography>
-          <Stack direction='row' spacing={1} flexWrap='wrap'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              flexWrap: 'wrap',
+            }}
+          >
             {selectedReleases.map((release) => (
               <Chip
                 key={release.semver}

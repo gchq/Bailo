@@ -22,7 +22,13 @@ export default function DockerLogin({ token }: DockerLoginProps) {
 
   return (
     <Stack spacing={2} direction='column'>
-      <Typography fontWeight='bold'>1. Run Docker login:</Typography>
+      <Typography
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
+        1. Run Docker login:
+      </Typography>
       <Typography>Enter the following command on the command line: </Typography>
       <TokenCommand
         token={token}

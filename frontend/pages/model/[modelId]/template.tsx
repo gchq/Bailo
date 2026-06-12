@@ -79,7 +79,13 @@ export default function ModelTemplateSelect() {
                   {`Back to ${EntryKindLabel[model.kind]}`}
                 </Button>
               </Link>
-              <Stack spacing={2} justifyContent='center' alignItems='center'>
+              <Stack
+                spacing={2}
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <Typography variant='h5' component='h1' color='primary'>
                   Select a model to use as a template
                 </Typography>

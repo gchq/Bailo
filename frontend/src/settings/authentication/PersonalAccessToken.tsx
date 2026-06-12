@@ -25,7 +25,13 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
 
   return (
     <>
-      <Grid container spacing={1} alignItems='center'>
+      <Grid
+        container
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Grid size={{ xs: 2 }}>
           <Typography>Access Key</Typography>
         </Grid>

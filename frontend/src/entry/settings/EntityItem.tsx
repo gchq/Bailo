@@ -38,7 +38,13 @@ export default function EntityItem({
   return (
     <TableRow>
       <TableCell>
-        <Stack direction='row' alignItems='center' spacing={1}>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <EntityNameDisplay entryCollaborator={entity} />
         </Stack>
       </TableCell>

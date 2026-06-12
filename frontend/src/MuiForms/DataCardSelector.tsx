@@ -6,7 +6,7 @@ import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntryKind } from 'types/types'
 import { getMirroredState } from 'utils/formUtils'
@@ -39,7 +39,6 @@ export default function DataCardSelector({
 }: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
-  const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 
   const {
     entries: dataCards,
@@ -47,23 +46,18 @@ export default function DataCardSelector({
     isEntriesError: isDataCardsError,
   } = useListEntries(EntryKind.DATA_CARD)
 
-  const theme = useTheme()
-  const router = useRouter()
-
-  const onSeelctedDataCardsChanged = useEffectEvent((newDataCards: EntrySearchResult[]) => {
-    setSelectedDataCards(newDataCards)
-  })
+  const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 
   useEffect(() => {
-    if (currentValue) {
-      const updatedDataCards: EntrySearchResult[] = dataCards.filter((dataCard) => {
-        if (currentValue.includes(dataCard.id)) {
-          return dataCard
-        }
-      })
-      onSeelctedDataCardsChanged(updatedDataCards)
+    if (!dataCards || !currentValue) {
+      return
     }
-  }, [currentValue, dataCards])
+
+    setSelectedDataCards(dataCards.filter((card) => currentValue.includes(card.id)))
+  }, [dataCards, currentValue])
+
+  const theme = useTheme()
+  const router = useRouter()
 
   const handleSelectedDataCardsChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntrySearchResult[]) => {
@@ -125,7 +119,7 @@ export default function DataCardSelector({
             noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
             options={dataCards || []}
-            renderTags={(value, getTagProps) =>
+            renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Box key={option.name} sx={{ maxWidth: '200px' }}>
                   <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
