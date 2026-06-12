@@ -98,8 +98,10 @@ export default function SchemaListItem({
           id={`schema-actions-menu-${schema.id}`}
           open={open}
           anchorEl={anchorEl}
-          MenuListProps={{
-            'aria-label': `schema-actions-button-${schema.id}`,
+          slotProps={{
+            list: {
+              'aria-label': `schema-actions-button-${schema.id}`,
+            },
           }}
           anchorOrigin={{
             vertical: 'bottom',
