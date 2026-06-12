@@ -39,7 +39,7 @@ registerPath({
 })
 
 interface getReleaseResponse {
-  release: ReleaseInterface & { files: FileWithScanResultsAggregate[] }
+  release: Omit<ReleaseInterface, 'semver'> & { semver: string; files: FileWithScanResultsAggregate[] }
 }
 
 export const getRelease = [
@@ -52,7 +52,7 @@ export const getRelease = [
     const release = await getReleaseBySemver(req.user, modelId, semver)
     await audit.onViewRelease(req, release)
     const files = await getFilesByIds(req.user, modelId, release.fileIds)
-    const releaseWithFiles = { ...release.toObject(), files, kind: ResponseKind.Comment }
+    const releaseWithFiles = { ...release.toObject(), semver: release.semverString, files, kind: ResponseKind.Comment }
 
     res.json({
       release: releaseWithFiles,

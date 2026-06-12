@@ -215,22 +215,22 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onCreateRelease > save expected event', async () => {
-    await connector.onCreateRelease(createEventRequest, { modelId: 'model ID', semver: '1.2.3' } as ReleaseDoc)
+    await connector.onCreateRelease(createEventRequest, { modelId: 'model ID', semverString: '1.2.3' } as ReleaseDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewRelease > save expected event', async () => {
-    await connector.onViewRelease(viewEventRequest, { modelId: 'model ID', semver: '1.2.3' } as ReleaseDoc)
+    await connector.onViewRelease(viewEventRequest, { modelId: 'model ID', semverString: '1.2.3' } as ReleaseDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewReleases > save expected event', async () => {
-    await connector.onViewReleases(viewEventRequest, [{ modelId: 'model ID', semver: '1.2.3' } as ReleaseDoc])
+    await connector.onViewReleases(viewEventRequest, [{ modelId: 'model ID', semverString: '1.2.3' } as ReleaseDoc])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateRelease > save expected event', async () => {
-    await connector.onUpdateRelease(updateEventRequest, { modelId: 'model ID', semver: '1.2.3' } as ReleaseDoc)
+    await connector.onUpdateRelease(updateEventRequest, { modelId: 'model ID', semverString: '1.2.3' } as ReleaseDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

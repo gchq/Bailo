@@ -233,7 +233,7 @@ describe('services > model', () => {
       const user = {} as any
       const modelId = 'modelId'
       const _id = '6776901b879d08e34b599d7e'
-      const semver = '1.2.3'
+      const semverString = '1.2.3'
       const accessRequestId = 'accessRequestId'
       const fileId = 'fileId'
       const modelCardRevisionMockDelete = vi.fn(() => Promise.resolve())
@@ -243,7 +243,7 @@ describe('services > model', () => {
       registryMock.listModelImages.mockResolvedValueOnce(
         Array(itemsFound).fill({ tags: ['tag1', 'tag2'], repository: 'repository', name: 'name' }),
       )
-      releaseMock.getModelReleases.mockResolvedValueOnce(Array(itemsFound).fill({ semver }))
+      releaseMock.getModelReleases.mockResolvedValueOnce(Array(itemsFound).fill({ semverString }))
       tokenMock.getTokensForModel.mockResolvedValueOnce(Array(itemsFound).fill({}))
       webhookMock.getWebhooksByModel.mockResolvedValueOnce(
         Array.from({ length: itemsFound }, () => ({
@@ -277,7 +277,7 @@ describe('services > model', () => {
       expect(releaseMock.deleteReleases).toHaveBeenCalledWith(
         user,
         modelId,
-        Array(itemsFound).fill(semver),
+        Array(itemsFound).fill(semverString),
         true,
         undefined,
       )

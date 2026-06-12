@@ -411,7 +411,9 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
   for (const release of releases) {
     const validReviews = reviews.find(
       (review) =>
-        review.role === newReviewRole.shortName && review.modelId === model.id && review.semver === release.semver,
+        review.role === newReviewRole.shortName &&
+        review.modelId === model.id &&
+        review.semver === release.semverString,
     )
     if (!Array.isArray(validReviews) || validReviews.length === 0) {
       const review = new ReviewModel({

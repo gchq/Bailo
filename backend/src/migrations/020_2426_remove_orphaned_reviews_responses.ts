@@ -9,8 +9,8 @@ export async function up() {
   const deletedReviews: ReviewDoc[] = []
 
   // For each deleted release, deleted the reviews associated with it
-  for (const { modelId, semver } of deletedReleases) {
-    const reviews = await removeReleaseReviews(modelId, semver)
+  for (const { modelId, semverString } of deletedReleases) {
+    const reviews = await removeReleaseReviews(modelId, semverString)
     deletedReviews.push(...reviews)
   }
 

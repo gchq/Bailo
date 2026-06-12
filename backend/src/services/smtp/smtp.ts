@@ -80,7 +80,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     `Release ${release.semver} for model ${release.modelId} is ready for your review`,
     [
       { title: 'Model ID', data: release.modelId },
-      { title: 'Semver', data: release.semver },
+      { title: 'Semver', data: release.semverString },
       { title: 'Your Role', data: review.role.toUpperCase() },
       {
         title: 'Created By',

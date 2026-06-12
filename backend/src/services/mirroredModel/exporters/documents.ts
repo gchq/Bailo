@@ -10,6 +10,7 @@ import { UserInterface } from '../../../models/User.js'
 import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { BadReq, InternalError } from '../../../utils/error.js'
+import { semverObjectToString } from '../../../utils/semver.js'
 import { getFilesByIds, getTotalFileSize } from '../../file.js'
 import log from '../../log.js'
 import { getModelCardRevisions } from '../../model.js'
@@ -40,7 +41,7 @@ export class DocumentsExporter extends BaseExporter {
 
   protected async _init() {
     if (this.releases.length > 0) {
-      const semvers = this.getSemvers()
+      const semvers = this.getSemvers().map((semver) => semverObjectToString(semver))
       const fileIds = await getAllFileIds(this.model.id, semvers)
       this.files = await getFilesByIds(this.user, this.model.id, fileIds)
 
@@ -201,7 +202,7 @@ export class DocumentsExporter extends BaseExporter {
         error,
         modelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
-        releaseId: release.id,
+        releaseId: release._id.toString(),
         ...this.logData,
       })
     }

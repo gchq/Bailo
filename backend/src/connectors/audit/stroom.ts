@@ -258,23 +258,23 @@ export class StroomAuditConnector extends BaseAuditConnector {
   }
 
   async onCreateRelease(req: Request, release: ReleaseDoc) {
-    this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
+    this.auditGenericEvent(req, `${release.modelId}:${release.semverString}`)
   }
 
   async onViewRelease(req: Request, release: ReleaseDoc) {
-    this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
+    this.auditGenericEvent(req, `${release.modelId}:${release.semverString}`)
   }
 
   async onViewReleases(req: Request, releases: ReleaseDoc[]) {
     this.auditMultipleViewEvent(
       req,
-      releases.map((release) => ({ Id: `${release.modelId}:${release.semver}` })),
+      releases.map((release) => ({ Id: `${release.modelId}:${release.semverString}` })),
       'release',
     )
   }
 
   async onUpdateRelease(req: Request, release: ReleaseDoc) {
-    this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
+    this.auditGenericEvent(req, `${release.modelId}:${release.semverString}`)
   }
 
   async onDeleteRelease(req: Request, modelId: string, semver: string) {

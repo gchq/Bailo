@@ -28,7 +28,7 @@ export type MongoDocumentMirrorInformation = {
   metadata: DocumentsMirrorMetadata
   modelCardVersions: ModelCardRevisionDoc['version'][]
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
-  releaseSemvers: ReleaseDoc['semver'][]
+  releaseSemvers: ReleaseDoc['semverString'][]
   newReleases: Omit<ReleaseDoc, '_id'>[]
   fileIds: { key: Types.ObjectId; name: string }[]
   imageIds: string[]
@@ -118,7 +118,7 @@ export class DocumentsImporter extends BaseImporter {
             } as DistributionPackageName),
           )
         }
-        this.releaseSemvers.push(release.semver)
+        this.releaseSemvers.push(release.semverString)
         const savedRelease = await saveImportedRelease(release)
         if (savedRelease) {
           this.newReleases.push(savedRelease)

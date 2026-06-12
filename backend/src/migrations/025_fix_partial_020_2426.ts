@@ -9,10 +9,10 @@ export async function up() {
   const deletedReviews: ReviewDoc[] = []
 
   // For each deleted release, find the already deleted reviews (from 020_2426_remove_orphaned_reviews_responses.ts) associated with it
-  for (const { modelId, semver } of deletedReleases) {
+  for (const { modelId, semverString } of deletedReleases) {
     const reviews: ReviewDoc[] = await Review.find({
       modelId,
-      semver,
+      semver: semverString,
       deleted: true,
     })
     deletedReviews.push(...reviews)
