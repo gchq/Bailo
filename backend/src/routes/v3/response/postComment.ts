@@ -7,15 +7,34 @@ import { ResponseInterface } from '../../../models/Response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
 import { newComment } from '../../../services/v3/response.js'
 import { ReviewKind } from '../../../types/enums.js'
-import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postCommentSchema = z.object({
-  query: z.object({
-    modelId: z.string().openapi({ example: 'test-model-123' }),
-    identifier: z.string().optional().openapi({ example: '1.0.0' }),
-    kind: z.enum(getEnumValues(ReviewKind)).openapi({ example: ReviewKind.Release }),
-  }),
+  query: z.discriminatedUnion('kind', [
+    z.object({
+      kind: z.literal(ReviewKind.Release).openapi({ example: ReviewKind.Release }),
+      modelId: z.string().openapi({ example: 'test-model-123' }),
+      identifier: z.string().openapi({
+        example: '1.0.0',
+        description: 'Semantic version identifying the release.',
+      }),
+    }),
+    z.object({
+      kind: z.literal(ReviewKind.Access).openapi({ example: ReviewKind.Access }),
+      modelId: z.string().openapi({ example: 'test-model-123' }),
+      identifier: z.string().openapi({
+        example: 'access-req-456',
+        description: 'Access request identifier.',
+      }),
+    }),
+    z.object({
+      kind: z.literal(ReviewKind.Lifecycle).openapi({ example: ReviewKind.Lifecycle }),
+      modelId: z.string().openapi({ example: 'test-model-123' }),
+      identifier: z.undefined().openapi({
+        description: 'Not used for lifecycle comments.',
+      }),
+    }),
+  ]),
   body: z.object({
     comment: z.string().trim().min(1).max(10000).openapi({ example: 'This is an example comment' }),
   }),

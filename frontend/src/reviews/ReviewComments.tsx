@@ -102,6 +102,7 @@ export default function ReviewComments({
           response={data}
           modelId={entryId}
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+          showReplyButton={showComments}
           currentUser={currentUser}
           mutateResponses={mutateResponses}
         />
@@ -112,6 +113,7 @@ export default function ReviewComments({
           key={data._id}
           response={data}
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+          showReplyButton={showComments}
           currentUser={currentUser}
           mutateResponses={mutateResponses}
         />
