@@ -48,7 +48,6 @@ export default defineConfig([
       'no-console': 'warn',
       'react-hooks/set-state-in-effect': 'off',
       curly: ['error', 'all'],
-      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {
