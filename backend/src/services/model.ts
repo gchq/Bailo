@@ -1,3 +1,4 @@
+import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
@@ -609,15 +610,18 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
       throw BadReq('You cannot have duplicate tags')
     }
   }
+
+  checkUntrustedModelRestrictions(model.kind, modelDiff)
+
   if (modelDiff.state && model.card) {
-    try {
-      await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
-    } catch {
+    const schema = await getSchemaById(model.card.schemaId, modelDiff.state)
+    const { valid } = new Validator().validate(model.card.metadata, schema.jsonSchema, {
+      required: true,
+    })
+    if (!valid) {
       throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
     }
   }
-
-  checkUntrustedModelRestrictions(model.kind, modelDiff)
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
