@@ -3,7 +3,6 @@ import {
   Autocomplete,
   AutocompleteChangeDetails,
   AutocompleteChangeReason,
-  AutocompleteRenderGetTagProps,
   Button,
   Checkbox,
   Chip,
@@ -102,7 +101,7 @@ export default function NewToken() {
   }
 
   const renderActionTags = useCallback(
-    (value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
+    (value: string[], getTagProps) =>
       value.map((option, index) => {
         const isReadAction = (action: string) => {
           return Object.values(TokenReadAction).includes(action)
@@ -323,7 +322,7 @@ export default function NewToken() {
                     getLimitTagsText={(more) => `+${plural(more, 'action')}`}
                     onChange={handleSelectedActionsChange}
                     renderInput={(params) => <TextField {...params} required size='small' />}
-                    renderValue={renderActionTags}
+                    renderValue={(value, getTagProps) => renderActionTags(value, getTagProps)}
                   />
                 </Stack>
               </Stack>
