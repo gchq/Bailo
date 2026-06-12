@@ -69,9 +69,16 @@ export default function Paginate<T>({
   const [searchFilter, setSearchFilter] = useState('')
 
   const filteredList = list.filter((item: T) => {
-    if (searchFilterProperty !== undefined && item[searchFilterProperty as string]) {
-      return item[searchFilterProperty as string].toLowerCase().includes(searchFilter.toLowerCase())
+    if (!searchFilterProperty) {
+      return true
     }
+
+    const value = item[searchFilterProperty as string]
+    if (!value) {
+      return false
+    }
+
+    return value.toLowerCase().includes(searchFilter.toLowerCase())
   })
 
   const theme = useTheme()

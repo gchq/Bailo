@@ -6,7 +6,7 @@ import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, SyntheticEvent, useCallback, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntryKind } from 'types/types'
 import { getMirroredState } from 'utils/formUtils'
@@ -46,13 +46,15 @@ export default function DataCardSelector({
     isEntriesError: isDataCardsError,
   } = useListEntries(EntryKind.DATA_CARD)
 
-  const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>(
-    dataCards.filter((dataCard) => {
-      if (currentValue.includes(dataCard.id)) {
-        return dataCard
-      }
-    }),
-  )
+  const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
+
+  useEffect(() => {
+    if (!dataCards || !currentValue) {
+      return
+    }
+
+    setSelectedDataCards(dataCards.filter((card) => currentValue.includes(card.id)))
+  }, [dataCards, currentValue])
 
   const theme = useTheme()
   const router = useRouter()
