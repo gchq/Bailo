@@ -62,7 +62,9 @@ export default function AdditionalInformation({
           {label}
           {required && editMode && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
+        {description && editMode && (
+          <ExpandableTypography sx={{ whiteSpace: 'pre-wrap' }}>{description}</ExpandableTypography>
+        )}
         {children}
       </Stack>
     )
@@ -145,7 +147,7 @@ export default function AdditionalInformation({
                 {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
               </Typography>
               {description && (
-                <ExpandableTypography variant='caption' whiteSpace='pre-wrap'>
+                <ExpandableTypography variant='caption' sx={{ whiteSpace: 'pre-wrap' }}>
                   {description}
                 </ExpandableTypography>
               )}
