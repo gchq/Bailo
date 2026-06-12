@@ -63,72 +63,22 @@ export default function Marketplace() {
     titleOnly: titleOnlyFromQuery,
   } = router.query
 
-  function getTagsFromQuery() {
-    if (tagsFromQuery) {
-      let tagsAsArray: string[] = []
-      if (typeof tagsFromQuery === 'string') {
-        tagsAsArray.push(tagsFromQuery)
-      } else {
-        tagsAsArray = [...tagsFromQuery]
-      }
-      return [...tagsAsArray]
-    } else {
+  function parseQueryArray(value?: string | string[]): string[] {
+    if (!value) {
       return []
     }
-  }
-
-  function getOrganisationsFromQuery() {
-    if (organisationsFromQuery) {
-      let organisationsAsArray: string[] = []
-      if (typeof organisationsFromQuery === 'string') {
-        organisationsAsArray.push(organisationsFromQuery)
-      } else {
-        organisationsAsArray = [...organisationsFromQuery]
-      }
-
-      return [...organisationsAsArray]
-    } else {
-      return []
-    }
-  }
-
-  function getStatesFromQuery() {
-    if (statesFromQuery) {
-      let statesAsArray: string[] = []
-      if (typeof statesFromQuery === 'string') {
-        statesAsArray.push(statesFromQuery)
-      } else {
-        statesAsArray = [...statesFromQuery]
-      }
-      return [...statesAsArray]
-    } else {
-      return []
-    }
-  }
-
-  function getPeersFromQuery() {
-    if (peersFromQuery) {
-      let peersAsArray: string[] = []
-      if (typeof peersFromQuery === 'string') {
-        peersAsArray.push(peersFromQuery)
-      } else {
-        peersAsArray = [...peersFromQuery]
-      }
-      return [...peersAsArray]
-    } else {
-      return []
-    }
+    return Array.isArray(value) ? [...value] : [value]
   }
 
   const [filter, setFilter] = useState((filterFromQuery as string) || '')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
-  const [selectedPeers, setSelectedPeers] = useState<string[]>(getPeersFromQuery())
-  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>(getOrganisationsFromQuery())
-  const [selectedStates, setSelectedStates] = useState<string[]>(getStatesFromQuery())
+  const [selectedPeers, setSelectedPeers] = useState<string[]>(parseQueryArray(peersFromQuery))
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>(parseQueryArray(organisationsFromQuery))
+  const [selectedStates, setSelectedStates] = useState<string[]>(parseQueryArray(statesFromQuery))
 
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
-  const [selectedTags, setSelectedTags] = useState<string[]>(getTagsFromQuery())
+  const [selectedTags, setSelectedTags] = useState<string[]>(parseQueryArray(tagsFromQuery))
   const [titleOnly, setTitleOnly] = useState(titleOnlyFromQuery === 'true' ? true : false)
   const debouncedFilter = useDebounce(filter, 250)
 

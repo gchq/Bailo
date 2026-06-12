@@ -6,19 +6,7 @@ import { Entity } from 'types/types'
 type Luminosity = 'light' | 'dark'
 
 export default function UserAvatar({ entity, luminosity }: { entity: Entity; luminosity?: Luminosity }) {
-  function determineFontColour() {
-    switch (luminosity) {
-      case 'light':
-        return 'black'
-        break
-      case 'dark':
-        return 'white'
-        break
-      default:
-        return 'black'
-        break
-    }
-  }
+  const fontColour = luminosity === 'dark' ? 'white' : 'black'
 
   const color = randomColor({
     seed: entity.id,
@@ -29,7 +17,7 @@ export default function UserAvatar({ entity, luminosity }: { entity: Entity; lum
   return (
     <Avatar
       sx={{
-        color: determineFontColour(),
+        color: fontColour,
         backgroundColor: color,
         height: '25px',
         width: '25px',
