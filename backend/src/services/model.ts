@@ -609,6 +609,13 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
       throw BadReq('You cannot have duplicate tags')
     }
   }
+  if (modelDiff.state && model.card) {
+    try {
+      await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    } catch {
+      throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
+    }
+  }
 
   checkUntrustedModelRestrictions(model.kind, modelDiff)
 

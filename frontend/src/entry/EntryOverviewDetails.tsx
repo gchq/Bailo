@@ -6,6 +6,7 @@ import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useContext, useMemo, useState } from 'react'
+import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
@@ -16,7 +17,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewDateDialog from 'src/entry/overview/ReviewDateDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -133,20 +134,25 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             </Stack>
           )}
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
-            <Stack>
-              <Typography fontWeight='bold' color='primary'>
-                Organisation:
-              </Typography>
-              <Typography>{entry.organisation || <span style={{ fontStyle: 'italic' }}>Unset</span>}</Typography>
-            </Stack>
+            <EntrySelect
+              label='Organisation'
+              value={entry.organisation}
+              entryId={entry.id}
+              field='organisation'
+              mutate={mutateEntry}
+              options={uiConfig.modelDetails.organisations}
+            />
           )}
-          {uiConfig && uiConfig.modelDetails.states.length > 0 && (
-            <Stack>
-              <Typography fontWeight='bold' color='primary'>
-                State:
-              </Typography>
-              <Typography>{entry.state || <span style={{ fontStyle: 'italic' }}>Unset</span>}</Typography>
-            </Stack>
+          {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
+            <EntrySelect
+              label='State'
+              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL}
+              value={entry.state}
+              entryId={entry.id}
+              field='state'
+              mutate={mutateEntry}
+              options={uiConfig.modelDetails.states}
+            />
           )}
         </Stack>
         <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>
