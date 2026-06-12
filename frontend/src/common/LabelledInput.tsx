@@ -19,7 +19,7 @@ export default function LabelledInput({
 }: LabelledInputProps) {
   const theme = useTheme()
 
-  const stackProps: StackProps = fullWidth ? { width: '100%' } : { alignItems: 'flex-start' }
+  const stackProps: StackProps = fullWidth ? { sx: { width: '100%' } } : { sx: { alignItems: 'flex-start' } }
 
   return (
     <Stack {...stackProps}>
