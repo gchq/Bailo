@@ -34,20 +34,7 @@ export default function EditableAccessRequestForm({
   onIsEditChange,
   readOnly = false,
 }: EditableAccessRequestFormProps) {
-  function getSteps() {
-    if (isEdit === false && schema) {
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
-      for (const step of steps) {
-        step.steps = steps
-      }
-      return { reference: schemaId, steps }
-    } else {
-      return { reference: '', steps: [] }
-    }
-  }
-
   const [isLoading, setIsLoading] = useState(false)
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>(getSteps())
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
@@ -61,6 +48,25 @@ export default function EditableAccessRequestForm({
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   const router = useRouter()
+
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({
+    reference: '',
+    steps: [],
+  })
+
+  useEffect(() => {
+    if (!schema || isEdit) {
+      return
+    }
+
+    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
+
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    setSplitSchema({ reference: schema.id, steps })
+  }, [schema, accessRequest.metadata, isEdit])
 
   const handleDeleteConfirm = async () => {
     setDeleteErrorMessage('')
