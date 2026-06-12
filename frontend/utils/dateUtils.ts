@@ -27,6 +27,10 @@ export const formatDateStringAsMonthAndYear = (value: string) => {
   return dayjs(value).format('MMM YYYY')
 }
 
+export const formatDateStringAsDayMonthAndYear = (value: string) => {
+  return dayjs(value).format('DD/MM/YYYY')
+}
+
 export const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000
   const msPerHour = msPerMinute * 60
@@ -65,4 +69,9 @@ export const setAsFirstDayOfMonth = (date: Dayjs): string => {
 
 export const setAsLastDayOfMonth = (date: Dayjs): string => {
   return date.endOf('month').toISOString().split('T')[0]
+}
+
+export const increaseCurrentDateInDays = (daysToAdd: number) => {
+  const currentDate = dayjs(new Date())
+  return currentDate.add(daysToAdd, 'day')
 }

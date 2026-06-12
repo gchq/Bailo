@@ -1,23 +1,21 @@
+import { Schema } from 'mongoose'
+
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
-import ReviewModel, { ReviewDoc } from '../../models/Review.js'
+import { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
-import { BadReq } from '../../utils/error.js'
+import { BadReq, NotFound } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
-import { findReviewById } from '../v3/review.js'
-import { sendWebhooks } from '../webhook.js'
+import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
+import { createLifecycleReview, findReviewById } from '../v3/review.js'
+import { dispatchWebhooks } from '../webhook.js'
 
 function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | undefined) {
-  if (review.kind === ReviewKind.Lifecycle) {
-    if (!dueDate) {
-      throw BadReq('Lifecycle review responses should have a due date')
-    }
-    if (dueDate.getTime() <= Date.now()) {
-      throw BadReq('Due date of next review cannot be in the past.')
-    }
+  if (!dueDate || dueDate.getTime() <= Date.now()) {
+    throw BadReq('Due date of next review cannot be in the past.')
   }
 }
 
@@ -28,7 +26,9 @@ export async function respondToReview(
   dueDate?: Date,
 ) {
   const review = await findReviewById(user, reviewId)
-  validateLifecycleReview(review, dueDate)
+  if (response.decision === Decision.Approve) {
+    validateLifecycleReview(review, dueDate)
+  }
 
   // Store the response
   const reviewResponse = new ResponseModel({
@@ -40,25 +40,30 @@ export async function respondToReview(
   })
 
   await reviewResponse.save()
+  await cancelLifecycleReviewJobs(review.modelId, reviewId)
   await sendReviewResponseNotification(review, reviewResponse, user)
 
-  sendWebhooks(
+  dispatchWebhooks(
     review.modelId,
     WebhookEvent.CreateReviewResponse,
     `A new response has been added to a review requested for Model ${review.modelId}`,
     { review: review },
   )
 
-  // When approving a model card review we need to create a new review using the supplied due date
-  if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve) {
-    const newReview = new ReviewModel({
-      modelId: review.modelId,
-      kind: review.kind,
-      role: review.role,
-      dueDate,
-    })
-    await newReview.save()
+  if (review.kind === ReviewKind.Lifecycle && dueDate) {
+    await createLifecycleReview(user, review.modelId, dueDate)
+  }
+  return reviewResponse
+}
+
+export async function getLatestResponseForReview(reviewId: string) {
+  const response = await ResponseModel.findOne({ parentId: reviewId as unknown as Schema.Types.ObjectId }).sort({
+    createdAt: -1,
+  })
+
+  if (!response) {
+    throw NotFound(`The requested response was not found.`, { reviewId })
   }
 
-  return reviewResponse
+  return response
 }

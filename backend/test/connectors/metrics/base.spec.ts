@@ -74,7 +74,7 @@ vi.mock('../../../src/models/ReviewRole.js', () => ({
 }))
 
 const authenticationMocks = vi.hoisted(() => ({
-  hasRole: vi.fn(),
+  hasRole: vi.fn(() => true),
 }))
 
 vi.mock('../../../src/connectors/authentication/index.js', () => ({
@@ -107,14 +107,16 @@ const mockCursorQuery = (result: any[]) => {
   }
 }
 
-describe('connectors > metrics > simple > getUsageMetrics', () => {
-  beforeEach(() => {
+await describe('connectors > metrics > simple > getUsageMetrics', async () => {
+  let connector
+  await beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
-    authenticationMocks.hasRole.mockResolvedValue(true)
     releaseMocks.aggregate.mockResolvedValue([])
     accessRequestMocks.aggregate.mockResolvedValue([])
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['b corp'])
   })
 
   test('calculateUsageMetrics returns global metrics', async () => {
@@ -147,9 +149,6 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
     serviceMocks.searchModels.mockResolvedValueOnce({ models: [{}, {}] }).mockResolvedValueOnce({ models: [{}] })
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
-
     const result = await connector.getUsageMetrics(mockUser)
 
     expect(result.global.entries).toBe(10)
@@ -178,9 +177,6 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
 
     schemaMocks.searchSchemas.mockResolvedValue([])
     serviceMocks.searchModels.mockResolvedValue({ models: [] })
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.getUsageMetrics(mockUser)
 
@@ -214,8 +210,6 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
     accessRequestMocks.distinct.mockResolvedValue([])
     modelMocks.countDocuments.mockResolvedValue(0)
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
     const result = await connector.getUsageMetrics(mockUser)
 
     expect(result.global.schemaBreakdown).toEqual([
@@ -240,9 +234,6 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
     accessRequestMocks.aggregate.mockResolvedValue([])
 
     schemaMocks.searchSchemas.mockResolvedValue([])
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.getUsageMetrics(mockUser)
 
@@ -278,18 +269,20 @@ describe('connectors > metrics > simple > getUsageMetrics', () => {
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
+    const response = connector.getUsageMetrics(mockUser)
 
-    await expect(connector.getUsageMetrics(mockUser)).rejects.toThrow()
+    await expect(response).rejects.toThrow('You do not have the required role.')
   })
 })
 
-describe('connectors > metrics > simple > getComplianceMetrics', () => {
-  beforeEach(() => {
+await describe('connectors > metrics > simple > getComplianceMetrics', async () => {
+  let connector
+  await beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
-    authenticationMocks.hasRole.mockResolvedValue(true)
+
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['b corp'])
   })
 
   test('calculateComplianceMetrics returns correct global summary and entries', async () => {
@@ -332,9 +325,6 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
         },
       ]),
     )
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.getComplianceMetrics(mockUser)
 
@@ -388,8 +378,6 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       return mockCursorQuery(filtered)
     })
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
     const result = await connector.getComplianceMetrics(mockUser)
 
     expect(result.byOrganisation).toHaveLength(2)
@@ -431,8 +419,6 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
       return mockCursorQuery(filtered)
     })
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
     const result = await connector.getComplianceMetrics(mockUser)
 
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
@@ -445,17 +431,16 @@ describe('connectors > metrics > simple > getComplianceMetrics', () => {
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
-
     await expect(connector.getComplianceMetrics(mockUser)).rejects.toThrow()
   })
 })
 
-describe('connectors > metrics > simple > calculateEntryVolue', () => {
-  beforeEach(() => {
+await describe('connectors > metrics > simple > calculateEntryVolume', async () => {
+  let connector
+  await beforeEach(async () => {
     vi.clearAllMocks()
-    authenticationMocks.hasRole.mockResolvedValue(true)
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['b corp'])
   })
 
   test('calculateEntryVolume > basic aggregation', async () => {
@@ -472,9 +457,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
       ])
 
     modelMocks.distinct.mockResolvedValueOnce(['org-1'])
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.calculateEntryVolume(mockUser, 'day', '2026-01-01', '2026-01-03')
 
@@ -528,12 +510,9 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
       Object.assign(new Error('Invalid timezone'), { name: 'MongoServerError' }),
     )
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
-
     await expect(
       connector.calculateEntryVolume(mockUser, 'week', '2026-01-01', '2026-02-01', 'notARealTimeZone'),
-    ).rejects.toThrowError(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
+    ).rejects.toThrow(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
   })
 
   test('calculateEntryVolume > day interval stepping', async () => {
@@ -542,9 +521,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
       .mockResolvedValueOnce([])
 
     modelMocks.distinct.mockResolvedValueOnce([])
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.calculateEntryVolume(mockUser, 'day', '2026-01-01', '2026-01-03')
 
@@ -560,9 +536,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
 
     modelMocks.distinct.mockResolvedValueOnce([])
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
-
     const result = await connector.calculateEntryVolume(mockUser, 'week', '2026-01-04', '2026-01-18')
 
     expect(result.interval).toBe('week')
@@ -576,9 +549,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
       .mockResolvedValueOnce([])
 
     modelMocks.distinct.mockResolvedValueOnce([])
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.calculateEntryVolume(mockUser, 'month', '2026-01-01', '2026-03-01')
 
@@ -594,9 +564,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
 
     modelMocks.distinct.mockResolvedValueOnce([])
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
-
     const result = await connector.calculateEntryVolume(mockUser, 'quarter', '2026-01-01', '2026-07-01')
 
     expect(result.interval).toBe('quarter')
@@ -610,9 +577,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
       .mockResolvedValueOnce([])
 
     modelMocks.distinct.mockResolvedValueOnce([])
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.calculateEntryVolume(mockUser, 'year', '2026-01-01', '2028-01-01')
 
@@ -636,9 +600,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
 
     // Simulate DB containing an empty string org
     modelMocks.distinct.mockResolvedValueOnce(['', 'Example Organisation'])
-
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp'])
 
     const result = await connector.calculateEntryVolume(mockUser, 'month', '2026-04-01', '2026-04-28')
 
@@ -671,9 +632,6 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
 
     modelMocks.distinct.mockResolvedValueOnce(['org-1'])
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['org-1'])
-
     const result = await connector.calculateEntryVolume(mockUser, 'month', '2026-05-01', '2026-05-31')
 
     expect(result.data[0]).toEqual({
@@ -685,5 +643,13 @@ describe('connectors > metrics > simple > calculateEntryVolue', () => {
         unset: 0,
       },
     })
+  })
+
+  test('throws Forbidden if user is not admin', async () => {
+    authenticationMocks.hasRole.mockResolvedValue(false)
+
+    await expect(connector.calculateEntryVolume(mockUser, 'month', '2026-05-01', '2026-05-31')).rejects.toThrow(
+      'You do not have the required role.',
+    )
   })
 })

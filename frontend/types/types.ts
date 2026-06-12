@@ -302,6 +302,11 @@ export interface User {
   isAdmin: boolean
 }
 
+export interface UserV3 {
+  dn: string
+  systemRoles: string[]
+}
+
 export interface EntityObject {
   kind: string
   id: string
@@ -1024,3 +1029,9 @@ export interface PolicyMetrics {
   byOrganisation: OrganisationPolicyMetrics[]
   lastUpdated: string
 }
+
+export const Roles = {
+  Admin: 'admin',
+  Compliance: 'compliance',
+} as const
+export type RoleKeys = (typeof Roles)[keyof typeof Roles]

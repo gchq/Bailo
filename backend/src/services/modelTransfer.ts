@@ -7,11 +7,13 @@ import ModelTransferModel, {
   TransferStatusKeys,
 } from '../models/ModelTransfer.js'
 import { UserInterface } from '../models/User.js'
+import { WebhookEvent } from '../models/Webhook.js'
 import { MirrorKind, MirrorKindKeys } from '../types/types.js'
 import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { startImportNotification, transferCompleteNotification } from './smtp/smtp.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
@@ -227,7 +229,7 @@ export async function handleStartEmail(exportId: string, modelId: string, create
   }
 }
 
-function filterArtefactsByKindAndStatus(
+export function filterArtefactsByKindAndStatus(
   artefactStatus: TransferArtefactStatus[],
   kind: MirrorKindKeys,
   status: TransferStatusKeys,
@@ -237,7 +239,7 @@ function filterArtefactsByKindAndStatus(
     .map((item) => item.name ?? item.key)
 }
 
-async function handleCompleteEmail(exportId: string) {
+export async function handleCompleteEmail(exportId: string) {
   const transfer = await ModelTransferModel.findOne({
     exportId,
   })
@@ -273,5 +275,8 @@ async function handleCompleteEmail(exportId: string) {
   )
   if (updated) {
     await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
+    dispatchWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
+      transfer,
+    })
   }
 }

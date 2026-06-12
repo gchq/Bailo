@@ -1,8 +1,9 @@
-import fetch from 'node-fetch'
+import fetch, { HeadersInit } from 'node-fetch'
 
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
+import { ModelTransferDoc } from '../models/ModelTransfer.js'
 import { ReleaseDoc } from '../models/Release.js'
 import { ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -72,16 +73,33 @@ export async function removeWebhook(user: UserInterface, modelId: string, webhoo
   }
 }
 
+type WebhookContent =
+  | { release: ReleaseDoc }
+  | { review: ReviewInterface }
+  | { accessRequest: AccessRequestDoc }
+  | { transfer: ModelTransferDoc }
+
+/**
+ * Sends webhooks in an `await`able manner.
+ *
+ * Webhook delivery is best-effort and must never affect the primary operation (e.g. creating a release).
+ * Errors are swallowed and logged so they cannot reject into the caller or crash the process.
+ *
+ * @param modelId The ID of the model the webhooks are registered against.
+ * @param eventKind The webhook event type that has occurred.
+ * @param eventTitle A human-readable description of the event.
+ * @param content The event payload (release, review, access request, transfer etc.).
+ */
 export async function sendWebhooks(
   modelId: string,
   eventKind: WebhookEventKeys,
   eventTitle: string,
-  content: { release: ReleaseDoc } | { review: ReviewInterface } | { accessRequest: AccessRequestDoc },
+  content: WebhookContent,
 ) {
   const webhooks = await WebhookModel.find({ modelId, events: eventKind })
 
   for (const webhook of webhooks) {
-    let headers
+    let headers: HeadersInit | undefined
     if (webhook.token) {
       headers = {
         Authorization: `Bearer ${webhook.token}`,
@@ -110,4 +128,26 @@ export async function sendWebhooks(
       log.error({ eventKind, err }, 'Unable to send Webhook.')
     }
   }
+}
+
+/**
+ * Dispatches webhooks without blocking the caller.
+ *
+ * Webhook delivery is best-effort and must never affect the primary operation (e.g. creating a release).
+ * Errors are swallowed and logged so they cannot reject into the caller or crash the process.
+ *
+ * @param modelId The ID of the model the webhooks are registered against.
+ * @param eventKind The webhook event type that has occurred.
+ * @param eventTitle A human-readable description of the event.
+ * @param content The event payload (release, review, access request, transfer etc.).
+ */
+export function dispatchWebhooks(
+  modelId: string,
+  eventKind: WebhookEventKeys,
+  eventTitle: string,
+  content: WebhookContent,
+): void {
+  sendWebhooks(modelId, eventKind, eventTitle, content).catch((err) => {
+    log.error({ err, eventKind, modelId }, 'Failed to dispatch webhooks.')
+  })
 }

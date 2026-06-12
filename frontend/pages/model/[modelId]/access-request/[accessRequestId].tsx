@@ -25,7 +25,7 @@ export default function AccessRequest() {
 
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: modelId as string,
     accessRequestId: accessRequestId || '',
   })
   const {

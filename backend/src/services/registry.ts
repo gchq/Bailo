@@ -2,7 +2,6 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
-  getImageTagManifest,
   getImageTagManifests,
   getRegistryLayerStream,
   listImageTags,
@@ -281,17 +280,6 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
     }
     return acc
   }, initial)
-}
-
-export async function getImageManifest(user: UserInterface, imageRef: ImageRef) {
-  await checkUserAuth(user, imageRef.repository, ['pull'])
-
-  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
-  ])
-
-  // get which layers exist for the model
-  return await getImageTagManifest(repositoryToken, imageRef)
 }
 
 export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {

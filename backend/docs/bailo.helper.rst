@@ -17,6 +17,11 @@ bailo.helper package
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: bailo.helper.mirroredModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. automodule:: bailo.helper.model
    :members:
    :undoc-members:
@@ -30,4 +35,5 @@ bailo.helper package
 .. automodule:: bailo.helper.schema
    :members:
    :undoc-members:
+   :show-inheritance:
    :member-order: bysource

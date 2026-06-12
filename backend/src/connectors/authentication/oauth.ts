@@ -86,6 +86,11 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
       const admins = await this.getEntityMembers(toEntity(OauthEntityKind.Group, adminGroup))
       return admins.includes(user.dn)
     }
+    if (role === Roles.Compliance) {
+      const complianceGroup = config.oauth.cognito.complianceGroupName
+      const complianceUsers = await this.getEntityMembers(toEntity(OauthEntityKind.Group, complianceGroup))
+      return complianceUsers.includes(user.dn)
+    }
     return false
   }
 

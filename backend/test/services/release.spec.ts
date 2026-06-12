@@ -74,7 +74,7 @@ vi.mock('../../src/services/response.js', () => mockResponseService)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
-    sendWebhooks: vi.fn(),
+    dispatchWebhooks: vi.fn(),
   }
 })
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
@@ -88,7 +88,7 @@ describe('services > release', () => {
     expect(ReleaseModelMock.save).toHaveBeenCalled()
     expect(ReleaseModelMock).toHaveBeenCalled()
     expect(mockReviewService.createReleaseReviews).toHaveBeenCalled()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalled()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalled()
   })
 
   test('createRelease > minor release', async () => {
@@ -403,7 +403,7 @@ describe('services > release', () => {
     expect(ReleaseModelMock.append.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  test('semverObjectToString > deals with edge cases', async () => {
+  test('semverObjectToString > deals with edge cases', () => {
     const semObj: SemverObject = {
       major: 1,
       minor: 1,
@@ -670,7 +670,7 @@ describe('services > release', () => {
     expect(size).toStrictEqual([])
   })
 
-  test('isReleaseDoc > success', async () => {
+  test('isReleaseDoc > success', () => {
     const result = isReleaseDoc({
       modelId: '',
       modelCardVersion: 1,
@@ -690,7 +690,7 @@ describe('services > release', () => {
     expect(result).toBe(true)
   })
 
-  test('isReleaseDoc > missing property', async () => {
+  test('isReleaseDoc > missing property', () => {
     const result = isReleaseDoc({
       modelId: '',
       modelCardVersion: 1,
@@ -709,7 +709,7 @@ describe('services > release', () => {
     expect(result).toBe(false)
   })
 
-  test('isReleaseDoc > wrong type', async () => {
+  test('isReleaseDoc > wrong type', () => {
     const result = isReleaseDoc(null)
 
     expect(result).toBe(false)

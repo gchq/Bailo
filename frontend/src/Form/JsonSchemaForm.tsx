@@ -177,6 +177,12 @@ export default function JsonSchemaForm({
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
           )}
+          {canEdit && (
+            <Typography sx={{ pt: 1 }}>
+              Required fields for this state are marked with an asterisk
+              <span style={{ color: theme.palette.error.main }}>*</span>
+            </Typography>
+          )}
           <Form
             schema={currentStep.schema}
             formData={updatedMirroredState}

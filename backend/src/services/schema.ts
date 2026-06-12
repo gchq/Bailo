@@ -1,18 +1,22 @@
-import { Schema as JsonSchema } from 'jsonschema'
+import traverse from 'json-schema-traverse'
+import { Schema as JsonSchema, Validator } from 'jsonschema'
+import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import SchemaModel, { SchemaInterface } from '../models/Schema.js'
+import SchemaModel, { SchemaDoc, SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import config from '../utils/config.js'
-import { Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound, UnprocessableContent } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
+const schemaCache = new NodeCache()
 export interface DefaultSchema {
   name: string
   id: string
@@ -21,15 +25,26 @@ export interface DefaultSchema {
   reviewRoles?: string[]
 }
 
-export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {
+export async function searchSchemas(
+  kind?: SchemaKindKeys,
+  hidden?: boolean,
+  reviewRoles?: string,
+  ids?: string[],
+): Promise<SchemaDoc[]> {
   const schemas = await SchemaModel.find({
     ...(kind && { kind }),
     ...(hidden != undefined && { hidden }),
+    ...(reviewRoles && { reviewRoles }),
+    ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
   return schemas
 }
 
-export async function getSchemaById(schemaId: string) {
+export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
+  const cachedSchema = schemaCache.get<SchemaInterface>(JSON.stringify({ schemaId, modelState }))
+  if (cachedSchema) {
+    return cachedSchema
+  }
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -38,7 +53,42 @@ export async function getSchemaById(schemaId: string) {
     throw NotFound(`The requested schema was not found.`, { schemaId })
   }
 
-  return schema
+  const schemaObject = schema.toObject()
+  schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
+
+  if (modelState) {
+    schemaObject.jsonSchema = enforceModelStateFields(schemaObject.jsonSchema, modelState)
+  }
+  schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
+  return schemaObject
+}
+
+function enforceModelStateFields(schema: object, targetState: string) {
+  const validStates = config.ui.modelDetails.states
+  if (!validStates.includes(targetState)) {
+    throw BadReq('The value for modelState is not a valid model state', { validStates, modelState: targetState })
+  }
+  const jsonSchema = structuredClone(schema)
+  traverse(jsonSchema, { allKeys: true }, (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
+    if (!subschema || typeof subschema !== 'object') {
+      return
+    }
+
+    if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
+      if (parentKeyword === 'properties' && parentSchema) {
+        const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
+
+        if (!parentSchema.required) {
+          parentSchema.required = []
+        }
+
+        if (!parentSchema.required.includes(propertyName)) {
+          parentSchema.required.push(propertyName)
+        }
+      }
+    }
+  })
+  return jsonSchema
 }
 
 export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<string> {
@@ -91,7 +141,13 @@ export type UpdateSchemaParams = Partial<
 >
 
 export async function updateSchema(user: UserInterface, schemaId: string, diff: UpdateSchemaParams) {
-  const schema = await getSchemaById(schemaId)
+  const schema = await SchemaModel.findOne({
+    id: schemaId,
+  })
+
+  if (!schema) {
+    throw NotFound(`The requested schema was not found.`, { schemaId })
+  }
 
   const auth = await authorisation.schema(user, schema, SchemaAction.Update)
   if (!auth.success) {
@@ -203,5 +259,20 @@ export async function addDefaultSchemas() {
     })
     await SchemaModel.deleteOne({ id: schema.id })
     await modelSchema.save()
+  }
+}
+
+export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {
+  const schema = await getSchemaById(schemaId, modelState)
+  try {
+    new Validator().validate(content, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw UnprocessableContent('Content could not be validated against the schema.', {
+        schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
   }
 }

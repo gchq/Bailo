@@ -27,7 +27,7 @@ export default function Release() {
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: modelId as string,
     semver: semver || '',
   })
   const {

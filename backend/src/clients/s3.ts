@@ -195,7 +195,7 @@ export async function completeMultipartUpload(
 }
 
 export async function deleteObject(key: string, bucket: string = config.s3.buckets.uploads) {
-  const client = await getS3Client()
+  const client = getS3Client()
   const command = new DeleteObjectCommand({
     Bucket: bucket,
     Key: key,

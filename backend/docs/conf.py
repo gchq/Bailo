@@ -32,6 +32,9 @@ extensions = [
     "myst_parser",  # Markdown converter
 ]
 
+# myst parser extensions (for Markdown conversion)
+myst_enable_extensions = ["alert"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -53,7 +56,7 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_theme_options = {
-    "style_nav_header_background": "#54278e",  # primary.main
+    "style_nav_header_background": "#4d3075",  # primary.main
 }
 
 html_css_files = ["custom.css"]
@@ -61,6 +64,9 @@ html_css_files = ["custom.css"]
 # Napoleon settings
 napoleon_include_init_with_doc = True
 napoleon_include_private_with_doc = True
+
+autodoc_typehints = "description"
+autodoc_member_order = "bysource"
 
 # Disable execution in Github actions
 nbsphinx_execute = "never"

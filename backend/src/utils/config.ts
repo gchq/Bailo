@@ -87,6 +87,11 @@ export interface Config {
       }
     }
 
+    lifecycle: {
+      preReminderIntervals: string[]
+      postReminderInterval: string
+    }
+
     from: string
   }
 
@@ -156,6 +161,7 @@ export interface Config {
       userPoolId: string
       userIdAttribute: string
       adminGroupName: string
+      complianceGroupName: string
     }
   }
 

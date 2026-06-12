@@ -6,19 +6,24 @@ import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
+import { getImageTagManifests, getImageTagManifestsRaw } from '../../clients/registry.js'
 import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
+import { issueAccessToken } from '../../routes/v1/registryAuth.js'
 import { MirrorExportLogData, MirrorImportLogData, MirrorKind, MirrorMetadata } from '../../types/types.js'
+import { dedupeByKey } from '../../utils/array.js'
 import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
+import { ManifestListV2 } from '../../utils/registryResponses.js'
 import { getHttpsAgent } from '../http.js'
+import { getImageLayers } from '../images/getImageLayers.js'
 import log from '../log.js'
 import { getModelById, getModelByIdNoAuth } from '../model.js'
-import { getImageBlob, getImageManifest, splitDistributionPackageName } from '../registry.js'
+import { getImageBlob, splitDistributionPackageName } from '../registry.js'
 import { getReleasesForExport } from '../release.js'
 import { BaseExporter } from './exporters/base.js'
 import { DocumentsExporter } from './exporters/documents.js'
@@ -214,6 +219,103 @@ export function getImporter(metadata: MirrorMetadata, user: UserInterface, logDa
   }
 }
 
+async function saveManifestToTar(
+  tarStream: Pack,
+  manifestJson: string,
+  digest: string,
+  mediaType: string,
+  logData: MirrorExportLogData,
+) {
+  const fileName = `blobs/manifests/${digest.replace(/^(sha256:)/, '')}`
+  await addEntryToTarGzUpload(
+    tarStream,
+    { type: 'text', filename: fileName, content: manifestJson },
+    { ...logData, mediaType, manifestDigest: digest },
+  )
+}
+
+async function exportPlatformManifests(
+  repositoryToken: string,
+  modelId: string,
+  imageName: string,
+  imageTag: string,
+  manifests: ManifestListV2['manifests'],
+  tarStream: Pack,
+  logData: MirrorExportLogData,
+) {
+  for (const platformManifest of manifests) {
+    const platformManifestResponse = await getImageTagManifestsRaw(repositoryToken, {
+      repository: modelId,
+      name: imageName,
+      digest: platformManifest.digest,
+    })
+    const platformManifestJson = platformManifestResponse.body as string
+    const platformManifestMediaType = platformManifestResponse.headers['content-type']!
+
+    await saveManifestToTar(
+      tarStream,
+      platformManifestJson,
+      platformManifest.digest,
+      platformManifestMediaType,
+      logData,
+    )
+
+    log.debug(
+      {
+        modelId,
+        imageName,
+        imageTag,
+        platformManifestDigest: platformManifest.digest,
+        platform: platformManifest.platform,
+        ...logData,
+      },
+      'Saved platform-specific manifest',
+    )
+  }
+}
+
+async function exportImageLayers(
+  user: UserInterface,
+  repositoryToken: string,
+  modelId: string,
+  imageName: string,
+  imageTag: string,
+  tarStream: Pack,
+  logData: MirrorExportLogData,
+) {
+  const imageLayers = dedupeByKey(
+    await getImageLayers(repositoryToken, { repository: modelId, name: imageName, tag: imageTag }),
+    (d) => d.digest,
+  )
+
+  for (const layer of imageLayers) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+    }
+
+    log.debug({ modelId, imageName, imageTag, layerDigest, ...logData }, 'Fetching image layer')
+
+    const { stream: responseStream, abort } = await getImageBlob(
+      user,
+      { repository: modelId, name: imageName },
+      layerDigest,
+    )
+
+    try {
+      const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
+      await addEntryToTarGzUpload(
+        tarStream,
+        { type: 'stream', filename: entryName, stream: responseStream, size: layer.size },
+        { ...logData, layerDigest, mediaType: layer.mediaType },
+      )
+    } catch (err) {
+      abort()
+      throw err
+    }
+  }
+}
+
 export async function addCompressedRegistryImageComponents(
   user: UserInterface,
   modelId: string,
@@ -229,69 +331,82 @@ export async function addCompressedRegistryImageComponents(
     })
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
-  // get which layers exist for the model
-  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body!
+
+  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['pull'] },
+  ])
+
+  const tagManifestResponse = await getImageTagManifests(repositoryToken, {
+    repository: modelId,
+    name: imageName,
+    tag: imageTag,
+  })
+  const tagManifest = tagManifestResponse.body!
+  const manifestDigest = tagManifestResponse.headers['docker-content-digest']
+
+  if (!manifestDigest) {
+    throw InternalError('Manifest digest not found in response headers.', {
+      modelId,
+      imageName,
+      imageTag,
+      headers: tagManifestResponse.headers,
+      ...logData,
+    })
+  }
+
+  const isFatManifest = 'manifests' in tagManifest
+
   log.debug(
     {
       modelId,
       imageName,
       imageTag,
-      layersLength: tagManifest.layers.length,
-      layers: tagManifest.layers.map((layer: { [x: string]: any }) => {
-        return { size: layer['size'], digest: layer['digest'] }
+      manifestDigest,
+      isFatManifest,
+      ...(!isFatManifest && {
+        layersLength: tagManifest.layers?.length,
+        layers: tagManifest.layers?.map((layer: { [x: string]: any }) => ({
+          size: layer['size'],
+          digest: layer['digest'],
+        })),
+        config: tagManifest.config,
       }),
-      config: tagManifest.config,
-      tagManifest,
       ...logData,
     },
     'Got image tag manifest',
   )
 
-  // upload the manifest first as this is the starting point when later importing the blob
-  const tagManifestJson = JSON.stringify(tagManifest)
+  // Get the raw manifest JSON to preserve exact bytes for digest calculation
+  const tagManifestRawResponse = await getImageTagManifestsRaw(repositoryToken, {
+    repository: modelId,
+    name: imageName,
+    tag: imageTag,
+  })
+  const tagManifestJsonRaw = tagManifestRawResponse.body as string
+
+  // Save manifest as manifest.json (for backward compatibility)
   await addEntryToTarGzUpload(
     tarStream,
-    { type: 'text', filename: 'manifest.json', content: tagManifestJson },
+    { type: 'text', filename: 'manifest.json', content: tagManifestJsonRaw },
     { ...logData, mediaType: tagManifest.mediaType },
   )
 
-  // fetch and compress one layer (including config) at a time to manage RAM usage
-  // also, tar can only handle one pipe at a time
-  for (const layer of [tagManifest.config, ...tagManifest.layers]) {
-    const layerDigest = layer['digest']
-    if (!layerDigest || layerDigest.length === 0) {
-      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
-    }
-
-    log.debug(
-      {
-        modelId,
-        imageName,
-        imageTag,
-        layerDigest,
-        ...logData,
-      },
-      'Fetching image layer',
+  // If fat manifest, export platform-specific manifests
+  if (isFatManifest) {
+    await exportPlatformManifests(
+      repositoryToken,
+      modelId,
+      imageName,
+      imageTag,
+      tagManifest.manifests,
+      tarStream,
+      logData,
     )
-    const { stream: responseStream, abort } = await getImageBlob(
-      user,
-      { repository: modelId, name: imageName },
-      layerDigest,
-    )
-
-    try {
-      // pipe the body to tar using streams
-      const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-      await addEntryToTarGzUpload(
-        tarStream,
-        { type: 'stream', filename: entryName, stream: responseStream, size: layer.size },
-        { ...logData, layerDigest, mediaType: layer.mediaType },
-      )
-    } catch (err) {
-      abort()
-      throw err
-    }
   }
+
+  // Export image layers
+  await exportImageLayers(user, repositoryToken, modelId, imageName, imageTag, tarStream, logData)
+
   log.debug({ modelId, imageName, imageTag, ...logData }, 'Finished adding registry image.')
 }
 

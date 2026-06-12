@@ -1,5 +1,5 @@
-ipython==9.13.0
-myst_parser==5.0.0
+ipython==9.14.1
+myst_parser==5.1.0
 nbsphinx==0.9.8
 sphinx==8.2.3
 sphinx-copybutton==0.5.2
