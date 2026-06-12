@@ -4,7 +4,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { Dayjs } from 'dayjs'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useEffectEvent, useState } from 'react'
+import { SyntheticEvent, useEffect, useState } from 'react'
 import { increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -139,7 +139,7 @@ export default function ReviewWithComment({
             />
             {includeDueDate && (
               <Stack spacing={0.5}>
-                <Typography fontWeight='bold'>Next review date</Typography>
+                <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
                 <DatePicker
                   value={dueDate}
                   onChange={(newValue) => {

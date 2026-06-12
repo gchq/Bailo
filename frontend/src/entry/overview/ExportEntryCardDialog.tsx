@@ -63,7 +63,7 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
     <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' slots={{ transition: Transition }}>
       <DialogContent ref={modelCardContentRef}>
         <Stack spacing={2} divider={<Divider />}>
-          <Stack direction='row' alignItems='center'>
+          <Stack direction='row' sx={{ alignItems: 'center' }}>
             <Image src={logo} alt='bailo logo' width={180} height={70} />
             <Typography
               variant='h4'

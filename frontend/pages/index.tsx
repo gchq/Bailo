@@ -379,8 +379,8 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-                <Typography component='h2' variant='h5' fontWeight='bold'>
+              <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
+                <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
                   Filters
                 </Typography>
                 <HelpDialog title='Search Information' content={<SearchInfo />} />

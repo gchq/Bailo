@@ -146,8 +146,8 @@ export default function OverviewMetricsCharts({
   return (
     <Stack spacing={4}>
       <Stack spacing={2}>
-        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
-          <Typography fontWeight='bold' variant='h6' color='primary'>
+        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'center' }}>
+          <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
             Monthly uploads between
           </Typography>
           <DatePicker
@@ -161,7 +161,7 @@ export default function OverviewMetricsCharts({
             minDate={dayjs('1970/01/01')}
             maxDate={endDate || dayjs(new Date())}
           />
-          <Typography fontWeight='bold' variant='h6' color='primary'>
+          <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
             -
           </Typography>
           <DatePicker
@@ -189,7 +189,11 @@ export default function OverviewMetricsCharts({
         />
       </Stack>
       <Stack spacing={4}>
-        <Stack spacing={6} alignItems={{ lg: 'flex-start', md: 'center' }} direction={{ lg: 'row', md: 'column' }}>
+        <Stack
+          spacing={6}
+          sx={{ alignItems: { lg: 'flex-start', md: 'center' } }}
+          direction={{ lg: 'row', md: 'column' }}
+        >
           <Stack spacing={2}>
             <OverviewStatPanel label='total entries' value={data.entries} minWidth='300px' />
             <OverviewStatPanel label='entries with releases' value={data.withReleases} minWidth='300px' />
@@ -198,11 +202,10 @@ export default function OverviewMetricsCharts({
           <Stack
             spacing={2}
             direction={{ lg: 'row', md: 'column' }}
-            justifyContent='space-around'
-            sx={{ width: '100%' }}
+            sx={{ width: '100%', justifyContent: 'space-around' }}
           >
-            <Stack spacing={2} alignItems='center'>
-              <Typography fontWeight='bold' variant='h6' color='primary'>
+            <Stack spacing={2} sx={{ alignItems: 'center' }}>
+              <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
                 Life cycle status
               </Typography>
               <PieChart
@@ -229,8 +232,8 @@ export default function OverviewMetricsCharts({
                 {...pieChartSettings}
               />
             </Stack>
-            <Stack spacing={2} alignItems='center'>
-              <Typography fontWeight='bold' variant='h6' color='primary'>
+            <Stack spacing={2} sx={{ alignItems: 'center' }}>
+              <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
                 Schema usage
               </Typography>
               <PieChart

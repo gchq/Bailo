@@ -131,7 +131,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
           {entry.kind === EntryKind.UNTRUSTED_MODEL ? (
             <Stack>
-              <Typography fontWeight='bold'>State</Typography>
+              <Typography sx={{ fontWeight: 'bold' }}>State</Typography>
               <Typography>{entry.state}</Typography>
             </Stack>
           ) : (

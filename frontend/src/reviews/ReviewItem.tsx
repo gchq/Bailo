@@ -51,7 +51,7 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
     return (
       <Stack>
         <Stack spacing={1} direction='column' sx={{ justifyContent: 'flex-start' }}>
-          <Typography sx={{ wordBreak: 'break-all' }} color='primary' variant='h6' component='h2' fontWeight='bold'>
+          <Typography sx={{ wordBreak: 'break-all', fontWeight: 'bold' }} color='primary' variant='h6' component='h2'>
             {review.model.name}
           </Typography>
           {review.dueDate && (
