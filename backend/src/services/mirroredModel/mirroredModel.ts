@@ -383,7 +383,6 @@ export async function addCompressedRegistryImageComponents(
     tag: imageTag,
   })
   const tagManifestJsonRaw = tagManifestRawResponse.body as string
-  const tagManifestMediaType = tagManifestRawResponse.headers['content-type']!
 
   // Save manifest as manifest.json (for backward compatibility)
   await addEntryToTarGzUpload(
@@ -391,9 +390,6 @@ export async function addCompressedRegistryImageComponents(
     { type: 'text', filename: 'manifest.json', content: tagManifestJsonRaw },
     { ...logData, mediaType: tagManifest.mediaType },
   )
-
-  // Save manifest in blobs/manifests under its digest name with raw bytes
-  await saveManifestToTar(tarStream, tagManifestJsonRaw, manifestDigest, tagManifestMediaType, logData)
 
   // If fat manifest, export platform-specific manifests
   if (isFatManifest) {

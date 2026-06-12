@@ -73,6 +73,7 @@ export default function RichTextInput({
       editMode={registry.formContext.editMode}
       mirroredState={mirroredState}
       display={registry.formContext.mirroredModel && value}
+      required={required}
       label={label}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}

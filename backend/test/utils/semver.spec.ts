@@ -20,4 +20,21 @@ describe('', () => {
     expect(semverObjectToString(undefined as any)).toBe('')
     expect(semverObjectToString(semObj2)).toBe('1.1.1')
   })
+
+  test('semverObjectToString > deals with edge cases', () => {
+    const semObj: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+      metadata: 'test',
+    }
+    const semObj2: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+    }
+    expect(semverObjectToString(semObj)).toBe('1.1.1-test')
+    expect(semverObjectToString(undefined as any)).toBe('')
+    expect(semverObjectToString(semObj2)).toBe('1.1.1')
+  })
 })
