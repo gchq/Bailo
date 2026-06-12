@@ -1,6 +1,6 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { ReactionKindKeys, ResponseInterface } from 'types/types'
+import { ReactionKindKeys, ResponseInterface, ReviewKindKeys } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyResponseList = []
@@ -66,5 +66,18 @@ export async function patchResponseReaction(id: string, kind: ReactionKindKeys) 
   return fetch(`/api/v2/response/${id}/reaction/${kind}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+export function postComment(modelId: string, kind: ReviewKindKeys, comment: string, identifier?: string) {
+  const queryParams = {
+    modelId,
+    kind,
+    ...(identifier && { identifier }),
+  }
+  return fetch(`/api/v3/response/comment?${qs.stringify(queryParams)}`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
   })
 }

@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { Decision } from '../../../src/models/Response.js'
-import { getLatestResponseForReview, respondToReview } from '../../../src/services/v3/response.js'
+import { getLatestResponseForReview, newComment, respondToReview } from '../../../src/services/v3/response.js'
+import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 import { testReleaseReview, testResponse } from '../../testUtils/testModels.js'
 
@@ -29,6 +30,12 @@ const responseV2Mock = vi.hoisted(() => ({
   sendReviewResponseNotification: vi.fn(),
 }))
 vi.mock('../../../src/services/response.js', () => responseV2Mock)
+
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+  getModelSystemRoles: vi.fn(),
+}))
+vi.mock('../../../src/services/model.js', () => modelMock)
 
 const mockWebhookService = vi.hoisted(() => ({
   dispatchWebhooks: vi.fn(),
@@ -83,5 +90,38 @@ describe('services > v3 > response', () => {
     const latestResponse = await getLatestResponseForReview('6a058ab4db7a3be341fb3cca')
     expect(ResponseModelMock.findOne).toHaveBeenCalledOnce()
     expect(latestResponse.entity).toBe(testResponse.entity)
+  })
+
+  test('submit a comment on a release > successful', async () => {
+    modelMock.getModelById.mockResolvedValue({
+      id: 'test-1234',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    })
+    ResponseModelMock.save.mockReturnValue(testResponse)
+    const releaseComment = await newComment({} as any, 'test-123', ReviewKind.Release, 'This is a comment', '1.0.0')
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
+    expect(releaseComment.comment).toBe('This is a comment')
+  })
+
+  test('submit a comment on a release without a semver identifier > unsuccessful', async () => {
+    modelMock.getModelById.mockResolvedValue({
+      id: 'test-123',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    })
+    ResponseModelMock.save.mockReturnValue(testResponse)
+    await expect(newComment({} as any, 'test-123', ReviewKind.Release, 'This is a comment')).rejects.toThrow(
+      /^A valid semver must be provided for release comments./,
+    )
+  })
+
+  test('submit a model card comment > successful', async () => {
+    modelMock.getModelById.mockResolvedValue({
+      id: 'test-123',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    })
+    ResponseModelMock.save.mockReturnValue(testResponse)
+    const releaseComment = await newComment({} as any, 'test-123', ReviewKind.Lifecycle, 'This is a comment')
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
+    expect(releaseComment.comment).toBe('This is a comment')
   })
 })
