@@ -66,7 +66,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     )
   }, [entry])
 
-  const updateReviewDatePermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
+  const updateEntryPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
     setEntryTagUpdateErrorMessage('')
@@ -136,6 +136,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
+              editable={updateEntryPermission.hasPermission}
               value={entry.organisation}
               entryId={entry.id}
               field='organisation'
@@ -146,7 +147,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL}
+              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL && updateEntryPermission.hasPermission}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -170,12 +171,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             <Typography fontWeight='bold' color='primary'>
               Next review due:
             </Typography>
-            {updateReviewDatePermission.hasPermission && reviews.length === 0 && (
+            {updateEntryPermission.hasPermission && reviews.length === 0 && (
               <Button size='small' onClick={() => setIsReviewDateInputOpen(true)} variant='outlined'>
                 Set review date
               </Button>
             )}
-            {!updateReviewDatePermission.hasPermission && reviews.length === 0 && <em>Unset</em>}
+            {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>Unset</em>}
             <Stack
               direction='row'
               spacing={2}
@@ -189,7 +190,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                     : 'Invalid date'}
                 </Typography>
               )}
-              {updateReviewDatePermission.hasPermission && reviews[0] && (
+              {updateEntryPermission.hasPermission && reviews[0] && (
                 <Button
                   variant='outlined'
                   size='small'
