@@ -1,6 +1,6 @@
 import { HydratedDocument, model, ObjectId, Schema, Types } from 'mongoose'
 
-import { semverObjectToString, semverStringToObject } from '../services/release.js'
+import { semverObjectToString, semverStringToObject } from '../utils/semver.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 // This interface stores information about the properties on the base object.
@@ -10,7 +10,7 @@ export interface ReleaseInterface {
   modelId: string
   modelCardVersion: number
 
-  semver: string
+  semver: SemverObject
   notes: string
 
   minor: boolean
@@ -24,6 +24,10 @@ export interface ReleaseInterface {
   createdBy: string
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ReleaseVirtuals {
+  semverString: string
 }
 
 export interface ImageNameRef {
@@ -44,7 +48,12 @@ export type ImageRef = ImageTagRef | ImageDigestRef
 export type ReleaseDoc = HydratedDocument<
   Omit<ReleaseInterface, 'images'> & {
     images: Array<HydratedDocument<ImageTagRef>>
-  }
+  },
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  {},
+  ReleaseVirtuals
 > &
   SoftDeleteDocument
 
@@ -55,7 +64,8 @@ export interface SemverObject {
   metadata?: string
 }
 
-const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>(
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+const ReleaseSchema = new Schema<ReleaseDoc, {}, {}, ReleaseVirtuals>(
   {
     modelId: { type: String, required: true },
     modelCardVersion: { type: Number, required: true },
@@ -63,16 +73,6 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
     semver: {
       type: Schema.Types.Mixed,
       required: true,
-      set: function (semver: string) {
-        return semverStringToObject(semver)
-      },
-      get: function (semver: SemverObject | string) {
-        if (typeof semver === 'string') {
-          return semver
-        } else {
-          return semverObjectToString(semver)
-        }
-      },
     },
 
     notes: { type: String, required: true },
@@ -109,6 +109,17 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
     toObject: { getters: true },
   },
 )
+
+ReleaseSchema.virtual('semverString').get(function () {
+  return semverObjectToString(this.semver)
+})
+ReleaseSchema.virtual('semverString').set(function (semver: SemverObject | string) {
+  if (typeof semver === 'string') {
+    this.semver = semverStringToObject(semver)
+  } else {
+    this.semver = semver
+  }
+})
 
 ReleaseSchema.plugin(softDeletionPlugin)
 ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })

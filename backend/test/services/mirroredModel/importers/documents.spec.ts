@@ -111,7 +111,8 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
   test('processEntry > success handle release file with auth success', async () => {
     entityParsersMocks.parseRelease.mockReturnValue({
-      semver: '1.0.0',
+      semver: { major: 1, minor: 0, patch: 0 },
+      semverString: '1.0.0',
       images: [{ repository: 'repo', name: 'path', tag: 'tag' }],
     })
     modelMocks.getModelByIdNoAuth.mockResolvedValue({ id: mockMetadata.mirroredModelId })
@@ -134,7 +135,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > error auth failure', async () => {
-    entityParsersMocks.parseRelease.mockReturnValue({ semver: '2.0.0', images: [] })
+    entityParsersMocks.parseRelease.mockReturnValue({ semverString: '2.0.0', images: [] })
     modelMocks.getModelByIdNoAuth.mockResolvedValue({})
     authMocks.default.releases.mockResolvedValue([{ success: false }])
 

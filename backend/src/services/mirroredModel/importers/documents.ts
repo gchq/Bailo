@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
-import { ObjectId } from 'mongoose'
+import { Types } from 'mongoose'
 import { Headers } from 'tar-stream'
 
 import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
@@ -28,9 +28,9 @@ export type MongoDocumentMirrorInformation = {
   metadata: DocumentsMirrorMetadata
   modelCardVersions: ModelCardRevisionDoc['version'][]
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
-  releaseSemvers: ReleaseDoc['semver'][]
+  releaseSemvers: ReleaseDoc['semverString'][]
   newReleases: Omit<ReleaseDoc, '_id'>[]
-  fileIds: { key: ObjectId; name: string }[]
+  fileIds: { key: Types.ObjectId; name: string }[]
   imageIds: string[]
 }
 
@@ -41,7 +41,7 @@ export class DocumentsImporter extends BaseImporter {
 
   protected modelCardVersions: number[] = []
   protected releaseSemvers: string[] = []
-  protected fileIds: { key: ObjectId; name: string }[] = []
+  protected fileIds: { key: Types.ObjectId; name: string }[] = []
   protected imageIds: string[] = []
   protected newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   protected newReleases: Omit<ReleaseDoc, '_id'>[] = []
@@ -118,7 +118,7 @@ export class DocumentsImporter extends BaseImporter {
             } as DistributionPackageName),
           )
         }
-        this.releaseSemvers.push(release.semver)
+        this.releaseSemvers.push(release.semverString)
         const savedRelease = await saveImportedRelease(release)
         if (savedRelease) {
           this.newReleases.push(savedRelease)

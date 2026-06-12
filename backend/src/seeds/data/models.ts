@@ -76,7 +76,11 @@ export const release: ReleaseInterface = {
   modelId: 'example',
   modelCardVersion: 0,
 
-  semver: 'v1.0.0',
+  semver: {
+    major: 1,
+    minor: 0,
+    patch: 0,
+  },
   notes: `This makes major steps forward in both speed and quality of \
 results given by the model.  Here is a table of the updated speed:
 

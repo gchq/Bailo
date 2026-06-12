@@ -1,8 +1,7 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { SemverObject } from '../../src/models/Release.js'
 import { UserInterface } from '../../src/models/User.js'
 import { listModelImages } from '../../src/services/registry.js'
 import {
@@ -18,11 +17,11 @@ import {
   isReleaseDoc,
   newReleaseComment,
   removeFileFromReleases,
-  semverObjectToString,
   updateRelease,
   validateRelease,
 } from '../../src/services/release.js'
 import { NotFound } from '../../src/utils/error.js'
+import { semverObjectToString } from '../../src/utils/semver.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -79,11 +78,33 @@ const mockWebhookService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
+function injectReleaseModelMockVirtuals() {
+  const ReleaseModelMockImplementation = ReleaseModelMock.getMockImplementation()
+
+  ReleaseModelMock.mockImplementation(
+    class {
+      constructor(...args: any[]) {
+        const release = new (ReleaseModelMockImplementation as any)(...args)
+
+        Object.assign(release, {
+          semverString: semverObjectToString((release as any).semver),
+        })
+
+        return release
+      }
+    } as any,
+  )
+}
+
 describe('services > release', () => {
+  beforeEach(() => {
+    injectReleaseModelMockVirtuals()
+  })
+
   test('createRelease > simple', async () => {
     ReleaseModelMock.findOne.mockResolvedValue(null)
 
-    await createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)
+    await createRelease({} as any, { semver: '1.0.0', minor: false } as any)
 
     expect(ReleaseModelMock.save).toHaveBeenCalled()
     expect(ReleaseModelMock).toHaveBeenCalled()
@@ -94,7 +115,7 @@ describe('services > release', () => {
   test('createRelease > minor release', async () => {
     ReleaseModelMock.findOne.mockResolvedValue(null)
 
-    await createRelease({} as any, { semver: 'v1.0.0', minor: true } as any)
+    await createRelease({} as any, { semver: '1.0.0', minor: true } as any)
 
     expect(ReleaseModelMock.save).toHaveBeenCalled()
     expect(ReleaseModelMock).toHaveBeenCalled()
@@ -110,7 +131,7 @@ describe('services > release', () => {
     await createRelease(
       {} as any,
       {
-        semver: 'v1.0.0',
+        semver: '1.0.0',
         images: existingImages.flatMap(({ tags, ...rest }) => tags.map((tag) => ({ tag, ...rest }))),
       } as any,
     )
@@ -129,7 +150,7 @@ describe('services > release', () => {
       createRelease(
         {} as any,
         {
-          semver: 'v1.0.0',
+          semver: '1.0.0',
           modelCardVersion: 999,
           images: [
             { repository: 'fake', name: 'fake', tag: 'fake1' },
@@ -150,7 +171,7 @@ describe('services > release', () => {
       createRelease(
         {} as any,
         {
-          semver: 'v1.0.0',
+          semver: '1.0.0',
           modelCardVersion: 999,
           fileIds: ['test'],
         } as any,
@@ -168,7 +189,7 @@ describe('services > release', () => {
       createRelease(
         {} as any,
         {
-          semver: 'v1.0.0',
+          semver: '1.0.0',
           modelCardVersion: 999,
           fileIds: ['test'],
         } as any,
@@ -186,7 +207,7 @@ describe('services > release', () => {
       createRelease(
         {} as any,
         {
-          semver: 'v1.0.0',
+          semver: '1.0.0',
           modelCardVersion: 999,
           fileIds: ['test'],
         } as any,
@@ -210,7 +231,7 @@ describe('services > release', () => {
         await createRelease(
           {} as any,
           {
-            semver: 'v1.0.0',
+            semver: '1.0.0',
             modelCardVersion: 999,
             fileIds: ['test', 'test2'],
           } as any,
@@ -238,7 +259,7 @@ describe('services > release', () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     ReleaseModelMock.findOne.mockResolvedValue(null)
-    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrow(
+    await expect(() => createRelease({} as any, { semver: '1.0.0' } as any)).rejects.toThrow(
       /^You do not have permission/,
     )
   })
@@ -251,7 +272,7 @@ describe('services > release', () => {
     })
     ReleaseModelMock.findOne.mockResolvedValue(null)
 
-    await createRelease({} as any, { semver: 'v1.0.0' } as any)
+    await createRelease({} as any, { semver: '1.0.0' } as any)
 
     expect(ReleaseModelMock.save).toHaveBeenCalled()
     expect(ReleaseModelMock.mock.calls.at(0)?.at(0)?.modelCardVersion).toBe(999)
@@ -264,7 +285,7 @@ describe('services > release', () => {
       kind: 'model',
     })
 
-    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrow(
+    await expect(() => createRelease({} as any, { semver: '1.0.0' } as any)).rejects.toThrow(
       /^This model does not have a model card associated with it/,
     )
 
@@ -278,7 +299,7 @@ describe('services > release', () => {
       kind: 'mirrored-model',
     })
 
-    await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrow(
+    await expect(() => createRelease({} as any, { semver: '1.0.0' } as any)).rejects.toThrow(
       /^Cannot create a release from a mirrored model/,
     )
   })
@@ -303,7 +324,7 @@ describe('services > release', () => {
     ReleaseModelMock.findOne.mockResolvedValue(null)
     ReleaseModelMock.save.mockRejectedValueOnce(new Error('err'))
 
-    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrow('err')
+    await expect(createRelease({} as any, { semver: '1.0.0', minor: false } as any)).rejects.toThrow('err')
 
     expect(ReleaseModelMock.save).toHaveBeenCalled()
     expect(ReleaseModelMock).toHaveBeenCalled()
@@ -317,7 +338,7 @@ describe('services > release', () => {
     ReleaseModelMock.save.mockRejectedValueOnce(error)
     mongoUtilsMocks.isMongoServerError.mockReturnValueOnce(true)
 
-    await expect(createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)).rejects.toThrow(
+    await expect(createRelease({} as any, { semver: '1.0.0', minor: false } as any)).rejects.toThrow(
       /^A release with this semver already exists for this model./,
     )
 
@@ -328,7 +349,7 @@ describe('services > release', () => {
 
   test('updateRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
-    await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrow(
+    await expect(() => updateRelease({} as any, 'model-id', '1.0.0', {} as any)).rejects.toThrow(
       /^You do not have permission/,
     )
   })
@@ -337,17 +358,17 @@ describe('services > release', () => {
     fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
 
     await expect(() =>
-      updateRelease({} as any, 'model-id', 'v1.0.0', {
-        semver: 'v1.0.0',
+      updateRelease({} as any, 'model-id', '1.0.0', {
+        semverString: '1.0.0',
         fileIds: ['test'],
       } as any),
     ).rejects.toThrow(/^The file 'test' comes from the model/)
   })
 
   test('updateRelease > success', async () => {
-    ReleaseModelMock.findOne.mockResolvedValue({ semver: 'v1.0.0' })
+    ReleaseModelMock.findOne.mockResolvedValue({ semverString: '1.0.0' })
 
-    await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
+    await updateRelease({} as any, 'model-id', '1.0.0', { notes: 'New notes' } as any)
 
     expect(ReleaseModelMock.findOneAndUpdate).toHaveBeenCalled()
   })
@@ -359,7 +380,7 @@ describe('services > release', () => {
       kind: 'mirrored-model',
     })
 
-    await expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrow(
+    await expect(() => updateRelease({} as any, 'model-id', '1.0.0', {} as any)).rejects.toThrow(
       /^Cannot update a release on a mirrored model./,
     )
   })
@@ -367,7 +388,11 @@ describe('services > release', () => {
   test('validateRelease > should not call listModelImages', async () => {
     registryMocks.listModelImages.mockResolvedValueOnce([{ repository: 'mockRep', name: 'image', tags: ['latest'] }])
 
-    await validateRelease({ dn: 'dn' }, {} as any, { semver: '1.1.1', images: [], modelId: 'test-modelId' } as any)
+    await validateRelease(
+      { dn: 'dn' },
+      {} as any,
+      { semverString: '1.1.1', images: [], modelId: 'test-modelId' } as any,
+    )
 
     expect(listModelImages).not.toHaveBeenCalled()
   })
@@ -401,23 +426,6 @@ describe('services > release', () => {
     expect(ReleaseModelMock.sort.mock.calls.at(0)).toMatchSnapshot()
     expect(ReleaseModelMock.lookup.mock.calls.at(0)).toMatchSnapshot()
     expect(ReleaseModelMock.append.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('semverObjectToString > deals with edge cases', () => {
-    const semObj: SemverObject = {
-      major: 1,
-      minor: 1,
-      patch: 1,
-      metadata: 'test',
-    }
-    const semObj2: SemverObject = {
-      major: 1,
-      minor: 1,
-      patch: 1,
-    }
-    expect(semverObjectToString(semObj)).toBe('1.1.1-test')
-    expect(semverObjectToString(undefined as any)).toBe('')
-    expect(semverObjectToString(semObj2)).toBe('1.1.1')
   })
 
   test('getModelReleases > convertSemverQueryToMongoQuery functions', async () => {
@@ -634,7 +642,7 @@ describe('services > release', () => {
     const mockUser: any = { dn: 'test' }
     const modelId = 'example'
     const semvers = ['1.0.0']
-    ReleaseModelMock.find.mockResolvedValueOnce([{ semver: '1.0.0' }])
+    ReleaseModelMock.find.mockResolvedValueOnce([{ semverString: '1.0.0' }])
     vi.mocked(authorisation.releases).mockResolvedValue([
       { info: 'You do not have permission', success: false, id: '' },
     ])
@@ -648,7 +656,7 @@ describe('services > release', () => {
     const mockUser: any = { dn: 'test' }
     const modelId = 'example'
     const semvers = ['1.0.0']
-    const releases = [{ semver: '1.0.0' }]
+    const releases = [{ semverString: '1.0.0' }]
     ReleaseModelMock.find.mockResolvedValueOnce(releases)
 
     const result = await getReleasesForExport(mockUser, modelId, semvers)

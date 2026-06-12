@@ -230,7 +230,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
       deleteReleases(
         user,
         modelId,
-        allModelReleases.flatMap((release) => release.semver),
+        allModelReleases.flatMap((release) => release.semverString),
         true,
         session,
       ),

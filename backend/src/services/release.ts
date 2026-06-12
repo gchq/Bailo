@@ -16,6 +16,7 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import { semverObjectToString, semverStringToObject } from '../utils/semver.js'
 import { arrayOfObjectsHasKeysOfType, hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
@@ -49,8 +50,8 @@ export function isReleaseDoc(data: unknown): data is ReleaseDoc {
 }
 
 export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
-  if (!semver.valid(release.semver)) {
-    throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
+  if (!semver.valid(release.semverString)) {
+    throw BadReq(`The version '${release.semverString}' is not a valid semver value.`)
   }
 
   if (release.images && release.images.length > 0) {
@@ -89,7 +90,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
         if (isBailoError(e) && e.code === 404) {
           throw BadReq('Unable to create release as the file cannot be found.', {
             fileId,
-            semver: release.semver,
+            semver: release.semverString,
             modelId: release.modelId,
           })
         }
@@ -125,10 +126,9 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
 }
 
 export type CreateReleaseParams = Optional<
-  Pick<
-    ReleaseInterface,
-    'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
-  >,
+  Pick<ReleaseInterface, 'modelId' | 'modelCardVersion' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'> & {
+    semver: string
+  },
   'modelCardVersion'
 >
 export async function createRelease(user: UserInterface, releaseParams: CreateReleaseParams) {
@@ -150,7 +150,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
 
   const deletedRelease = await ReleaseModel.findOne({
     modelId: releaseParams.modelId,
-    semver: releaseParams.semver,
+    semver: semverStringToObject(releaseParams.semver),
     deleted: true,
   })
   if (deletedRelease) {
@@ -162,6 +162,8 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
   const release = new ReleaseModel({
     createdBy: user.dn,
     ...releaseParams,
+    // override semver string to be the object representation
+    semver: semverStringToObject(releaseParams.semver),
   })
 
   await validateRelease(user, model, release)
@@ -198,7 +200,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
   dispatchWebhooks(
     release.modelId,
     WebhookEvent.CreateRelease,
-    `Release ${release.semver} has been created for model ${release.modelId}`,
+    `Release ${release.semverString} has been created for model ${release.modelId}`,
     { release },
   )
 
@@ -223,8 +225,10 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-  const semverObj = semverStringToObject(semver)
-  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
+  const updatedRelease = await ReleaseModel.findOneAndUpdate(
+    { modelId, semver: semverStringToObject(semver) },
+    { $set: release },
+  )
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
@@ -233,7 +237,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   dispatchWebhooks(
     release.modelId,
     WebhookEvent.UpdateRelease,
-    `ReleaseModel ${release.semver} has been updated for model ${release.modelId}`,
+    `ReleaseModel ${release.semverString} has been updated for model ${release.modelId}`,
     { release },
   )
 
@@ -246,8 +250,7 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
 
-  const semverObj = semverStringToObject(semver)
-  const release = await ReleaseModel.findOne({ modelId, semver: semverObj })
+  const release = await ReleaseModel.findOne({ modelId, semver: semverStringToObject(semver) })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -322,13 +325,13 @@ export async function getModelReleases(
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
-  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
+  const semverObjects = semvers.map((semver) => semverStringToObject(semver))
   const releases = await ReleaseModel.find({
     modelId,
-    semver: semverObjs,
+    semver: { $in: semverObjects },
   })
 
-  const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
+  const missing = semvers.filter((x) => !releases.some((release) => release.semverString === x))
   if (missing.length > 0) {
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
@@ -338,7 +341,7 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
   if (failedReleases.length > 0) {
     throw Forbidden('You do not have the necessary permissions to export these releases.', {
       modelId,
-      releases: failedReleases.map((release) => release.semver),
+      releases: failedReleases.map((release) => release.semverString),
       user,
     })
   }
@@ -346,39 +349,11 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
   return releases
 }
 
-export function semverStringToObject(semver: string): SemverObject {
-  const vIdentifierIndex = semver.indexOf('v')
-  const trimmedSemver = vIdentifierIndex === -1 ? semver : semver.slice(vIdentifierIndex + 1)
-  const [version, metadata] = trimmedSemver.split('-')
-  const [major, minor, patch] = version.split('.')
-  const majorNum: number = Number(major)
-  const minorNum: number = Number(minor)
-  const patchNum: number = Number(patch)
-  return { major: majorNum, minor: minorNum, patch: patchNum, ...(metadata && { metadata }) }
-}
-
-export function semverObjectToString(semver: SemverObject): string {
-  if (!semver) {
-    return ''
-  }
-  let metadata: string
-  if (semver.metadata != undefined) {
-    metadata = `-${semver.metadata}`
-  } else {
-    metadata = ``
-  }
-  return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
-}
-
 export async function getReleaseBySemver(user: UserInterface, model: string | ModelDoc, semver: string) {
   if (typeof model === 'string') {
     model = await getModelById(user, model)
   }
-  const semverObj = semverStringToObject(semver)
-  const release = await ReleaseModel.findOne({
-    modelId: model.id,
-    semver: semverObj,
-  })
+  const release = await ReleaseModel.findOne({ modelId: model.id, semver: semverStringToObject(semver) })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId: model.id, semver })
@@ -545,7 +520,7 @@ export async function deleteReleases(
 
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
-    await removeResponsesByParentIds([...reviewsForRelease.map((review) => review.id), release.id], session)
+    await removeResponsesByParentIds([...reviewsForRelease.map((review) => review.id), release._id.toString()], session)
   }
 
   return { modelId, semvers }
@@ -618,9 +593,8 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 }
 
 export async function getAllFileIds(modelId: string, semvers: string[]): Promise<string[]> {
-  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const result = await ReleaseModel.aggregate()
-    .match({ modelId, semver: { $in: semverObjs } })
+    .match({ modelId, semver: { $in: semvers } })
     .unwind({ path: '$fileIds' })
     .group({
       _id: null,
@@ -636,7 +610,7 @@ export async function getAllFileIds(modelId: string, semvers: string[]): Promise
 
 export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
   const foundRelease = await ReleaseModel.findOneAndUpdate(
-    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    { modelId: release.modelId, semver: release.semver },
     release,
     {
       upsert: true,

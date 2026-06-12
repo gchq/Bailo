@@ -65,7 +65,8 @@ const mockModel = {
 
 const mockRelease = {
   _id: { toString: () => 'relId' },
-  semver: '1.0.0',
+  semver: { major: 1, minor: 0, patch: 0 },
+  semverString: '1.0.0',
   modelId: 'modelId',
   fileIds: ['f1'],
   toJSON: () => ({ foo: 'bar' }),
