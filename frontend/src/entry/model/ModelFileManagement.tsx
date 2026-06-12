@@ -72,7 +72,6 @@ export default function Files({ model }: FilesProps) {
               width: '100%',
               justifyContent: 'flex-end',
               py: 0.5,
-              width: '100%',
               px: 2,
             }}
           >
