@@ -173,6 +173,7 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
     ],
   )
   await dispatchEmail(toEntity('user', release.createdBy), await emailContent)
+  await dispatchEmailToModelRole(release.modelId, reviewResponse.role, await emailContent)
 }
 
 export async function notifyLifeCycleReview(modelId: string, reviewId: string, dueIn?: string) {
@@ -237,6 +238,7 @@ export async function notifyReviewResponseForAccess(
     ],
   )
   await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
+  await dispatchEmailToModelRole(accessRequest.modelId, reviewResponse.role, await emailContent)
 }
 
 async function sendEmail(email: Mail.Options) {
