@@ -1,6 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit'
 import { IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { patchEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -31,7 +30,6 @@ export default function EntrySelect({
 }: EntrySelectInputProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const theme = useTheme()
   const router = useRouter()
 
   const handleEditChange = () => {
@@ -63,11 +61,11 @@ export default function EntrySelect({
 
   return (
     <>
-      <Typography id={`${label.toLowerCase()}-label`} sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+      <Typography id={`${label.toLowerCase()}-label`} color='primary' sx={{ fontWeight: 'bold' }}>
         {`${label}:`}
       </Typography>
-      {isEdit ? (
-        <Stack direction='row' alignItems='center'>
+      <Stack direction='row' sx={{ alignItems: 'center' }}>
+        {isEdit ? (
           <Select
             label={label}
             size='small'
@@ -81,19 +79,21 @@ export default function EntrySelect({
                 {option}
               </MenuItem>
             ))}
-            <MenuItem value=''>Unset</MenuItem>
+            <MenuItem value=''>
+              <em>Unset</em>
+            </MenuItem>
           </Select>
-        </Stack>
-      ) : (
-        <Stack direction='row' alignItems='center'>
-          <Typography>{value ? value : 'Unset'}</Typography>
-          {editable && (
-            <IconButton onClick={handleEditChange} aria-label={`Edit ${label.toLowerCase()}`}>
-              <EditIcon fontSize='small' />
-            </IconButton>
-          )}
-        </Stack>
-      )}
+        ) : (
+          <>
+            {value ? <Typography>{value}</Typography> : <em>Unset</em>}
+            {editable && (
+              <IconButton onClick={handleEditChange} aria-label={`Edit ${label.toLowerCase()}`}>
+                <EditIcon fontSize='small' />
+              </IconButton>
+            )}
+          </>
+        )}
+      </Stack>
       <MessageAlert message={errorMessage} severity='error' />
     </>
   )
