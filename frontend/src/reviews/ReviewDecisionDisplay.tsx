@@ -22,6 +22,7 @@ type ReviewDecisionDisplayProps = {
   response: ResponseInterface
   modelId: string
   onReplyButtonClick: (value: string) => void
+  showReplyButton?: boolean
   currentUser: User | undefined
   mutateResponses: () => void
 }
@@ -30,6 +31,7 @@ export default function ReviewDecisionDisplay({
   response,
   modelId,
   onReplyButtonClick,
+  showReplyButton = true,
   currentUser,
   mutateResponses,
 }: ReviewDecisionDisplayProps) {
@@ -142,9 +144,12 @@ export default function ReviewDecisionDisplay({
             </Stack>
             <Stack direction='row' alignItems='center' spacing={1}>
               <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
-              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
-                <MoreHorizIcon />
-              </IconButton>
+              {showReplyButton ||
+                (currentUser && currentUser.dn === username && (
+                  <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
+                    <MoreHorizIcon />
+                  </IconButton>
+                ))}
             </Stack>
           </Stack>
           <Divider sx={{ mt: 1, mb: 2 }} />
@@ -162,7 +167,7 @@ export default function ReviewDecisionDisplay({
         </Box>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
+        {showReplyButton && <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>}
         {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
       </Menu>
     </>
