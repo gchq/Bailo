@@ -1,5 +1,7 @@
 import { Box, Button, Stack } from '@mui/material'
-import { postComment, useGetResponses } from 'actions/response'
+import { postAccessRequestComment } from 'actions/accessRequest'
+import { postReleaseComment } from 'actions/release'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
@@ -124,13 +126,24 @@ export default function ReviewComments({
   async function submitReviewComment() {
     setCommentSubmissionError('')
     setSubmitButtonLoading(true)
-    const res = await postComment(entryId, kind, newReviewComment, identifier)
-    if (res.ok) {
-      mutator()
-      mutateResponses()
-      setNewReviewComment('')
-    } else {
-      setCommentSubmissionError(await getErrorMessage(res))
+    if (kind === ReviewKind.RELEASE && identifier) {
+      const res = await postReleaseComment(entryId, identifier, newReviewComment)
+      if (res.ok) {
+        mutator()
+        mutateResponses()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
+    } else if (kind === ReviewKind.ACCESS && identifier) {
+      const res = await postAccessRequestComment(entryId, identifier, newReviewComment)
+      if (res.ok) {
+        mutator()
+        mutateResponses()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
     }
     setSubmitButtonLoading(false)
   }

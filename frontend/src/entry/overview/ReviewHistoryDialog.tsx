@@ -18,7 +18,7 @@ export default function ReviewHistoryDialog({ entry, mutateEntry, open, onClose 
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth slotProps={{ transition: Transition }} maxWidth='md'>
-      <DialogTitle color='primary'>Review history for {entry.name}</DialogTitle>
+      <DialogTitle color='primary'>Lifecycle review history for {entry.name}</DialogTitle>
       <DialogContent>
         <Box sx={{ mx: 'auto' }}>
           <ReviewComments
