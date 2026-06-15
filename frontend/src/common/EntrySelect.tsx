@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit'
-import { IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import { FormControl, IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { patchEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -66,23 +66,24 @@ export default function EntrySelect({
       </Typography>
       <Stack direction='row' sx={{ alignItems: 'center' }}>
         {isEdit ? (
-          <Select
-            label={label}
-            size='small'
-            error={Boolean(errorMessage)}
-            id={label.toLowerCase()}
-            value={value ?? ''}
-            onChange={handleSelectOption}
-          >
-            {options.map((option: string) => (
-              <MenuItem key={option} value={option}>
-                {option}
+          <FormControl sx={{ minWidth: 240 }} size='small'>
+            <Select
+              label={label}
+              error={Boolean(errorMessage)}
+              id={label.toLowerCase()}
+              value={value ?? ''}
+              onChange={handleSelectOption}
+            >
+              {options.map((option: string) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+              <MenuItem value=''>
+                <em>Unset</em>
               </MenuItem>
-            ))}
-            <MenuItem value=''>
-              <em>Unset</em>
-            </MenuItem>
-          </Select>
+            </Select>
+          </FormControl>
         ) : (
           <>
             {value ? <Typography>{value}</Typography> : <em>Unset</em>}
