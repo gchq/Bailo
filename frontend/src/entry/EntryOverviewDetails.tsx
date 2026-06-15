@@ -194,9 +194,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                 </Button>
               )}
             </Stack>
-            {archivedReviews.length > 0 && (
-              <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} entry={entry} mutateEntry={mutateEntry} />
-            )}
+            {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
           </Stack>
         )}
         <Box>
