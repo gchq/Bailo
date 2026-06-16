@@ -48,11 +48,13 @@ export default function JsonSchemaForm({
   mirroredModel?: boolean
   displayStats?: boolean
 }) {
-  const [activeStep, setActiveStep] = useState(0)
-  const [sharedSection, setSharedSection] = useState('')
-  const [filteredState, setFilteredState] = useState('')
   const theme = useTheme()
   const router = useRouter()
+  const [activeStep, setActiveStep] = useState(0)
+  const [sharedSection, setSharedSection] = useState('')
+
+  const [filteredState, setFilteredState] = useState<string | undefined>((router.query.filteredState as string) || '')
+
   const ref = useRef<HTMLDivElement | null>(null)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -70,7 +72,8 @@ export default function JsonSchemaForm({
 
   const formStats = useMemo(
     () => getFormStats(currentStep, mirroredModel, filteredState),
-    [currentStep, mirroredModel, filteredState],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentStep, currentStep?.state, mirroredModel, filteredState],
   )
 
   const collatedStats = useMemo(
@@ -123,6 +126,16 @@ export default function JsonSchemaForm({
     })
   }
 
+  const handleFilterStateClick = (state: string) => {
+    if (filteredState === state) {
+      state = ''
+    }
+    router.replace({
+      query: { ...router.query, filteredState: state },
+    })
+    setFilteredState(state)
+  }
+
   function ErrorListTemplate() {
     return (
       <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
@@ -138,14 +151,6 @@ export default function JsonSchemaForm({
       horizontal: 'center',
       vertical: 'bottom',
     })
-  }
-
-  const handleFilterStateClick = (state: string) => {
-    if (filteredState === state) {
-      setFilteredState('')
-    } else {
-      setFilteredState(state)
-    }
   }
 
   if (isUiConfigError) {
