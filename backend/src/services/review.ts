@@ -4,7 +4,7 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
-import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
@@ -14,7 +14,7 @@ import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
-import { getModelById } from './model.js'
+import { getModelById, getRoleEntities } from './model.js'
 import { getSchemaById, searchSchemas } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
@@ -223,21 +223,6 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   return await ReviewModel.find({
     accessRequestId: accessRequestIds,
   })
-}
-
-export function getRoleEntities<T extends string>(
-  roles: readonly T[],
-  collaborators: CollaboratorEntry[],
-): Record<T, string[]> {
-  return roles.reduce(
-    (acc, role) => {
-      acc[role] = collaborators
-        .filter((collaborator) => collaborator.roles.includes(role))
-        .map((collaborator) => collaborator.entity)
-      return acc
-    },
-    {} as Record<T, string[]>,
-  )
 }
 
 /**

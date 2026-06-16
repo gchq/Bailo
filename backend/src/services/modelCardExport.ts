@@ -8,8 +8,7 @@ import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { getModelById, getModelCard } from './model.js'
-import { getRoleEntities } from './review.js'
+import { getModelById, getModelCard, getRoleEntities } from './model.js'
 import { getSchemaById } from './schema.js'
 
 type Common = {

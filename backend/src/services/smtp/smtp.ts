@@ -10,8 +10,7 @@ import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
-import { getModelByIdNoAuth } from '../model.js'
-import { getRoleEntities } from '../review.js'
+import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -72,7 +71,7 @@ async function dispatchEmail(entities: string[], emailContent: EmailContent) {
   }
 }
 
-export async function requestReviewForRelease(entity: string[], review: ReviewDoc, release: ReleaseDoc) {
+export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -96,7 +95,7 @@ export async function requestReviewForRelease(entity: string[], review: ReviewDo
     true,
   )
 
-  await dispatchEmail(entity, await emailContent)
+  await dispatchEmail(entities, await emailContent)
 }
 
 const requestingEntitiesText = (value: number) => {
@@ -104,7 +103,7 @@ const requestingEntitiesText = (value: number) => {
 }
 
 export async function requestReviewForAccessRequest(
-  entity: string[],
+  entities: string[],
   review: ReviewDoc,
   accessRequest: AccessRequestDoc,
 ) {
@@ -135,7 +134,7 @@ export async function requestReviewForAccessRequest(
     true,
   )
 
-  await dispatchEmail(entity, await emailContent)
+  await dispatchEmail(entities, await emailContent)
 }
 
 export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
