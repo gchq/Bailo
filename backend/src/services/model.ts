@@ -618,7 +618,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
 
   if (modelDiff.state && model.card) {
     const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
-    if (!valid || _.isEmpty(model.card.metadata)) {
+    if (!valid) {
       throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
     }
   }

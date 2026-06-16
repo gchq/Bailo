@@ -44,14 +44,14 @@ export default function EntrySelect({
     if (!response.ok) {
       if (field === 'state') {
         router.replace({
-          query: { ...router.query, requiredState: event.target.value },
+          query: { ...router.query, requiredByModelState: event.target.value },
         })
       }
       setErrorMessage(await getErrorMessage(response))
     } else {
       if (field === 'state') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { requiredState, ...queryWithoutFiltered } = router.query
+        const { requiredByModelState, ...queryWithoutFiltered } = router.query
         router.replace({
           query: queryWithoutFiltered,
         })
@@ -71,7 +71,6 @@ export default function EntrySelect({
           <FormControl sx={{ maxWidth: 240 }} fullWidth size='small'>
             <Select
               onClose={handleEditChange}
-              label={label}
               error={Boolean(errorMessage)}
               id={labelLowerCase}
               value={value ?? ''}

@@ -64,31 +64,54 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   return schemaObject
 }
 
+function addToParentRequired(
+  pointer: string,
+  parentKeyword: string | undefined,
+  parentSchema: traverse.SchemaObject | undefined,
+  modifiedSchemas: WeakSet<object>,
+) {
+  if (parentKeyword === 'properties' && parentSchema) {
+    const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
+
+    if (!parentSchema.required) {
+      parentSchema.required = []
+    }
+
+    if (!parentSchema.required.includes(propertyName)) {
+      parentSchema.required.push(propertyName)
+      modifiedSchemas.add(parentSchema)
+    }
+  }
+}
+
 function enforceModelStateFields(schema: object, targetState: string) {
   const validStates = config.ui.modelDetails.states
   if (!validStates.includes(targetState)) {
     throw BadReq('The value for modelState is not a valid model state', { validStates, modelState: targetState })
   }
   const jsonSchema = structuredClone(schema)
-  traverse(jsonSchema, { allKeys: true }, (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
-    if (!subschema || typeof subschema !== 'object') {
-      return
-    }
+  const modifiedSchemas = new WeakSet<object>()
 
-    if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
-      if (parentKeyword === 'properties' && parentSchema) {
-        const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
-
-        if (!parentSchema.required) {
-          parentSchema.required = []
+  // Post-order traversal
+  traverse(jsonSchema, {
+    allKeys: true,
+    cb: {
+      post: (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
+        if (!subschema || typeof subschema !== 'object') {
+          return
         }
 
-        if (!parentSchema.required.includes(propertyName)) {
-          parentSchema.required.push(propertyName)
+        if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
+          addToParentRequired(pointer, parentKeyword, parentSchema, modifiedSchemas)
         }
-      }
-    }
+
+        if (modifiedSchemas.has(subschema)) {
+          addToParentRequired(pointer, parentKeyword, parentSchema, modifiedSchemas)
+        }
+      },
+    },
   })
+
   return jsonSchema
 }
 
