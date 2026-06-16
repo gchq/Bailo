@@ -16,6 +16,7 @@ import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
+const jsonSchemaValidator = new Validator()
 const schemaCache = new NodeCache()
 export interface DefaultSchema {
   name: string
@@ -264,7 +265,7 @@ export async function addDefaultSchemas() {
 
 export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {
   const schema = await getSchemaById(schemaId, modelState)
-  const result = new Validator().validate(content, schema.jsonSchema, {
+  const result = jsonSchemaValidator.validate(content, schema.jsonSchema, {
     required: true,
   })
   return {
