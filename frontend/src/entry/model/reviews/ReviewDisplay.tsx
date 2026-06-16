@@ -6,6 +6,7 @@ import { postNotifyReviewer } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, ResponseInterface } from 'types/types'
@@ -120,13 +121,19 @@ export default function ReviewDisplay({
                             ? `You have requested changes as a ${roleNameDisplay(response)}`
                             : `Changes requested by  ${roleNameDisplay(response)}`}
                         </Typography>
-                        <Button
-                          size='small'
-                          onClick={() => handleNotifyReviewerOnClick(response.parentId)}
-                          startIcon={<Refresh />}
-                        >
-                          Request re-review
-                        </Button>
+                        <Restricted action='editRelease' fallback={<></>}>
+                          <>
+                            {
+                              <Button
+                                size='small'
+                                onClick={() => handleNotifyReviewerOnClick(response.parentId)}
+                                startIcon={<Refresh />}
+                              >
+                                Request re-review
+                              </Button>
+                            }
+                          </>
+                        </Restricted>
                       </Stack>
                     )
                   })}
