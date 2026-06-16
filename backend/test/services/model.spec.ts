@@ -620,6 +620,24 @@ describe('services > model', () => {
     )
   })
 
+  test('updateModel > throws an error when model card fails validation for new state', async () => {
+    const testModel = {
+      name: 'test model',
+      kind: EntryKind.Model,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { name: 'Test' } },
+      },
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+
+    await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
+      /^Please fill in all required fields in the model card, to update the state to Production/,
+    )
+  })
+
   test('createModelCardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'Cannot alter a mirrored model.',
