@@ -66,9 +66,9 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
 
 function addToParentRequired(
   pointer: string,
-  parentKeyword: string | undefined,
-  parentSchema: traverse.SchemaObject | undefined,
   modifiedSchemas: WeakSet<object>,
+  parentKeyword?: string,
+  parentSchema?: traverse.SchemaObject,
 ) {
   if (parentKeyword === 'properties' && parentSchema) {
     const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
@@ -102,11 +102,11 @@ function enforceModelStateFields(schema: object, targetState: string) {
         }
 
         if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
-          addToParentRequired(pointer, parentKeyword, parentSchema, modifiedSchemas)
+          addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
         }
 
         if (modifiedSchemas.has(subschema)) {
-          addToParentRequired(pointer, parentKeyword, parentSchema, modifiedSchemas)
+          addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
         }
       },
     },
