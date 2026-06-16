@@ -35,7 +35,7 @@ const smtpMock = vi.hoisted(() => ({
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMock)
 
 const webhookMock = vi.hoisted(() => ({
-  sendWebhooks: vi.fn(),
+  dispatchWebhooks: vi.fn(),
 }))
 vi.mock('../../src/services/webhook.ts', () => webhookMock)
 
@@ -248,7 +248,7 @@ describe('services > modelTransfer', () => {
 
     await handleCompleteEmail(validExportId)
     expect(smtpMock.transferCompleteNotification).not.toHaveBeenCalled()
-    expect(webhookMock.sendWebhooks).not.toHaveBeenCalled()
+    expect(webhookMock.dispatchWebhooks).not.toHaveBeenCalled()
   })
 
   test('handleCompleteEmail > success, updated is truthy', async () => {
@@ -259,6 +259,6 @@ describe('services > modelTransfer', () => {
 
     await handleCompleteEmail(validExportId)
     expect(smtpMock.transferCompleteNotification).toHaveBeenCalled()
-    expect(webhookMock.sendWebhooks).toHaveBeenCalled()
+    expect(webhookMock.dispatchWebhooks).toHaveBeenCalled()
   })
 })

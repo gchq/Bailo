@@ -20,7 +20,7 @@ describe('routes > review > postReviewResponse', () => {
     decision: Decision.Approve,
     kind: ReviewKind.Lifecycle,
     modelId: 'model-123',
-    dueDate: new Date().toISOString(),
+    dueDate: new Date('01/01/2051'),
   } as any
 
   const releaseReviewBody = {

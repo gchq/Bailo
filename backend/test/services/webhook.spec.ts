@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import {
   createWebhook,
+  dispatchWebhooks,
   getWebhooksByModel,
   removeWebhook,
   sendWebhooks,
@@ -19,7 +20,7 @@ const logMock = vi.hoisted(() => ({
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/log.js', async () => ({
+vi.mock('../../src/services/log.js', () => ({
   default: logMock,
 }))
 
@@ -35,7 +36,11 @@ const fetchMock = vi.hoisted(() => ({
     }
   }),
 }))
-vi.mock('node-fetch', async () => fetchMock)
+vi.mock('node-fetch', () => fetchMock)
+
+// Helper to flush pending microtasks/timers so fire-and-forget side
+// effects have a chance to run before we assert on them
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve))
 
 describe('services > webhook', () => {
   const user: any = { dn: 'test' }
@@ -162,6 +167,35 @@ describe('services > webhook', () => {
     fetchMock.default.mockRejectedValueOnce('Error')
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
+
+    expect(fetchMock.default).toHaveBeenCalled()
+    expect(logMock.error).toHaveBeenCalled()
+  })
+
+  test('dispatchWebhooks > triggers webhook delivery in the background', async () => {
+    const webhooks = [{ uri: 'test/uri' }, { uri: 'test/another/uri' }]
+    WebhookModelMock.find.mockReturnValueOnce(webhooks)
+
+    const result = dispatchWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
+    expect(result).toBeUndefined()
+
+    // fetch has not necessarily been called yet - delivery is asynchronous.
+    await flushPromises()
+
+    expect(fetchMock.default).toHaveBeenCalled()
+    expect(fetchMock.default.mock.calls.length).toBe(webhooks.length)
+    expect(fetchMock.default.mock.calls.at(0)?.at(0)).toBe(webhooks[0].uri)
+    expect(fetchMock.default.mock.calls.at(1)?.at(0)).toBe(webhooks[1].uri)
+  })
+
+  test('dispatchWebhooks > swallows fetch errors during delivery', async () => {
+    const webhooks = [{ uri: 'test/uri' }]
+    WebhookModelMock.find.mockReturnValueOnce(webhooks)
+    fetchMock.default.mockRejectedValueOnce('Error')
+
+    expect(() => dispatchWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)).not.toThrow()
+
+    await flushPromises()
 
     expect(fetchMock.default).toHaveBeenCalled()
     expect(logMock.error).toHaveBeenCalled()

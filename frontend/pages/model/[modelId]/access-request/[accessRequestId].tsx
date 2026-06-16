@@ -15,6 +15,7 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { ReviewKind } from 'types/types'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function AccessRequest() {
@@ -23,7 +24,10 @@ export default function AccessRequest() {
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
+  const { accessRequest, isAccessRequestLoading, isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(
+    modelId,
+    accessRequestId,
+  )
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: modelId as string,
     accessRequestId: accessRequestId || '',
@@ -107,7 +111,14 @@ export default function AccessRequest() {
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}
-                <ReviewComments accessRequest={accessRequest} isEdit={isEdit} />
+                <ReviewComments
+                  identifier={accessRequest.id}
+                  parentId={accessRequest._id}
+                  entryId={accessRequest.modelId}
+                  kind={ReviewKind.ACCESS}
+                  isEdit={isEdit}
+                  mutator={mutateAccessRequest}
+                />
               </Stack>
             </>
           )}
