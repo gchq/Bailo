@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
+  FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
   TitleFieldProps,
@@ -13,6 +14,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
+import { isStateFilterRelevant } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -50,6 +52,13 @@ export function ArrayFieldItemTemplate({ children, registry, buttonsProps }: Arr
 }
 
 export function DescriptionFieldTemplate() {
+  return <></>
+}
+
+export function FieldTemplate({ children, registry, schema }: FieldTemplateProps) {
+  if (schema.properties || isStateFilterRelevant(registry.formContext.filteredState, schema)) {
+    return <>{children}</>
+  }
   return <></>
 }
 

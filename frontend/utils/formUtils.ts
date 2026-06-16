@@ -59,12 +59,9 @@ export function createStep({
     mirroredState,
     type,
     index,
-
     section,
     schemaRef,
-
     shouldValidate: false,
-
     isComplete,
   }
 }
@@ -253,13 +250,20 @@ function isPrimitiveSchema(schema: any): boolean {
   return ['string', 'number', 'boolean'].includes(schema.type)
 }
 
-function countQuestionsFromSchema(schema: any): number {
+export function isStateFilterRelevant(filteredState?: string, schema?: any) {
+  return filteredState &&
+    (schema.requiredByModelStates === undefined || !schema.requiredByModelStates.includes(filteredState))
+    ? false
+    : true
+}
+
+function countQuestionsFromSchema(schema: any, filteredState?: string): number {
   if (!schema || typeof schema !== 'object') {
     return 0
   }
 
   if (isPrimitiveSchema(schema)) {
-    return 1
+    return isStateFilterRelevant(filteredState, schema) ? 1 : 0
   }
 
   // If array - Only count if needed
@@ -267,7 +271,7 @@ function countQuestionsFromSchema(schema: any): number {
     if (!isRequiredArray(schema)) {
       return 0
     }
-    return countQuestionsFromSchema(schema.items)
+    return countQuestionsFromSchema(schema.items, filteredState)
   }
 
   if (schema.type === 'object' && schema.properties) {
@@ -276,7 +280,7 @@ function countQuestionsFromSchema(schema: any): number {
       if (isMetricsKey(key)) {
         continue
       }
-      total += countQuestionsFromSchema(prop)
+      total += countQuestionsFromSchema(prop, filteredState)
     }
     return total
   }
@@ -284,13 +288,13 @@ function countQuestionsFromSchema(schema: any): number {
   return 0
 }
 
-function countAnswersFromSchemaAndState(schema: any, state: any): number {
+function countAnswersFromSchemaAndState(schema: any, state: any, requiredState?: string): number {
   if (!schema || typeof schema !== 'object') {
     return 0
   }
 
   if (isPrimitiveSchema(schema)) {
-    return isAnswered(state) ? 1 : 0
+    return isAnswered(state) && isStateFilterRelevant(requiredState, schema) ? 1 : 0
   }
 
   // If Array - Check first item
@@ -298,7 +302,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
     if (!Array.isArray(state) || state.length === 0) {
       return 0
     }
-    return countAnswersFromSchemaAndState(schema.items, state[0])
+    return countAnswersFromSchemaAndState(schema.items, state[0], requiredState)
   }
 
   if (schema.type === 'object' && schema.properties) {
@@ -307,7 +311,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
       if (isMetricsKey(key)) {
         continue
       }
-      total += countAnswersFromSchemaAndState(prop, state?.[key])
+      total += countAnswersFromSchemaAndState(prop, state?.[key], requiredState)
     }
     return total
   }
@@ -325,7 +329,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
  * If no step is provided, all numeric values are returned as -1 and the form
  * is marked as incomplete.
  */
-export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): FormStats {
+export function getFormStats(step?: StepNoRender, mirroredModel?: boolean, filteredState?: string): FormStats {
   if (!step) {
     return {
       totalQuestions: -1,
@@ -335,29 +339,37 @@ export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): Form
     }
   }
 
-  const totalQuestions = countQuestionsFromSchema(step.schema)
-  const totalAnswers = countAnswersFromSchemaAndState(step.schema, mirroredModel ? step.mirroredState : step.state)
+  const totalQuestions = countQuestionsFromSchema(step.schema, filteredState)
+  const totalAnswers = countAnswersFromSchemaAndState(
+    step.schema,
+    mirroredModel ? step.mirroredState : step.state,
+    filteredState,
+  )
 
   // If more answers given than required answers then return 100% otherwise calulate percentage
   const percentageQuestionsComplete =
-    totalQuestions === 0 ? 0 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
+    totalQuestions === 0 ? 100 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
 
   return {
     totalQuestions,
     totalAnswers,
     percentageQuestionsComplete,
-    formCompleted: totalAnswers >= totalQuestions,
+    formCompleted: totalAnswers >= totalQuestions || totalQuestions === 0,
   }
 }
 
-export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?: boolean): ModelFormStats {
+export function getOverallCompletionStats(
+  steps: StepNoRender[],
+  mirroredModel?: boolean,
+  filteredState?: string,
+): ModelFormStats {
   let totalQuestions = 0
   let totalAnswers = 0
   let totalPages = 0
   let pagesCompleted = 0
 
   steps.forEach((step) => {
-    const stepStats = getFormStats(step, mirroredModel)
+    const stepStats = getFormStats(step, mirroredModel, filteredState)
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
     totalPages += 1

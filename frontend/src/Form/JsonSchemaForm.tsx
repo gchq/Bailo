@@ -1,20 +1,24 @@
-import { Box, Grid, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
+import { Box, Chip, Grid, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import Loading from 'src/common/Loading'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
   DescriptionFieldTemplate,
+  FieldTemplate,
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
@@ -46,9 +50,12 @@ export default function JsonSchemaForm({
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const [sharedSection, setSharedSection] = useState('')
+  const [filteredState, setFilteredState] = useState('')
   const theme = useTheme()
   const router = useRouter()
   const ref = useRef<HTMLDivElement | null>(null)
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const copyToClipboard = useCopyToClipboard()
 
@@ -61,16 +68,16 @@ export default function JsonSchemaForm({
 
   const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
-
-  const collatedStats = useMemo(
-    () => getOverallCompletionStats(splitSchema.steps, mirroredModel),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [splitSchema, calculateStats, mirroredModel],
+  const formStats = useMemo(
+    () => getFormStats(currentStep, mirroredModel, filteredState),
+    [currentStep, mirroredModel, filteredState],
   )
 
-  // const requiredStatesUsed = useMemo(() => {}, [])
+  const collatedStats = useMemo(
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, filteredState),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [splitSchema, calculateStats, mirroredModel, filteredState],
+  )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
@@ -133,6 +140,22 @@ export default function JsonSchemaForm({
     })
   }
 
+  const handleFilterStateClick = (state: string) => {
+    if (filteredState === state) {
+      setFilteredState('')
+    } else {
+      setFilteredState(state)
+    }
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
+
   return (
     <Stack>
       {displayStats && (
@@ -184,16 +207,29 @@ export default function JsonSchemaForm({
           {displayStats && (
             <Box>
               <Box>
-                Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
+                {filteredState} Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
           )}
           {canEdit && (
-            <Typography sx={{ pt: 1 }}>
-              Required fields for this state are marked with an asterisk
-              <span style={{ color: theme.palette.error.main }}>*</span>
-            </Typography>
+            <Stack direction={'column'} spacing={1}>
+              <Stack spacing={2} direction={'row'}>
+                <Typography>Filter fields by: </Typography>
+                {uiConfig?.modelDetails.states.map((state) => (
+                  <Chip
+                    key={state}
+                    label={state}
+                    onClick={() => handleFilterStateClick(state)}
+                    color={filteredState === state ? 'primary' : 'default'}
+                  />
+                ))}
+              </Stack>
+              <Typography sx={{ pt: 1 }}>
+                Required fields for this state are marked with an asterisk
+                <span style={{ color: theme.palette.error.main }}> *</span>
+              </Typography>
+            </Stack>
           )}
           <Form
             schema={currentStep.schema}
@@ -214,6 +250,7 @@ export default function JsonSchemaForm({
               state: currentStep.state,
               mirroredModel,
               onShare: onShareSectionOnClick,
+              filteredState: filteredState,
             }}
             templates={
               !canEdit
@@ -229,6 +266,7 @@ export default function JsonSchemaForm({
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,
                     ErrorListTemplate,
+                    FieldTemplate,
                   }
             }
           >
