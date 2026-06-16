@@ -11,6 +11,7 @@ import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import EditableReviewComment from 'src/reviews/EditableReviewComment'
 import { Decision, EntityKind, ResponseInterface, User } from 'types/types'
@@ -45,6 +46,8 @@ export default function ReviewDecisionDisplay({
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )
+
+  const sendNotification = useNotification()
 
   const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
 
@@ -90,7 +93,11 @@ export default function ReviewDecisionDisplay({
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
-      mutateResponses()
+      sendNotification({
+        variant: 'success',
+        msg: 'Reviewers have been notified.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
   }
 
