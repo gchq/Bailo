@@ -1,4 +1,4 @@
-import { Box, Chip, Grid, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
+import { Box, Chip, Grid, List, ListItem, ListItemButton, Stack, Stepper, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
@@ -52,7 +52,6 @@ export default function JsonSchemaForm({
   const router = useRouter()
   const [activeStep, setActiveStep] = useState(0)
   const [sharedSection, setSharedSection] = useState('')
-
   const [filteredState, setFilteredState] = useState<string | undefined>((router.query.filteredState as string) || '')
 
   const ref = useRef<HTMLDivElement | null>(null)
@@ -222,12 +221,14 @@ export default function JsonSchemaForm({
               <Stack spacing={2} direction={'row'}>
                 <Typography>Filter fields by: </Typography>
                 {uiConfig?.modelDetails.states.map((state) => (
-                  <Chip
-                    key={state}
-                    label={state}
-                    onClick={() => handleFilterStateClick(state)}
-                    color={filteredState === state ? 'primary' : 'default'}
-                  />
+                  <Tooltip key={state} title={`Filter out questions necessary for ${state}`}>
+                    <Chip
+                      key={state}
+                      label={state}
+                      onClick={() => handleFilterStateClick(state)}
+                      color={filteredState === state ? 'primary' : 'default'}
+                    />
+                  </Tooltip>
                 ))}
               </Stack>
               <Typography sx={{ pt: 1 }}>

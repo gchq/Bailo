@@ -56,7 +56,8 @@ export function DescriptionFieldTemplate() {
 }
 
 export function FieldTemplate({ children, registry, schema }: FieldTemplateProps) {
-  if (schema.properties || isStateFilterRelevant(registry.formContext.filteredState, schema)) {
+  const sectionNotQuestion = !!schema.properties
+  if (sectionNotQuestion || isStateFilterRelevant(registry.formContext.filteredState, schema)) {
     return <>{children}</>
   }
   return <></>
