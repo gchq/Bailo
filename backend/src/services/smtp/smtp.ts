@@ -3,12 +3,15 @@ import Mail from 'nodemailer/lib/mailer/index.js'
 
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
+import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
-import { ReviewDoc } from '../../models/Review.js'
+import { ReviewDoc, ReviewInterface } from '../../models/Review.js'
+import { UserInterface } from '../../models/User.js'
+import { ReviewKind } from '../../types/enums.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
+import { BadReq, NotFound } from '../../utils/error.js'
 import { sanitiseEmail } from '../../utils/smtp.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
@@ -237,6 +240,67 @@ export async function notifyReviewResponseForAccess(
     ],
   )
   await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
+}
+
+export async function notifyReviewerOfAdditionalReview(
+  user: UserInterface,
+  response: ResponseInterface,
+  review: ReviewInterface,
+) {
+  if (review.kind === ReviewKind.Release) {
+    const release = await ReleaseModel.findOne({
+      modelId: review.modelId,
+      semver: review.semver,
+    })
+
+    if (!release) {
+      throw NotFound(`The requested release was not found.`, { modelId: review.modelId, semver: review.semver })
+    }
+    await dispatchEmail(
+      toEntity('user', response.entity),
+      await buildEmail(
+        `${user.dn} has requested an additional review on a release.`,
+        [
+          { title: 'Model ID', data: review.modelId },
+          { title: 'Release version', data: review.semver },
+          { title: 'Review Role', data: review.role.toUpperCase() },
+        ],
+        [
+          {
+            name: 'Open release',
+            url: getReleaseUrl(release),
+          },
+          { name: 'See Reviews', url: `${appBaseUrl}/review` },
+        ],
+      ),
+    )
+  } else if (review.kind === ReviewKind.Access) {
+    const accessRequest = await AccessRequestModel.findOne({ id: review.accessRequestId })
+    if (!accessRequest) {
+      throw NotFound('The requested access request was not found.', { accessRequestId: review.accessRequestId })
+    }
+    await dispatchEmail(
+      toEntity('user', response.entity),
+      await buildEmail(
+        `${user.dn} has requested an additional review on an access request.`,
+        [
+          { title: 'Model ID', data: review.modelId },
+          { title: 'Access request ID', data: review.accessRequestId },
+          { title: 'Review Role', data: review.role.toUpperCase() },
+        ],
+        [
+          {
+            name: 'Open access request',
+            url: getAccessRequestUrl(accessRequest),
+          },
+          { name: 'See Reviews', url: `${appBaseUrl}/review` },
+        ],
+      ),
+    )
+  } else {
+    throw BadReq('Unknown review kind given, unable to notify reviewer.', { kind: review.kind })
+  }
+  return
 }
 
 async function sendEmail(email: Mail.Options) {

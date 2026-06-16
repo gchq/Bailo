@@ -1,8 +1,12 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { ResponseInterface } from '../../../src/models/Response.js'
+import { ReviewInterface } from '../../../src/models/Review.js'
+import { UserInterface } from '../../../src/models/User.js'
 import {
   dispatchEmailToModelRole,
   notifyLifeCycleReview,
+  notifyReviewerOfAdditionalReview,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
@@ -11,7 +15,7 @@ import {
   transferCompleteNotification,
 } from '../../../src/services/smtp/smtp.js'
 import { fromEntity } from '../../../src/utils/entity.js'
-import { testReviewResponse } from '../../testUtils/testModels.js'
+import { testRelease, testReleaseReview, testReviewResponse } from '../../testUtils/testModels.js'
 
 const configMock = vi.hoisted(() => ({
   app: { protocol: 'http', host: 'example.com', port: 80 },
@@ -125,6 +129,11 @@ const getModelByIdMock = vi.hoisted(() =>
 vi.mock('../../../src/services/model.js', () => ({
   getModelByIdNoAuth: getModelByIdMock,
 }))
+
+const releaseService = vi.hoisted(() => ({
+  getReleaseBySemver: vi.fn(() => testRelease),
+}))
+vi.mock('../../../src/services/response.js', async () => releaseService)
 
 describe('services > smtp > smtp', () => {
   const review = {
@@ -296,6 +305,21 @@ describe('services > smtp > smtp', () => {
       "A lifecycle review for Test Model has past it's due date",
       expect.anything(),
       expect.anything(),
+    )
+    expect(transporterMock.sendMail).toHaveBeenCalled()
+  })
+
+  test('that an email is sent to a reviewer when a user requests an additional review', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyReviewerOfAdditionalReview(
+      {} as UserInterface,
+      testReviewResponse as unknown as ResponseInterface,
+      testReleaseReview as unknown as ReviewInterface,
     )
     expect(transporterMock.sendMail).toHaveBeenCalled()
   })

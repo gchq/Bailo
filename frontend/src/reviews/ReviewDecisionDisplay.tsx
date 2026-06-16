@@ -2,10 +2,10 @@ import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryRoles } from 'actions/entry'
-import { patchResponse } from 'actions/response'
+import { patchResponse, postNotifyReviewer } from 'actions/response'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -84,6 +84,16 @@ export default function ReviewDecisionDisplay({
     }
   }
 
+  const handleNotifyReviewerOnClick = async () => {
+    setErrorMessage('')
+    const res = await postNotifyReviewer(response._id)
+    if (!res.ok) {
+      setErrorMessage(await getErrorMessage(res))
+    } else {
+      mutateResponses()
+    }
+  }
+
   if (isUserInformationError && isUserInformationError.status !== 404) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
@@ -139,6 +149,13 @@ export default function ReviewDecisionDisplay({
                   <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
                     Outdated
                   </Typography>
+                )}
+              </span>
+              <span>
+                {!response.outdated && response.decision === Decision.RequestChanges && (
+                  <Button size='small' onClick={handleNotifyReviewerOnClick}>
+                    Request re-review
+                  </Button>
                 )}
               </span>
             </Stack>

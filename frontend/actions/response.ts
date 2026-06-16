@@ -68,3 +68,10 @@ export async function patchResponseReaction(id: string, kind: ReactionKindKeys) 
     headers: { 'Content-Type': 'application/json' },
   })
 }
+
+export async function postNotifyReviewer(responseId: string) {
+  return fetch(`/api/v3/response/${responseId}/reviewer/notify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
