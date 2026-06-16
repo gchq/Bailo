@@ -56,6 +56,11 @@ async function dispatchEmail(entities: string[], emailContent: EmailContent) {
     ),
   ]
 
+  if (uniqueEmails.length === 0) {
+    log.warn({ entities }, 'No valid recipients found; skipping email dispatch')
+    return
+  }
+
   const email = {
     from: config.smtp.from,
     bcc: uniqueEmails,
