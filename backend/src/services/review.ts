@@ -92,15 +92,15 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
     model.collaborators,
   )
 
-  const createReviews = roleEntities.map((roleInfo) => {
+  const createReviews = Object.entries(roleEntities).map(([role, entities]) => {
     const review = new ReviewModel({
       semver: release.semver,
       modelId: model.id,
       kind: ReviewKind.Release,
-      role: roleInfo.role,
+      role,
     })
-    requestReviewForRelease(roleInfo.entities, review, release).catch((error) =>
-      log.warn({ error, roleInfo }, 'Error when sending notifications requesting review for release.'),
+    requestReviewForRelease(entities, review, release).catch((error) =>
+      log.warn({ error, entities }, 'Error when sending notifications requesting review for release.'),
     )
     return review.save()
   })
@@ -122,15 +122,15 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
     model.collaborators,
   )
 
-  const createReviews = roleEntities.map((roleInfo) => {
+  const createReviews = Object.entries(roleEntities).map(([role, entities]) => {
     const review = new ReviewModel({
       accessRequestId: accessRequest.id,
       modelId: model.id,
       kind: ReviewKind.Access,
-      role: roleInfo.role,
+      role,
     })
-    requestReviewForAccessRequest(roleInfo.entities, review, accessRequest).catch((error) =>
-      log.warn({ error, roleInfo }, 'Error when sending notifications requesting review for Access Request.'),
+    requestReviewForAccessRequest(entities, review, accessRequest).catch((error) =>
+      log.warn({ error, entities }, 'Error when sending notifications requesting review for Access Request.'),
     )
     return review.save()
   })
@@ -225,13 +225,19 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   })
 }
 
-export function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
-  return roles.map((role) => {
-    const entities = collaborators
-      .filter((collaborator) => collaborator.roles.includes(role))
-      .map((collaborator) => collaborator.entity)
-    return { role, entities }
-  })
+export function getRoleEntities<T extends string>(
+  roles: readonly T[],
+  collaborators: CollaboratorEntry[],
+): Record<T, string[]> {
+  return roles.reduce(
+    (acc, role) => {
+      acc[role] = collaborators
+        .filter((collaborator) => collaborator.roles.includes(role))
+        .map((collaborator) => collaborator.entity)
+      return acc
+    },
+    {} as Record<T, string[]>,
+  )
 }
 
 /**

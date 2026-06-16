@@ -49,7 +49,7 @@ vi.mock('../../../src/services/log.js', async () => ({
 }))
 
 const reviewMock = vi.hoisted(() => ({
-  getRoleEntities: vi.fn(() => [{ role: 'owner', entities: ['user:user'] }]),
+  getRoleEntities: vi.fn(() => ({ owner: ['user:user'] })),
 }))
 vi.mock('../../../src/services/review.js', async () => reviewMock)
 

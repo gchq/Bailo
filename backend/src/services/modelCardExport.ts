@@ -116,7 +116,7 @@ export async function renderToMarkdown(
 }
 
 function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
-  return getRoleEntities([role], collaborators)[0].entities.join('\n')
+  return getRoleEntities([role], collaborators)[role].join('\n')
 }
 
 async function createReleaseReviewExports(modelId: string) {

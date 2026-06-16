@@ -10,7 +10,7 @@ vi.mock('../../src/services/model.js')
 vi.mock('../../src/services/schema.js')
 
 const reviewServiceMock = vi.hoisted(() => ({
-  getRoleEntities: vi.fn(() => [{ role: 'msro', entities: ['user:user'] }]),
+  getRoleEntities: vi.fn((roles, _collaborators) => ({ [roles[0]]: ['user:user'] })),
 }))
 vi.mock('../../src/services/review.js', async () => reviewServiceMock)
 

@@ -197,10 +197,8 @@ export async function notifyLifeCycleReview(modelId: string, reviewId: string, d
     ],
   )
 
-  const ownerEntities = getRoleEntities(['owner'], model.collaborators).pop()?.entities
-  if (ownerEntities) {
-    await dispatchEmail(ownerEntities, await emailContent)
-  }
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 export async function notifyReviewResponseForAccess(
@@ -260,10 +258,8 @@ export async function startImportNotification(modelId: string) {
   )
 
   const model = await getModelByIdNoAuth(modelId)
-  const ownerEntities = getRoleEntities(['owner'], model.collaborators).pop()?.entities
-  if (ownerEntities) {
-    await dispatchEmail(ownerEntities, await emailContent)
-  }
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 export async function transferCompleteNotification(
@@ -301,10 +297,8 @@ export async function transferCompleteNotification(
   const emailContent = buildEmail(title, infoArray, actions)
 
   const model = await getModelByIdNoAuth(modelId)
-  const ownerEntities = getRoleEntities(['owner'], model.collaborators).pop()?.entities
-  if (ownerEntities) {
-    await dispatchEmail(ownerEntities, await emailContent)
-  }
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 function getReleaseUrl(release: ReleaseDoc) {
