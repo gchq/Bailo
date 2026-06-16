@@ -26,7 +26,7 @@ const mockMongoUtils = vi.hoisted(() => {
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 
-const validatorMock = vi.hoisted(() => ({ validate: vi.fn() }))
+const validatorMock = vi.hoisted(() => ({ validate: vi.fn(() => ({ valid: true, errors: [] })) }))
 vi.mock('jsonschema', () => ({
   Validator: vi.fn(function () {
     return validatorMock

@@ -69,7 +69,7 @@ vi.mock('../../src/services/review.js', async () => reviewMock)
 
 const schemaMock = vi.hoisted(() => ({
   getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
-  validateContentAgainstSchema: vi.fn(),
+  validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
@@ -544,7 +544,7 @@ describe('services > model', () => {
   test('updateModelCard > should throw bad request when metadata fails schema validation', async () => {
     const mockModel = { settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
     ModelModelMock.findOne.mockResolvedValueOnce(mockModel)
-    schemaMock.validateContentAgainstSchema.mockRejectedValueOnce(new Error('Validation failed'))
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
       /^Model metadata could not be validated against the schema./,
@@ -635,9 +635,7 @@ describe('services > model', () => {
 
   test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
     ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    schemaMock.validateContentAgainstSchema.mockImplementationOnce(() => {
-      throw Error('Unable to validate.')
-    })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     const result = saveImportedModelCard({} as any)
 

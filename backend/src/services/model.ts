@@ -1,4 +1,3 @@
-import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
@@ -68,8 +67,6 @@ function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel:
     }
   }
 }
-
-const jsonSchemaValidator = new Validator()
 
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
 
@@ -574,11 +571,10 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  try {
-    await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  if (!valid) {
     throw BadReq('Model metadata could not be validated against the schema.', {
-      error,
+      validationErrors: errors,
     })
   }
 
@@ -621,11 +617,8 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   if (modelDiff.state && model.card) {
-    const schema = await getSchemaById(model.card.schemaId, modelDiff.state)
-    const { valid } = jsonSchemaValidator.validate(model.card.metadata, schema.jsonSchema, {
-      required: true,
-    })
-    if (!valid) {
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    if (!valid || _.isEmpty(model.card.metadata)) {
       throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
     }
   }
@@ -762,11 +755,10 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  try {
-    await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+  if (!valid) {
     throw BadReq('Model metadata could not be validated against the schema.', {
-      error,
+      validationErrors: errors,
     })
   }
 

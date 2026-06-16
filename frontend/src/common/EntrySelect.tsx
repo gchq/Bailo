@@ -32,6 +32,8 @@ export default function EntrySelect({
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
 
+  const labelLowerCase = label.toLowerCase()
+
   const handleEditChange = () => {
     setIsEdit(!isEdit)
   }
@@ -61,16 +63,17 @@ export default function EntrySelect({
 
   return (
     <>
-      <Typography id={`${label.toLowerCase()}-label`} color='primary' sx={{ fontWeight: 'bold' }}>
+      <Typography id={`${labelLowerCase}-label`} color='primary' sx={{ fontWeight: 'bold' }}>
         {`${label}:`}
       </Typography>
       <Stack direction='row' sx={{ alignItems: 'center' }}>
         {isEdit ? (
-          <FormControl sx={{ minWidth: 240 }} size='small'>
+          <FormControl sx={{ maxWidth: 240 }} fullWidth size='small'>
             <Select
+              onClose={handleEditChange}
               label={label}
               error={Boolean(errorMessage)}
-              id={label.toLowerCase()}
+              id={labelLowerCase}
               value={value ?? ''}
               onChange={handleSelectOption}
             >
@@ -88,7 +91,7 @@ export default function EntrySelect({
           <>
             {value ? <Typography>{value}</Typography> : <em>Unset</em>}
             {editable && (
-              <IconButton onClick={handleEditChange} aria-label={`Edit ${label.toLowerCase()}`}>
+              <IconButton onClick={handleEditChange} aria-label={`Edit ${labelLowerCase}`}>
                 <EditIcon fontSize='small' />
               </IconButton>
             )}
