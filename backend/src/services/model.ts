@@ -69,6 +69,8 @@ function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel:
   }
 }
 
+const jsonSchemaValidator = new Validator()
+
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
 
 export type CreateModelParams = Pick<
@@ -613,19 +615,19 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
 
   checkUntrustedModelRestrictions(model.kind, modelDiff)
 
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
   if (modelDiff.state && model.card) {
     const schema = await getSchemaById(model.card.schemaId, modelDiff.state)
-    const { valid } = new Validator().validate(model.card.metadata, schema.jsonSchema, {
+    const { valid } = jsonSchemaValidator.validate(model.card.metadata, schema.jsonSchema, {
       required: true,
     })
     if (!valid) {
       throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
     }
-  }
-
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn })
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
