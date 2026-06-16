@@ -112,6 +112,10 @@ export async function createLifecycleReview(
   modelId: string,
   dueDate: Date,
 ): Promise<ReviewInterface> {
+  if (!dueDate || dueDate.getTime() <= Date.now()) {
+    throw BadReq('Due date of next review cannot be in the past.')
+  }
+
   // Authorisation check to make sure the user can access a model
   const model = await getModelById(user, modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)
