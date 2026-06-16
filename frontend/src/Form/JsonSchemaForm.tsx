@@ -29,6 +29,11 @@ import {
   widgets,
 } from 'utils/formUtils'
 
+type RouterQueryParams = {
+  page?: number
+  requiredByModelState?: string
+}
+
 export default function JsonSchemaForm({
   splitSchema,
   setSplitSchema,
@@ -52,7 +57,9 @@ export default function JsonSchemaForm({
   const router = useRouter()
   const [activeStep, setActiveStep] = useState(0)
   const [sharedSection, setSharedSection] = useState('')
-  const [filteredState, setFilteredState] = useState<string | undefined>((router.query.filteredState as string) || '')
+  const [requiredByModelState, setRequiredByModelState] = useState<string | undefined>(
+    (router.query.requiredByModelState as string) || '',
+  )
 
   const ref = useRef<HTMLDivElement | null>(null)
 
@@ -70,15 +77,15 @@ export default function JsonSchemaForm({
   const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 
   const formStats = useMemo(
-    () => getFormStats(currentStep, mirroredModel, filteredState),
+    () => getFormStats(currentStep, mirroredModel, requiredByModelState),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentStep, currentStep?.state, mirroredModel, filteredState],
+    [currentStep, currentStep?.state, mirroredModel, requiredByModelState],
   )
 
   const collatedStats = useMemo(
-    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, filteredState),
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, requiredByModelState),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [splitSchema, calculateStats, mirroredModel, filteredState],
+    [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
@@ -121,18 +128,18 @@ export default function JsonSchemaForm({
   function handleListItemClick(index: number) {
     setActiveStep(index)
     router.replace({
-      query: { ...router.query, page: index },
+      query: { ...router.query, page: index } as RouterQueryParams,
     })
   }
 
   const handleFilterStateClick = (state: string) => {
-    if (filteredState === state) {
+    if (requiredByModelState === state) {
       state = ''
     }
     router.replace({
-      query: { ...router.query, filteredState: state },
+      query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
     })
-    setFilteredState(state)
+    setRequiredByModelState(state)
   }
 
   function ErrorListTemplate() {
@@ -211,7 +218,7 @@ export default function JsonSchemaForm({
           {displayStats && (
             <Box>
               <Box>
-                {filteredState} Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
+                {requiredByModelState} Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
@@ -226,7 +233,7 @@ export default function JsonSchemaForm({
                       key={state}
                       label={state}
                       onClick={() => handleFilterStateClick(state)}
-                      color={filteredState === state ? 'primary' : 'default'}
+                      color={requiredByModelState === state ? 'primary' : 'default'}
                     />
                   </Tooltip>
                 ))}
@@ -256,7 +263,7 @@ export default function JsonSchemaForm({
               state: currentStep.state,
               mirroredModel,
               onShare: onShareSectionOnClick,
-              filteredState: filteredState,
+              requiredByModelState: requiredByModelState,
             }}
             templates={
               !canEdit

@@ -14,7 +14,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { isStateFilterRelevant } from 'utils/formUtils'
+import { requiredByStateFilter } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -57,7 +57,7 @@ export function DescriptionFieldTemplate() {
 
 export function FieldTemplate({ children, registry, schema }: FieldTemplateProps) {
   const sectionNotQuestion = !!schema.properties
-  if (sectionNotQuestion || isStateFilterRelevant(registry.formContext.filteredState, schema)) {
+  if (sectionNotQuestion || requiredByStateFilter(registry.formContext.requiredByModelState, schema)) {
     return <>{children}</>
   }
   return <></>
