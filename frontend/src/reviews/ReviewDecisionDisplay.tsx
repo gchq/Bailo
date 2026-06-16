@@ -2,16 +2,15 @@ import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { Box, Button, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryRoles } from 'actions/entry'
-import { patchResponse, postNotifyReviewer } from 'actions/response'
+import { patchResponse } from 'actions/response'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
-import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import EditableReviewComment from 'src/reviews/EditableReviewComment'
 import { Decision, EntityKind, ResponseInterface, User } from 'types/types'
@@ -46,8 +45,6 @@ export default function ReviewDecisionDisplay({
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )
-
-  const sendNotification = useNotification()
 
   const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
 
@@ -84,20 +81,6 @@ export default function ReviewDecisionDisplay({
     } else {
       mutateResponses()
       setIsEditMode(false)
-    }
-  }
-
-  const handleNotifyReviewerOnClick = async () => {
-    setErrorMessage('')
-    const res = await postNotifyReviewer(response._id)
-    if (!res.ok) {
-      setErrorMessage(await getErrorMessage(res))
-    } else {
-      sendNotification({
-        variant: 'success',
-        msg: 'Reviewers have been notified.',
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
     }
   }
 
@@ -156,13 +139,6 @@ export default function ReviewDecisionDisplay({
                   <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
                     Outdated
                   </Typography>
-                )}
-              </span>
-              <span>
-                {!response.outdated && response.decision === Decision.RequestChanges && (
-                  <Button size='small' onClick={handleNotifyReviewerOnClick}>
-                    Request re-review
-                  </Button>
                 )}
               </span>
             </Stack>

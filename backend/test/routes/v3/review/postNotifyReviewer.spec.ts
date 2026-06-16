@@ -1,21 +1,21 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { postNotifyReviewerSchema } from '../../../../src/routes/v3/response/postNotifyReviewer.js'
+import { postNotifyReviewerSchema } from '../../../../src/routes/v3/review/postNotifyReviewer.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
-const mockResponseServices = vi.hoisted(() => {
+const mockReviewService = vi.hoisted(() => {
   return {
     notifyReviewer: vi.fn(() => {}),
   }
 })
-vi.mock('../../../../src/services/v3/response.js', () => mockResponseServices)
+vi.mock('../../../../src/services/v3/review.js', () => mockReviewService)
 
-describe('routes > response > getLatestReviewResponse', () => {
+describe('routes > review > notify reviewers of additional review', () => {
   test('successfully fetches the latest response for a review', async () => {
     const fixture = createFixture(postNotifyReviewerSchema)
-    const res = await testPost(`/api/v3/response/${fixture.params.responseId}/reviewer/notify`, {})
+    const res = await testPost(`/api/v3/review/${fixture.params.reviewId}/notify`, {})
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

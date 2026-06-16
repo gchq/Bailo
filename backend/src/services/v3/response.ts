@@ -4,14 +4,12 @@ import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
-import { findResponseById, sendReviewResponseNotification } from '../../services/response.js'
+import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
-import { BadReq, InternalError, NotFound } from '../../utils/error.js'
-import log from '../log.js'
+import { BadReq, NotFound } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
-import { notifyReviewerOfAdditionalReview } from '../smtp/smtp.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
 import { dispatchWebhooks } from '../webhook.js'
 
@@ -68,18 +66,4 @@ export async function getLatestResponseForReview(reviewId: string) {
   }
 
   return response
-}
-
-export async function notifyReviewer(user: UserInterface, responseId: string) {
-  const response = await findResponseById(responseId)
-  const review = await findReviewById(user, response.parentId.toString())
-  try {
-    await notifyReviewerOfAdditionalReview(user, response, review)
-  } catch (e) {
-    log.warn({ e })
-    throw InternalError(
-      'Notification to reviewer could not be sent, please contact Bailo support if the problem persists.',
-    )
-  }
-  return
 }

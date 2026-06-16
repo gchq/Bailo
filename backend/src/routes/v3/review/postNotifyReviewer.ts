@@ -2,21 +2,21 @@ import { Request, Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
-import { notifyReviewer } from '../../../services/v3/response.js'
+import { notifyReviewer } from '../../../services/v3/review.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postNotifyReviewerSchema = z.object({
   params: z.object({
-    responseId: z.string(),
+    reviewId: z.string(),
   }),
 })
 
 registerPath(
   {
     method: 'post',
-    path: '/api/v3/response/{responseId}/reviewer/notify',
-    tags: ['response'],
-    description: 'Notify the author of the review response that this item needs another review',
+    path: '/api/v3/review/{reviewId}/notify',
+    tags: ['review'],
+    description: 'Notify all reviewers of this review role that this item needs another review',
     schema: postNotifyReviewerSchema,
     responses: {
       200: {
@@ -41,10 +41,9 @@ interface PostNotifyReviewerResponse {
 export const postNotifyReviewer = [
   async (req: Request, res: Response<PostNotifyReviewerResponse>): Promise<void> => {
     const {
-      params: { responseId },
+      params: { reviewId },
     } = parse(req, postNotifyReviewerSchema)
-
-    await notifyReviewer(req.user, responseId)
+    await notifyReviewer(req.user, reviewId)
 
     res.json({ status: 'Notification sent to reviewer.' })
   },

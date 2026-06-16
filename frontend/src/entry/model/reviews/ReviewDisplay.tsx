@@ -1,14 +1,17 @@
-import { Done } from '@mui/icons-material'
+import { Done, Refresh } from '@mui/icons-material'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Stack, Tooltip, Typography } from '@mui/material'
+import { Button, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
+import { postNotifyReviewer } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, ResponseInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { fromEntity } from 'utils/entityUtils'
+import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 export interface ReviewDisplayProps {
@@ -31,6 +34,10 @@ export default function ReviewDisplay({
     return entryRoles.filter((role) => !staticRoles.includes(role.shortName))
   }, [entryRoles])
 
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const sendNotification = useNotification()
+
   const orderedReviewResponses = useMemo(
     () =>
       reviewResponses
@@ -46,6 +53,20 @@ export default function ReviewDisplay({
       return uiConfig ? uiConfig.roleDisplayNames.owner : 'Owner'
     }
     return dynamicRoles.find((role) => role.shortName === response.role)?.name
+  }
+
+  const handleNotifyReviewerOnClick = async (reviewId: string) => {
+    setErrorMessage('')
+    const res = await postNotifyReviewer(reviewId)
+    if (!res.ok) {
+      setErrorMessage(await getErrorMessage(res))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Reviewers have been notified.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
   }
 
   if (isEntryRolesLoading || isUiConfigLoading) {
@@ -84,25 +105,35 @@ export default function ReviewDisplay({
           </Tooltip>
         )}
         {orderedReviewResponses.some((reviewResponse) => reviewResponse.decision === Decision.RequestChanges) && (
-          <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
-            <Stack>
-              {orderedReviewResponses
-                .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
-                .map((response) => {
-                  const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
-                  return (
-                    <Stack direction='row' key={roleName}>
-                      <HourglassEmpty color='warning' fontSize='small' />
-                      <Typography variant='caption'>
-                        {showCurrentUserResponses
-                          ? `You have requested changes as a ${roleNameDisplay(response)}`
-                          : `Changes requested by  ${roleNameDisplay(response)}`}
-                      </Typography>
-                    </Stack>
-                  )
-                })}
-            </Stack>
-          </Tooltip>
+          <>
+            <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
+              <Stack>
+                {orderedReviewResponses
+                  .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
+                  .map((response) => {
+                    const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
+                    return (
+                      <Stack direction='row' key={roleName} sx={{ alignItems: 'center' }} spacing={1}>
+                        <HourglassEmpty color='warning' fontSize='small' />
+                        <Typography variant='caption'>
+                          {showCurrentUserResponses
+                            ? `You have requested changes as a ${roleNameDisplay(response)}`
+                            : `Changes requested by  ${roleNameDisplay(response)}`}
+                        </Typography>
+                        <Button
+                          size='small'
+                          onClick={() => handleNotifyReviewerOnClick(response.parentId)}
+                          startIcon={<Refresh />}
+                        >
+                          Request re-review
+                        </Button>
+                      </Stack>
+                    )
+                  })}
+              </Stack>
+            </Tooltip>
+            <MessageAlert message={errorMessage} severity='error' />
+          </>
         )}
       </Stack>
       {reviewResponses.length === 0 && <Typography variant='caption'>Awaiting review</Typography>}

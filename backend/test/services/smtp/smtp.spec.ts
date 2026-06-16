@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ResponseInterface } from '../../../src/models/Response.js'
 import { ReviewInterface } from '../../../src/models/Review.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
@@ -132,8 +131,9 @@ vi.mock('../../../src/services/model.js', () => ({
 
 const releaseService = vi.hoisted(() => ({
   getReleaseBySemver: vi.fn(() => testRelease),
+  semverStringToObject: vi.fn(() => {}),
 }))
-vi.mock('../../../src/services/response.js', async () => releaseService)
+vi.mock('../../../src/services/release.js', async () => releaseService)
 
 describe('services > smtp > smtp', () => {
   const review = {
@@ -316,11 +316,7 @@ describe('services > smtp > smtp', () => {
       kind: 'model',
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
     } as any)
-    await notifyReviewerOfAdditionalReview(
-      {} as UserInterface,
-      testReviewResponse as unknown as ResponseInterface,
-      testReleaseReview as unknown as ReviewInterface,
-    )
+    await notifyReviewerOfAdditionalReview({} as UserInterface, testReleaseReview as unknown as ReviewInterface)
     expect(transporterMock.sendMail).toHaveBeenCalled()
   })
 })
