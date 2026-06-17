@@ -124,9 +124,24 @@ function convertSemverInFilter(filter: Record<string, any>) {
 }
 
 // Querying by semver can be performed either with a string or a semver object this resolves the type to an object for database lookup
-ReleaseSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function () {
-  convertSemverInFilter(this.getFilter())
-})
+ReleaseSchema.pre(
+  [
+    'find',
+    'findOne',
+    'findOneAndUpdate',
+    'findOneAndDelete',
+    'findOneAndReplace',
+    'updateOne',
+    'updateMany',
+    'replaceOne',
+    'deleteOne',
+    'deleteMany',
+    'countDocuments',
+  ],
+  function () {
+    convertSemverInFilter(this.getFilter())
+  },
+)
 
 const ReleaseModel = model<ReleaseDoc>('v2_Release', ReleaseSchema)
 
