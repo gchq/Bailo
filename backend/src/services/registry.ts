@@ -94,27 +94,43 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
+type ModelImageWithToken = ModelImages[number] & { repositoryToken: string }
+
+export async function listModelImages(
+  user: UserInterface,
+  modelId: string,
+  includeTokens: true,
+): Promise<ModelImageWithToken[]>
+export async function listModelImages(user: UserInterface, modelId: string, includeTokens?: false): Promise<ModelImages>
+export async function listModelImages(
+  user: UserInterface,
+  modelId: string,
+  includeTokens = false,
+): Promise<ModelImages | ModelImageWithToken[]> {
   await checkUserAuth(user, modelId, ['list'])
 
   const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
-  return (
-    (
-      await Promise.all(
-        repos.map(async (repo) => {
-          const [repository, name] = repo.split(/\/(.*)/s)
-          const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-            { type: 'repository', name: repo, actions: ['pull'] },
-          ])
-          const tags = await listImageTags(repositoryToken, { repository, name })
-          return { repository, name, tags }
-        }),
-      )
+
+  const results = (
+    await Promise.all(
+      repos.map(async (repo) => {
+        const [repository, name] = repo.split(/\/(.*)/s)
+        const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+          { type: 'repository', name: repo, actions: ['pull'] },
+        ])
+        const tags = await listImageTags(repositoryToken, { repository, name })
+        return { repository, name, tags, repositoryToken }
+      }),
     )
-      // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
-      .filter((repo) => repo.tags && repo.tags.length > 0)
   )
+    // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
+    .filter((repo) => repo.tags && repo.tags.length > 0)
+
+  if (includeTokens) {
+    return results
+  }
+  return results.map(({ repositoryToken: _token, ...img }) => img)
 }
 
 export async function getScansFromLayers(
@@ -215,18 +231,10 @@ export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
 ): Promise<ModelImagesWithScanResults[]> {
-  const modelImages = await listModelImages(user, modelId)
+  const modelImagesWithToken = await listModelImages(user, modelId, true)
 
   return Promise.all(
-    modelImages.map(async (img) => {
-      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-        {
-          type: 'repository',
-          name: `${img.repository}/${img.name}`,
-          actions: ['pull'],
-        },
-      ])
-
+    modelImagesWithToken.map(async ({ repositoryToken, ...img }) => {
       const scanSummaries = (
         await Promise.all(
           img.tags.map(async (tag) => {
@@ -252,7 +260,7 @@ export async function listModelImagesWithScanResults(
               )
             }
 
-            const layers = await getLayersForImage(repositoryToken, { ...img, tag })
+            const layers = await getLayersForImage(repositoryToken, { ...img, tag }, manifestResponse.body)
 
             const scan = await getScansFromLayers(layers)
 

@@ -261,6 +261,7 @@ data:
           retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }},
           maxInitRetries: {{ .Values.connectors.artefactScanners.maxInitRetries }},
           initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }},
+          scanTimeoutMs: {{ .Values.connectors.artefactScanners.scanTimeoutMs }},
         },
       },
 
