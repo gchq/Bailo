@@ -1,16 +1,12 @@
-import 'dayjs/locale/en-gb'
-
+import dayjs, { Dayjs } from '@dayjs'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Registry, RJSFSchema } from '@rjsf/utils'
-import dayjs, { Dayjs } from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { getMirroredState } from 'utils/formUtils'
-dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
   label?: string

@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from '@dayjs'
 import { plural } from 'utils/stringUtils'
 
 export const formatDate = (date: Date) => {
