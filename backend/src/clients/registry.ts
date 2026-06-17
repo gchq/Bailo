@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream'
 
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
-import type { ZodSchema } from 'zod'
+import type { ZodType, ZodTypeDef } from 'zod'
 
 import { ImageDigestRef, ImageNameRef, ImageRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
@@ -51,8 +51,8 @@ interface PaginationOptions<TBody> {
 }
 
 interface RegistryRequestOptions<TBody, THeaders> {
-  bodySchema?: ZodSchema<TBody>
-  headersSchema?: ZodSchema<THeaders>
+  bodySchema?: ZodType<TBody, ZodTypeDef, any>
+  headersSchema?: ZodType<THeaders, ZodTypeDef, any>
   expectStream?: boolean
   forceText?: boolean
   extraFetchOptions?: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>>
@@ -116,7 +116,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
   endpoint: string,
   {
     bodySchema,
-    headersSchema = CommonRegistryHeadersSchema as unknown as ZodSchema<THeaders>,
+    headersSchema = CommonRegistryHeadersSchema as unknown as ZodType<THeaders, ZodTypeDef, any>,
     expectStream = false,
     forceText = false,
     extraFetchOptions = {},
