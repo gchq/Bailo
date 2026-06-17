@@ -30,7 +30,7 @@ vi.mock('../../src/services/model.js', () => modelMocks)
 
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
-  validateContentAgainstSchema: vi.fn(),
+  validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] })),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
@@ -119,7 +119,7 @@ describe('services > accessRequest', () => {
   test('createAccessRequest > validation error', async () => {
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
-    schemaMocks.validateContentAgainstSchema.mockRejectedValueOnce('')
+    schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => createAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
       /^Access Request Metadata could not be validated against the schema./,
@@ -337,7 +337,7 @@ describe('services > accessRequest', () => {
   })
 
   test('updateAccessRequest > validation error', async () => {
-    schemaMocks.validateContentAgainstSchema.mockRejectedValueOnce('')
+    schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
       /^Access Request Metadata could not be validated against the schema./,

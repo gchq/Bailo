@@ -41,6 +41,7 @@ import log from './log.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
+import { cancelLifecycleJobsForModel } from './schedule/scheduler.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
@@ -269,6 +270,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
           ),
         ),
       ]),
+    // The Mongo implementations for this data is handled using a third-party library so we don't need to pass in the session.
+    () => cancelLifecycleJobsForModel(model.id),
     // Finally, delete the Model
     (session) => model.delete(session),
   ])
@@ -568,11 +571,10 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  try {
-    await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  if (!valid) {
     throw BadReq('Model metadata could not be validated against the schema.', {
-      error,
+      validationErrors: errors,
     })
   }
 
@@ -612,6 +614,13 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (modelDiff.state && model.card) {
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    if (!valid) {
+      throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
+    }
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
@@ -746,11 +755,10 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  try {
-    await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+  if (!valid) {
     throw BadReq('Model metadata could not be validated against the schema.', {
-      error,
+      validationErrors: errors,
     })
   }
 
