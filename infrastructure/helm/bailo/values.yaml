@@ -287,6 +287,8 @@ config:
     pass: "mailpass"
     from: "bailo@example.com"
     transporter: "smtp"
+    preReminderIntervals: ['1 day', '2 weeks', '10 weeks']
+    postReminderInterval: '1 day'
 
   app:
     protocol: "https"
@@ -311,6 +313,7 @@ connectors:
     retryDelayInMinutes: 60
     maxInitRetries: 5
     initRetryDelay: 5000
+    scanTimeoutMs: 60000
 
 instrumentation:
   enabled: false

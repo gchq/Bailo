@@ -38,13 +38,16 @@ export function useGetSchemas(kind?: SchemaKindKeys, hidden?: boolean) {
   }
 }
 
-export function useGetSchema(id: string) {
+export function useGetSchema(id: string, modelState?: string) {
+  const queryParams = {
+    ...(modelState && { modelState }),
+  }
   const { data, isLoading, error, mutate } = useSWR<
     {
       schema: SchemaInterface
     },
     ErrorInfo
-  >(id ? `/api/v2/schema/${id}` : null, fetcher)
+  >(id ? `/api/v2/schema/${id}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateSchema: mutate,

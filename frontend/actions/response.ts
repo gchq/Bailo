@@ -9,7 +9,6 @@ export function useGetResponses(parentIds: string[]) {
   const queryParams = {
     ...(parentIds.length > 0 && { parentIds }),
   }
-
   const { data, error, mutate, isLoading } = useSWR<
     {
       responses: ResponseInterface[]
@@ -22,6 +21,20 @@ export function useGetResponses(parentIds: string[]) {
     responses: data ? data.responses : emptyResponseList,
     isResponsesLoading: isLoading,
     isResponsesError: error,
+  }
+}
+
+export function useGetLatestResponseForReview(reviewId: string) {
+  const { data, error, mutate, isLoading } = useSWR<{ response: ResponseInterface }, ErrorInfo>(
+    `/api/v3/review/${reviewId}/responses/latest`,
+    fetcher,
+  )
+
+  return {
+    mutateResponses: mutate,
+    response: data ? data.response : undefined,
+    isResponseLoading: isLoading,
+    isResponseError: error,
   }
 }
 

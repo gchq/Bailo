@@ -178,7 +178,7 @@ export default function SideNavigation({
               primaryText='Python client docs'
               drawerOpen={drawerOpen}
               menuPage='pythonDocs'
-              title='Python cient docs'
+              title='Python client docs'
               icon={<PythonIcon />}
               openLinkInNewTab
             />
@@ -201,7 +201,7 @@ export default function SideNavigation({
               primaryText='Review Roles'
               drawerOpen={drawerOpen}
               menuPage='reviewRoles'
-              title='Review Roles'
+              title='Review roles'
               icon={<SupervisorAccount />}
               requiredRole={Roles.Admin}
             />

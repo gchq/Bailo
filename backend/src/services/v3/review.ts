@@ -9,6 +9,7 @@ import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/error.js'
 import { getModelById } from '../model.js'
+import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
 
 type ReviewWithModel = ReviewDoc & {
   model: ModelInterface
@@ -111,6 +112,10 @@ export async function createLifecycleReview(
   modelId: string,
   dueDate: Date,
 ): Promise<ReviewInterface> {
+  if (!dueDate || dueDate.getTime() <= Date.now()) {
+    throw BadReq('Due date of next review cannot be in the past.')
+  }
+
   // Authorisation check to make sure the user can access a model
   const model = await getModelById(user, modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -157,5 +162,8 @@ export async function createLifecycleReview(
     dueDate,
   })
   await newReview.save()
+
+  await scheduleLifeCycleReviewEmails(modelId, newReview._id.toString(), dueDate)
+
   return newReview
 }

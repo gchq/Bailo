@@ -595,7 +595,7 @@ describe('services > mirroredModel', () => {
 
       await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any)
 
-      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledTimes(5)
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledTimes(4)
     })
 
     test('error with tar stream add', async () => {
@@ -702,15 +702,6 @@ describe('services > mirroredModel', () => {
         expect.objectContaining({
           type: 'text',
           filename: 'manifest.json',
-          content: rootIndexRaw,
-        }),
-        expect.anything(),
-      )
-      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          type: 'text',
-          filename: `blobs/manifests/${rootDigest.replace(/^sha256:/, '')}`,
           content: rootIndexRaw,
         }),
         expect.anything(),
