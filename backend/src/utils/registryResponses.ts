@@ -130,7 +130,10 @@ const DockerImageManifestV2Schema = z.object({
   schemaVersion: z.literal(2),
   mediaType: z.literal(DockerManifestMediaType),
   config: BaseDescriptorSchema,
-  layers: z.array(DockerDescriptorSchema),
+  layers: z
+    .array(DockerDescriptorSchema)
+    .nullish()
+    .transform((layers) => layers ?? []),
 })
 
 // helper for conditional setting
@@ -139,7 +142,10 @@ const OCIImageBaseManifestV2Schema = z.object({
   mediaType: z.literal(OCIManifestMediaType).optional(),
   artifactType: z.string().optional(),
   config: OCIDescriptorSchema,
-  layers: z.array(OCIDescriptorSchema),
+  layers: z
+    .array(OCIDescriptorSchema)
+    .nullish()
+    .transform((layers) => layers ?? []),
   subject: OCIDescriptorSchema.optional(),
   annotations: OCIAnnotationsSchema.optional(),
 })
