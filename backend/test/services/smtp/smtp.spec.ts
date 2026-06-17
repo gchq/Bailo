@@ -319,4 +319,9 @@ describe('services > smtp > smtp', () => {
     await notifyReviewerOfAdditionalReview({} as UserInterface, testReleaseReview as unknown as ReviewInterface)
     expect(transporterMock.sendMail).toHaveBeenCalled()
   })
+
+  test('that an email is sent after a response for a release review to additional reviewers', async () => {
+    await notifyReviewResponseForRelease(testReviewResponse as any, release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(2)
+  })
 })
