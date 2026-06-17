@@ -7,9 +7,18 @@ import time
 from io import BytesIO
 from typing import Any
 
+try:
+    from backports.datetime_fromisoformat import MonkeyPatch  # pyright: ignore[reportMissingImports]
+except ImportError:
+    MonkeyPatch = None
+
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none, normalise_query_params
+
+if MonkeyPatch is not None:
+    # backport `datetime.fromisoformat` 3.11 changes https://pypi.org/project/backports-datetime-fromisoformat/
+    MonkeyPatch.patch_fromisoformat()
 
 logger = logging.getLogger(__name__)
 # Give users a clean way to suppress/reformat announcements without affecting debug/error logs
@@ -74,14 +83,12 @@ class Client:
                     return
 
                 start_timestamp = announcement.get("startTimestamp", "")
-                # Python 3.10 support - see https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat for origin
-                start_timestamp = start_timestamp.replace("Z", "+00:00")
                 now = datetime.datetime.now(datetime.timezone.utc)
                 if not start_timestamp == "" and now < datetime.datetime.fromisoformat(start_timestamp):
                     return
 
                 for line in text.splitlines():
-                    announcement_logger.info("remote: %s", line)
+                    announcement_logger.warning("remote: %s", line)
             except Exception:  # pylint: disable=broad-exception-caught
                 logger.debug("Failed to check for server announcements", exc_info=True)
 
