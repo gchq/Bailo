@@ -53,6 +53,9 @@ const reviewMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/review.js', async () => reviewMock)
 
+const modelServiceMocks = vi.hoisted(() => ({}))
+vi.mock('../../../src/services/model.js', () => modelServiceMocks)
+
 const transporterMock = vi.hoisted(() => {
   return {
     sendMail: vi.fn(function () {
@@ -126,8 +129,10 @@ const getModelByIdMock = vi.hoisted(() =>
     }
   }),
 )
+
 vi.mock('../../../src/services/model.js', () => ({
   getModelByIdNoAuth: getModelByIdMock,
+  getRoleEntities: vi.fn((roles, _collaborators) => ({ [roles[0]]: ['user:user'] })),
 }))
 
 describe('services > smtp > smtp', () => {
