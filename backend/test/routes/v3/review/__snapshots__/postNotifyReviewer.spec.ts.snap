@@ -1,11 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > review > notify reviewers of additional review > successfully fetches the latest response for a review 1`] = `
-{
-  "status": "Notification sent to reviewer.",
-}
-`;
-
 exports[`routes > review > notify reviewers of additional review > successfully sends notification to reviewers 1`] = `
 {
   "status": "Notification sent to reviewer.",
