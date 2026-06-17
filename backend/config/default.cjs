@@ -295,6 +295,7 @@ module.exports = {
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
+      scanTimeoutMs: 60_000,
     },
 
     metrics: {

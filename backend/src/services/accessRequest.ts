@@ -20,7 +20,7 @@ import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -71,7 +71,7 @@ export async function createAccessRequest(
     log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this Access Request')
   }
 
-  sendWebhooks(
+  dispatchWebhooks(
     accessRequest.modelId,
     WebhookEvent.CreateAccessRequest,
     `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
