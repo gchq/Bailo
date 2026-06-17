@@ -133,13 +133,19 @@ export default function JsonSchemaForm({
   }
 
   const handleFilterStateClick = (state: string) => {
-    if (requiredByModelState === state) {
-      state = ''
+    if (state === requiredByModelState) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { requiredByModelState, ...queryWithoutFiltered } = router.query
+      router.replace({
+        query: queryWithoutFiltered,
+      })
+      setRequiredByModelState('')
+    } else {
+      router.replace({
+        query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
+      })
+      setRequiredByModelState(state)
     }
-    router.replace({
-      query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
-    })
-    setRequiredByModelState(state)
   }
 
   function ErrorListTemplate() {
