@@ -75,6 +75,8 @@ export default function EntrySelect({
               id={labelLowerCase}
               value={value ?? ''}
               onChange={handleSelectOption}
+              displayEmpty
+              renderValue={(value: any) => (value ? value : <em>Unset</em>)}
             >
               {options.map((option: string) => (
                 <MenuItem key={option} value={option}>

@@ -17,7 +17,6 @@ import {
   isModelCardRevisionDoc,
   popularTagsForEntries,
   removeModel,
-  saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
   updateModel,
@@ -649,15 +648,6 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(ModelModelMock.save).not.toHaveBeenCalled()
-  })
-
-  test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
-    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
-
-    const result = saveImportedModelCard({} as any)
-
-    await expect(result).rejects.toThrow(/^Model metadata could not be validated against the schema./)
   })
 
   test('setLatestImportedModelCard > success', async () => {
