@@ -251,10 +251,9 @@ function isPrimitiveSchema(schema: any): boolean {
 }
 
 export function requiredByStateFilter(requiredByModelState?: string, schema?: any) {
-  return requiredByModelState &&
-    (!schema.requiredByModelStates || !schema.requiredByModelStates.includes(requiredByModelState))
-    ? false
-    : true
+  return Boolean(
+    requiredByModelState && schema.requiredByModelStates && schema.requiredByModelStates.includes(requiredByModelState),
+  )
 }
 
 function countQuestionsFromSchema(schema: any, requiredByModelState?: string): number {
