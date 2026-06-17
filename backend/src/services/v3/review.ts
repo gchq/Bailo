@@ -7,7 +7,9 @@ import { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
+import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/error.js'
+import log from '../log.js'
 import { getModelById } from '../model.js'
 import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
 import { notifyReviewerOfAdditionalReview } from '../smtp/smtp.js'
@@ -170,6 +172,10 @@ export async function createLifecycleReview(
 }
 
 export async function notifyReviewer(user: UserInterface, reviewId: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
   const review = await findReviewById(user, reviewId)
   if (review.lastNotificationAt && Date.now() < review.lastNotificationAt.getTime() + 300000) {
     throw BadReq('A notification was already sent recently.')
