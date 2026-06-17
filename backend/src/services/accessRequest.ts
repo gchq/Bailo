@@ -41,11 +41,10 @@ export async function createAccessRequest(
   if (schema.hidden) {
     throw BadReq('Cannot create new Access Request using a hidden schema.', { schemaId: accessRequestInfo.schemaId })
   }
-  try {
-    await validateContentAgainstSchema(accessRequestInfo.schemaId, accessRequestInfo.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(accessRequestInfo.schemaId, accessRequestInfo.metadata)
+  if (!valid) {
     throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      error,
+      errors,
     })
   }
 
@@ -228,11 +227,10 @@ export async function updateAccessRequest(
   }
 
   // Ensure that the AR meets the schema
-  try {
-    await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
+  if (!valid) {
     throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      error,
+      errors,
     })
   }
 

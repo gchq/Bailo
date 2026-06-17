@@ -571,11 +571,10 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  try {
-    await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  if (!valid) {
     throw BadReq('Model metadata could not be validated against the schema.', {
-      error,
+      validationErrors: errors,
     })
   }
 
@@ -615,6 +614,13 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (modelDiff.state && model.card) {
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    if (!valid) {
+      throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
+    }
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
@@ -749,11 +755,10 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  try {
-    await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+  if (!valid) {
     throw BadReq('Model metadata could not be validated against the schema.', {
-      error,
+      validationErrors: errors,
     })
   }
 
