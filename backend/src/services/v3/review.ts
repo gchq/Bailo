@@ -8,7 +8,6 @@ import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/error.js'
-import log from '../log.js'
 import { getModelById } from '../model.js'
 import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
 import { notifyReviewerOfAdditionalReview } from '../smtp/smtp.js'
@@ -183,16 +182,9 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
       throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
     }
     await notifyReviewerOfAdditionalReview(user, review)
-  } catch (e) {
-    log.warn(
-      {
-        err: e instanceof Error ? e.message : 'Unknown error',
-        reviewId,
-      },
-      'Failed to notify reviewers',
-    )
+  } catch (_e) {
     throw InternalError(
-      'Notification to reviewer could not be sent, please contact Bailo support if the problem persists.',
+      'Notification to reviewer(s) could not be sent, please contact Bailo support if the problem persists.',
     )
   }
   await ReviewModel.findOneAndUpdate(
