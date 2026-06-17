@@ -186,9 +186,8 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
   } catch (e) {
     log.warn(
       {
-        err: e,
+        err: e instanceof Error ? e.message : 'Unknown error',
         reviewId,
-        user: user.dn,
       },
       'Failed to notify reviewers',
     )
