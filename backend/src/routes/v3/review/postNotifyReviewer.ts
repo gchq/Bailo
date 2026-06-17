@@ -7,7 +7,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const postNotifyReviewerSchema = z.object({
   params: z.object({
-    reviewId: z.string(),
+    reviewId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   }),
 })
 

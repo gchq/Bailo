@@ -29,6 +29,7 @@ type PartialReviewInterface = {
   role: string
   createdAt: string
   updatedAt: string
+  lastNotificationAt?: Date
 }
 
 // The doc type includes all values in the plain interface, as well as all the
@@ -71,6 +72,9 @@ const ReviewSchema = new Schema<ReviewDoc>(
       },
     },
     role: { type: String, required: true },
+    lastNotificationAt: {
+      type: Schema.Types.Date,
+    },
   },
   {
     timestamps: true,

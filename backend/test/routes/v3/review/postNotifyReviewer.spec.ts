@@ -13,7 +13,7 @@ const mockReviewService = vi.hoisted(() => {
 vi.mock('../../../../src/services/v3/review.js', () => mockReviewService)
 
 describe('routes > review > notify reviewers of additional review', () => {
-  test('successfully fetches the latest response for a review', async () => {
+  test('successfully sends notification to reviewers', async () => {
     const fixture = createFixture(postNotifyReviewerSchema)
     const res = await testPost(`/api/v3/review/${fixture.params.reviewId}/notify`, {})
 

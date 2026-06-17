@@ -36,6 +36,7 @@ export default function ReviewDisplay({
   }, [entryRoles])
 
   const [errorMessage, setErrorMessage] = useState('')
+  const [isNotifyButtonLoading, setIsNotifyButtonLoading] = useState(false)
 
   const sendNotification = useNotification()
 
@@ -57,6 +58,7 @@ export default function ReviewDisplay({
   }
 
   const handleNotifyReviewerOnClick = async (reviewId: string) => {
+    setIsNotifyButtonLoading(true)
     setErrorMessage('')
     const res = await postNotifyReviewer(reviewId)
     if (!res.ok) {
@@ -68,6 +70,7 @@ export default function ReviewDisplay({
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
+    setIsNotifyButtonLoading(false)
   }
 
   if (isEntryRolesLoading || isUiConfigLoading) {
@@ -112,9 +115,8 @@ export default function ReviewDisplay({
                 {orderedReviewResponses
                   .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
                   .map((response) => {
-                    const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
                     return (
-                      <Stack direction='row' key={roleName} sx={{ alignItems: 'center' }} spacing={1}>
+                      <Stack direction='row' key={response._id} sx={{ alignItems: 'center' }} spacing={1}>
                         <HourglassEmpty color='warning' fontSize='small' />
                         <Typography variant='caption'>
                           {showCurrentUserResponses
@@ -128,6 +130,7 @@ export default function ReviewDisplay({
                                 size='small'
                                 onClick={() => handleNotifyReviewerOnClick(response.parentId)}
                                 startIcon={<Refresh />}
+                                loading={isNotifyButtonLoading}
                               >
                                 Request re-review
                               </Button>

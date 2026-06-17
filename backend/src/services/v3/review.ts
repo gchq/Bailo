@@ -172,13 +172,35 @@ export async function createLifecycleReview(
 
 export async function notifyReviewer(user: UserInterface, reviewId: string) {
   const review = await findReviewById(user, reviewId)
+  if (review.lastNotificationAt && Date.now() < review.lastNotificationAt.getTime() + 300000) {
+    throw BadReq('A notification was already sent recently.')
+  }
   try {
+    const model = await getModelById(user, review.modelId)
+    // The above only determines view access to a model, we should make sure the user has write access too
+    const auth = await authorisation.model(user, model, ModelAction.Write)
+    if (!auth.success) {
+      throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+    }
     await notifyReviewerOfAdditionalReview(user, review)
   } catch (e) {
-    log.warn({ e })
+    log.warn(
+      {
+        err: e,
+        reviewId,
+        user: user.dn,
+      },
+      'Failed to notify reviewers',
+    )
     throw InternalError(
       'Notification to reviewer could not be sent, please contact Bailo support if the problem persists.',
     )
   }
+  await ReviewModel.findOneAndUpdate(
+    { _id: reviewId },
+    {
+      $set: { lastNotificationAt: new Date() },
+    },
+  )
   return
 }

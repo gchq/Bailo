@@ -243,6 +243,21 @@ export async function notifyReviewResponseForAccess(
   await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
 }
 
+async function notifyRole(
+  user: UserInterface,
+  review: ReviewInterface,
+  title: string,
+  fields: Info[],
+  actionUrl: string,
+) {
+  const emailContent = await buildEmail(title, fields, [
+    { name: 'Open item', url: actionUrl },
+    { name: 'See Reviews', url: `${appBaseUrl}/review` },
+  ])
+
+  await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
+}
+
 export async function notifyReviewerOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
   if (review.kind === ReviewKind.Release) {
     const semverObj = semverStringToObject(review.semver)
@@ -254,43 +269,33 @@ export async function notifyReviewerOfAdditionalReview(user: UserInterface, revi
     if (!release) {
       throw NotFound(`The requested release was not found.`, { modelId: review.modelId, semver: review.semver })
     }
-    const emailContent = await buildEmail(
+    await notifyRole(
+      user,
+      review,
       `${user.dn} has requested an additional review on a release.`,
       [
         { title: 'Model ID', data: review.modelId },
         { title: 'Release version', data: review.semver },
         { title: 'Review Role', data: review.role.toUpperCase() },
       ],
-      [
-        {
-          name: 'Open release',
-          url: getReleaseUrl(release),
-        },
-        { name: 'See Reviews', url: `${appBaseUrl}/review` },
-      ],
+      getReleaseUrl(release),
     )
-    await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
   } else if (review.kind === ReviewKind.Access) {
     const accessRequest = await AccessRequestModel.findOne({ id: review.accessRequestId })
     if (!accessRequest) {
       throw NotFound('The requested access request was not found.', { accessRequestId: review.accessRequestId })
     }
-    const emailContent = await buildEmail(
+    await notifyRole(
+      user,
+      review,
       `${user.dn} has requested an additional review on an access request.`,
       [
         { title: 'Model ID', data: review.modelId },
         { title: 'Access request ID', data: review.accessRequestId },
         { title: 'Review Role', data: review.role.toUpperCase() },
       ],
-      [
-        {
-          name: 'Open access request',
-          url: getAccessRequestUrl(accessRequest),
-        },
-        { name: 'See Reviews', url: `${appBaseUrl}/review` },
-      ],
+      getAccessRequestUrl(accessRequest),
     )
-    await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
   } else {
     throw BadReq('Unknown review kind given, unable to notify reviewer.', { kind: review.kind })
   }
