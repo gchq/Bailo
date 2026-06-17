@@ -5,7 +5,6 @@ let registryUrl = ''
 const testModelImage = 'testmodelimage'
 const testModelImageTag = '1'
 const testModelMultiplatformImageTag = 'multiplatform'
-const platforms = 'linux/amd64,linux/arm64'
 
 describe('Make and approve an access request', () => {
   before(() => {
@@ -71,14 +70,28 @@ describe('Make and approve an access request', () => {
 
   it('can push a multiplatform image to the registry', function () {
     const registryImage = `${registryUrl}/${modelUuidForRegistry}/${testModelImage}:${testModelMultiplatformImageTag}`
-    cy.log('Running all the docker commands to build and push a multi-platform image')
+    const amd64Image = `${registryUrl}/${modelUuidForRegistry}/${testModelImage}:${testModelMultiplatformImageTag}-amd64`
+    const arm64Image = `${registryUrl}/${modelUuidForRegistry}/${testModelImage}:${testModelMultiplatformImageTag}-arm64`
+
+    cy.log('Logging in to the registry')
     cy.exec(`docker login ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, { timeout: 60000 })
-    cy.exec(
-      `docker buildx build --platform ${platforms} --tag ${registryImage} --output=type=registry,registry.insecure=true --push cypress/fixtures/docker-image`,
-      {
-        timeout: 180000,
-      },
-    )
+
+    cy.log('Building and pushing platform-specific images')
+    cy.exec(`docker build --label "architecture=amd64" --tag ${amd64Image} cypress/fixtures/docker-image`, {
+      timeout: 60000,
+    })
+    cy.exec(`docker push ${amd64Image}`, { timeout: 60000 })
+
+    cy.exec(`docker build --label "architecture=arm64" --tag ${arm64Image} cypress/fixtures/docker-image`, {
+      timeout: 60000,
+    })
+    cy.exec(`docker push ${arm64Image}`, { timeout: 60000 })
+
+    cy.log('Creating and pushing multi-platform manifest list')
+    cy.exec(`docker manifest create --insecure ${registryImage} ${amd64Image} ${arm64Image}`, { timeout: 60000 })
+    cy.exec(`docker manifest annotate ${registryImage} ${amd64Image} --os linux --arch amd64`)
+    cy.exec(`docker manifest annotate ${registryImage} ${arm64Image} --os linux --arch arm64`)
+    cy.exec(`docker manifest push --insecure ${registryImage}`, { timeout: 60000 })
 
     cy.log('Verifying the pushed image contains both target platforms')
     cy.exec(`docker buildx imagetools inspect ${registryImage}`, {
