@@ -93,6 +93,10 @@ export interface Config {
       postReminderInterval: string
     }
 
+    review: {
+      lastNotifiedCoolDownMs: number
+    }
+
     from: string
   }
 

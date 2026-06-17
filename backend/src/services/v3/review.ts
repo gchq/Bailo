@@ -10,9 +10,9 @@ import { ReviewKind } from '../../types/enums.js'
 import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/error.js'
 import log from '../log.js'
-import { getModelById } from '../model.js'
+import { getModelById, getModelByIdNoAuth } from '../model.js'
 import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
-import { notifyReviewerOfAdditionalReview } from '../smtp/smtp.js'
+import { notifyReviewRoleOfAdditionalReview } from '../smtp/smtp.js'
 
 type ReviewWithModel = ReviewDoc & {
   model: ModelInterface
@@ -177,21 +177,24 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
     return
   }
   const review = await findReviewById(user, reviewId)
-  if (review.lastNotificationAt && Date.now() < review.lastNotificationAt.getTime() + 300000) {
+  if (
+    review.lastNotificationAt &&
+    Date.now() < review.lastNotificationAt.getTime() + config.smtp.review.lastNotifiedCoolDownMs
+  ) {
     throw BadReq('A notification was already sent recently.')
   }
+
+  const model = await getModelByIdNoAuth(review.modelId)
+  // The above only determines view access to a model, we should make sure the user has write access too
+  const auth = await authorisation.model(user, model, ModelAction.Write)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+  }
   try {
-    const model = await getModelById(user, review.modelId)
-    // The above only determines view access to a model, we should make sure the user has write access too
-    const auth = await authorisation.model(user, model, ModelAction.Write)
-    if (!auth.success) {
-      throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
-    }
-    await notifyReviewerOfAdditionalReview(user, review)
-  } catch (_e) {
-    throw InternalError(
-      'Notification to reviewer(s) could not be sent, please contact Bailo support if the problem persists.',
-    )
+    await notifyReviewRoleOfAdditionalReview(user, review)
+  } catch (err) {
+    log.error(err, 'Failed to notify reviewer')
+    throw InternalError('Notification to reviewer(s) could not be sent', { modelId: model.id, err })
   }
   await ReviewModel.findOneAndUpdate(
     { _id: reviewId },

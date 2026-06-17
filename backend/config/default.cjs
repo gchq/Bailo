@@ -90,6 +90,10 @@ module.exports = {
       postReminderInterval: '1 day',
     },
 
+    review: {
+      lastNotifiedCoolDownMs: 300000,
+    },
+
     // Set the email address that Bailo should use, can be different from the SMTP server details.
     from: '"Bailo 📝" <bailo@example.org>',
   },

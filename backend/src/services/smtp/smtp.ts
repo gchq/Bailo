@@ -245,13 +245,7 @@ export async function notifyReviewResponseForAccess(
   await dispatchEmailToModelRole(accessRequest.modelId, reviewResponse.role, await emailContent)
 }
 
-async function notifyRole(
-  user: UserInterface,
-  review: ReviewInterface,
-  title: string,
-  fields: Info[],
-  actionUrl: string,
-) {
+async function notifyRole(review: ReviewInterface, title: string, fields: Info[], actionUrl: string) {
   const emailContent = await buildEmail(title, fields, [
     { name: 'Open item', url: actionUrl },
     { name: 'See Reviews', url: `${appBaseUrl}/review` },
@@ -260,7 +254,7 @@ async function notifyRole(
   await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
 }
 
-export async function notifyReviewerOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
+export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
   if (review.kind === ReviewKind.Release) {
     const semverObj = semverStringToObject(review.semver)
     const release = await ReleaseModel.findOne({
@@ -272,7 +266,6 @@ export async function notifyReviewerOfAdditionalReview(user: UserInterface, revi
       throw NotFound(`The requested release was not found.`, { modelId: review.modelId, semver: review.semver })
     }
     await notifyRole(
-      user,
       review,
       `${user.dn} has requested an additional review on a release.`,
       [
@@ -288,7 +281,6 @@ export async function notifyReviewerOfAdditionalReview(user: UserInterface, revi
       throw NotFound('The requested access request was not found.', { accessRequestId: review.accessRequestId })
     }
     await notifyRole(
-      user,
       review,
       `${user.dn} has requested an additional review on an access request.`,
       [

@@ -39,7 +39,7 @@ export default function AccessRequest() {
     responses: reviewResponses,
     isResponsesLoading: isReviewResponsesLoading,
     isResponsesError: isReviewResponsesError,
-  } = useGetResponses([...reviews.map((review) => review._id)])
+  } = useGetResponses(reviews.map((review) => review._id))
   const {
     reviews: userReviews,
     isReviewsLoading: isUserReviewsLoading,

@@ -5,9 +5,9 @@ import { UserInterface } from '../../../src/models/User.js'
 import {
   dispatchEmailToModelRole,
   notifyLifeCycleReview,
-  notifyReviewerOfAdditionalReview,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
+  notifyReviewRoleOfAdditionalReview,
   requestReviewForAccessRequest,
   requestReviewForRelease,
   startImportNotification,
@@ -316,7 +316,7 @@ describe('services > smtp > smtp', () => {
       kind: 'model',
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
     } as any)
-    await notifyReviewerOfAdditionalReview({} as UserInterface, testReleaseReview as unknown as ReviewInterface)
+    await notifyReviewRoleOfAdditionalReview({} as UserInterface, testReleaseReview as unknown as ReviewInterface)
     expect(transporterMock.sendMail).toHaveBeenCalled()
   })
 
