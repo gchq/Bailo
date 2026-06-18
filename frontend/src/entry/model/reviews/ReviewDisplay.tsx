@@ -1,18 +1,14 @@
-import { Done, Refresh } from '@mui/icons-material'
-import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Button, Stack, Tooltip, Typography } from '@mui/material'
+import { Done } from '@mui/icons-material'
+import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
-import { postNotifyReviewer } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
-import Restricted from 'src/common/Restricted'
-import useNotification from 'src/hooks/useNotification'
+import { ChangesRequestedDisplay } from 'src/entry/model/reviews/ChangesRequestedDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, ResponseInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { fromEntity } from 'utils/entityUtils'
-import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 export interface ReviewDisplayProps {
@@ -36,9 +32,6 @@ export default function ReviewDisplay({
   }, [entryRoles])
 
   const [errorMessage, setErrorMessage] = useState('')
-  const [isNotifyButtonLoading, setIsNotifyButtonLoading] = useState(false)
-
-  const sendNotification = useNotification()
 
   const orderedReviewResponses = useMemo(
     () =>
@@ -55,22 +48,6 @@ export default function ReviewDisplay({
       return uiConfig ? uiConfig.roleDisplayNames.owner : 'Owner'
     }
     return dynamicRoles.find((role) => role.shortName === response.role)?.name
-  }
-
-  const handleNotifyReviewerOnClick = async (reviewId: string) => {
-    setIsNotifyButtonLoading(true)
-    setErrorMessage('')
-    const res = await postNotifyReviewer(reviewId)
-    if (!res.ok) {
-      setErrorMessage(await getErrorMessage(res))
-    } else {
-      sendNotification({
-        variant: 'success',
-        msg: 'Reviewers have been notified.',
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-    }
-    setIsNotifyButtonLoading(false)
   }
 
   if (isEntryRolesLoading || isUiConfigLoading) {
@@ -116,28 +93,13 @@ export default function ReviewDisplay({
                   .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
                   .map((response) => {
                     return (
-                      <Stack direction='row' key={response._id} sx={{ alignItems: 'center' }} spacing={1}>
-                        <HourglassEmpty color='warning' fontSize='small' />
-                        <Typography variant='caption'>
-                          {showCurrentUserResponses
-                            ? `You have requested changes as a ${roleNameDisplay(response)}`
-                            : `Changes requested by  ${roleNameDisplay(response)}`}
-                        </Typography>
-                        <Restricted action='editRelease' fallback={<></>}>
-                          <>
-                            {
-                              <Button
-                                size='small'
-                                onClick={() => handleNotifyReviewerOnClick(response.parentId)}
-                                startIcon={<Refresh />}
-                                loading={isNotifyButtonLoading}
-                              >
-                                Request re-review
-                              </Button>
-                            }
-                          </>
-                        </Restricted>
-                      </Stack>
+                      <ChangesRequestedDisplay
+                        response={response}
+                        key={response._id}
+                        roleNameDisplay={roleNameDisplay}
+                        setErrorMessage={setErrorMessage}
+                        showCurrentUserResponses={showCurrentUserResponses}
+                      />
                     )
                   })}
               </Stack>
