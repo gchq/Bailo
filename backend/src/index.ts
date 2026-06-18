@@ -13,12 +13,9 @@ import { registerSigTerminate } from './utils/signals.js'
 // Update certificates based on mount
 shelljs.exec('update-ca-certificates', { fatal: false, async: false })
 
-// technically, we do need to wait for this, but it's so quick
-// that nobody should notice unless they want to upload an image
-// within the first few milliseconds of the _first_ time it's run
 if (config.s3.automaticallyCreateBuckets) {
-  ensureBucketExists(config.s3.buckets.uploads)
-  ensureBucketExists(config.s3.buckets.registry)
+  const bucketNames = [config.s3.buckets.uploads, config.s3.buckets.registry]
+  await Promise.all(bucketNames.map((bucket) => ensureBucketExists(bucket)))
 }
 
 // connect to Mongo

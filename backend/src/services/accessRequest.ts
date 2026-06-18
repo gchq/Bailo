@@ -20,7 +20,7 @@ import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -41,11 +41,10 @@ export async function createAccessRequest(
   if (schema.hidden) {
     throw BadReq('Cannot create new Access Request using a hidden schema.', { schemaId: accessRequestInfo.schemaId })
   }
-  try {
-    await validateContentAgainstSchema(accessRequestInfo.schemaId, accessRequestInfo.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(accessRequestInfo.schemaId, accessRequestInfo.metadata)
+  if (!valid) {
     throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      error,
+      errors,
     })
   }
 
@@ -72,7 +71,7 @@ export async function createAccessRequest(
     log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this Access Request')
   }
 
-  sendWebhooks(
+  dispatchWebhooks(
     accessRequest.modelId,
     WebhookEvent.CreateAccessRequest,
     `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
@@ -228,11 +227,10 @@ export async function updateAccessRequest(
   }
 
   // Ensure that the AR meets the schema
-  try {
-    await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
-  } catch (error) {
+  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
+  if (!valid) {
     throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      error,
+      errors,
     })
   }
 

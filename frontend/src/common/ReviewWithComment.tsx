@@ -2,9 +2,10 @@ import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
-import dayjs, { Dayjs } from 'dayjs'
+import { Dayjs } from 'dayjs'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useEffectEvent, useState } from 'react'
+import { increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
@@ -148,7 +149,7 @@ export default function ReviewWithComment({
                   onChange={(newValue) => {
                     setDueDate(newValue)
                   }}
-                  minDate={dayjs(new Date())}
+                  minDate={increaseCurrentDateInDays(1)}
                 />
               </Stack>
             )}
@@ -191,6 +192,7 @@ export default function ReviewWithComment({
                   loading={loading}
                   data-test='approveReviewButton'
                   size='small'
+                  disabled={includeDueDate && !dueDate}
                 >
                   Approve
                 </Button>

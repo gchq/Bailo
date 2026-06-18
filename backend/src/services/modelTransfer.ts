@@ -13,7 +13,7 @@ import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { startImportNotification, transferCompleteNotification } from './smtp/smtp.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
@@ -275,7 +275,7 @@ export async function handleCompleteEmail(exportId: string) {
   )
   if (updated) {
     await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
-    sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
+    dispatchWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
       transfer,
     })
   }

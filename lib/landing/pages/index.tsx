@@ -1,5 +1,6 @@
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import { createRef } from 'react'
 import imageLoader from '../src/imageLoader'
@@ -12,6 +13,8 @@ import navigationLinks from '../src/navigationLinks'
 export default function Home() {
   const ref = createRef<HTMLDivElement>()
 
+  const theme = useTheme()
+
   const scrollToContent = () => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' })
@@ -22,7 +25,7 @@ export default function Home() {
       <Box
         sx={{
           backgroundColor: '#f8e6dc',
-          background: 'linear-gradient(#4d3075, #b5497d)',
+          background: `linear-gradient(${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
           backgroundSize: '400% 400%',
           minHeight: '100vh',
         }}
@@ -80,7 +83,7 @@ export default function Home() {
           borderLeft: '50px solid transparent',
           borderRight: '50px solid transparent',
           margin: 'auto',
-          borderTop: '50px solid #742783',
+          borderTop: '50px solid #673677',
         }}
       />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>

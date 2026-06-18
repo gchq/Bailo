@@ -977,6 +977,22 @@ describe('services > registry', () => {
       ])
     })
 
+    test('listModelImages > includeTokens returns repositoryToken', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1', 'tag2'])
+
+      const result = await listModelImages({ dn: 'user' } as any, 'modelId', true)
+
+      expect(result).toEqual([
+        {
+          repository: 'repo1',
+          name: 'image1',
+          tags: ['tag1', 'tag2'],
+          repositoryToken: 'token',
+        },
+      ])
+    })
+
     test('listModelImages > filters repositories with no tags', async () => {
       registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1', 'repo2/image2'])
       registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1']).mockResolvedValueOnce([])

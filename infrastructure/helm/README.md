@@ -437,6 +437,7 @@ The following tables describe selected configuration options available in `value
 | `connectors.artefactScanners.retryDelayInMinutes` | Number of minutes between scans on a given file | `60` |
 | `connectors.artefactScanners.maxInitRetries` | Number of times the microservice is attempted to be reached before failing at startup | `5` |
 | `connectors.artefactScanners.initRetryDelay` | Delay between successive microservice pings in milliseconds | `5000` |
+| `connectors.artefactScanners.scanTimeoutMs` | Number of milliseconds waited until the microservice is considered unresponsive | `60000` |
 | `instrumentation.enabled` | Enable OpenTelemetry instrumentation | `false` |
 | `instrumentation.debug` | Enable instrumentation debugging | `false` |
 | `stroom.logOnlyMode` | Enable Stroom audit logging | `true` |

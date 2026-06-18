@@ -70,3 +70,8 @@ export const setAsFirstDayOfMonth = (date: Dayjs): string => {
 export const setAsLastDayOfMonth = (date: Dayjs): string => {
   return date.endOf('month').toISOString().split('T')[0]
 }
+
+export const increaseCurrentDateInDays = (daysToAdd: number) => {
+  const currentDate = dayjs(new Date())
+  return currentDate.add(daysToAdd, 'day')
+}

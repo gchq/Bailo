@@ -512,7 +512,7 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
 
     await expect(
       connector.calculateEntryVolume(mockUser, 'week', '2026-01-01', '2026-02-01', 'notARealTimeZone'),
-    ).rejects.toThrowError(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
+    ).rejects.toThrow(BadReq('Invalid timezone. Must be a valid IANA timezone or UTC offset.'))
   })
 
   test('calculateEntryVolume > day interval stepping', async () => {

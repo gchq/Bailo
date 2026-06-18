@@ -80,6 +80,8 @@ Configure scanner settings in the backend application configuration. These setti
 - **connectors.artefactScanners.maxInitRetries** - Number of startup connection attempts before failing. Default: `5`
 - **connectors.artefactScanners.initRetryDelay** - Delay between successive startup pings (milliseconds). Default:
   `5000`.
+  - **connectors.artefactScanners.scanTimeoutMs** - Number of milliseconds waited before a scan times out. Default:
+  `60000`.
 
 Enabling or disabling specific scanners is handled via connector configuration and deployed microservices.
 

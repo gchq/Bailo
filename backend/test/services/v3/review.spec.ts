@@ -61,13 +61,13 @@ describe('services > review', () => {
     authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
     const newReview = await createReview({} as any, 'test-1234', {
       kind: ReviewKind.Lifecycle,
-      dueDate: new Date('2026-05-28T12:54:03.780Z'),
+      dueDate: new Date('2050-05-28T12:54:03.780Z'),
     })
     expect(newReview).toMatchSnapshot()
   })
 
   test('createReview > schedules lifecycle review emails after creating a lifecycle review', async () => {
-    const dueDate = new Date('2026-05-28T12:54:03.780Z')
+    const dueDate = new Date('2050-05-28T12:54:03.780Z')
     modelMock.getModelById.mockResolvedValueOnce({
       id: 'test-1234',
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
@@ -115,7 +115,7 @@ describe('services > review', () => {
     await expect(() =>
       createReview({} as any, 'test-1234', {
         kind: ReviewKind.Lifecycle,
-        dueDate: new Date('2026-05-28T12:54:03.780Z'),
+        dueDate: new Date('2050-05-28T12:54:03.780Z'),
       }),
     ).rejects.toThrow(/^This model has an open lifecycle review./)
   })

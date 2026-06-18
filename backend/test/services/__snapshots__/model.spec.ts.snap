@@ -18,6 +18,7 @@ exports[`services > model > removeModel > success empty 1`] = `
     undefined,
     [],
   ],
+  undefined,
   {
     "_id": {
       "toString": [Function],
@@ -49,6 +50,7 @@ exports[`services > model > removeModel > success empty 1`] = `
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
     "id": "mock-id",
+    "limit": [MockFunction],
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],
@@ -103,6 +105,7 @@ exports[`services > model > removeModel > success entries 1`] = `
       undefined,
     ],
   ],
+  undefined,
   {
     "_id": {
       "toString": [Function],
@@ -134,6 +137,7 @@ exports[`services > model > removeModel > success entries 1`] = `
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
     "id": "mock-id",
+    "limit": [MockFunction],
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],

@@ -15,7 +15,7 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testAccessRequestReview, testReleaseReview } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/connectors/authentication/index.js', async () => ({
+vi.mock('../../src/connectors/authentication/index.js', () => ({
   default: {
     getEntities: vi.fn(function () {
       return ['user:test']
@@ -39,7 +39,7 @@ const smtpMock = vi.hoisted(() => ({
     return Promise.resolve()
   }),
 }))
-vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
+vi.mock('../../src/services/smtp/smtp.js', () => smtpMock)
 
 const reviewMock = vi.hoisted(() => ({
   findReviewsForAccessRequests: vi.fn(function () {
@@ -49,30 +49,30 @@ const reviewMock = vi.hoisted(() => ({
     return testReleaseReview
   }),
 }))
-vi.mock('../../src/services/review.js', async () => reviewMock)
+vi.mock('../../src/services/review.js', () => reviewMock)
 
 const accessRequestServiceMock = vi.hoisted(() => ({
   getAccessRequestById: vi.fn(),
 }))
-vi.mock('../../src/services/accessRequest.js', async () => accessRequestServiceMock)
+vi.mock('../../src/services/accessRequest.js', () => accessRequestServiceMock)
 
 const releaseServiceMock = vi.hoisted(() => ({
   getReleaseBySemver: vi.fn(),
 }))
-vi.mock('../../src/services/release.js', async () => releaseServiceMock)
+vi.mock('../../src/services/release.js', () => releaseServiceMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/log.js', async () => ({
+vi.mock('../../src/services/log.js', () => ({
   default: logMock,
 }))
 const arrayUtilMock = vi.hoisted(() => ({
   asyncFilter: vi.fn(),
 }))
-vi.mock('../../src/utils/array.js', async () => arrayUtilMock)
+vi.mock('../../src/utils/array.js', () => arrayUtilMock)
 const entityUtilMock = vi.hoisted(() => ({
   toEntity: vi.fn(),
 }))
@@ -80,7 +80,7 @@ vi.mock('../../src/utils/entity.js', () => entityUtilMock)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
-    sendWebhooks: vi.fn(),
+    dispatchWebhooks: vi.fn(),
   }
 })
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
@@ -244,7 +244,7 @@ describe('services > response', () => {
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
     expect(releaseServiceMock.getReleaseBySemver).toHaveBeenCalledOnce()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalledOnce()
   })
 
   test('respondToReview > access request successful', async () => {
@@ -264,7 +264,7 @@ describe('services > response', () => {
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(smtpMock.notifyReviewResponseForAccess).toHaveBeenCalledOnce()
     expect(accessRequestServiceMock.getAccessRequestById).toHaveBeenCalledOnce()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalledOnce()
   })
 
   test('respondToReview > unable to send notification due to missing access request ID', async () => {
@@ -306,7 +306,7 @@ describe('services > response', () => {
 
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(accessRequestServiceMock.getAccessRequestById).toHaveBeenCalledOnce()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalledOnce()
     expect(logMock.warn).toHaveBeenCalledOnce()
   })
 
@@ -329,7 +329,7 @@ describe('services > response', () => {
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
     expect(releaseServiceMock.getReleaseBySemver).toHaveBeenCalledOnce()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalledOnce()
     expect(logMock.warn).toHaveBeenCalledOnce()
   })
 

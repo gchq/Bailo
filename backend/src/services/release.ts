@@ -23,7 +23,7 @@ import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createReleaseReviews, removeReleaseReviews } from './review.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
   return (
@@ -195,7 +195,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
       log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
     }
   }
-  sendWebhooks(
+  dispatchWebhooks(
     release.modelId,
     WebhookEvent.CreateRelease,
     `Release ${release.semver} has been created for model ${release.modelId}`,
@@ -230,7 +230,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  sendWebhooks(
+  dispatchWebhooks(
     release.modelId,
     WebhookEvent.UpdateRelease,
     `ReleaseModel ${release.semver} has been updated for model ${release.modelId}`,

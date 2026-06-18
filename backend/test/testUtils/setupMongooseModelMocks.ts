@@ -15,6 +15,7 @@ const CHAINABLE_METHODS = [
   'findOneAndDelete',
   'findOneAndUpdate',
   'group',
+  'limit',
   'lookup',
   'match',
   'save',

@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { Decision } from '../../../src/models/Response.js'
-import { respondToReview } from '../../../src/services/v3/response.js'
+import { getLatestResponseForReview, respondToReview } from '../../../src/services/v3/response.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
-import { testReleaseReview } from '../../testUtils/testModels.js'
+import { testReleaseReview, testResponse } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/connectors/authorisation/index.js')
 vi.mock('../../../src/connectors/authentication/index.js', () => ({
@@ -30,8 +30,14 @@ const responseV2Mock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/response.js', () => responseV2Mock)
 
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+  getModelSystemRoles: vi.fn(),
+}))
+vi.mock('../../../src/services/model.js', () => modelMock)
+
 const mockWebhookService = vi.hoisted(() => ({
-  sendWebhooks: vi.fn(),
+  dispatchWebhooks: vi.fn(),
 }))
 vi.mock('../../../src/services/webhook.js', () => mockWebhookService)
 
@@ -58,7 +64,7 @@ describe('services > v3 > response', () => {
 
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(responseV2Mock.sendReviewResponseNotification).toHaveBeenCalledOnce()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalledOnce()
   })
 
   test('respondToReview > cancels lifecycle review jobs after saving response', async () => {
@@ -74,5 +80,14 @@ describe('services > v3 > response', () => {
       testReleaseReview.modelId,
       '6a058ab4db7a3be341fb3cca',
     )
+  })
+
+  test('find latest response for review > successful', async () => {
+    ResponseModelMock.findOne.mockImplementation(() => ({
+      sort: vi.fn().mockResolvedValue(testResponse),
+    }))
+    const latestResponse = await getLatestResponseForReview('6a058ab4db7a3be341fb3cca')
+    expect(ResponseModelMock.findOne).toHaveBeenCalledOnce()
+    expect(latestResponse.entity).toBe(testResponse.entity)
   })
 })

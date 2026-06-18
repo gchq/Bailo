@@ -312,9 +312,9 @@ describe('services > file', () => {
 
     await expect(() =>
       uploadMultipartFilePart({} as any, modelId, testFileId, 'testUploadId', 1, new Readable() as any, 1024),
-    ).rejects.toThrowError(/^You do not have permission to upload a file to this model./)
+    ).rejects.toThrow(/^You do not have permission to upload a file to this model./)
 
-    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
+    expect(s3Mocks.putObjectPartStream).not.toHaveBeenCalled()
   })
 
   test('uploadMultipartFilePart > no file', async () => {
@@ -322,9 +322,9 @@ describe('services > file', () => {
 
     await expect(() =>
       uploadMultipartFilePart({} as any, 'testModelId', testFileId, 'testUploadId', 1, new Readable() as any, 1024),
-    ).rejects.toThrowError(/^The requested file was not found./)
+    ).rejects.toThrow(/^The requested file was not found./)
 
-    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
+    expect(s3Mocks.putObjectPartStream).not.toHaveBeenCalled()
   })
 
   test('finishUploadMultipartFile > success', async () => {
