@@ -1,0 +1,98 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Retention Configuration
+
+Bailo includes configurable lifecycle reminder functionality to help ensure that models are periodically reviewed and
+remain compliant with organisational governance policies. The system can automatically send reminder emails to model
+owners before and after a lifecycle review due date.
+
+Retention behaviour is controlled through the SMTP lifecycle configuration. This determines when reminder notifications
+are sent and how frequently overdue reminders are repeated.
+
+This page explains how to configure lifecycle reminders, how the reminder and warning flows work, and how to safely
+disable the feature if required.
+
+## How Lifecycle Reminder Scheduling Works
+
+When a lifecycle review is created with a due date, Bailo schedules reminder jobs using the internal scheduler. These
+jobs send notification emails to the model owners.
+
+Two types of reminders are supported:
+
+- Pre‑due reminders: sent before the lifecycle review due date
+- Post‑due reminders: sent repeatedly after the due date until the review is completed
+
+Reminders are scheduled when the lifecycle review is created. If a lifecycle review or model is removed, associated
+scheduled jobs are cancelled.
+
+All scheduling is handled by the internal Agenda scheduler backed by MongoDB.
+
+## Configuration Location
+
+Lifecycle reminder behaviour is configured in the Bailo backend configuration under `smtp.lifecycle`.
+
+Example configuration:
+
+```json
+smtp: {
+  enabled: true,
+  lifecycle: {
+    preReminderIntervals: ['1 day', '2 weeks', '10 weeks'],
+    postReminderInterval: '1 day'
+  }
+}
+```
+
+## Configuration Options
+
+`smtp.lifecycle.preReminderIntervals`
+
+A list of time intervals before the lifecycle review due date when reminder emails should be sent.
+
+Example:
+
+```typescript
+preReminderIntervals: ['1 day', '2 weeks', '10 weeks']
+```
+
+This example produces:
+
+- A reminder 10 weeks before the due date
+- A reminder 2 weeks before the due date
+- A reminder 1 day before the due date
+
+Supported formats follow the `human-interval` syntax, such as:
+
+- `1 hour`
+- `12 hours`
+- `1 day`
+- `3 days`
+- `2 weeks`
+- `1 month`
+
+For more information please read [Human Interval](https://github.com/agenda/human-interval).
+
+If an interval cannot be parsed, Bailo logs a warning and skips that interval.
+
+Important behaviour:
+
+- Reminders are only scheduled if the calculated timestamp is in the future
+- If a lifecycle review is created close to its due date, earlier reminders may be skipped automatically
+
+`smtp.lifecycle.postReminderInterval`
+
+Defines how often reminder emails are sent after the lifecycle review due date has passed.
+
+```typescript
+postReminderInterval: '1 day'
+```
+
+Behaviour:
+
+- After the due date, Bailo sends reminder emails repeatedly at the configured interval
+- These reminders continue until the lifecycle review is completed or removed
+
+Supported formats follow the same human-interval syntax used by preReminderIntervals. If the interval cannot be parsed,
+Bailo logs a warning and no post‑due reminders will be scheduled.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
