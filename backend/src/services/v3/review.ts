@@ -177,10 +177,23 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
     return
   }
   const review = await findReviewById(user, reviewId)
+
+  const originalReview = await ReviewModel.findOneAndUpdate(
+    { _id: reviewId },
+    {
+      $set: { lastNotificationAt: new Date() },
+    },
+  )
+
+  if (!originalReview) {
+    throw BadReq('Could not find existing review.', { reviewId })
+  }
+
   if (
     review.lastNotificationAt &&
     Date.now() < review.lastNotificationAt.getTime() + config.smtp.review.lastNotifiedCoolDownMs
   ) {
+    await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     throw BadReq('A notification was already sent recently.')
   }
 
@@ -188,19 +201,16 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
   // The above only determines view access to a model, we should make sure the user has write access too
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
+    await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
   }
+
   try {
     await notifyReviewRoleOfAdditionalReview(user, review)
   } catch (err) {
+    await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     log.error(err, 'Failed to notify reviewer')
     throw InternalError('Notification to reviewer(s) could not be sent', { modelId: model.id, err })
   }
-  await ReviewModel.findOneAndUpdate(
-    { _id: reviewId },
-    {
-      $set: { lastNotificationAt: new Date() },
-    },
-  )
   return
 }
