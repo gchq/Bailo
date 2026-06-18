@@ -1,5 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
 
 import pushingAnImage from '../../../../public/docs/Pushing-an-image.png'
 import registryTab from '../../../../public/docs/Registry-tab.png'
@@ -8,12 +9,22 @@ import ModelReleaseImageList from '../../../../public/docs/Model-release-images.
 
 # Model Images
 
+> **Common questions this page answers:**
+>
+> - How do I push a container (Docker) image to Bailo?
+> - How do I pull a container (Docker) image from Bailo?
+> - How do I add a container image to a release?
+
 ## Pushing a Docker image
 
-Docker images can be pushed to the Bailo registry and associated with a specific model. These images can later be used
-in model releases.
+Container (Docker) images can be pushed to the Bailo registry and associated with a specific model. These images can
+later be used in model releases.
 
-<Image alt='model registry tab with push image button circled' src={registryTab} />
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='model registry tab with push image button circled' src={registryTab} />
+</Box>
+
+The screenshot above shows the model Registry tab with a push image button.
 
 The process is:
 
@@ -28,13 +39,21 @@ The process is:
 After pushing an image, it becomes selectable when drafting a release. Choose the image from the dropdown in the release
 creation form.
 
-<Image alt='image dropdown displaying model-assigned images for use in a release' src={selectingAnImage} />
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='image dropdown displaying model-assigned images for use in a release' src={selectingAnImage} />
+</Box>
+
+The screenshot above shows the image selection dropdown in the release creation form.
 
 ## Accessing an image
 
 Images attached to a release are listed in the **Releases** tab.
 
-<Image alt='release in releases tab with attached docker images' src={ModelReleaseImageList} />
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='release in releases tab with attached docker images' src={ModelReleaseImageList} />
+</Box>
+
+The screenshot above shows a release in the Releases tab with attached container images listed.
 
 You can pull an image using:
 

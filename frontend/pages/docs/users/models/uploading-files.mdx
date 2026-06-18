@@ -1,0 +1,61 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import bailoUploadFileRelease from 'public/docs/bailo_release_file_upload.png'
+import bailoUploadedFileRelease from 'public/docs/bailo_created_release_upload_file.png'
+import bailoUploadFile from 'public/docs/bailo_file_upload.png'
+
+# Uploading Files
+
+Files represent any artefacts related to a model, such as binaries, configuration files, or supporting documentation.
+These files allow others to build, evaluate, and use your model.
+
+> **Common questions this page answers:**
+>
+> - How do I upload files to a model in Bailo?
+> - How do I attach files to a release?
+> - How do I upload files programmatically?
+
+## Adding files to a model
+
+Upload files from the **File Management** tab on your model page:
+
+1. Click **Add new files**
+2. Select files to upload
+3. Optionally assign tags to each file
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of files being uploaded' src={bailoUploadFile} />
+</Box>
+
+The screenshot above shows the file upload interface with file selection, tag assignment, and an Upload files button.
+
+4. Click **Upload files**
+
+## Adding files to a new release
+
+When creating a new release, you can attach both newly uploaded files and files that already exist on the model.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='new release form with file attached' src={bailoUploadFileRelease} />
+</Box>
+
+The screenshot above shows the new release form with a file already attached.
+
+## Adding files to an existing release
+
+You can edit existing releases to add or remove file attachments.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of existing release with edit release button' src={bailoUploadedFileRelease} />
+</Box>
+
+The screenshot above shows an existing release with an Edit release button for adding or removing files.
+
+## Uploading files programmatically
+
+Use the Bailo Python Client to upload or download files via code. Examples are available
+[here](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
