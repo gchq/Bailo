@@ -4,8 +4,6 @@ import { patchEntry, useGetEntry } from 'actions/entry'
 import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
-import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
-import EntryStateInput from 'src/entry/EntryStateInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, EntryKindLabel, UpdateEntryForm } from 'types/types'
@@ -19,8 +17,6 @@ type EntryDetailsProps = {
 export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
-  const [organisation, setOrganisation] = useState(entry.organisation || '')
-  const [state, setState] = useState(entry.state || '')
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -46,8 +42,6 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       name,
       description,
       visibility,
-      organisation: organisation || '',
-      state: state || '',
     }
     const response = await patchEntry(entry.id, formData)
 
@@ -101,16 +95,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           </Typography>
           <Divider />
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
-          <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
-          {entry.kind === EntryKind.UNTRUSTED_MODEL ? (
-            <Stack>
-              <Typography fontWeight='bold'>State</Typography>
-              <Typography>{entry.state}</Typography>
-            </Stack>
-          ) : (
-            <EntryStateInput value={state} onChange={(value) => setState(value)} />
-          )}
         </>
         <Divider />
         <>

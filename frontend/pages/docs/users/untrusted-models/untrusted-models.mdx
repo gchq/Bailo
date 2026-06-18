@@ -1,0 +1,60 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Untrusted Models
+
+Untrusted models are a special entry type for models that require additional scrutiny before being fully trusted within
+your organisation. This feature is optional and must be enabled by your administrator.
+
+> **Common questions this page answers:**
+>
+> - What is an untrusted model in Bailo?
+> - How do untrusted models differ from regular models?
+> - How do I create an untrusted model?
+
+## What are untrusted models?
+
+An untrusted model is a model that has not yet been verified or validated to the same standard as a regular model. Your
+organisation may use this classification for:
+
+- Models from external or unknown sources
+- Models that have not yet completed a full review cycle
+
+The specific meaning of "untrusted" depends on your organisation's policies. Your administrator configures a description
+that explains what untrusted models mean in your context.
+
+## Creating an untrusted model
+
+Create an untrusted model from the model creation page if the feature is enabled by your administrator:
+
+1. Click the **+ Create** button in the navigation bar
+2. Under the **Models** section, select **Untrusted Model**
+3. Fill in the required fields:
+   - **Name**
+   - **Description**
+4. Click **Save**
+
+The creation process is the same as for a regular model, but the entry is classified as untrusted.
+
+## How untrusted models differ
+
+Untrusted models appear in the Marketplace alongside regular models but are clearly marked as untrusted. Key differences
+include:
+
+- Untrusted Models are always Private
+- Access requests are not available for untrusted models
+- The container (Docker) registry is disabled for untrusted models
+- Users should exercise additional caution when using artefacts from untrusted models
+- Your organisation may have additional policies governing the use of untrusted models
+
+## Availability
+
+This feature is controlled by your administrator. If you don't see the **Untrusted Model** option when creating a new
+entry, it means the feature is not enabled in your Bailo instance.
+
+## Related pages
+
+- [Creating a Model](/docs/users/models/creating-a-model) - Standard model creation
+- [Core Concepts](/docs/getting-started/core-concepts) - Overview of all entry types
+- [Glossary](/docs/reference/glossary) - Definition of untrusted models
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

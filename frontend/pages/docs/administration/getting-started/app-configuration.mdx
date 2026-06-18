@@ -1,12 +1,23 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import Alert from '@mui/material/Alert'
 
 # App Configuration
 
-## Configuration Files
+> **Common questions this page answers:**
+>
+> - How do I configure Bailo?
+> - Where are the configuration files?
+> - How does configuration inheritance work?
 
-> ⚠️ Note: If you use Helm this information does not apply to you. We use Helm to automatically configure the
-> application for you. Within helm you can manually alter this configuration in
-> `infrastructure/helm/bailo/templates/bailo/bailo.configmap.yaml`
+## Configuration files
+
+<Alert sx={{ my: '20px', '& .MuiAlert-message p': { margin: 0 } }} severity='warning'>
+If you use Helm this information does not apply to you.
+
+We use Helm to automatically configure the application for you. Within helm you can manually alter this configuration in
+`infrastructure/helm/bailo/templates/bailo/bailo.configmap.yaml`
+
+</Alert>
 
 Bailo uses [`node-config`](https://github.com/node-config/node-config#readme) for application configuration.
 `node-config` organizes hierarchical configurations, allowing the user to set a series of overrides over a base

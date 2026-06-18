@@ -177,7 +177,10 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-  await dispatchEmail([toEntity('user', release.createdBy)], await emailContent)
+
+  const model = await getModelByIdNoAuth(release.modelId)
+  const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
+  await dispatchEmail([toEntity('user', release.createdBy), ...reviewRoleEntities], await emailContent)
 }
 
 export async function notifyLifeCycleReview(modelId: string, reviewId: string, dueIn?: string) {
@@ -242,7 +245,10 @@ export async function notifyReviewResponseForAccess(
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-  await dispatchEmail([toEntity('user', accessRequest.createdBy)], await emailContent)
+
+  const model = await getModelByIdNoAuth(accessRequest.modelId)
+  const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
+  await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], await emailContent)
 }
 
 export async function startImportNotification(modelId: string) {

@@ -1,0 +1,121 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Glossary
+
+This page defines key terms used throughout Bailo's documentation and interface. Terms are listed alphabetically.
+
+> **Common questions this page answers:**
+>
+> - What does MTR mean in Bailo?
+> - What is a model card?
+> - What is an access request?
+> - What is the difference between an Owner, Contributor, and Consumer?
+> - What is RJSF?
+
+---
+
+**Access Request** - A formal request submitted by a user to gain permission to download files or pull container images
+from a model. Access requests go through a review process and must be approved before access is granted.
+
+**Artefact** - A general term for any file or container image associated with a model, including model weights,
+configuration files, training data, and container images.
+
+**ClamAV** - An open-source antivirus engine used by Bailo to scan uploaded files for malware.
+
+**Collaborator** - A user or group that has been granted a role (Owner, Contributor, or Consumer) on a specific model.
+
+**Consumer** - A system role that allows a user to download files and pull container images from a model, provided they
+have an approved access request or the model has ungoverned access enabled.
+
+**Container image** (e.g. a Docker image) is a standalone, executable artefact used to create a container. This
+container image contains all the libraries, dependencies, and files that the container needs to run.
+
+**Contributor** - A system role that allows a user to edit the model card, upload files and images, and create releases
+for a model.
+
+**Data Card** - An entry type for documenting datasets. Data cards capture information about data provenance, storage,
+and relationships to models.
+
+**Entry** - The top-level entity in Bailo. Models, Data Cards, Mirrored Models, and Untrusted Models are all types of
+entry.
+
+**Entry Role** - The collective term for all system roles and review roles.
+
+**Federation** - A feature that connects multiple Bailo instances (or external sources like HuggingFace Hub), allowing
+models from one to be browsed and mirrored in another.
+
+**Inference Service** - A running deployment of a model's container image within Bailo, providing a live endpoint for
+making predictions without downloading the model.
+
+**Marketplace** - The main browsing page in Bailo where users discover public models and data cards through search, tag
+filtering, and category browsing.
+
+**Mirrored Model** - A read-only copy of a model from another Bailo instance or external source. Mirrored models are
+kept in sync with their source and cannot be directly edited.
+
+**Model** - The primary entry type in Bailo. A model represents a machine learning model with its documentation (model
+card), versioned releases, files, container images, and access controls.
+
+**Model Card** - The structured documentation attached to a model. Its content is defined by the selected schema and
+typically includes intended use, training details, performance metrics, and known limitations. Model cards are
+versioned.
+
+**Model Senior Responsible Officer (MSRO)** - A commonly used review role representing the person responsible for
+governance and compliance decisions about a model. This is a configurable review role, not a fixed system role.
+
+**Model Technical Reviewer (MTR)** - A commonly used review role representing the person responsible for reviewing the
+technical quality of a model. This is a configurable review role, not a fixed system role.
+
+**ModelScan** - A security scanning tool used by Bailo to detect serialisation attacks in uploaded model files (e.g.
+malicious pickle files).
+
+**Owner** - A system role that grants full control over a model: editing, managing collaborators, creating releases, and
+deleting the model.
+
+**Peer** - Another Bailo instance or external model repository connected through federation.
+
+**Personal Access Token (PAT)** - An API key pair (access key + secret key) that allows programmatic access to Bailo's
+API. Tokens can be scoped to specific models and actions.
+
+**Release** - A versioned snapshot of a model, using semantic versioning (e.g. `1.0.0`). Releases bundle together a
+model card version, uploaded files, container images, and release notes. Creating a release triggers the review process.
+
+**Review** - The evaluation process that releases and access requests go through before approval. Reviews are conducted
+by users assigned to review roles on the model.
+
+**Review Role** - An administrator-defined role (e.g. Model Technical Reviewer, Model Senior Responsible Officer) that
+is attached to schemas and assigned to specific people on each model. Review roles determine who must approve releases
+and access requests.
+
+**RJSF (React JSON Schema Form)** - The library Bailo uses to render dynamic forms from JSON Schema definitions. This is
+the underlying technology behind schemas and model cards.
+
+**Schema** - A JSON Schema definition that determines the structure and questions of a model card or access request
+form. Schemas are created by administrators and selected when setting up a model.
+
+**Schema Migration** - A plan for transforming model card data from one schema version to another, allowing schemas to
+evolve without losing existing data.
+
+**Semantic Versioning (Semver)** - A versioning convention used for releases: `MAJOR.MINOR.PATCH` (e.g. `1.2.3`). Major
+versions indicate breaking changes, minor versions add functionality, and patch versions fix issues.
+
+**Soft Deletion** - Bailo's deletion model where deleted items are marked as removed but not immediately destroyed.
+Administrators can recover soft-deleted items in exceptional circumstances.
+
+**System Role** - A system role (e.g. Owner, Contributor, Consumer) that is built into Bailo and determines what actions
+a user or group can perform on a model, such as editing metadata, uploading files, creating releases, or downloading
+artefacts.
+
+**Trivy** - An open-source vulnerability scanner used by Bailo to scan container images for known security
+vulnerabilities (CVEs).
+
+**Ungoverned Access** - A model setting that allows any user to download files and pull images without submitting an
+access request.
+
+**Untrusted Model** - An entry type for models that require additional scrutiny. Untrusted models may have restricted
+capabilities compared to standard models. This feature must be enabled by an administrator.
+
+**Webhook** - An HTTP callback that Bailo sends to an external URL when certain events occur (e.g. a release is created,
+an access request is submitted). Used for integrating Bailo with external systems.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
