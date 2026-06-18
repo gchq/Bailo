@@ -185,8 +185,8 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
     return
   }
 
-  const originalReview = await ReviewModel.findOneAndUpdate(
-    { _id: reviewId },
+  const originalReview = await ReviewModel.findByIdAndUpdate(
+    reviewId,
     {
       $set: { lastNotificationAt: new Date() },
     },
@@ -199,15 +199,15 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
   }
 
   if (
-    review.lastNotificationAt &&
-    Date.now() < review.lastNotificationAt.getTime() + config.smtp.review.lastNotifiedCoolDownMs
+    originalReview.lastNotificationAt &&
+    Date.now() < originalReview.lastNotificationAt.getTime() + config.smtp.review.lastNotifiedCoolDownMs
   ) {
     await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     throw BadReq('A notification was already sent recently.')
   }
 
   try {
-    await notifyReviewRoleOfAdditionalReview(user, review)
+    await notifyReviewRoleOfAdditionalReview(user, originalReview)
   } catch (err) {
     await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     log.error(err, 'Failed to notify reviewer')
