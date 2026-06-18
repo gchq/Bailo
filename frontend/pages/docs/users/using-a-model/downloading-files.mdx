@@ -8,30 +8,43 @@ import downloadfile3 from 'public/docs/bailo_file_download_release_page.png'
 
 # Downloading Files
 
-Files can be downloaded in three ways. The final two are exclusively for files with associated releases.
+> **Common questions this page answers:**
+>
+> - How do I download files from a model in Bailo?
+> - Where can I find files to download?
+> - What are the different ways to download files?
 
-## From the File Management tab
+Files can be downloaded from three locations in Bailo. The File Management tab provides access to all files, while the
+Releases tab and individual release pages show only files attached to releases.
 
-Navigate to the **File Management** tab and click the file name to download it.
+## From the file management tab
+
+Download files directly from the **File Management** tab by clicking the file name.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='clickable file in file management tab' src={downloadfile1} />
 </Box>
 
-## From the Releases tab
+The screenshot above shows the File Management tab with clickable file names for direct download.
 
-Open the **Releases** tab and click the download link next to the relevant file.
+## From the releases tab
+
+Download release-associated files from the **Releases** tab using the download link next to each file.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view of releases with the clickable file download link' src={downloadfile2} />
 </Box>
 
+The screenshot above shows the Releases tab with download links next to each file in each release.
+
 ## From a specific release page
 
-Open an individual release and use the file download link provided.
+Open an individual release page to access file download links for that release.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view of specific release with the clickable file download link' src={downloadfile3} />
 </Box>
+
+The screenshot above shows a specific release page with a file download link.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

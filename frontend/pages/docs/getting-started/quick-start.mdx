@@ -1,0 +1,138 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Quick Start Guide
+
+This guide walks you through the essential steps of using Bailo, from browsing models to creating your own. It should
+take around 15 minutes to complete.
+
+> **Common questions this page answers:**
+>
+> - How do I create my first model in Bailo?
+> - How do I get started with Bailo?
+> - What is the basic workflow for publishing a model?
+
+Before you begin, make sure you have access to your organisation's Bailo instance and can log in.
+
+## Step 1: Browse the Marketplace
+
+The Marketplace is Bailo's home page where you can search and filter all public models and data cards.
+
+When you first log in, you'll see the **Marketplace**. This is where all public models and data cards are listed. You
+can:
+
+- **Search** for models by name using the search bar at the top
+- **Filter** using common properties, organisations, popular tags etc. shown below the search bar
+- **Switch tabs** between Models and Data Cards
+
+If you're looking for a specific model, try the search bar first. If you're exploring what's available, browse by tags
+or scroll through the list.
+
+## Step 2: Create a Model
+
+Register a new model entry in Bailo by providing its name, description, and visibility settings:
+
+1. Click the **+** (Create) button in the top navigation bar or in the Marketplace
+2. Select **Model** as the entry type
+3. Next, provide the basic information about your model by filling in the required fields:
+   - **Model Name**: A clear, descriptive name for your model
+   - **Description**: What the model does and its intended use
+   - **Access control**: Choose **Public** (visible to all users) or **Private** (visible only to collaborators)
+4. Once you have filled in these details:, click **Create Model**
+
+Your model is now created and visible in the Marketplace (if public).
+
+## Step 3: Select a Schema and Fill In the Model Card
+
+After creating your model, you need to select a **schema**. A schema defines the questions you'll answer about your
+model - things like intended use, training details, known limitations, and performance metrics.
+
+1. You'll be prompted to select a schema from the available options
+2. Once selected, click **Edit model card** then a form appears with sections to fill in
+3. Work through each section, providing as much detail as you can
+4. Click **Save**
+
+The model card is the core documentation for your model. It helps reviewers and consumers understand what the model does
+and how it should be used.
+
+## Step 4: Add Collaborators and Reviewers
+
+Control who can contribute to your model and who is responsible for reviewing releases:
+
+1. Navigate to the **Settings** tab on your model page
+2. Under **Access**, add users or groups as collaborators
+3. Assign the appropriate level of access to each collaborator via roles:
+   - **Owner**: Full control over the model
+   - **Contributor**: Can edit the model card and upload files
+   - **Consumer**: Can download files and images (after access approval)
+4. Assign **Review Roles** (e.g. Model Technical Reviewer, Model Senior Responsible Officer) to the appropriate people
+5. Click **Save**
+
+## Step 5: Upload Model Files
+
+Upload the actual model artefacts such as weights, configuration files, and training data so they can be attached to a
+release.
+
+You can upload model artefacts at any time:
+
+1. Go to the **File management** tab
+2. Click **Add new files** and select a file from your computer
+3. Optionally add tags to help organise your files
+4. Uploaded files can be attached to releases
+
+If enabled, files are automatically scanned for security issues after upload.
+
+## Step 6: Upload Container Images
+
+If your model includes a containerised application (e.g. a Docker image for inference), you can push it to the Bailo
+registry so it can be included in releases:
+
+1. Go to the **Registry** tab on your model page
+2. Click **Push image**
+3. If you do not already have a user authentication token, click **Manage user tokens** and create one
+4. Authenticate your local Docker client using:
+   - Use your access key as the username
+   - Use your user token as the password
+5. Tag your local image using the command shown in the dialog:
+   - Replace `<image>` with your local image name and tag
+   - Replace `<name>` with the image name you want to use in Bailo
+   - Replace `<tag>` with the image version tag
+6. Push the tagged image to the registry using the command shown in the dialog
+7. Uploaded container images can be attached to releases
+
+If enabled, images are automatically scanned for vulnerabilities after upload.
+
+## Step 7: Create a Release
+
+A release bundles a specific version of your model card together with its uploaded files and images, and triggers the
+review workflow:
+
+1. Go to the **Releases** tab on your model page
+2. Click **Draft new release**
+3. Describe this version of the model:
+   - **Version**: Use semantic versioning (e.g. `1.0.0`)
+   - **Release notes**: Describe what's included in this release
+4. Include the artefacts you uploaded earlier e.g. any files and/or container images you've uploaded
+5. Click **Create Release**
+
+Creating a release triggers the review process. Your assigned reviewers will be notified.
+
+## Step 8: Review and Approval
+
+After creating a release, it enters the review process:
+
+1. Assigned reviewers receive notifications
+2. Reviewers examine the model card and release artefacts
+3. Each reviewer either **approves** or **requests changes**
+4. Once all required reviewers approve, the release is marked as approved
+
+You can check the status of your reviews from the **Review** page (accessible from the navigation sidebar).
+
+## What's Next?
+
+- [Core Concepts](/docs/getting-started/core-concepts) - Understand the data model and key terminology
+- [Requesting Access](/docs/users/using-a-model/requesting-access) - Learn how to request access to someone else's model
+- [Python Client](/docs/users/programmatically-using-bailo/python-client) - Automate your workflow with the Python
+  client
+- [Roles & Permissions](/docs/reference/roles-and-permissions) - Understand what each role can do
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
