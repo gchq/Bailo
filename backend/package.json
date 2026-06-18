@@ -60,7 +60,7 @@
     "nanoid": "^5.1.11",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^9.0.1",
     "outdent": "^0.8.0",
     "p-queue": "^9.3.0",
     "pino": "^10.3.0",
