@@ -482,7 +482,7 @@ export default function Marketplace() {
                     accordion
                   />
                 </Box>
-                {mirroredModels.length > 0 && (
+                {uiConfig && uiConfig.modelMirror.import.enabled && (
                   <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
                     <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
                       <Typography component='h2' variant='h6'>
