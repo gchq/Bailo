@@ -8,7 +8,7 @@ import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
 import config from '../../utils/config.js'
-import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/error.js'
+import { BadReq, ConfigurationError, Forbidden, InternalError, NotFound } from '../../utils/error.js'
 import log from '../log.js'
 import { getModelById, getModelByIdNoAuth } from '../model.js'
 import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
@@ -182,7 +182,7 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
 
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
-    return
+    throw ConfigurationError('Email service currently unavailable.', { reviewId })
   }
 
   const originalReview = await ReviewModel.findByIdAndUpdate(
