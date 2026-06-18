@@ -588,6 +588,7 @@ type PartialReviewInterface = {
   role: string
   createdAt: string
   updatedAt: string
+  lastNotificationAt?: Date | null
 }
 
 export const ReviewKind = {

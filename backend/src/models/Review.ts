@@ -29,7 +29,7 @@ type PartialReviewInterface = {
   role: string
   createdAt: string
   updatedAt: string
-  lastNotificationAt?: Date
+  lastNotificationAt?: Date | null
 }
 
 // The doc type includes all values in the plain interface, as well as all the

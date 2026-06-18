@@ -172,17 +172,26 @@ export async function createLifecycleReview(
 }
 
 export async function notifyReviewer(user: UserInterface, reviewId: string) {
+  const review = await findReviewById(user, reviewId)
+  const model = await getModelByIdNoAuth(review.modelId)
+  // The above only determines view access to a model, we should make sure the user has write access too
+  const auth = await authorisation.model(user, model, ModelAction.Write)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+  }
+
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const review = await findReviewById(user, reviewId)
 
   const originalReview = await ReviewModel.findOneAndUpdate(
     { _id: reviewId },
     {
       $set: { lastNotificationAt: new Date() },
     },
+    // We want to store the original document for rollback purposes
+    { new: false },
   )
 
   if (!originalReview) {
@@ -195,14 +204,6 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
   ) {
     await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     throw BadReq('A notification was already sent recently.')
-  }
-
-  const model = await getModelByIdNoAuth(review.modelId)
-  // The above only determines view access to a model, we should make sure the user has write access too
-  const auth = await authorisation.model(user, model, ModelAction.Write)
-  if (!auth.success) {
-    await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
   }
 
   try {
