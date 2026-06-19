@@ -51,7 +51,16 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    files: [
+      'actions/**/*.ts',
+      'actions/**/*.tsx',
+      'pages/**/*.ts',
+      'pages/**/*.tsx',
+      'src/**/*.ts',
+      'src/**/*.tsx',
+      'utils/**/*.ts',
+      'utils/**/*.tsx',
+    ],
     ignores: ['src/dayjsConfig.ts'],
     rules: {
       'no-restricted-imports': [
