@@ -1,6 +1,6 @@
 import { Close, Save } from '@mui/icons-material'
-import Code from '@mui/icons-material/Code'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import Code from '@mui/icons-material/Code'
 import { Button, Divider, Stack } from '@mui/material'
 
 interface SaveAndCancelButtonsProps {

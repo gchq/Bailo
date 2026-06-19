@@ -182,10 +182,7 @@ export async function extractModelCardFromText(
 
   const cleaned = stripUnknownKeys(parsed, schema.jsonSchema)
 
-  log.info(
-    { modelId, extractedKeys: Object.keys(cleaned) },
-    'Successfully extracted model card data from text.',
-  )
+  log.info({ modelId, extractedKeys: Object.keys(cleaned) }, 'Successfully extracted model card data from text.')
 
   return cleaned
 }

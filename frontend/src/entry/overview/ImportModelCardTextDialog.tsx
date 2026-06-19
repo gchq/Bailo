@@ -12,7 +12,12 @@ interface ImportModelCardTextDialogProps {
   modelId: string
 }
 
-export default function ImportModelCardTextDialog({ open, onClose, onSubmit, modelId }: ImportModelCardTextDialogProps) {
+export default function ImportModelCardTextDialog({
+  open,
+  onClose,
+  onSubmit,
+  modelId,
+}: ImportModelCardTextDialogProps) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
