@@ -1,3 +1,4 @@
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
 import { postImportModelCardText } from 'actions/modelCard'
 import { useState } from 'react'
@@ -45,9 +46,11 @@ export default function ImportModelCardTextDialog({ open, onClose, onSubmit, mod
       <DialogContent sx={{ p: 2 }}>
         <Typography variant='body2' sx={{ mb: 2 }}>
           Paste the contents of an existing model card (e.g. from HuggingFace, a system card, or other documentation).
-          An LLM will extract relevant information into your schema fields. You can review and edit the results before
-          saving.
+          An LLM will extract relevant information into your schema fields.
         </Typography>
+        <Alert severity='warning' sx={{ mb: 2 }}>
+          You must review any information provided for correctness. AI-extracted data may be incomplete or inaccurate.
+        </Alert>
         <TextField
           size='small'
           placeholder='Paste model card text here...'
@@ -75,6 +78,7 @@ export default function ImportModelCardTextDialog({ open, onClose, onSubmit, mod
           onClick={handleExtract}
           loading={loading}
           data-test='importModelCardTextButton'
+          startIcon={<AutoAwesomeIcon />}
         >
           Extract
         </Button>

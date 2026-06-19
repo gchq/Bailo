@@ -1,6 +1,6 @@
 import { Close, Save } from '@mui/icons-material'
 import Code from '@mui/icons-material/Code'
-import DescriptionIcon from '@mui/icons-material/Description'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { Button, Divider, Stack } from '@mui/material'
 
 interface SaveAndCancelButtonsProps {
@@ -34,7 +34,7 @@ export default function SaveAndCancelButtons({
       {showImportFromText && openImportTextDialog && (
         <Button
           variant='contained'
-          startIcon={<DescriptionIcon />}
+          startIcon={<AutoAwesomeIcon />}
           color='secondary'
           onClick={openImportTextDialog}
           data-test='importModelCardTextButton'
