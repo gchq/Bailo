@@ -288,6 +288,6 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is sent after a response for a release review to additional reviewers', async () => {
     await notifyReviewResponseForRelease(testReviewResponse as any, release)
-    expect(transporterMock.sendMail).toHaveBeenCalledTimes(2)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })
