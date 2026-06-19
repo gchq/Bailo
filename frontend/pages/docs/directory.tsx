@@ -86,7 +86,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Getting Started', slug: 'administration/getting-started', header: true },
   { title: 'Deployment Architecture', slug: 'administration/getting-started/deployment-architecture' },
   { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
-  { title: 'Retention Configuration', slug: 'administration/getting-started/retention-configuration' },
+  { title: 'Model Lifecycle Configuration', slug: 'administration/getting-started/model-lifecycle-configuration' },
 
   /// Schema Management
   { title: 'Schemas', slug: 'administration/schemas', header: true },

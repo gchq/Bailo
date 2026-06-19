@@ -32,6 +32,21 @@ reviews, lifecycle reviews are not usually assigned to a separate reviewer role.
 
 The model owner is responsible for checking the model card and confirming that it remains accurate.
 
+## How does lifecycle reminder scheduling works?
+
+When a lifecycle review is created with a due date, Bailo schedules reminder jobs using the internal scheduler. These
+jobs send notification emails to the model owners.
+
+Two types of reminders are supported:
+
+- Pre‑due reminders: sent before the lifecycle review due date
+- Post‑due reminders: sent repeatedly after the due date until the review is completed
+
+Reminders are scheduled when the lifecycle review is created. If a lifecycle review or model is removed, associated
+scheduled jobs are cancelled.
+
+All scheduling is handled by the internal Agenda scheduler backed by MongoDB.
+
 ## Setting a lifecycle review date
 
 A lifecycle review is created by setting a review due date on the model.

@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-# Retention Configuration
+# Model Lifecycle Configuration
 
 Bailo includes configurable lifecycle reminder functionality to help ensure that models are periodically reviewed and
 remain compliant with organisational governance policies. The system can automatically send reminder emails to model
@@ -11,21 +11,6 @@ are sent and how frequently overdue reminders are repeated.
 
 This page explains how to configure lifecycle reminders, how the reminder and warning flows work, and how to safely
 disable the feature if required.
-
-## How Lifecycle Reminder Scheduling Works
-
-When a lifecycle review is created with a due date, Bailo schedules reminder jobs using the internal scheduler. These
-jobs send notification emails to the model owners.
-
-Two types of reminders are supported:
-
-- Pre‑due reminders: sent before the lifecycle review due date
-- Post‑due reminders: sent repeatedly after the due date until the review is completed
-
-Reminders are scheduled when the lifecycle review is created. If a lifecycle review or model is removed, associated
-scheduled jobs are cancelled.
-
-All scheduling is handled by the internal Agenda scheduler backed by MongoDB.
 
 ## Configuration Location
 
