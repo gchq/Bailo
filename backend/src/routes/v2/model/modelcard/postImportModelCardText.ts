@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
@@ -18,7 +17,7 @@ export const postImportModelCardTextSchema = z.object({
       .string({
         required_error: 'Must provide model card text to import',
       })
-      .max(200000),
+      .max(500000),
   }),
 })
 
@@ -47,7 +46,6 @@ interface PostImportModelCardTextResponse {
 }
 
 export const postImportModelCardText = [
-  bodyParser.json({ limit: '500kb' }),
   async (req: Request, res: Response<PostImportModelCardTextResponse>): Promise<void> => {
     req.audit = AuditInfo.ImportModelCardText
     const {

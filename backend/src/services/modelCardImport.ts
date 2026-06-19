@@ -14,6 +14,7 @@ interface FieldDescriptor {
   title: string
   type: string
   description?: string
+  format?: string
 }
 
 export function buildSchemaDescription(schema: JsonSchema, basePath = ''): FieldDescriptor[] {
@@ -47,11 +48,13 @@ export function buildSchemaDescription(schema: JsonSchema, basePath = ''): Field
           ...(prop.description && { description: prop.description }),
         })
       } else {
+        const format = (prop as { format?: string }).format
         fields.push({
           path,
           title: prop.title || key,
-          type: (prop.type as string) || 'string',
+          type: format ? `${prop.type || 'string'} (format: ${format})` : (prop.type as string) || 'string',
           ...(prop.description && { description: prop.description }),
+          ...(format && { format }),
         })
       }
     }
@@ -128,6 +131,7 @@ CRITICAL RULES:
 - For array fields, extract all matching items found in the document.
 - For number fields, extract numeric values only if explicitly stated.
 - For boolean fields, extract true/false only if the answer is clearly stated.
+- When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
 - The output JSON must use the exact property names from the schema (the "path" field).`
 
   const schemaDescription = JSON.stringify(fields, null, 2)
