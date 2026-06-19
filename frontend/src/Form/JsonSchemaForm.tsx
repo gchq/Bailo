@@ -3,22 +3,21 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { debounce } from 'lodash-es'
+import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import Loading from 'src/common/Loading'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
   DescriptionFieldTemplate,
+  ErrorListTemplate,
   FieldTemplate,
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
-import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
@@ -43,6 +42,7 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
+  stateList,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -52,18 +52,15 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
+  stateList?: string[]
 }) {
   const theme = useTheme()
   const router = useRouter()
   const [activeStep, setActiveStep] = useState(0)
   const [sharedSection, setSharedSection] = useState('')
-  const [requiredByModelState, setRequiredByModelState] = useState<string | undefined>(
-    (router.query.requiredByModelState as string) || '',
-  )
+  const requiredByModelState = useSearchParams().get('requiredByModelState')
 
   const ref = useRef<HTMLDivElement | null>(null)
-
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const copyToClipboard = useCopyToClipboard()
 
@@ -77,13 +74,13 @@ export default function JsonSchemaForm({
   const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 
   const formStats = useMemo(
-    () => getFormStats(currentStep, mirroredModel, requiredByModelState),
+    () => getFormStats(currentStep, mirroredModel, requiredByModelState || undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentStep, currentStep?.state, mirroredModel, requiredByModelState],
   )
 
   const collatedStats = useMemo(
-    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, requiredByModelState),
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, requiredByModelState || undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
@@ -132,30 +129,6 @@ export default function JsonSchemaForm({
     })
   }
 
-  const handleFilterStateClick = (state: string) => {
-    if (state === requiredByModelState) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { requiredByModelState, ...queryWithoutFiltered } = router.query
-      router.replace({
-        query: queryWithoutFiltered,
-      })
-      setRequiredByModelState('')
-    } else {
-      router.replace({
-        query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
-      })
-      setRequiredByModelState(state)
-    }
-  }
-
-  function ErrorListTemplate() {
-    return (
-      <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
-        Please make sure that all errors listed below have been resolved.
-      </Typography>
-    )
-  }
-
   function onShareSectionOnClick(sectionId: string) {
     const link = `${window.location.origin}${window.location.pathname}?page=${activeStep}#${sectionId}`
 
@@ -165,12 +138,18 @@ export default function JsonSchemaForm({
     })
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading) {
-    return <Loading />
+  const handleFilterStateClick = (state: string) => {
+    if (state === requiredByModelState) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { requiredByModelState, ...queryWithoutFiltered } = router.query
+      router.replace({
+        query: queryWithoutFiltered,
+      })
+    } else {
+      router.replace({
+        query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
+      })
+    }
   }
 
   return (
@@ -231,22 +210,24 @@ export default function JsonSchemaForm({
           )}
           {canEdit && (
             <Stack direction={'column'} spacing={1}>
-              <Stack spacing={2} direction={'row'}>
-                <Typography>Filter fields by: </Typography>
-                {uiConfig?.modelDetails.states.map((state) => (
-                  <Tooltip key={state} title={`Filter out questions necessary for ${state}`}>
-                    <Chip
-                      key={state}
-                      label={state}
-                      onClick={() => handleFilterStateClick(state)}
-                      color={requiredByModelState === state ? 'primary' : 'default'}
-                    />
-                  </Tooltip>
-                ))}
-              </Stack>
+              {stateList && (
+                <Stack spacing={2} direction={'row'}>
+                  <Typography>Filter fields by: </Typography>
+                  {stateList.map((state) => (
+                    <Tooltip key={state} title={`Filter out questions necessary for ${state}`}>
+                      <Chip
+                        key={state}
+                        label={state}
+                        onClick={() => handleFilterStateClick(state)}
+                        color={requiredByModelState === state ? 'primary' : 'default'}
+                      />
+                    </Tooltip>
+                  ))}
+                </Stack>
+              )}
               <Typography sx={{ pt: 1 }}>
                 Required fields for this state are marked with an asterisk
-                <span style={{ color: theme.palette.error.main }}> *</span>
+                <span style={{ color: theme.palette.error.main }}> *</span>``
               </Typography>
             </Stack>
           )}
@@ -270,6 +251,7 @@ export default function JsonSchemaForm({
               mirroredModel,
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
+              theme: theme,
             }}
             templates={
               !canEdit
@@ -278,6 +260,7 @@ export default function JsonSchemaForm({
                     ArrayFieldTemplate,
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,
+                    FieldTemplate,
                   }
                 : {
                     DescriptionFieldTemplate,

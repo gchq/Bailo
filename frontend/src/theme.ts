@@ -22,6 +22,7 @@ declare module '@mui/material/styles' {
     vulnerabilityHigh: PaletteColorOptions
     vulnerabilityMedium: PaletteColorOptions
     vulnerabilityLow: PaletteColorOptions
+    correct: PaletteColorOptions
   }
 }
 
@@ -185,6 +186,9 @@ export const lightTheme = createTheme({
       main: '#ff9800',
       dark: '#ce7b00',
     },
+    correct: {
+      main: '#66ff00',
+    },
   },
 })
 
@@ -242,6 +246,9 @@ export const darkTheme = createTheme({
     },
     vulnerabilityLow: {
       main: '#ff9800',
+    },
+    correct: {
+      main: '#66ff00',
     },
   },
   components: {

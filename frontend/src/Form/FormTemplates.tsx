@@ -1,8 +1,10 @@
 import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
+import Done from '@mui/icons-material/Done'
+import Error from '@mui/icons-material/Error'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
@@ -14,7 +16,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { requiredByStateFilter } from 'utils/formUtils'
+import { isQuestionAnswered } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -55,12 +57,43 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function FieldTemplate({ children, registry, schema }: FieldTemplateProps) {
-  const sectionNotQuestion = !!schema.properties
-  if (sectionNotQuestion || requiredByStateFilter(registry.formContext.requiredByModelState, schema)) {
-    return <>{children}</>
+export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+  const answered = isQuestionAnswered(id, schema, registry.formContext)
+  const requiredByState =
+    registry.formContext.requiredByModelState &&
+    schema.requiredByModelStates &&
+    schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
+  if (requiredByState) {
+    return (
+      <Box
+        p={0.5}
+        sx={{
+          backgroundColor: alpha(
+            answered ? registry.formContext.theme.palette.primary.main : registry.formContext.theme.palette.error.main,
+            0.1,
+          ),
+        }}
+      >
+        <Stack direction='row' alignItems='center'>
+          {answered ? <Done color='success' fontSize='small' /> : <Error color='error' fontSize='small' />}
+          <Typography fontSize={12} color={answered ? 'success' : 'error'}>
+            {`Required for ${registry.formContext.requiredByModelState}`}
+          </Typography>
+        </Stack>
+        {children}
+      </Box>
+    )
   }
-  return <></>
+
+  return <>{children}</>
+}
+
+export function ErrorListTemplate({ registry }) {
+  return (
+    <Typography color={registry.formContext.theme.palette.error.main} sx={{ mb: 2 }}>
+      Please make sure that all errors listed below have been resolved.
+    </Typography>
+  )
 }
 
 export function ObjectFieldTemplate({

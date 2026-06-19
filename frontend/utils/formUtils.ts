@@ -232,6 +232,48 @@ function isAnswered(value: any): boolean {
   return true
 }
 
+/**
+ * Checks whether a single field/question in the form has been filled out.
+ *
+ * Uses the field's `id` (e.g. `root_someProperty_subProperty`) to walk the
+ * current form state held on the `formContext`, then evaluates whether the
+ * resolved value satisfies the given schema.
+ *
+ * - For primitive schemas (string/number/boolean/$ref) the value just needs
+ *   to be non-empty.
+ * - For array schemas the array needs to contain at least one entry and, if
+ *   the array items are themselves an object schema, the first entry needs
+ *   to have all of its non-metrics primitive children answered.
+ *
+ * @param id           The RJSF field id (from `FieldTemplateProps`).
+ * @param schema       The schema fragment associated with the field.
+ * @param formContext  The RJSF form context (must contain `state`).
+ * @returns true when the question is considered filled out, false otherwise.
+ */
+export function isQuestionAnswered(id: string, schema: any, formContext: Registry['formContext']): boolean {
+  if (!schema || typeof schema !== 'object') {
+    return false
+  }
+
+  const value = getState(id, formContext)
+
+  if (isPrimitiveSchema(schema)) {
+    return isAnswered(value)
+  }
+
+  if (schema.type === 'array' && schema.items) {
+    if (!Array.isArray(value) || value.length === 0) {
+      return false
+    }
+    // For arrays of objects/primitives, ensure the first entry is fully answered
+    const total = countQuestionsFromSchema(schema.items)
+    const answered = countAnswersFromSchemaAndState(schema.items, value[0])
+    return total === 0 ? isAnswered(value[0]) : answered >= total
+  }
+
+  return isAnswered(value)
+}
+
 function isRequiredArray(schema: any): boolean {
   return schema?.type === 'array' && typeof schema.minItems === 'number' && schema.minItems >= 1
 }
@@ -251,9 +293,10 @@ function isPrimitiveSchema(schema: any): boolean {
 }
 
 export function requiredByStateFilter(requiredByModelState?: string, schema?: any) {
-  return Boolean(
-    requiredByModelState && schema.requiredByModelStates && schema.requiredByModelStates.includes(requiredByModelState),
-  )
+  return requiredByModelState &&
+    (!schema.requiredByModelStates || !schema.requiredByModelStates.includes(requiredByModelState))
+    ? false
+    : true
 }
 
 function countQuestionsFromSchema(schema: any, requiredByModelState?: string): number {

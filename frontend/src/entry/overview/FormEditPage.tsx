@@ -333,6 +333,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           calculateStats={calculateStats}
           canEdit={isEdit}
           displayStats={displayFormStats}
+          stateList={schema?.jsonSchema.stateList || []}
         />
         {isEdit && (
           <SaveAndCancelButtons

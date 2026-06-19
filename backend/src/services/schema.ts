@@ -46,6 +46,7 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   if (cachedSchema) {
     return cachedSchema
   }
+
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -57,9 +58,8 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   const schemaObject = schema.toObject()
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
 
-  if (modelState) {
-    schemaObject.jsonSchema = enforceModelStateFields(schemaObject.jsonSchema, modelState)
-  }
+  schemaObject.jsonSchema = enforceModelStateFields(schemaObject.jsonSchema, modelState)
+
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject
 }
@@ -84,9 +84,20 @@ function addToParentRequired(
   }
 }
 
-function enforceModelStateFields(schema: object, targetState: string) {
+function addUniqueStates(_root: traverse.SchemaObject, states: string[]) {
+  if (!_root.stateList) {
+    _root.stateList = []
+  }
+  for (const state of states) {
+    if (!_root.stateList.includes(state)) {
+      _root.stateList.push(state)
+    }
+  }
+}
+
+function enforceModelStateFields(schema: object, targetState?: string) {
   const validStates = config.ui.modelDetails.states
-  if (!validStates.includes(targetState)) {
+  if (targetState && !validStates.includes(targetState)) {
     throw BadReq('The value for modelState is not a valid model state', { validStates, modelState: targetState })
   }
   const jsonSchema = structuredClone(schema)
@@ -101,8 +112,11 @@ function enforceModelStateFields(schema: object, targetState: string) {
           return
         }
 
-        if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
-          addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
+        if (Array.isArray(subschema.requiredByModelStates)) {
+          if (subschema.requiredByModelStates.includes(targetState)) {
+            addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
+          }
+          addUniqueStates(_root, subschema.requiredByModelStates)
         }
 
         if (modifiedSchemas.has(subschema)) {
