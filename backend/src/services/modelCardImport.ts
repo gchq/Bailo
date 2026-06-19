@@ -26,7 +26,9 @@ function describeObjectFields(schema: JsonSchema): string {
       if (items.type === 'object' && items.properties) {
         parts.push(`${k}: array of objects with fields: ${describeObjectFields(items)}`)
       } else if (items.enum) {
-        parts.push(`${k}: array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((e) => `"${e}"`).join(', ')}]`)
+        parts.push(
+          `${k}: array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((e) => `"${e}"`).join(', ')}]`,
+        )
       } else {
         parts.push(`${k}: array of ${items.type || 'string'}`)
       }
