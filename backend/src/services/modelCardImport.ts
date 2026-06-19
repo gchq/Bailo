@@ -1,4 +1,4 @@
-import { Schema as JsonSchema } from 'jsonschema'
+import { Schema as JsonSchema, Validator } from 'jsonschema'
 
 import { callLlmChatCompletion, ChatMessage } from '../clients/llm.js'
 import { UserInterface } from '../models/User.js'
@@ -15,6 +15,28 @@ interface FieldDescriptor {
   type: string
   description?: string
   format?: string
+}
+
+function describeObjectFields(schema: JsonSchema): string {
+  if (!schema.properties) return '{}'
+  const parts: string[] = []
+  for (const [k, v] of Object.entries(schema.properties) as [string, JsonSchema][]) {
+    if (v.type === 'array' && v.items) {
+      const items = v.items as JsonSchema
+      if (items.type === 'object' && items.properties) {
+        parts.push(`${k}: array of objects with fields: ${describeObjectFields(items)}`)
+      } else if (items.enum) {
+        parts.push(`${k}: array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((e) => `"${e}"`).join(', ')}]`)
+      } else {
+        parts.push(`${k}: array of ${items.type || 'string'}`)
+      }
+    } else if (v.type === 'object' && v.properties) {
+      parts.push(`${k}: object with fields: ${describeObjectFields(v)}`)
+    } else {
+      parts.push(`${k}: ${v.type || 'string'}`)
+    }
+  }
+  return `{ ${parts.join(', ')} }`
 }
 
 export function buildSchemaDescription(schema: JsonSchema, basePath = ''): FieldDescriptor[] {
@@ -34,10 +56,9 @@ export function buildSchemaDescription(schema: JsonSchema, basePath = ''): Field
         const items = prop.items as JsonSchema & { widget?: string }
         let typeDesc: string
         if (items.type === 'object' && items.properties) {
-          const subFields = Object.entries(items.properties as Record<string, JsonSchema>)
-            .map(([k, v]) => `${k}: ${v.type || 'string'}`)
-            .join(', ')
-          typeDesc = `array of objects with fields: { ${subFields} }`
+          typeDesc = `array of objects with fields: ${describeObjectFields(items)}`
+        } else if (items.enum) {
+          typeDesc = `array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((v) => `"${v}"`).join(', ')}]`
         } else {
           typeDesc = `array of ${items.type || 'string'}`
         }
@@ -63,17 +84,42 @@ export function buildSchemaDescription(schema: JsonSchema, basePath = ''): Field
   return fields
 }
 
-function stripUnknownKeys(data: Record<string, unknown>, schema: JsonSchema): Record<string, unknown> {
+function resolveRef(ref: string, rootSchema: JsonSchema): JsonSchema | undefined {
+  const path = ref.replace('#/', '').split('/')
+  let current: unknown = rootSchema
+  for (const segment of path) {
+    if (typeof current === 'object' && current !== null && segment in current) {
+      current = (current as Record<string, unknown>)[segment]
+    } else {
+      return undefined
+    }
+  }
+  return current as JsonSchema
+}
+
+function stripUnknownKeys(
+  data: Record<string, unknown>,
+  schema: JsonSchema,
+  rootSchema?: JsonSchema,
+): Record<string, unknown> {
+  const root = rootSchema || schema
   if (schema.type !== 'object' || !schema.properties) {
     return data
   }
 
   const result: Record<string, unknown> = {}
-  const props = schema.properties as Record<string, JsonSchema & { widget?: string }>
+  const props = schema.properties as Record<string, JsonSchema & { widget?: string; $ref?: string }>
 
   for (const [key, value] of Object.entries(data)) {
-    const propSchema = props[key]
+    let propSchema = props[key]
     if (!propSchema) continue
+
+    if (propSchema.$ref) {
+      const resolved = resolveRef(propSchema.$ref, root)
+      if (resolved) {
+        propSchema = { ...resolved, ...propSchema, $ref: undefined } as typeof propSchema
+      }
+    }
 
     if (propSchema.widget && EXCLUDED_WIDGETS.has(propSchema.widget)) continue
 
@@ -82,16 +128,25 @@ function stripUnknownKeys(data: Record<string, unknown>, schema: JsonSchema): Re
     if (isPlaceholderValue(value)) continue
 
     if (propSchema.type === 'object' && typeof value === 'object' && !Array.isArray(value)) {
-      const cleaned = stripUnknownKeys(value as Record<string, unknown>, propSchema)
+      const cleaned = stripUnknownKeys(value as Record<string, unknown>, propSchema, root)
       if (Object.keys(cleaned).length > 0) {
         result[key] = cleaned
       }
     } else if (propSchema.type === 'array' && Array.isArray(value)) {
-      const items = propSchema.items as JsonSchema | undefined
+      let itemSchema = propSchema.items as (JsonSchema & { $ref?: string }) | undefined
+      if (itemSchema?.$ref) {
+        const resolved = resolveRef(itemSchema.$ref, root)
+        if (resolved) {
+          itemSchema = { ...resolved, ...itemSchema, $ref: undefined } as typeof itemSchema
+        }
+      }
       const cleaned = value
         .map((item) => {
-          if (items?.type === 'object' && typeof item === 'object' && item !== null) {
-            return stripUnknownKeys(item as Record<string, unknown>, items)
+          if (itemSchema?.type === 'object' && typeof item === 'object' && item !== null) {
+            return stripUnknownKeys(item as Record<string, unknown>, itemSchema, root)
+          }
+          if (itemSchema?.enum && !itemSchema.enum.includes(item)) {
+            return null
           }
           return item
         })
@@ -101,7 +156,14 @@ function stripUnknownKeys(data: Record<string, unknown>, schema: JsonSchema): Re
         result[key] = cleaned
       }
     } else if (propSchema.type === 'string' && typeof value === 'string') {
-      result[key] = value
+      const maxLength = propSchema.maxLength as number | undefined
+      if (maxLength && value.length > maxLength) {
+        result[key] = value.slice(0, maxLength)
+      } else if (propSchema.enum && !propSchema.enum.includes(value)) {
+        // skip values not in the enum
+      } else {
+        result[key] = value
+      }
     } else if (propSchema.type === 'number' && typeof value === 'number') {
       result[key] = value
     } else if (propSchema.type === 'boolean' && typeof value === 'boolean') {
@@ -115,7 +177,23 @@ function stripUnknownKeys(data: Record<string, unknown>, schema: JsonSchema): Re
 function isPlaceholderValue(value: unknown): boolean {
   if (typeof value !== 'string') return false
   const normalised = value.trim().toLowerCase()
-  return ['n/a', 'not specified', 'not available', 'unknown', 'none', 'tbd', 'to be determined'].includes(normalised)
+  if (
+    ['n/a', 'not specified', 'not available', 'unknown', 'none', 'tbd', 'to be determined', 'not applicable'].includes(
+      normalised,
+    )
+  ) {
+    return true
+  }
+  if (/^https?:\/\/(example\.com|www\.example\.|placeholder|your-|insert-|link-here)/i.test(value.trim())) {
+    return true
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+    const date = new Date(value.trim())
+    if (isNaN(date.getTime())) {
+      return true
+    }
+  }
+  return false
 }
 
 function buildPromptMessages(fields: FieldDescriptor[], text: string): ChatMessage[] {
@@ -126,6 +204,8 @@ CRITICAL RULES:
 - If a field cannot be populated from the document, omit it entirely from the output.
 - Do NOT infer, guess, or hallucinate any values.
 - Do NOT generate placeholder text like "Not specified", "N/A", or "Unknown" — leave the field out.
+- Do NOT generate placeholder or example URLs. Only include a URL if it appears verbatim in the source document.
+- Do NOT infer or generate dates. Only populate date fields if an explicit date is clearly stated in the source document for that specific purpose.
 - Return valid JSON matching the schema structure exactly.
 - For string fields, extract the relevant text verbatim or as a close summary.
 - For array fields, extract all matching items found in the document.
@@ -181,6 +261,14 @@ export async function extractModelCardFromText(
   }
 
   const cleaned = stripUnknownKeys(parsed, schema.jsonSchema)
+
+  const validationResult = new Validator().validate(cleaned, schema.jsonSchema)
+  if (validationResult.errors.length > 0) {
+    log.warn(
+      { modelId, errors: validationResult.errors.map((e) => `${e.property}: ${e.message}`) },
+      'Extracted data has validation issues, stripping invalid fields.',
+    )
+  }
 
   log.info({ modelId, extractedKeys: Object.keys(cleaned) }, 'Successfully extracted model card data from text.')
 
