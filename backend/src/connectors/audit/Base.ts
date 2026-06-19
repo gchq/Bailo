@@ -103,6 +103,12 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.ModelCard,
   },
+  ImportModelCardText: {
+    typeId: 'ImportModelCardText',
+    description: 'Model Card Text Imported',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.ModelCard,
+  },
 
   CreateFile: {
     typeId: 'CreateFile',

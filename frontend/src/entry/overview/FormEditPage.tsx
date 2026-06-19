@@ -18,6 +18,7 @@ import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
+import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
 import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -26,6 +27,7 @@ import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
+import ImportModelCardTextDialog from 'src/entry/overview/ImportModelCardTextDialog'
 import MigrationListDialog from 'src/entry/overview/MigrationListDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
@@ -51,6 +53,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
+  const [importTextDialogOpen, setImportTextDialogOpen] = useState(false)
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -66,6 +69,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     entry.card.schemaId,
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId, entry.state)
+  const { uiConfig } = useGetUiConfig()
   const sendNotification = useNotification()
   const { mutateEntryCardRevisions } = useGetEntryCardRevisions(entry.id)
 
@@ -158,6 +162,30 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       sendNotification({
         variant: 'error',
         msg: 'Could not update form - please make sure to use valid JSON',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+  }
+
+  function handleImportTextOnSubmit(metadata: Record<string, unknown>) {
+    setImportTextDialogOpen(false)
+    try {
+      if (schema) {
+        const steps = getStepsFromSchema(schema, {}, [], metadata)
+        for (const step of steps) {
+          step.steps = steps
+        }
+        setSplitSchema({ reference: schema.id, steps })
+        sendNotification({
+          variant: 'success',
+          msg: 'Model card data imported successfully. Please review the extracted fields.',
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+    } catch (_e) {
+      sendNotification({
+        variant: 'error',
+        msg: 'Could not populate form with imported data',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
@@ -331,6 +359,8 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                 onCancel={onCancel}
                 onSubmit={onSubmit}
                 openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+                openImportTextDialog={() => setImportTextDialogOpen(true)}
+                showImportFromText={!!uiConfig?.llmImport?.enabled}
                 loading={loading}
                 cancelDataTestId='cancelEditEntryCardButton'
                 saveDataTestId='saveEntryCardButton'
@@ -353,6 +383,8 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             onSubmit={onSubmit}
             loading={loading}
             openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+            openImportTextDialog={() => setImportTextDialogOpen(true)}
+            showImportFromText={!!uiConfig?.llmImport?.enabled}
           />
         )}
       </Box>
@@ -363,6 +395,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         onSubmit={handleJsonFormOnSubmit}
         helperText={`Paste in raw JSON to fill in the ${EntryCardKindLabel[entry.kind]} form`}
         dialogTitle='Add Raw JSON to Form'
+      />
+      <ImportModelCardTextDialog
+        open={importTextDialogOpen}
+        onClose={() => setImportTextDialogOpen(false)}
+        onSubmit={handleImportTextOnSubmit}
+        modelId={entry.id}
       />
       <ExportEntryCardDialog
         entry={entry}

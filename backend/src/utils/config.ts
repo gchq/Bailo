@@ -239,6 +239,15 @@ export interface Config {
   untrustedModels: {
     defaultState: string
   }
+
+  llm: {
+    enabled: boolean
+    endpoint: string
+    apiKey: string
+    model: string
+    maxTokens: number
+    timeoutMs: number
+  }
 }
 
 const config = _config.util.toObject(_config)

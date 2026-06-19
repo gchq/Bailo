@@ -216,6 +216,21 @@ def test_model_card_from_template(requests_mock):
     assert result == {"success": True}
 
 
+def test_import_model_card_text(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/import-model-card-text",
+        json={"metadata": {"overview": {"modelSummary": "A test model"}}},
+    )
+
+    client = Client("https://example.com")
+    result = client.import_model_card_text(
+        model_id="test_id",
+        text="# Test Model\n\nThis is a test model that does classification.",
+    )
+
+    assert result == {"metadata": {"overview": {"modelSummary": "A test model"}}}
+
+
 def test_post_release(requests_mock):
     requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
 

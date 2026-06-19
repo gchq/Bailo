@@ -177,6 +177,10 @@ export interface UiConfig {
     enabled: boolean
     untrustedModelDescription: string
   }
+
+  llmImport: {
+    enabled: boolean
+  }
 }
 
 export interface EntrySearchResult {

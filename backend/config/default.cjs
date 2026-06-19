@@ -275,6 +275,10 @@ module.exports = {
       enabled: false,
       untrustedModelDescription: 'These are private only models.',
     },
+
+    llmImport: {
+      enabled: false,
+    },
   },
 
   connectors: {
@@ -372,5 +376,14 @@ module.exports = {
 
   untrustedModels: {
     defaultState: 'Production',
+  },
+
+  llm: {
+    enabled: false,
+    endpoint: '',
+    apiKey: '',
+    model: '',
+    maxTokens: 16384,
+    timeoutMs: 120000,
   },
 }

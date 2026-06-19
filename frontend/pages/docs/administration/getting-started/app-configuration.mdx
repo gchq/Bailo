@@ -49,4 +49,32 @@ When deploying using `helm`, configuration is primarily handled through `values.
 `helm/bailo/templates/bailo/bailo.configmap.yaml`. Configuration is loaded when the application starts. The application
 must be restarted when configuration changes.
 
+## LLM Import Configuration
+
+Bailo can optionally use an LLM to extract model card data from free text (e.g. HuggingFace model cards). This feature
+is disabled by default and requires an OpenAI-compatible chat completions endpoint.
+
+```javascript
+// In your configuration override (e.g. production.cjs or local.js)
+{
+  llm: {
+    enabled: true,
+    endpoint: 'https://api.openai.com/v1/chat/completions', // Any OpenAI-compatible endpoint
+    apiKey: 'your-api-key',
+    model: 'gpt-4o',          // Model identifier for the LLM provider
+    maxTokens: 16384,         // Maximum tokens in the LLM response
+    timeoutMs: 120000,        // Timeout for LLM requests in milliseconds
+  },
+
+  ui: {
+    llmImport: {
+      enabled: true,          // Shows the "Import from Text" button in the UI
+    },
+  },
+}
+```
+
+When `llm.enabled` is `false` (the default) or the configuration is absent, the import feature is completely hidden
+from the user interface.
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
