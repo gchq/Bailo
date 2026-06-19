@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose'
+import { Types } from 'mongoose'
 
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
@@ -57,7 +57,7 @@ export async function respondToReview(
 }
 
 export async function getLatestResponseForReview(reviewId: string) {
-  const response = await ResponseModel.findOne({ parentId: reviewId as unknown as Schema.Types.ObjectId }).sort({
+  const response = await ResponseModel.findOne({ parentId: new Types.ObjectId(reviewId) }).sort({
     createdAt: -1,
   })
 

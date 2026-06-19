@@ -17,7 +17,6 @@ import {
   isModelCardRevisionDoc,
   popularTagsForEntries,
   removeModel,
-  saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
   updateModel,
@@ -69,7 +68,7 @@ vi.mock('../../src/services/review.js', async () => reviewMock)
 
 const schemaMock = vi.hoisted(() => ({
   getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
-  validateContentAgainstSchema: vi.fn(),
+  validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
@@ -542,7 +541,7 @@ describe('services > model', () => {
   test('updateModelCard > should throw bad request when metadata fails schema validation', async () => {
     const mockModel = { settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
     ModelModelMock.findOne.mockResolvedValueOnce(mockModel)
-    schemaMock.validateContentAgainstSchema.mockRejectedValueOnce(new Error('Validation failed'))
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
       /^Model metadata could not be validated against the schema./,
@@ -618,6 +617,24 @@ describe('services > model', () => {
     )
   })
 
+  test('updateModel > throws an error when model card fails validation for new state', async () => {
+    const testModel = {
+      name: 'test model',
+      kind: EntryKind.Model,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { name: 'Test' } },
+      },
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+
+    await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
+      /^Please fill in all required fields in the model card, to update the state to Production/,
+    )
+  })
+
   test('createModelCardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'Cannot alter a mirrored model.',
@@ -629,17 +646,6 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(ModelModelMock.save).not.toHaveBeenCalled()
-  })
-
-  test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
-    ModelModelMock.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    schemaMock.validateContentAgainstSchema.mockImplementationOnce(() => {
-      throw Error('Unable to validate.')
-    })
-
-    const result = saveImportedModelCard({} as any)
-
-    await expect(result).rejects.toThrow(/^Model metadata could not be validated against the schema./)
   })
 
   test('setLatestImportedModelCard > success', async () => {
