@@ -53,9 +53,6 @@ const reviewMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/review.js', async () => reviewMock)
 
-const modelServiceMocks = vi.hoisted(() => ({}))
-vi.mock('../../../src/services/model.js', () => modelServiceMocks)
-
 const transporterMock = vi.hoisted(() => {
   return {
     sendMail: vi.fn(function () {
