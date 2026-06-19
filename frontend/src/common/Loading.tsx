@@ -10,7 +10,7 @@ export default function Loading(): ReactElement {
     height: '10px',
     borderRadius: '5px',
     backgroundColor: '#9880ff',
-    color: ' #d62560',
+    color: ' #b5497d',
     boxShadow: '9999px 0 0 -5px',
     animation: 'dot-pulse 1.5s infinite linear',
     animationDelay: '0.25s',
@@ -25,7 +25,7 @@ export default function Loading(): ReactElement {
       height: '10px',
       borderRadius: '5px',
       backgroundColor: '#9880ff',
-      color: ' #54278e',
+      color: ' #4d3075',
     },
 
     '&:before': {

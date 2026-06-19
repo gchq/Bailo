@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   dispatchEmailToModelRole,
+  notifyLifeCycleReview,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
@@ -259,5 +260,48 @@ describe('services > smtp > smtp', () => {
 
     const result: Promise<void> = requestReviewForRelease('user:user', review, release)
     await expect(result).rejects.toThrow(`Unable to send email`)
+  })
+
+  test('that a lifecycle review email is not sent when smtp is disabled', async () => {
+    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    await notifyLifeCycleReview('modelId', 'review-1', '1 hour')
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
+  })
+
+  test('that a lifecycle review email includes a due-in message when dueIn is provided', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyLifeCycleReview('modelId', 'review-1', '1 hour')
+    expect(emailBuilderMock.buildEmail).toHaveBeenCalledWith(
+      'A lifecycle review for Test Model is due in 1 hour',
+      expect.anything(),
+      expect.anything(),
+    )
+    expect(transporterMock.sendMail).toHaveBeenCalled()
+  })
+
+  test('that a lifecycle review email includes a past-due message when dueIn is not provided', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyLifeCycleReview('modelId', 'review-1')
+    expect(emailBuilderMock.buildEmail).toHaveBeenCalledWith(
+      "A lifecycle review for Test Model has past it's due date",
+      expect.anything(),
+      expect.anything(),
+    )
+    expect(transporterMock.sendMail).toHaveBeenCalled()
+  })
+
+  test('that an email is sent after a response for a release review to additional reviewers', async () => {
+    await notifyReviewResponseForRelease(testReviewResponse as any, release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(2)
   })
 })

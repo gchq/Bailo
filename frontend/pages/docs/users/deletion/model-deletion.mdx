@@ -7,6 +7,12 @@ import bailoDeleteConfirm from 'public/docs/bailo_delete_model_confirm.png'
 
 # Deleting a model
 
+> **Common questions this page answers:**
+>
+> - How do I delete a model in Bailo?
+> - What happens when I delete a model?
+> - Can I recover a deleted model?
+
 Models can be deleted from Bailo by users with the appropriate permissions. Deleting a model removes it from use and
 visibility across the platform.
 
@@ -40,6 +46,8 @@ From a user perspective, the model is gone and cannot be used.
 
 ## How to delete a model
 
+Delete a model from the Settings tab in the Deletion section:
+
 1. Open the model
 2. Navigate to **Settings**
 3. Scroll to the **Deletion** section
@@ -49,9 +57,11 @@ From a user perspective, the model is gone and cannot be used.
   <Image alt='model settings deletion section' src={bailoDeleteModel} />
 </Box>
 
+The screenshot above shows the model Settings page with the Deletion section and a Delete Model button.
+
 ## Confirming deletion
 
-To prevent accidental deletion, you must confirm the action:
+To prevent accidental deletion, you must type the exact model name to confirm deletion:
 
 1. A confirmation dialog will appear
 2. Type the **exact model name** into the confirmation field
@@ -60,6 +70,8 @@ To prevent accidental deletion, you must confirm the action:
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='delete model confirmation dialog' src={bailoDeleteConfirm} />
 </Box>
+
+The screenshot above shows the delete confirmation dialog requiring the exact model name to be typed.
 
 If the name does not match exactly, the delete button remains disabled.
 
@@ -71,10 +83,10 @@ If the name does not match exactly, the delete button remains disabled.
 
 ## About recovery
 
-Model deletion is designed to be **final**.
+Model deletion is designed to be **final**, with only rare administrator recovery possible.
 
-In rare and exceptional circumstances, platform administrators may be able to restore a deleted model. This is **not a
-standard service** and users should only request recovery if absolutely required.
+In exceptional circumstances, platform administrators may be able to restore a deleted model. This is **not a standard
+service** and users should only request recovery if absolutely required.
 
 Before deleting a model, ensure it is no longer needed.
 

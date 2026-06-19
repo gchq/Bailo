@@ -30,6 +30,7 @@ vi.mock('../../src/services/model.js', () => modelMocks)
 
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
+  validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] })),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
@@ -37,7 +38,7 @@ const mockAuthentication = vi.hoisted(() => ({
   hasRole: vi.fn(),
   getEntities: vi.fn(() => ['user:testUser']),
 }))
-vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
+vi.mock('../../src/connectors/authentication/index.js', () => ({ default: mockAuthentication }))
 
 const mockReviewService = vi.hoisted(() => ({
   createAccessRequestReviews: vi.fn(),
@@ -51,21 +52,9 @@ const mockResponseService = vi.hoisted(() => ({
 vi.mock('../../src/services/response.js', () => mockResponseService)
 
 const mockWebhookService = vi.hoisted(() => ({
-  sendWebhooks: vi.fn(),
+  dispatchWebhooks: vi.fn(),
 }))
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
-
-const validationMocks = vi.hoisted(() => ({
-  isValidatorResultError: vi.fn(),
-}))
-vi.mock('../../src/types/ValidatorResultError.js', () => validationMocks)
-
-const validator = vi.hoisted(() => ({ validate: vi.fn() }))
-vi.mock('jsonschema', () => ({
-  Validator: vi.fn(function () {
-    return validator
-  }),
-}))
 
 const accessRequest = {
   metadata: {
@@ -85,7 +74,7 @@ describe('services > accessRequest', () => {
     expect(AccessRequestModelMock.save).toHaveBeenCalled()
     expect(AccessRequestModelMock).toHaveBeenCalled()
     expect(mockReviewService.createAccessRequestReviews).toHaveBeenCalled()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalled()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalled()
   })
 
   test('createAccessRequest > bad authorisation', async () => {
@@ -113,7 +102,7 @@ describe('services > accessRequest', () => {
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.UntrustedModel } as any)
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
-    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       'Cannot create an access request for an untrusted model.',
     )
   })
@@ -130,10 +119,7 @@ describe('services > accessRequest', () => {
   test('createAccessRequest > validation error', async () => {
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
-    validationMocks.isValidatorResultError.mockReturnValue(true)
-    validator.validate.mockImplementationOnce(() => {
-      throw Error()
-    })
+    schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => createAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
       /^Access Request Metadata could not be validated against the schema./,
@@ -351,11 +337,7 @@ describe('services > accessRequest', () => {
   })
 
   test('updateAccessRequest > validation error', async () => {
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
-    validationMocks.isValidatorResultError.mockReturnValue(true)
-    validator.validate.mockImplementationOnce(() => {
-      throw Error()
-    })
+    schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
       /^Access Request Metadata could not be validated against the schema./,

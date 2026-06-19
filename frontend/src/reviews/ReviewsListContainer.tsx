@@ -50,6 +50,12 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
         >
           Releases
         </SimpleListItemButton>
+        <SimpleListItemButton
+          selected={selectedCategory === ReviewKind.LIFECYCLE}
+          onClick={() => handleListItemClick(ReviewKind.LIFECYCLE)}
+        >
+          Model card
+        </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>
         <ReviewsList kind={selectedCategory} status={status} />

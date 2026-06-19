@@ -1,4 +1,4 @@
-import { ClientSession, QueryFilter, Types } from 'mongoose'
+import { ClientSession, Types } from 'mongoose'
 
 import ResponseModel, {
   Decision,
@@ -19,7 +19,7 @@ import log from './log.js'
 import { getReleaseBySemver } from './release.js'
 import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
 import { notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export async function findResponseById(responseId: string) {
   const response = await ResponseModel.findOne({
@@ -35,13 +35,7 @@ export async function findResponseById(responseId: string) {
 
 export async function getResponsesByParentIds(parentIds: string[]) {
   const objectIds = parentIds.map((id) => new Types.ObjectId(id))
-
-  const filter = {
-    parentId: { $in: objectIds },
-    // Hack/Workaround broken mongooose typing
-  } as unknown as QueryFilter<ResponseDoc>
-
-  const responses = await ResponseModel.find(filter)
+  const responses = await ResponseModel.find({ parentId: { $in: objectIds } })
 
   if (!responses) {
     throw NotFound(`The requested response was not found.`, { parentIds })
@@ -71,7 +65,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
 
   response.comment = comment
   response.commentEditedAt = new Date().toISOString()
-  response.save()
+  await response.save()
 
   return response
 }
@@ -141,7 +135,7 @@ export async function respondToReview(
   await reviewResponse.save()
   await sendReviewResponseNotification(review, reviewResponse, user)
 
-  sendWebhooks(
+  dispatchWebhooks(
     review.modelId,
     WebhookEvent.CreateReviewResponse,
     `A new response has been added to a review requested for Model ${review.modelId}`,
@@ -151,7 +145,7 @@ export async function respondToReview(
   return reviewResponse
 }
 
-async function sendReviewResponseNotification(
+export async function sendReviewResponseNotification(
   review: ReviewDoc,
   reviewResponse: ResponseInterface,
   user: UserInterface,
@@ -181,11 +175,15 @@ async function sendReviewResponseNotification(
       )
       break
     }
+    case ReviewKind.Lifecycle: {
+      // We don't need to notify anyone as this action is done by the person who would receive the notification.
+      return
+    }
     default:
-      throw InternalError('Review Kind not recognised', {
-        reviewId: review.id,
-        modelId: review.modelId,
-        kind: review.kind,
+      throw InternalError('Review kind not recognised', {
+        reviewId: review['id'],
+        modelId: review['modelId'],
+        kind: review['kind'],
       })
   }
 }
@@ -200,7 +198,10 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
 }
 
 export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
-  const responses = await ResponseModel.find({ parentId: parentIds })
+  const objectIds = parentIds.map((id) => new Types.ObjectId(id))
+  const responses = await ResponseModel.find({
+    parentId: { $in: objectIds },
+  })
 
   const deletions: ResponseDoc[] = []
   for (const response of responses) {

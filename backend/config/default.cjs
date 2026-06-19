@@ -84,6 +84,12 @@ module.exports = {
       },
     },
 
+    // Refer to: https://github.com/agenda/human-interval#uses
+    lifecycle: {
+      preReminderIntervals: ['1 day', '2 weeks', '10 weeks'],
+      postReminderInterval: '1 day',
+    },
+
     // Set the email address that Bailo should use, can be different from the SMTP server details.
     from: '"Bailo 📝" <bailo@example.org>',
   },
@@ -182,6 +188,7 @@ module.exports = {
       userPoolId: '',
       userIdAttribute: '',
       adminGroupName: '',
+      complianceGroupName: '',
     },
   },
 
@@ -288,6 +295,7 @@ module.exports = {
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
+      scanTimeoutMs: 60_000,
     },
 
     metrics: {

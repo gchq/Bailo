@@ -1,0 +1,152 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Roles and Permissions
+
+Bailo uses two complementary role systems: **System Roles** that control what actions a user can take on a model, and
+**Review Roles** that determine who must approve releases and access requests.
+
+> **Common questions this page answers:**
+>
+> - What can an Owner do in Bailo?
+> - What is the difference between system roles and review roles?
+> - Who can delete a model?
+> - Who can upload files?
+> - What is a Model Technical Reviewer (MTR)?
+
+## System roles
+
+Every collaborator on a model is assigned one of three system roles that govern day-to-day interactions.
+
+### Owner
+
+The **Owner** has full control over a model. There must be at least one owner on every model.
+
+Owners can:
+
+- Edit the model name, description, and visibility
+- Edit the model card
+- Manage collaborators (add, remove, change roles)
+- Upload and delete files
+- Push and delete container images (e.g. Docker images)
+- Create, edit, and delete releases
+- Create and manage access requests
+- Delete the model
+- Configure model settings (e.g. ungoverned access, template eligibility)
+
+### Contributor
+
+A **Contributor** can work on the model's content but cannot manage access or delete the model.
+
+Contributors can:
+
+- Edit the model card
+- Upload and delete files
+- Push container images
+- Create releases
+
+Contributors cannot:
+
+- Change model settings or visibility
+- Manage collaborators
+- Delete the model
+
+### Consumer
+
+A **Consumer** can access the model's artefacts for use, provided they have an approved access request (or the model has
+ungoverned access enabled).
+
+Consumers can:
+
+- View the model and its model card
+- Download files (with approved access request)
+- Pull container images (with approved access request)
+- Create access requests
+
+Consumers cannot:
+
+- Edit the model card
+- Upload files or images
+- Create releases
+
+## Permission summary
+
+This reference lists every action in Bailo and which roles can perform it.
+
+- **View public model** - Owner: Yes, Contributor: Yes, Consumer: Yes, Public (no role): Yes
+- **View private model** - Owner: Yes, Contributor: Yes, Consumer: Yes, Public (no role): No
+- **Edit model card** - Owner: Yes, Contributor: Yes, Consumer: No, Public (no role): No
+- **Edit model settings** - Owner: Yes, Contributor: No, Consumer: No, Public (no role): No
+- **Manage collaborators** - Owner: Yes, Contributor: No, Consumer: No, Public (no role): No
+- **Upload files** - Owner: Yes, Contributor: Yes, Consumer: No, Public (no role): No
+- **Delete files** - Owner: Yes, Contributor: Yes, Consumer: No, Public (no role): No
+- **Push container images** - Owner: Yes, Contributor: Yes, Consumer: No, Public (no role): No
+- **Create releases** - Owner: Yes, Contributor: Yes, Consumer: No, Public (no role): No
+- **Delete releases** - Owner: Yes, Contributor: No, Consumer: No, Public (no role): No
+- **Download files** - Owner: Yes, Contributor: Yes, Consumer: With access request, Public (no role): With ungoverned
+  access
+- **Pull container images** - Owner: Yes, Contributor: Yes, Consumer: With access request, Public (no role): With
+  ungoverned access
+- **Create access requests** - Owner: Yes, Contributor: Yes, Consumer: Yes, Public (no role): No
+- **Delete model** - Owner: Yes, Contributor: No, Consumer: No, Public (no role): No
+
+## Review roles
+
+Review roles are created by administrators and attached to schemas. Unlike system roles, review roles are not fixed -
+your organisation can define whatever roles make sense for your governance process.
+
+### How review roles work
+
+1. An administrator creates review roles (e.g. "Model Technical Reviewer", "Model Senior Responsible Officer")
+2. The administrator attaches these roles to a schema
+3. When a model uses that schema, the model owner assigns specific people to each review role
+4. When a release or access request is created, the assigned reviewers are notified
+5. Each review role must approve before the submission is considered fully approved
+
+### Common review roles
+
+While organisations can create any review roles they need, two are commonly used:
+
+- **Model Technical Reviewer (MTR)**: Reviews the technical quality of the model - architecture, training process,
+  evaluation metrics, and fitness for purpose
+- **Model Senior Responsible Officer (MSRO)**: Reviews governance and compliance aspects - data handling, ethical
+  considerations, risk assessment, and organisational policies
+
+### Review role properties
+
+Each review role has:
+
+- **Name** - Display name (e.g. "Model Technical Reviewer")
+- **Short Name** - Abbreviated identifier (e.g. "mtr")
+- **Description** - Explanation of the role's purpose
+- **System Role** - The minimum system role needed (owner, contributor, consumer, or none)
+- **Default Entities** - Users or groups automatically assigned to this role on new models
+
+### Who can review what?
+
+- **Release reviews** can be performed by any assigned review role
+- **Access request reviews** are typically restricted to specific review roles (commonly MSRO)
+
+The exact review requirements depend on how your administrator has configured the schemas and review roles.
+
+## Entry roles
+
+The collective term for all system roles and review roles.
+
+## Assigning roles
+
+All roles on a model are managed from the model's Settings tab:
+
+1. Open the model page
+2. Go to the **Settings** tab
+3. Under **Access**, search for users or groups
+4. Select the appropriate role(s)
+5. **Save** changes
+
+## Related pages
+
+- [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works
+- [Managing Review Roles](/docs/administration/review-roles/managing-review-roles) - Creating and configuring review
+  roles (administrators)
+- [Glossary](/docs/reference/glossary) - Definitions of all Bailo terms
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

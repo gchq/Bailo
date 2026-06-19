@@ -9,6 +9,7 @@ export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 export const ReviewKind = {
   Release: 'release',
   Access: 'access',
+  Lifecycle: 'lifecycle',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 

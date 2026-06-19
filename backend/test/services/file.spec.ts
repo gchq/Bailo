@@ -312,9 +312,9 @@ describe('services > file', () => {
 
     await expect(() =>
       uploadMultipartFilePart({} as any, modelId, testFileId, 'testUploadId', 1, new Readable() as any, 1024),
-    ).rejects.toThrowError(/^You do not have permission to upload a file to this model./)
+    ).rejects.toThrow(/^You do not have permission to upload a file to this model./)
 
-    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
+    expect(s3Mocks.putObjectPartStream).not.toHaveBeenCalled()
   })
 
   test('uploadMultipartFilePart > no file', async () => {
@@ -322,9 +322,9 @@ describe('services > file', () => {
 
     await expect(() =>
       uploadMultipartFilePart({} as any, 'testModelId', testFileId, 'testUploadId', 1, new Readable() as any, 1024),
-    ).rejects.toThrowError(/^The requested file was not found./)
+    ).rejects.toThrow(/^The requested file was not found./)
 
-    expect(s3Mocks.putObjectPartStream).not.toBeCalled()
+    expect(s3Mocks.putObjectPartStream).not.toHaveBeenCalled()
   })
 
   test('finishUploadMultipartFile > success', async () => {
@@ -385,7 +385,7 @@ describe('services > file', () => {
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledWith({ fileId: { $eq: testFileId } }, undefined)
-    expect(FileModelMock.findOneAndDelete).toHaveBeenCalled()
+    expect(FileModelMock.findByIdAndDelete).toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
 
@@ -402,7 +402,7 @@ describe('services > file', () => {
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
+    expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).not.toHaveBeenCalled()
     expect(result).toMatchSnapshot()
   })
@@ -420,7 +420,7 @@ describe('services > file', () => {
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
+    expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).toHaveBeenCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
@@ -481,7 +481,7 @@ describe('services > file', () => {
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
     expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
-    expect(FileModelMock.findOneAndDelete).toHaveBeenCalledTimes(2)
+    expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(result).toMatchSnapshot()
   })
 

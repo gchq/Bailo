@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose'
+import { Types } from 'mongoose'
 
 import ModelTransferModel, {
   ModelTransferInterface,
@@ -7,11 +7,13 @@ import ModelTransferModel, {
   TransferStatusKeys,
 } from '../models/ModelTransfer.js'
 import { UserInterface } from '../models/User.js'
+import { WebhookEvent } from '../models/Webhook.js'
 import { MirrorKind, MirrorKindKeys } from '../types/types.js'
 import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { startImportNotification, transferCompleteNotification } from './smtp/smtp.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
@@ -80,12 +82,12 @@ export async function updateModelTransfer(
 
 export async function updateArtefactTransferStatus(
   exportId: string,
-  image: string,
+  key: string,
   kind: MirrorKindKeys,
   status: TransferStatusKeys,
 ): Promise<ModelTransferInterface | null> {
   const updated = await ModelTransferModel.findOneAndUpdate(
-    { exportId, 'artefactStatus.key': image, 'artefactStatus.kind': kind },
+    { exportId, 'artefactStatus.key': key, 'artefactStatus.kind': kind },
     {
       $set: { 'artefactStatus.$.status': status },
     },
@@ -96,13 +98,13 @@ export async function updateArtefactTransferStatus(
     const added = await ModelTransferModel.findOneAndUpdate(
       { exportId },
       {
-        $push: { artefactStatus: { key: image, status, kind } },
+        $push: { artefactStatus: { key, status, kind } },
       },
       { new: true },
     )
 
     if (!added) {
-      log.warn({ exportId, image }, 'The requested model transfer was not found.')
+      log.warn({ exportId, key }, 'The requested model transfer was not found.')
       return null
     }
 
@@ -117,7 +119,7 @@ export async function updateArtefactTransferStatus(
 export async function updateArtefactsTransferStatus(
   exportId: string,
   images?: string[],
-  files?: ObjectId[],
+  files?: { key: Types.ObjectId; name: string }[],
 ): Promise<ModelTransferInterface | null> {
   await ModelTransferModel.findOneAndUpdate(
     { exportId, 'artefactStatus.key': 'documents', 'artefactStatus.kind': MirrorKind.Documents },
@@ -126,30 +128,66 @@ export async function updateArtefactsTransferStatus(
     },
   )
 
-  const artefactsToAdd: any[] = []
+  const artefactsToUpsert: any[] = []
 
   if (images && images.length > 0) {
-    artefactsToAdd.push(
+    artefactsToUpsert.push(
       ...images.map((image) => ({ key: image, status: TransferStatus.InProgress, kind: MirrorKind.Image })),
     )
   }
 
   if (files && files.length > 0) {
-    artefactsToAdd.push(
-      ...files.map((file) => ({ key: file.toString(), status: TransferStatus.InProgress, kind: MirrorKind.File })),
+    artefactsToUpsert.push(
+      ...files.map((file) => ({
+        key: file.key.toString(),
+        status: TransferStatus.InProgress,
+        kind: MirrorKind.File,
+        name: file.name,
+      })),
     )
   }
 
-  if (artefactsToAdd.length > 0) {
+  if (artefactsToUpsert.length > 0) {
     await ModelTransferModel.findOneAndUpdate({ exportId }, [
       {
         $set: {
           artefactStatus: {
             $concatArrays: [
-              '$artefactStatus',
+              {
+                $map: {
+                  input: '$artefactStatus',
+                  as: 'existing',
+                  in: {
+                    $let: {
+                      vars: {
+                        match: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: artefactsToUpsert,
+                                cond: { $eq: ['$$this.key', '$$existing.key'] },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: {
+                        $cond: {
+                          if: { $ne: ['$$match', null] },
+                          then: {
+                            $mergeObjects: ['$$existing', { name: '$$match.name' }],
+                          },
+                          else: '$$existing',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               {
                 $filter: {
-                  input: artefactsToAdd,
+                  input: artefactsToUpsert,
                   cond: { $not: { $in: ['$$this.key', '$artefactStatus.key'] } },
                 },
               },
@@ -191,15 +229,17 @@ export async function handleStartEmail(exportId: string, modelId: string, create
   }
 }
 
-function filterArtefactsByKindAndStatus(
+export function filterArtefactsByKindAndStatus(
   artefactStatus: TransferArtefactStatus[],
   kind: MirrorKindKeys,
   status: TransferStatusKeys,
 ): string[] {
-  return artefactStatus.filter((item) => item.kind === kind && item.status === status).map((item) => item.key)
+  return artefactStatus
+    .filter((item) => item.kind === kind && item.status === status)
+    .map((item) => item.name ?? item.key)
 }
 
-async function handleCompleteEmail(exportId: string) {
+export async function handleCompleteEmail(exportId: string) {
   const transfer = await ModelTransferModel.findOne({
     exportId,
   })
@@ -235,5 +275,8 @@ async function handleCompleteEmail(exportId: string) {
   )
   if (updated) {
     await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
+    dispatchWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
+      transfer,
+    })
   }
 }

@@ -7,6 +7,7 @@ export const WebhookEvent = {
   UpdateRelease: 'updateRelease',
   CreateReviewResponse: 'createReviewResponse',
   CreateAccessRequest: 'createAccessRequest',
+  ImportModel: 'importModel',
 } as const
 export type WebhookEventKeys = (typeof WebhookEvent)[keyof typeof WebhookEvent]
 

@@ -63,14 +63,13 @@ def test_mirrored_model(local_mirrored_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "sourceModelId", "organisation", "state", "tags", "visibility", "collaborators"),
+    ("name", "description", "sourceModelId", "organisation", "tags", "visibility", "collaborators"),
     [
-        ("test-mirrored-model", "test", "test-1234", None, None, None, ModelVisibility.PUBLIC, None),
+        ("test-mirrored-model", "test", "test-1234", None, None, ModelVisibility.PUBLIC, None),
         (
             "test-mirrored-model",
             "test",
             "test-1234",
-            None,
             None,
             None,
             None,
@@ -81,7 +80,6 @@ def test_mirrored_model(local_mirrored_model):
             "test",
             "test-1234",
             "Example Organisation",
-            "Development",
             ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
@@ -94,7 +92,6 @@ def test_create_get_from_id_update_and_delete_mirrored_model(
     sourceModelId: str,
     visibility: ModelVisibility | None,
     organisation: str | None,
-    state: str | None,
     tags: list[str] | None,
     collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
@@ -107,7 +104,6 @@ def test_create_get_from_id_update_and_delete_mirrored_model(
         sourceModelId=sourceModelId,
         visibility=visibility,
         organisation=organisation,
-        state=state,
         tags=tags,
         collaborators=collaborators,
     )

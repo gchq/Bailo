@@ -11,6 +11,7 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
+import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 
@@ -42,6 +43,7 @@ export const ResourceKind = {
   Export: 'export',
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
+  User: 'user',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -417,6 +419,18 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Metric,
   },
+  CreateReview: {
+    typeId: 'CreateReview',
+    description: 'Review created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Review,
+  },
+  ViewCurrentUserInformation: {
+    typeId: 'ViewCurrentUserInformation',
+    description: 'Viewed information about the user making the request',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Metric,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -500,6 +514,9 @@ export abstract class BaseAuditConnector {
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
 
   abstract onViewMetric(req: Request): Promise<void>
+
+  abstract onCreateReview(req: Request, modelId: string): Promise<void>
+  abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

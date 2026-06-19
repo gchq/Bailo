@@ -134,7 +134,6 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     const entry: Headers = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
       type: 'file',
-      size: 20,
     } as Headers
     const stream = new PassThrough()
 
@@ -144,9 +143,8 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     expect(registryClientMocks.uploadLayerMonolithic).toHaveBeenCalledWith(
       undefined,
       'upload-location',
-      expect.stringContaining('sha256:'),
+      'sha256:' + 'b'.repeat(64),
       stream,
-      String(entry.size),
     )
   })
 
@@ -205,6 +203,58 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
       // @ts-expect-error accessing protected property
       JSON.stringify(importer.manifestBody),
       'mt',
+    )
+    expect(resolve).toHaveBeenCalledWith({
+      metadata: mockMetadata,
+      image: { modelId: mockMetadata.mirroredModelId, imageName: 'imageName', imageTag: 'tag' },
+    })
+  })
+
+  test('finishListener > success upload fat manifest successfully when valid', async () => {
+    const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
+    const platformDigest = 'sha256:' + 'a'.repeat(64)
+    // @ts-expect-error accessing protected property
+    importer.manifestBody = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          digest: platformDigest,
+          size: 123,
+          platform: {
+            architecture: 'amd64',
+            os: 'linux',
+          },
+        },
+      ],
+    }
+    // @ts-expect-error accessing protected property
+    importer.manifestsToUpload.set(
+      platformDigest,
+      JSON.stringify({
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { digest: 'sha256:config', size: 1, mediaType: 'application/json' },
+        layers: [],
+      }),
+    )
+    const resolve = vi.fn()
+    const reject = vi.fn()
+    await importer.handleStreamCompletion(resolve, reject)
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      1,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', digest: platformDigest },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.v2+json',
+    )
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      2,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', tag: 'tag' },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.list.v2+json',
     )
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

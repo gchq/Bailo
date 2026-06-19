@@ -25,23 +25,29 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r req
 
 RUN make dirhtml
 
-FROM node:24.15.0-alpine AS base
+FROM node:24.15.0-alpine AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update
 
 WORKDIR /app
 
-COPY --from=sphinx-docs /app/docs/python-docs python-docs
+FROM node-base AS node-build
 
 COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --omit=dev --cache=/cache/npm
+
+FROM node-base AS base
+
+COPY --from=sphinx-docs /app/docs/python-docs python-docs
+COPY --from=node-build /app/node_modules node_modules
 
 EXPOSE 3001
 
 FROM base AS dev
 
 # Pickup dev packages too
+COPY --from=node-build /app/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .

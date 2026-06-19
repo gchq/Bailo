@@ -106,7 +106,7 @@ export const testRelease = {
 
 export const testResponse = {
   message: 'test comment',
-  user: 'user',
+  entity: 'user',
   createdAt: '2024-05-17T06:13:41.690Z',
   _id: '6646f5953391b094ca4f55ee',
 }

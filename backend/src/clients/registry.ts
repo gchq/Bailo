@@ -1,9 +1,9 @@
 import { Readable } from 'node:stream'
 
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
-import type { ZodSchema } from 'zod'
+import type { ZodType, ZodTypeDef } from 'zod'
 
-import { ImageDigestRef, ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
+import { ImageDigestRef, ImageNameRef, ImageRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -21,7 +21,6 @@ import {
   CommonRegistryHeaders,
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
-  ImageManifestV2Schema,
   ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
@@ -52,9 +51,10 @@ interface PaginationOptions<TBody> {
 }
 
 interface RegistryRequestOptions<TBody, THeaders> {
-  bodySchema?: ZodSchema<TBody>
-  headersSchema?: ZodSchema<THeaders>
+  bodySchema?: ZodType<TBody, ZodTypeDef, any>
+  headersSchema?: ZodType<THeaders, ZodTypeDef, any>
   expectStream?: boolean
+  forceText?: boolean
   extraFetchOptions?: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>>
   extraHeaders?: HeadersInit
   pagination?: PaginationOptions<TBody>
@@ -82,7 +82,11 @@ function parseNextLink(linkHeader: string | null): string | undefined {
   }
 }
 
-async function readBody(res: Response, expectStream: boolean): Promise<{ body?: unknown; stream?: Readable }> {
+async function readBody(
+  res: Response,
+  expectStream: boolean,
+  forceText = false,
+): Promise<{ body?: unknown; stream?: Readable }> {
   if (expectStream) {
     if (!res.body) {
       return {}
@@ -92,8 +96,16 @@ async function readBody(res: Response, expectStream: boolean): Promise<{ body?: 
     }
   }
 
-  if (isJsonContentType(res.headers.get('content-type'))) {
-    return { body: await res.json() }
+  if (forceText) {
+    return { body: await res.text() }
+  }
+
+  try {
+    if (isJsonContentType(res.headers.get('content-type'))) {
+      return { body: await res.json() }
+    }
+  } catch {
+    // NOOP because sometimes the header doesn't suggest this is JSON
   }
 
   return { body: await res.text() }
@@ -104,8 +116,9 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
   endpoint: string,
   {
     bodySchema,
-    headersSchema = CommonRegistryHeadersSchema as unknown as ZodSchema<THeaders>,
+    headersSchema = CommonRegistryHeadersSchema as unknown as ZodType<THeaders, ZodTypeDef, any>,
     expectStream = false,
+    forceText = false,
     extraFetchOptions = {},
     extraHeaders = {},
     pagination,
@@ -145,7 +158,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    const { body: rawBody, stream } = await readBody(res, expectStream && res.ok)
+    const { body: rawBody, stream } = await readBody(res, expectStream && res.ok, forceText)
     const context = {
       url: res.url,
       status: res.status,
@@ -286,25 +299,6 @@ export async function listImageTags(token: string, repoRef: ImageNameRef) {
   }
 }
 
-/**
- * @deprecated To be replaced with `getImageTagManifests` for full fat-manifest support
- */
-export async function getImageTagManifest(token: string, imageRef: ImageRef) {
-  const result = await registryRequest(
-    token,
-    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
-    {
-      bodySchema: ImageManifestV2Schema,
-      headersSchema: ManifestResponseHeadersSchema,
-      extraHeaders: {
-        Accept: AcceptManifestMediaTypeHeaderValue,
-      },
-    },
-  )
-
-  return { body: result.body, headers: result.headers }
-}
-
 export async function getImageTagManifests(token: string, imageRef: ImageRef) {
   const result = await registryRequest(
     token,
@@ -319,6 +313,23 @@ export async function getImageTagManifests(token: string, imageRef: ImageRef) {
   )
 
   return { body: result.body, headers: result.headers }
+}
+
+export async function getImageTagManifestsRaw(token: string, imageRef: ImageRef) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      headersSchema: ManifestResponseHeadersSchema,
+      forceText: true,
+      extraHeaders: {
+        Accept: AcceptManifestListMediaTypeHeaderValue,
+      },
+    },
+  )
+  // The digest for the manifest within a multiplatform image is hard to get
+  // Force text mode to preserve exact bytes for digest calculation
+  return { body: result.body as string, headers: result.headers }
 }
 
 export async function getRegistryLayerStream(
@@ -399,20 +410,24 @@ export async function initialiseUpload(token: string, repoRef: ImageNameRef) {
   return result.headers
 }
 
-export async function putManifest(token: string, imageRef: ImageTagRef, manifest: BodyInit, contentType: string) {
-  const result = await registryRequest(token, `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`, {
-    headersSchema: ManifestResponseHeadersSchema,
-    expectStream: true,
-    extraFetchOptions: {
-      method: 'PUT',
-      body: manifest,
+export async function putManifest(token: string, imageRef: ImageRef, manifest: BodyInit, contentType?: string) {
+  const result = await registryRequest(
+    token,
+    `${imageRef.repository}/${imageRef.name}/manifests/${getImageRefId(imageRef)}`,
+    {
+      headersSchema: ManifestResponseHeadersSchema,
+      expectStream: true,
+      extraFetchOptions: {
+        method: 'PUT',
+        body: manifest,
+      },
+      extraHeaders: {
+        'Content-Type': contentType,
+        name: `${imageRef.repository}/${imageRef.name}`,
+        reference: getImageRefId(imageRef),
+      },
     },
-    extraHeaders: {
-      'Content-Type': contentType,
-      name: `${imageRef.repository}/${imageRef.name}`,
-      reference: imageRef.tag,
-    },
-  })
+  )
 
   return result.headers
 }
@@ -422,7 +437,6 @@ export async function uploadLayerMonolithic(
   uploadURL: string,
   digest: string,
   blob: Readable | ReadableStream,
-  size: string,
 ) {
   const result = await registryRequest(token, `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''), {
     headersSchema: BlobUploadResponseHeadersSchema,
@@ -435,7 +449,6 @@ export async function uploadLayerMonolithic(
       redirect: 'error',
     },
     extraHeaders: {
-      'content-length': size,
       'content-type': 'application/octet-stream',
     },
   })
@@ -457,7 +470,6 @@ export async function mountBlob(
       extraFetchOptions: {
         method: 'POST',
       },
-      extraHeaders: { 'Content-Length': '0' },
     },
   )
 

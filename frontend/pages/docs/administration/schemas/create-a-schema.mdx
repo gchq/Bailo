@@ -1,22 +1,101 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-# Creating and Uploading schemas
+# Creating a Schema
 
-Bailo makes use of the [RJSF](https://react-jsonschema-form.readthedocs.io/en/latest/) (react-jsonschema-form) library
-in order to dynamically create its upload & access request forms. These forms are constructed using existing widgets, or
-custom widgets that have been created specifically for Bailo.
+Schemas define the structure of model card and access request forms in Bailo. They are built using
+[JSON Schema](https://json-schema.org/) and rendered using
+[RJSF (React JSON Schema Form)](https://react-jsonschema-form.readthedocs.io/en/latest/).
 
-## Example / minimal schemas
+If you're new to schemas, read [Understanding Schemas](/docs/administration/schemas/understanding-schemas) first for a
+non-technical overview.
 
-Bailo includes both an example schema for uploads and for deployments. You can find them in
-`backend/src/scripts/example_schemas`. It is important to note that these schemas contain all of mandatory fields that
-the application needs in order to run. These fields are hard-coded in various places in the source code.
+> **Common questions this page answers:**
+>
+> - How do I create a schema in Bailo?
+> - What question types are available in schemas?
+> - How do I add conditional fields to a schema?
+> - How do I test a schema?
 
-## Create a schema
+## Before you start
 
-### Simple questions
+Bailo includes example schemas for both model cards and access requests in `backend/src/scripts/example_schemas`. It is
+important to note that these schemas contain all of mandatory fields that the application needs in order to run. These
+fields are hard-coded in various places in the source code. Use them as a starting point for your own schemas.
 
-A typical object inside the schema will look like this:
+> **Important**: Some fields are required by the application and are referenced in the source code. Always start from an
+> example schema rather than building from scratch.
+
+## Schema structure
+
+A schema is a JSON object with a `properties` field containing pages, sections, and questions.
+
+### Pages
+
+The top-level `properties` define the pages (tabs) of the form:
+
+```json
+{
+  "properties": {
+    "firstPage": {
+      "type": "object",
+      "title": "Page 1",
+      "properties": {
+        ...
+      }
+    },
+    "secondPage": {
+      "type": "object",
+      "title": "Page 2",
+      "properties": {
+        ...
+      }
+    }
+  }
+}
+```
+
+### Sections
+
+Within each page, you can create sub-sections using nested objects:
+
+```json
+{
+  "properties": {
+    "firstPage": {
+      "type": "object",
+      "title": "Page 1",
+      "properties": {
+        "sectionOne": {
+          "type": "object",
+          "title": "Section 1",
+          "properties": {
+            "questionOne": {
+              "type": "number",
+              "title": "Enter a number"
+            }
+          }
+        },
+        "sectionTwo": {
+          "type": "object",
+          "title": "Section 2",
+          "properties": {
+            "questionTwo": {
+              "type": "string",
+              "title": "Enter a string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Question types
+
+Schemas support several question types including text, dates, booleans, and dropdowns.
+
+### Simple text questions
 
 ```json
 "firstName": {
@@ -27,14 +106,14 @@ A typical object inside the schema will look like this:
 }
 ```
 
-The type property can be altered depending on what value you want the question to return. The title property will be
-displayed as the question itself, and the description will appear under the question to include any additional
-information that might help the user. Please note that if you do not include a title property, the library will use the
-name of the object (in this case firstName) instead.
+- **type** - the data type (`string`, `number`, `boolean`, `integer`)
+- **title** - the question text displayed to the user
+- **description** - help text shown below the question
+- **default** - a pre-filled value (optional)
+
+If you omit the `title` property, the library uses the property name (e.g. `firstName`).
 
 ### Dates
-
-Dates can be added like this:
 
 ```json
 "date": {
@@ -44,69 +123,29 @@ Dates can be added like this:
 }
 ```
 
-### Sections
-
-When using Bailo you will see that the upload form is made up of a number of pages. Each page is a separate object
-inside the first "properties" property of the schema. For example:
+### Boolean questions
 
 ```json
-"properties": {
-  "firstPage": {
-    "type": "object",
-    "title": "Page 1",
-    "properties": {
-      ...
-    }
-  },
-  "secondPage": {
-    "type": "object",
-    "title": "Page 2",
-    "properties": {
-      ...
-    }
-  }
+"isPublic": {
+  "type": "boolean",
+  "title": "Is this model publicly available?"
 }
 ```
 
-Creating sub-sections works identically to how we defined our pages above. If we take the first page of our example
-above, and then amend it so it looks like this:
+### Dropdown selections
 
 ```json
-"properties": {
-  "firstPage": {
-    "type": "object",
-    "title": "Page 1",
-    "properties": {
-      "sectionOne": {
-        "type": "object",
-        "title": "Section 1"
-        "properties": {
-          "questionOne": {
-            "type": "number",
-            "title": "Enter a number",
-          }
-        }
-      },
-      "sectionTwo": {
-        "type": "object",
-        "title": "Section 2"
-        "properties": {
-          "questionTwo": {
-            "type": "string",
-            "title": "Enter a string",
-          }
-        }
-      }
-    },
-    ...
-  }
+"category": {
+  "type": "string",
+  "title": "Model category",
+  "enum": ["Classification", "Regression", "Generation", "Other"]
 }
 ```
 
-#### Hiding sections from the model card
+## Hiding sections from the model card
 
-Sections will display on the model card page by default, but in the case whereby a section needs to be hidden from the
-model card, then add the following property:
+By default, all sections are displayed on the model card page. To hide a section from the model card view while still
+collecting the data in the form:
 
 ```json
 "myPage": {
@@ -115,20 +154,38 @@ model card, then add the following property:
   "properties": {
     ...
   },
-  "displayModelCard": false,
+  "displayModelCard": false
 }
 ```
 
-Note: This will only hide it from the model page, the data will still persist in the version metadata.
+> **Note**: This only hides the section from the model card display. The data still persists in the version metadata.
 
-### Dependencies
+## Required fields for model states
 
-A dependency is useful when the answer to one question might warrant some additional information; for example, a boolean
-question might not need a detailed response if the answer is 'no', but if the user answer is 'yes' you might want to ask
-them for some additional details.
+Bailo supports conditional required fields based on the state set on a model. Add the `requiredByModelStates` property
+to a question and specify which model states require it:
 
-To avoid validation errors, Bailo schema dependencies need to be handled slightly differently to the ones provided in
-the RJSF documentation. Here is an example of how we handle dependencies for Bailo schemas:
+```json
+"modelSummary": {
+  "title": "What does the model do?",
+  "description": "A description of what the model does.",
+  "type": "string",
+  "minLength": 1,
+  "maxLength": 5000,
+  "requiredByModelStates": ["Development"]
+}
+```
+
+When a user retrieves a schema, they can supply a model state alongside the schema ID. The backend sets the appropriate
+[required properties](https://json-schema.org/understanding-json-schema/reference/object#required) for that state.
+
+## Dependencies (Conditional Questions)
+
+Dependencies allow you to show or hide questions based on the answer to another question. For example, a boolean
+question might not need a detailed response if the answer is 'no', but if the user answers 'yes' you might want to ask
+for additional details.
+
+To avoid validation errors, Bailo schemas handle dependencies differently from the standard RJSF documentation:
 
 ```json
 "myPage": {
@@ -137,11 +194,11 @@ the RJSF documentation. Here is an example of how we handle dependencies for Bai
   "properties": {
     "questionOne": {
       "type": "boolean",
-      "title": "True or false?",
+      "title": "True or false?"
     },
     "questionTwo": {
       "title": "More information please!",
-      "type": "string",
+      "type": "string"
     }
   },
   "dependencies": {
@@ -180,21 +237,88 @@ the RJSF documentation. Here is an example of how we handle dependencies for Bai
 }
 ```
 
-Inside `dependencies` we have defined a case of only having one of two different situations. Firstly, if `questionOne`
-is set to `false`, then `questionTwo` will be set to read only, whereas if we set `questionOne` to `true` then
-`questionTwo` will not be set as read only. This method might seem slightly more convoluted than the documentation
-online, but it allows for answers to be changed without making the schema invalid. The current design of RJSF's
-dependencies works as so:
+### Why this pattern?
 
-- User selects `true` for `questionOne`
-- User enters data into `questionTwo`
-- User changes their mind and selects `false` for `questionOne`
-- User data for `questionTwo` remains in the form data, despite not being visible on the form itself
+The standard RJSF dependency approach can cause validation errors when users change their answers. The issue is:
 
-This behaviour is so that any user data is retained in case the user wishes to select `true` for `questionOne` again.
-From a user perspective this nice as it means there is less chance of data being lost when changing answers, but it does
-have a knock-on affect whereby in certain situations it will make the schema fail validation. Our approach is set the
-additional questions to read only when they are not in use. The downside to this approach is that we potentially include
-unwanted additional data, but this can be removed by the user if this happens.
+1. User selects `true` for `questionOne`
+2. User enters data into `questionTwo`
+3. User changes their mind and selects `false` for `questionOne`
+4. User data for `questionTwo` remains in the form data, despite not being visible
+
+Our approach sets additional questions to **read-only** instead of hiding them entirely. This preserves user data if
+they change their mind, while avoiding schema validation failures. The trade-off is that some unused data may persist,
+but it can be cleared by the user if needed.
+
+## Testing your schema
+
+Always test a schema by uploading it, creating a test model, and working through every form page.
+
+Before deploying a schema to production:
+
+1. Create the schema as a JSON file following the structure above
+2. Upload it using the [Upload a Schema](/docs/administration/schemas/upload-a-schema) page
+3. Create a test model using the new schema
+4. Work through every page of the form to verify:
+   - All questions appear as expected
+   - Required fields are properly validated
+   - Dependencies show and hide correctly
+   - Section titles and descriptions are clear
+5. Check the model card view to confirm the right sections are displayed
+
+## Complete example
+
+A minimal but complete schema with two pages, required fields, and basic structure:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "overview": {
+      "type": "object",
+      "title": "Overview",
+      "properties": {
+        "modelName": {
+          "type": "string",
+          "title": "Model name"
+        },
+        "description": {
+          "type": "string",
+          "title": "Model description"
+        },
+        "tags": {
+          "type": "array",
+          "title": "Tags",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["modelName", "description"]
+    },
+    "details": {
+      "type": "object",
+      "title": "Technical Details",
+      "properties": {
+        "framework": {
+          "type": "string",
+          "title": "ML Framework",
+          "enum": ["PyTorch", "TensorFlow", "scikit-learn", "Other"]
+        },
+        "trainingData": {
+          "type": "string",
+          "title": "Training data description"
+        }
+      }
+    }
+  }
+}
+```
+
+## Related pages
+
+- [Understanding Schemas](/docs/administration/schemas/understanding-schemas) - Non-technical overview
+- [Uploading a Schema](/docs/administration/schemas/upload-a-schema) - How to upload your schema to Bailo
+- [Schema Migrations](/docs/administration/schemas/schema-migrations) - Migrating data between schema versions
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

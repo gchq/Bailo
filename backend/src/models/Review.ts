@@ -1,23 +1,34 @@
-import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
-import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { ReviewKind } from '../types/enums.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
-// This interface stores information about the properties on the base object.
-// It should be used for plain object representations, e.g. for sending to the
-// client.
-export interface ReviewInterface {
-  _id: ObjectId
+export type ReviewInterface =
+  | ({
+      kind: 'access'
+      dueDate?: undefined
+      semver?: undefined
+      accessRequestId: string
+    } & PartialReviewInterface)
+  | ({
+      kind: 'release'
+      dueDate?: undefined
+      semver: string
+      accessRequestId: undefined
+    } & PartialReviewInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: undefined
+      accessRequestId?: undefined
+    } & PartialReviewInterface)
 
-  semver?: string
-  accessRequestId?: string
+type PartialReviewInterface = {
+  _id: Types.ObjectId
   modelId: string
-
-  kind: ReviewKindKeys
   role: string
-
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 // The doc type includes all values in the plain interface, as well as all the
@@ -53,7 +64,12 @@ const ReviewSchema = new Schema<ReviewDoc>(
     },
     modelId: { type: String, required: true },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
-
+    dueDate: {
+      type: Schema.Types.Date,
+      required: function (this: ReviewInterface): boolean {
+        return this.kind === ReviewKind.Lifecycle
+      },
+    },
     role: { type: String, required: true },
   },
   {

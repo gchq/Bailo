@@ -48,7 +48,7 @@ export const getReviewRoles = [
     const {
       query: { schemaId },
     } = parse(req, getReviewRolesSchema)
-    const reviewRoles = await findReviewRoles(schemaId)
+    const reviewRoles = schemaId ? await findReviewRoles([schemaId]) : await findReviewRoles()
     await audit.onViewReviewRoles(req, reviewRoles)
     res.setHeader('x-count', reviewRoles.length)
     res.json({ reviewRoles })

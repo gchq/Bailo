@@ -4,10 +4,13 @@ import { TransferStatus } from '../../src/models/ModelTransfer.js'
 import {
   createModelTransfer,
   deleteModelTransfer,
+  filterArtefactsByKindAndStatus,
   findModelTransferById,
   findModelTransfersByModelId,
+  handleCompleteEmail,
   updateModelTransfer,
 } from '../../src/services/modelTransfer.js'
+import { MirrorKind } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const ModelTransferModelMock = getTypedModelMock('ModelTransferModel')
@@ -15,21 +18,43 @@ const ModelTransferModelMock = getTypedModelMock('ModelTransferModel')
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/model.js', async () => modelMock)
+vi.mock('../../src/services/model.js', () => modelMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/log.js', async () => ({
+vi.mock('../../src/services/log.js', () => ({
   default: logMock,
 }))
+
+const smtpMock = vi.hoisted(() => ({
+  transferCompleteNotification: vi.fn(),
+}))
+vi.mock('../../src/services/smtp/smtp.js', () => smtpMock)
+
+const webhookMock = vi.hoisted(() => ({
+  dispatchWebhooks: vi.fn(),
+}))
+vi.mock('../../src/services/webhook.ts', () => webhookMock)
 
 const user = { dn: 'user:test' } as any
 
 describe('services > modelTransfer', () => {
   const validExportId = 'abc123'
+  const validArtefactsStatus = {
+    exportId: validExportId,
+    modelId: 'model-123',
+    completed: true,
+    completedNotificationSent: false,
+    status: TransferStatus.Completed,
+    artefactStatus: [
+      { key: 'file1', kind: MirrorKind.File, status: TransferStatus.Completed },
+      { key: 'file2', kind: MirrorKind.File, status: TransferStatus.Failed },
+      { key: 'image1', kind: MirrorKind.Image, status: TransferStatus.Completed },
+    ],
+  }
 
   test('findModelTransferById > throws NotFound when transfer does not exist', async () => {
     ModelTransferModelMock.findOne.mockImplementation(() => ({
@@ -193,5 +218,47 @@ describe('services > modelTransfer', () => {
 
     expect(transfer.delete).toHaveBeenCalled()
     expect(result).toEqual(validExportId)
+  })
+
+  test('handleCompleteEmail  > no transfer', async () => {
+    ModelTransferModelMock.findOne.mockResolvedValue(null)
+    vi.doUnmock('../../src/services/log.js')
+
+    await handleCompleteEmail(validExportId)
+
+    expect(logMock.warn).toHaveBeenCalledWith({ exportId: validExportId }, 'The requested model transfer was not found')
+
+    vi.doMock('../../src/services/log.js', () => ({ default: logMock }))
+  })
+
+  test('handleCompleteEmail > transfer not complete', async () => {
+    const spy = vi.spyOn({ filterArtefactsByKindAndStatus }, 'filterArtefactsByKindAndStatus')
+    ModelTransferModelMock.findOne.mockResolvedValue({
+      completed: false,
+    })
+
+    await handleCompleteEmail(validExportId)
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
+  })
+
+  test('handleCompleteEmail > transfer not updated', async () => {
+    ModelTransferModelMock.findOne.mockResolvedValue(validArtefactsStatus)
+    ModelTransferModelMock.findOneAndUpdate.mockResolvedValue(null)
+
+    await handleCompleteEmail(validExportId)
+    expect(smtpMock.transferCompleteNotification).not.toHaveBeenCalled()
+    expect(webhookMock.dispatchWebhooks).not.toHaveBeenCalled()
+  })
+
+  test('handleCompleteEmail > success, updated is truthy', async () => {
+    ModelTransferModelMock.findOne.mockResolvedValue(validArtefactsStatus)
+    ModelTransferModelMock.findOneAndUpdate.mockResolvedValue({
+      exportId: validExportId,
+    })
+
+    await handleCompleteEmail(validExportId)
+    expect(smtpMock.transferCompleteNotification).toHaveBeenCalled()
+    expect(webhookMock.dispatchWebhooks).toHaveBeenCalled()
   })
 })

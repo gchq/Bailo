@@ -10,6 +10,7 @@ import { ReviewDoc } from '../../models/Review.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { sanitiseEmail } from '../../utils/smtp.js'
+import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth } from '../model.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
@@ -172,6 +173,31 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
     ],
   )
   await dispatchEmail(toEntity('user', release.createdBy), await emailContent)
+  await dispatchEmailToModelRole(release.modelId, reviewResponse.role, await emailContent)
+}
+
+export async function notifyLifeCycleReview(modelId: string, reviewId: string, dueIn?: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const model = await getModelByIdNoAuth(modelId)
+  const emailContent = buildEmail(
+    dueIn
+      ? `A lifecycle review for ${model.name} is due in ${dueIn}`
+      : `A lifecycle review for ${model.name} has past it's due date`,
+    [],
+    [
+      { name: `See ${toTitleCase(model.kind, '-')}`, url: `${appBaseUrl}/${resolveKindToUrl(model.kind)}/${modelId}` },
+      {
+        name: 'Review Lifecycle',
+        url: `${appBaseUrl}/${model.kind}/${modelId}/lifecycle/${reviewId}/review?role=owner`,
+      },
+    ],
+  )
+
+  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
 }
 
 export async function notifyReviewResponseForAccess(
@@ -212,6 +238,7 @@ export async function notifyReviewResponseForAccess(
     ],
   )
   await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
+  await dispatchEmailToModelRole(accessRequest.modelId, reviewResponse.role, await emailContent)
 }
 
 async function sendEmail(email: Mail.Options) {

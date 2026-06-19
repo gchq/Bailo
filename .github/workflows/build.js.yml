@@ -145,7 +145,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        task: [unit, style]
+        task: [build, unit, style]
 
     steps:
       # Clone repository
@@ -165,6 +165,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run build
+        if: matrix.task == 'build'
+        run: npm run build
 
       - name: Create certs
         if: matrix.task == 'unit'
@@ -465,7 +469,7 @@ jobs:
         if: matrix.job_name == 'integration_python'
         id: mlflow_version
         run: |
-          version=$(python -m pip show mlflow | awk '/Version:/ {print $2}')
+          version=$(python -m pip show mlflow-skinny | awk '/Version:/ {print $2}')
           echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Start MLFlow via Docker

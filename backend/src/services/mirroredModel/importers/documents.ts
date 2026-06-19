@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
-import { ObjectId } from 'mongoose'
+import { Types } from 'mongoose'
 import { Headers } from 'tar-stream'
 
 import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
@@ -30,7 +30,7 @@ export type MongoDocumentMirrorInformation = {
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
   releaseSemvers: ReleaseDoc['semver'][]
   newReleases: Omit<ReleaseDoc, '_id'>[]
-  fileIds: ObjectId[]
+  fileIds: { key: Types.ObjectId; name: string }[]
   imageIds: string[]
 }
 
@@ -41,7 +41,7 @@ export class DocumentsImporter extends BaseImporter {
 
   protected modelCardVersions: number[] = []
   protected releaseSemvers: string[] = []
-  protected fileIds: ObjectId[] = []
+  protected fileIds: { key: Types.ObjectId; name: string }[] = []
   protected imageIds: string[] = []
   protected newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   protected newReleases: Omit<ReleaseDoc, '_id'>[] = []
@@ -113,7 +113,6 @@ export class DocumentsImporter extends BaseImporter {
         for (const image of release.images) {
           this.imageIds.push(
             joinDistributionPackageName({
-              domain: image.repository,
               path: image.name,
               tag: image.tag,
             } as DistributionPackageName),
@@ -133,7 +132,7 @@ export class DocumentsImporter extends BaseImporter {
           metadata: this.metadata,
           ...this.logData,
         })
-        this.fileIds.push(file._id)
+        this.fileIds.push({ key: file._id, name: file.name })
         await saveImportedFile(file)
       } else {
         throw InternalError('Cannot parse compressed file: unrecognised contents.', {

@@ -2,7 +2,6 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
-  getImageTagManifest,
   getImageTagManifests,
   getRegistryLayerStream,
   listImageTags,
@@ -95,27 +94,43 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
+type ModelImageWithToken = ModelImages[number] & { repositoryToken: string }
+
+export async function listModelImages(
+  user: UserInterface,
+  modelId: string,
+  includeTokens: true,
+): Promise<ModelImageWithToken[]>
+export async function listModelImages(user: UserInterface, modelId: string, includeTokens?: false): Promise<ModelImages>
+export async function listModelImages(
+  user: UserInterface,
+  modelId: string,
+  includeTokens = false,
+): Promise<ModelImages | ModelImageWithToken[]> {
   await checkUserAuth(user, modelId, ['list'])
 
   const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
-  return (
-    (
-      await Promise.all(
-        repos.map(async (repo) => {
-          const [repository, name] = repo.split(/\/(.*)/s)
-          const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-            { type: 'repository', name: repo, actions: ['pull'] },
-          ])
-          const tags = await listImageTags(repositoryToken, { repository, name })
-          return { repository, name, tags }
-        }),
-      )
+
+  const results = (
+    await Promise.all(
+      repos.map(async (repo) => {
+        const [repository, name] = repo.split(/\/(.*)/s)
+        const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+          { type: 'repository', name: repo, actions: ['pull'] },
+        ])
+        const tags = await listImageTags(repositoryToken, { repository, name })
+        return { repository, name, tags, repositoryToken }
+      }),
     )
-      // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
-      .filter((repo) => repo.tags && repo.tags.length > 0)
   )
+    // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
+    .filter((repo) => repo.tags && repo.tags.length > 0)
+
+  if (includeTokens) {
+    return results
+  }
+  return results.map(({ repositoryToken: _token, ...img }) => img)
 }
 
 export async function getScansFromLayers(
@@ -216,18 +231,10 @@ export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
 ): Promise<ModelImagesWithScanResults[]> {
-  const modelImages = await listModelImages(user, modelId)
+  const modelImagesWithToken = await listModelImages(user, modelId, true)
 
   return Promise.all(
-    modelImages.map(async (img) => {
-      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-        {
-          type: 'repository',
-          name: `${img.repository}/${img.name}`,
-          actions: ['pull'],
-        },
-      ])
-
+    modelImagesWithToken.map(async ({ repositoryToken, ...img }) => {
       const scanSummaries = (
         await Promise.all(
           img.tags.map(async (tag) => {
@@ -253,7 +260,7 @@ export async function listModelImagesWithScanResults(
               )
             }
 
-            const layers = await getLayersForImage(repositoryToken, { ...img, tag })
+            const layers = await getLayersForImage(repositoryToken, { ...img, tag }, manifestResponse.body)
 
             const scan = await getScansFromLayers(layers)
 
@@ -283,17 +290,6 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
   }, initial)
 }
 
-export async function getImageManifest(user: UserInterface, imageRef: ImageRef) {
-  await checkUserAuth(user, imageRef.repository, ['pull'])
-
-  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
-  ])
-
-  // get which layers exist for the model
-  return await getImageTagManifest(repositoryToken, imageRef)
-}
-
 export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {
   await checkUserAuth(user, repoRef.repository, ['pull'])
 
@@ -304,8 +300,12 @@ export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, d
   return await getRegistryLayerStream(repositoryToken, repoRef, digest)
 }
 
-async function getTagDigestMap(token: string, repository: string, name: string): Promise<Map<string, string>> {
-  const map = new Map<string, string>()
+async function getTagDigestReferenceMap(
+  token: string,
+  repository: string,
+  name: string,
+): Promise<Map<string, Set<string>>> {
+  const map = new Map<string, Set<string>>()
 
   let tags: string[]
   try {
@@ -317,18 +317,24 @@ async function getTagDigestMap(token: string, repository: string, name: string):
     return map
   }
 
-  const results = await Promise.all(
+  await Promise.all(
     tags.map(async (tag) => {
-      const { headers } = await getImageTagManifests(token, { repository, name, tag })
-      return { tag, digest: headers['docker-content-digest'] }
+      const refs = new Set<string>()
+      const { body, headers } = await getImageTagManifests(token, { repository, name, tag })
+      const rootDigest = headers['docker-content-digest']
+      if (rootDigest) {
+        refs.add(rootDigest)
+      }
+      if (body && 'manifests' in body) {
+        for (const manifest of body.manifests) {
+          if (manifest.digest) {
+            refs.add(manifest.digest)
+          }
+        }
+      }
+      map.set(tag, refs)
     }),
   )
-
-  for (const { tag, digest } of results) {
-    if (digest) {
-      map.set(tag, digest)
-    }
-  }
 
   return map
 }
@@ -415,9 +421,15 @@ async function renameMultiManifest(
   multiRepositoryToken: string,
   sourceDigest: string,
 ) {
-  const sourceTagDigestMap = await getTagDigestMap(multiRepositoryToken, source.repository, source.name)
-  const sourceDigestSet = new Set(sourceTagDigestMap.values())
-  const listIsOrphaned = !sourceDigestSet.has(sourceDigest)
+  const allRefsMap = await getTagDigestReferenceMap(multiRepositoryToken, source.repository, source.name)
+  allRefsMap.delete(source.tag)
+  const otherRefs = new Set<string>()
+  for (const refs of allRefsMap.values()) {
+    for (const digest of refs) {
+      otherRefs.add(digest)
+    }
+  }
+  const listIsOrphaned = !otherRefs.has(sourceDigest)
 
   const tmpTags: string[] = []
   const updatedManifestBody = structuredClone(manifestBody)
@@ -467,14 +479,25 @@ async function renameMultiManifest(
         throw InternalError('Child manifest digest missing after PUT', { tmpTag })
       }
 
-      const platformIsOrphaned = !Array.from(sourceTagDigestMap.values()).some((digest) => digest === manifest.digest)
+      // Only delete the child platform manifest if no other tag references it
+      // (either as a root digest or as a child platform digest)
+      const platformIsOrphaned = !otherRefs.has(manifest.digest)
 
       if (platformIsOrphaned) {
+        log.trace(
+          { source, childDigest: manifest.digest },
+          'Child platform manifest is orphaned; deleting from source repository.',
+        )
         await deleteManifest(multiRepositoryToken, {
           repository: source.repository,
           name: source.name,
           digest: manifest.digest,
         })
+      } else {
+        log.trace(
+          { source, childDigest: manifest.digest },
+          'Child platform manifest is still referenced by another tag; preserving.',
+        )
       }
 
       // overwrite digest to point to new child manifest

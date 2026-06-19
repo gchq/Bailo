@@ -104,7 +104,7 @@ export default function ChipSelector({
             <Typography variant='caption'>{subheading ? subheading : ''}</Typography>
           </Stack>
         </AccordionSummary>
-        <AccordionDetails sx={{ p: 0 }}>
+        <AccordionDetails sx={{ p: 0, pb: 1 }}>
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
             {allOptions.length === 0 && (
@@ -168,7 +168,7 @@ function ChipItem({
           color={activeChip ? 'secondary' : 'default'}
           size={size}
           key={chip}
-          sx={{ mx: 0.5, mb: 1, ...style }}
+          sx={{ mx: 0.5, my: 0.5, ...style }}
           label={chip}
           data-test={`chipOption-${chip}`}
           onClick={() => handleChange(chip)}

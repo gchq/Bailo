@@ -36,7 +36,6 @@ const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
   checkperiod: METRICS_CACHE_TTL,
   useClones: false,
-  maxKeys: 5000,
 })
 
 type CachedMetrics<MetricsCache> = {
@@ -53,10 +52,10 @@ function setCached<T>(key: string, value: T): void {
 }
 
 async function checkUserIsAuthorised(user: UserInterface) {
-  if (!(await authentication.hasRole(user, Roles.Admin))) {
+  if (!(await authentication.hasRole(user, Roles.Compliance))) {
     throw Forbidden('You do not have the required role.', {
       userDn: user.dn,
-      requiredRole: Roles.Admin,
+      requiredRole: Roles.Compliance,
     })
   }
 }

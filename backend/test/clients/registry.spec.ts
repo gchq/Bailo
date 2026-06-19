@@ -6,7 +6,6 @@ import {
   deleteManifest,
   doesLayerExist,
   getApiVersion,
-  getImageTagManifest,
   getImageTagManifests,
   getRegistryLayerStream,
   initialiseUpload,
@@ -123,7 +122,7 @@ describe('clients > registry', () => {
       headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
     })
 
-    const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = await getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -193,7 +192,7 @@ describe('clients > registry', () => {
       headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
     })
 
-    const response = await getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = await getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -229,7 +228,7 @@ describe('clients > registry', () => {
       }),
     })
 
-    const response = await getImageTagManifest('token', {
+    const response = await getImageTagManifests('token', {
       repository: 'modelId',
       name: 'image',
       digest: 'sha256:digest',
@@ -242,7 +241,7 @@ describe('clients > registry', () => {
 
   test('getImageTagManifest > cannot reach registry', async () => {
     fetchMock.mockRejectedValueOnce('Error')
-    const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })
@@ -253,7 +252,7 @@ describe('clients > registry', () => {
       headers: new Headers({}),
       text: vi.fn().mockResolvedValue('{}'),
     })
-    const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     await expect(response).rejects.toThrow('Registry returned invalid headers.')
   })
@@ -265,7 +264,7 @@ describe('clients > registry', () => {
       json: vi.fn(),
       headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
     })
-    const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     await expect(response).rejects.toThrow('Unrecognised registry error response.')
   })
@@ -285,7 +284,7 @@ describe('clients > registry', () => {
       })),
       headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
     })
-    const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     await expect(response).rejects.toThrow('Error response received from registry.')
   })
@@ -305,7 +304,7 @@ describe('clients > registry', () => {
       headers: new Headers({ 'content-type': 'application/json', 'docker-content-digest': 'digest' }),
     })
 
-    const response = getImageTagManifest('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
+    const response = getImageTagManifests('token', { repository: 'modelId', name: 'image', tag: 'tag1' })
 
     await expect(response).rejects.toThrow('Error response received from registry.')
   })
@@ -841,7 +840,7 @@ describe('clients > registry', () => {
       headers: mockHeaders,
     })
 
-    const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
+    const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable)
 
     expect(fetchMock).toHaveBeenCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -851,7 +850,7 @@ describe('clients > registry', () => {
   test('uploadLayerMonolithic > cannot reach registry', async () => {
     fetchMock.mockRejectedValueOnce('Error')
 
-    const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
+    const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable)
 
     await expect(response).rejects.toThrow('Unable to communicate with the registry.')
   })

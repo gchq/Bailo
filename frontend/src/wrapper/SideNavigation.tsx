@@ -18,9 +18,10 @@ import { useGetUserResponses } from 'actions/response'
 import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
+import PythonIcon from 'src/common/PythonIcon'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { User } from 'types/types'
+import { ReviewKind, Roles } from 'types/types'
 
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
@@ -66,7 +67,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 export interface SideNavigationProps {
   page: string
   bannerVisible: boolean
-  currentUser: User
   toggleDrawer: () => void
   onError: (errorMessage: string) => void
   onResetErrorMessage: () => void
@@ -77,28 +77,40 @@ export interface SideNavigationProps {
 export default function SideNavigation({
   page,
   bannerVisible,
-  currentUser,
   toggleDrawer,
   onResetErrorMessage,
   drawerOpen = false,
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForUser(true)
+  const {
+    reviewCountHeader: releaseReviewCountHeader,
+    isReviewsLoading: isReleaseReviewsLoading,
+    isReviewsError: isReleaseReviewsError,
+  } = useHeadReviewRequestsForUser(true, ReviewKind.RELEASE)
+  const {
+    reviewCountHeader: accessRequestReviewCountHeader,
+    isReviewsLoading: isAccessRequestReviewsLoading,
+    isReviewsError: isAccessRequestReviewsError,
+  } = useHeadReviewRequestsForUser(true, ReviewKind.ACCESS)
   const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (reviewCountHeader) {
-        setReviewCount(reviewCountHeader)
-      }
+      const releaseCount = releaseReviewCountHeader ?? 0
+      const accessCount = accessRequestReviewCountHeader ?? 0
+      setReviewCount(releaseCount + accessCount)
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, responses, currentUser.dn, reviewCountHeader])
+  }, [accessRequestReviewCountHeader, onResetErrorMessage, releaseReviewCountHeader, responses])
 
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  if (isReleaseReviewsError) {
+    return <MessageAlert message={isReleaseReviewsError.info.message} severity='error' />
+  }
+
+  if (isAccessRequestReviewsError) {
+    return <MessageAlert message={isAccessRequestReviewsError.info.message} severity='error' />
   }
 
   if (isResponsesError) {
@@ -107,7 +119,7 @@ export default function SideNavigation({
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
-      {(isReviewsLoading || isResponsesLoading) && <Loading />}
+      {(isReleaseReviewsLoading || isAccessRequestReviewsLoading || isResponsesLoading) && <Loading />}
       <Toolbar
         sx={(theme) => ({
           marginTop: bannerVisible ? 4 : 0,
@@ -151,15 +163,61 @@ export default function SideNavigation({
               openLinkInNewTab
             />
             <NavMenuItem
-              href='/docs/python/index.html'
+              href='/docs'
               selectedPage={page}
-              primaryText='Python Client Docs'
+              primaryText='User docs'
               drawerOpen={drawerOpen}
-              menuPage='pythonDocs'
-              title='Python Client Docs'
+              menuPage='userDocs'
+              title='User documentation'
               icon={<DescriptionIcon />}
               openLinkInNewTab
             />
+            <NavMenuItem
+              href='/docs/python/index.html'
+              selectedPage={page}
+              primaryText='Python client docs'
+              drawerOpen={drawerOpen}
+              menuPage='pythonDocs'
+              title='Python client docs'
+              icon={<PythonIcon />}
+              openLinkInNewTab
+            />
+            <Divider aria-hidden='true' />
+            <>
+              <NavMenuItem
+                href='/schemas/list'
+                selectedPage={page}
+                primaryText='Schemas'
+                drawerOpen={drawerOpen}
+                menuPage='schemas'
+                title='Schemas'
+                icon={<SchemaIcon />}
+                requiredRole={Roles.Admin}
+              />
+            </>
+            <NavMenuItem
+              href='/reviewRoles/view'
+              selectedPage={page}
+              primaryText='Review Roles'
+              drawerOpen={drawerOpen}
+              menuPage='reviewRoles'
+              title='Review roles'
+              icon={<SupervisorAccount />}
+              requiredRole={Roles.Admin}
+            />
+            <NavMenuItem
+              href='/metrics'
+              selectedPage={page}
+              primaryText='Metrics'
+              drawerOpen={drawerOpen}
+              menuPage='metrics'
+              title='Metrics'
+              icon={<Equalizer />}
+              requiredRole={Roles.Compliance}
+            />
+          </StyledList>
+          <StyledList>
+            <Divider aria-hidden='true' />
             <NavMenuItem
               href='/help'
               selectedPage={page}
@@ -169,45 +227,6 @@ export default function SideNavigation({
               title='Help & Support'
               icon={<ContactSupportIcon />}
             />
-            <Divider aria-hidden='true' />
-            {currentUser.isAdmin && (
-              <>
-                <NavMenuItem
-                  href='/schemas/list'
-                  selectedPage={page}
-                  primaryText='Schemas'
-                  drawerOpen={drawerOpen}
-                  menuPage='schemas'
-                  title='Schemas'
-                  icon={<SchemaIcon />}
-                />
-              </>
-            )}
-            {currentUser.isAdmin && (
-              <NavMenuItem
-                href='/reviewRoles/view'
-                selectedPage={page}
-                primaryText='Review Roles'
-                drawerOpen={drawerOpen}
-                menuPage='reviewRoles'
-                title='Review Roles'
-                icon={<SupervisorAccount />}
-              />
-            )}
-            {currentUser.isAdmin && (
-              <NavMenuItem
-                href='/metrics'
-                selectedPage={page}
-                primaryText='Metrics'
-                drawerOpen={drawerOpen}
-                menuPage='metrics'
-                title='Metrics'
-                icon={<Equalizer />}
-              />
-            )}
-          </StyledList>
-          <StyledList>
-            <Divider aria-hidden='true' />
             <NavMenuItem
               href='/accessibility/statement'
               selectedPage={page}

@@ -12,6 +12,7 @@ services:
   frontend:
     volumes:
       - ./frontend:/app
+      - /app/node_modules/@next # use container-built @next SWC binaries (musl), not the host's (e.g. glibc)
     build:
       target: dev
 

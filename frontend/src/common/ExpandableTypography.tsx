@@ -1,4 +1,4 @@
-import { Box, Button, Typography, TypographyProps } from '@mui/material'
+import { Button, Stack, Typography, TypographyProps } from '@mui/material'
 import { useState } from 'react'
 
 interface ExpandableTypographyProps extends Omit<TypographyProps, 'children'> {
@@ -11,12 +11,12 @@ export default function ExpandableTypography({ children: text, maxLength = 100, 
 
   if (text.length > maxLength) {
     return (
-      <Box sx={{ mb: 1 }}>
+      <Stack sx={{ mb: 1 }} direction={expanded ? 'column' : 'row'} alignItems='center' spacing={1}>
         <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength).trimEnd()}...`}</Typography>
         <Button size='small' onClick={() => setExpanded(!expanded)}>
           {expanded ? 'Show less' : 'Show more'}
         </Button>
-      </Box>
+      </Stack>
     )
   } else {
     return <Typography {...props}>{text}</Typography>

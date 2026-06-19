@@ -58,7 +58,7 @@ export default function AdditionalInformation({
           htmlFor={id}
         >
           {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          {required && editMode && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
         {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
         {children}

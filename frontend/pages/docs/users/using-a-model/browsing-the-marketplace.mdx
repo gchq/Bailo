@@ -1,0 +1,85 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Browsing the Marketplace
+
+The Marketplace is the main page you see when you log into Bailo. It lists all public models and data cards, providing
+search and filtering tools to help you find what you need.
+
+> **Common questions this page answers:**
+>
+> - How do I find a model in Bailo?
+> - How do I filter models in the Marketplace?
+> - Why can't I see a model?
+> - Can I share a filtered view of the Marketplace?
+
+## Searching
+
+Use the search bar at the top left of the Marketplace to find entries by name or description. You need to enter at least
+3 characters for search results to appear.
+
+By default, the search scans the entire document, including the model card data, to find exact matches to your query. To
+search only by title, toggle from **Full Text** to **Name** on the right side of the search bar. This performs a partial
+match search on titles only.
+
+Search results are limited to the currently selected tab (**Models** or **Data Cards**).
+
+## Filtering
+
+The Marketplace provides several filter categories to narrow down results.
+
+### By entry type
+
+Use the tabs to switch between:
+
+- **Models** - Machine learning models
+- **Data Cards** - Dataset documentation
+
+### By organisation
+
+Organisations are displayed below the search bar. Filter models by the organisation they belong to.
+
+### By state
+
+Filter models by their development state (e.g. in development, ready for deployment).
+
+### By external sources (Federation)
+
+If your Bailo instance is connected to other Bailo instances or external model repositories through federation, you can
+filter to see models from specific external sources. External sources only appear if federation is enabled by your
+administrator.
+
+### By tags
+
+Click a tag to filter the list to models that have been assigned that tag. You can select multiple tags to narrow your
+results further.
+
+### By mirrored models
+
+Filter the list to show only mirrored models or data cards. Mirrored entries are replicas from external sources and are
+only available if mirroring has been enabled by your administrator.
+
+### By roles
+
+Filter models based on your assigned role, showing only those where you hold a specific access role.
+
+## Visibility
+
+Model visibility determines whether a model appears in the Marketplace.
+
+- **Public** models are visible to all users in the Marketplace
+- **Private** models do not appear in the Marketplace and are only visible to users who have been added as collaborators
+
+Even for public models, you typically need an approved access request to download files or pull container images.
+
+## Sharing filtered views
+
+Filter selections are stored in the page URL as query parameters. You can copy and share the URL to give someone the
+same filtered view of the Marketplace. **Role-based filters are not included.**
+
+## Related pages
+
+- [Requesting Access](/docs/users/using-a-model/requesting-access) - How to request access to a model
+- [Creating a Model](/docs/users/models/creating-a-model) - Adding your own model
+- [Core Concepts](/docs/getting-started/core-concepts) - Understanding entry types and visibility
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

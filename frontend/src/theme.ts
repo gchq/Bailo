@@ -123,7 +123,7 @@ export const lightTheme = createTheme({
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#d62560',
+            borderColor: '#b5497d',
           },
         },
       },
@@ -141,10 +141,10 @@ export const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#54278e',
+      main: '#4d3075',
     },
     secondary: {
-      main: '#d62560',
+      main: '#b5497d',
     },
     error: {
       main: red.A700,
@@ -267,7 +267,7 @@ export const darkTheme = createTheme({
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#d62560',
+            borderColor: '#b5497d',
           },
         },
       },

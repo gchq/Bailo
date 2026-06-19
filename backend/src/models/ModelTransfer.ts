@@ -14,6 +14,9 @@ export type TransferStatusKeys = (typeof TransferStatus)[keyof typeof TransferSt
 
 export interface TransferArtefactStatus {
   key: string
+
+  // Human readable name that is used for transfer progress
+  name?: string
   status: TransferStatusKeys
   kind: MirrorKindKeys
 }
@@ -46,6 +49,7 @@ const ModelTransferSchema = new Schema<ModelTransferDoc>(
       type: [
         {
           key: { type: String, required: true },
+          name: { type: String },
           status: {
             type: String,
             enum: Object.values(TransferStatus),

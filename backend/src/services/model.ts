@@ -1,4 +1,3 @@
-import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
@@ -29,7 +28,6 @@ import {
   EntryUserPermissions,
   MirrorImportLogData,
 } from '../types/types.js'
-import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -43,7 +41,8 @@ import log from './log.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
-import { getSchemaById } from './schema.js'
+import { cancelLifecycleJobsForModel } from './schedule/scheduler.js'
+import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
@@ -271,6 +270,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
           ),
         ),
       ]),
+    // The Mongo implementations for this data is handled using a third-party library so we don't need to pass in the session.
+    () => cancelLifecycleJobsForModel(model.id),
     // Finally, delete the Model
     (session) => model.delete(session),
   ])
@@ -430,8 +431,9 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
   }
 
   // Always do a partial match on the model name
+  const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
   let results = await ModelModel.find(
-    opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query,
+    escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
     projection,
   ).sort({
     updatedAt: -1,
@@ -569,17 +571,11 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await getSchemaById(model.card.schemaId)
-  try {
-    new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
-  } catch (error) {
-    if (isValidatorResultError(error)) {
-      throw BadReq('Model metadata could not be validated against the schema.', {
-        schemaId: model.card.schemaId,
-        validationErrors: error.errors,
-      })
-    }
-    throw error
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  if (!valid) {
+    throw BadReq('Model metadata could not be validated against the schema.', {
+      validationErrors: errors,
+    })
   }
 
   const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, metadata)
@@ -618,6 +614,13 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (modelDiff.state && model.card) {
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    if (!valid) {
+      throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
+    }
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
@@ -752,17 +755,11 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  const schema = await getSchemaById(modelCardRevision.schemaId)
-  try {
-    new Validator().validate(modelCardRevision.metadata, schema.jsonSchema, { throwAll: true, required: true })
-  } catch (error) {
-    if (isValidatorResultError(error)) {
-      throw BadReq('Model metadata could not be validated against the schema.', {
-        schemaId: modelCardRevision.schemaId,
-        validationErrors: error.errors,
-      })
-    }
-    throw error
+  const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+  if (!valid) {
+    throw BadReq('Model metadata could not be validated against the schema.', {
+      validationErrors: errors,
+    })
   }
 
   const foundModelCardRevision = await ModelCardRevisionModel.findOne({

@@ -28,7 +28,7 @@ describe('routes > images > getImageByDigest', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewModelImage).toBeCalled()
+    expect(audit.onViewModelImage).toHaveBeenCalled()
     expect(audit.onViewModelImage.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onViewModelImage.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

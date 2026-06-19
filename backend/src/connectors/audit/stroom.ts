@@ -15,6 +15,7 @@ import { SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { StroomEventObject } from '../../models/StroomEvent.js'
 import { TokenDoc } from '../../models/Token.js'
+import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import log from '../../services/log.js'
 import { MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../services/mirroredModel/importers/file.js'
@@ -480,6 +481,14 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   async onViewMetric(req: Request): Promise<void> {
     this.auditGenericEvent(req, 'Viewing metric')
+  }
+
+  async onCreateReview(req: Request, modelId: string) {
+    this.auditGenericEvent(req, `Review created for ${modelId}`)
+  }
+
+  async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
+    this.auditGenericEvent(req, userInformation.user.dn)
   }
 
   async onError(req: Request, error: BailoError) {

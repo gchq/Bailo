@@ -5,7 +5,7 @@ import shelljs from 'shelljs'
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
 import { addDefaultReviewRoles } from './services/review.js'
-import { startScheduler } from './services/schedule/scheduler.js'
+import { registerLifecycleReviewJob, startScheduler } from './services/schedule/scheduler.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
@@ -13,12 +13,9 @@ import { registerSigTerminate } from './utils/signals.js'
 // Update certificates based on mount
 shelljs.exec('update-ca-certificates', { fatal: false, async: false })
 
-// technically, we do need to wait for this, but it's so quick
-// that nobody should notice unless they want to upload an image
-// within the first few milliseconds of the _first_ time it's run
 if (config.s3.automaticallyCreateBuckets) {
-  ensureBucketExists(config.s3.buckets.uploads)
-  ensureBucketExists(config.s3.buckets.registry)
+  const bucketNames = [config.s3.buckets.uploads, config.s3.buckets.registry]
+  await Promise.all(bucketNames.map((bucket) => ensureBucketExists(bucket)))
 }
 
 // connect to Mongo
@@ -32,7 +29,7 @@ await addDefaultReviewRoles()
 await addDefaultSchemas()
 
 // Start the scheduler
-await startScheduler([])
+await startScheduler([registerLifecycleReviewJob])
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {

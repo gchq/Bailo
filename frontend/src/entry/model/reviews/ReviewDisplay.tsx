@@ -2,6 +2,7 @@ import { Done } from '@mui/icons-material'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -24,6 +25,7 @@ export default function ReviewDisplay({
   currentUserDn,
 }: ReviewDisplayProps) {
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const dynamicRoles = useMemo(() => {
     const staticRoles = ['owner', 'contributor', 'consumer']
     return entryRoles.filter((role) => !staticRoles.includes(role.shortName))
@@ -39,12 +41,23 @@ export default function ReviewDisplay({
     [reviewResponses, currentUserDn, showCurrentUserResponses],
   )
 
-  if (isEntryRolesLoading) {
+  const roleNameDisplay = (response: ResponseInterface) => {
+    if (response.role === 'owner') {
+      return uiConfig ? uiConfig.roleDisplayNames.owner : 'Owner'
+    }
+    return dynamicRoles.find((role) => role.shortName === response.role)?.name
+  }
+
+  if (isEntryRolesLoading || isUiConfigLoading) {
     return <Loading />
   }
 
   if (isEntryRolesError) {
     return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
   return (
@@ -56,13 +69,13 @@ export default function ReviewDisplay({
               {orderedReviewResponses
                 .filter((reviewResponse) => reviewResponse.decision === Decision.Approve)
                 .map((response) => {
-                  const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
                   return (
-                    <Stack direction='row' key={roleName}>
+                    <Stack direction='row' key={roleNameDisplay(response)}>
                       <Done color='success' fontSize='small' />
                       <Typography variant='caption'>
-                        {' '}
-                        {showCurrentUserResponses ? `You have approved as a ${roleName}` : `Approved by  ${roleName}`}
+                        {showCurrentUserResponses
+                          ? `You have approved as a ${roleNameDisplay(response)}`
+                          : `Approved by  ${roleNameDisplay(response)}`}
                       </Typography>
                     </Stack>
                   )
@@ -82,8 +95,8 @@ export default function ReviewDisplay({
                       <HourglassEmpty color='warning' fontSize='small' />
                       <Typography variant='caption'>
                         {showCurrentUserResponses
-                          ? `You have requested changes as a ${roleName}`
-                          : `Changes requested by  ${roleName}`}
+                          ? `You have requested changes as a ${roleNameDisplay(response)}`
+                          : `Changes requested by  ${roleNameDisplay(response)}`}
                       </Typography>
                     </Stack>
                   )

@@ -70,6 +70,8 @@ export default function JsonSchemaForm({
     [splitSchema, calculateStats, mirroredModel],
   )
 
+  // const requiredStatesUsed = useMemo(() => {}, [])
+
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
   })
@@ -186,6 +188,12 @@ export default function JsonSchemaForm({
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
+          )}
+          {canEdit && (
+            <Typography sx={{ pt: 1 }}>
+              Required fields for this state are marked with an asterisk
+              <span style={{ color: theme.palette.error.main }}>*</span>
+            </Typography>
           )}
           <Form
             schema={currentStep.schema}

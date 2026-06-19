@@ -11,6 +11,7 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
+import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
@@ -423,6 +424,18 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onViewMetric(req: Request): Promise<void> {
     this.checkEventType(AuditInfo.ViewMetric, req)
     const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateReview(req: Request, modelId: string) {
+    this.checkEventType(AuditInfo.CreateReview, req)
+    const event = this.generateEvent(req, { modelId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
+    this.checkEventType(AuditInfo.ViewCurrentUserInformation, req)
+    const event = this.generateEvent(req, { userDn: userInformation.user.dn })
     req.log.info(event, req.audit.description)
   }
 

@@ -23,7 +23,7 @@ import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createReleaseReviews, removeReleaseReviews } from './review.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
   return (
@@ -195,8 +195,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
       log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
     }
   }
-
-  sendWebhooks(
+  dispatchWebhooks(
     release.modelId,
     WebhookEvent.CreateRelease,
     `Release ${release.semver} has been created for model ${release.modelId}`,
@@ -224,14 +223,13 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-  const semverObj = semverStringToObject(semver)
-  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
+  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver }, { $set: release })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  sendWebhooks(
+  dispatchWebhooks(
     release.modelId,
     WebhookEvent.UpdateRelease,
     `ReleaseModel ${release.semver} has been updated for model ${release.modelId}`,
@@ -247,8 +245,7 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
 
-  const semverObj = semverStringToObject(semver)
-  const release = await ReleaseModel.findOne({ modelId, semver: semverObj })
+  const release = await ReleaseModel.findOne({ modelId, semver })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -323,10 +320,9 @@ export async function getModelReleases(
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
-  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const releases = await ReleaseModel.find({
     modelId,
-    semver: semverObjs,
+    semver: { $in: semvers },
   })
 
   const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
@@ -375,11 +371,7 @@ export async function getReleaseBySemver(user: UserInterface, model: string | Mo
   if (typeof model === 'string') {
     model = await getModelById(user, model)
   }
-  const semverObj = semverStringToObject(semver)
-  const release = await ReleaseModel.findOne({
-    modelId: model.id,
-    semver: semverObj,
-  })
+  const release = await ReleaseModel.findOne({ modelId: model.id, semver })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId: model.id, semver })
@@ -619,9 +611,8 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 }
 
 export async function getAllFileIds(modelId: string, semvers: string[]): Promise<string[]> {
-  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const result = await ReleaseModel.aggregate()
-    .match({ modelId, semver: { $in: semverObjs } })
+    .match({ modelId, semver: { $in: semvers } })
     .unwind({ path: '$fileIds' })
     .group({
       _id: null,
@@ -637,7 +628,7 @@ export async function getAllFileIds(modelId: string, semvers: string[]): Promise
 
 export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
   const foundRelease = await ReleaseModel.findOneAndUpdate(
-    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    { modelId: release.modelId, semver: release.semver },
     release,
     {
       upsert: true,

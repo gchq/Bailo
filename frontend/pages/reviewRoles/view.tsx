@@ -4,11 +4,9 @@ import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from 
 import { useGetEntryRoles } from 'actions/entry'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
-import { useGetCurrentUser } from 'actions/user'
 import { ChangeEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
-import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
@@ -36,7 +34,6 @@ export default function ReviewRoles() {
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
 
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -256,12 +253,8 @@ export default function ReviewRoles() {
     ],
   )
 
-  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading || isEntryRolesLoading) {
+  if (isReviewRolesLoading || isSchemasLoading || isEntryRolesLoading) {
     return <Loading />
-  }
-
-  if (isCurrentUserError) {
-    return <ErrorWrapper message={isCurrentUserError.info.message} />
   }
 
   if (isReviewRolesError) {
@@ -274,16 +267,6 @@ export default function ReviewRoles() {
 
   if (isEntryRolesError) {
     return <ErrorWrapper message={isEntryRolesError.info.message} />
-  }
-
-  if (!currentUser || !currentUser.isAdmin) {
-    return (
-      <Forbidden
-        errorMessage='If you think this is an error please contact the Bailo administrators'
-        noMargin
-        hideNavButton
-      />
-    )
   }
 
   return (

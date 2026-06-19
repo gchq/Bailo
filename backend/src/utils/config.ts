@@ -56,6 +56,7 @@ export interface Config {
       retryDelayInMinutes: number
       maxInitRetries: number
       initRetryDelay: number
+      scanTimeoutMs: number
     }
 
     metrics: {
@@ -85,6 +86,11 @@ export interface Config {
       tls: {
         rejectUnauthorized: boolean
       }
+    }
+
+    lifecycle: {
+      preReminderIntervals: string[]
+      postReminderInterval: string
     }
 
     from: string
@@ -156,6 +162,7 @@ export interface Config {
       userPoolId: string
       userIdAttribute: string
       adminGroupName: string
+      complianceGroupName: string
     }
   }
 

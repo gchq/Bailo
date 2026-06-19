@@ -1,8 +1,8 @@
-import { getImageTagManifest, getImageTagManifests } from '../../clients/registry.js'
+import { getImageTagManifests } from '../../clients/registry.js'
 import { ImageRef } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
 import { InternalError, NotFound } from '../../utils/error.js'
-import { Descriptors } from '../../utils/registryResponses.js'
+import { Descriptors, ImageManifestV2 } from '../../utils/registryResponses.js'
 
 /**
  * @remarks
@@ -39,12 +39,16 @@ export async function getImageLayers(repositoryToken: string, image: ImageRef): 
   }
 }
 
-export async function getLayersForImage(repositoryToken: string, imageRef: ImageRef): Promise<Descriptors[]> {
-  const manifest = await getImageTagManifest(repositoryToken, imageRef)
+export async function getLayersForImage(
+  repositoryToken: string,
+  imageRef: ImageRef,
+  manifestParam?: ImageManifestV2,
+): Promise<Descriptors[]> {
+  const manifest = manifestParam ?? (await getImageTagManifests(repositoryToken, imageRef)).body
 
-  if (!manifest.body || 'manifests' in manifest.body) {
+  if (!manifest || 'manifests' in manifest) {
     throw InternalError('The registry returned a response but the body was missing.', { manifest })
   }
 
-  return [manifest.body.config, ...manifest.body.layers]
+  return [manifest.config, ...manifest.layers]
 }

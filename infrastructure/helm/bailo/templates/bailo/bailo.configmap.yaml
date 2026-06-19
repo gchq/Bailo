@@ -121,6 +121,10 @@ data:
             rejectUnauthorized: {{ .Values.config.smtp.rejectUnauthorized }},
           },
         },
+        lifecycle: {
+          preReminderIntervals: {{ toJson .Values.config.smtp.preReminderIntervals }},
+          postReminderInterval: '{{ .Values.config.smtp.postReminderInterval }}',
+        },
 
         // Set the email address that Bailo should use, can be different from the SMTP server details.
         from: '{{ .Values.config.smtp.from }}',
@@ -163,7 +167,8 @@ data:
           },
           userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
-          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}'
+          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}',
+          complianceGroupName: '{{ .Values.oauth.cognito.complianceGroupName }}',
         },
       },
 
@@ -256,6 +261,7 @@ data:
           retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }},
           maxInitRetries: {{ .Values.connectors.artefactScanners.maxInitRetries }},
           initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }},
+          scanTimeoutMs: {{ .Values.connectors.artefactScanners.scanTimeoutMs }},
         },
       },
 

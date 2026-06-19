@@ -15,6 +15,7 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { ReviewKind } from 'types/types'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function Release() {
@@ -23,11 +24,11 @@ export default function Release() {
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
+  const { release, isReleaseLoading, isReleaseError, mutateRelease } = useGetRelease(modelId, semver)
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: modelId as string,
     semver: semver || '',
   })
   const {
@@ -119,7 +120,14 @@ export default function Release() {
                   readOnly={!!model?.settings.mirror?.sourceModelId}
                 />
               )}
-              <ReviewComments release={release} isEdit={isEdit} />
+              <ReviewComments
+                identifier={release.semver}
+                parentId={release._id}
+                entryId={release.modelId}
+                kind={ReviewKind.RELEASE}
+                isEdit={isEdit}
+                mutator={mutateRelease}
+              />
             </Stack>
           </>
         </Paper>

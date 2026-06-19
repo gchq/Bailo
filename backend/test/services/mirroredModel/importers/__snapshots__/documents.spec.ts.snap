@@ -12,6 +12,7 @@ DocumentsImporter {
     "importerType": "DocumentsImporter",
   },
   "metadata": {
+    "exportId": "exportId",
     "exporter": "exporter",
     "importKind": "documents",
     "mirroredModelId": "mirroredModelId",
@@ -32,7 +33,10 @@ DocumentsImporter {
 exports[`connectors > mirroredModel > importers > DocumentsImporter > processEntry > success handle file entry 1`] = `
 DocumentsImporter {
   "fileIds": [
-    "file-id",
+    {
+      "key": "file-id",
+      "name": undefined,
+    },
   ],
   "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
   "imageIds": [],
@@ -43,6 +47,7 @@ DocumentsImporter {
     "importerType": "DocumentsImporter",
   },
   "metadata": {
+    "exportId": "exportId",
     "exporter": "exporter",
     "importKind": "documents",
     "mirroredModelId": "mirroredModelId",
@@ -72,6 +77,7 @@ DocumentsImporter {
     "importerType": "DocumentsImporter",
   },
   "metadata": {
+    "exportId": "exportId",
     "exporter": "exporter",
     "importKind": "documents",
     "mirroredModelId": "mirroredModelId",
@@ -111,6 +117,7 @@ DocumentsImporter {
     "importerType": "DocumentsImporter",
   },
   "metadata": {
+    "exportId": "exportId",
     "exporter": "exporter",
     "importKind": "documents",
     "mirroredModelId": "mirroredModelId",
@@ -146,6 +153,7 @@ DocumentsImporter {
     "importerType": "DocumentsImporter",
   },
   "metadata": {
+    "exportId": "exportId",
     "exporter": "exporter",
     "importKind": "documents",
     "mirroredModelId": "mirroredModelId",

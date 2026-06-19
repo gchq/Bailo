@@ -19,7 +19,6 @@ import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
 
 const ReviewModelMock = getTypedModelMock('ReviewModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
-const SchemaModelMock = getTypedModelMock('SchemaModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ResponseModelMock = getTypedModelMock('ResponseModel')
 
@@ -49,6 +48,12 @@ const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', async () => modelMock)
+
+const schemaServiceMock = vi.hoisted(() => ({
+  getSchemaById: vi.fn(() => ({ id: 'test123' })),
+  searchSchemas: vi.fn(() => [{ ...testModelSchema, save: vi.fn() }]),
+}))
+vi.mock('../../src/services/schema.js', async () => schemaServiceMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -122,7 +127,6 @@ describe('services > review', () => {
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
     ReviewRoleModelMock.find.mockResolvedValueOnce([])
     const result: Promise<void> = createReleaseReviews(
       { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] } as any,
@@ -135,7 +139,6 @@ describe('services > review', () => {
   })
 
   test('createReleaseReviews > successful', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
     await createReleaseReviews(
       { collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr', 'reviewer'] }], card: {} } as any,
@@ -147,7 +150,6 @@ describe('services > review', () => {
   })
 
   test('createAccessRequestReviews > successful', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
 
     await createAccessRequestReviews(
@@ -193,9 +195,8 @@ describe('services > review', () => {
     ReviewRoleModelMock.find.mockImplementationOnce(() => ({
       lean: vi.fn(),
     }))
-    SchemaModelMock.find.mockResolvedValue([testModelSchema])
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
-    await findReviewRoles('test123')
+    await findReviewRoles(['test123'])
 
     expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
@@ -220,14 +221,13 @@ describe('services > review', () => {
 
   test('removeReviewRole > successful', async () => {
     ReviewRoleModelMock.findOne.mockResolvedValue({ ...testReviewRole, delete: vi.fn() })
-    SchemaModelMock.find.mockResolvedValue([{ ...testModelSchema, save: vi.fn() }])
     ModelModelMock.find.mockResolvedValue([
       { id: 'test-1234', collaborators: [{ entity: 'user:user', roles: ['reviewer'] }], save: vi.fn() },
     ])
     await removeReviewRole({} as any, 'reviewer')
 
     expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(SchemaModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(schemaServiceMock.searchSchemas.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('updateReviewRole > successful', async () => {

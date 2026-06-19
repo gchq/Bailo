@@ -1,5 +1,5 @@
 import { PassThrough } from 'node:stream'
-import { json } from 'node:stream/consumers'
+import { json, text } from 'node:stream/consumers'
 
 import { escapeRegExp } from 'lodash-es'
 import { finished } from 'stream/promises'
@@ -12,7 +12,12 @@ import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
-import { ImageManifestV2, ImageManifestV2Schema, OCIEmptyMediaType } from '../../../utils/registryResponses.js'
+import {
+  ImageManifestV2,
+  ManifestListV2,
+  ManifestResponseBodySchema,
+  OCIEmptyMediaType,
+} from '../../../utils/registryResponses.js'
 import log from '../../log.js'
 import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
@@ -33,11 +38,17 @@ export class ImageImporter extends BaseImporter {
   protected readonly user: UserInterface
   protected readonly imageName: string
   protected readonly imageTag: string
-  protected manifestBody: ImageManifestV2 | null = null
+  protected manifestBody: ImageManifestV2 | ManifestListV2 | null = null
+  protected manifestsToUpload: Map<string, string> = new Map()
 
-  static readonly manifestRegex = new RegExp(
+  static readonly indexRegex = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,
   )
+
+  static readonly blobsManifestRegex = new RegExp(
+    String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/manifests\/[0-9a-f]{64}$`,
+  )
+
   static readonly blobRegex = new RegExp(
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/sha256\/[0-9a-f]{64}$`,
   )
@@ -67,10 +78,19 @@ export class ImageImporter extends BaseImporter {
   async processEntry(entry: Headers, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
-      if (ImageImporter.manifestRegex.test(entry.name)) {
+      if (ImageImporter.indexRegex.test(entry.name)) {
         // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
         log.debug({ ...this.logData }, 'Extracting un-tarred manifest.')
-        this.manifestBody = ImageManifestV2Schema.parse(await json(stream))
+        this.manifestBody = ManifestResponseBodySchema.parse(await json(stream))
+      } else if (ImageImporter.blobsManifestRegex.test(entry.name)) {
+        // Extract manifests from blobs/manifests/ directory
+        const manifestDigest = `sha256:${entry.name.replace(new RegExp(String.raw`^(${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/manifests\/)`), '')}`
+        log.debug({ ...this.logData, manifestDigest }, 'Extracting manifest from blobs/manifests.')
+        // Store the raw JSON string to preserve exact bytes for digest calculation
+        const manifestJsonString = await text(stream)
+        // Validate it's valid JSON
+        ManifestResponseBodySchema.parse(JSON.parse(manifestJsonString))
+        this.manifestsToUpload.set(manifestDigest, manifestJsonString)
       } else if (ImageImporter.blobRegex.test(entry.name)) {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
@@ -131,7 +151,7 @@ export class ImageImporter extends BaseImporter {
               },
               'Putting image blob.',
             )
-            await uploadLayerMonolithic(repositoryPushPullToken, res.location!, layerDigest, stream, String(entry.size))
+            await uploadLayerMonolithic(repositoryPushPullToken, res.location!, layerDigest, stream)
             await finished(stream)
           }
         } catch (err) {
@@ -170,7 +190,7 @@ export class ImageImporter extends BaseImporter {
   }
 
   async handleStreamCompletion(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
-    log.debug({ ...this.logData }, 'Uploading manifest.')
+    log.debug({ ...this.logData }, 'Uploading manifests.')
     if (this.manifestBody) {
       const repositoryPushPullToken = await issueAccessToken({ dn: this.user.dn }, [
         {
@@ -180,17 +200,65 @@ export class ImageImporter extends BaseImporter {
         },
       ])
 
-      const mediaType =
+      if ('manifests' in this.manifestBody) {
+        // For fat manifests, upload platform-specific manifests first (by digest)
+        log.debug(
+          { ...this.logData, manifestCount: this.manifestBody.manifests.length },
+          'Uploading platform-specific manifests for fat manifest.',
+        )
+
+        for (const platformManifest of this.manifestBody.manifests) {
+          const manifestDigest = platformManifest.digest
+          const manifestJsonString = this.manifestsToUpload.get(manifestDigest)
+
+          if (!manifestJsonString) {
+            throw InternalError('Platform-specific manifest not found in archive.', {
+              manifestDigest,
+              platform: platformManifest.platform,
+              metadata: this.metadata,
+              ...this.logData,
+            })
+          }
+
+          // Parse the manifest to get the mediaType
+          const manifestData = ManifestResponseBodySchema.parse(JSON.parse(manifestJsonString))
+
+          // The content type needs to be resolved in order to upload manifest correctly
+          const manifestMediaType =
+            manifestData.mediaType == OCIEmptyMediaType ? manifestData.artifactType! : manifestData.mediaType!
+
+          // Upload the main manifest (either a regular manifest or a manifest list) with the tag
+          await putManifest(
+            repositoryPushPullToken,
+            { repository: this.metadata.mirroredModelId, name: this.imageName, digest: manifestDigest },
+            manifestJsonString,
+            manifestMediaType,
+          )
+
+          log.debug(
+            {
+              manifestDigest,
+              platform: platformManifest.platform,
+              ...this.logData,
+            },
+            'Uploaded platform-specific manifest.',
+          )
+        }
+      }
+
+      const mainMediaType =
         this.manifestBody.mediaType == OCIEmptyMediaType ? this.manifestBody.artifactType : this.manifestBody.mediaType
       await putManifest(
         repositoryPushPullToken,
         { repository: this.metadata.mirroredModelId, name: this.imageName, tag: this.imageTag },
         JSON.stringify(this.manifestBody),
-        mediaType,
+        mainMediaType,
       )
+
       log.debug(
         {
           image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
+          isFatManifest: 'manifests' in this.manifestBody,
           ...this.logData,
         },
         'Completed registry upload',

@@ -10,7 +10,7 @@ import { UserInformation } from '../connectors/authentication/constants.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 
-async function setupCognitoClient() {
+function setupCognitoClient() {
   let dnName: string
   let userPoolId: string
   try {
@@ -34,7 +34,7 @@ async function setupCognitoClient() {
 }
 
 export async function getGroupMembership(group: string) {
-  const { client, dnName, userPoolId } = await setupCognitoClient()
+  const { client, dnName, userPoolId } = setupCognitoClient()
 
   const command = new ListUsersInGroupCommand({ UserPoolId: userPoolId, GroupName: group })
   let results: ListUsersInGroupCommandOutput
@@ -59,7 +59,7 @@ export async function getGroupMembership(group: string) {
 }
 
 export async function listUsers(query: string, exactMatch = false) {
-  const { client, dnName, userPoolId } = await setupCognitoClient()
+  const { client, dnName, userPoolId } = setupCognitoClient()
 
   const command = new ListUsersCommand({
     UserPoolId: userPoolId,
