@@ -18,7 +18,9 @@ interface FieldDescriptor {
 }
 
 function describeObjectFields(schema: JsonSchema): string {
-  if (!schema.properties) return '{}'
+  if (!schema.properties) {
+    return '{}'
+  }
   const parts: string[] = []
   for (const [k, v] of Object.entries(schema.properties) as [string, JsonSchema][]) {
     if (v.type === 'array' && v.items) {
@@ -114,7 +116,9 @@ function stripUnknownKeys(
 
   for (const [key, value] of Object.entries(data)) {
     let propSchema = props[key]
-    if (!propSchema) continue
+    if (!propSchema) {
+      continue
+    }
 
     if (propSchema.$ref) {
       const resolved = resolveRef(propSchema.$ref, root)
@@ -123,11 +127,17 @@ function stripUnknownKeys(
       }
     }
 
-    if (propSchema.widget && EXCLUDED_WIDGETS.has(propSchema.widget)) continue
+    if (propSchema.widget && EXCLUDED_WIDGETS.has(propSchema.widget)) {
+      continue
+    }
 
-    if (value === null || value === undefined) continue
+    if (value === null || value === undefined) {
+      continue
+    }
 
-    if (isPlaceholderValue(value)) continue
+    if (isPlaceholderValue(value)) {
+      continue
+    }
 
     if (propSchema.type === 'object' && typeof value === 'object' && !Array.isArray(value)) {
       const cleaned = stripUnknownKeys(value as Record<string, unknown>, propSchema, root)
@@ -177,7 +187,9 @@ function stripUnknownKeys(
 }
 
 function isPlaceholderValue(value: unknown): boolean {
-  if (typeof value !== 'string') return false
+  if (typeof value !== 'string') {
+    return false
+  }
   const normalised = value.trim().toLowerCase()
   if (
     ['n/a', 'not specified', 'not available', 'unknown', 'none', 'tbd', 'to be determined', 'not applicable'].includes(
