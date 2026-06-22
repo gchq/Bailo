@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { createReview, findReviewById } from '../../../src/services/v3/review.js'
+import { createReview, findReviewById, notifyReviewer } from '../../../src/services/v3/review.js'
 import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 
@@ -21,6 +21,7 @@ vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
   getModelSystemRoles: vi.fn(),
+  getModelByIdNoAuth: vi.fn(),
 }))
 vi.mock('../../../src/services/model.js', () => modelMock)
 
@@ -28,6 +29,11 @@ const mockSchedulerService = vi.hoisted(() => ({
   scheduleLifeCycleReviewEmails: vi.fn(),
 }))
 vi.mock('../../../src/services/schedule/scheduler.js', () => mockSchedulerService)
+
+const smtpMock = vi.hoisted(() => ({
+  notifyReviewRoleOfAdditionalReview: vi.fn(),
+}))
+vi.mock('../../../src/services/smtp.js', () => smtpMock)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
@@ -119,4 +125,18 @@ describe('services > review', () => {
       }),
     ).rejects.toThrow(/^This model has an open lifecycle review./)
   })
+})
+
+test('notifyReviewer > successfully notifies a review role', async () => {
+  modelMock.getModelByIdNoAuth.mockResolvedValueOnce({ id: 'model-123' })
+  authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
+  ReviewModel.limit.mockResolvedValue([
+    {
+      modelId: 'model-123',
+      role: 'owner',
+      kind: ReviewKind.Release,
+    },
+  ])
+  smtpMock.notifyReviewRoleOfAdditionalReview.mockRejectedValueOnce(() => Promise.resolve())
+  await notifyReviewer({} as any, '6a2c20a481e52c790216eaaa')
 })

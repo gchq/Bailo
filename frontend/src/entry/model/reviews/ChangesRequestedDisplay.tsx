@@ -28,7 +28,11 @@ export function ChangesRequestedDisplay({
     setErrorMessage('')
     const res = await postNotifyReviewer(reviewId)
     if (!res.ok) {
-      setErrorMessage(await getErrorMessage(res))
+      if (res.status === 429) {
+        setErrorMessage('Please wait before sending another request.')
+      } else {
+        setErrorMessage(await getErrorMessage(res))
+      }
     } else {
       sendNotification({
         variant: 'success',

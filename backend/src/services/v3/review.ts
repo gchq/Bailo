@@ -185,31 +185,9 @@ export async function notifyReviewer(user: UserInterface, reviewId: string) {
     throw ConfigurationError('Email service currently unavailable.', { reviewId })
   }
 
-  const originalReview = await ReviewModel.findByIdAndUpdate(
-    reviewId,
-    {
-      $set: { lastNotificationAt: new Date() },
-    },
-    // We want to store the original document for rollback purposes
-    { new: false },
-  )
-
-  if (!originalReview) {
-    throw BadReq('Could not find existing review.', { reviewId })
-  }
-
-  if (
-    originalReview.lastNotificationAt &&
-    Date.now() < originalReview.lastNotificationAt.getTime() + config.smtp.review.lastNotifiedCoolDownMs
-  ) {
-    await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
-    throw BadReq('A notification was already sent recently.')
-  }
-
   try {
-    await notifyReviewRoleOfAdditionalReview(user, originalReview)
+    await notifyReviewRoleOfAdditionalReview(user, review)
   } catch (err) {
-    await ReviewModel.findByIdAndUpdate(reviewId, { $set: { lastNotificationAt: originalReview.lastNotificationAt } })
     log.error(err, 'Failed to notify reviewer')
     throw InternalError('Notification to reviewer(s) could not be sent', { modelId: model.id, err })
   }

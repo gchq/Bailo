@@ -34,17 +34,12 @@ registerPath(
   'v3',
 )
 
-interface PostNotifyReviewerResponse {
-  status: string
-}
-
 export const postNotifyReviewer = [
-  async (req: Request, res: Response<PostNotifyReviewerResponse>): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const {
       params: { reviewId },
     } = parse(req, postNotifyReviewerSchema)
     await notifyReviewer(req.user, reviewId)
-
-    res.json({ status: 'Notification sent to reviewer.' })
+    res.sendStatus(200)
   },
 ]
