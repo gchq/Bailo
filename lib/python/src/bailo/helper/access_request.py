@@ -84,8 +84,8 @@ class AccessRequest:
         Posts an access request to Bailo to be reviewed
 
         :param client: A client object used to interact with Bailo
-        :param name: The name of the access request
         :param model_id: A unique model ID within Bailo
+        :param metadata: Access request metadata.
         :param schema_id: A unique schema ID, defaults to minimal-access-request-general-v10
         :return: JSON response object
         """
