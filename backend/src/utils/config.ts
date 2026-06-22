@@ -247,6 +247,7 @@ export interface Config {
     model: string
     maxTokens: number
     timeoutMs: number
+    temperature: number
   }
 }
 

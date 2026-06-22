@@ -385,5 +385,6 @@ module.exports = {
     model: '',
     maxTokens: 16384,
     timeoutMs: 120000,
+    temperature: 0,
   },
 }

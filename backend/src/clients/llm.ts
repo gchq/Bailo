@@ -33,7 +33,7 @@ export async function callLlmChatCompletion(messages: ChatMessage[]): Promise<st
         model: config.llm.model,
         messages,
         max_tokens: config.llm.maxTokens,
-        temperature: 0,
+        temperature: config.llm.temperature,
         response_format: { type: 'json_object' },
       }),
       signal: controller.signal as AbortSignal,
