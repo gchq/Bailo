@@ -30,8 +30,14 @@ const responseV2Mock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/response.js', () => responseV2Mock)
 
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+  getModelSystemRoles: vi.fn(),
+}))
+vi.mock('../../../src/services/model.js', () => modelMock)
+
 const mockWebhookService = vi.hoisted(() => ({
-  sendWebhooks: vi.fn(),
+  dispatchWebhooks: vi.fn(),
 }))
 vi.mock('../../../src/services/webhook.js', () => mockWebhookService)
 
@@ -58,7 +64,7 @@ describe('services > v3 > response', () => {
 
     expect(ResponseModelMock.save).toHaveBeenCalledOnce()
     expect(responseV2Mock.sendReviewResponseNotification).toHaveBeenCalledOnce()
-    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(mockWebhookService.dispatchWebhooks).toHaveBeenCalledOnce()
   })
 
   test('respondToReview > cancels lifecycle review jobs after saving response', async () => {

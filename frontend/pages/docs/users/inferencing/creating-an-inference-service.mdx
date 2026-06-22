@@ -1,0 +1,78 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Creating an Inference Service
+
+An inference service deploys a model's container (Docker) image as a live endpoint, allowing you to make predictions
+without downloading the model locally. This feature must be enabled by your administrator.
+
+> **Common questions this page answers:**
+>
+> - How do I deploy a model as an inference service?
+> - What processor types are available for inference?
+> - How are requests to an inference service authenticated?
+
+## Prerequisites
+
+Before creating an inference service, you need:
+
+- A container (Docker) image pushed to the model's registry (see
+  [Uploading Images](/docs/users/models/uploading-images))
+- Appropriate permissions on the model (Owner or Contributor)
+
+## Creating a service
+
+Create an inference service from the Inferencing tab on your model page.
+
+1. Open your model page
+2. Navigate to the **Inferencing** tab
+3. Click **Create a new Inferencing Service**
+4. Populate the following required fields:
+   - **Description**: What this inference service does. Required
+   - **Image**: Select from the model's available container images. Required
+   - **Port**: The port your model exposes for inference requests (1-65535). Required
+   - **Processor Type**: Choose CPU or an available GPU type. Required
+   - **Memory**: Memory allocation in GB (1-8 GB, shown for CPU only). Required for CPU
+5. Once all fields are filled in, click **Create Inferencing Service**
+
+### Choosing a processor type
+
+- **CPU**: Available on all deployments. You'll need to specify memory allocation (1-8 GB)
+- **GPU**: Available GPU types depend on your deployment's configuration. GPU options are configured by your
+  administrator
+
+### Choosing a port
+
+The port should match the port your model's container exposes for serving predictions. Common ports include:
+
+- `8080` or `8000` for HTTP-based inference servers
+- `5000` for Flask-based applications
+
+Check your model's container configuration if you're unsure which port to use.
+
+## After creation
+
+Once created, the service is provisioned and accessible via an endpoint on the Inferencing tab. You can:
+
+- View the service status on the model's **Inferencing** tab
+- Access the service endpoint to make prediction requests
+- Use your existing Bailo access to authenticate to the service
+
+## Authenticating requests
+
+Authentication is handled automatically by the platform. Inference services sit behind an authentication proxy in the
+service mesh. When a request is made to an inference service, the proxy checks with Bailo to confirm that the user has
+the required access for the relevant model scope, similar to how container registry authentication works.
+
+You do not normally need to create or provide a Personal Access Token (PAT) for inference service requests. Access is
+tied to the permissions you already have in Bailo for the model. If you do not have the required model access, the
+request is denied.
+
+CORS is enabled on inference services so that Bailo can embed an externally hosted service interface in an `iframe`.
+
+## Related pages
+
+- [Managing Inference Services](/docs/users/inferencing/managing-inference-services) - Updating and deleting services
+- [Uploading Images](/docs/users/models/uploading-images) - How to push container images
+- [Requesting Access](/docs/users/using-a-model/requesting-access) - How to request access to a model
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

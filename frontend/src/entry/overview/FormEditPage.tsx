@@ -27,6 +27,7 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import MigrationListDialog from 'src/entry/overview/MigrationListDialog'
+import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
@@ -57,6 +58,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   // For displaying the stats around model information completion
   const [calculateStats, setCalculateStats] = useState(0)
   const [displayFormStats, setDisplayFormStats] = useState(getDisplayFormStats())
+  const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
 
   const open = Boolean(anchorEl)
 
@@ -302,6 +304,17 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     </ListItemIcon>
                     <ListItemText>View History</ListItemText>
                   </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setReviewHistoryOpen(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <HistoryIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>View lifecycle history</ListItemText>
+                  </MenuItem>
                 </Menu>
               </Stack>
             </Stack>
@@ -364,6 +377,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         migrations={schemaMigrations}
         errorText={migrationErrorMessage}
         onConfirmation={handleMigrationConfirm}
+      />
+      <ReviewHistoryDialog
+        open={reviewHistoryOpen}
+        onClose={() => setReviewHistoryOpen(false)}
+        entry={entry}
+        mutateEntry={mutateEntry}
       />
     </>
   )

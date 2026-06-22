@@ -5,6 +5,7 @@ import { FileInterface } from '../../models/File.js'
 import { ImageRef } from '../../models/Release.js'
 import { ArtefactKindKeys, ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import config from '../../utils/config.js'
 
 export type ArtefactScanResult = Pick<
   ScanInterface,
@@ -48,7 +49,7 @@ export abstract class BaseArtefactScanningConnector {
 
     log.debug({ artefact, ...this.getConnectorInfo(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResult = await this.queue
-      .add(() => this.executeScan(artefact))
+      .add(() => this.executeScanWithTimeout(artefact, config.connectors.artefactScanners.scanTimeoutMs))
       .catch((error) => {
         return this.buildErrorResult('Queued scan threw an error.', { error, artefact })
       })
@@ -86,5 +87,23 @@ export abstract class BaseArtefactScanningConnector {
       artefactSize: bytes.format(artefactSize),
       maxSize: bytes.format(this.maxSize),
     })
+  }
+
+  private async executeScanWithTimeout(artefact: ArtefactInterface, timeoutMs: number): Promise<ArtefactScanResult> {
+    let timeout: ReturnType<typeof setTimeout>
+
+    const timeoutPromise = new Promise<ArtefactScanResult>((resolve) => {
+      timeout = setTimeout(() => {
+        resolve(this.buildErrorResult('Scan timeout exceeded.', { artefact, timeoutMs: timeoutMs }))
+      }, timeoutMs)
+    })
+
+    try {
+      return await Promise.race([this.executeScan(artefact), timeoutPromise])
+    } finally {
+      // Clear timeout after race promise as resolved.
+      // Prevents scenario of any additional 'timeout' errors appearing after the fact.
+      clearTimeout(timeout!)
+    }
   }
 }

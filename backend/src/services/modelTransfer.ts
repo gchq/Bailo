@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose'
+import { Types } from 'mongoose'
 
 import ModelTransferModel, {
   ModelTransferInterface,
@@ -13,7 +13,7 @@ import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { startImportNotification, transferCompleteNotification } from './smtp/smtp.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export async function findModelTransferById(user: UserInterface, exportId: string): Promise<ModelTransferInterface> {
   const transfer = await ModelTransferModel.findOne({
@@ -119,7 +119,7 @@ export async function updateArtefactTransferStatus(
 export async function updateArtefactsTransferStatus(
   exportId: string,
   images?: string[],
-  files?: { key: ObjectId; name: string }[],
+  files?: { key: Types.ObjectId; name: string }[],
 ): Promise<ModelTransferInterface | null> {
   await ModelTransferModel.findOneAndUpdate(
     { exportId, 'artefactStatus.key': 'documents', 'artefactStatus.kind': MirrorKind.Documents },
@@ -275,7 +275,7 @@ export async function handleCompleteEmail(exportId: string) {
   )
   if (updated) {
     await transferCompleteNotification(transfer.modelId, transfer.status === TransferStatus.Failed, artefacts)
-    sendWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
+    dispatchWebhooks(transfer.modelId, WebhookEvent.ImportModel, `Model ${transfer.modelId} has been imported`, {
       transfer,
     })
   }

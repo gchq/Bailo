@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose'
+import { Types } from 'mongoose'
 
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
@@ -11,7 +11,7 @@ import { BadReq, NotFound } from '../../utils/error.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
-import { sendWebhooks } from '../webhook.js'
+import { dispatchWebhooks } from '../webhook.js'
 
 function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | undefined) {
   if (!dueDate || dueDate.getTime() <= Date.now()) {
@@ -43,7 +43,7 @@ export async function respondToReview(
   await cancelLifecycleReviewJobs(review.modelId, reviewId)
   await sendReviewResponseNotification(review, reviewResponse, user)
 
-  sendWebhooks(
+  dispatchWebhooks(
     review.modelId,
     WebhookEvent.CreateReviewResponse,
     `A new response has been added to a review requested for Model ${review.modelId}`,
@@ -57,7 +57,7 @@ export async function respondToReview(
 }
 
 export async function getLatestResponseForReview(reviewId: string) {
-  const response = await ResponseModel.findOne({ parentId: reviewId as unknown as Schema.Types.ObjectId }).sort({
+  const response = await ResponseModel.findOne({ parentId: new Types.ObjectId(reviewId) }).sort({
     createdAt: -1,
   })
 

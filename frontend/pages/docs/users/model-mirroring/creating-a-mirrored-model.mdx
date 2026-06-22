@@ -9,10 +9,16 @@ import tokens from 'public/docs/bailo_tokens.png'
 
 # Creating a mirrored model
 
+> **Common questions this page answers:**
+>
+> - How do I create a mirrored model in Bailo?
+> - What is model mirroring?
+> - How do I synchronise a mirrored model with its source?
+
 ## What is model mirroring?
 
-Model mirroring allows you to create a read-only copy of an existing model that is synchronised from an external source.
-The source model may exist:
+Model mirroring allows you to create a read-only copy of an existing model that is manually synchronised from an
+external source. The source model may exist:
 
 - In another Bailo instance owned by the same organisation, or
 - In an external system that supports Bailo model exports
@@ -21,21 +27,25 @@ The mirrored model uses the source model as the single source of truth. Core mod
 cannot be edited locally. This ensures consistency while still allowing controlled reuse of model metadata. You may
 optionally add additional local context to a mirrored model without modifying the source model.
 
-## How to create a Mirrored Model
+## How to create a mirrored model
 
-If model mirroring is enabled for your instance, you will be able to create a mirrored model on the model creation page:
+Create a mirrored model from the model creation page if mirroring is enabled for your Bailo instance:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='access request schema selection' src={mirrorCreateImage} />
+  <Image alt='model creation page with mirrored model option' src={mirrorCreateImage} />
 </Box>
+
+The screenshot above shows the model creation page with the Mirrored Model option available.
 
 1. Select **Create mirrored model**
 2. Provide the basic model details as prompted
 3. Enter the **Source Model ID** of the model you want to mirror
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='access request schema selection' src={mirrorCreateFormImage} />
+  <Image alt='mirrored model creation form with source model ID field' src={mirrorCreateFormImage} />
 </Box>
+
+The screenshot above shows the mirrored model creation form with fields for basic details and the Source Model ID.
 
 The Source Model ID must exactly match the ID of the source model. This is used to establish the synchronisation link.
 
@@ -49,8 +59,10 @@ source model:
 3. Export the model
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='access request schema selection' src={mirrorSettingsFormImage} />
+  <Image alt='source model export settings' src={mirrorSettingsFormImage} />
 </Box>
+
+The screenshot above shows the source model's export settings used to synchronise the mirrored copy.
 
 Once exported, the mirrored model will be populated with the source model's data and kept in sync on subsequent exports.
 

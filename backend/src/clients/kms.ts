@@ -31,10 +31,10 @@ export async function sign(hash: string) {
     MessageType: 'DIGEST',
   })
   const signResponse = await client.send(signCommand)
-  return await getSignatureValues(signResponse)
+  return getSignatureValues(signResponse)
 }
 
-async function getSignatureValues(signResponse: SignCommandOutput) {
+function getSignatureValues(signResponse: SignCommandOutput) {
   if (!signResponse.Signature) {
     throw InternalError('Cannot get signature.', { response: signResponse })
   }

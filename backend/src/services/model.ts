@@ -914,3 +914,18 @@ export async function popularTagsForEntries() {
   const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
   return tags.map((tag) => tag._id) as string[]
 }
+
+export function getRoleEntities<T extends string>(
+  roles: readonly T[],
+  collaborators: CollaboratorEntry[],
+): Record<T, string[]> {
+  return roles.reduce(
+    (acc, role) => {
+      acc[role] = collaborators
+        .filter((collaborator) => collaborator.roles.includes(role))
+        .map((collaborator) => collaborator.entity)
+      return acc
+    },
+    {} as Record<T, string[]>,
+  )
+}

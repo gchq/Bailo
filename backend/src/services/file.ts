@@ -78,9 +78,7 @@ export async function uploadFile(
 }
 
 export async function saveImportedFile(file: FileInterface) {
-  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
-    upsert: true,
-  })
+  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, { upsert: true })
 }
 
 export async function startUploadMultipartFile(
@@ -363,7 +361,7 @@ export async function removeFiles(
 
     // Unless specified, we don't actually remove the file from storage, we only hide all
     // references to it.  This makes the file not visible to the user.
-    await FileModel.findOneAndDelete({ _id: file._id }, session)
+    await FileModel.findByIdAndDelete(file._id, session)
     // We cannot use the mongo session with aws-sdk so send the aws-sdk API call last as if
     // aws-sdk fails then the mongo session will roll back
     if (hardDelete) {

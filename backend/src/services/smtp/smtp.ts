@@ -1,5 +1,4 @@
 import nodemailer, { Transporter } from 'nodemailer'
-import Mail from 'nodemailer/lib/mailer/index.js'
 
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
@@ -9,12 +8,12 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
-import { sanitiseEmail } from '../../utils/smtp.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
-import { getModelByIdNoAuth } from '../model.js'
+import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
+const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 const transporter = await generateTransporter(config.smtp.transporter)
 const LINE_BREAK = '<br />'
 
@@ -25,7 +24,7 @@ const LINE_BREAK = '<br />'
  * @param transportOption {TransportOption} the option to use depending on the environment
  * @returns the transporter to use
  */
-export async function generateTransporter(transportOption: TransportOption): Promise<Transporter> {
+async function generateTransporter(transportOption: TransportOption): Promise<Transporter> {
   if (transportOption === 'aws') {
     // If deployed to AWS then use AWS SES as our transport medium
     log.info('Generating transporter: Using AWS SES')
@@ -43,35 +42,41 @@ export async function generateTransporter(transportOption: TransportOption): Pro
   }
 }
 
-export async function dispatchEmail(entity: string, emailContent: EmailContent) {
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
+async function dispatchEmail(entities: string[], emailContent: EmailContent) {
+  const userInfoLists = await Promise.all(
+    entities.map(async (entity) => Promise.all(await authentication.getUserInformationList(entity))),
+  )
+
+  const uniqueEmails = [
+    ...new Set(
+      userInfoLists
+        .flat()
+        .map((userInfo) => userInfo.email)
+        .filter((email) => email !== undefined),
+    ),
+  ]
+
+  if (uniqueEmails.length === 0) {
+    log.warn({ entities }, 'No valid recipients found; skipping email dispatch')
+    return
   }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
-  )
-  await Promise.all(sendEmailResponses)
+
+  const email = {
+    from: config.smtp.from,
+    bcc: uniqueEmails,
+    ...emailContent,
+  }
+  try {
+    const info = await transporter.sendMail(email)
+    log.info({ messageId: info.messageId }, 'Email sent')
+  } catch (error) {
+    const content = { bcc: email.bcc, subject: email.subject, text: email.text }
+    log.warn({ content, error }, `Unable to send email`)
+    return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
+  }
 }
 
-export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent) {
-  const model = await getModelByIdNoAuth(modelId)
-  const entities = await Promise.all(
-    model.collaborators
-      .filter((collaborator) => collaborator.roles.includes(role))
-      .map((collaborator) => authentication.getUserInformation(collaborator.entity)),
-  )
-  const emails = entities.map((entry) => entry.email).filter((email): email is string => email !== undefined)
-  await sendEmail({ to: emails, ...emailContent })
-}
-
-const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
-export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -95,7 +100,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     true,
   )
 
-  await dispatchEmail(entity, await emailContent)
+  await dispatchEmail(entities, await emailContent)
 }
 
 const requestingEntitiesText = (value: number) => {
@@ -103,7 +108,7 @@ const requestingEntitiesText = (value: number) => {
 }
 
 export async function requestReviewForAccessRequest(
-  entity: string,
+  entities: string[],
   review: ReviewDoc,
   accessRequest: AccessRequestDoc,
 ) {
@@ -134,7 +139,7 @@ export async function requestReviewForAccessRequest(
     true,
   )
 
-  await dispatchEmail(entity, await emailContent)
+  await dispatchEmail(entities, await emailContent)
 }
 
 export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
@@ -172,7 +177,10 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-  await dispatchEmail(toEntity('user', release.createdBy), await emailContent)
+
+  const model = await getModelByIdNoAuth(release.modelId)
+  const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
+  await dispatchEmail([toEntity('user', release.createdBy), ...reviewRoleEntities], await emailContent)
 }
 
 export async function notifyLifeCycleReview(modelId: string, reviewId: string, dueIn?: string) {
@@ -196,7 +204,8 @@ export async function notifyLifeCycleReview(modelId: string, reviewId: string, d
     ],
   )
 
-  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 export async function notifyReviewResponseForAccess(
@@ -236,22 +245,10 @@ export async function notifyReviewResponseForAccess(
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-  await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
-}
 
-async function sendEmail(email: Mail.Options) {
-  try {
-    const sanitisedEmail = sanitiseEmail({
-      from: config.smtp.from,
-      ...email,
-    })
-    const info = await transporter.sendMail(sanitisedEmail)
-    log.info({ messageId: info.messageId }, 'Email sent')
-  } catch (error) {
-    const content = { to: email.to, subject: email.subject, text: email.text }
-    log.warn({ content, error }, `Unable to send email`)
-    return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
-  }
+  const model = await getModelByIdNoAuth(accessRequest.modelId)
+  const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
+  await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], await emailContent)
 }
 
 export async function startImportNotification(modelId: string) {
@@ -270,7 +267,9 @@ export async function startImportNotification(modelId: string) {
     ],
   )
 
-  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+  const model = await getModelByIdNoAuth(modelId)
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 export async function transferCompleteNotification(
@@ -307,7 +306,9 @@ export async function transferCompleteNotification(
 
   const emailContent = buildEmail(title, infoArray, actions)
 
-  await dispatchEmailToModelRole(modelId, 'owner', await emailContent)
+  const model = await getModelByIdNoAuth(modelId)
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 function getReleaseUrl(release: ReleaseDoc) {
