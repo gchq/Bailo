@@ -33,7 +33,7 @@ vi.mock('../../../src/services/schedule/scheduler.js', () => mockSchedulerServic
 const smtpMock = vi.hoisted(() => ({
   notifyReviewRoleOfAdditionalReview: vi.fn(),
 }))
-vi.mock('../../../src/services/smtp.js', () => smtpMock)
+vi.mock('../../../src/services/smtp/smtp.js', () => smtpMock)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
@@ -129,6 +129,7 @@ describe('services > review', () => {
 
 test('notifyReviewer > successfully notifies a review role', async () => {
   modelMock.getModelByIdNoAuth.mockResolvedValueOnce({ id: 'model-123' })
+  modelMock.getModelById.mockResolvedValueOnce({ id: 'model-123' })
   authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
   ReviewModel.limit.mockResolvedValue([
     {
@@ -137,6 +138,6 @@ test('notifyReviewer > successfully notifies a review role', async () => {
       kind: ReviewKind.Release,
     },
   ])
-  smtpMock.notifyReviewRoleOfAdditionalReview.mockRejectedValueOnce(() => Promise.resolve())
+  smtpMock.notifyReviewRoleOfAdditionalReview.mockResolvedValueOnce(() => Promise.resolve())
   await notifyReviewer({} as any, '6a2c20a481e52c790216eaaa')
 })

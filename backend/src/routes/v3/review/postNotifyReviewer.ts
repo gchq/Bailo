@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
 import { notifyReviewer } from '../../../services/v3/review.js'
@@ -36,10 +38,12 @@ registerPath(
 
 export const postNotifyReviewer = [
   async (req: Request, res: Response): Promise<void> => {
+    req.audit = AuditInfo.CreateReview
     const {
       params: { reviewId },
     } = parse(req, postNotifyReviewerSchema)
     await notifyReviewer(req.user, reviewId)
+    await audit.onNotifyReviewers(req, reviewId)
     res.sendStatus(200)
   },
 ]
