@@ -46,7 +46,7 @@ export default function ImportModelCardTextDialog({
   }
 
   return (
-    <Dialog maxWidth='md' fullWidth open={open} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog maxWidth='md' fullWidth open={open} onClose={handleClose} slots={{ transition: Transition }}>
       <DialogTitle>Import Model Card from Text</DialogTitle>
       <DialogContent sx={{ p: 2, overflow: 'hidden' }}>
         <Typography variant='body2' sx={{ mb: 2 }}>
