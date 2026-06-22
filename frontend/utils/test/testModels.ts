@@ -260,6 +260,10 @@ export const testUiConfig: UiConfig = {
     enabled: true,
   },
 
+  llmImport: {
+    enabled: false,
+  },
+
   announcement: {
     enabled: false,
     text: '',
