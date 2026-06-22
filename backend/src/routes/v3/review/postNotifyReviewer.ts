@@ -38,7 +38,7 @@ registerPath(
 
 export const postNotifyReviewer = [
   async (req: Request, res: Response): Promise<void> => {
-    req.audit = AuditInfo.CreateReview
+    req.audit = AuditInfo.NotifyReviewers
     const {
       params: { reviewId },
     } = parse(req, postNotifyReviewerSchema)
