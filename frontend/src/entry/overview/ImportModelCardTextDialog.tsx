@@ -48,7 +48,7 @@ export default function ImportModelCardTextDialog({
   return (
     <Dialog maxWidth='md' fullWidth open={open} onClose={handleClose} TransitionComponent={Transition}>
       <DialogTitle>Import Model Card from Text</DialogTitle>
-      <DialogContent sx={{ p: 2 }}>
+      <DialogContent sx={{ p: 2, overflow: 'hidden' }}>
         <Typography variant='body2' sx={{ mb: 2 }}>
           Paste the contents of an existing model card (e.g. from HuggingFace, a system card, or other documentation).
           An LLM will extract relevant information into your schema fields.
