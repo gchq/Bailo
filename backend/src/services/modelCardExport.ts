@@ -8,8 +8,7 @@ import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { getModelById, getModelCard } from './model.js'
-import { getRoleEntities } from './review.js'
+import { getModelById, getModelCard, getRoleEntities } from './model.js'
 import { getSchemaById } from './schema.js'
 
 type Common = {
@@ -116,7 +115,7 @@ export async function renderToMarkdown(
 }
 
 function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
-  return getRoleEntities([role], collaborators)[0].entities.join('\n')
+  return getRoleEntities([role], collaborators)[role].join('\n')
 }
 
 async function createReleaseReviewExports(modelId: string) {

@@ -13,11 +13,15 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/services/review.ts')
 
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
 const SchemaModelModelMock = getTypedModelMock('SchemaModel')
+
+const reviewServiceMocks = vi.hoisted(() => ({
+  addReviewsForNewRole: vi.fn(),
+}))
+vi.mock('../../src/services/review.js', () => reviewServiceMocks)
 
 const mockMongoUtils = vi.hoisted(() => {
   return {

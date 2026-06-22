@@ -54,7 +54,7 @@ const registryClientMocks = vi.hoisted(() => ({
   putManifest: vi.fn(),
   isImageTagManifestList: vi.fn(() => false),
 }))
-vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+vi.mock('../../src/clients/registry.js', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
