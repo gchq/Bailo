@@ -1,6 +1,22 @@
 import dayjs, { Dayjs } from '@dayjs'
 import { plural } from 'utils/stringUtils'
 
+export const utcDate = (value: string) => {
+  return dayjs.utc(value)
+}
+
+export const utcStartOfDate = (value: string) => {
+  return dayjs.utc(value).startOf('day')
+}
+
+export const utcStartOfCurrentDate = () => {
+  return dayjs.utc().startOf('day')
+}
+
+export const utcStartOfDateISOString = (date: Dayjs) => {
+  return date.utc().startOf('day').toISOString()
+}
+
 export const formatDate = (date: Date) => {
   return date.toDateString()
 }
