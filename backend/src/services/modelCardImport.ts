@@ -22,22 +22,22 @@ function describeObjectFields(schema: JsonSchema): string {
     return '{}'
   }
   const parts: string[] = []
-  for (const [k, v] of Object.entries(schema.properties) as [string, JsonSchema][]) {
-    if (v.type === 'array' && v.items) {
-      const items = v.items as JsonSchema
+  for (const [key, prop] of Object.entries(schema.properties) as [string, JsonSchema][]) {
+    if (prop.type === 'array' && prop.items) {
+      const items = prop.items as JsonSchema
       if (items.type === 'object' && items.properties) {
-        parts.push(`${k}: array of objects with fields: ${describeObjectFields(items)}`)
+        parts.push(`${key}: array of objects with fields: ${describeObjectFields(items)}`)
       } else if (items.enum) {
         parts.push(
-          `${k}: array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((e) => `"${e}"`).join(', ')}]`,
+          `${key}: array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((val) => `"${val}"`).join(', ')}]`,
         )
       } else {
-        parts.push(`${k}: array of ${items.type || 'string'}`)
+        parts.push(`${key}: array of ${items.type || 'string'}`)
       }
-    } else if (v.type === 'object' && v.properties) {
-      parts.push(`${k}: object with fields: ${describeObjectFields(v)}`)
+    } else if (prop.type === 'object' && prop.properties) {
+      parts.push(`${key}: object with fields: ${describeObjectFields(prop)}`)
     } else {
-      parts.push(`${k}: ${v.type || 'string'}`)
+      parts.push(`${key}: ${prop.type || 'string'}`)
     }
   }
   return `{ ${parts.join(', ')} }`
@@ -62,7 +62,7 @@ export function buildSchemaDescription(schema: JsonSchema, basePath = ''): Field
         if (items.type === 'object' && items.properties) {
           typeDesc = `array of objects with fields: ${describeObjectFields(items)}`
         } else if (items.enum) {
-          typeDesc = `array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((v) => `"${v}"`).join(', ')}]`
+          typeDesc = `array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((val) => `"${val}"`).join(', ')}]`
         } else {
           typeDesc = `array of ${items.type || 'string'}`
         }
@@ -279,7 +279,7 @@ export async function extractModelCardFromText(
   const validationResult = new Validator().validate(cleaned, schema.jsonSchema)
   if (validationResult.errors.length > 0) {
     log.warn(
-      { modelId, errors: validationResult.errors.map((e) => `${e.property}: ${e.message}`) },
+      { modelId, errors: validationResult.errors.map((err) => `${err.property}: ${err.message}`) },
       'Extracted data has validation issues, stripping invalid fields.',
     )
   }
