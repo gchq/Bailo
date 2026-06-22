@@ -272,7 +272,7 @@ class Client:
     def model_card_from_template(self, model_id: str, template_id: str | None):
         """Create a model card using a given template ID (previously created models, model ID)
         :param model_id: Unique model ID
-        :param template_id Previous model's unique ID to be used as template for new model card
+        :param template_id: Previous model's unique ID to be used as template for new model card
         :return: JSON response object
         """
         return self.agent.post(
@@ -643,7 +643,6 @@ class Client:
         """Retrieve all access requests given a specific model.
 
         :param model_id: Unique model ID
-        :param access_request_id: Unique access request ID
         :return: JSON response object
         """
         return self.agent.get(
@@ -685,7 +684,7 @@ class Client:
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID
-        :metadata: Metadata object, defined by access request schemas
+        :param metadata: Metadata object, defined by access request schemas
         :return: JSON response object
         """
         filtered_params = filter_none({"schemaId": schema_id, "metadata": metadata})
