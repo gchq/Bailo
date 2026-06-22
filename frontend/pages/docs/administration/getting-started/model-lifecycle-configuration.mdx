@@ -12,6 +12,11 @@ are sent and how frequently overdue reminders are repeated.
 This page explains how to configure lifecycle reminders, how the reminder and warning flows work, and how to safely
 disable the feature if required.
 
+> **Common questions this page answers:**
+>
+> - How do I configure the lifecycle rules?
+> - What are the configuration options?
+
 ## Configuration Location
 
 Lifecycle reminder behaviour is configured in the Bailo backend configuration under `smtp.lifecycle`.
@@ -79,5 +84,10 @@ Behaviour:
 
 Supported formats follow the same human-interval syntax used by preReminderIntervals. If the interval cannot be parsed,
 Bailo logs a warning and no post‑due reminders will be scheduled.
+
+## Related pages
+
+- [Model Lifecycle](/docs/users/reviews/reviewing/model-lifecycle) - Completing and updating model card lifecycle
+  reviews
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
