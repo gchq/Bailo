@@ -1,0 +1,336 @@
+import { describe, expect, test, vi } from 'vitest'
+
+import { buildSchemaDescription, extractModelCardFromText } from '../../src/services/modelCardImport.js'
+
+const llmMock = vi.hoisted(() => ({
+  callLlmChatCompletion: vi.fn(),
+}))
+vi.mock('../../src/clients/llm.js', () => llmMock)
+
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+}))
+vi.mock('../../src/services/model.js', () => modelMock)
+
+const schemaMock = vi.hoisted(() => ({
+  getSchemaById: vi.fn(),
+}))
+vi.mock('../../src/services/schema.js', () => schemaMock)
+
+vi.mock('../../src/services/log.js', () => ({
+  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}))
+
+describe('services > modelCardImport', () => {
+  const testUser = { dn: 'user' } as any
+
+  describe('buildSchemaDescription', () => {
+    test('returns empty array for non-object schema', () => {
+      expect(buildSchemaDescription({ type: 'string' })).toEqual([])
+    })
+
+    test('returns empty array for object schema with no properties', () => {
+      expect(buildSchemaDescription({ type: 'object' })).toEqual([])
+    })
+
+    test('extracts simple string field', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          name: { type: 'string', title: 'Model Name' },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([
+        { path: 'name', title: 'Model Name', type: 'string' },
+      ])
+    })
+
+    test('extracts number and boolean fields', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          accuracy: { type: 'number', title: 'Accuracy' },
+          approved: { type: 'boolean', title: 'Approved' },
+        },
+      }
+      const result = buildSchemaDescription(schema)
+      expect(result).toEqual([
+        { path: 'accuracy', title: 'Accuracy', type: 'number' },
+        { path: 'approved', title: 'Approved', type: 'boolean' },
+      ])
+    })
+
+    test('uses key as title when title is not provided', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          version: { type: 'string' },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([{ path: 'version', title: 'version', type: 'string' }])
+    })
+
+    test('includes description when present', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          name: { type: 'string', title: 'Name', description: 'The model name' },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([
+        { path: 'name', title: 'Name', type: 'string', description: 'The model name' },
+      ])
+    })
+
+    test('includes format when present', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          createdAt: { type: 'string', title: 'Created', format: 'date' },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([
+        { path: 'createdAt', title: 'Created', type: 'string (format: date)', format: 'date' },
+      ])
+    })
+
+    test('handles nested objects recursively', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          overview: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', title: 'Name' },
+            },
+          },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([{ path: 'overview.name', title: 'Name', type: 'string' }])
+    })
+
+    test('handles deeply nested objects with basePath', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          inner: {
+            type: 'object',
+            properties: {
+              value: { type: 'string', title: 'Value' },
+            },
+          },
+        },
+      }
+      expect(buildSchemaDescription(schema, 'root')).toEqual([
+        { path: 'root.inner.value', title: 'Value', type: 'string' },
+      ])
+    })
+
+    test('handles array of strings', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          tags: { type: 'array', title: 'Tags', items: { type: 'string' } },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([{ path: 'tags', title: 'Tags', type: 'array of string' }])
+    })
+
+    test('handles array of objects with sub-fields', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          authors: {
+            type: 'array',
+            title: 'Authors',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                email: { type: 'string' },
+              },
+            },
+          },
+        },
+      }
+      const result = buildSchemaDescription(schema)
+      expect(result).toEqual([
+        { path: 'authors', title: 'Authors', type: 'array of objects with fields: { name: string, email: string }' },
+      ])
+    })
+
+    test('handles array with enum items', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          categories: {
+            type: 'array',
+            title: 'Categories',
+            items: { type: 'string', enum: ['nlp', 'vision', 'audio'] },
+          },
+        },
+      }
+      const result = buildSchemaDescription(schema)
+      expect(result).toEqual([
+        {
+          path: 'categories',
+          title: 'Categories',
+          type: 'array of string, allowed values: ["nlp", "vision", "audio"]',
+        },
+      ])
+    })
+
+    test('skips fields with excluded widgets', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          name: { type: 'string', title: 'Name' },
+          selector: { type: 'string', title: 'Selector', widget: 'dataCardSelector' },
+          entity: { type: 'string', title: 'Entity', widget: 'entitySelector' },
+        },
+      }
+      expect(buildSchemaDescription(schema)).toEqual([{ path: 'name', title: 'Name', type: 'string' }])
+    })
+  })
+
+  describe('extractModelCardFromText', () => {
+    const minimalJsonSchema = {
+      type: 'object',
+      properties: {
+        overview: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', title: 'Name' },
+            description: { type: 'string', title: 'Description' },
+          },
+        },
+      },
+    }
+
+    test('throws when model has no schemaId', async () => {
+      modelMock.getModelById.mockResolvedValueOnce({ card: {} })
+
+      await expect(extractModelCardFromText(testUser, 'model-1', 'some text')).rejects.toThrow(
+        /select a schema before importing/,
+      )
+    })
+
+    test('throws when model has no card', async () => {
+      modelMock.getModelById.mockResolvedValueOnce({})
+
+      await expect(extractModelCardFromText(testUser, 'model-1', 'some text')).rejects.toThrow(
+        /select a schema before importing/,
+      )
+    })
+
+    test('calls LLM and returns cleaned data', async () => {
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: minimalJsonSchema })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(
+        JSON.stringify({ overview: { name: 'Test Model', description: 'A test model' } }),
+      )
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'My model is called Test Model')
+
+      expect(llmMock.callLlmChatCompletion).toHaveBeenCalledOnce()
+      expect(result).toEqual({ overview: { name: 'Test Model', description: 'A test model' } })
+    })
+
+    test('throws when LLM returns invalid JSON', async () => {
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: minimalJsonSchema })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce('not valid json {{{')
+
+      await expect(extractModelCardFromText(testUser, 'model-1', 'some text')).rejects.toThrow(
+        /LLM returned invalid JSON/,
+      )
+    })
+
+    test('strips keys not present in schema', async () => {
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: minimalJsonSchema })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(
+        JSON.stringify({
+          overview: { name: 'Test', description: 'Desc', unknownField: 'should be removed' },
+          nonExistentSection: { data: 'gone' },
+        }),
+      )
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result).toEqual({ overview: { name: 'Test', description: 'Desc' } })
+      expect((result as any).nonExistentSection).toBeUndefined()
+      expect((result as any).overview?.unknownField).toBeUndefined()
+    })
+
+    test('strips placeholder values like N/A and example URLs', async () => {
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: minimalJsonSchema })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(
+        JSON.stringify({
+          overview: { name: 'N/A', description: 'https://example.com/placeholder' },
+        }),
+      )
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result).toEqual({})
+    })
+
+    test('strips fields with excluded widgets', async () => {
+      const schemaWithWidget = {
+        type: 'object',
+        properties: {
+          overview: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', title: 'Name' },
+              selector: { type: 'string', title: 'Selector', widget: 'dataCardSelector' },
+            },
+          },
+        },
+      }
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: schemaWithWidget })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(
+        JSON.stringify({ overview: { name: 'Test', selector: 'should be stripped' } }),
+      )
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result).toEqual({ overview: { name: 'Test' } })
+    })
+
+    test('handles enum validation by stripping invalid enum values', async () => {
+      const schemaWithEnum = {
+        type: 'object',
+        properties: {
+          status: { type: 'string', title: 'Status', enum: ['draft', 'published'] },
+        },
+      }
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: schemaWithEnum })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(JSON.stringify({ status: 'invalid_value' }))
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result.status).toBeUndefined()
+    })
+
+    test('truncates strings exceeding maxLength', async () => {
+      const schemaWithMaxLength = {
+        type: 'object',
+        properties: {
+          name: { type: 'string', title: 'Name', maxLength: 5 },
+        },
+      }
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: schemaWithMaxLength })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(JSON.stringify({ name: 'Too Long String' }))
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result.name).toBe('Too L')
+    })
+  })
+})
