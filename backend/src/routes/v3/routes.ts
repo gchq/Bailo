@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
 
 import { generateV3SwaggerSpec } from '../../services/specification.js'
+import config from '../../utils/config.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getComplianceMetrics } from './metrics/getComplianceMetrics.js'
@@ -13,14 +14,14 @@ import { postReview } from './review/postReview.js'
 import { postReviewResponse } from './review/postReviewResponse.js'
 
 const reviewNotifierLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
+  windowMs: config.smtp.review.lastNotifiedCoolDownMs,
   limit: 1,
   standardHeaders: true,
   legacyHeaders: false,
-  message: 'Too many requests, please try again later.',
   keyGenerator: (req) => {
     // Create a unique key based on the user and review ID so users can request different releases/access requests
-    return `${req.user.dn}-${req.params['reviewId']}`
+    const userDn = req.user?.dn ?? req.ip
+    return `${userDn}-${req.params['reviewId']}`
   },
 })
 

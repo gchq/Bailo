@@ -23,13 +23,6 @@ registerPath(
     responses: {
       200: {
         description: 'The status of the request.',
-        content: {
-          'application/json': {
-            schema: z.object({
-              status: z.string(),
-            }),
-          },
-        },
       },
     },
   },

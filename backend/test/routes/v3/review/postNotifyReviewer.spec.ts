@@ -13,25 +13,6 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../../../src/services/v3/review.js', () => mockReviewService)
 
-const mockRouteUtils = vi.hoisted(() => {
-  return {
-    reviewNotifierLimiter: vi.mocked(() => {
-      return {
-        windowMs: 5 * 60 * 1000,
-        limit: 100,
-        standardHeaders: true,
-        legacyHeaders: false,
-        message: 'Too many requests, please try again later.',
-        keyGenerator: (req) => {
-          // Create a unique key based on the user and review ID so users can request different releases/access requests
-          return `${req.user.dn}-${req.params['reviewId']}`
-        },
-      }
-    }),
-  }
-})
-vi.mock('../../../../src/utils/routes.js', () => mockRouteUtils)
-
 describe('routes > review > notify reviewers of additional review', () => {
   test('successfully sends notification to reviewers', async () => {
     const fixture = createFixture(postNotifyReviewerSchema)
