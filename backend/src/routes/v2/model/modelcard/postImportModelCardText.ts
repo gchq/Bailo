@@ -13,11 +13,9 @@ export const postImportModelCardTextSchema = z.object({
     }),
   }),
   body: z.object({
-    text: z
-      .string({
-        required_error: 'Must provide model card text to import',
-      })
-      .max(500000),
+    text: z.string({
+      required_error: 'Must provide model card text to import',
+    }),
   }),
 })
 
