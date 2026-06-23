@@ -1,6 +1,6 @@
 -r requirements.txt
 black==26.5.1
 pre_commit==4.6.0
-pytest==9.1.0
+pytest==9.1.1
 pytest-github-actions-annotate-failures==0.4.2
 pytest-mock==3.15.1
