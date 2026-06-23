@@ -152,7 +152,7 @@ export async function sendReviewResponseNotification(
   review: ReviewDoc,
   reviewResponse: ResponseInterface,
   user: UserInterface,
-  isApproved: boolean,
+  isApproved?: boolean,
 ) {
   switch (review.kind) {
     case ReviewKind.Access: {
