@@ -1,5 +1,5 @@
 {
-  "name": "Python 3.12 & Node.js 24",
+  "name": "Python 3.12 & Node.js 26",
   "build": {
     "dockerfile": "Dockerfile"
   },
