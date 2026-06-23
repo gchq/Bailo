@@ -210,7 +210,7 @@ export default function JsonSchemaForm({
           )}
           {canEdit && (
             <Stack direction={'column'} spacing={1}>
-              {stateList && (
+              {stateList && stateList.length > 0 && (
                 <Stack spacing={2} direction={'row'}>
                   <Typography>Filter fields by: </Typography>
                   {stateList.map((state) => (
@@ -227,7 +227,7 @@ export default function JsonSchemaForm({
               )}
               <Typography sx={{ pt: 1 }}>
                 Required fields for this state are marked with an asterisk
-                <span style={{ color: theme.palette.error.main }}> *</span>``
+                <span style={{ color: theme.palette.error.main }}> *</span>
               </Typography>
             </Stack>
           )}
