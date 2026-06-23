@@ -272,7 +272,7 @@ class Client:
     def model_card_from_template(self, model_id: str, template_id: str | None):
         """Create a model card using a given template ID (previously created models, model ID)
         :param model_id: Unique model ID
-        :param template_id Previous model's unique ID to be used as template for new model card
+        :param template_id: Previous model's unique ID to be used as template for new model card
         :return: JSON response object
         """
         return self.agent.post(
@@ -330,16 +330,15 @@ class Client:
         images: list[str],
     ):
         """
-        Create a new model release.
+        Update a model release.
 
         :param model_id: Unique model ID
         :param model_card_version: Model card version
         :param release_version: Release version
         :param notes: Notes on release
+        :param draft: Signifies a draft release
         :param file_ids: Files for release
         :param images: Images for release
-        :param minor: Signifies a minor release, defaults to False
-        :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
         """
         return self.agent.put(
@@ -418,7 +417,7 @@ class Client:
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
-        :return: The unique file ID
+        :return: Response object
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
@@ -444,7 +443,7 @@ class Client:
         :param model_id: Unique model ID
         :param semver: Semver of the release
         :param filename: The filename trying to download from
-        :return: The filename
+        :return: Response object
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
@@ -643,7 +642,6 @@ class Client:
         """Retrieve all access requests given a specific model.
 
         :param model_id: Unique model ID
-        :param access_request_id: Unique access request ID
         :return: JSON response object
         """
         return self.agent.get(
@@ -685,7 +683,8 @@ class Client:
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID
-        :metadata: Metadata object, defined by access request schemas
+        :param metadata: Metadata object, defined by access request schemas
+        :param schema_id: Unique schema ID, defaults to None
         :return: JSON response object
         """
         filtered_params = filter_none({"schemaId": schema_id, "metadata": metadata})
@@ -736,7 +735,7 @@ class Client:
         decision: str,
         comment: str | None = None,
     ):
-        """Create a review for a release.
+        """Create a review for an access request.
 
         :param model_id: A unique model ID
         :param access_request_id: Unique access request ID
