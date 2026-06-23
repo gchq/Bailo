@@ -12,7 +12,8 @@
           "description": "A description of what the model does.",
           "type": "string",
           "minLength": 1,
-          "maxLength": 5000
+          "maxLength": 5000,
+          "requiredByModelStates": ["Production", "Review"]
         },
         "datasets": {
           "title": "Are there any datasets related to this model?",
@@ -21,7 +22,8 @@
           "items": {
             "type": "string"
           },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "requiredByModelStates": ["Development"]
         },
         "metrics": {
           "type": "array",
@@ -62,7 +64,8 @@
               "title": "Question three",
               "description": "This is a date question",
               "type": "string",
-              "format": "date"
+              "format": "date",
+              "requiredByModelStates": ["Production", "Review"]
             }
           }
         },

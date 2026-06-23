@@ -2,7 +2,7 @@ import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
-import Error from '@mui/icons-material/Error'
+import Error from '@mui/icons-material/ErrorOutline'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import {
@@ -58,6 +58,7 @@ export function DescriptionFieldTemplate() {
 }
 
 export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+  const theme = useTheme()
   const answered = isQuestionAnswered(id, schema, registry.formContext)
   const requiredByState =
     registry.formContext.requiredByModelState &&
@@ -68,10 +69,7 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
       <Box
         p={0.5}
         sx={{
-          backgroundColor: alpha(
-            answered ? registry.formContext.theme.palette.primary.main : registry.formContext.theme.palette.error.main,
-            0.1,
-          ),
+          backgroundColor: alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1),
         }}
       >
         <Stack direction='row' alignItems='center'>
@@ -88,9 +86,10 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
   return <>{children}</>
 }
 
-export function ErrorListTemplate({ registry }) {
+export function ErrorListTemplate() {
+  const theme = useTheme()
   return (
-    <Typography color={registry.formContext.theme.palette.error.main} sx={{ mb: 2 }}>
+    <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
       Please make sure that all errors listed below have been resolved.
     </Typography>
   )

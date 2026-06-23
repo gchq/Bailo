@@ -18,6 +18,7 @@ import {
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
@@ -27,6 +28,7 @@ import {
   setStepState,
   widgets,
 } from 'utils/formUtils'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type RouterQueryParams = {
   page?: number
@@ -152,6 +154,15 @@ export default function JsonSchemaForm({
     }
   }
 
+  if (requiredByModelState && !stateList?.includes(requiredByModelState)) {
+    return (
+      <MessageAlert
+        message={`Invalid query parameter requiredByModelState ("${requiredByModelState}")`}
+        severity='error'
+      />
+    )
+  }
+
   return (
     <Stack>
       {displayStats && (
@@ -203,7 +214,9 @@ export default function JsonSchemaForm({
           {displayStats && (
             <Box>
               <Box>
-                {requiredByModelState} Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
+                {toSentenceCase(
+                  `${requiredByModelState ? `${requiredByModelState} ` : ''}entries completed: ${formStats.totalAnswers}/${formStats.totalQuestions}`,
+                )}
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
@@ -211,10 +224,10 @@ export default function JsonSchemaForm({
           {canEdit && (
             <Stack direction={'column'} spacing={1}>
               {stateList && stateList.length > 0 && (
-                <Stack spacing={2} direction={'row'}>
+                <Stack spacing={2} direction={'row'} alignItems={'center'}>
                   <Typography>Filter fields by: </Typography>
                   {stateList.map((state) => (
-                    <Tooltip key={state} title={`Filter out questions necessary for ${state}`}>
+                    <Tooltip key={state} title={`Highlight questions required for ${state}`}>
                       <Chip
                         key={state}
                         label={state}
@@ -251,7 +264,6 @@ export default function JsonSchemaForm({
               mirroredModel,
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
-              theme: theme,
             }}
             templates={
               !canEdit
