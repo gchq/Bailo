@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   notifyLifeCycleReview,
+  notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
@@ -106,8 +107,18 @@ const responseService = vi.hoisted(() => ({
       kind: 'review',
     }
   }),
+  checkAccessRequestsApproved: vi.fn(function () {
+    return true
+  }),
 }))
 vi.mock('../../../src/services/response.js', async () => responseService)
+
+const AccessRequestModelMock = vi.hoisted(() => ({
+  find: vi.fn(function () {
+    return [] as any[]
+  }),
+}))
+vi.mock('../../../src/models/AccessRequest.js', () => ({ default: AccessRequestModelMock }))
 
 const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
@@ -285,6 +296,17 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is sent after a response for a release review to additional reviewers', async () => {
     await notifyReviewResponseForRelease(testReviewResponse as any, release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to all stakeholders on release', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyReleaseOnApproval('modelId', release)
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })

@@ -2,7 +2,8 @@ import nodemailer, { Transporter } from 'nodemailer'
 
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { SystemRoles } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
@@ -11,6 +12,7 @@ import { toEntity } from '../../utils/entity.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
+import { checkAccessRequestsApproved } from '../response.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -74,6 +76,17 @@ async function dispatchEmail(entities: string[], emailContent: EmailContent) {
     log.warn({ content, error }, `Unable to send email`)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
+}
+
+export async function getApprovedAccessRequests(modelId: string) {
+  const accessRequests = await AccessRequestModel.find({
+    modelId,
+  })
+  const approvalResults = await Promise.all(
+    accessRequests.map((accessRequest) => checkAccessRequestsApproved([accessRequest.id])),
+  )
+  const approvedAccessRequests = accessRequests.filter((_, index) => approvalResults[index])
+  return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
@@ -245,7 +258,6 @@ export async function notifyReviewResponseForAccess(
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-
   const model = await getModelByIdNoAuth(accessRequest.modelId)
   const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
   await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], await emailContent)
@@ -270,6 +282,29 @@ export async function startImportNotification(modelId: string) {
   const model = await getModelByIdNoAuth(modelId)
   const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
   await dispatchEmail(ownerEntities, await emailContent)
+}
+
+export async function notifyReleaseOnApproval(modelId: string, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `A new release is available`,
+    [],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Release', url: getReleaseUrl(release) },
+    ],
+  )
+  const model = await getModelByIdNoAuth(modelId)
+  const entries = Object.values(
+    getRoleEntities([SystemRoles.Consumer, SystemRoles.Owner, SystemRoles.Contributor], model.collaborators),
+  )
+    .flat()
+    .concat(await getApprovedAccessRequests(modelId))
+  await dispatchEmail(entries, await emailContent)
 }
 
 export async function transferCompleteNotification(

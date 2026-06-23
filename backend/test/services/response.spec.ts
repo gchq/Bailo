@@ -4,9 +4,11 @@ import { describe, expect, test, vi } from 'vitest'
 import { Decision, ReactionKind } from '../../src/models/Response.js'
 import {
   checkAccessRequestsApproved,
+  checkReleaseApproved,
   findResponseById,
   getResponsesByParentIds,
   respondToReview,
+  sendReviewResponseNotification,
   updateResponse,
   updateResponseReaction,
 } from '../../src/services/response.js'
@@ -24,12 +26,16 @@ vi.mock('../../src/connectors/authentication/index.js', () => ({
 }))
 
 const ResponseModelMock = getTypedModelMock('ResponseModel')
+const ReviewModelMock = getTypedModelMock('ReviewModel')
 
 const smtpMock = vi.hoisted(() => ({
   notifyReviewResponseForAccess: vi.fn(function () {
     return Promise.resolve()
   }),
   notifyReviewResponseForRelease: vi.fn(function () {
+    return Promise.resolve()
+  }),
+  notifyReleaseOnApproval: vi.fn(function () {
     return Promise.resolve()
   }),
   requestReviewForRelease: vi.fn(function () {
@@ -229,6 +235,10 @@ describe('services > response', () => {
   })
 
   test('respondToReview > release successful', async () => {
+    releaseServiceMock.getReleaseBySemver.mockResolvedValueOnce({
+      modelId: 'abc',
+      semver: '3.0.3',
+    })
     await respondToReview(
       user,
       'modelId',
@@ -312,6 +322,10 @@ describe('services > response', () => {
 
   test('respondToReview > log when failed to send release response notification', async () => {
     smtpMock.notifyReviewResponseForRelease.mockRejectedValueOnce('failed to send')
+    releaseServiceMock.getReleaseBySemver.mockResolvedValueOnce({
+      modelId: 'abc',
+      semver: '3.0.3',
+    })
     await respondToReview(
       user,
       'modelId',
@@ -391,5 +405,87 @@ describe('services > response', () => {
 
     expect(result).toBe(false)
     expect(reviewMock.findReviewsForAccessRequests.mock.calls).toMatchSnapshot()
+  })
+
+  describe('checkReleaseApproved', () => {
+    test('returns true when all reviews have approved latest response', async () => {
+      ReviewModelMock.aggregate.mockResolvedValueOnce([])
+      ReviewModelMock.countDocuments.mockResolvedValueOnce(2)
+
+      const result = await checkReleaseApproved('modelId', '1.0.0')
+
+      expect(result).toBe(true)
+    })
+
+    test('returns false when some reviews lack approval', async () => {
+      ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: 'review1' }])
+      ReviewModelMock.countDocuments.mockResolvedValueOnce(2)
+
+      const result = await checkReleaseApproved('modelId', '1.0.0')
+
+      expect(result).toBe(false)
+    })
+
+    test('returns false when there are no reviews', async () => {
+      ReviewModelMock.aggregate.mockResolvedValueOnce([])
+      ReviewModelMock.countDocuments.mockResolvedValueOnce(0)
+
+      const result = await checkReleaseApproved('modelId', '1.0.0')
+
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('sendReviewResponseNotification', () => {
+    test('calls notifyReleaseOnApproval when release becomes newly approved', async () => {
+      const review = { ...testReleaseReview, kind: ReviewKind.Release } as any
+      const reviewResponse = { entity: 'user:test', decision: 'approve', role: 'msro' } as any
+
+      releaseServiceMock.getReleaseBySemver.mockResolvedValueOnce({
+        modelId: 'abc',
+        semver: '3.0.3',
+      })
+      ReviewModelMock.aggregate.mockResolvedValueOnce([])
+      ReviewModelMock.countDocuments.mockResolvedValueOnce(1)
+
+      await sendReviewResponseNotification(review, reviewResponse, user, false)
+
+      expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
+      expect(smtpMock.notifyReleaseOnApproval).toHaveBeenCalledOnce()
+    })
+
+    test('does not call notifyReleaseOnApproval when release was already approved', async () => {
+      const review = { ...testReleaseReview, kind: ReviewKind.Release } as any
+      const reviewResponse = { entity: 'user:test', decision: 'approve', role: 'msro' } as any
+
+      releaseServiceMock.getReleaseBySemver.mockResolvedValueOnce({
+        modelId: 'abc',
+        semver: '3.0.3',
+      })
+      ReviewModelMock.aggregate.mockResolvedValueOnce([])
+      ReviewModelMock.countDocuments.mockResolvedValueOnce(1)
+
+      await sendReviewResponseNotification(review, reviewResponse, user, true)
+
+      expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
+      expect(smtpMock.notifyReleaseOnApproval).not.toHaveBeenCalled()
+    })
+
+    test('does not call notifyReleaseOnApproval when release is not fully approved', async () => {
+      const review = { ...testReleaseReview, kind: ReviewKind.Release } as any
+      const reviewResponse = { entity: 'user:test', decision: 'approve', role: 'msro' } as any
+
+      releaseServiceMock.getReleaseBySemver.mockResolvedValueOnce({
+        modelId: 'abc',
+        semver: '3.0.3',
+      })
+      ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: 'unapproved' }])
+      ReviewModelMock.countDocuments.mockResolvedValueOnce(2)
+
+      await sendReviewResponseNotification(review, reviewResponse, user, false)
+
+      expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
+      expect(smtpMock.notifyReleaseOnApproval).not.toHaveBeenCalled()
+    })
   })
 })
