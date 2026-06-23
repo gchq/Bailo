@@ -56,9 +56,6 @@ const config: PartialDeep<Config> = {
       },
     },
     from: '"Bailo 📝" <bailo@example.org>',
-    review: {
-      lastNotifiedCoolDownMs: 30000,
-    },
   },
   log: {
     level: 'debug',

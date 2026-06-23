@@ -422,7 +422,6 @@ The following tables describe selected configuration options available in `value
 | `config.smtp.user` | Auth username | `mailuser` |
 | `config.smtp.pass` | Auth password | `mailpass` |
 | `config.smtp.from` | Email address used by Bailo. When a review is required, for example | `bailo@example.com` |
-| `config.smtp.review.lastNotifiedCoolDownMs` | The cool down period in milliseconds between attempts to notify a review role of changes | `300000` |
 | `config.app.protocol` | Used for external bailo url. See backed/src/services/smtp | `https` |
 | `config.app.port` | Used for external bailo url | `443` |
 | `config.issueLinks.support` | Help page email configuration | `mailto:?subject=Bailo%20Contact` |

@@ -126,10 +126,6 @@ data:
           postReminderInterval: '{{ .Values.config.smtp.postReminderInterval }}',
         },
 
-        review: {
-          lastNotifiedCoolDownMs: {{ .Values.config.smtp.lastNotifiedCoolDownMs }},
-        },
-
         // Set the email address that Bailo should use, can be different from the SMTP server details.
         from: '{{ .Values.config.smtp.from }}',
       },

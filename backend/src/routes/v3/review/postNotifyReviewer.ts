@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import rateLimit from 'express-rate-limit'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -6,6 +7,18 @@ import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
 import { notifyReviewer } from '../../../services/v3/review.js'
 import { parse } from '../../../utils/validate.js'
+
+const reviewNotifierLimiter = rateLimit({
+  windowMs: 30000,
+  limit: 1,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Create a unique key based on the user and review ID so users can request different releases/access requests
+    const userDn = req.user?.dn ?? req.ip
+    return `${userDn}-${req.params['reviewId']}`
+  },
+})
 
 export const postNotifyReviewerSchema = z.object({
   params: z.object({
@@ -30,6 +43,7 @@ registerPath(
 )
 
 export const postNotifyReviewer = [
+  reviewNotifierLimiter,
   async (req: Request, res: Response): Promise<void> => {
     req.audit = AuditInfo.NotifyReviewers
     const {
