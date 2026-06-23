@@ -14,7 +14,6 @@ import { BadReq, NotFound } from '../../utils/error.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
-import { semverStringToObject } from '../release.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -271,10 +270,9 @@ async function notifyRole(review: ReviewInterface, title: string, fields: Info[]
 
 export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
   if (review.kind === ReviewKind.Release) {
-    const semverObj = semverStringToObject(review.semver)
     const release = await ReleaseModel.findOne({
       modelId: review.modelId,
-      semver: semverObj,
+      semver: review.semver,
     })
 
     if (!release) {
