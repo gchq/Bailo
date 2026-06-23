@@ -16,6 +16,9 @@
     "jsxImportSource": "@emotion/react",
     "incremental": true,
     "baseUrl": ".",
+    "paths": {
+      "@dayjs": ["src/dayjsConfig.ts"]
+    },
     "noImplicitAny": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "vitest.config.mts", "**/*.mdx"],

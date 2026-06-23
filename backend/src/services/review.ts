@@ -4,7 +4,7 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
-import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
@@ -14,7 +14,7 @@ import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
-import { getModelById } from './model.js'
+import { getModelById, getRoleEntities } from './model.js'
 import { getSchemaById, searchSchemas } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
@@ -92,17 +92,15 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
     model.collaborators,
   )
 
-  const createReviews = roleEntities.map((roleInfo) => {
+  const createReviews = Object.entries(roleEntities).map(([role, entities]) => {
     const review = new ReviewModel({
       semver: release.semver,
       modelId: model.id,
       kind: ReviewKind.Release,
-      role: roleInfo.role,
+      role,
     })
-    roleInfo.entities.forEach((entity) =>
-      requestReviewForRelease(entity, review, release).catch((error) =>
-        log.warn({ error }, 'Error when sending notifications requesting review for release.'),
-      ),
+    requestReviewForRelease(entities, review, release).catch((error) =>
+      log.warn({ error, entities }, 'Error when sending notifications requesting review for release.'),
     )
     return review.save()
   })
@@ -124,17 +122,15 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
     model.collaborators,
   )
 
-  const createReviews = roleEntities.map((roleInfo) => {
+  const createReviews = Object.entries(roleEntities).map(([role, entities]) => {
     const review = new ReviewModel({
       accessRequestId: accessRequest.id,
       modelId: model.id,
       kind: ReviewKind.Access,
-      role: roleInfo.role,
+      role,
     })
-    roleInfo.entities.forEach((entity) =>
-      requestReviewForAccessRequest(entity, review, accessRequest).catch((error) =>
-        log.warn({ error }, 'Error when sending notifications requesting review for Access Request.'),
-      ),
+    requestReviewForAccessRequest(entities, review, accessRequest).catch((error) =>
+      log.warn({ error, entities }, 'Error when sending notifications requesting review for Access Request.'),
     )
     return review.save()
   })
@@ -226,15 +222,6 @@ export async function findReviewForResponse(
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   return await ReviewModel.find({
     accessRequestId: accessRequestIds,
-  })
-}
-
-export function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
-  return roles.map((role) => {
-    const entities = collaborators
-      .filter((collaborator) => collaborator.roles.includes(role))
-      .map((collaborator) => collaborator.entity)
-    return { role, entities }
   })
 }
 

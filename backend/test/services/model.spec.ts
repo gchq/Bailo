@@ -14,6 +14,7 @@ import {
   getModelByIdNoAuth,
   getModelCardRevision,
   getModelSystemRoles,
+  getRoleEntities,
   isModelCardRevisionDoc,
   popularTagsForEntries,
   removeModel,
@@ -857,5 +858,65 @@ describe('services > model', () => {
     const response = await getModelSystemRoles(mockUser, mockModel)
 
     expect(response).toContain('owner')
+  })
+
+  test('getRoleEntities > basic mapping', () => {
+    const roles = ['owner', 'contributor'] as const
+    const collaborators = [
+      { entity: 'user:alice', roles: ['owner'] },
+      { entity: 'user:bob', roles: ['contributor'] },
+    ]
+
+    const result = getRoleEntities(roles, collaborators)
+
+    expect(result).toEqual({
+      owner: ['user:alice'],
+      contributor: ['user:bob'],
+    })
+  })
+
+  test('getRoleEntities > role with no matching collaborators returns empty array', () => {
+    const roles = ['owner', 'reviewer'] as const
+    const collaborators = [{ entity: 'user:alice', roles: ['owner'] }]
+
+    const result = getRoleEntities(roles, collaborators)
+
+    expect(result).toEqual({
+      owner: ['user:alice'],
+      reviewer: [],
+    })
+  })
+
+  test('getRoleEntities > empty collaborators returns empty arrays for all roles', () => {
+    const roles = ['owner', 'contributor'] as const
+    const collaborators: { entity: string; roles: string[] }[] = []
+
+    const result = getRoleEntities(roles, collaborators)
+
+    expect(result).toEqual({
+      owner: [],
+      contributor: [],
+    })
+  })
+
+  test('getRoleEntities > empty roles returns empty object', () => {
+    const roles = [] as const
+    const collaborators = [{ entity: 'user:alice', roles: ['owner'] }]
+
+    const result = getRoleEntities(roles, collaborators)
+
+    expect(result).toEqual({})
+  })
+
+  test('getRoleEntities > collaborator with multiple roles appears in all relevant role arrays', () => {
+    const roles = ['owner', 'contributor'] as const
+    const collaborators = [{ entity: 'user:alice', roles: ['owner', 'contributor'] }]
+
+    const result = getRoleEntities(roles, collaborators)
+
+    expect(result).toEqual({
+      owner: ['user:alice'],
+      contributor: ['user:alice'],
+    })
   })
 })

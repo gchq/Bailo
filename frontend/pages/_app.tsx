@@ -2,6 +2,7 @@ import '../public/css/fonts.css'
 import '../public/css/layouting.css'
 import '../public/css/table.css'
 import '../public/css/highlight.css'
+import '@dayjs'
 
 import { EmotionCache } from '@emotion/cache'
 import { AppCacheProvider, createEmotionCache } from '@mui/material-nextjs/v15-pagesRouter'

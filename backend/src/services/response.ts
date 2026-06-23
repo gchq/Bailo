@@ -1,4 +1,4 @@
-import { ClientSession, QueryFilter, Types } from 'mongoose'
+import { ClientSession, Types } from 'mongoose'
 
 import ResponseModel, {
   Decision,
@@ -35,13 +35,7 @@ export async function findResponseById(responseId: string) {
 
 export async function getResponsesByParentIds(parentIds: string[]) {
   const objectIds = parentIds.map((id) => new Types.ObjectId(id))
-
-  const filter = {
-    parentId: { $in: objectIds },
-    // Hack/Workaround broken mongooose typing
-  } as unknown as QueryFilter<ResponseDoc>
-
-  const responses = await ResponseModel.find(filter)
+  const responses = await ResponseModel.find({ parentId: { $in: objectIds } })
 
   if (!responses) {
     throw NotFound(`The requested response was not found.`, { parentIds })
@@ -204,7 +198,10 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
 }
 
 export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
-  const responses = await ResponseModel.find({ parentId: parentIds })
+  const objectIds = parentIds.map((id) => new Types.ObjectId(id))
+  const responses = await ResponseModel.find({
+    parentId: { $in: objectIds },
+  })
 
   const deletions: ResponseDoc[] = []
   for (const response of responses) {

@@ -46,6 +46,7 @@ vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
+  getRoleEntities: vi.fn((roles, _collaborators) => ({ [roles[0]]: ['user:user'] })),
 }))
 vi.mock('../../src/services/model.js', async () => modelMock)
 
@@ -127,7 +128,7 @@ describe('services > review', () => {
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
-    ReviewRoleModelMock.find.mockResolvedValueOnce([])
+    modelMock.getRoleEntities.mockReturnValueOnce({})
     const result: Promise<void> = createReleaseReviews(
       { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] } as any,
       {} as any,

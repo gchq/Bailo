@@ -122,12 +122,12 @@ vi.mock('../../src/services/images/getImageLayers.js', () => imageMocks)
 const registryClientMocks = vi.hoisted(() => ({
   isImageTagManifestList: vi.fn(() => false),
 }))
-vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+vi.mock('../../src/clients/registry.js', () => registryClientMocks)
 
 const registryAuthMocks = vi.hoisted(() => ({
   issueAccessToken: vi.fn(() => 'token'),
 }))
-vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
+vi.mock('../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 
 const testFileId = '73859F8D26679D2E52597326'
 const mockFile = { _id: 'file123', name: 'file.txt', size: 1 } as any
