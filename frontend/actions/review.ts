@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs'
+import { Dayjs } from '@dayjs'
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
