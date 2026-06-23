@@ -4,6 +4,11 @@ import { buildSchemaDescription, extractModelCardFromText } from '../../src/serv
 
 const llmMock = vi.hoisted(() => ({
   callLlmChatCompletion: vi.fn(),
+  ChatMessageRole: {
+    SYSTEM: 'system',
+    USER: 'user',
+    ASSISTANT: 'assistant',
+  },
 }))
 vi.mock('../../src/clients/llm.js', () => llmMock)
 
@@ -40,9 +45,7 @@ describe('services > modelCardImport', () => {
           name: { type: 'string', title: 'Model Name' },
         },
       }
-      expect(buildSchemaDescription(schema)).toEqual([
-        { path: 'name', title: 'Model Name', type: 'string' },
-      ])
+      expect(buildSchemaDescription(schema)).toEqual([{ path: 'name', title: 'Model Name', type: 'string' }])
     })
 
     test('extracts number and boolean fields', () => {

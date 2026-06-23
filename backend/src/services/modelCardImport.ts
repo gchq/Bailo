@@ -1,6 +1,6 @@
 import { Schema as JsonSchema, Validator } from 'jsonschema'
 
-import { callLlmChatCompletion, ChatMessage } from '../clients/llm.js'
+import { callLlmChatCompletion, ChatMessage, ChatMessageRole } from '../clients/llm.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq } from '../utils/error.js'
 import log from './log.js'
@@ -241,8 +241,8 @@ The output must be a JSON object where the top-level keys are the first segment 
 Return ONLY the JSON object.`
 
   return [
-    { role: 'system', content: systemMessage },
-    { role: 'user', content: userMessage },
+    { role: ChatMessageRole.SYSTEM, content: systemMessage },
+    { role: ChatMessageRole.USER, content: userMessage },
   ]
 }
 

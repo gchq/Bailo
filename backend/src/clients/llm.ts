@@ -4,17 +4,14 @@ import log from '../services/log.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 
-  export enum ChatMessageRole {
-    USER = 'system',
-    GROUP = 'user',
-    ASSISTANT = 'assistant'
-    
-  } as const
-
-  export type ChatMessageRoleKeys = (typeof ChatMessageRole)[keyof typeof ChatMessageRole]
+export enum ChatMessageRole {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
 
 export interface ChatMessage {
-  role: ChatMessageRoleKeys
+  role: ChatMessageRole
   content: string
 }
 
