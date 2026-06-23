@@ -70,7 +70,7 @@ class Agent:
         return self.__request("GET", *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        """Make a POST request. See :func:`__request for parameters.
+        """Make a POST request. See :func:`__request` for parameters.
 
         :return: Response object.
         """

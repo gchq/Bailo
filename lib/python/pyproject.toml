@@ -24,7 +24,7 @@ dynamic = ["version"]
 dependencies = [
     "requests==2.34.2",
     "semantic-version==2.10.0",
-    "tqdm==4.68.2"
+    "tqdm==4.68.3"
 ]
 
 [project.optional-dependencies]
@@ -40,7 +40,7 @@ test = [
     "pytest-cov==7.1.0",
     "pytest-mock==3.15.1",
     "pytest-runner==6.0.1",
-    "pytest==9.1.0",
+    "pytest==9.1.1",
     "pytest-github-actions-annotate-failures==0.4.0",
     "requests_mock==1.12.1",
     "shellcheck-py==0.11.0.1",
