@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -15,7 +15,7 @@ const reviewNotifierLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     // Create a unique key based on the user and review ID so users can request different releases/access requests
-    const userDn = req.user?.dn ?? req.ip
+    const userDn = req.user?.dn ?? ipKeyGenerator(req.ip as string)
     return `${userDn}-${req.params['reviewId']}`
   },
 })
