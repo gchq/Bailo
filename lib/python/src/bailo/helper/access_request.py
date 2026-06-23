@@ -41,11 +41,12 @@ class AccessRequest:
 
     @classmethod
     def from_id(cls, client: Client, model_id: str, access_request_id: str) -> AccessRequest:
-        """Return an existing review from Bailo given it's unique ID.
+        """Return an existing access request from Bailo given its unique ID.
 
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID within Bailo
         :param access_request_id: A unique ID for an access request
+        :return: AccessRequest object
         """
         json_access_request = client.get_access_request(model_id, access_request_id)["accessRequest"]
 
@@ -87,7 +88,7 @@ class AccessRequest:
         :param model_id: A unique model ID within Bailo
         :param metadata: Access request metadata.
         :param schema_id: A unique schema ID, defaults to minimal-access-request-general-v10
-        :return: JSON response object
+        :return: AccessRequest object
         """
         access_request_json = client.post_access_request(model_id, metadata, schema_id)["accessRequest"]
 
@@ -115,7 +116,7 @@ class AccessRequest:
     def delete(self) -> bool:
         """Delete the access request on Bailo.
 
-        :return: A message confirming the removal of the access request.
+        :return: True if the access request was successfully deleted.
         """
         self.client.delete_access_request(self.model_id, self.access_request_id)
 
@@ -132,7 +133,7 @@ class AccessRequest:
     def __str__(self) -> str:
         """Return the human-readable string representation of the access request.
 
-        :return: String value of the enum.
+        :return: String representation of the access request.
         """
         return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"
 
