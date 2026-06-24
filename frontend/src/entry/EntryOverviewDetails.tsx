@@ -170,7 +170,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             )}
             {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>Unset</em>}
             <Stack
-              direction='row'
+              direction={{ md: 'column', lg: 'row' }}
               spacing={1}
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
