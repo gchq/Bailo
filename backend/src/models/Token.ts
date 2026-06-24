@@ -1,8 +1,16 @@
-import bcrypt from 'bcryptjs'
-import { createHash } from 'crypto'
 import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
-import { BadReq } from '../utils/error.js'
+import {
+  createArgon2Hash,
+  createBcryptHash,
+  createSHA256Hash,
+  HashType,
+  HashTypeKeys,
+  toSecretKey,
+  verifyArgon2Hash,
+  verifyBcryptHash,
+  verifySHA256Hash,
+} from '../services/hash.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TokenScope = {
@@ -54,13 +62,6 @@ export const TokenActions = {
 export const tokenActionIds = Object.values(TokenActions).map((tokenAction) => tokenAction.id)
 
 export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]['id']
-
-export const HashType = {
-  Bcrypt: 'bcrypt',
-  SHA256: 'sha-256',
-}
-
-export type HashTypeKeys = (typeof HashType)[keyof typeof HashType]
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -120,50 +121,31 @@ TokenSchema.pre('save', function userPreSave() {
     this.hashMethod = HashType.SHA256
   }
 
-  if (this.hashMethod === HashType.Bcrypt) {
-    bcrypt.hash(this.secretKey, 8, (err: Error | null, result: string | undefined) => {
-      if (err) {
-        throw err
-      }
-      if (!result) {
-        throw BadReq('Unable to create token')
-      }
-      this.secretKey = result
-    })
+  if (this.hashMethod === HashType.argon2) {
+    const { salt, hash } = createArgon2Hash(this.secretKey)
+    this.secretKey = toSecretKey(salt, hash)
+  } else if (this.hashMethod === HashType.Bcrypt) {
+    this.secretKey = createBcryptHash(this.secretKey)
   } else if (this.hashMethod === HashType.SHA256) {
-    const hash = createHash('sha256').update(this.secretKey).digest('hex')
-    this.secretKey = hash
+    this.secretKey = createSHA256Hash(this.secretKey)
   } else {
     throw new Error('Unexpected hash type: ' + this.hashMethod)
   }
 })
 
 TokenSchema.methods.compareToken = function compareToken(candidateToken: string) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!this.secretKey) {
       resolve(false)
       return
     }
 
-    if (this.hashMethod === HashType.Bcrypt) {
-      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, result: boolean | undefined) => {
-        if (err) {
-          reject(err)
-          return
-        }
-        if (!result) {
-          BadReq('Unable to compare token')
-        }
-        resolve(result)
-      })
+    if (this.hashMethod === HashType.argon2) {
+      resolve(verifyArgon2Hash(candidateToken, this.secretKey))
+    } else if (this.hashMethod === HashType.Bcrypt) {
+      resolve(verifyBcryptHash(candidateToken, this.secretKey))
     } else if (this.hashMethod === HashType.SHA256) {
-      const candidateHash = createHash('sha256').update(candidateToken).digest('hex')
-      if (candidateHash !== this.secretKey) {
-        resolve(false)
-        return
-      }
-
-      resolve(true)
+      resolve(verifySHA256Hash(candidateToken, this.secretKey))
     } else {
       throw new Error('Unexpected hash type: ' + this.hashMethod)
     }

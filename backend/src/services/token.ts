@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { ClientSession } from 'mongoose'
 import { customAlphabet } from 'nanoid'
 
@@ -23,7 +24,7 @@ export async function createToken(user: UserInterface, { description, scope, mod
   }
 
   const accessKey = `BAC_${nanoid(8)}`
-  const secretKey = `BSK_${nanoid(12)}`
+  const secretKey = `BSK_${randomBytes(32).toString('base64url')}`
 
   if (scope === 'models') {
     // Checks to make sure the models are valid
