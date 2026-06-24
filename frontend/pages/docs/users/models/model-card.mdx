@@ -1,6 +1,7 @@
 import Image from 'next/legacy/image'
 import Box from '@mui/material/Box'
 import bailoModelAccess from 'public/docs/bailo_model_access.png'
+import bailoUpdateModelCardForProduction from 'public/docs/bailo_update_model_card_for_production.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Filling In the Model Card
@@ -15,6 +16,7 @@ selected when creating the model.
 > - How do I add collaborators to a model?
 > - How do I assign review roles?
 > - What is the model card version history?
+> - What are required model status fields?
 
 ## What is a model card?
 
@@ -34,6 +36,22 @@ schema.
 - You can return and edit the model card at any time
 
 Each edit creates a **new version** of the model card. You can view previous versions in the model's version history.
+
+### Required by model status fields
+
+Some model cards will require you to fill in specific fields for different points in that model's lifecycle. This helps
+ensure the structured document is up to date and accurate, for consumers.
+
+To update to a new lifecycle status, select an option in status chips. This will highlight fields required by that
+status. Fill in all these fields on all pages.
+
+<Box sx={{ maxWidth: '75%' }}>
+  <Image alt='updating a model card for production using required fields' src={bailoUpdateModelCardForProduction} />
+</Box>
+
+The screenshot above shows the model summary on the model card being updated, as a required field for production.
+
+You can now save the model card and update the state on the model details tab.
 
 ## Configuring model access
 
