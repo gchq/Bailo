@@ -162,7 +162,7 @@ function stripUnknownKeys(
           }
           return item
         })
-        .filter((item) => item !== null && item !== undefined && !isPlaceholderValue(item))
+        .filter((item) => !isPlaceholderValue(item))
 
       if (cleaned.length > 0) {
         result[key] = cleaned
