@@ -387,29 +387,31 @@ export default function ReleaseForm({
           </AccordionDetails>
         </Accordion>
       </Stack>
-      <Box>
-        <Accordion defaultExpanded sx={{ p: 0 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography
-              fontWeight='bold'
-              component='label'
-              htmlFor='image-input'
-            >{`Images (${formData.imageList.length})`}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <ModelImageList
-              multiple
-              model={model}
-              value={formData.imageList}
-              readOnly={isReadOnly}
-              onChange={onImageListChange}
-              onRegistryError={onRegistryError}
-              id='image-input'
-            />
-            {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
-          </AccordionDetails>
-        </Accordion>
-      </Box>
+      {model.kind !== EntryKind.UNTRUSTED_MODEL && (
+        <Box>
+          <Accordion defaultExpanded sx={{ p: 0 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+              <Typography
+                fontWeight='bold'
+                component='label'
+                htmlFor='image-input'
+              >{`Images (${formData.imageList.length})`}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <ModelImageList
+                multiple
+                model={model}
+                value={formData.imageList}
+                readOnly={isReadOnly}
+                onChange={onImageListChange}
+                onRegistryError={onRegistryError}
+                id='image-input'
+              />
+              {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
+            </AccordionDetails>
+          </Accordion>
+        </Box>
+      )}
     </Stack>
   )
 }
