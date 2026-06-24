@@ -1,9 +1,8 @@
-import { Info, LocalOffer } from '@mui/icons-material'
-import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
+import { LocalOffer } from '@mui/icons-material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchEntry, useGetEntry } from 'actions/entry'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { useGetSchema } from 'actions/schema'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useContext, useMemo, useState } from 'react'
 import EntrySelect from 'src/common/EntrySelect'
@@ -17,7 +16,6 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewDateDialog from 'src/entry/overview/ReviewDateDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import InformationDialog from 'src/schemas/InformationDialog'
 import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
@@ -31,12 +29,10 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
-  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
   const [isReviewDateInputOpen, setIsReviewDateInputOpen] = useState(false)
   const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
 
   const { mutateEntry } = useGetEntry(entry.id)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card ? entry.card.schemaId : '')
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: entry.id,
     kind: ReviewKind.LIFECYCLE,
@@ -86,16 +82,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     mutateArchivedREviews()
   }
 
-  if (isUiConfigLoading || isSchemaLoading || isReviewsLoading || isArchivedReviewsLoading) {
+  if (isUiConfigLoading || isReviewsLoading || isArchivedReviewsLoading) {
     return <Loading />
   }
 
   if (isUiConfigError) {
     return <ErrorWrapper message={isUiConfigError.info.message} />
-  }
-
-  if (isSchemaError) {
-    return <ErrorWrapper message={isSchemaError.info.message} />
   }
 
   if (isReviewsError) {
@@ -117,24 +109,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {toSentenceCase(entry.kind)} details
         </Typography>
         <Stack>
-          {schema && (
-            <Stack>
-              <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
-                Schema:
-              </Typography>
-              <Stack direction='row' alignItems='center'>
-                <Typography>{schema.name}</Typography>
-                <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                  <Info color='primary' fontSize='small' />
-                </IconButton>
-                <InformationDialog
-                  open={SchemaInformationOpen}
-                  schema={schema}
-                  onClose={() => setSchemaInformationOpen(false)}
-                />
-              </Stack>
-            </Stack>
-          )}
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
