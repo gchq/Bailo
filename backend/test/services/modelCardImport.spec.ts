@@ -183,6 +183,63 @@ describe('services > modelCardImport', () => {
       ])
     })
 
+    test('resolves $ref and includes enum values in description', () => {
+      const schema = {
+        type: 'object',
+        definitions: {
+          securityClassification: { type: 'string', enum: ['OFFICIAL', 'OFFICIAL SENSITIVE'] },
+        },
+        properties: {
+          classification: { title: 'Classification', $ref: '#/definitions/securityClassification' },
+        },
+      }
+      const result = buildSchemaDescription(schema)
+      expect(result).toEqual([
+        {
+          path: 'classification',
+          title: 'Classification',
+          type: 'string, allowed values: ["OFFICIAL", "OFFICIAL SENSITIVE"]',
+        },
+      ])
+    })
+
+    test('resolves $ref for array items', () => {
+      const schema = {
+        type: 'object',
+        definitions: {
+          status: { type: 'string', enum: ['active', 'retired'] },
+        },
+        properties: {
+          statuses: { type: 'array', title: 'Statuses', items: { $ref: '#/definitions/status' } },
+        },
+      }
+      const result = buildSchemaDescription(schema)
+      expect(result).toEqual([
+        {
+          path: 'statuses',
+          title: 'Statuses',
+          type: 'array of string, allowed values: ["active", "retired"]',
+        },
+      ])
+    })
+
+    test('includes enum values for inline enum fields', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          priority: { type: 'string', title: 'Priority', enum: ['low', 'medium', 'high'] },
+        },
+      }
+      const result = buildSchemaDescription(schema)
+      expect(result).toEqual([
+        {
+          path: 'priority',
+          title: 'Priority',
+          type: 'string, allowed values: ["low", "medium", "high"]',
+        },
+      ])
+    })
+
     test('skips fields with excluded widgets', () => {
       const schema = {
         type: 'object',
@@ -318,6 +375,42 @@ describe('services > modelCardImport', () => {
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
       expect(result.status).toBeUndefined()
+    })
+
+    test('matches enum values case-insensitively and returns the schema-defined casing', async () => {
+      const schemaWithEnum = {
+        type: 'object',
+        properties: {
+          status: { type: 'string', title: 'Status', enum: ['Draft', 'Published'] },
+        },
+      }
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: schemaWithEnum })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(JSON.stringify({ status: 'published' }))
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result.status).toBe('Published')
+    })
+
+    test('matches array enum values case-insensitively', async () => {
+      const schemaWithArrayEnum = {
+        type: 'object',
+        properties: {
+          tags: {
+            type: 'array',
+            title: 'Tags',
+            items: { type: 'string', enum: ['NLP', 'Vision', 'Audio'] },
+          },
+        },
+      }
+      modelMock.getModelById.mockResolvedValueOnce({ card: { schemaId: 'schema-1' } })
+      schemaMock.getSchemaById.mockResolvedValueOnce({ jsonSchema: schemaWithArrayEnum })
+      llmMock.callLlmChatCompletion.mockResolvedValueOnce(JSON.stringify({ tags: ['nlp', 'VISION', 'invalid'] }))
+
+      const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
+
+      expect(result.tags).toEqual(['NLP', 'Vision'])
     })
 
     test('truncates strings exceeding maxLength', async () => {

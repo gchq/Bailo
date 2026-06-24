@@ -51,21 +51,39 @@ function describeObjectFields(schema: JsonSchema): string {
   return `{ ${parts.join(', ')} }`
 }
 
-export function buildSchemaDescription(schema: JsonSchema, basePath = ''): FieldDescriptor[] {
+export function buildSchemaDescription(schema: JsonSchema, basePath = '', rootSchema?: JsonSchema): FieldDescriptor[] {
+  const root = rootSchema || schema
   const fields: FieldDescriptor[] = []
 
   if (schema.type === 'object' && schema.properties) {
-    for (const [key, prop] of Object.entries(schema.properties) as [string, JsonSchema & { widget?: string }][]) {
+    for (const [key, rawProp] of Object.entries(schema.properties) as [
+      string,
+      JsonSchema & { widget?: string; $ref?: string },
+    ][]) {
       const path = basePath ? `${basePath}.${key}` : key
+
+      let prop = rawProp
+      if (prop.$ref) {
+        const resolved = resolveRef(prop.$ref, root)
+        if (resolved) {
+          prop = { ...resolved, ...prop, $ref: undefined } as typeof prop
+        }
+      }
 
       if (prop.widget && EXCLUDED_WIDGETS.has(prop.widget)) {
         continue
       }
 
       if (prop.type === 'object' && prop.properties) {
-        fields.push(...buildSchemaDescription(prop, path))
+        fields.push(...buildSchemaDescription(prop, path, root))
       } else if (prop.type === 'array' && prop.items) {
-        const items = prop.items as JsonSchema & { widget?: string }
+        let items = prop.items as JsonSchema & { widget?: string; $ref?: string }
+        if (items.$ref) {
+          const resolved = resolveRef(items.$ref, root)
+          if (resolved) {
+            items = { ...resolved, ...items, $ref: undefined } as typeof items
+          }
+        }
         let typeDesc: string
         if (items.type === 'object' && items.properties) {
           typeDesc = `array of objects with fields: ${describeObjectFields(items)}`
@@ -78,6 +96,13 @@ export function buildSchemaDescription(schema: JsonSchema, basePath = ''): Field
           path,
           title: prop.title || key,
           type: typeDesc,
+          ...(prop.description && { description: prop.description }),
+        })
+      } else if (prop.enum) {
+        fields.push({
+          path,
+          title: prop.title || key,
+          type: `${prop.type || 'string'}, allowed values: [${(prop.enum as string[]).map((val) => `"${val}"`).join(', ')}]`,
           ...(prop.description && { description: prop.description }),
         })
       } else {
@@ -165,12 +190,19 @@ function stripUnknownKeys(
           if (itemSchema?.type === 'object' && typeof item === 'object' && item !== null) {
             return stripUnknownKeys(item as Record<string, unknown>, itemSchema, root)
           }
-          if (itemSchema?.enum && !itemSchema.enum.includes(item)) {
-            return null
+          if (itemSchema?.enum) {
+            const matched = typeof item === 'string' ? matchEnumValue(item, itemSchema.enum) : undefined
+            if (matched === undefined) {
+              log.warn(
+                { key, value: item, allowedValues: itemSchema.enum },
+                'Dropping array item: no matching enum value.',
+              )
+            }
+            return matched !== undefined ? matched : null
           }
           return item
         })
-        .filter((item) => !isPlaceholderValue(item))
+        .filter((item) => item !== null && item !== undefined && !isPlaceholderValue(item))
 
       if (cleaned.length > 0) {
         result[key] = cleaned
@@ -179,8 +211,13 @@ function stripUnknownKeys(
       const maxLength = propSchema.maxLength as number | undefined
       if (maxLength && value.length > maxLength) {
         result[key] = value.slice(0, maxLength)
-      } else if (propSchema.enum && !propSchema.enum.includes(value)) {
-        // skip values not in the enum
+      } else if (propSchema.enum) {
+        const matched = matchEnumValue(value, propSchema.enum)
+        if (matched !== undefined) {
+          result[key] = matched
+        } else {
+          log.warn({ key, value, allowedValues: propSchema.enum }, 'Dropping field: no matching enum value.')
+        }
       } else {
         result[key] = value
       }
@@ -192,6 +229,16 @@ function stripUnknownKeys(
   }
 
   return result
+}
+
+function matchEnumValue(value: string, enumValues: unknown[]): string | undefined {
+  const exact = enumValues.find((entry) => entry === value)
+  if (exact !== undefined) {
+    return exact as string
+  }
+  const lower = value.trim().toLowerCase()
+  const match = enumValues.find((entry) => typeof entry === 'string' && entry.trim().toLowerCase() === lower)
+  return match as string | undefined
 }
 
 function isPlaceholderValue(value: unknown): boolean {
@@ -231,6 +278,7 @@ CRITICAL RULES:
 - Return valid JSON matching the schema structure exactly.
 - For string fields, extract the relevant text verbatim or as a close summary.
 - For array fields, extract all matching items found in the document.
+- For enum fields (where allowed values are listed), you MUST use one of the allowed values exactly as written. Match the closest value semantically if the document uses different wording.
 - For number fields, extract numeric values only if explicitly stated.
 - For boolean fields, extract true/false only if the answer is clearly stated.
 - When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
