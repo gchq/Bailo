@@ -104,7 +104,7 @@ const TokenSchema = new Schema<TokenDoc>(
 
     accessKey: { type: String, required: true, unique: true, index: true },
     secretKey: { type: String, required: true, select: false },
-    hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.SHA256 },
+    hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.argon2 },
   },
   {
     timestamps: true,
@@ -118,7 +118,7 @@ TokenSchema.pre('save', function userPreSave() {
   }
 
   if (!this.hashMethod) {
-    this.hashMethod = HashType.SHA256
+    this.hashMethod = HashType.argon2
   }
 
   if (this.hashMethod === HashType.argon2) {

@@ -12,7 +12,7 @@ export type HashTypeKeys = (typeof HashType)[keyof typeof HashType]
 
 const ARGON2_CONFIG = {
   parallelism: 1,
-  tagLength: 32,
+  tagLength: 64,
   memory: 64 * 1024, // 64 MB
   passes: 3,
 }
