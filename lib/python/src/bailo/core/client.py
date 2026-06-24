@@ -5,6 +5,9 @@ from json import JSONDecodeError
 from typing import Any
 
 import requests
+
+# isort: split
+
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.exceptions import BailoException, ResponseException
@@ -27,7 +30,8 @@ class Client:
         self.url = url.rstrip("/") + "/api"
         self.agent = agent or Agent()
 
-    def _parse_json(self, res: requests.Response) -> dict[str, Any]:
+    @staticmethod
+    def _parse_json(res: requests.Response) -> dict[str, Any]:
         """Parse a JSON response, raising BailoException if the body contains an error.
 
         :param res: Response object from the agent.

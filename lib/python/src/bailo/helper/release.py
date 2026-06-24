@@ -316,8 +316,8 @@ class Release:
             colour=colour,
         ) as t:
             wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
-            res: dict[str, Any] = self.client._parse_json(  # type: ignore[reportArgumentType]
-                self.client.simple_upload(self.model_id, name, wrapped_buffer)
+            res: dict[str, Any] = self.client._parse_json(
+                self.client.simple_upload(self.model_id, name, wrapped_buffer)  # type: ignore[reportArgumentType]
             )
 
         self.files.append(res["file"]["id"])
