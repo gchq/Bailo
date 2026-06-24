@@ -176,7 +176,7 @@ export async function sendReviewResponseNotification(
       notifyReviewResponseForRelease(reviewResponse, release).catch((error) =>
         log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
-      if ((await checkReleaseApproved(release.modelId, release.semver)) && !isApproved) {
+      if (!isApproved && (await checkReleaseApproved(release.modelId, release.semver))) {
         notifyReleaseOnApproval(release.modelId, release).catch((error) =>
           log.warn({ error }, 'Error when notifying release approval.'),
         )

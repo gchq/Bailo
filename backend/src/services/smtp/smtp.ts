@@ -291,8 +291,11 @@ export async function notifyReleaseOnApproval(modelId: string, release: ReleaseD
   }
 
   const emailContent = buildEmail(
-    `A new release is available`,
-    [],
+    `A new release has been approved`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Semver', data: release.semver },
+    ],
     [
       { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
       { name: 'See Release', url: getReleaseUrl(release) },

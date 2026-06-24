@@ -35,9 +35,7 @@ const smtpMock = vi.hoisted(() => ({
   notifyReviewResponseForRelease: vi.fn(function () {
     return Promise.resolve()
   }),
-  notifyReleaseOnApproval: vi.fn(function () {
-    return Promise.resolve()
-  }),
+  notifyReleaseOnApproval: vi.fn(() => Promise.resolve()),
   requestReviewForRelease: vi.fn(function () {
     return Promise.resolve()
   }),

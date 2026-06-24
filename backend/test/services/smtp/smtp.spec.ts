@@ -107,16 +107,12 @@ const responseService = vi.hoisted(() => ({
       kind: 'review',
     }
   }),
-  checkAccessRequestsApproved: vi.fn(function () {
-    return true
-  }),
+  checkAccessRequestsApproved: vi.fn(() => true),
 }))
 vi.mock('../../../src/services/response.js', async () => responseService)
 
 const AccessRequestModelMock = vi.hoisted(() => ({
-  find: vi.fn(function () {
-    return [] as any[]
-  }),
+  find: vi.fn(() => [] as any[]),
 }))
 vi.mock('../../../src/models/AccessRequest.js', () => ({ default: AccessRequestModelMock }))
 
