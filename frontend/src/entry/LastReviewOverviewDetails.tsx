@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { useGetLatestResponseForReview } from 'actions/response'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
@@ -26,12 +26,15 @@ export default function LastReviewOverviewDetails({ reviewId }: LastReviewOvervi
         Last reviewed:
       </Typography>
       <Typography>
-        {response ? formatDateStringAsDayMonthAndYear(response.createdAt.toString()) : 'Invalid date'}
+        {response ? (
+          <Stack direction='row' spacing={1}>
+            <div>{formatDateStringAsDayMonthAndYear(response.createdAt.toString())} by</div>
+            <UserDisplay dn={response.entity} showIcon />
+          </Stack>
+        ) : (
+          <em>Error fetching review</em>
+        )}
       </Typography>
-      <Typography fontWeight='bold' color='primary'>
-        Last reviewed by:
-      </Typography>
-      {response ? <UserDisplay dn={response.entity} showIcon /> : <Typography>Invalid user</Typography>}
     </>
   )
 }

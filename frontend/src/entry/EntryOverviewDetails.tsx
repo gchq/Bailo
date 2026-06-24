@@ -15,6 +15,7 @@ import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewDateDialog from 'src/entry/overview/ReviewDateDialog'
+import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
@@ -32,6 +33,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
   const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
   const [isReviewDateInputOpen, setIsReviewDateInputOpen] = useState(false)
+  const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
 
   const { mutateEntry } = useGetEntry(entry.id)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card ? entry.card.schemaId : '')
@@ -114,7 +116,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} details
         </Typography>
-        <Stack spacing={1}>
+        <Stack>
           {schema && (
             <Stack>
               <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
@@ -156,16 +158,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             />
           )}
         </Stack>
-        <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>
-          <Button
-            size='small'
-            onClick={() => setRolesDialogOpen(true)}
-            sx={{ width: 'max-content', fontWeight: 'bold' }}
-          >
-            View collaborators
-          </Button>
-          {collaboratorList}
-        </Stack>
         {entry.card && (
           <Stack spacing={1}>
             <Typography fontWeight='bold' color='primary'>
@@ -179,7 +171,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>Unset</em>}
             <Stack
               direction='row'
-              spacing={2}
+              spacing={1}
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
             >
@@ -192,7 +184,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               )}
               {updateEntryPermission.hasPermission && reviews[0] && (
                 <Button
-                  variant='outlined'
                   size='small'
                   sx={{ width: 'fit-content' }}
                   href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
@@ -200,10 +191,28 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                   Review
                 </Button>
               )}
+              <Button
+                size='small'
+                onClick={() => {
+                  setReviewHistoryOpen(true)
+                }}
+              >
+                History
+              </Button>
             </Stack>
             {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
           </Stack>
         )}
+        <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>
+          <Button
+            size='small'
+            onClick={() => setRolesDialogOpen(true)}
+            sx={{ width: 'max-content', fontWeight: 'bold' }}
+          >
+            View collaborators
+          </Button>
+          {collaboratorList}
+        </Stack>
         <Box>
           <Restricted action='editEntry' fallback={<></>}>
             <Button
@@ -229,6 +238,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         open={isReviewDateInputOpen}
         onClose={() => handleReviewDateDialogOnClose()}
         entryId={entry.id}
+      />
+      <ReviewHistoryDialog
+        open={reviewHistoryOpen}
+        onClose={() => setReviewHistoryOpen(false)}
+        entry={entry}
+        mutateEntry={mutateEntry}
       />
     </Box>
   )
