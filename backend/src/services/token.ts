@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto'
 import { ClientSession } from 'mongoose'
 import { customAlphabet } from 'nanoid'
 
@@ -16,7 +15,7 @@ interface CreateTokenProps {
   actions: Array<string>
 }
 
-const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZ')
+const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZabcdefghijklmnopqrstuvwxyz')
 export async function createToken(user: UserInterface, { description, scope, modelIds, actions }: CreateTokenProps) {
   if (user.token) {
     // Prevent escalating token privileges
@@ -24,7 +23,7 @@ export async function createToken(user: UserInterface, { description, scope, mod
   }
 
   const accessKey = `BAC_${nanoid(8)}`
-  const secretKey = `BSK_${randomBytes(32).toString('base64url')}`
+  const secretKey = `BSK_${nanoid(32)}`
 
   if (scope === 'models') {
     // Checks to make sure the models are valid
