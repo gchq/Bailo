@@ -175,3 +175,10 @@ export async function postReview({ modelId, kind, dueDate, semver, accessRequest
     body: JSON.stringify({ kind, dueDate, semver, accessRequestId }),
   })
 }
+
+export async function postNotifyReviewer(reviewId: string) {
+  return fetch(`/api/v3/review/${reviewId}/notify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
