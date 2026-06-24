@@ -1,4 +1,5 @@
 import { Schema as JsonSchema, Validator } from 'jsonschema'
+import NodeCache from 'node-cache'
 
 import { callLlmChatCompletion, ChatMessage, ChatMessageRole } from '../clients/llm.js'
 import { UserInterface } from '../models/User.js'
@@ -8,6 +9,13 @@ import { getModelById } from './model.js'
 import { getSchemaById } from './schema.js'
 
 const EXCLUDED_WIDGETS = new Set(['dataCardSelector', 'entitySelector'])
+
+const SCHEMA_DESCRIPTION_CACHE_TTL = 3600
+const schemaDescriptionCache = new NodeCache({
+  stdTTL: SCHEMA_DESCRIPTION_CACHE_TTL,
+  checkperiod: SCHEMA_DESCRIPTION_CACHE_TTL,
+  useClones: false,
+})
 
 interface FieldDescriptor {
   path: string
@@ -259,7 +267,12 @@ export async function extractModelCardFromText(
   }
 
   const schema = await getSchemaById(schemaId)
-  const fields = buildSchemaDescription(schema.jsonSchema)
+
+  let fields = schemaDescriptionCache.get<FieldDescriptor[]>(schemaId)
+  if (!fields) {
+    fields = buildSchemaDescription(schema.jsonSchema)
+    schemaDescriptionCache.set(schemaId, fields)
+  }
 
   log.info({ modelId, fieldCount: fields.length }, 'Extracting model card data from text via LLM.')
 
