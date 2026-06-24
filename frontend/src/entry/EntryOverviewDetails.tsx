@@ -203,7 +203,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
           </Stack>
         )}
-        <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>
+        <Stack spacing={1}>
           <Button
             size='small'
             onClick={() => setRolesDialogOpen(true)}
