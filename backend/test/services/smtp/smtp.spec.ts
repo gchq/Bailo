@@ -4,6 +4,7 @@ import { ReviewInterface } from '../../../src/models/Review.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
   notifyLifeCycleReview,
+  notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   notifyReviewRoleOfAdditionalReview,
@@ -109,8 +110,14 @@ const responseService = vi.hoisted(() => ({
       kind: 'review',
     }
   }),
+  checkAccessRequestsApproved: vi.fn(() => true),
 }))
 vi.mock('../../../src/services/response.js', async () => responseService)
+
+const AccessRequestModelMock = vi.hoisted(() => ({
+  find: vi.fn(() => [] as any[]),
+}))
+vi.mock('../../../src/models/AccessRequest.js', () => ({ default: AccessRequestModelMock }))
 
 const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
@@ -305,6 +312,17 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is sent after a response for a release review to additional reviewers', async () => {
     await notifyReviewResponseForRelease(testReviewResponse as any, release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to all stakeholders on release', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyReleaseOnApproval('modelId', release)
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })
