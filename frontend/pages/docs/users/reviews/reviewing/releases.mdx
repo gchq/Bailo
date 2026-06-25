@@ -7,25 +7,85 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Reviewing a Release
 
-When a release requires review, it appears to the relevant users & groups in the **Release Reviews** tab on the
-**Review** page.
+When a release is created on a model, it enters the review process. If you have been assigned a review role on that
+model, you will be notified and the release will appear in your review queue.
+
+> **Common questions this page answers:**
+>
+> - How do I review a release in Bailo?
+> - What should I look for when reviewing a release?
+> - Where do I find releases to review?
+
+## Who sees release reviews?
+
+Release reviews are visible to users who have been assigned a **review role** on the model (e.g. Model Technical
+Reviewer, Model Senior Responsible Officer). The specific roles depend on the schema attached to the model.
+
+## Finding releases to review
+
+Navigate to the **Reviews** page from the navigation bar. Releases awaiting your review appear in the **Your open
+reviews** tab, under the **Releases** heading.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='open release reviews page with a list of unreviewed releases' src={bailoReviewPage} />
 </Box>
 
-Select the relevant release to open its details. A **Review** button appears in the release banner.
+The screenshot above shows the Reviews page with a list of open release reviews waiting for action.
+
+## Reviewing a release
+
+Open a release from the Reviews page or the model's Releases tab, examine the submission, and submit your decision:
+
+1. Either:
+   - Select a review from the **Reviews** page
+   - Navigate to the **Releases** page for the model. A **Review** button appears in the release banner
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='releases page showing release with review banner visually attached' src={bailoReview} />
 </Box>
 
-You have the option of approving or requesting changes.
+The screenshot above shows a release on the model's Releases page with a review banner attached.
+
+2. Click **View full release** to examine the release:
+   - Review the **model card** for completeness and accuracy
+   - Check the **release notes** describe what is included
+   - Verify that appropriate **files** and **container images** are attached
+3. After examining the release details, add a **comment** explaining your decision (especially important if requesting
+   changes)
+4. Choose your decision:
+   - **Approve** - you are satisfied with the release
+   - **Request changes** - something needs to be addressed
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='release review approval popup' src={bailoReviewForm} />
 </Box>
 
-When you have made your decision, an email will be sent to the model owner to notify them of your response.
+The screenshot above shows the release review form with options to approve or request changes, and a comment field.
+
+## After submitting your review
+
+After submitting, the model owner is notified and other reviewers can see your response.
+
+- An **email notification** is sent to the model owner with your decision
+- If you approved, the release moves closer to full approval (all required roles must approve)
+- If you requested changes, the model owner will update the release and you can review again
+- Your response is visible to other reviewers and the model owner
+
+## What to look for
+
+Different reviewer roles focus on different aspects of the release.
+
+Depending on your review role, consider checking:
+
+- **Technical reviewers**: Is the model architecture appropriate? Are evaluation metrics provided? Are known limitations
+  documented?
+- **Governance reviewers**: Are data handling practices documented? Are ethical considerations addressed? Does the model
+  meet organisational policies?
+
+## Related pages
+
+- [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works end-to-end
+- [Review Outcomes](/docs/users/reviews/review-outcomes) - What happens after approval or change requests
+- [Roles & Permissions](/docs/reference/roles-and-permissions) - Understanding review roles
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

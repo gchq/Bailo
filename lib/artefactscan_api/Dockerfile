@@ -37,7 +37,7 @@ RUN groupadd --gid ${GID} appuser && \
 
 WORKDIR /app
 
-FROM aquasec/trivy:0.71.0 AS trivy
+FROM aquasec/trivy:0.71.2 AS trivy
 
 FROM base AS dev
 

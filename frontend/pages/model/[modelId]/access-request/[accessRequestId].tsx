@@ -2,19 +2,23 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
 import { useGetEntry } from 'actions/entry'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
+import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { ResponseInterface, ReviewKind } from 'types/types'
+import { latestReviewsForEachUser } from 'utils/reviewUtils'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function AccessRequest() {
@@ -23,11 +27,19 @@ export default function AccessRequest() {
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
+  const { accessRequest, isAccessRequestLoading, isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(
+    modelId,
+    accessRequestId,
+  )
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: modelId as string,
     accessRequestId: accessRequestId || '',
   })
+  const {
+    responses: reviewResponses,
+    isResponsesLoading: isReviewResponsesLoading,
+    isResponsesError: isReviewResponsesError,
+  } = useGetResponses(reviews.map((review) => review._id))
   const {
     reviews: userReviews,
     isReviewsLoading: isUserReviewsLoading,
@@ -40,6 +52,15 @@ export default function AccessRequest() {
   )
 
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
+
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
+
+  useEffect(() => {
+    if (!isReviewsLoading && reviews) {
+      const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
+      setReviewsWithLatestResponses(latestReviews)
+    }
+  }, [reviews, isReviewsLoading, reviewResponses])
 
   const userCanReview = useMemo(
     () =>
@@ -63,6 +84,7 @@ export default function AccessRequest() {
     isModelError,
     isCurrentUserError,
     isReviewRolesError,
+    isReviewResponsesError,
   })
   if (error) {
     return error
@@ -78,6 +100,7 @@ export default function AccessRequest() {
             isUserReviewsLoading ||
             isModelLoading ||
             isCurrentUserLoading ||
+            isReviewResponsesLoading ||
             isReviewRolesLoading) && <Loading />}
           {accessRequest && (
             <>
@@ -109,10 +132,18 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
+                <ReviewDisplay reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}
-                <ReviewComments accessRequest={accessRequest} isEdit={isEdit} />
+                <ReviewComments
+                  identifier={accessRequest.id}
+                  parentId={accessRequest._id}
+                  entryId={accessRequest.modelId}
+                  kind={ReviewKind.ACCESS}
+                  isEdit={isEdit}
+                  mutator={mutateAccessRequest}
+                />
               </Stack>
             </>
           )}

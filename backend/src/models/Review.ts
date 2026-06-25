@@ -1,4 +1,4 @@
-import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import { ReviewKind } from '../types/enums.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -24,7 +24,7 @@ export type ReviewInterface =
     } & PartialReviewInterface)
 
 type PartialReviewInterface = {
-  _id: ObjectId
+  _id: Types.ObjectId
   modelId: string
   role: string
   createdAt: string

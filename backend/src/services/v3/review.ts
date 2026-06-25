@@ -7,9 +7,12 @@ import { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
-import { BadReq, Forbidden, NotFound } from '../../utils/error.js'
-import { getModelById } from '../model.js'
+import config from '../../utils/config.js'
+import { BadReq, ConfigurationError, Forbidden, InternalError, NotFound } from '../../utils/error.js'
+import log from '../log.js'
+import { getModelById, getModelByIdNoAuth } from '../model.js'
 import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
+import { notifyReviewRoleOfAdditionalReview } from '../smtp/smtp.js'
 
 type ReviewWithModel = ReviewDoc & {
   model: ModelInterface
@@ -166,4 +169,27 @@ export async function createLifecycleReview(
   await scheduleLifeCycleReviewEmails(modelId, newReview._id.toString(), dueDate)
 
   return newReview
+}
+
+export async function notifyReviewer(user: UserInterface, reviewId: string) {
+  const review = await findReviewById(user, reviewId)
+  const model = await getModelByIdNoAuth(review.modelId)
+  // `getModelById` would only determine view access to a model, we must make sure the user has write access too
+  const auth = await authorisation.model(user, model, ModelAction.Write)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+  }
+
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    throw ConfigurationError('Email service currently unavailable.', { reviewId })
+  }
+
+  try {
+    await notifyReviewRoleOfAdditionalReview(user, review)
+  } catch (err) {
+    log.error(err, 'Failed to notify reviewer')
+    throw InternalError('Notification to reviewer(s) could not be sent', { modelId: model.id, err })
+  }
+  return
 }

@@ -15,6 +15,7 @@ import { getErrorMessage } from 'utils/fetcher'
 type ReviewCommentDisplayProps = {
   response: ResponseInterface
   onReplyButtonClick: (value: string) => void
+  showReplyButton?: boolean
   currentUser: User | undefined
   mutateResponses: () => void
 }
@@ -22,6 +23,7 @@ type ReviewCommentDisplayProps = {
 export default function ReviewCommentDisplay({
   response,
   onReplyButtonClick,
+  showReplyButton = true,
   currentUser,
   mutateResponses,
 }: ReviewCommentDisplayProps) {
@@ -145,7 +147,7 @@ export default function ReviewCommentDisplay({
         </Box>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
+        {showReplyButton && <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>}
         {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit</MenuItem>}
       </Menu>
     </>

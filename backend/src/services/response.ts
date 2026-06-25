@@ -1,4 +1,4 @@
-import { ClientSession, QueryFilter, Types } from 'mongoose'
+import { ClientSession, Types } from 'mongoose'
 
 import ResponseModel, {
   Decision,
@@ -8,7 +8,7 @@ import ResponseModel, {
   ResponseKind,
   ResponseReaction,
 } from '../models/Response.js'
-import { ReviewDoc } from '../models/Review.js'
+import ReviewModel, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
@@ -18,7 +18,7 @@ import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
 import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
-import { notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
+import { notifyReleaseOnApproval, notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
 import { dispatchWebhooks } from './webhook.js'
 
 export async function findResponseById(responseId: string) {
@@ -35,13 +35,7 @@ export async function findResponseById(responseId: string) {
 
 export async function getResponsesByParentIds(parentIds: string[]) {
   const objectIds = parentIds.map((id) => new Types.ObjectId(id))
-
-  const filter = {
-    parentId: { $in: objectIds },
-    // Hack/Workaround broken mongooose typing
-  } as unknown as QueryFilter<ResponseDoc>
-
-  const responses = await ResponseModel.find(filter)
+  const responses = await ResponseModel.find({ parentId: { $in: objectIds } })
 
   if (!responses) {
     throw NotFound(`The requested response was not found.`, { parentIds })
@@ -128,7 +122,10 @@ export async function respondToReview(
   reviewId: string,
 ): Promise<ResponseInterface> {
   const review = await findReviewForResponse(user, modelId, role, kind, reviewId)
-
+  let isApproved = false
+  if (kind === ReviewKind.Release && review.semver) {
+    isApproved = await checkReleaseApproved(modelId, review.semver)
+  }
   // Store the response
   const reviewResponse = new ResponseModel({
     entity: toEntity('user', user.dn),
@@ -139,7 +136,7 @@ export async function respondToReview(
   })
 
   await reviewResponse.save()
-  await sendReviewResponseNotification(review, reviewResponse, user)
+  await sendReviewResponseNotification(review, reviewResponse, user, isApproved)
 
   dispatchWebhooks(
     review.modelId,
@@ -155,6 +152,7 @@ export async function sendReviewResponseNotification(
   review: ReviewDoc,
   reviewResponse: ResponseInterface,
   user: UserInterface,
+  isApproved?: boolean,
 ) {
   switch (review.kind) {
     case ReviewKind.Access: {
@@ -174,11 +172,15 @@ export async function sendReviewResponseNotification(
         log.error({ review }, 'Unable to send notification for review response. Cannot find semver.')
         return
       }
-
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
       notifyReviewResponseForRelease(reviewResponse, release).catch((error) =>
         log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
+      if (!isApproved && (await checkReleaseApproved(release.modelId, release.semver))) {
+        notifyReleaseOnApproval(release.modelId, release).catch((error) =>
+          log.warn({ error }, 'Error when notifying release approval.'),
+        )
+      }
       break
     }
     case ReviewKind.Lifecycle: {
@@ -203,8 +205,49 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   return approvals.length > 0
 }
 
+export async function checkReleaseApproved(modelId: string, semver: string) {
+  const reviewsWithoutApproval = await ReviewModel.aggregate([
+    { $match: { semver, modelId } },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'responses',
+      },
+    },
+    {
+      $addFields: {
+        latestResponse: {
+          $arrayElemAt: [
+            {
+              $sortArray: {
+                input: '$responses',
+                sortBy: { createdAt: -1 },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $match: {
+        $or: [{ latestResponse: { $exists: false } }, { 'latestResponse.decision': { $ne: Decision.Approve } }],
+      },
+    },
+  ])
+
+  const totalReviews = await ReviewModel.countDocuments({ semver })
+
+  return totalReviews > 0 && reviewsWithoutApproval.length === 0
+}
+
 export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
-  const responses = await ResponseModel.find({ parentId: parentIds })
+  const objectIds = parentIds.map((id) => new Types.ObjectId(id))
+  const responses = await ResponseModel.find({
+    parentId: { $in: objectIds },
+  })
 
   const deletions: ResponseDoc[] = []
   for (const response of responses) {

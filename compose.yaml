@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.3.2-ubi9
+    image: mongodb/mongodb-community-server:8.3.4-ubi9
     networks:
       internal:
     environment:
@@ -47,7 +47,7 @@ services:
       - minioVolume:/bitnami/minio
 
   nginx:
-    image: nginxinc/nginx-unprivileged:1.31.1-alpine3.23-slim
+    image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim
     networks:
       default:
       internal:
@@ -60,7 +60,8 @@ services:
       - backend
 
   registry:
-    image: registry:3.1.1
+    # https://github.com/distribution/distribution/pull/4898
+    image: distribution/distribution@sha256:1eda63c5b5ba2c53b8b7e7071d7e67ca42e93c4ea5d9015c2b8160eb09a95d61
     networks:
       internal:
     environment:

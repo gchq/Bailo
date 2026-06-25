@@ -56,6 +56,7 @@ export interface Config {
       retryDelayInMinutes: number
       maxInitRetries: number
       initRetryDelay: number
+      scanTimeoutMs: number
     }
 
     metrics: {

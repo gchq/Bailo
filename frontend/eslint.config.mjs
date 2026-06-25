@@ -51,6 +51,36 @@ export default defineConfig([
     },
   },
   {
+    files: [
+      'actions/**/*.ts',
+      'actions/**/*.tsx',
+      'pages/**/*.ts',
+      'pages/**/*.tsx',
+      'src/**/*.ts',
+      'src/**/*.tsx',
+      'utils/**/*.ts',
+      'utils/**/*.tsx',
+    ],
+    ignores: ['src/dayjsConfig.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message:
+                "Do not import dayjs directly from the npm package, use the pre-configured alias '@dayjs' e.g. `import dayjs from '@dayjs'` or for the type definition, `import type { Dayjs } from '@dayjs'`.",
+              allowTypeImports: false,
+            },
+          ],
+          patterns: ['dayjs/*'],
+        },
+      ],
+    },
+  },
+
+  {
     files: ['cypress/**/*.cy.ts'],
     plugins: {
       cypress: pluginCypress,

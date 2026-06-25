@@ -79,6 +79,8 @@ const audit = {
 
   onViewCurrentUserInformation: vi.fn(),
 
+  onNotifyReviewers: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit

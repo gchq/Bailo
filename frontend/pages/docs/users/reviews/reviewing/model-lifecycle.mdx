@@ -1,0 +1,116 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Reviewing a Model Card Lifecycle
+
+Model card lifecycle reviews help ensure that the information recorded on a model remains accurate, complete, and up to
+date. They are typically handled by the **model owner** or another user responsible for maintaining the model card.
+
+> **Common questions this page answers:**
+>
+> - What is a model card lifecycle review?
+> - Who reviews model cards?
+> - How do I complete a lifecycle review?
+> - What happens after I submit a lifecycle review?
+
+## What is a model card lifecycle review?
+
+A model card lifecycle review is a periodic check of a model's documentation. It gives model owners a structured way to
+confirm that the model card still reflects the current state of the model.
+
+Lifecycle reviews are useful for checking that:
+
+- The model description is still accurate
+- Ownership and contact details are correct
+- Intended use, limitations, and ethical considerations are up to date
+- Data, training, evaluation, and deployment information still reflects the current model
+- Any organisational or governance requirements are still being met
+
+## Who reviews model cards?
+
+Model card lifecycle reviews are normally completed by **model owners**. Unlike release reviews and access request
+reviews, lifecycle reviews are not usually assigned to a separate reviewer role.
+
+The model owner is responsible for checking the model card and confirming that it remains accurate.
+
+## How does lifecycle reminder scheduling works?
+
+When a lifecycle review is created with a due date, Bailo schedules reminder jobs using the internal scheduler. These
+jobs send notification emails to the model owners.
+
+Two types of reminders are supported:
+
+- Pre‑due reminders: sent before the lifecycle review due date
+- Post‑due reminders: sent repeatedly after the due date until the review is completed
+
+Reminders are scheduled when the lifecycle review is created. If a lifecycle review or model is removed, associated
+scheduled jobs are cancelled.
+
+The frequency of these events are configured by your Bailo administrator.
+
+## Setting a lifecycle review date
+
+A lifecycle review is created by setting a review due date on the model.
+
+To set a lifecycle review date:
+
+1. Navigate to the model
+2. Open the **Overview** tab
+3. Find the **Details** section beside the model card
+4. Set a **review due date**
+
+Once a due date is set, Bailo automatically creates a lifecycle review. The review can be completed when the model owner
+is ready, including before the due date if appropriate.
+
+## Finding lifecycle reviews to complete
+
+Navigate to the **Reviews** page from the navigation bar. Lifecycle reviews awaiting your action appear in the **Your
+open reviews** tab, under the **Model card** heading.
+
+You may also be able to start the review from the model card itself by using the **Review** button in the model card
+**Details** panel.
+
+## Completing a lifecycle review
+
+Open the lifecycle review, check the model card, and submit your response.
+
+1. Either:
+   - Select the lifecycle review from the **Reviews** page
+   - Navigate to the model's **Overview** tab and click **Review** in the model card **Details** panel
+2. Read through the model card and confirm whether the information is still accurate and complete
+3. Update the model card if anything is missing, outdated, or incorrect
+4. Choose a new **review due date**
+5. Add a **comment** explaining the outcome of the review
+6. **Approve** the lifecycle review
+
+The new review due date is mandatory. It determines when the model card should next be reviewed.
+
+## After submitting your review
+
+After submitting the lifecycle review:
+
+- The current lifecycle review is closed
+- The model card is treated as reviewed
+- A new review due date is recorded
+- A future lifecycle review will be created based on the new due date
+- The review moves to the **Your archived reviews** tab on the Reviews page
+
+## What to look for
+
+When completing a lifecycle review, consider checking:
+
+- **Model purpose** - Is the description of the model and its intended use still correct?
+- **Ownership** - Are the owner, organisation, and contact details up to date?
+- **Usage guidance** - Are users given accurate information about how the model should and should not be used?
+- **Limitations** - Are known limitations, risks, and assumptions still documented?
+- **Evaluation** - Are performance metrics, testing information, and validation results still relevant?
+- **Data** - Are training, evaluation, or reference datasets still accurately described?
+- **Governance** - Does the model card still meet any required organisational or policy expectations?
+
+## Related pages
+
+- [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works end-to-end
+- [Reviewing a Release](/docs/users/reviews/reviewing/releases) - How to review model releases
+- [Reviewing an Access Request](/docs/users/reviews/reviewing/access) - How to review access requests
+- [Review Outcomes](/docs/users/reviews/review-outcomes) - What happens after approval or change requests
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

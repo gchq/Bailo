@@ -11,10 +11,12 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
+import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { ReviewKind } from 'types/types'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function Release() {
@@ -23,7 +25,7 @@ export default function Release() {
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
+  const { release, isReleaseLoading, isReleaseError, mutateRelease } = useGetRelease(modelId, semver)
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -89,7 +91,7 @@ export default function Release() {
         <Paper>
           <>
             {userCanReview && <ReviewBanner release={release} />}
-            <Stack spacing={2} sx={{ p: 4 }}>
+            <Stack spacing={2} sx={{ px: 4, py: 2 }}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
                 spacing={2}
@@ -125,6 +127,7 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
+              <ReleaseAssetsResponses model={model} release={release} />
               {release && (
                 <EditableRelease
                   release={release}
@@ -133,7 +136,14 @@ export default function Release() {
                   readOnly={!!model?.settings.mirror?.sourceModelId}
                 />
               )}
-              <ReviewComments release={release} isEdit={isEdit} />
+              <ReviewComments
+                identifier={release.semver}
+                parentId={release._id}
+                entryId={release.modelId}
+                kind={ReviewKind.RELEASE}
+                isEdit={isEdit}
+                mutator={mutateRelease}
+              />
             </Stack>
           </>
         </Paper>

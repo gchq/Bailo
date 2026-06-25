@@ -30,6 +30,12 @@ const responseV2Mock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/response.js', () => responseV2Mock)
 
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+  getModelSystemRoles: vi.fn(),
+}))
+vi.mock('../../../src/services/model.js', () => modelMock)
+
 const mockWebhookService = vi.hoisted(() => ({
   dispatchWebhooks: vi.fn(),
 }))

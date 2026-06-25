@@ -54,7 +54,7 @@ const registryClientMocks = vi.hoisted(() => ({
   putManifest: vi.fn(),
   isImageTagManifestList: vi.fn(() => false),
 }))
-vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+vi.mock('../../src/clients/registry.js', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
@@ -973,6 +973,22 @@ describe('services > registry', () => {
           repository: 'repo1',
           name: 'image1',
           tags: ['tag1', 'tag2'],
+        },
+      ])
+    })
+
+    test('listModelImages > includeTokens returns repositoryToken', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1', 'tag2'])
+
+      const result = await listModelImages({ dn: 'user' } as any, 'modelId', true)
+
+      expect(result).toEqual([
+        {
+          repository: 'repo1',
+          name: 'image1',
+          tags: ['tag1', 'tag2'],
+          repositoryToken: 'token',
         },
       ])
     })

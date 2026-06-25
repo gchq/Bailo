@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs'
+import { Dayjs } from '@dayjs'
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
@@ -173,5 +173,12 @@ export async function postReview({ modelId, kind, dueDate, semver, accessRequest
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ kind, dueDate, semver, accessRequestId }),
+  })
+}
+
+export async function postNotifyReviewer(reviewId: string) {
+  return fetch(`/api/v3/review/${reviewId}/notify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
   })
 }

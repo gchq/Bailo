@@ -1,0 +1,111 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Review Outcomes
+
+This page explains what happens after a release, access request, or model card lifecycle review has been reviewed,
+including the different outcomes and what to do when changes are requested.
+
+> **Common questions this page answers:**
+>
+> - What happens after a release is reviewed?
+> - What do I do when changes are requested?
+> - How do I view review history?
+> - What happens after a model card lifecycle review is completed?
+
+## Release review outcomes
+
+A release review can result in approval or a request for changes.
+
+### Approved
+
+When all required review roles have approved a release, it is marked as approved and moves to the **Your archived
+reviews** tab on the Reviews page. Approved releases are considered final and ready for use.
+
+Both the **Model Technical Reviewer (MTR)** and the **Model Senior Responsible Officer (MSRO)** (or equivalent review
+roles configured for the schema) must approve before a release is fully approved.
+
+### Changes requested
+
+If any reviewer requests changes, the model owner is notified. The model owner should:
+
+1. Review the feedback provided in the reviewer's comments
+2. Make the necessary changes to the model card, files, or release notes
+3. The reviewer can then re-evaluate and approve
+
+### Who can create releases?
+
+Only the **Owner** and **Contributors** of a model can create releases. See
+[Roles & Permissions](/docs/reference/roles-and-permissions) for details.
+
+## Access request review outcomes
+
+Access request reviews follow a similar approval or change-request flow.
+
+### Approved
+
+When the required reviewer approves an access request, the requesting user gains permission to download files and pull
+container images from the model. Approved access requests move to the **Your archived reviews** tab.
+
+### Changes requested
+
+If the reviewer requests changes, the requesting user is notified. They should review the feedback and update their
+access request accordingly.
+
+### Who reviews access requests?
+
+Access requests are typically reviewed by the **Model Senior Responsible Officer** (or equivalent). The specific review
+role depends on your schema configuration.
+
+## Model card lifecycle review outcomes
+
+Model card lifecycle reviews help confirm that a model card remains accurate and up to date.
+
+### Approved
+
+When a lifecycle review is completed, the current review is closed and the model card is treated as reviewed. The
+reviewer must set a new review due date, which determines when the model card should next be reviewed.
+
+Approved lifecycle reviews move to the **Your archived reviews** tab.
+
+### Changes required before completion
+
+If the model card is not accurate or complete, the model owner should update the model card before completing the
+lifecycle review.
+
+The reviewer should check that any outdated or missing information has been addressed, then submit the lifecycle review
+with a new review due date.
+
+### Who reviews model cards?
+
+Model card lifecycle reviews are normally completed by **model owners** or another user responsible for maintaining the
+model card.
+
+## Viewing review history
+
+To see the history of reviews for a model:
+
+- **Releases**: Open the model page and navigate to the **Releases** tab. Each release shows its review status
+- **Access requests**: Open the model page and navigate to the **Access Requests** tab
+- **Model card lifecycle reviews**: Open the model page and navigate to the **Overview** tab. The model card details
+  show lifecycle review information where configured.
+
+To see all your completed reviews:
+
+1. Click **Reviews** in the navigation bar
+2. Select the **Your archived reviews** tab
+
+## Python client examples
+
+Detailed Python examples for working with releases and access requests are available:
+
+- [Models and Releases demo](/docs/python/notebooks/models_and_releases_demo_pytorch/index.html)
+- [Access Requests demo](/docs/python/notebooks/access_requests_demo/index.html)
+
+## Related pages
+
+- [Understanding Reviews](/docs/users/reviews/understanding-reviews) - How the review process works
+- [Reviewing a Release](/docs/users/reviews/reviewing/releases) - Guide for reviewers
+- [Reviewing an Access Request](/docs/users/reviews/reviewing/access) - Reviewing access requests
+- [Reviewing a Model Card Lifecycle](/docs/users/reviews/reviewing/model-lifecycle) - Reviewing model cards
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

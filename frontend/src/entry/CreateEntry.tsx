@@ -27,6 +27,7 @@ import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelInput'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TagSelector from 'src/MuiForms/TagSelector'
 import {
@@ -327,8 +328,11 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       Manage access list
                     </Typography>
                     <Typography variant='caption'>
-                      Please note that only entry roles can be added at this stage, and review roles should be added
-                      once a schema has been selected.
+                      Please note that only{' '}
+                      <Link href='/docs/getting-started/core-concepts#system-roles' target='_blank'>
+                        system roles
+                      </Link>{' '}
+                      can be added at this stage, and review roles should be added once a schema has been selected.
                     </Typography>
                     <Box sx={{ my: 1 }}>
                       {isEntryRolesLoading ? (
