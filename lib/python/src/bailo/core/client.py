@@ -1,11 +1,28 @@
 from __future__ import annotations
 
+import datetime
+import logging
+import threading
+import time
 from io import BytesIO
 from typing import Any
+
+try:
+    from backports.datetime_fromisoformat import MonkeyPatch  # pyright: ignore[reportMissingImports]
+except ImportError:
+    MonkeyPatch = None
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none, normalise_query_params
+
+if MonkeyPatch is not None:
+    # backport `datetime.fromisoformat` 3.11 changes https://pypi.org/project/backports-datetime-fromisoformat/
+    MonkeyPatch.patch_fromisoformat()
+
+logger = logging.getLogger(__name__)
+# Give users a clean way to suppress/reformat announcements without affecting debug/error logs
+announcement_logger = logging.getLogger("bailo.announcements")
 
 
 class Client:
@@ -15,14 +32,74 @@ class Client:
     :param agent: An agent object to handle requests
     """
 
-    def __init__(self, url: str, agent: Agent | None = None):
+    _ANNOUNCEMENT_CHECK_INTERVAL = 60 * 60 * 24  # 24 hours
+
+    def __init__(self, url: str, agent: Agent | None = None, *, announcements: bool = True):
         """Initialise a Client.
 
         :param url: URL of the Bailo instance website.
         :param agent: An agent object to handle requests, defaults to Agent().
+        :param announcements: Whether to check and display server announcements, defaults to True.
         """
         self.url = url.rstrip("/") + "/api"
-        self.agent = agent or Agent()
+        self._agent = agent or Agent()
+        self._announcements_enabled = announcements
+        self._last_announcement_check: float | None = None
+        self._announcement_lock = threading.Lock()
+
+    @property
+    def agent(self) -> Agent:
+        """Return the HTTP agent, checking for announcements periodically."""
+        if self._announcements_enabled:
+            self._maybe_check_announcement()
+        return self._agent
+
+    @agent.setter
+    def agent(self, value: Agent) -> None:
+        self._agent = value
+
+    def _maybe_check_announcement(self) -> None:
+        """Check for announcements if enough time has elapsed since the last check."""
+        now = time.time()
+        if (
+            self._last_announcement_check is None
+            or (now - self._last_announcement_check) >= self._ANNOUNCEMENT_CHECK_INTERVAL
+        ):
+            self._check_announcement()
+            self._last_announcement_check = now
+
+    def _check_announcement(self) -> None:
+        """Fetch the server announcement and print it to stderr if enabled and current."""
+        with self._announcement_lock:
+            try:
+                response = self._agent.get(f"{self.url}/v2/config/ui").json()
+                announcement = response.get("uiConfig", {}).get("announcement", {})
+
+                if not announcement.get("enabled", False):
+                    return
+
+                text = announcement.get("text", "")
+                if not text:
+                    return
+
+                start_timestamp = announcement.get("startTimestamp", "")
+                now = datetime.datetime.now(datetime.timezone.utc)
+                if not start_timestamp == "" and now < datetime.datetime.fromisoformat(start_timestamp):
+                    return
+
+                for line in text.splitlines():
+                    announcement_logger.warning("remote: %s", line)
+            except Exception:  # pylint: disable=broad-exception-caught
+                logger.debug("Failed to check for server announcements", exc_info=True)
+
+    def get_ui_config(self):
+        """Retrieve the UI configuration from the server.
+
+        :return: JSON response object containing the UI configuration.
+        """
+        return self._agent.get(
+            f"{self.url}/v2/config/ui",
+        ).json()
 
     def post_model(
         self,
