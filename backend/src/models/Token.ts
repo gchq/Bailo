@@ -6,7 +6,6 @@ import {
   createSHA256Hash,
   HashType,
   HashTypeKeys,
-  toSecretKey,
   verifyArgon2Hash,
   verifyBcryptHash,
   verifySHA256Hash,
@@ -104,7 +103,7 @@ const TokenSchema = new Schema<TokenDoc>(
 
     accessKey: { type: String, required: true, unique: true, index: true },
     secretKey: { type: String, required: true, select: false },
-    hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.argon2 },
+    hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.ARGON2 },
   },
   {
     timestamps: true,
@@ -112,20 +111,19 @@ const TokenSchema = new Schema<TokenDoc>(
   },
 )
 
-TokenSchema.pre('save', function userPreSave() {
+TokenSchema.pre('save', async function userPreSave() {
   if (!this.isModified('secretKey') || !this.secretKey) {
     return
   }
 
   if (!this.hashMethod) {
-    this.hashMethod = HashType.argon2
+    this.hashMethod = HashType.ARGON2
   }
 
-  if (this.hashMethod === HashType.argon2) {
-    const { salt, hash } = createArgon2Hash(this.secretKey)
-    this.secretKey = toSecretKey(salt, hash)
+  if (this.hashMethod === HashType.ARGON2) {
+    this.secretKey = await createArgon2Hash(this.secretKey)
   } else if (this.hashMethod === HashType.Bcrypt) {
-    this.secretKey = createBcryptHash(this.secretKey)
+    this.secretKey = await createBcryptHash(this.secretKey)
   } else if (this.hashMethod === HashType.SHA256) {
     this.secretKey = createSHA256Hash(this.secretKey)
   } else {
@@ -133,23 +131,20 @@ TokenSchema.pre('save', function userPreSave() {
   }
 })
 
-TokenSchema.methods.compareToken = function compareToken(candidateToken: string) {
-  return new Promise((resolve) => {
-    if (!this.secretKey) {
-      resolve(false)
-      return
-    }
+TokenSchema.methods.compareToken = async function compareToken(candidateToken: string): Promise<boolean> {
+  if (!this.secretKey) {
+    return false
+  }
 
-    if (this.hashMethod === HashType.argon2) {
-      resolve(verifyArgon2Hash(candidateToken, this.secretKey))
-    } else if (this.hashMethod === HashType.Bcrypt) {
-      resolve(verifyBcryptHash(candidateToken, this.secretKey))
-    } else if (this.hashMethod === HashType.SHA256) {
-      resolve(verifySHA256Hash(candidateToken, this.secretKey))
-    } else {
-      throw new Error('Unexpected hash type: ' + this.hashMethod)
-    }
-  })
+  if (this.hashMethod === HashType.ARGON2) {
+    return verifyArgon2Hash(candidateToken, this.secretKey)
+  } else if (this.hashMethod === HashType.Bcrypt) {
+    return verifyBcryptHash(candidateToken, this.secretKey)
+  } else if (this.hashMethod === HashType.SHA256) {
+    return verifySHA256Hash(candidateToken, this.secretKey)
+  } else {
+    throw new Error('Unexpected hash type: ' + this.hashMethod)
+  }
 }
 
 TokenSchema.plugin(softDeletionPlugin)

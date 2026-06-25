@@ -1,12 +1,11 @@
 import { ClientSession } from 'mongoose'
-import { customAlphabet } from 'nanoid'
 
 import { Response } from '../connectors/authorisation/base.js'
 import TokenModel, { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
+import { longAlphabet, shortAlphabet } from '../utils/id.js'
 import { getModelById } from './model.js'
-
 interface CreateTokenProps {
   description: string
 
@@ -15,15 +14,14 @@ interface CreateTokenProps {
   actions: Array<string>
 }
 
-const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZabcdefghijklmnopqrstuvwxyz')
 export async function createToken(user: UserInterface, { description, scope, modelIds, actions }: CreateTokenProps) {
   if (user.token) {
     // Prevent escalating token privileges
     throw Forbidden('A token cannot be used to create another token', { accessKey: user.token.accessKey })
   }
 
-  const accessKey = `BAC_${nanoid(8)}`
-  const secretKey = `BSK_${nanoid(32)}`
+  const accessKey = `BAC_${shortAlphabet(8)}`
+  const secretKey = `BSK_${longAlphabet(32)}`
 
   if (scope === 'models') {
     // Checks to make sure the models are valid
