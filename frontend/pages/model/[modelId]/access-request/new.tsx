@@ -6,7 +6,7 @@ import { useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -25,9 +25,19 @@ export default function NewAccessRequest() {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  function getDefaultState() {
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [submissionErrorText, setSubmissionErrorText] = useState('')
+  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
+
+  const isLoading = useMemo(
+    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
+    [isModelLoading, isSchemaLoading, isCurrentUserLoading],
+  )
+
+  useEffect(() => {
     if (!model || !schema || !currentUser) {
-      return { reference: '', steps: [] }
+      return
     }
 
     const defaultState = {
@@ -41,18 +51,8 @@ export default function NewAccessRequest() {
       step.steps = steps
     }
 
-    return { reference: schema.id, steps }
-  }
-
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>(getDefaultState())
-  const [submissionErrorText, setSubmissionErrorText] = useState('')
-  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
-  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
-
-  const isLoading = useMemo(
-    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
-    [isModelLoading, isSchemaLoading, isCurrentUserLoading],
-  )
+    setSplitSchema({ reference: schema.id, steps })
+  }, [schema, model, currentUser])
 
   async function onSubmit() {
     setSubmissionErrorText('')
