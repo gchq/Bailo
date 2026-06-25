@@ -22,10 +22,9 @@ Click the **+ Create** button in the navigation bar. You'll see the available en
 
 - **Model** - A standard machine learning model with full lifecycle management
 - **Mirrored Model** - A read-only copy of a model from an external source (see
-  [Model Mirroring](/docs/users/model-mirroring/creating-a-mirrored-model))
-- **Untrusted Model** - A model requiring additional scrutiny (if enabled - see
-  [Untrusted Models](/docs/users/untrusted-models))
-- **Data Card** - Documentation for a dataset (see [Creating a Data Card](/docs/users/data-cards/creating-a-data-card))
+  [Model Mirroring](../model-mirroring/creating-a-mirrored-model))
+- **Untrusted Model** - A model requiring additional scrutiny (if enabled - see [Untrusted Models](../untrusted-models))
+- **Data Card** - Documentation for a dataset (see [Creating a Data Card](../data-cards/creating-a-data-card))
 
 Select **Model** to create a standard model.
 
@@ -54,7 +53,7 @@ After creating the model, you must select a **schema**. You have two options:
 
 - **Create from schema** - select a schema from the available list and start with a blank form
 - **Create from template** - copy the model card structure and content from an existing model (see
-  [Model Templating](/docs/users/models/model-templating))
+  [Model Templating](model-templating))
 
 The model card captures important information such as:
 
@@ -67,9 +66,9 @@ The model card captures important information such as:
 
 After creating a model and selecting a schema:
 
-1. [Fill in the model card](/docs/users/models/model-card) - document your model
-2. [Upload files](/docs/users/models/uploading-files) - add model artefacts
-3. [Create a release](/docs/users/models/creating-a-release) - version your model for distribution
+1. [Fill in the model card](model-card) - document your model
+2. [Upload files](uploading-files) - add model artefacts
+3. [Create a release](creating-a-release) - version your model for distribution
 
 ## Changing the model name or description
 
@@ -81,8 +80,8 @@ To update the model name or description after creation:
 
 ## Related pages
 
-- [Model Card](/docs/users/models/model-card) - Filling in the model card and configuring access
-- [Core Concepts](/docs/getting-started/core-concepts) - Understanding the Bailo data model
-- [Python Client](/docs/users/programmatically-using-bailo/python-client) - Creating models programmatically
+- [Model Card](model-card) - Filling in the model card and configuring access
+- [Core Concepts](../../getting-started/core-concepts) - Understanding the Bailo data model
+- [Python Client](../programmatically-using-bailo/python-client) - Creating models programmatically
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
