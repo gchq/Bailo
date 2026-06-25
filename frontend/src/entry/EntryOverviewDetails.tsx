@@ -150,7 +150,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               divider={<Divider flexItem orientation='vertical' />}
             >
               {reviews.length > 0 && (
-                <Typography>
+                <Typography sx={{ pr: 1 }}>
                   {reviews[0].dueDate
                     ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
                     : 'Invalid date'}

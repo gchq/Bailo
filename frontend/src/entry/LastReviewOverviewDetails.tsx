@@ -27,9 +27,9 @@ export default function LastReviewOverviewDetails({ reviewId }: LastReviewOvervi
       </Typography>
       <Typography>
         {response ? (
-          <Stack direction='row' spacing={1}>
+          <Stack direction='row' spacing={0.5}>
             <div>{formatDateStringAsDayMonthAndYear(response.createdAt.toString())} by</div>
-            <UserDisplay dn={response.entity} showIcon />
+            <UserDisplay dn={response.entity} />
           </Stack>
         ) : (
           <em>Error fetching review</em>
