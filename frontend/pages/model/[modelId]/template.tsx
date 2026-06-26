@@ -1,6 +1,6 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
-import { EntrySearchResult, useGetModel, useListEntries } from 'actions/entry'
+import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { postFromTemplate } from 'actions/modelCard'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
@@ -25,7 +25,7 @@ export default function ModelTemplateSelect() {
     isEntryLoading: isModelLoading,
     isEntryError: isModelError,
     mutateEntry: mutateModel,
-  } = useGetModel(modelId, EntryKind.MODEL)
+  } = useGetEntry(modelId, EntryKind.MODEL)
   const {
     entries: models,
     isEntriesLoading: isModelsLoading,
