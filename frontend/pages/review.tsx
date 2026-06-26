@@ -18,9 +18,9 @@ export default function Review() {
   )
 
   return (
-    <>
+    <div role='main'>
       <Title text='Review' />
       <PageWithTabs title='Your Reviews' tabs={tabs} />
-    </>
+    </div>
   )
 }
