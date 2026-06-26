@@ -55,7 +55,8 @@ export default function DateSelector({ onChange, value, label, registry, require
     >
       {registry.formContext.editMode && (
         <DatePicker
-          value={value ? dayjs(value) : undefined}
+          // MUI DatePicker requires null (not undefined) for empty state to correctly re-render when the value changes externally
+          value={value ? dayjs(value) : null}
           aria-label={`date input field for ${label}`}
           onChange={handleChange}
           format='DD-MM-YYYY'
