@@ -150,7 +150,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               divider={<Divider flexItem orientation='vertical' />}
             >
               {reviews.length > 0 && (
-                <Typography sx={{ pr: 1 }}>
+                <Typography>
                   {reviews[0].dueDate
                     ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
                     : 'Invalid date'}
@@ -161,6 +161,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                   size='small'
                   sx={{ width: 'fit-content' }}
                   href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
+                  variant='outlined'
                 >
                   Review
                 </Button>
@@ -170,6 +171,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
                 onClick={() => {
                   setReviewHistoryOpen(true)
                 }}
+                variant='outlined'
               >
                 History
               </Button>
