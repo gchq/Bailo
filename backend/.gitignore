@@ -145,3 +145,5 @@ doctrees
 
 # Statically built Swagger/OpenAPI spec
 openapi-specs/
+
+backenddocsvenv/
