@@ -2,6 +2,8 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   buildSchemaDescription,
+  cleanArrayItems,
+  cleanStringValue,
   extractModelCardFromText,
   isInvalidDateString,
   isPlaceholderUrl,
@@ -482,6 +484,66 @@ describe('services > modelCardImport', () => {
       expect(isInvalidDateString('not a date')).toBe(false)
       expect(isInvalidDateString('2024-1-1')).toBe(false)
       expect(isInvalidDateString('')).toBe(false)
+    })
+  })
+
+  describe('cleanArrayItems', () => {
+    const emptyRoot = { type: 'object', properties: {} }
+
+    test('filters out items not matching enum values', () => {
+      const itemSchema = { type: 'string', enum: ['NLP', 'Vision'] }
+      const result = cleanArrayItems(['NLP', 'invalid', 'Vision'], 'tags', itemSchema, emptyRoot)
+      expect(result).toEqual(['NLP', 'Vision'])
+    })
+
+    test('matches enum values case-insensitively', () => {
+      const itemSchema = { type: 'string', enum: ['NLP', 'Vision'] }
+      const result = cleanArrayItems(['nlp', 'VISION'], 'tags', itemSchema, emptyRoot)
+      expect(result).toEqual(['NLP', 'Vision'])
+    })
+
+    test('filters out placeholder values', () => {
+      const itemSchema = { type: 'string' }
+      const result = cleanArrayItems(['valid text', 'N/A', 'not specified'], 'items', itemSchema, emptyRoot)
+      expect(result).toEqual(['valid text'])
+    })
+
+    test('filters out null and undefined values', () => {
+      const itemSchema = { type: 'string' }
+      const result = cleanArrayItems(['valid', null, undefined, 'also valid'], 'items', itemSchema, emptyRoot)
+      expect(result).toEqual(['valid', 'also valid'])
+    })
+
+    test('passes through items when no item schema is provided', () => {
+      const result = cleanArrayItems(['a', 'b', 'c'], 'items', undefined, emptyRoot)
+      expect(result).toEqual(['a', 'b', 'c'])
+    })
+  })
+
+  describe('cleanStringValue', () => {
+    test('truncates strings exceeding maxLength', () => {
+      const schema = { type: 'string', maxLength: 5 }
+      expect(cleanStringValue('Too Long String', 'name', schema)).toBe('Too L')
+    })
+
+    test('returns string unchanged when within maxLength', () => {
+      const schema = { type: 'string', maxLength: 100 }
+      expect(cleanStringValue('short', 'name', schema)).toBe('short')
+    })
+
+    test('matches enum values case-insensitively', () => {
+      const schema = { type: 'string', enum: ['Draft', 'Published'] }
+      expect(cleanStringValue('published', 'status', schema)).toBe('Published')
+    })
+
+    test('returns undefined for unmatched enum values', () => {
+      const schema = { type: 'string', enum: ['Draft', 'Published'] }
+      expect(cleanStringValue('invalid', 'status', schema)).toBeUndefined()
+    })
+
+    test('passes through plain strings unchanged', () => {
+      const schema = { type: 'string' }
+      expect(cleanStringValue('hello world', 'name', schema)).toBe('hello world')
     })
   })
 })

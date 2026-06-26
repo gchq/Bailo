@@ -218,42 +218,14 @@ function stripUnknownKeys(
           arrayItemSchema = { ...resolvedSchema, ...arrayItemSchema, $ref: undefined } as typeof arrayItemSchema
         }
       }
-      const cleanedArray = value
-        .map((arrayItem) => {
-          if (arrayItemSchema?.type === 'object' && typeof arrayItem === 'object' && arrayItem !== null) {
-            return stripUnknownKeys(arrayItem as Record<string, unknown>, arrayItemSchema, root)
-          }
-          if (arrayItemSchema?.enum) {
-            const matchedValue =
-              typeof arrayItem === 'string' ? matchEnumValue(arrayItem, arrayItemSchema.enum) : undefined
-            if (matchedValue === undefined) {
-              log.warn(
-                { key, value: arrayItem, allowedValues: arrayItemSchema.enum },
-                'Dropping array item: no matching enum value.',
-              )
-            }
-            return matchedValue !== undefined ? matchedValue : null
-          }
-          return arrayItem
-        })
-        .filter((arrayItem) => arrayItem !== null && arrayItem !== undefined && !isPlaceholderValue(arrayItem))
-
+      const cleanedArray = cleanArrayItems(value, key, arrayItemSchema, root)
       if (cleanedArray.length > 0) {
         cleanedData[key] = cleanedArray
       }
     } else if (propertySchema.type === 'string' && typeof value === 'string') {
-      const maxLength = propertySchema.maxLength as number | undefined
-      if (maxLength && value.length > maxLength) {
-        cleanedData[key] = value.slice(0, maxLength)
-      } else if (propertySchema.enum) {
-        const matchedValue = matchEnumValue(value, propertySchema.enum)
-        if (matchedValue !== undefined) {
-          cleanedData[key] = matchedValue
-        } else {
-          log.warn({ key, value, allowedValues: propertySchema.enum }, 'Dropping field: no matching enum value.')
-        }
-      } else {
-        cleanedData[key] = value
+      const cleanedString = cleanStringValue(value, key, propertySchema)
+      if (cleanedString !== undefined) {
+        cleanedData[key] = cleanedString
       }
     } else if (propertySchema.type === 'number' && typeof value === 'number') {
       cleanedData[key] = value
@@ -263,6 +235,61 @@ function stripUnknownKeys(
   }
 
   return cleanedData
+}
+
+/**
+ * Cleans an array of LLM-extracted values against the schema for the array's items.
+ * For object items, recursively strips unknown keys. For enum items, matches case-insensitively
+ * and drops unmatched values. Filters out nulls and placeholder values from the result.
+ */
+export function cleanArrayItems(
+  items: unknown[],
+  fieldKey: string,
+  arrayItemSchema: (JsonSchema & { $ref?: string }) | undefined,
+  rootSchema: JsonSchema,
+): unknown[] {
+  return items
+    .map((arrayItem) => {
+      if (arrayItemSchema?.type === 'object' && typeof arrayItem === 'object' && arrayItem !== null) {
+        return stripUnknownKeys(arrayItem as Record<string, unknown>, arrayItemSchema, rootSchema)
+      }
+      if (arrayItemSchema?.enum) {
+        const matchedValue = typeof arrayItem === 'string' ? matchEnumValue(arrayItem, arrayItemSchema.enum) : undefined
+        if (matchedValue === undefined) {
+          log.warn(
+            { key: fieldKey, value: arrayItem, allowedValues: arrayItemSchema.enum },
+            'Dropping array item: no matching enum value.',
+          )
+        }
+        return matchedValue !== undefined ? matchedValue : null
+      }
+      return arrayItem
+    })
+    .filter((arrayItem) => arrayItem !== null && arrayItem !== undefined && !isPlaceholderValue(arrayItem))
+}
+
+/**
+ * Cleans a string value against its schema constraints: truncates to maxLength, matches enum values
+ * case-insensitively, or passes through unchanged. Returns undefined if the value should be dropped.
+ */
+export function cleanStringValue(
+  value: string,
+  fieldKey: string,
+  propertySchema: JsonSchema & { maxLength?: number },
+): string | undefined {
+  const maxLength = propertySchema.maxLength as number | undefined
+  if (maxLength && value.length > maxLength) {
+    return value.slice(0, maxLength)
+  }
+  if (propertySchema.enum) {
+    const matchedValue = matchEnumValue(value, propertySchema.enum)
+    if (matchedValue !== undefined) {
+      return matchedValue
+    }
+    log.warn({ key: fieldKey, value, allowedValues: propertySchema.enum }, 'Dropping field: no matching enum value.')
+    return undefined
+  }
+  return value
 }
 
 /**
