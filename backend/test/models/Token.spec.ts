@@ -5,7 +5,7 @@ import TokenModel from '../../src/models/Token.js'
 import { HashType } from '../../src/services/hash.js'
 
 const bcryptMocks = vi.hoisted(() => ({
-  compare: vi.fn((a, b, c) => c(null, true)),
+  compare: vi.fn(),
 }))
 vi.mock('bcryptjs', () => ({ default: bcryptMocks }))
 
@@ -22,7 +22,14 @@ vi.mock('../../src/connectors/artefactScanning/Base.js', () => baseScannerMock)
 const sha256Mocks = vi.hoisted(() => ({
   digest: vi.fn(),
 }))
-vi.mock('crypto', () => ({ createHash: vi.fn(() => ({ update: vi.fn(() => sha256Mocks) })) }))
+const timingSafeEqualMock = vi.hoisted(() => vi.fn())
+
+vi.mock('crypto', () => ({
+  createHash: vi.fn(() => ({ update: vi.fn(() => sha256Mocks) })),
+  timingSafeEqual: timingSafeEqualMock,
+  randomBytes: vi.fn(),
+  argon2: vi.fn(),
+}))
 
 describe('models > Token', () => {
   test('compareToken > missing secret key', async () => {
@@ -36,7 +43,7 @@ describe('models > Token', () => {
     const token = new TokenModel()
     token.secretKey = 'secret'
     token.hashMethod = HashType.Bcrypt
-    bcryptMocks.compare.mockImplementationOnce((a, b, c) => c('Compare Error'))
+    bcryptMocks.compare.mockRejectedValueOnce(new Error('Compare Error'))
 
     const result = token.compareToken('abc')
 
@@ -57,7 +64,7 @@ describe('models > Token', () => {
     const token = new TokenModel()
     token.secretKey = 'secret'
     token.hashMethod = HashType.Bcrypt
-    bcryptMocks.compare.mockImplementationOnce((a, b, c) => c(null, true))
+    bcryptMocks.compare.mockResolvedValueOnce(true)
 
     const result = await token.compareToken('abc')
 
@@ -68,7 +75,7 @@ describe('models > Token', () => {
     const token = new TokenModel()
     token.secretKey = 'secret'
     token.hashMethod = HashType.Bcrypt
-    bcryptMocks.compare.mockImplementationOnce((a, b, c) => c(null, false))
+    bcryptMocks.compare.mockResolvedValueOnce(false)
 
     const result = await token.compareToken('abc')
 
@@ -80,6 +87,7 @@ describe('models > Token', () => {
     token.secretKey = 'secret'
     token.hashMethod = HashType.SHA256
     sha256Mocks.digest.mockReturnValueOnce(token.secretKey)
+    timingSafeEqualMock.mockReturnValueOnce(true)
 
     const result = await token.compareToken('abc')
 
@@ -91,6 +99,7 @@ describe('models > Token', () => {
     token.secretKey = 'secret'
     token.hashMethod = HashType.SHA256
     sha256Mocks.digest.mockReturnValueOnce(token.secretKey)
+    timingSafeEqualMock.mockReturnValueOnce(true)
 
     const result = await token.compareToken('abc')
 
@@ -102,6 +111,7 @@ describe('models > Token', () => {
     token.secretKey = 'secret'
     token.hashMethod = HashType.SHA256
     sha256Mocks.digest.mockReturnValueOnce(token.secretKey)
+    timingSafeEqualMock.mockReturnValueOnce(true)
 
     const result = await token.compareToken('abc')
 
@@ -113,6 +123,7 @@ describe('models > Token', () => {
     token.secretKey = 'secret'
     token.hashMethod = HashType.SHA256
     sha256Mocks.digest.mockReturnValueOnce('wrong value')
+    timingSafeEqualMock.mockReturnValueOnce(false)
 
     const result = await token.compareToken('abc')
 
