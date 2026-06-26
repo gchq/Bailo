@@ -1,6 +1,6 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
@@ -42,7 +42,7 @@ export default function NewRelease() {
   const router = useRouter()
 
   const { modelId }: { modelId?: string } = router.query
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 

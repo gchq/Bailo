@@ -166,7 +166,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           </Button>
           {collaboratorList}
         </Stack>
-        {entry.card && (
+        {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
             <Typography fontWeight='bold' color='primary'>
               Next review due:

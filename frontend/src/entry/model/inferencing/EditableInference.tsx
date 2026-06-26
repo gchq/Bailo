@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { putInference, UpdateInferenceParams, useGetInference } from 'actions/inferencing'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -30,7 +30,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   const [isLoading, setIsLoading] = useState(false)
   const [isEdit, onIsEditChange] = useState(false)
 
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(inference.modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(inference.modelId)
   const { mutateInference } = useGetInference(inference.modelId, inference.image, inference.tag)
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 

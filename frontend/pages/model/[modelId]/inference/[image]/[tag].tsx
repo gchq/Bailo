@@ -1,6 +1,6 @@
 import { ArrowBack } from '@mui/icons-material'
 import { Button, Container, Link, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -11,7 +11,7 @@ import MessageAlert from 'src/MessageAlert'
 export default function InferenceApp() {
   const router = useRouter()
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [isSpinningUp, setIsSpinningUp] = useState(true)

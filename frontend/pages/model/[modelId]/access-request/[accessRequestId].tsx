@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -45,7 +45,7 @@ export default function AccessRequest() {
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(
     accessRequest ? accessRequest.schemaId : undefined,
