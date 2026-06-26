@@ -611,8 +611,9 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 }
 
 export async function getAllFileIds(modelId: string, semvers: string[]): Promise<string[]> {
+  const semverObjects = semvers.flatMap((semverString) => semverStringToObject(semverString))
   const result = await ReleaseModel.aggregate()
-    .match({ modelId, semver: { $in: semvers } })
+    .match({ modelId, semver: { $in: semverObjects } })
     .unwind({ path: '$fileIds' })
     .group({
       _id: null,
