@@ -24,8 +24,8 @@ export default function ReviewRolesForm() {
 
   const newReviewRoleHeading = (
     <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
-      <Typography variant='h6' component='h1'>
-        Create new Role
+      <Typography variant='h6' component='h1' color='primary'>
+        Create new review role
       </Typography>
       <PersonAdd color='primary' fontSize='large' />
     </Stack>
@@ -57,9 +57,6 @@ export default function ReviewRolesForm() {
         loading={loading}
         errorMessage={errorMessage}
         handleSubmit={handleSubmit}
-        handleCancel={() => {
-          router.push('/reviewRoles/view')
-        }}
       />
     </>
   )

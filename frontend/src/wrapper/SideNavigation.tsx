@@ -1,16 +1,15 @@
 import {
   AccessibilityNew,
+  AdminPanelSettings,
   Equalizer,
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
-  SupervisorAccount,
 } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DescriptionIcon from '@mui/icons-material/Description'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
@@ -183,26 +182,14 @@ export default function SideNavigation({
               openLinkInNewTab
             />
             <Divider aria-hidden='true' />
-            <>
-              <NavMenuItem
-                href='/schemas/list'
-                selectedPage={page}
-                primaryText='Schemas'
-                drawerOpen={drawerOpen}
-                menuPage='schemas'
-                title='Schemas'
-                icon={<SchemaIcon />}
-                requiredRole={Roles.Admin}
-              />
-            </>
             <NavMenuItem
-              href='/reviewRoles/view'
+              href='/admin'
               selectedPage={page}
-              primaryText='Review Roles'
+              primaryText='Schemas'
               drawerOpen={drawerOpen}
-              menuPage='reviewRoles'
-              title='Review roles'
-              icon={<SupervisorAccount />}
+              menuPage='admin'
+              title='Admin panel'
+              icon={<AdminPanelSettings />}
               requiredRole={Roles.Admin}
             />
             <NavMenuItem

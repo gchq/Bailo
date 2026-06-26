@@ -141,7 +141,7 @@ export default function SchemaMigrationSelector() {
           <Paper sx={{ my: 4, p: 4 }}>
             <Stack spacing={4} alignItems='center' sx={{ maxWidth: '750px' }}>
               <Box sx={{ textAlign: 'left', width: '100%' }}>
-                <Link href={`/schemas/list?tab=migrations`}>
+                <Link href={`/admin?section=migration`}>
                   <Button
                     size='small'
                     sx={{ width: 'fit-content', pb: 2 }}
