@@ -41,6 +41,7 @@ registerPath({
 
 interface PostImportModelCardTextResponse {
   metadata: Record<string, unknown>
+  warnings: string[]
 }
 
 export const postImportModelCardText = [
@@ -51,8 +52,8 @@ export const postImportModelCardText = [
       body: { text },
     } = parse(req, postImportModelCardTextSchema)
 
-    const metadata = await extractModelCardFromText(req.user, modelId, text)
+    const { metadata, warnings } = await extractModelCardFromText(req.user, modelId, text)
 
-    res.json({ metadata })
+    res.json({ metadata, warnings })
   },
 ]

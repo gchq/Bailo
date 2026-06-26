@@ -8,7 +8,7 @@ import { getErrorMessage } from 'utils/fetcher'
 interface ImportModelCardTextDialogProps {
   open: boolean
   onClose: () => void
-  onSubmit: (metadata: Record<string, unknown>) => void
+  onSubmit: (metadata: Record<string, unknown>, warnings: string[]) => void
   modelId: string
 }
 
@@ -29,7 +29,7 @@ export default function ImportModelCardTextDialog({
     const response = await postImportModelCardText(modelId, text)
 
     if (response.status && response.status < 400) {
-      onSubmit(response.data.metadata)
+      onSubmit(response.data.metadata, response.data.warnings || [])
       setText('')
     } else {
       setErrorMessage(typeof response.data === 'string' ? response.data : await getErrorMessage(response.data))

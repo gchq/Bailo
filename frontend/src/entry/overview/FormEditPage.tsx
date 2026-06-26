@@ -167,7 +167,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     }
   }
 
-  function handleImportTextOnSubmit(metadata: Record<string, unknown>) {
+  function handleImportTextOnSubmit(metadata: Record<string, unknown>, warnings: string[]) {
     setImportTextDialogOpen(false)
     try {
       if (schema) {
@@ -178,7 +178,10 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         setSplitSchema({ reference: schema.id, steps })
         sendNotification({
           variant: 'success',
-          msg: 'Model card data imported successfully. Please review the extracted fields.',
+          msg:
+            warnings.length > 0
+              ? `Model card data imported with ${warnings.length} validation warning(s):\n${warnings.map((warning) => `- ${warning}`).join('\n')}`
+              : 'Model card data imported successfully. Please review the extracted fields.',
           anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
         })
       }

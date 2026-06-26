@@ -301,7 +301,8 @@ describe('services > modelCardImport', () => {
       const result = await extractModelCardFromText(testUser, 'model-1', 'My model is called Test Model')
 
       expect(llmMock.callLlmChatCompletion).toHaveBeenCalledOnce()
-      expect(result).toEqual({ overview: { name: 'Test Model', description: 'A test model' } })
+      expect(result.metadata).toEqual({ overview: { name: 'Test Model', description: 'A test model' } })
+      expect(result.warnings).toEqual([])
     })
 
     test('throws when LLM returns invalid JSON', async () => {
@@ -326,9 +327,9 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result).toEqual({ overview: { name: 'Test', description: 'Desc' } })
-      expect((result as any).nonExistentSection).toBeUndefined()
-      expect((result as any).overview?.unknownField).toBeUndefined()
+      expect(result.metadata).toEqual({ overview: { name: 'Test', description: 'Desc' } })
+      expect((result.metadata as any).nonExistentSection).toBeUndefined()
+      expect((result.metadata as any).overview?.unknownField).toBeUndefined()
     })
 
     test('strips placeholder values like N/A and example URLs', async () => {
@@ -342,7 +343,7 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result).toEqual({})
+      expect(result.metadata).toEqual({})
     })
 
     test('strips fields with excluded widgets', async () => {
@@ -366,7 +367,7 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result).toEqual({ overview: { name: 'Test' } })
+      expect(result.metadata).toEqual({ overview: { name: 'Test' } })
     })
 
     test('handles enum validation by stripping invalid enum values', async () => {
@@ -382,7 +383,7 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result.status).toBeUndefined()
+      expect(result.metadata.status).toBeUndefined()
     })
 
     test('matches enum values case-insensitively and returns the schema-defined casing', async () => {
@@ -398,7 +399,7 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result.status).toBe('Published')
+      expect(result.metadata.status).toBe('Published')
     })
 
     test('matches array enum values case-insensitively', async () => {
@@ -418,7 +419,7 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result.tags).toEqual(['NLP', 'Vision'])
+      expect(result.metadata.tags).toEqual(['NLP', 'Vision'])
     })
 
     test('truncates strings exceeding maxLength', async () => {
@@ -434,7 +435,7 @@ describe('services > modelCardImport', () => {
 
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
-      expect(result.name).toBe('Too L')
+      expect(result.metadata.name).toBe('Too L')
     })
   })
 })

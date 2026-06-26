@@ -291,7 +291,7 @@ export async function extractModelCardFromText(
   user: UserInterface,
   modelId: string,
   text: string,
-): Promise<Record<string, unknown>> {
+): Promise<{ metadata: Record<string, unknown>; warnings: string[] }> {
   const model = await getModelById(user, modelId)
   const schemaId = model.card?.schemaId
 
@@ -323,14 +323,13 @@ export async function extractModelCardFromText(
   const cleaned = stripUnknownKeys(parsed, schema.jsonSchema)
 
   const validationResult = new Validator().validate(cleaned, schema.jsonSchema)
-  if (validationResult.errors.length > 0) {
-    log.warn(
-      { modelId, errors: validationResult.errors.map((err) => `${err.property}: ${err.message}`) },
-      'Extracted data has validation issues, stripping invalid fields.',
-    )
+  const warnings = validationResult.errors.map((err) => `${err.property}: ${err.message}`)
+
+  if (warnings.length > 0) {
+    log.warn({ modelId, warnings }, 'Extracted data has validation issues.')
   }
 
   log.info({ modelId, extractedKeys: Object.keys(cleaned) }, 'Successfully extracted model card data from text.')
 
-  return cleaned
+  return { metadata: cleaned, warnings }
 }
