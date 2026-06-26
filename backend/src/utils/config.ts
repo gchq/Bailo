@@ -248,6 +248,7 @@ export interface Config {
     maxTokens: number
     timeoutMs: number
     temperature: number
+    systemPrompt: string
   }
 }
 

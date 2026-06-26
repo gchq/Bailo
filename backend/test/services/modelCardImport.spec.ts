@@ -26,6 +26,14 @@ vi.mock('../../src/services/log.js', () => ({
   default: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }))
 
+vi.mock('../../src/utils/config.js', () => ({
+  default: {
+    llm: {
+      systemPrompt: 'Test system prompt',
+    },
+  },
+}))
+
 describe('services > modelCardImport', () => {
   const testUser = { dn: 'user' } as any
 

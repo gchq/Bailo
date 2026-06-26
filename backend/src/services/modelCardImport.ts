@@ -3,6 +3,7 @@ import NodeCache from 'node-cache'
 
 import { callLlmChatCompletion, ChatMessage, ChatMessageRole } from '../clients/llm.js'
 import { UserInterface } from '../models/User.js'
+import config from '../utils/config.js'
 import { BadReq } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -266,23 +267,7 @@ function isPlaceholderValue(value: unknown): boolean {
 }
 
 function buildPromptMessages(fields: FieldDescriptor[], text: string): ChatMessage[] {
-  const systemMessage = `You are a data extraction assistant. You will be given a model card text document and a target JSON schema. Extract information from the document into the schema format.
-
-CRITICAL RULES:
-- Only extract information that is EXPLICITLY stated in the source document.
-- If a field cannot be populated from the document, omit it entirely from the output.
-- Do NOT infer, guess, or hallucinate any values.
-- Do NOT generate placeholder text like "Not specified", "N/A", or "Unknown" — leave the field out.
-- Do NOT generate placeholder or example URLs. Only include a URL if it appears verbatim in the source document.
-- Do NOT infer or generate dates. Only populate date fields if an explicit date is clearly stated in the source document for that specific purpose.
-- Return valid JSON matching the schema structure exactly.
-- For string fields, extract the relevant text verbatim or as a close summary.
-- For array fields, extract all matching items found in the document.
-- For enum fields (where allowed values are listed), you MUST use one of the allowed values exactly as written. Match the closest value semantically if the document uses different wording.
-- For number fields, extract numeric values only if explicitly stated.
-- For boolean fields, extract true/false only if the answer is clearly stated.
-- When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
-- The output JSON must use the exact property names from the schema (the "path" field).`
+  const systemMessage = config.llm.systemPrompt
 
   const schemaDescription = JSON.stringify(fields, null, 2)
 
