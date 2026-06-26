@@ -8,6 +8,11 @@ export default defineConfig({
   plugins: [react()] as ViteUserConfig['plugins'],
   test: {
     globals: true,
+    server: {
+      deps: {
+        inline: ['@mui/material', '@mui/icons-material', '@mui/system', '@mui/utils', '@mui/styled-engine'],
+      },
+    },
     environment: 'jsdom',
     setupFiles: ['./utils/test/testUtils.ts'],
   },
