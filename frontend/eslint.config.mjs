@@ -20,6 +20,11 @@ export default defineConfig([
       prettier,
       'simple-import-sort': simpleImportSort,
     },
+    settings: {
+      react: {
+        version: '19',
+      },
+    },
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
