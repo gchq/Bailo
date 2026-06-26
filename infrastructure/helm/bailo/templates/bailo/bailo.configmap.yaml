@@ -318,6 +318,14 @@ data:
 
       untrustedModels: {
         defaultState: '{{ .Values.untrustedModels.defaultState }}'
+      },
+
+      llm: {
+        enabled: {{ .Values.llm.enabled }},
+        endpoint: '{{ .Values.llm.endpoint }}',
+        model: '{{ .Values.llm.model }}',
+        maxTokens: {{ .Values.llm.maxTokens }},
+        timeoutMs: {{ .Values.llm.timeoutMs }},
       }
     }
 
@@ -349,5 +357,8 @@ data:
             },
           },
         },
+      },
+      llm: {
+        apiKey: 'LLM_API_KEY',
       },
     }

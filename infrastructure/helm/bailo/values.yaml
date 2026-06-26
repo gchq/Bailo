@@ -278,6 +278,9 @@ config:
       enabled: false
       untrustedModelDescription: 'These are private only models.'
 
+    llmImport:
+      enabled: false
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -407,3 +410,10 @@ artefactscan:
   env: # Override settings here
     # TRIVY_DB_INSECURE: false
     # TRIVY_DB_HOSTNAME: ghcr.io
+
+llm:
+  enabled: false
+  endpoint: ''
+  model: ''
+  maxTokens: 16384
+  timeoutMs: 120000
