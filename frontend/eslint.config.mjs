@@ -3,7 +3,6 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import pluginCypress from 'eslint-plugin-cypress'
 import prettier from 'eslint-plugin-prettier'
-import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import tseslint from 'typescript-eslint'
@@ -14,8 +13,6 @@ export default defineConfig([
   },
   eslint.configs.recommended,
   tseslint.configs.recommended,
-  react.configs.flat.recommended,
-  react.configs.flat['jsx-runtime'],
   reactHooks.configs.flat.recommended,
   ...nextVitals,
   {
