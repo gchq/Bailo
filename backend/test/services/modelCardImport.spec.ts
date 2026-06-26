@@ -1,6 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { buildSchemaDescription, extractModelCardFromText } from '../../src/services/modelCardImport.js'
+import {
+  buildSchemaDescription,
+  extractModelCardFromText,
+  isInvalidDateString,
+  isPlaceholderUrl,
+} from '../../src/services/modelCardImport.js'
 
 const llmMock = vi.hoisted(() => ({
   callLlmChatCompletion: vi.fn(),
@@ -436,6 +441,47 @@ describe('services > modelCardImport', () => {
       const result = await extractModelCardFromText(testUser, 'model-1', 'some text')
 
       expect(result.metadata.name).toBe('Too L')
+    })
+  })
+
+  describe('isPlaceholderUrl', () => {
+    test('detects example.com URLs', () => {
+      expect(isPlaceholderUrl('https://example.com')).toBe(true)
+      expect(isPlaceholderUrl('http://example.com/path')).toBe(true)
+    })
+
+    test('detects www.example URLs', () => {
+      expect(isPlaceholderUrl('https://www.example.org/test')).toBe(true)
+    })
+
+    test('detects placeholder URLs', () => {
+      expect(isPlaceholderUrl('https://placeholder.com/image')).toBe(true)
+      expect(isPlaceholderUrl('https://your-website.com')).toBe(true)
+      expect(isPlaceholderUrl('https://insert-url-here.com')).toBe(true)
+      expect(isPlaceholderUrl('https://link-here.com')).toBe(true)
+    })
+
+    test('allows legitimate URLs', () => {
+      expect(isPlaceholderUrl('https://github.com/repo')).toBe(false)
+      expect(isPlaceholderUrl('https://huggingface.co/model')).toBe(false)
+      expect(isPlaceholderUrl('https://arxiv.org/abs/1234')).toBe(false)
+    })
+  })
+
+  describe('isInvalidDateString', () => {
+    test('detects invalid date strings', () => {
+      expect(isInvalidDateString('0000-00-00')).toBe(true)
+    })
+
+    test('allows valid date strings', () => {
+      expect(isInvalidDateString('2024-01-15')).toBe(false)
+      expect(isInvalidDateString('2023-12-31')).toBe(false)
+    })
+
+    test('returns false for non-date strings', () => {
+      expect(isInvalidDateString('not a date')).toBe(false)
+      expect(isInvalidDateString('2024-1-1')).toBe(false)
+      expect(isInvalidDateString('')).toBe(false)
     })
   })
 })

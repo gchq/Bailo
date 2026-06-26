@@ -306,21 +306,36 @@ function isPlaceholderValue(value: unknown): boolean {
     return true
   }
 
-  const placeholderUrlPattern = /^https?:\/\/(example\.com|www\.example\.|placeholder|your-|insert-|link-here)/i
-  if (placeholderUrlPattern.test(value.trim())) {
+  if (isPlaceholderUrl(value.trim())) {
     return true
   }
 
-  // Reject date-formatted strings that don't parse to a valid date (e.g. "0000-00-00")
-  const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/
-  if (isoDatePattern.test(value.trim())) {
-    const parsedDate = new Date(value.trim())
-    if (isNaN(parsedDate.getTime())) {
-      return true
-    }
+  if (isInvalidDateString(value.trim())) {
+    return true
   }
 
   return false
+}
+
+/**
+ * Detects fake or example URLs that LLMs commonly generate as placeholder values.
+ */
+export function isPlaceholderUrl(value: string): boolean {
+  const placeholderUrlPattern = /^https?:\/\/(example\.com|www\.example\.|placeholder|your-|insert-|link-here)/i
+  return placeholderUrlPattern.test(value)
+}
+
+/**
+ * Detects date-formatted strings (YYYY-MM-DD) that don't parse to a valid date (e.g. "0000-00-00").
+ * Returns false for non-date strings and valid dates.
+ */
+export function isInvalidDateString(value: string): boolean {
+  const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/
+  if (!isoDatePattern.test(value)) {
+    return false
+  }
+  const parsedDate = new Date(value)
+  return isNaN(parsedDate.getTime())
 }
 
 function buildPromptMessages(fields: FieldDescriptor[], text: string): ChatMessage[] {
