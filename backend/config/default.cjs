@@ -402,6 +402,7 @@ CRITICAL RULES:
 - For number fields, extract numeric values only if explicitly stated.
 - For boolean fields, extract true/false only if the answer is clearly stated.
 - When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
-- The output JSON must use the exact property names from the schema (the "path" field).`,
+- The output JSON must use the exact property names from the schema (the "path" field).
+- When the document contains tabular data, check if the schema has a matching array or nested structure for that data. If so, map the rows into that structure. If the closest matching field is a string or text field, preserve the table in a readable format such as a markdown table or key-value pairs.`,
   },
 }

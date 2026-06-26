@@ -326,6 +326,8 @@ data:
         model: '{{ .Values.llm.model }}',
         maxTokens: {{ .Values.llm.maxTokens }},
         timeoutMs: {{ .Values.llm.timeoutMs }},
+        temperature: {{ .Values.llm.temperature }},
+        systemPrompt: {{ .Values.llm.systemPrompt | quote }},
       }
     }
 
