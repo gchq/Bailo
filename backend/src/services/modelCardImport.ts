@@ -9,6 +9,7 @@ import log from './log.js'
 import { getModelById } from './model.js'
 import { getSchemaById } from './schema.js'
 
+// Widgets that represent entity/data relationships rather than user-editable content, excluded from LLM extraction
 const EXCLUDED_WIDGETS = new Set(['dataCardSelector', 'entitySelector'])
 
 const SCHEMA_DESCRIPTION_CACHE_TTL = 3600
@@ -18,6 +19,7 @@ const schemaDescriptionCache = new NodeCache({
   useClones: false,
 })
 
+// Flat representation of a schema field, used to describe the target structure to the LLM
 interface FieldDescriptor {
   path: string
   title: string
@@ -26,93 +28,106 @@ interface FieldDescriptor {
   format?: string
 }
 
+/**
+ * Produces a compact, human-readable summary of an object schema's fields (e.g. "{ name: string, age: number }").
+ * Used inside LLM prompts to describe the shape of nested objects and array items so the LLM knows what to extract.
+ * Recurses into nested objects and annotates arrays with their item types and enum constraints.
+ */
 function describeObjectFields(schema: JsonSchema): string {
   if (!schema.properties) {
     return '{}'
   }
-  const parts: string[] = []
-  for (const [key, prop] of Object.entries(schema.properties) as [string, JsonSchema][]) {
-    if (prop.type === 'array' && prop.items) {
-      const items = prop.items as JsonSchema
-      if (items.type === 'object' && items.properties) {
-        parts.push(`${key}: array of objects with fields: ${describeObjectFields(items)}`)
-      } else if (items.enum) {
-        parts.push(
-          `${key}: array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((val) => `"${val}"`).join(', ')}]`,
+  const fieldSummaries: string[] = []
+  for (const [fieldName, fieldSchema] of Object.entries(schema.properties) as [string, JsonSchema][]) {
+    if (fieldSchema.type === 'array' && fieldSchema.items) {
+      const arrayItemSchema = fieldSchema.items as JsonSchema
+      if (arrayItemSchema.type === 'object' && arrayItemSchema.properties) {
+        fieldSummaries.push(`${fieldName}: array of objects with fields: ${describeObjectFields(arrayItemSchema)}`)
+      } else if (arrayItemSchema.enum) {
+        fieldSummaries.push(
+          `${fieldName}: array of ${arrayItemSchema.type || 'string'}, allowed values: [${(arrayItemSchema.enum as string[]).map((val) => `"${val}"`).join(', ')}]`,
         )
       } else {
-        parts.push(`${key}: array of ${items.type || 'string'}`)
+        fieldSummaries.push(`${fieldName}: array of ${arrayItemSchema.type || 'string'}`)
       }
-    } else if (prop.type === 'object' && prop.properties) {
-      parts.push(`${key}: object with fields: ${describeObjectFields(prop)}`)
+    } else if (fieldSchema.type === 'object' && fieldSchema.properties) {
+      fieldSummaries.push(`${fieldName}: object with fields: ${describeObjectFields(fieldSchema)}`)
     } else {
-      parts.push(`${key}: ${prop.type || 'string'}`)
+      fieldSummaries.push(`${fieldName}: ${fieldSchema.type || 'string'}`)
     }
   }
-  return `{ ${parts.join(', ')} }`
+  return `{ ${fieldSummaries.join(', ')} }`
 }
 
+/**
+ * Walks a JSON Schema and produces a flat list of FieldDescriptors that the LLM uses as its extraction target.
+ * Resolves $ref pointers (e.g. "#/definitions/securityClassification") so the LLM sees the actual type and enum
+ * constraints. Skips fields whose widget type is in EXCLUDED_WIDGETS (entity selectors etc.) since those are not
+ * populated from free text. Recurses into nested objects, building dot-separated paths (e.g. "overview.name").
+ */
 export function buildSchemaDescription(schema: JsonSchema, basePath = '', rootSchema?: JsonSchema): FieldDescriptor[] {
   const root = rootSchema || schema
   const fields: FieldDescriptor[] = []
 
   if (schema.type === 'object' && schema.properties) {
-    for (const [key, rawProp] of Object.entries(schema.properties) as [
+    for (const [key, rawProperty] of Object.entries(schema.properties) as [
       string,
       JsonSchema & { widget?: string; $ref?: string },
     ][]) {
-      const path = basePath ? `${basePath}.${key}` : key
+      const fieldPath = basePath ? `${basePath}.${key}` : key
 
-      let prop = rawProp
-      if (prop.$ref) {
-        const resolved = resolveRef(prop.$ref, root)
-        if (resolved) {
-          prop = { ...resolved, ...prop, $ref: undefined } as typeof prop
+      // Resolve $ref so we see the actual type/enum constraints
+      let property = rawProperty
+      if (property.$ref) {
+        const resolvedSchema = resolveRef(property.$ref, root)
+        if (resolvedSchema) {
+          property = { ...resolvedSchema, ...property, $ref: undefined } as typeof property
         }
       }
 
-      if (prop.widget && EXCLUDED_WIDGETS.has(prop.widget)) {
+      if (property.widget && EXCLUDED_WIDGETS.has(property.widget)) {
         continue
       }
 
-      if (prop.type === 'object' && prop.properties) {
-        fields.push(...buildSchemaDescription(prop, path, root))
-      } else if (prop.type === 'array' && prop.items) {
-        let items = prop.items as JsonSchema & { widget?: string; $ref?: string }
-        if (items.$ref) {
-          const resolved = resolveRef(items.$ref, root)
-          if (resolved) {
-            items = { ...resolved, ...items, $ref: undefined } as typeof items
+      if (property.type === 'object' && property.properties) {
+        fields.push(...buildSchemaDescription(property, fieldPath, root))
+      } else if (property.type === 'array' && property.items) {
+        // Resolve $ref on array item schemas as well
+        let arrayItemSchema = property.items as JsonSchema & { widget?: string; $ref?: string }
+        if (arrayItemSchema.$ref) {
+          const resolvedSchema = resolveRef(arrayItemSchema.$ref, root)
+          if (resolvedSchema) {
+            arrayItemSchema = { ...resolvedSchema, ...arrayItemSchema, $ref: undefined } as typeof arrayItemSchema
           }
         }
-        let typeDesc: string
-        if (items.type === 'object' && items.properties) {
-          typeDesc = `array of objects with fields: ${describeObjectFields(items)}`
-        } else if (items.enum) {
-          typeDesc = `array of ${items.type || 'string'}, allowed values: [${(items.enum as string[]).map((val) => `"${val}"`).join(', ')}]`
+        let typeDescription: string
+        if (arrayItemSchema.type === 'object' && arrayItemSchema.properties) {
+          typeDescription = `array of objects with fields: ${describeObjectFields(arrayItemSchema)}`
+        } else if (arrayItemSchema.enum) {
+          typeDescription = `array of ${arrayItemSchema.type || 'string'}, allowed values: [${(arrayItemSchema.enum as string[]).map((val) => `"${val}"`).join(', ')}]`
         } else {
-          typeDesc = `array of ${items.type || 'string'}`
+          typeDescription = `array of ${arrayItemSchema.type || 'string'}`
         }
         fields.push({
-          path,
-          title: prop.title || key,
-          type: typeDesc,
-          ...(prop.description && { description: prop.description }),
+          path: fieldPath,
+          title: property.title || key,
+          type: typeDescription,
+          ...(property.description && { description: property.description }),
         })
-      } else if (prop.enum) {
+      } else if (property.enum) {
         fields.push({
-          path,
-          title: prop.title || key,
-          type: `${prop.type || 'string'}, allowed values: [${(prop.enum as string[]).map((val) => `"${val}"`).join(', ')}]`,
-          ...(prop.description && { description: prop.description }),
+          path: fieldPath,
+          title: property.title || key,
+          type: `${property.type || 'string'}, allowed values: [${(property.enum as string[]).map((val) => `"${val}"`).join(', ')}]`,
+          ...(property.description && { description: property.description }),
         })
       } else {
-        const format = (prop as { format?: string }).format
+        const format = (property as { format?: string }).format
         fields.push({
-          path,
-          title: prop.title || key,
-          type: format ? `${prop.type || 'string'} (format: ${format})` : (prop.type as string) || 'string',
-          ...(prop.description && { description: prop.description }),
+          path: fieldPath,
+          title: property.title || key,
+          type: format ? `${property.type || 'string'} (format: ${format})` : (property.type as string) || 'string',
+          ...(property.description && { description: property.description }),
           ...(format && { format }),
         })
       }
@@ -122,10 +137,14 @@ export function buildSchemaDescription(schema: JsonSchema, basePath = '', rootSc
   return fields
 }
 
+/**
+ * Resolves a JSON Schema $ref pointer (e.g. "#/definitions/securityClassification") by walking the root schema.
+ * Returns the referenced sub-schema, or undefined if the path doesn't exist.
+ */
 function resolveRef(ref: string, rootSchema: JsonSchema): JsonSchema | undefined {
-  const path = ref.replace('#/', '').split('/')
+  const segments = ref.replace('#/', '').split('/')
   let current: unknown = rootSchema
-  for (const segment of path) {
+  for (const segment of segments) {
     if (typeof current === 'object' && current !== null && segment in current) {
       current = (current as Record<string, unknown>)[segment]
     } else {
@@ -135,6 +154,18 @@ function resolveRef(ref: string, rootSchema: JsonSchema): JsonSchema | undefined
   return current as JsonSchema
 }
 
+/**
+ * Removes keys from LLM-extracted data that don't exist in the schema, and cleans values to match schema constraints.
+ * Specifically:
+ *  - Drops keys not defined in schema.properties
+ *  - Resolves $ref pointers before checking types
+ *  - Skips fields with excluded widgets (entity selectors etc.)
+ *  - Filters out null/undefined values and placeholder text (e.g. "N/A", example URLs)
+ *  - Recursively cleans nested objects and arrays
+ *  - Matches enum values case-insensitively, mapping to the schema-defined casing
+ *  - Truncates strings exceeding maxLength
+ *  - Only keeps values whose type matches the schema (string, number, boolean)
+ */
 function stripUnknownKeys(
   data: Record<string, unknown>,
   schema: JsonSchema,
@@ -145,23 +176,24 @@ function stripUnknownKeys(
     return data
   }
 
-  const result: Record<string, unknown> = {}
-  const props = schema.properties as Record<string, JsonSchema & { widget?: string; $ref?: string }>
+  const cleanedData: Record<string, unknown> = {}
+  const schemaProperties = schema.properties as Record<string, JsonSchema & { widget?: string; $ref?: string }>
 
   for (const [key, value] of Object.entries(data)) {
-    let propSchema = props[key]
-    if (!propSchema) {
+    let propertySchema = schemaProperties[key]
+    if (!propertySchema) {
       continue
     }
 
-    if (propSchema.$ref) {
-      const resolved = resolveRef(propSchema.$ref, root)
-      if (resolved) {
-        propSchema = { ...resolved, ...propSchema, $ref: undefined } as typeof propSchema
+    // Resolve $ref so we can check the actual type and enum constraints
+    if (propertySchema.$ref) {
+      const resolvedSchema = resolveRef(propertySchema.$ref, root)
+      if (resolvedSchema) {
+        propertySchema = { ...resolvedSchema, ...propertySchema, $ref: undefined } as typeof propertySchema
       }
     }
 
-    if (propSchema.widget && EXCLUDED_WIDGETS.has(propSchema.widget)) {
+    if (propertySchema.widget && EXCLUDED_WIDGETS.has(propertySchema.widget)) {
       continue
     }
 
@@ -173,96 +205,121 @@ function stripUnknownKeys(
       continue
     }
 
-    if (propSchema.type === 'object' && typeof value === 'object' && !Array.isArray(value)) {
-      const cleaned = stripUnknownKeys(value as Record<string, unknown>, propSchema, root)
-      if (Object.keys(cleaned).length > 0) {
-        result[key] = cleaned
+    if (propertySchema.type === 'object' && typeof value === 'object' && !Array.isArray(value)) {
+      const cleanedNestedObject = stripUnknownKeys(value as Record<string, unknown>, propertySchema, root)
+      if (Object.keys(cleanedNestedObject).length > 0) {
+        cleanedData[key] = cleanedNestedObject
       }
-    } else if (propSchema.type === 'array' && Array.isArray(value)) {
-      let itemSchema = propSchema.items as (JsonSchema & { $ref?: string }) | undefined
-      if (itemSchema?.$ref) {
-        const resolved = resolveRef(itemSchema.$ref, root)
-        if (resolved) {
-          itemSchema = { ...resolved, ...itemSchema, $ref: undefined } as typeof itemSchema
+    } else if (propertySchema.type === 'array' && Array.isArray(value)) {
+      let arrayItemSchema = propertySchema.items as (JsonSchema & { $ref?: string }) | undefined
+      if (arrayItemSchema?.$ref) {
+        const resolvedSchema = resolveRef(arrayItemSchema.$ref, root)
+        if (resolvedSchema) {
+          arrayItemSchema = { ...resolvedSchema, ...arrayItemSchema, $ref: undefined } as typeof arrayItemSchema
         }
       }
-      const cleaned = value
-        .map((item) => {
-          if (itemSchema?.type === 'object' && typeof item === 'object' && item !== null) {
-            return stripUnknownKeys(item as Record<string, unknown>, itemSchema, root)
+      const cleanedArray = value
+        .map((arrayItem) => {
+          if (arrayItemSchema?.type === 'object' && typeof arrayItem === 'object' && arrayItem !== null) {
+            return stripUnknownKeys(arrayItem as Record<string, unknown>, arrayItemSchema, root)
           }
-          if (itemSchema?.enum) {
-            const matched = typeof item === 'string' ? matchEnumValue(item, itemSchema.enum) : undefined
-            if (matched === undefined) {
+          if (arrayItemSchema?.enum) {
+            const matchedValue =
+              typeof arrayItem === 'string' ? matchEnumValue(arrayItem, arrayItemSchema.enum) : undefined
+            if (matchedValue === undefined) {
               log.warn(
-                { key, value: item, allowedValues: itemSchema.enum },
+                { key, value: arrayItem, allowedValues: arrayItemSchema.enum },
                 'Dropping array item: no matching enum value.',
               )
             }
-            return matched !== undefined ? matched : null
+            return matchedValue !== undefined ? matchedValue : null
           }
-          return item
+          return arrayItem
         })
-        .filter((item) => item !== null && item !== undefined && !isPlaceholderValue(item))
+        .filter((arrayItem) => arrayItem !== null && arrayItem !== undefined && !isPlaceholderValue(arrayItem))
 
-      if (cleaned.length > 0) {
-        result[key] = cleaned
+      if (cleanedArray.length > 0) {
+        cleanedData[key] = cleanedArray
       }
-    } else if (propSchema.type === 'string' && typeof value === 'string') {
-      const maxLength = propSchema.maxLength as number | undefined
+    } else if (propertySchema.type === 'string' && typeof value === 'string') {
+      const maxLength = propertySchema.maxLength as number | undefined
       if (maxLength && value.length > maxLength) {
-        result[key] = value.slice(0, maxLength)
-      } else if (propSchema.enum) {
-        const matched = matchEnumValue(value, propSchema.enum)
-        if (matched !== undefined) {
-          result[key] = matched
+        cleanedData[key] = value.slice(0, maxLength)
+      } else if (propertySchema.enum) {
+        const matchedValue = matchEnumValue(value, propertySchema.enum)
+        if (matchedValue !== undefined) {
+          cleanedData[key] = matchedValue
         } else {
-          log.warn({ key, value, allowedValues: propSchema.enum }, 'Dropping field: no matching enum value.')
+          log.warn({ key, value, allowedValues: propertySchema.enum }, 'Dropping field: no matching enum value.')
         }
       } else {
-        result[key] = value
+        cleanedData[key] = value
       }
-    } else if (propSchema.type === 'number' && typeof value === 'number') {
-      result[key] = value
-    } else if (propSchema.type === 'boolean' && typeof value === 'boolean') {
-      result[key] = value
+    } else if (propertySchema.type === 'number' && typeof value === 'number') {
+      cleanedData[key] = value
+    } else if (propertySchema.type === 'boolean' && typeof value === 'boolean') {
+      cleanedData[key] = value
     }
   }
 
-  return result
+  return cleanedData
 }
 
+/**
+ * Attempts to match a value against a list of allowed enum values, first by exact match, then case-insensitively.
+ * Returns the schema-defined casing if a match is found (e.g. input "official" matches enum "OFFICIAL").
+ */
 function matchEnumValue(value: string, enumValues: unknown[]): string | undefined {
-  const exact = enumValues.find((entry) => entry === value)
-  if (exact !== undefined) {
-    return exact as string
+  const exactMatch = enumValues.find((entry) => entry === value)
+  if (exactMatch !== undefined) {
+    return exactMatch as string
   }
-  const lower = value.trim().toLowerCase()
-  const match = enumValues.find((entry) => typeof entry === 'string' && entry.trim().toLowerCase() === lower)
-  return match as string | undefined
+  const lowerCaseValue = value.trim().toLowerCase()
+  const caseInsensitiveMatch = enumValues.find(
+    (entry) => typeof entry === 'string' && entry.trim().toLowerCase() === lowerCaseValue,
+  )
+  return caseInsensitiveMatch as string | undefined
 }
 
+/**
+ * Detects LLM-generated placeholder values that should be discarded rather than saved to the model card.
+ * Catches common patterns: generic strings like "N/A" or "Not specified", fake URLs (example.com, placeholder),
+ * and invalid date strings that parse to NaN.
+ */
 function isPlaceholderValue(value: unknown): boolean {
   if (typeof value !== 'string') {
     return false
   }
   const normalised = value.trim().toLowerCase()
-  if (
-    ['n/a', 'not specified', 'not available', 'unknown', 'none', 'tbd', 'to be determined', 'not applicable'].includes(
-      normalised,
-    )
-  ) {
+
+  const placeholderStrings = [
+    'n/a',
+    'not specified',
+    'not available',
+    'unknown',
+    'none',
+    'tbd',
+    'to be determined',
+    'not applicable',
+  ]
+  if (placeholderStrings.includes(normalised)) {
     return true
   }
-  if (/^https?:\/\/(example\.com|www\.example\.|placeholder|your-|insert-|link-here)/i.test(value.trim())) {
+
+  const placeholderUrlPattern = /^https?:\/\/(example\.com|www\.example\.|placeholder|your-|insert-|link-here)/i
+  if (placeholderUrlPattern.test(value.trim())) {
     return true
   }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    const date = new Date(value.trim())
-    if (isNaN(date.getTime())) {
+
+  // Reject date-formatted strings that don't parse to a valid date (e.g. "0000-00-00")
+  const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/
+  if (isoDatePattern.test(value.trim())) {
+    const parsedDate = new Date(value.trim())
+    if (isNaN(parsedDate.getTime())) {
       return true
     }
   }
+
   return false
 }
 
