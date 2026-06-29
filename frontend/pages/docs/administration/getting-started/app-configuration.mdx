@@ -56,6 +56,8 @@ is disabled by default and requires an OpenAI-compatible chat completions endpoi
 
 ```javascript
 // In your configuration override (e.g. production.cjs or local.js)
+// The default system prompt has been configured to try and improve the accuracy of the processing, but you may want to tune
+// for the llm and also schema that you are using for model cards.
 {
   llm: {
     enabled: true,
@@ -64,6 +66,18 @@ is disabled by default and requires an OpenAI-compatible chat completions endpoi
     model: 'gpt-4o',          // Model identifier for the LLM provider
     maxTokens: 16384,         // Maximum tokens in the LLM response
     timeoutMs: 120000,        // Timeout for LLM requests in milliseconds
+    temperature: 0,            // Temperature for LLM provider - a low temprature will make the responses more deterministic
+    systemPrompt: `You are a data extraction assistant. You will be given a model card text document and a target JSON schema. Extract information from the document into the schema format.
+
+CRITICAL RULES:
+- Only extract information that is EXPLICITLY stated in the source document.
+- If a field cannot be populated from the document, omit it entirely from the output.
+- Do NOT infer, guess, or hallucinate any values.
+- Do NOT generate placeholder text like "Not specified", "N/A", or "Unknown" — leave the field out.
+- Do NOT generate placeholder or example URLs. Only include a URL if it appears verbatim in the source document.
+- Do NOT infer or generate dates. Only populate date fields if an explicit date is clearly stated in the source document for that specific purpose.
+- Return valid JSON matching the schema structure exactly.
+// ....
   },
 
   ui: {
