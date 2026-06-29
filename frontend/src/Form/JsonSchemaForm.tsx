@@ -277,7 +277,7 @@ export default function JsonSchemaForm({
             <Box>
               <Box>
                 {toSentenceCase(
-                  `${requiredByModelState ? `${requiredByModelState} ` : ''}entries completed: ${formStats.totalAnswers}/${formStats.totalQuestions}`,
+                  `${requiredByModelState ? `${requiredByModelState} ` : ''}fields completed: ${formStats.totalAnswers}/${formStats.totalQuestions}`,
                 )}
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
