@@ -292,9 +292,9 @@ function isPrimitiveSchema(schema: any): boolean {
   return ['string', 'number', 'boolean'].includes(schema.type)
 }
 
-export function requiredByStateFilter(requiredByModelState?: string, schema?: any) {
+export function requiredByStateFilter(schema: any, requiredByModelState?: string) {
   return requiredByModelState &&
-    (!schema.requiredByModelStates || !schema.requiredByModelStates.includes(requiredByModelState))
+    !(schema.requiredByModelStates && schema.requiredByModelStates.includes(requiredByModelState))
     ? false
     : true
 }
@@ -305,7 +305,7 @@ function countQuestionsFromSchema(schema: any, requiredByModelState?: string): n
   }
 
   if (isPrimitiveSchema(schema)) {
-    return requiredByStateFilter(requiredByModelState, schema) ? 1 : 0
+    return requiredByStateFilter(schema, requiredByModelState) ? 1 : 0
   }
 
   // If array - Only count if needed
@@ -336,7 +336,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any, requiredByModel
   }
 
   if (isPrimitiveSchema(schema)) {
-    return isAnswered(state) && requiredByStateFilter(requiredByModelState, schema) ? 1 : 0
+    return isAnswered(state) && requiredByStateFilter(schema, requiredByModelState) ? 1 : 0
   }
 
   // If Array - Check first item

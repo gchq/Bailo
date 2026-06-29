@@ -1,4 +1,18 @@
-import { Box, Chip, Grid, List, ListItem, ListItemButton, Stack, Stepper, Tooltip, Typography } from '@mui/material'
+import { Circle } from '@mui/icons-material'
+import {
+  Box,
+  Chip,
+  Grid,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Stepper,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
@@ -61,6 +75,45 @@ export default function JsonSchemaForm({
   const [activeStep, setActiveStep] = useState(0)
   const [sharedSection, setSharedSection] = useState('')
   const requiredByModelState = useSearchParams().get('requiredByModelState')
+  const [sectionCompletion, setSectionCompletion] = useState<Record<string, number>>(() =>
+    splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+      acc[step.schema.title] = 0
+      return acc
+    }, {}),
+  )
+
+  useEffect(() => {
+    if (!canEdit) {
+      return
+    }
+    if (!requiredByModelState) {
+      setSectionCompletion((prev) => {
+        const resetCompletion = splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+          acc[step.schema.title] = 0
+          return acc
+        }, {})
+        const prevKeys = Object.keys(prev)
+        const nextKeys = Object.keys(resetCompletion)
+        const unchanged =
+          prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key] === resetCompletion[key])
+        return unchanged ? prev : resetCompletion
+      })
+      return
+    }
+    const nextCompletion = splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+      const { totalQuestions, totalAnswers } = getFormStats(step, mirroredModel, requiredByModelState)
+      acc[step.schema.title] = Math.max(0, totalQuestions - totalAnswers)
+      return acc
+    }, {})
+
+    setSectionCompletion((prev) => {
+      const prevKeys = Object.keys(prev)
+      const nextKeys = Object.keys(nextCompletion)
+      const unchanged =
+        prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key] === nextCompletion[key])
+      return unchanged ? prev : nextCompletion
+    })
+  }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
 
   const ref = useRef<HTMLDivElement | null>(null)
 
@@ -140,13 +193,13 @@ export default function JsonSchemaForm({
     })
   }
 
-  const handleFilterStateClick = (state: string) => {
+  const handleHighlightStateClick = (state: string) => {
     if (state === requiredByModelState) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { requiredByModelState, ...queryWithoutFiltered } = router.query
+      const { requiredByModelState, ...queryWithoutHighlighted } = router.query
       router.replace({
-        query: queryWithoutFiltered,
-      })
+        query: queryWithoutHighlighted,
+      }) as RouterQueryParams
     } else {
       router.replace({
         query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
@@ -188,21 +241,30 @@ export default function JsonSchemaForm({
                 <ListItem
                   key={step.schema.title}
                   disablePadding
-                  sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
+                  secondaryAction={
+                    canEdit &&
+                    sectionCompletion[step.schema.title] > 0 && (
+                      <ListItemIcon>
+                        <Circle color='error' sx={{ fontSize: 12 }} />
+                      </ListItemIcon>
+                    )
+                  }
                 >
                   <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                    <Typography
-                      sx={{
-                        wordBreak: 'break-word',
-                        color:
-                          !step.isComplete(step) && displayLabelValidation
-                            ? theme.palette.error.main
-                            : theme.palette.common.black,
-                      }}
-                      width='100%'
-                    >
-                      {step.schema.title}
-                    </Typography>
+                    <ListItemText>
+                      <Typography
+                        sx={{
+                          wordBreak: 'break-word',
+                          color:
+                            !step.isComplete(step) && displayLabelValidation
+                              ? theme.palette.error.main
+                              : theme.palette.common.black,
+                        }}
+                        width='100%'
+                      >
+                        {step.schema.title}
+                      </Typography>
+                    </ListItemText>
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
                   </ListItemButton>
                 </ListItem>
@@ -225,13 +287,13 @@ export default function JsonSchemaForm({
             <Stack direction={'column'} spacing={1}>
               {stateList && stateList.length > 0 && (
                 <Stack spacing={2} direction={'row'} alignItems={'center'}>
-                  <Typography>Filter fields by: </Typography>
+                  <Typography>Highlight fields by: </Typography>
                   {stateList.map((state) => (
                     <Tooltip key={state} title={`Highlight questions required for ${state}`}>
                       <Chip
                         key={state}
                         label={state}
-                        onClick={() => handleFilterStateClick(state)}
+                        onClick={() => handleHighlightStateClick(state)}
                         color={requiredByModelState === state ? 'primary' : 'default'}
                       />
                     </Tooltip>
@@ -272,7 +334,6 @@ export default function JsonSchemaForm({
                     ArrayFieldTemplate,
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,
-                    FieldTemplate,
                   }
                 : {
                     DescriptionFieldTemplate,

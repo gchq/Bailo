@@ -64,6 +64,7 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
     registry.formContext.requiredByModelState &&
     schema.requiredByModelStates &&
     schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
+
   if (requiredByState) {
     return (
       <Box

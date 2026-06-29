@@ -48,6 +48,7 @@ export default function EntrySelect({
         })
       }
       setErrorMessage(await getErrorMessage(response))
+      setIsEdit(true)
     } else {
       if (field === 'state') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -57,8 +58,8 @@ export default function EntrySelect({
         })
       }
       mutate()
+      setIsEdit(false)
     }
-    setIsEdit(false)
   }
 
   return (
