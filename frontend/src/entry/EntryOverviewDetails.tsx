@@ -1,11 +1,12 @@
-import { Info, LocalOffer } from '@mui/icons-material'
-import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
+import { LocalOffer } from '@mui/icons-material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { DatePicker } from '@mui/x-date-pickers'
+import { PickerValue } from '@mui/x-date-pickers/internals'
 import { patchEntry, useGetEntry } from 'actions/entry'
-import { useGetReviewRequestsForModel } from 'actions/review'
-import { useGetSchema } from 'actions/schema'
+import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useContext, useMemo, useState } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
@@ -14,11 +15,11 @@ import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
-import ReviewDateDialog from 'src/entry/overview/ReviewDateDialog'
+import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import InformationDialog from 'src/schemas/InformationDialog'
+import useNotification from 'src/hooks/useNotification'
 import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
-import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
+import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -30,11 +31,12 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
-  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
-  const [isReviewDateInputOpen, setIsReviewDateInputOpen] = useState(false)
+  const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
+  const [reviewDate, setReviewDate] = useState<PickerValue>()
+
+  const sendNotification = useNotification()
 
   const { mutateEntry } = useGetEntry(entry.id)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card ? entry.card.schemaId : '')
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: entry.id,
     kind: ReviewKind.LIFECYCLE,
@@ -44,7 +46,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     reviews: archivedReviews,
     isReviewsLoading: isArchivedReviewsLoading,
     isReviewsError: isArchivedReviewsError,
-    mutateReviews: mutateArchivedREviews,
+    mutateReviews: mutateArchivedReviews,
   } = useGetReviewRequestsForModel({
     modelId: entry.id,
     kind: ReviewKind.LIFECYCLE,
@@ -78,22 +80,23 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
     }
   }
 
-  const handleReviewDateDialogOnClose = () => {
-    setIsReviewDateInputOpen(false)
-    mutateReviews()
-    mutateArchivedREviews()
-  }
+  const handleConfirmReviewDate = useCallback(async () => {
+    const res = await postReview({ modelId: entry.id, kind: ReviewKind.LIFECYCLE, dueDate: reviewDate })
+    if (res.ok) {
+      sendNotification({ msg: 'Next model card review date set.', variant: 'success' })
+      mutateArchivedReviews()
+      mutateReviews()
+    } else {
+      sendNotification({ msg: await getErrorMessage(res), variant: 'error' })
+    }
+  }, [entry.id, mutateArchivedReviews, mutateReviews, reviewDate, sendNotification])
 
-  if (isUiConfigLoading || isSchemaLoading || isReviewsLoading || isArchivedReviewsLoading) {
+  if (isUiConfigLoading || isReviewsLoading || isArchivedReviewsLoading) {
     return <Loading />
   }
 
   if (isUiConfigError) {
     return <ErrorWrapper message={isUiConfigError.info.message} />
-  }
-
-  if (isSchemaError) {
-    return <ErrorWrapper message={isSchemaError.info.message} />
   }
 
   if (isReviewsError) {
@@ -114,25 +117,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} details
         </Typography>
-        <Stack spacing={1}>
-          {schema && (
-            <Stack>
-              <Typography fontWeight='bold' sx={{ color: theme.palette.primary.main }}>
-                Schema:
-              </Typography>
-              <Stack direction='row' alignItems='center'>
-                <Typography>{schema.name}</Typography>
-                <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                  <Info color='primary' fontSize='small' />
-                </IconButton>
-                <InformationDialog
-                  open={SchemaInformationOpen}
-                  schema={schema}
-                  onClose={() => setSchemaInformationOpen(false)}
-                />
-              </Stack>
-            </Stack>
-          )}
+        <Stack>
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
@@ -169,17 +154,27 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
             <Typography fontWeight='bold' color='primary'>
-              Next review due:
+              Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (
-              <Button size='small' onClick={() => setIsReviewDateInputOpen(true)} variant='outlined'>
-                Set review date
-              </Button>
+              <>
+                <DatePicker
+                  value={reviewDate}
+                  sx={{ backgroundColor: 'unset', borderRadius: 1, maxWidth: 'fit-content' }}
+                  onChange={(newValue) => {
+                    setReviewDate(newValue)
+                  }}
+                  minDate={increaseCurrentDateInDays(1)}
+                />
+                <Button disabled={!reviewDate} sx={{ maxWidth: 'fit-content' }} onClick={handleConfirmReviewDate}>
+                  Confirm
+                </Button>
+              </>
             )}
-            {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>Unset</em>}
+            {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>No review date set</em>}
             <Stack
-              direction='row'
-              spacing={2}
+              direction={{ md: 'column', lg: 'row' }}
+              spacing={1}
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
             >
@@ -192,18 +187,39 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               )}
               {updateEntryPermission.hasPermission && reviews[0] && (
                 <Button
-                  variant='outlined'
                   size='small'
                   sx={{ width: 'fit-content' }}
                   href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
+                  variant='outlined'
                 >
                   Review
+                </Button>
+              )}
+              {archivedReviews.length > 0 && (
+                <Button
+                  size='small'
+                  onClick={() => {
+                    setReviewHistoryOpen(true)
+                  }}
+                  variant='outlined'
+                >
+                  History
                 </Button>
               )}
             </Stack>
             {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
           </Stack>
         )}
+        <Stack spacing={1}>
+          <Button
+            size='small'
+            onClick={() => setRolesDialogOpen(true)}
+            sx={{ width: 'max-content', fontWeight: 'bold' }}
+          >
+            View collaborators
+          </Button>
+          {collaboratorList}
+        </Stack>
         <Box>
           <Restricted action='editEntry' fallback={<></>}>
             <Button
@@ -225,10 +241,11 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Box>
       </Stack>
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
-      <ReviewDateDialog
-        open={isReviewDateInputOpen}
-        onClose={() => handleReviewDateDialogOnClose()}
-        entryId={entry.id}
+      <ReviewHistoryDialog
+        open={reviewHistoryOpen}
+        onClose={() => setReviewHistoryOpen(false)}
+        entry={entry}
+        mutateEntry={mutateEntry}
       />
     </Box>
   )

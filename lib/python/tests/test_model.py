@@ -106,6 +106,20 @@ def test_get_and_update_latest_model_card(integration_client):
 
 
 @pytest.mark.integration
+def test_update_model_card_schema_validation_error(example_model):
+    with pytest.raises(BailoException) as exc_info:
+        example_model.update_model_card(
+            model_card={"overview": {"modelSummary": "Valid"}, "invalidField": "should fail validation"},
+        )
+
+    exc = exc_info.value
+    assert exc.context is not None
+    assert "validationErrors" in exc.context
+    assert len(exc.context["validationErrors"]) > 0
+    assert "schema" in exc.message.lower() or "validated" in exc.message.lower()
+
+
+@pytest.mark.integration
 def get_model_card_without_creation(integration_client):
     model = Model.create(
         client=integration_client,

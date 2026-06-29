@@ -761,11 +761,20 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
-  if (!valid) {
-    throw BadReq('Model metadata could not be validated against the schema.', {
-      validationErrors: errors,
-    })
+  if (modelCardRevision.version === 1) {
+    // Special case for the first when a schema is set but `metadata` is still `undefined`
+    if (modelCardRevision.metadata !== undefined) {
+      throw BadReq('Model card metadata must not be set for the first version.', {
+        metadata: modelCardRevision.metadata,
+      })
+    }
+  } else {
+    const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+    if (!valid) {
+      throw BadReq('Model metadata could not be validated against the schema.', {
+        validationErrors: errors,
+      })
+    }
   }
 
   const foundModelCardRevision = await ModelCardRevisionModel.findOne({
