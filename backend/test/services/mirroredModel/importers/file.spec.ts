@@ -38,7 +38,7 @@ vi.mock('../../../../src/services/file.js', () => fileServiceMocks)
 const fileUtilsMocks = vi.hoisted(() => ({
   createFilePath: vi.fn(() => 'updated/file/path'),
 }))
-vi.mock('../../../../src/utils/fileUtils.ts', () => fileUtilsMocks)
+vi.mock('../../../../src/utils/fileUtils.js', () => fileUtilsMocks)
 
 const registryMocks = vi.hoisted(() => ({
   joinDistributionPackageName: vi.fn(() => 'repo/path:tag'),

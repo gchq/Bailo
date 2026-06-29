@@ -18,6 +18,7 @@ class Schema:
     :param description: Description of the schema
     :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
     :param json_schema: Schema JSON
+    :param review_roles: List made up of the "shortName" property from a Review Role object
     """
 
     def __init__(

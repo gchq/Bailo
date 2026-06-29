@@ -1,17 +1,20 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { ReviewInterface } from '../../../src/models/Review.js'
+import { UserInterface } from '../../../src/models/User.js'
 import {
-  dispatchEmailToModelRole,
   notifyLifeCycleReview,
+  notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
+  notifyReviewRoleOfAdditionalReview,
   requestReviewForAccessRequest,
   requestReviewForRelease,
   startImportNotification,
   transferCompleteNotification,
 } from '../../../src/services/smtp/smtp.js'
 import { fromEntity } from '../../../src/utils/entity.js'
-import { testReviewResponse } from '../../testUtils/testModels.js'
+import { testRelease, testReleaseReview, testReviewResponse } from '../../testUtils/testModels.js'
 
 const configMock = vi.hoisted(() => ({
   app: { protocol: 'http', host: 'example.com', port: 80 },
@@ -48,6 +51,11 @@ const logMock = vi.hoisted(() => ({
 vi.mock('../../../src/services/log.js', async () => ({
   default: logMock,
 }))
+
+const reviewMock = vi.hoisted(() => ({
+  getRoleEntities: vi.fn(() => ({ owner: ['user:user'] })),
+}))
+vi.mock('../../../src/services/review.js', async () => reviewMock)
 
 const transporterMock = vi.hoisted(() => {
   return {
@@ -102,8 +110,14 @@ const responseService = vi.hoisted(() => ({
       kind: 'review',
     }
   }),
+  checkAccessRequestsApproved: vi.fn(() => true),
 }))
 vi.mock('../../../src/services/response.js', async () => responseService)
+
+const AccessRequestModelMock = vi.hoisted(() => ({
+  find: vi.fn(() => [] as any[]),
+}))
+vi.mock('../../../src/models/AccessRequest.js', () => ({ default: AccessRequestModelMock }))
 
 const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
@@ -122,9 +136,17 @@ const getModelByIdMock = vi.hoisted(() =>
     }
   }),
 )
+
 vi.mock('../../../src/services/model.js', () => ({
   getModelByIdNoAuth: getModelByIdMock,
+  getRoleEntities: vi.fn((roles, _collaborators) => ({ [roles[0]]: ['user:user'] })),
 }))
+
+const releaseService = vi.hoisted(() => ({
+  getReleaseBySemver: vi.fn(() => testRelease),
+  semverStringToObject: vi.fn(() => {}),
+}))
+vi.mock('../../../src/services/release.js', async () => releaseService)
 
 describe('services > smtp > smtp', () => {
   const review = {
@@ -142,14 +164,14 @@ describe('services > smtp > smtp', () => {
 
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await requestReviewForRelease('user:user', review, release)
+    await requestReviewForRelease(['user:user'], review, release)
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an Access Request Review email is not sent when disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await requestReviewForAccessRequest('user:user', review, access)
+    await requestReviewForAccessRequest(['user:user'], review, access)
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
@@ -169,13 +191,13 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent for Release Reviews', async () => {
-    await requestReviewForRelease('user:user', review, release)
+    await requestReviewForRelease(['user:user'], review, release)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that an email is sent for Access Request Reviews', async () => {
-    await requestReviewForAccessRequest('user:user', review, access)
+    await requestReviewForAccessRequest(['user:user'], review, access)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
@@ -223,31 +245,8 @@ describe('services > smtp > smtp', () => {
       Promise.resolve({ email: 'member2@email.com' }),
     ])
 
-    await requestReviewForRelease('group:group1', review, release)
+    await requestReviewForRelease(['group:group1'], review, release)
 
-    expect(transporterMock.sendMail.mock.calls).toMatchSnapshot()
-  })
-
-  test('that sendEmail is called a maximum of 20 times', async () => {
-    const users: Promise<{ email: string }>[] = []
-    for (let i = 0; i <= 20; i += 1) {
-      users[i] = Promise.resolve({ email: `member${i}@email.com` })
-    }
-    authenticationMock.getUserInformationList.mockReturnValueOnce(users)
-
-    await requestReviewForRelease('group:group1', { role: 'owner' } as any, {} as any)
-
-    expect(transporterMock.sendMail.mock.calls.length).toBe(20)
-  })
-
-  test('that email is sent to model owners', async () => {
-    const emailContent = {
-      subject: '',
-      text: '',
-      html: '',
-    }
-
-    await dispatchEmailToModelRole('modelId', 'owner', emailContent)
     expect(transporterMock.sendMail.mock.calls).toMatchSnapshot()
   })
 
@@ -258,7 +257,7 @@ describe('services > smtp > smtp', () => {
     ])
     transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
 
-    const result: Promise<void> = requestReviewForRelease('user:user', review, release)
+    const result: Promise<void> = requestReviewForRelease(['user:user'], review, release)
     await expect(result).rejects.toThrow(`Unable to send email`)
   })
 
@@ -300,8 +299,30 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).toHaveBeenCalled()
   })
 
+  test('that an email is sent to a reviewer when a user requests an additional review', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyReviewRoleOfAdditionalReview({} as UserInterface, testReleaseReview as unknown as ReviewInterface)
+    expect(transporterMock.sendMail).toHaveBeenCalled()
+  })
+
   test('that an email is sent after a response for a release review to additional reviewers', async () => {
     await notifyReviewResponseForRelease(testReviewResponse as any, release)
-    expect(transporterMock.sendMail).toHaveBeenCalledTimes(2)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to all stakeholders on release', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyReleaseOnApproval('modelId', release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })

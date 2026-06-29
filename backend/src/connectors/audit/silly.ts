@@ -87,5 +87,6 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewMetric(_req: Request): Promise<void> {}
   async onCreateReview(_req: Request, _modelId: string) {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
+  async onNotifyReviewers(_req: Request, _reviewId: string) {}
   async onError(_req: Request, _error: BailoError) {}
 }

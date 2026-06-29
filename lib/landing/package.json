@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "next lint",
-    "generate": "node ./scripts/generate.js"
+    "generate": "node ./scripts/generate.js",
+    "down": "node ./scripts/down.js"
   },
   "prettier": {
     "jsxSingleQuote": true,
@@ -40,7 +41,7 @@
     "swiper": "^12.2.0"
   },
   "devDependencies": {
-    "@types/node": "24.12.4",
+    "@types/node": "26.0.0",
     "@types/react": "19.2.16",
     "@types/styled-components": "^5.1.36",
     "@types/swagger-ui-dist": "^3.30.6",
