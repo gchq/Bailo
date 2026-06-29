@@ -46,9 +46,16 @@ export default function ImportModelCardTextDialog({
   }
 
   return (
-    <Dialog maxWidth='md' fullWidth open={open} onClose={handleClose} slots={{ transition: Transition }}>
+    <Dialog
+      maxWidth='md'
+      fullWidth
+      open={open}
+      onClose={handleClose}
+      slots={{ transition: Transition }}
+      sx={{ '& .MuiDialog-paper': { height: '100%' } }}
+    >
       <DialogTitle>Import Model Card from Text</DialogTitle>
-      <DialogContent sx={{ p: 2, overflow: 'hidden' }}>
+      <DialogContent sx={{ p: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Typography variant='body2' sx={{ mb: 2 }}>
           Paste the contents of an existing model card (e.g. from HuggingFace, a system card, or other documentation).
           An LLM will extract relevant information into your schema fields.
@@ -60,12 +67,16 @@ export default function ImportModelCardTextDialog({
           size='small'
           placeholder='Paste model card text here...'
           multiline
-          minRows={12}
-          maxRows={20}
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={loading}
           fullWidth
+          sx={{
+            flex: '1 1 auto',
+            overflow: 'hidden',
+            '& .MuiInputBase-root': { height: '100%' },
+            '& .MuiInputBase-input': { height: '100% !important', overflow: 'auto !important' },
+          }}
         />
         {errorMessage && (
           <Alert severity='error' sx={{ mt: 2 }}>
