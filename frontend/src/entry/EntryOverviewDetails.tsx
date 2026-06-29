@@ -150,13 +150,15 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
               <>
                 <DatePicker
                   value={reviewDate}
-                  sx={{ backgroundColor: 'unset', borderRadius: 1 }}
+                  sx={{ backgroundColor: 'unset', borderRadius: 1, maxWidth: 'fit-content' }}
                   onChange={(newValue) => {
                     setReviewDate(newValue)
                   }}
                   minDate={increaseCurrentDateInDays(1)}
                 />
-                <Button onClick={handleConfirmReviewDate}>Confirm</Button>
+                <Button disabled={!reviewDate} sx={{ maxWidth: 'fit-content' }} onClick={handleConfirmReviewDate}>
+                  Confirm
+                </Button>
               </>
             )}
             {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>No review date set</em>}
