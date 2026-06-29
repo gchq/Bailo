@@ -63,7 +63,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
               </Button>
             </Stack>
           </Card>
-          {(entry.kind === EntryKind.MODEL || entry.kind === EntryKind.UNTRUSTED_MODEL) && (
+          {entry.kind === EntryKind.MODEL && (
             <Card
               sx={{
                 width: '300px',

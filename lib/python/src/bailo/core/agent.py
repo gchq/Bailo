@@ -54,12 +54,12 @@ class Agent:
             return res
 
         try:
-            # Give the error message issued by bailo
             payload = res.json()
-            message = payload.get("error", {}).get("message", "Unknown API error")
-            raise BailoException(message)
+            error_body = payload.get("error", {})
+            message = error_body.get("message", "Unknown API error")
+            context = error_body.get("context")
+            raise BailoException(message=message, status_code=res.status_code, context=context)
         except JSONDecodeError as e:
-            # No response given
             raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}") from e
 
     def get(self, *args, **kwargs):

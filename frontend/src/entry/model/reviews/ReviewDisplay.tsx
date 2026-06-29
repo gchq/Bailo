@@ -1,10 +1,10 @@
 import { Done } from '@mui/icons-material'
-import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import { ChangesRequestedDisplay } from 'src/entry/model/reviews/ChangesRequestedDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, ResponseInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
@@ -30,6 +30,8 @@ export default function ReviewDisplay({
     const staticRoles = ['owner', 'contributor', 'consumer']
     return entryRoles.filter((role) => !staticRoles.includes(role.shortName))
   }, [entryRoles])
+
+  const [errorMessage, setErrorMessage] = useState('')
 
   const orderedReviewResponses = useMemo(
     () =>
@@ -84,25 +86,26 @@ export default function ReviewDisplay({
           </Tooltip>
         )}
         {orderedReviewResponses.some((reviewResponse) => reviewResponse.decision === Decision.RequestChanges) && (
-          <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
-            <Stack>
-              {orderedReviewResponses
-                .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
-                .map((response) => {
-                  const roleName = dynamicRoles.find((role) => role.shortName === response.role)?.name
-                  return (
-                    <Stack direction='row' key={roleName}>
-                      <HourglassEmpty color='warning' fontSize='small' />
-                      <Typography variant='caption'>
-                        {showCurrentUserResponses
-                          ? `You have requested changes as a ${roleNameDisplay(response)}`
-                          : `Changes requested by  ${roleNameDisplay(response)}`}
-                      </Typography>
-                    </Stack>
-                  )
-                })}
-            </Stack>
-          </Tooltip>
+          <>
+            <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
+              <Stack>
+                {orderedReviewResponses
+                  .filter((reviewResponse) => reviewResponse.decision === Decision.RequestChanges)
+                  .map((response) => {
+                    return (
+                      <ChangesRequestedDisplay
+                        response={response}
+                        key={response._id}
+                        roleNameDisplay={roleNameDisplay}
+                        setErrorMessage={setErrorMessage}
+                        showCurrentUserResponses={showCurrentUserResponses}
+                      />
+                    )
+                  })}
+              </Stack>
+            </Tooltip>
+            <MessageAlert message={errorMessage} severity='error' />
+          </>
         )}
       </Stack>
       {reviewResponses.length === 0 && <Typography variant='caption'>Awaiting review</Typography>}

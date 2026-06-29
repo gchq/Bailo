@@ -14,25 +14,28 @@ export const getLatestResponseSchema = z.object({
   }),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/review/{reviewId}/responses/latest',
-  tags: ['response'],
-  description: 'Get the latest response for a review',
-  schema: getLatestResponseSchema,
-  responses: {
-    200: {
-      description: 'A review response.',
-      content: {
-        'application/json': {
-          schema: z.object({
-            response: responseInterfaceSchema,
-          }),
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/review/{reviewId}/responses/latest',
+    tags: ['response'],
+    description: 'Get the latest response for a review',
+    schema: getLatestResponseSchema,
+    responses: {
+      200: {
+        description: 'A review response.',
+        content: {
+          'application/json': {
+            schema: z.object({
+              response: responseInterfaceSchema,
+            }),
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 interface GetLatestResponseResponse {
   response: ResponseInterface
