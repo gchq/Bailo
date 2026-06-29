@@ -2,6 +2,9 @@ import { PartialDeep } from '../../types/types.js'
 import { Config } from '../config.js'
 
 const config: PartialDeep<Config> = {
+  api: {
+    rateLimit: false,
+  },
   app: {
     protocol: '',
     host: '',
