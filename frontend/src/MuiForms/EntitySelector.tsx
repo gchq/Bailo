@@ -149,7 +149,6 @@ export default function EntitySelector({
               <TextField
                 {...params}
                 placeholder='Username or group name'
-                // dd
                 error={rawErrors && rawErrors.length > 0}
                 id={id}
                 onKeyDown={(event: KeyboardEvent) => {

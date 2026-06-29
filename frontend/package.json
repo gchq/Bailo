@@ -26,7 +26,6 @@
     "@mui/x-charts": "^9.2.0",
     "@mui/x-date-pickers": "9.0.0",
     "@next/mdx": "^16.2.7",
-    "@next/swc-linux-x64-gnu": "^16.2.6",
     "@next/swc-wasm-nodejs": "16.2.7",
     "@rjsf/core": "6.6.1",
     "@rjsf/mui": "6.6.1",
