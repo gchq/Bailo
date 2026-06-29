@@ -46,6 +46,14 @@ export async function createArgon2Hash(key: string, salt?: Buffer) {
 export async function verifyArgon2Hash(key: string, stored: string) {
   const [saltHex, hashHex] = stored.split(':')
 
+  if (typeof saltHex !== 'string' || saltHex.length === 0) {
+    throw new Error('Invalid stored hash: salt segment is missing or empty')
+  }
+
+  if (typeof hashHex !== 'string' || hashHex.length === 0) {
+    throw new Error('Invalid stored hash: hash segment is missing or empty')
+  }
+
   const salt = Buffer.from(saltHex, 'hex')
   const expectedHash = Buffer.from(hashHex, 'hex')
 
