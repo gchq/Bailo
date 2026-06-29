@@ -294,7 +294,7 @@ export function cleanStringValue(
 
 /**
  * Attempts to match a value against a list of allowed enum values, first by exact match, then case-insensitively.
- * Returns the schema-defined casing if a match is found (e.g. input "official" matches enum "OFFICIAL").
+ * Returns the schema-defined casing if a match is found (e.g. input "periodically" matches enum "PERIODICALLY").
  */
 function matchEnumValue(value: string, enumValues: unknown[]): string | undefined {
   const exactMatch = enumValues.find((entry) => entry === value)

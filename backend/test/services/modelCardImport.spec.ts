@@ -202,18 +202,18 @@ describe('services > modelCardImport', () => {
       const schema = {
         type: 'object',
         definitions: {
-          securityClassification: { type: 'string', enum: ['OFFICIAL', 'OFFICIAL SENSITIVE'] },
+          trainingFrequency: { type: 'string', enum: ['MONTHLY', 'ANNUALLY'] },
         },
         properties: {
-          classification: { title: 'Classification', $ref: '#/definitions/securityClassification' },
+          trainingFrequency: { title: 'Training Frequency', $ref: '#/definitions/trainingFrequency' },
         },
       }
       const result = buildSchemaDescription(schema)
       expect(result).toEqual([
         {
-          path: 'classification',
-          title: 'Classification',
-          type: 'string, allowed values: ["OFFICIAL", "OFFICIAL SENSITIVE"]',
+          path: 'trainingFrequency',
+          title: 'Training Frequency',
+          type: 'string, allowed values: ["MONTHLY", "ANNUALLY"]',
         },
       ])
     })
