@@ -63,9 +63,9 @@ for testing.
 
 For production deployments, Bailo provides Helm charts for deploying to Kubernetes. See:
 
-- [Helm Basic Usage](/docs/administration/helm/basic-usage)
-- [Helm Configuration](/docs/administration/helm/configuration)
-- [Isolated Environments](/docs/administration/helm/isolated-environments)
+- [Helm Basic Usage](../helm/basic-usage)
+- [Helm Configuration](../helm/configuration)
+- [Isolated Environments](../helm/isolated-environments)
 
 ### Standalone dockerfile
 
@@ -121,13 +121,12 @@ Both need to be backed up to prevent data loss.
 ## Configuration
 
 Bailo uses [node-config](https://github.com/node-config/node-config) for backend configuration. Configuration files can
-be overridden via environment variables or Helm values. See
-[App Configuration](/docs/administration/getting-started/app-configuration) for details.
+be overridden via environment variables or Helm values. See [App Configuration](app-configuration) for details.
 
 ## Related pages
 
-- [App Configuration](/docs/administration/getting-started/app-configuration) - Configuring the backend
-- [Helm Basic Usage](/docs/administration/helm/basic-usage) - Deploying with Helm
-- [Artefact Scanners](/docs/administration/microservices/artefact-scanners) - Configuring security scanning
+- [App Configuration](app-configuration) - Configuring the backend
+- [Helm Basic Usage](../helm/basic-usage) - Deploying with Helm
+- [Artefact Scanners](../microservices/artefact-scanners) - Configuring security scanning
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
