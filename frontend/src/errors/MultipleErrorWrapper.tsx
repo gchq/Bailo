@@ -1,4 +1,3 @@
-import NotFound from 'pages/404'
 import React from 'react'
 import Forbidden from 'src/common/Forbidden'
 
@@ -11,9 +10,6 @@ export default function MultipleErrorWrapper(generic: string, errors: any, Error
     if (error) {
       if (error.status === 403) {
         return <Forbidden errorMessage='If you think this is in error please contact the entry owners.' />
-      }
-      if (error.status === 404) {
-        return <NotFound />
       }
 
       const message = error?.message || error?.info?.message || generic
