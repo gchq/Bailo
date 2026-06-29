@@ -5,9 +5,9 @@ module.exports = {
   api: {
     // Publicly accessible host
     host: '',
-
     // Port to listen on
     port: 3001,
+    rateLimit: true,
   },
 
   app: {

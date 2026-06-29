@@ -13,6 +13,7 @@ import v1Router from './routes/v1/routes.js'
 import v2Router from './routes/v2/routes.js'
 import v3Router from './routes/v3/routes.js'
 import { httpLog } from './services/log.js'
+import config from './utils/config.js'
 
 export const server = express()
 
@@ -20,10 +21,14 @@ server.use([
   bodyParser.json(),
   httpLog,
   helmet(),
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-  }),
+  ...(config.api.rateLimit
+    ? [
+        rateLimit({
+          windowMs: 15 * 60 * 1000, // 15 minutes
+          limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+        }),
+      ]
+    : []),
 ])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {

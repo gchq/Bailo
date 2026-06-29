@@ -22,6 +22,7 @@ export interface Config {
   api: {
     host: string
     port: number
+    rateLimit: boolean
   }
 
   app: {
