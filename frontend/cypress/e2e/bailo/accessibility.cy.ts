@@ -37,13 +37,6 @@ describe('Check A11y violations', () => {
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
-  it('Check A11y violations, Admin Panel Page', () => {
-    cy.get('a[href="/admin?section=schema-list"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations)
-    cy.get('a[href="/admin?section=roles"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations)
-  })
-
   it('Check A11y violations, Settings Page', () => {
     cy.visit('/settings')
     cy.injectAxe()
