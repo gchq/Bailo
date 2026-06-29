@@ -24,6 +24,7 @@ export type UserDisplayProps = {
   hidePopover?: boolean
   displayAsAvatar?: boolean
   showIcon?: boolean
+  fontWeight?: string
 }
 
 export default function UserDisplay({
@@ -31,6 +32,7 @@ export default function UserDisplay({
   hidePopover = false,
   displayAsAvatar = false,
   showIcon = false,
+  fontWeight = '500',
 }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
@@ -90,7 +92,7 @@ export default function UserDisplay({
                     }}
                   />
                 )}
-                <Typography>{userInformation.name}</Typography>
+                <Typography sx={{ fontWeight }}>{userInformation.name}</Typography>
               </Stack>
             ) : (
               <Stack

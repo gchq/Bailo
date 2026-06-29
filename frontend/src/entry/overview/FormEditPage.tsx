@@ -1,18 +1,21 @@
-import { ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material'
+import { ExpandLess, ExpandMore, Info, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import {
   Box,
   Button,
+  Divider,
   FormControlLabel,
   FormGroup,
+  IconButton,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
   Stack,
   Switch,
+  Typography,
 } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
@@ -27,11 +30,11 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import MigrationListDialog from 'src/entry/overview/MigrationListDialog'
-import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import InformationDialog from 'src/schemas/InformationDialog'
 import { getDisplayFormStats, saveDisplayFormStats } from 'src/storage/userPreferences'
 import { KeyedMutator } from 'swr'
 import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
@@ -53,11 +56,11 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   // For displaying the stats around model information completion
   const [calculateStats, setCalculateStats] = useState(0)
   const [displayFormStats, setDisplayFormStats] = useState(getDisplayFormStats())
-  const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
 
   const open = Boolean(anchorEl)
 
@@ -231,19 +234,38 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack
-              direction='row'
-              spacing={1}
-              sx={{
-                justifyContent: 'space-between',
-              }}
-            >
-              <FormGroup>
-                <FormControlLabel
-                  control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}
-                  label='Show completion'
-                />
-              </FormGroup>
+            <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' spacing={1}>
+              <Stack
+                direction={{ sm: 'row', xs: 'column' }}
+                sx={{ alignItems: 'center' }}
+                spacing={2}
+                divider={<Divider flexItem orientation='vertical' />}
+              >
+                {schema && (
+                  <Stack>
+                    <Typography variant='caption' sx={{ fontWeight: 'bold' }} color='primary'>
+                      Schema:
+                    </Typography>
+                    <Stack direction='row' sx={{ alignItems: 'center' }}>
+                      <Typography variant='caption'>{schema.name}</Typography>
+                      <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                        <Info color='primary' fontSize='small' />
+                      </IconButton>
+                      <InformationDialog
+                        open={SchemaInformationOpen}
+                        schema={schema}
+                        onClose={() => setSchemaInformationOpen(false)}
+                      />
+                    </Stack>
+                  </Stack>
+                )}
+                <FormGroup>
+                  <FormControlLabel
+                    control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}
+                    label='Show completion'
+                  />
+                </FormGroup>
+              </Stack>
               <Stack direction='row' spacing={1}>
                 <Restricted
                   action='editEntryCard'
@@ -251,7 +273,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                 >
                   <Button
                     variant='outlined'
-                    sx={{ width: 'fit-content' }}
+                    sx={{ width: 'fit-content', height: 'fit-content' }}
                     onClick={() => {
                       handleActionButtonClose()
                       setIsEdit(!isEdit)
@@ -271,6 +293,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                   data-test='openEntryOverviewActions'
                   variant='contained'
                   onClick={handleActionButtonClick}
+                  sx={{ height: 'fit-content' }}
                 >
                   More
                 </Button>
@@ -309,17 +332,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                       <HistoryIcon fontSize='small' />
                     </ListItemIcon>
                     <ListItemText>View History</ListItemText>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setReviewHistoryOpen(true)
-                    }}
-                  >
-                    <ListItemIcon>
-                      <HistoryIcon fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>View lifecycle history</ListItemText>
                   </MenuItem>
                 </Menu>
               </Stack>
@@ -388,12 +400,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         migrations={schemaMigrations}
         errorText={migrationErrorMessage}
         onConfirmation={handleMigrationConfirm}
-      />
-      <ReviewHistoryDialog
-        open={reviewHistoryOpen}
-        onClose={() => setReviewHistoryOpen(false)}
-        entry={entry}
-        mutateEntry={mutateEntry}
       />
     </>
   )
