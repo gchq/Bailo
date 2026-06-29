@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r req
 
 RUN make dirhtml
 
-FROM node:26.3.1-alpine AS node-base
+FROM node:26.4.0-alpine AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update
