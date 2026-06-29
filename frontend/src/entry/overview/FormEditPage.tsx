@@ -234,7 +234,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' spacing={1}>
+            <Stack direction={{ sm: 'row', xs: 'column' }} sx={{ justifyContent: 'space-between' }} spacing={1}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
                 sx={{ alignItems: 'center' }}
