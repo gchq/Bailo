@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose'
+import { Types } from 'mongoose'
 
 import ModelTransferModel, {
   ModelTransferInterface,
@@ -119,7 +119,7 @@ export async function updateArtefactTransferStatus(
 export async function updateArtefactsTransferStatus(
   exportId: string,
   images?: string[],
-  files?: { key: ObjectId; name: string }[],
+  files?: { key: Types.ObjectId; name: string }[],
 ): Promise<ModelTransferInterface | null> {
   await ModelTransferModel.findOneAndUpdate(
     { exportId, 'artefactStatus.key': 'documents', 'artefactStatus.kind': MirrorKind.Documents },

@@ -1,0 +1,110 @@
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+import bailoNewRelease from 'public/docs/bailo_new_release.png'
+import bailoNewReleaseForm from 'public/docs/bailo_new_release_form.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Creating a Release
+
+A release is a versioned snapshot of your model at a point in time. Releases bundle together files, container images,
+and a reference to a specific model card version. Creating a release triggers the review process.
+
+> **Common questions this page answers:**
+>
+> - How do I create a release in Bailo?
+> - What is semantic versioning?
+> - What is a minor release?
+> - What happens after I create a release?
+
+## What is a release?
+
+Releases use [semantic versioning](https://semver.org/) (e.g. `1.0.0`, `1.1.0`, `2.0.0`) to track changes to a model
+over time:
+
+- **Major** version (first number): significant changes or breaking changes
+- **Minor** version (second number): new features or improvements
+- **Patch** version (third number): bug fixes or small updates
+
+## Creating a release
+
+You create a release from the Releases tab on your model page by filling in a version number, release notes, and
+attaching files or images:
+
+1. Open your model page and go to the **Releases** tab
+2. Click **Draft new Release**
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='empty model releases tab with new release button' src={bailoNewRelease} />
+</Box>
+
+The screenshot above shows the Releases tab with no releases yet and a 'Draft new Release' button.
+
+3. The release form opens with the following fields to complete:
+   - **Semver** - the version number for this release (e.g. `1.0.0`)
+   - **Release notes** - describe what is included in this release
+   - **Files** - attach uploaded files to this release
+   - **Images** - attach container (Docker) images to this release
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='draft new release form' src={bailoNewReleaseForm} />
+</Box>
+
+The screenshot above shows the release creation form with fields for version number, release notes, file attachments,
+and container image attachments.
+
+4. Once you have filled in the release details and attached any artefacts, click **Create Release** to submit
+
+## Draft vs published releases
+
+Releases are initially created as **drafts**. Draft releases can be edited before they are finalised. Once all required
+reviews are approved, the release is considered published.
+
+## Minor releases
+
+You can mark a release as a **minor release** to bypass the review workflow. This is intended for small, low-risk
+updates that do not materially change the behaviour or purpose of the model.
+
+Typical examples include:
+
+- Correcting documentation or release notes
+- Updating non-functional files (e.g. README updates)
+- Minor packaging or metadata adjustments
+- Replacing files with equivalent versions that do not change model behaviour
+
+Key points:
+
+- **No review is created** when a release is marked as minor
+- The release becomes available immediately after creation
+- The **minor flag cannot be changed** after the release is created
+- Minor releases should **not** be used for model updates, behavioural changes, or anything requiring governance review
+
+If a change could affect model performance, outputs, safety, or intended use, you should create a **standard release**
+so that it goes through the full review process.
+
+## What happens after creation
+
+Creating a release triggers the review process, notifying all assigned reviewers:
+
+1. All review roles assigned to the model are notified
+2. Each reviewer evaluates the release
+3. Once all required roles approve, the release is finalised
+4. If any reviewer requests changes, you'll be notified to update the release
+
+## Editing a release
+
+You can update a release's notes, files, and images after creation:
+
+1. Navigate to the **Releases** tab
+2. Select the release you want to edit
+3. Click **Edit release**
+4. Update the release notes, files, or images
+5. **Save** your changes
+
+## Related pages
+
+- [Uploading Files](uploading-files) - Adding files to your model
+- [Uploading Images](uploading-images) - Pushing container images
+- [Understanding Reviews](../reviews/understanding-reviews) - The review process
+- [Python Client](../programmatically-using-bailo/python-client) - Creating releases programmatically
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
-import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import { BadReq } from '../utils/error.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -66,7 +66,7 @@ export type HashTypeKeys = (typeof HashType)[keyof typeof HashType]
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface TokenInterface {
-  _id: ObjectId
+  _id: Types.ObjectId
 
   user: string
   description: string

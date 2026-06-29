@@ -429,8 +429,8 @@ export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVis
 export const EntryCardKindLabel = {
   model: 'model card',
   'data-card': 'data card',
-  'mirrored-model': 'mirrored model',
-  'untrusted-model': 'untrusted model',
+  'mirrored-model': 'model card',
+  'untrusted-model': 'model card',
 } as const
 export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
 
@@ -438,6 +438,7 @@ export const EntryCardKind = {
   model: 'model-card',
   'data-card': 'data-card',
   'mirrored-model': 'mirrored-model',
+  'untrusted-model': 'untrusted-model',
 } as const
 export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
 

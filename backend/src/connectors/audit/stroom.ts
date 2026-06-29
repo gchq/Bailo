@@ -491,6 +491,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, userInformation.user.dn)
   }
 
+  async onNotifyReviewers(req: Request, reviewId: string) {
+    this.auditGenericEvent(req, reviewId)
+  }
+
   async onError(req: Request, error: BailoError) {
     if (!req.audit) {
       log.warn({ url: req.url }, 'Unable to audit')

@@ -13,11 +13,15 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/services/review.ts')
 
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
 const SchemaModelModelMock = getTypedModelMock('SchemaModel')
+
+const reviewServiceMocks = vi.hoisted(() => ({
+  addReviewsForNewRole: vi.fn(),
+}))
+vi.mock('../../src/services/review.js', () => reviewServiceMocks)
 
 const mockMongoUtils = vi.hoisted(() => {
   return {
@@ -26,7 +30,7 @@ const mockMongoUtils = vi.hoisted(() => {
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 
-const validatorMock = vi.hoisted(() => ({ validate: vi.fn() }))
+const validatorMock = vi.hoisted(() => ({ validate: vi.fn(() => ({ valid: true, errors: [] })) }))
 vi.mock('jsonschema', () => ({
   Validator: vi.fn(function () {
     return validatorMock
@@ -241,7 +245,10 @@ describe('services > schema', () => {
       toObject: vi.fn().mockReturnValue(testModelSchema),
     })
 
-    await expect(validateContentAgainstSchema(testModelSchema.id, { key: 'value' })).resolves.toBeUndefined()
+    await expect(await validateContentAgainstSchema(testModelSchema.id, { key: 'value' })).toStrictEqual({
+      errors: [],
+      valid: true,
+    })
     expect(validatorMock.validate).toHaveBeenCalled()
   })
 
@@ -253,20 +260,17 @@ describe('services > schema', () => {
     )
   })
 
-  test('validateContentAgainstSchema > should throw UnprocessableContent when content fails schema validation', async () => {
+  test('validateContentAgainstSchema > should return invalid when content fails schema validation', async () => {
     SchemaModelModelMock.findOne.mockResolvedValueOnce({
       ...testModelSchema,
       toObject: vi.fn().mockReturnValue(testModelSchema),
     })
-    const validationError = { errors: [{ message: 'field is required' }] }
-    validatorMock.validate.mockImplementationOnce(() => {
-      throw validationError
+    validatorMock.validate.mockReturnValueOnce({
+      valid: false,
+      errors: [],
     })
-    validatorResultErrorMock.isValidatorResultError.mockReturnValueOnce(true)
 
-    await expect(validateContentAgainstSchema(testModelSchema.id, {})).rejects.toThrow(
-      /^Content could not be validated against the schema/,
-    )
+    expect((await validateContentAgainstSchema(testModelSchema.id, {})).valid).toBe(false)
   })
 
   test('validateContentAgainstSchema > should re-throw non-validation errors', async () => {

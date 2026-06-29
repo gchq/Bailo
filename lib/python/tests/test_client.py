@@ -34,6 +34,91 @@ def test_response_exception(requests_mock):
         client.get_model("test_model")
 
 
+def test_bailo_exception_with_validation_context(requests_mock):
+    error_response = {
+        "error": {
+            "name": "Bailo Error",
+            "message": "Model metadata could not be validated against the schema.",
+            "context": {
+                "validationErrors": [
+                    {"property": "instance.overview.tags", "message": "String does not match pattern"},
+                    {"property": "instance.overview.modelSummary", "message": "is required"},
+                ]
+            },
+        }
+    }
+    requests_mock.put(
+        "https://example.com/api/v2/model/test_id/model-cards",
+        status_code=400,
+        json=error_response,
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as exc_info:
+        client.put_model_card(model_id="test_id", metadata={"invalid": "data"})
+
+    exc = exc_info.value
+    assert exc.status_code == 400
+    assert exc.context is not None
+    assert "validationErrors" in exc.context
+    assert len(exc.context["validationErrors"]) == 2
+
+    error_str = str(exc)
+    assert "[400]" in error_str
+    assert "Validation errors:" in error_str
+    assert "instance.overview.tags" in error_str
+    assert "instance.overview.modelSummary" in error_str
+
+
+def test_bailo_exception_with_generic_context(requests_mock):
+    error_response = {
+        "error": {
+            "name": "Bailo Error",
+            "message": "Schema not found.",
+            "context": {"modelId": "abc-123"},
+        }
+    }
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id",
+        status_code=404,
+        json=error_response,
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as exc_info:
+        client.get_model("test_id")
+
+    exc = exc_info.value
+    assert exc.status_code == 404
+    assert exc.context == {"modelId": "abc-123"}
+    assert "Context:" in str(exc)
+
+
+def test_parse_json_error_in_success_response(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id",
+        status_code=200,
+        json={"error": {"message": "Unexpected error in 200 response", "context": {"key": "value"}}},
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as exc_info:
+        client.get_model("test_id")
+
+    exc = exc_info.value
+    assert exc.message == "Unexpected error in 200 response"
+    assert exc.status_code == 200
+    assert exc.context == {"key": "value"}
+
+
+def test_parse_json_non_json_response(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id",
+        status_code=200,
+        text="This is not JSON",
+    )
+    client = Client("https://example.com")
+    with pytest.raises(ResponseException):
+        client.get_model("test_id")
+
+
 def test_post_model(requests_mock):
     requests_mock.post("https://example.com/api/v2/models", json={"success": True})
 
@@ -627,3 +712,41 @@ def test_integration_release_lifecycle(integration_client: Client):
 
     fetched = integration_client.get_release(model_id=model_id, release_version="1.0.0")
     assert fetched is not None
+
+
+@pytest.mark.integration
+def test_integration_put_model_card_validation_error(integration_client: Client):
+    schema_id = str(random.randint(1, 1000000))
+
+    integration_client.post_schema(
+        schema_id=schema_id,
+        name="Strict Schema",
+        description="Schema with additionalProperties false",
+        kind=SchemaKind.MODEL,
+        json_schema=METRICS_JSON_SCHEMA,
+        review_roles=["reviewer"],
+    )
+
+    created = integration_client.post_model(
+        name="integration-validation-error-model",
+        kind=EntryKind.MODEL,
+        description="test validation error",
+        visibility=ModelVisibility.PUBLIC,
+    )
+    model_id = created["model"]["id"]
+    integration_client.model_card_from_schema(model_id, schema_id)
+
+    with pytest.raises(BailoException) as exc_info:
+        integration_client.put_model_card(
+            model_id=model_id,
+            metadata={"overview": {"modelSummary": "Valid"}, "invalidTopLevelField": "this should fail"},
+        )
+
+    exc = exc_info.value
+    assert exc.status_code == 400
+    assert exc.context is not None
+    assert "validationErrors" in exc.context
+    assert len(exc.context["validationErrors"]) > 0
+
+    error_str = str(exc)
+    assert "Validation errors:" in error_str

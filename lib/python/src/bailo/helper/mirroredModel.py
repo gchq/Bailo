@@ -87,7 +87,7 @@ class MirroredModel(Entry):
         :param tags: Tags to assign to the mirrored model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
-        :return: Model object
+        :return: MirroredModel object
         """
         res = client.post_model(
             name=name,
@@ -290,7 +290,7 @@ class MirroredModel(Entry):
 
         :param model_card: Model card dictionary, defaults to None
 
-        ..note:: If a model card is not provided, the current model card attribute value is used
+        .. note:: If a model card is not provided, the current model card attribute value is used
         """
         self._update_card(card=model_card)
 
@@ -355,6 +355,6 @@ class MirroredModel(Entry):
     def __str__(self) -> str:
         """Return the human-readable string representation of the mirrored model.
 
-        :return: String value of the enum.
+        :return: String representation of the mirrored model.
         """
         return f"{self.model_id}"

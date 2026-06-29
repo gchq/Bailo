@@ -7,7 +7,13 @@ import rescanView from 'public/docs/bailo_file_rescan.png'
 
 # Scanning Files
 
-## Using Scanners
+> **Common questions this page answers:**
+>
+> - How are files scanned in Bailo?
+> - What scanners are used for file scanning?
+> - How do I rescan a file?
+
+## Using scanners
 
 When uploading files to Bailo, your files will be automatically scanned (assuming scanners are configured and
 initialised).
@@ -18,19 +24,22 @@ By default, Bailo is configured to use the following scanners:
   [here](https://www.clamav.net/).
 - ModelScan is a tool used to prevent model serialisation attacks, across a variety of formats. You can read more about
   it [here](https://github.com/protectai/modelscan/tree/main). ModelScan is packaged in
-  [Bailo Artefact Scan](/docs/administration/microservices/artefact-scanners)
+  [Bailo ArtefactScan](../../administration/microservices/artefact-scanners)
 
 For scan results:
 
 - Go to your model and click on File Management Tab
 - Click the Scan chip, towards the right of your file
-- View scan results. Each scanning tool will have its results listed separately.
+- View scan results. Each scanning tool will have its results listed separately
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='view file scanning chip' src={chipView} />
 </Box>
 
-## Rescan File
+The screenshot above shows a file in the File Management tab with a scan status chip that can be clicked to view scan
+results.
+
+## Rescan file
 
 To rescan a file after it has been uploaded, click the 3 dots to the right of the scan results chip and select the
 Rescan option.
@@ -39,7 +48,9 @@ Rescan option.
   <Image alt='popup confirming file scan results' src={rescanView} />
 </Box>
 
-<Alert sx={{ my: '20px' }} severity='info'>
+The screenshot above shows the file actions menu with a Rescan option for re-running security scans.
+
+<Alert sx={{ my: '20px', '& .MuiAlert-message p': { margin: 0 } }} severity='info'>
   There is a cool-down period for rerunning a scan that is configured by your administrator
 </Alert>
 

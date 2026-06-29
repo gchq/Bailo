@@ -1,5 +1,6 @@
 import traverse from 'json-schema-traverse'
 import { Schema as JsonSchema, Validator } from 'jsonschema'
+import _ from 'lodash'
 import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
@@ -9,13 +10,13 @@ import ReviewRoleModel from '../models/ReviewRole.js'
 import SchemaModel, { SchemaDoc, SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
-import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden, NotFound, UnprocessableContent } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
+const jsonSchemaValidator = new Validator()
 const schemaCache = new NodeCache()
 export interface DefaultSchema {
   name: string
@@ -63,31 +64,54 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   return schemaObject
 }
 
+function addToParentRequired(
+  pointer: string,
+  modifiedSchemas: WeakSet<object>,
+  parentKeyword?: string,
+  parentSchema?: traverse.SchemaObject,
+) {
+  if (parentKeyword === 'properties' && parentSchema) {
+    const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
+
+    if (!parentSchema.required) {
+      parentSchema.required = []
+    }
+
+    if (!parentSchema.required.includes(propertyName)) {
+      parentSchema.required.push(propertyName)
+      modifiedSchemas.add(parentSchema)
+    }
+  }
+}
+
 function enforceModelStateFields(schema: object, targetState: string) {
   const validStates = config.ui.modelDetails.states
   if (!validStates.includes(targetState)) {
     throw BadReq('The value for modelState is not a valid model state', { validStates, modelState: targetState })
   }
   const jsonSchema = structuredClone(schema)
-  traverse(jsonSchema, { allKeys: true }, (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
-    if (!subschema || typeof subschema !== 'object') {
-      return
-    }
+  const modifiedSchemas = new WeakSet<object>()
 
-    if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
-      if (parentKeyword === 'properties' && parentSchema) {
-        const propertyName = pointer.replace(/~1/g, '/').replace(/~0/g, '~').split('/').pop()
-
-        if (!parentSchema.required) {
-          parentSchema.required = []
+  // Post-order traversal
+  traverse(jsonSchema, {
+    allKeys: true,
+    cb: {
+      post: (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
+        if (!subschema || typeof subschema !== 'object') {
+          return
         }
 
-        if (!parentSchema.required.includes(propertyName)) {
-          parentSchema.required.push(propertyName)
+        if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
+          addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
         }
-      }
-    }
+
+        if (modifiedSchemas.has(subschema)) {
+          addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
+        }
+      },
+    },
   })
+
   return jsonSchema
 }
 
@@ -264,15 +288,11 @@ export async function addDefaultSchemas() {
 
 export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {
   const schema = await getSchemaById(schemaId, modelState)
-  try {
-    new Validator().validate(content, schema.jsonSchema, { throwAll: true, required: true })
-  } catch (error) {
-    if (isValidatorResultError(error)) {
-      throw UnprocessableContent('Content could not be validated against the schema.', {
-        schemaId,
-        validationErrors: error.errors,
-      })
-    }
-    throw error
+  const result = jsonSchemaValidator.validate(content, schema.jsonSchema, {
+    required: true,
+  })
+  return {
+    valid: result.valid,
+    errors: result.errors,
   }
 }

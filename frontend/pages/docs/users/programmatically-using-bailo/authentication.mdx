@@ -7,58 +7,144 @@ import tokens from 'public/docs/bailo_tokens.png'
 
 # Programmatic Authentication with Bailo
 
+Bailo supports two authentication methods for programmatic access: PKI (Public Key Infrastructure) certificates and
+personal access tokens. Choose the method that suits your environment.
+
+> **Common questions this page answers:**
+>
+> - How do I authenticate with the Bailo API?
+> - Should I use PKI certificates or personal access tokens?
+> - How do I use the Python client with authentication?
+> - How do I use curl to call the Bailo API?
+
+## Which method should I use?
+
+Choose between PKI certificate authentication and token-based authentication depending on your environment.
+
+- **PKI (Public Key Infrastructure) certificates** - Best for organisations with PKI infrastructure and automated
+  pipelines. Requires a client certificate, private key, and CA (Certificate Authority) certificate.
+- **Token-based (Personal Access Tokens)** - Best for individual users, quick setup, and scoped access. Requires a Bailo
+  account to generate tokens.
+
 ## Public Key Infrastructure (PKI)
 
-Bailo supports PKI‑based authentication. The Python client can sign requests using certificates.
+PKI-based authentication uses mutual TLS (Transport Layer Security) with client certificates to sign requests. This is
+the recommended method for environments where mutual TLS is standard.
+
+### Setup
+
+You will need:
+
+- A **client certificate** (`.pem` file)
+- A **private key** (`.pem` file)
+- A **certificate authority (CA) file** (`.pem` file)
+
+### Using PKI with the Python client
 
 ```python
 from bailo import PkiAgent, Client
 
-pki_agent = PkiAgent()
-
-Client(
-    "http://127.0.0.1:8080",
-    cert="path/to/cert.pem",
-    key="path/to/key.pem",
-    auth="path/to/certificate/authority/file.pem"
+agent = PkiAgent(
+    cert="path/to/client-cert.pem",
+    key="path/to/client-key.pem",
+    auth="path/to/ca-cert.pem",
 )
+
+client = Client("https://your-bailo-instance.com", agent=agent)
 ```
 
-## Token‑based authentication
+### Using PKI with curl
 
-If you are not using PKI then Bailo allows the usage of access tokens to allow for fine-grained access. Tokens are used
-to grant access to models within Bailo to specific models and specific actions. These can be found in
-`Settings > Authentication`.
+```bash
+curl --cert path/to/client-cert.pem \
+     --key path/to/client-key.pem \
+     --cacert path/to/ca-cert.pem \
+     https://your-bailo-instance.com/api/v2/models/search
+```
+
+## Token-based Authentication
+
+Token-based authentication uses Personal Access Tokens (PATs) for fine-grained, scoped API access.
+
+If you are not using PKI, Bailo allows the use of PATs for fine-grained access. Tokens grant access to specific models
+and specific actions.
+
+### Creating a token
+
+1. Navigate to **User (top right) > Settings > Authentication**
+2. Click **Add token**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='Authentication tab listing personal access tokens and add token button' src={bailoSettingsAuth} />
 </Box>
 
-To create a new access token, press `Add token` and select the options from below.
+The screenshot above shows the Authentication tab in Bailo's user settings, listing existing personal access tokens with
+an 'Add token' button.
 
-- `image:read` pull Docker images from Bailo
-- `file:read` download files from Bailo
-
-Copy and paste the `Access Key` and `Secret Key` and store these safely.
+3. Configure the token:
+   - **Description** - a name to help you identify this token
+   - **Scope** - choose "All models" or select specific models
+   - **Permissions** - select the actions this token allows
+4. Click **Generate Token**
+5. **Copy both the Access Key and Secret Key immediately** - the secret key is only shown once
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='popup confirming token creation' src={tokens} />
 </Box>
+
+The screenshot above shows the token creation confirmation dialog displaying the access key and secret key.
 
 ### Using tokens with the Python client
 
 ```python
 from bailo import TokenAgent, Client
 
-token_agent = TokenAgent(ACCESS_KEY, SECRET_KEY)
+agent = TokenAgent(
+    access_key="your-access-key",
+    secret_key="your-secret-key",
+)
 
-Client("http://127.0.0.1:8080", agent=token_agent)
+client = Client("https://your-bailo-instance.com", agent=agent)
 ```
 
-## Base Agent
+### Using tokens with curl
+
+Tokens use HTTP Basic Authentication with the access key as the username and secret key as the password:
+
+```bash
+curl -u "your-access-key:your-secret-key" \
+     https://your-bailo-instance.com/api/v2/models/search
+```
+
+## Security best practices
+
+Follow these practices to keep your API credentials secure.
+
+- **Never commit tokens to source control** - use environment variables or secret managers
+- **Use the minimum required permissions** - only grant the actions your workflow needs
+- **Scope tokens to specific models** when possible, rather than "All models"
+- **Rotate tokens regularly** - delete old tokens and create new ones periodically
+- **Store secret keys securely** - they cannot be retrieved after creation
+
+## Base agent
 
 The full Python docs for the `Agent` class and subsequent child-classes is available
 [here](../../python/bailo.core.html#bailo.core.agent.Agent). It is possible to pass `kwargs` to the base `Agent` class
 such as `verify`.
+
+## Troubleshooting
+
+Common authentication errors and their solutions.
+
+- **401 Unauthorized** - Check your credentials are correct and the token hasn't been deleted
+- **403 Forbidden** - Your token may not have the right permissions or model scope
+- **Certificate errors** - Verify your certificate paths and that the CA certificate matches your Bailo instance
+- **Connection refused** - Check the Bailo URL is correct and the instance is running
+
+## Related pages
+
+- [Personal Access Tokens](personal-access-tokens) - Detailed token management
+- [Python Client](python-client) - Using the Python client library
+- [Swagger API](../../../api/docs) - All available API endpoints
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

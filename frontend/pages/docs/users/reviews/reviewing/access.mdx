@@ -5,11 +5,60 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Reviewing an Access Request
 
-Access requests appear in the **Access Request Reviews** tab on the **Review** page. The review process mirrors release
-reviews. Only the **Model Senior Responsible Officer** can approve access requests.
+When a user submits an access request for a model, it enters the review process. Access request reviews are typically
+handled by the **Model Senior Responsible Officer (MSRO)** (or equivalent review role configured for the schema).
+
+> **Common questions this page answers:**
+>
+> - How do I review an access request?
+> - What happens after I approve an access request?
+> - Who reviews access requests?
+
+## Finding access requests to review
+
+Navigate to the **Reviews** page from the navigation bar. Access requests awaiting your review appear in the **Your open
+reviews** tab.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image alt='open access requests reviews page with a unreviewed request' src={bailoAccessRequest} />
 </Box>
+
+The screenshot above shows the Reviews page with an open access request awaiting review.
+
+## Reviewing an access request
+
+Open the access request, examine the requester's details and justification, and submit your decision.
+
+1. Select the access request from your review queue
+2. Click **View access request** and examine the request details:
+   - **Who** is requesting access (the requesting user or group)
+   - **Why** they need access (the justification provided in the form)
+   - **What** permissions they are requesting
+   - **When** the access should expire (if an end date is specified)
+3. Add a **comment** explaining your decision
+4. Choose your decision:
+   - **Approve** - grant the requested access
+   - **Request changes** - ask the requester to provide more information or modify their request
+
+## After approval
+
+Once an access request is approved:
+
+- The requesting user gains permission to **download files** and **pull container images** from the model
+- The access request moves to the **Your archived reviews** tab on the Reviews page
+- The requester is notified of the approval
+
+## After requesting changes
+
+If you request changes:
+
+- The requester is notified and can update their access request
+- Once updated, you can review the request again
+
+## Related pages
+
+- [Understanding Reviews](../understanding-reviews) - How the review process works end-to-end
+- [Review Outcomes](../review-outcomes) - What happens after approval or change requests
+- [Requesting Access](../../using-a-model/requesting-access) - How users create access requests
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

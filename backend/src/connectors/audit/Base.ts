@@ -437,6 +437,12 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Metric,
   },
+  NotifyReviewers: {
+    typeId: 'NotifyReviewers',
+    description: 'Sent a request to email reviewers for an additional review',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.Review,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -523,6 +529,8 @@ export abstract class BaseAuditConnector {
 
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
+
+  abstract onNotifyReviewers(req: Request, reviewId: string)
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

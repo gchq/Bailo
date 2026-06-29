@@ -1,0 +1,132 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Alert from '@mui/material/Alert'
+
+# Deployment Architecture
+
+> **Common questions this page answers:**
+>
+> - What services make up Bailo?
+> - How does Bailo's architecture work?
+> - What are the deployment options?
+
+Bailo is composed of several services that work together. Understanding this architecture helps when configuring,
+deploying, and troubleshooting a Bailo instance.
+
+## Core services
+
+Bailo requires six core services to operate.
+
+- **Frontend** (Next.js / Node.js) - Serves the web application UI
+- **Backend** (Node.js) - API (Application Programming Interface) server handling all business logic and data access
+- **NGINX** - Reverse proxy routing requests to frontend, backend, and registry
+- **MongoDB** - Stores all metadata: models, releases, schemas, reviews, users, tokens
+- **Object Storage** (MinIO, S3-compatible) - Stores model files and registry blobs. S3 stands for Simple Storage
+  Service.
+- **Container Registry** (Docker Registry) - Hosts container (Docker) images pushed to models
+
+## Optional services
+
+These services add security scanning, email notifications, and webhook testing capabilities.
+
+- **ArtefactScan** (FastAPI / Python) - Security scanning microservice wrapping ModelScan and Trivy
+- **ClamD** (ClamAV) - Antivirus daemon used to scan uploaded files for malware
+- **Mail Service** (SMTP-compatible) - Sends email notifications for reviews and access requests. SMTP stands for Simple
+  Mail Transfer Protocol.
+- **Webhook** (Webhook Tester) - Development tool for receiving and inspecting webhook requests
+
+## How requests flow
+
+All requests enter through the NGINX reverse proxy and are routed to the appropriate service.
+
+1. Users access Bailo through the **NGINX** reverse proxy (default port 8080)
+2. NGINX routes requests:
+   - UI page requests go to the **Frontend**
+   - API requests (`/api/...`) go to the **Backend**
+   - Container registry requests (`/v2/...`) go to the **Container Registry**
+3. The **Backend** reads and writes metadata to **MongoDB**
+4. File uploads and downloads go through the **Backend** to **Object Storage** (MinIO)
+5. Container image push/pull operations go through the **Container Registry**, which also uses **Object Storage**
+6. When files or images are uploaded, the **Backend** triggers scans via the **ClamD** and **ArtefactScan** service (if
+   configured)
+
+## Deployment options
+
+Bailo can be deployed using Docker Compose for development or Helm for production Kubernetes environments.
+
+### Docker compose (Development & Small Deployments)
+
+The repository includes a `compose.yaml` that runs the core services locally. This is the simplest way to get started.
+There is also ``compose.prod.yaml` to run all services locally. This is also used in the repository's GitHub workflows
+for testing.
+
+### Helm (Production & Kubernetes)
+
+For production deployments, Bailo provides Helm charts for deploying to Kubernetes. See:
+
+- [Helm Basic Usage](../helm/basic-usage)
+- [Helm Configuration](../helm/configuration)
+- [Isolated Environments](../helm/isolated-environments)
+
+### Standalone dockerfile
+
+<Alert sx={{ my: '20px', '& .MuiAlert-message p': { margin: 0 } }} severity='warning'>
+  `Dockerfile.standalone` is intended for local testing and secondary-instance scenarios. It should **not** be used as
+  the recommended production deployment model. Use Helm for production Kubernetes deployments.
+</Alert>
+
+`Dockerfile.standalone` builds a single container that runs a self-contained Bailo instance. It packages the frontend,
+backend, NGINX, MongoDB, MinIO, the container registry, and Mailcrab into one image using `supervisord`.
+
+This is not the normal development path. For day-to-day local development, use `compose.yaml`, because it runs each
+service separately and supports rebuilding, inspecting, and restarting individual services more easily.
+
+Use the standalone Dockerfile when you need an additional Bailo instance alongside your main Docker Compose instance,
+for example:
+
+- Testing cross-instance functionality, such as searching for models in another Bailo instance
+- Running a second local instance without starting another full Compose project
+- Creating a compact demo or smoke-test instance
+- Checking behaviour where one Bailo deployment needs to communicate with another
+
+To use it, first start your main Bailo instance with Docker Compose:
+
+```bash
+docker compose build --parallel
+docker compose up -d
+```
+
+The main instance is then available at `http://localhost:8080`.
+
+Build and run the standalone image from the repository root:
+
+```bash
+docker build . -t second-bailo -f Dockerfile.standalone
+docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
+```
+
+The standalone instance is then available at `http://localhost:4318`.
+
+If your Compose instance uses a different `INSTANCE_NAME`, replace `dev_internal` with the matching internal network
+name, for example `<INSTANCE_NAME>_internal`.
+
+## Data storage
+
+Bailo stores structured metadata in MongoDB and binary artefacts in S3-compatible object storage:
+
+- **MongoDB** holds all structured metadata (models, schemas, reviews, tokens, etc.)
+- **Object Storage (MinIO/S3)** holds binary artefacts (model files, container image layers)
+
+Both need to be backed up to prevent data loss.
+
+## Configuration
+
+Bailo uses [node-config](https://github.com/node-config/node-config) for backend configuration. Configuration files can
+be overridden via environment variables or Helm values. See [App Configuration](app-configuration) for details.
+
+## Related pages
+
+- [App Configuration](app-configuration) - Configuring the backend
+- [Helm Basic Usage](../helm/basic-usage) - Deploying with Helm
+- [Artefact Scanners](../microservices/artefact-scanners) - Configuring security scanning
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

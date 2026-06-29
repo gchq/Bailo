@@ -1,0 +1,149 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Troubleshooting and FAQ
+
+> **Common questions this page answers:**
+>
+> - Why can't I see a model in the Marketplace?
+> - Why is my release stuck in review?
+> - Why can't I push or pull a container image?
+> - How do I fix token authentication errors?
+
+Common issues and answers for Bailo users and administrators.
+
+## Models and the marketplace
+
+Common issues with finding, editing, and deleting models.
+
+### I can't see a model in the Marketplace
+
+- **Private models** are only visible to collaborators. Ask the model owner to add you, or check whether the model is
+  set to public.
+- **Filters may be active.** Clear any search terms, tag filters, or organisation filters
+- If the model was recently created, try refreshing the page
+
+### I can't edit a model
+
+- Only **Owners** and **Contributors** can edit model cards. Check your role on the model's Settings tab
+- If you need access, ask the model owner to add you as a collaborator
+
+### I can't delete a model
+
+- Only the model **Owner** can delete a model
+- Deletion is permanent for the model and all its associated releases, files, and access requests
+
+## Releases
+
+Common issues with creating releases and the review process.
+
+### My release is stuck in review
+
+- Check that **all required review roles** have been assigned to specific people in the model's Settings tab
+- If reviewers haven't been assigned, no one will be notified of the review
+- Contact the assigned reviewers directly if the review has been pending for a long time
+
+### I can't create a release
+
+- Only **Owners** and **Contributors** can create releases
+- Make sure you have filled in the required fields: version (semver format), and release notes
+
+## Access requests
+
+Common issues with access request approval and file downloads.
+
+### My access request hasn't been approved
+
+- Access requests are reviewed by the Model Senior Responsible Officer (or equivalent review role). Check who is
+  assigned to that role in the model's Settings tab.
+- Contact the reviewer directly if the request has been pending
+
+### I can't download files even though I have access
+
+- Your access request must be **approved**, not just submitted
+- Check the status of your access request on the model page
+- If the model has **ungoverned access** enabled, you should be able to download without an access request
+
+## Container (Docker) Images
+
+Common issues with pushing and pulling container images.
+
+### I can't push a container image
+
+- Make sure you're using the correct registry address (check with your administrator)
+- Verify your personal access token has the `image:push` permission
+- Ensure your token is scoped to the correct model (or set to "All models")
+- Check that you're logged into the registry with `docker login`
+
+### I can't pull a container image
+
+- You need an **approved access request** for the model (unless ungoverned access is enabled)
+- Verify your personal access token has the `image:read` permission
+- Check the registry address is correct
+
+## Personal Access tokens
+
+Common issues with creating and using Personal Access Tokens (PATs).
+
+### How do i create a token?
+
+Navigate to **User (top right) > Settings > Authentication** and click **Add token**. See
+[Personal Access Tokens](../users/programmatically-using-bailo/personal-access-tokens) for details.
+
+### I lost my secret key
+
+Secret keys are only shown once when the token is created. If you've lost it, delete the old token and create a new one.
+
+### My token isn't working
+
+- Check that the token has the correct **permissions** for the action you're trying to perform
+- Check that the token is **scoped to the correct model** (or set to "All models")
+- Verify you're using the correct access key and secret key pair
+
+## Schemas and forms
+
+Common issues with schema validation and form fields.
+
+### Schema validation errors when filling in a model card
+
+- Required fields are marked - make sure all required fields are filled in
+- Check that dates are in the correct format
+- If a field appears read-only, it may be controlled by a dependency on another field's value
+
+### I can't see a schema when creating a model
+
+- Only **active** schemas appear in the selection list. An administrator may have deactivated the schema
+- Contact your administrator if you need a specific schema
+
+## Security scanning
+
+Common issues with file and container image scan results.
+
+### A file scan shows issues
+
+- **ClamAV** detects malware. If a file is flagged, do not distribute it until the issue is investigated
+- **ModelScan** detects serialisation attacks (e.g. in pickle files). Review the flagged file for unsafe deserialisation
+  patterns.
+- You can **rescan** a file after a cooldown period if you believe the result is a false positive
+
+### A container image scan shows vulnerabilities
+
+- **Trivy** reports known vulnerabilities (CVEs) with severity ratings
+- Review the vulnerability details to determine impact
+- Update base images or dependencies to address critical vulnerabilities
+- You can rescan an image after updating it
+
+## Administration
+
+Common administration questions.
+
+### How do i contact an administrator?
+
+Check the **Help** page in Bailo for support links and contact information specific to your deployment.
+
+## Related pages
+
+- [Quick Start Guide](../getting-started/quick-start) - Getting started with Bailo
+- [Roles & Permissions](roles-and-permissions) - Understanding what each role allows
+- [Glossary](glossary) - Definitions of Bailo terms
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
