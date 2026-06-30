@@ -20,7 +20,13 @@ export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
         role='button'
         tabIndex={0}
       >
-        <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           {icon}
           <Typography
             sx={{

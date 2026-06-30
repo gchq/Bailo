@@ -111,7 +111,14 @@ export default function EntrySearch() {
   return (
     <Stack>
       <Search sx={{ pl: 1 }}>
-        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <SearchIcon />
           <StyledInputBase
             placeholder='Search'

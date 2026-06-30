@@ -50,8 +50,8 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
   const listItemContent = useMemo(() => {
     return (
       <Stack>
-        <Stack spacing={1} direction='column' justifyContent='flex-start'>
-          <Typography sx={{ wordBreak: 'break-all' }} color='primary' variant='h6' component='h2' fontWeight='bold'>
+        <Stack spacing={1} direction='column' sx={{ justifyContent: 'flex-start' }}>
+          <Typography sx={{ wordBreak: 'break-all', fontWeight: 'bold' }} color='primary' variant='h6' component='h2'>
             {review.model.name}
           </Typography>
           {review.dueDate && (
@@ -67,7 +67,7 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
           )}
           {review.semver && <Typography sx={{ wordBreak: 'break-all' }}>{review.semver}</Typography>}
         </Stack>
-        <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
+        <Stack spacing={1} direction='row' sx={{ justifyContent: 'flex-start', alignItems: 'center' }}>
           <Typography variant='caption'>{`Created ${timeDifference(
             new Date(),
             new Date(review.createdAt),

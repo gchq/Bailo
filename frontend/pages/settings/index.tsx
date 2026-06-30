@@ -21,6 +21,10 @@ export default function Settings() {
     [currentUser],
   )
 
+  if (isCurrentUserLoading) {
+    return <Loading />
+  }
+
   const error = MultipleErrorWrapper(`Unable to load settings page`, {
     isCurrentUserError,
   })
@@ -31,7 +35,6 @@ export default function Settings() {
   return (
     <>
       <Title text='Settings' />
-      {isCurrentUserLoading && <Loading />}
       <PageWithTabs title='Settings' tabs={tabs} />
     </>
   )

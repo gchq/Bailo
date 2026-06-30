@@ -35,9 +35,9 @@ export default function MetricsExportPreview({
     <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg' slots={{ transition: Transition }}>
       <DialogContent ref={contentRef}>
         <Stack spacing={2} divider={<Divider />}>
-          <Stack direction='row' alignItems='center'>
+          <Stack direction='row' sx={{ alignItems: 'center' }}>
             <Image src={logo} alt='bailo logo' width={180} height={70} />
-            <Typography variant='h4' component='h1' sx={{ pl: 1 }} fontWeight='bold' color='primary'>
+            <Typography variant='h4' component='h1' sx={{ pl: 1, fontWeight: 'bold' }} color='primary'>
               {exportDocumentTitle}
             </Typography>
           </Stack>

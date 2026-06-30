@@ -1,26 +1,21 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Link, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import { Fragment, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import SchemaList from 'src/schemas/SchemaList'
 import { isSchemaKind, SchemaKind, SchemaKindKeys } from 'types/types'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 export default function SchemaTab() {
-  const [selectedCategory, setSelectedCategory] = useState<SchemaKindKeys>(SchemaKind.MODEL)
   const router = useRouter()
-
   const { category } = router.query
 
-  const onSelectedCategoryChange = useEffectEvent((category: SchemaKindKeys) => {
-    setSelectedCategory(category)
-  })
+  const [selectedCategory, setSelectedCategory] = useState<SchemaKindKeys>(
+    isSchemaKind(category) ? category : SchemaKind.MODEL,
+  )
 
   useEffect(() => {
-    if (isSchemaKind(category)) {
-      onSelectedCategoryChange(category)
-    } else if (category) {
-      onSelectedCategoryChange(SchemaKind.MODEL)
+    if (!isSchemaKind(category)) {
       router.replace({
         query: { ...router.query, category: SchemaKind.MODEL },
       })

@@ -1,5 +1,6 @@
-import { Close, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
 import Code from '@mui/icons-material/Code'
+import Save from '@mui/icons-material/Save'
 import { Button, Divider, Stack } from '@mui/material'
 
 interface SaveAndCancelButtonsProps {
@@ -22,9 +23,11 @@ export default function SaveAndCancelButtons({
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       spacing={1}
-      justifyContent='flex-end'
       divider={<Divider orientation='vertical' flexItem />}
-      sx={{ mb: { xs: 2 } }}
+      sx={{
+        justifyContent: 'flex-end',
+        mb: { xs: 2 },
+      }}
     >
       <Button
         variant='contained'

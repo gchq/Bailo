@@ -1,4 +1,4 @@
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from '@mui/material'
 import { ReactNode, useState } from 'react'
 import { Transition } from 'src/common/Transition'
@@ -25,7 +25,7 @@ export default function HelpDialog({ title, content }: HelpDialogProps) {
           <HelpOutlineIcon color='primary' />
         </IconButton>
       </Tooltip>
-      <Dialog open={open} onClose={handleClose} maxWidth='md' TransitionComponent={Transition}>
+      <Dialog open={open} onClose={handleClose} maxWidth='md' slots={{ transition: Transition }}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{content}</DialogContent>
         <DialogActions>

@@ -51,16 +51,20 @@ export default function AdditionalInformation({
     return (
       <Stack spacing={1}>
         <Typography
-          fontWeight='bold'
           id={`${id}-label`}
           aria-label={`Label for ${label}`}
           component='label'
           htmlFor={id}
+          sx={{
+            fontWeight: 'bold',
+          }}
         >
           {label}
           {required && editMode && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
+        {description && editMode && (
+          <ExpandableTypography sx={{ whiteSpace: 'pre-wrap' }}>{description}</ExpandableTypography>
+        )}
         {children}
       </Stack>
     )
@@ -83,11 +87,13 @@ export default function AdditionalInformation({
     return (
       <>
         <Typography
-          fontWeight='bold'
           id={`${id}-label`}
           aria-label={`Label for ${label}`}
           component='label'
           htmlFor={id}
+          sx={{
+            fontWeight: 'bold',
+          }}
         >
           {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -129,24 +135,31 @@ export default function AdditionalInformation({
           >
             <Stack>
               <Typography
-                fontWeight='bold'
                 id={`${id}-label`}
                 aria-label={`Label for ${label}`}
                 component='label'
                 htmlFor={id}
+                sx={{
+                  fontWeight: 'bold',
+                }}
               >
                 {label}
                 {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
               </Typography>
               {description && (
-                <ExpandableTypography variant='caption' whiteSpace='pre-wrap'>
+                <ExpandableTypography variant='caption' sx={{ whiteSpace: 'pre-wrap' }}>
                   {description}
                 </ExpandableTypography>
               )}
             </Stack>
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
-              <Typography variant='caption' fontWeight='bold'>
+              <Typography
+                variant='caption'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {uiConfig ? uiConfig.modelMirror.import.originalAnswerHeading : 'Original answer'}
               </Typography>
               <Box>
@@ -163,7 +176,13 @@ export default function AdditionalInformation({
                   </Typography>
                 )}
               </Box>
-              <Typography sx={{ pl: 4 }} variant='caption' fontWeight='bold'>
+              <Typography
+                variant='caption'
+                sx={{
+                  fontWeight: 'bold',
+                  pl: 4,
+                }}
+              >
                 {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
               </Typography>
               {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
@@ -175,11 +194,13 @@ export default function AdditionalInformation({
         <Stack spacing={2}>
           <Stack>
             <Typography
-              fontWeight='bold'
               id={`${id}-label`}
               aria-label={`Label for ${label}`}
               component='label'
               htmlFor={id}
+              sx={{
+                fontWeight: 'bold',
+              }}
             >
               {label}
               {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -213,7 +234,12 @@ export default function AdditionalInformation({
                 }}
               >
                 <Stack spacing={1}>
-                  <Typography variant='caption' fontWeight='bold'>
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
                   </Typography>
                   {children}

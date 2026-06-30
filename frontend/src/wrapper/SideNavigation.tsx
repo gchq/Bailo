@@ -1,13 +1,11 @@
-import {
-  AccessibilityNew,
-  AdminPanelSettings,
-  Equalizer,
-  KeyboardDoubleArrowLeft,
-  KeyboardDoubleArrowRight,
-} from '@mui/icons-material'
+import AccessibilityNew from '@mui/icons-material/AccessibilityNew'
+import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DescriptionIcon from '@mui/icons-material/Description'
+import Equalizer from '@mui/icons-material/Equalizer'
+import KeyboardDoubleArrowLeft from '@mui/icons-material/KeyboardDoubleArrowLeft'
+import KeyboardDoubleArrowRight from '@mui/icons-material/KeyboardDoubleArrowRight'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
@@ -129,7 +127,12 @@ export default function SideNavigation({
         })}
       />
       {drawerOpen !== undefined && (
-        <Stack sx={{ height: '100%' }} justifyContent='space-between'>
+        <Stack
+          sx={{
+            justifyContent: 'space-between',
+            height: '100%',
+          }}
+        >
           <StyledList>
             <NavMenuItem
               href='/'
@@ -150,7 +153,7 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            <Divider aria-hidden='true' />
+            {!drawerOpen && <Divider aria-hidden='true' />}
             <NavMenuItem
               href='/api/docs'
               selectedPage={page}
@@ -211,7 +214,7 @@ export default function SideNavigation({
               primaryText='Support'
               drawerOpen={drawerOpen}
               menuPage='help'
-              title='Help & Support'
+              title='Help & support'
               icon={<ContactSupportIcon />}
             />
             <NavMenuItem
