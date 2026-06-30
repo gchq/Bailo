@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid'
 import { v4 as generateUuidv4 } from 'uuid'
 
-const shortAlphabetCharacters = '0123456789abcdefghijklmnopqrstuvwxyz'
+const shortAlphabetCharacters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYW'
 export const shortAlphabet = customAlphabet(shortAlphabetCharacters)
 export const longAlphabet = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
 
