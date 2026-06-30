@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import { Box, Button, Container, Link, Paper, Typography } from '@mui/material'
 import { Stack } from '@mui/system'

@@ -1,4 +1,4 @@
-import { Save } from '@mui/icons-material'
+import Save from '@mui/icons-material/Save'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
 import { useCallback, useState } from 'react'

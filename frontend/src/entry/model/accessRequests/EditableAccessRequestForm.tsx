@@ -1,4 +1,6 @@
-import { Close, Info, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Info from '@mui/icons-material/Info'
+import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
 import {
   deleteAccessRequest,

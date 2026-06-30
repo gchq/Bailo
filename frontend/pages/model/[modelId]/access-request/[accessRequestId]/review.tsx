@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Card, Container, Dialog, DialogContent, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetEntry } from 'actions/entry'

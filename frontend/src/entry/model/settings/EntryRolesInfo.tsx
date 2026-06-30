@@ -1,4 +1,4 @@
-import { Done } from '@mui/icons-material'
+import Done from '@mui/icons-material/Done'
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { useGetEntryRoles } from 'actions/entry'

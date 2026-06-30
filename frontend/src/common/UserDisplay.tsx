@@ -1,5 +1,6 @@
-import { Error, Label } from '@mui/icons-material'
 import EmailIcon from '@mui/icons-material/Email'
+import Error from '@mui/icons-material/Error'
+import Label from '@mui/icons-material/Label'
 import UserIcon from '@mui/icons-material/Person'
 import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
 import { useGetUserInformation } from 'actions/user'

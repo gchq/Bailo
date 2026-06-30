@@ -1,5 +1,10 @@
-import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import FileUpload from '@mui/icons-material/FileUpload'
+import FolderCopy from '@mui/icons-material/FolderCopy'
+import Gavel from '@mui/icons-material/Gavel'
+import Lock from '@mui/icons-material/Lock'
+import LockOpen from '@mui/icons-material/LockOpen'
 import {
   Accordion,
   AccordionDetails,

@@ -1,4 +1,6 @@
-import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
+import CloudQueue from '@mui/icons-material/CloudQueue'
+import CorporateFare from '@mui/icons-material/CorporateFare'
+import LaunchOutlined from '@mui/icons-material/LaunchOutlined'
 import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/entry'

@@ -1,4 +1,5 @@
-import { ArrowBack, DesignServices } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import DesignServices from '@mui/icons-material/DesignServices'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntry } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'

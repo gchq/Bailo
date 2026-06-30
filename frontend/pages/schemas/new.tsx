@@ -1,4 +1,5 @@
-import { ArrowBack, Schema } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import Schema from '@mui/icons-material/Schema'
 import {
   Autocomplete,
   Box,

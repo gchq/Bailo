@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'

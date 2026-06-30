@@ -1,5 +1,7 @@
-import { Clear, ExpandMore, Refresh } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
+import Clear from '@mui/icons-material/Clear'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import Refresh from '@mui/icons-material/Refresh'
 import {
   Accordion,
   AccordionDetails,

@@ -1,4 +1,5 @@
-import { Add, RestartAlt } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {

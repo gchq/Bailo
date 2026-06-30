@@ -73,6 +73,11 @@ export default defineConfig([
                 "Do not import dayjs directly from the npm package, use the pre-configured alias '@dayjs' e.g. `import dayjs from '@dayjs'` or for the type definition, `import type { Dayjs } from '@dayjs'`.",
               allowTypeImports: false,
             },
+            {
+              name: '@mui/icons-material',
+              message:
+                "Do not import from the @mui/icons-material barrel. Use per-icon imports instead, e.g. `import Add from '@mui/icons-material/Add'`. Barrel imports significantly slow down Vitest imports.",
+            },
           ],
           patterns: ['dayjs/*'],
         },

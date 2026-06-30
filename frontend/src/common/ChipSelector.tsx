@@ -1,4 +1,4 @@
-import { ExpandMore } from '@mui/icons-material'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'

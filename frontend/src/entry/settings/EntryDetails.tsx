@@ -1,4 +1,6 @@
-import { Lock, LockOpen, Save } from '@mui/icons-material'
+import Lock from '@mui/icons-material/Lock'
+import LockOpen from '@mui/icons-material/LockOpen'
+import Save from '@mui/icons-material/Save'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchEntry, useGetEntry } from 'actions/entry'
 import { FormEvent, useMemo, useState } from 'react'

@@ -1,4 +1,7 @@
-import { Close, Create, Delete, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Create from '@mui/icons-material/Create'
+import Delete from '@mui/icons-material/Delete'
+import Save from '@mui/icons-material/Save'
 import { Button, Stack } from '@mui/material'
 import { ReactNode } from 'react'
 import Restricted from 'src/common/Restricted'

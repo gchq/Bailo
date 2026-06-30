@@ -1,4 +1,6 @@
-import { Add, Create, Delete } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import Create from '@mui/icons-material/Create'
+import Delete from '@mui/icons-material/Delete'
 import Edit from '@mui/icons-material/Edit'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'

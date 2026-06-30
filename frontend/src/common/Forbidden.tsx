@@ -1,4 +1,4 @@
-import { GppBad } from '@mui/icons-material'
+import GppBad from '@mui/icons-material/GppBad'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { CSSProperties, ReactElement } from 'react'
 import Link from 'src/Link'

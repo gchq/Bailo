@@ -1,5 +1,6 @@
-import { Close, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
 import Code from '@mui/icons-material/Code'
+import Save from '@mui/icons-material/Save'
 import { Button, Divider, Stack } from '@mui/material'
 
 interface SaveAndCancelButtonsProps {

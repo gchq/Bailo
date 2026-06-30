@@ -1,4 +1,5 @@
-import { Add, PostAdd } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import PostAdd from '@mui/icons-material/PostAdd'
 import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import Link from 'src/Link'

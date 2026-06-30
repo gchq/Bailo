@@ -1,4 +1,4 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRoles } from 'actions/reviewRoles'

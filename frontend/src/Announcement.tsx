@@ -1,5 +1,5 @@
-import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
+import Close from '@mui/icons-material/Close'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import ExpandableTypography from 'src/common/ExpandableTypography'

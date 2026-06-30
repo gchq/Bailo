@@ -1,4 +1,4 @@
-import { ArrowDropDown } from '@mui/icons-material'
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, Typography } from '@mui/material'
 import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'

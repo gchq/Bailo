@@ -10,7 +10,7 @@ export default defineConfig({
     globals: true,
     server: {
       deps: {
-        inline: ['@mui/material', '@mui/icons-material', '@mui/system', '@mui/utils', '@mui/styled-engine'],
+        inline: ['@mui/material', '@mui/system', '@mui/utils', '@mui/styled-engine'],
       },
     },
     environment: 'jsdom',

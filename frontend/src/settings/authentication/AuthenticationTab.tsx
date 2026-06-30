@@ -1,4 +1,5 @@
-import { Add, Delete } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import Delete from '@mui/icons-material/Delete'
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'

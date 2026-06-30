@@ -1,16 +1,14 @@
-import {
-  AccessibilityNew,
-  Equalizer,
-  KeyboardDoubleArrowLeft,
-  KeyboardDoubleArrowRight,
-  SupervisorAccount,
-} from '@mui/icons-material'
+import AccessibilityNew from '@mui/icons-material/AccessibilityNew'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DescriptionIcon from '@mui/icons-material/Description'
+import Equalizer from '@mui/icons-material/Equalizer'
+import KeyboardDoubleArrowLeft from '@mui/icons-material/KeyboardDoubleArrowLeft'
+import KeyboardDoubleArrowRight from '@mui/icons-material/KeyboardDoubleArrowRight'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
+import SupervisorAccount from '@mui/icons-material/SupervisorAccount'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'

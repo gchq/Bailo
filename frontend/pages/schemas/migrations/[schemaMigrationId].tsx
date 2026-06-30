@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import { putSchemaMigration, useGetSchemaMigration } from 'actions/schemaMigration'

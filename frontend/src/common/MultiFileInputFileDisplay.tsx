@@ -1,4 +1,4 @@
-import { LocalOffer } from '@mui/icons-material'
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'

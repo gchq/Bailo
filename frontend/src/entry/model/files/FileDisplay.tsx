@@ -1,4 +1,8 @@
-import { Delete, Info, LocalOffer, MoreVert, Refresh } from '@mui/icons-material'
+import Delete from '@mui/icons-material/Delete'
+import Info from '@mui/icons-material/Info'
+import LocalOffer from '@mui/icons-material/LocalOffer'
+import MoreVert from '@mui/icons-material/MoreVert'
+import Refresh from '@mui/icons-material/Refresh'
 import {
   Box,
   Button,

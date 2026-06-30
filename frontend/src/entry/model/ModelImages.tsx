@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetModelImages } from 'actions/entry'
 import { useState } from 'react'

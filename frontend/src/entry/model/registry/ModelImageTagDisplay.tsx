@@ -1,4 +1,7 @@
-import { Delete, Info, MoreVert, Refresh } from '@mui/icons-material'
+import Delete from '@mui/icons-material/Delete'
+import Info from '@mui/icons-material/Info'
+import MoreVert from '@mui/icons-material/MoreVert'
+import Refresh from '@mui/icons-material/Refresh'
 import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material'
 import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { deleteEntryImage } from 'actions/entry'

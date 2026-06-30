@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import {
   Autocomplete,
   AutocompleteChangeDetails,

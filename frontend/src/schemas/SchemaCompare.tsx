@@ -1,4 +1,4 @@
-import { Forward } from '@mui/icons-material'
+import Forward from '@mui/icons-material/Forward'
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'

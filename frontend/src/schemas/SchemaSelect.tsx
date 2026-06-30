@@ -1,6 +1,6 @@
-import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Schema from '@mui/icons-material/Schema'
 import {
   Accordion,
   AccordionDetails,

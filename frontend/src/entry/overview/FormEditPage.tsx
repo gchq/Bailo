@@ -1,6 +1,9 @@
-import { ExpandLess, ExpandMore, Info, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import HistoryIcon from '@mui/icons-material/History'
+import Info from '@mui/icons-material/Info'
+import MenuIcon from '@mui/icons-material/Menu'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import {
   Box,

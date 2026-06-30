@@ -1,4 +1,4 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'

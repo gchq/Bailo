@@ -1,4 +1,5 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Card, Stack, Typography } from '@mui/material'
 import { memoize } from 'lodash-es'
 import { useState } from 'react'

@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Link, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntry } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'

@@ -1,4 +1,5 @@
-import { ArrowBack, FileCopy } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import FileCopy from '@mui/icons-material/FileCopy'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { postFromTemplate } from 'actions/modelCard'

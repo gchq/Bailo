@@ -1,7 +1,7 @@
-import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import Undo from '@mui/icons-material/Undo'
 import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryRoles } from 'actions/entry'

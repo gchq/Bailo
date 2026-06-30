@@ -1,4 +1,4 @@
-import { PersonAdd } from '@mui/icons-material'
+import PersonAdd from '@mui/icons-material/PersonAdd'
 import { Stack, Typography } from '@mui/material'
 import { postReviewRole } from 'actions/reviewRoles'
 import router from 'next/router'

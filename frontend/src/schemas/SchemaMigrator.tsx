@@ -1,5 +1,6 @@
-import { Close, ExpandMore } from '@mui/icons-material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import Close from '@mui/icons-material/Close'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
   AccordionDetails,

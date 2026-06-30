@@ -1,4 +1,5 @@
-import { Close, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Save from '@mui/icons-material/Save'
 import { Button, Stack, Typography } from '@mui/material'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'

@@ -1,4 +1,4 @@
-import { LocalOffer } from '@mui/icons-material'
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'

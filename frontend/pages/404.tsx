@@ -1,4 +1,4 @@
-import { SentimentVeryDissatisfied } from '@mui/icons-material'
+import SentimentVeryDissatisfied from '@mui/icons-material/SentimentVeryDissatisfied'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import Link from 'src/Link'
 

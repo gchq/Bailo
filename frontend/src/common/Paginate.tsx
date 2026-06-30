@@ -1,4 +1,10 @@
-import { CalendarMonth, Check, ExpandLess, ExpandMore, LineWeight, Sort, SortByAlpha } from '@mui/icons-material'
+import CalendarMonth from '@mui/icons-material/CalendarMonth'
+import Check from '@mui/icons-material/Check'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import LineWeight from '@mui/icons-material/LineWeight'
+import Sort from '@mui/icons-material/Sort'
+import SortByAlpha from '@mui/icons-material/SortByAlpha'
 import {
   Box,
   Button,
