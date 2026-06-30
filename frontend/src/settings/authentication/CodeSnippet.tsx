@@ -53,9 +53,9 @@ export default function CodeSnippet({
         <Stack
           direction='row'
           spacing={1}
-          alignItems='center'
-          justifyContent='space-between'
           sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
             pl: 2,
             pr: 1,
             py: 1,
@@ -74,9 +74,9 @@ export default function CodeSnippet({
       <Stack
         direction='row'
         spacing={1}
-        alignItems='flex-start'
-        justifyContent='space-between'
         sx={{
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
           px: 2,
           py: 1,
         }}

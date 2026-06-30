@@ -20,11 +20,11 @@
     "@fontsource/pacifico": "^5.2.7",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@mui/icons-material": "7.3.9",
-    "@mui/material": "7.3.9",
-    "@mui/material-nextjs": "7.3.9",
+    "@mui/icons-material": "9.0.0",
+    "@mui/material": "9.0.0",
+    "@mui/material-nextjs": "9.0.0",
     "@mui/x-charts": "^9.2.0",
-    "@mui/x-date-pickers": "8.27.2",
+    "@mui/x-date-pickers": "9.0.0",
     "@next/mdx": "^16.2.7",
     "@next/swc-wasm-nodejs": "16.2.7",
     "@rjsf/core": "6.6.1",
@@ -60,7 +60,7 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "10.0.1",
     "@next/bundle-analyzer": "^16.2.7",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -75,11 +75,10 @@
     "axe-core": "^4.12.0",
     "cypress": "^15.16.0",
     "cypress-axe": "^1.7.0",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.1.6",
+    "eslint": "10.5.0",
+    "eslint-config-next": "16.2.9",
     "eslint-plugin-cypress": "^5.2.1",
     "eslint-plugin-prettier": "^5.5.6",
-    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "jsdom": "^29.1.1",
@@ -89,13 +88,13 @@
     "vitest": "^4.1.8"
   },
   "optionalDependencies": {
-    "@next/swc-darwin-x64": "^16.2.6",
     "@next/swc-darwin-arm64": "^16.2.6",
-    "@next/swc-linux-x64-gnu": "^16.2.6",
-    "@next/swc-linux-x64-musl": "^16.2.6",
+    "@next/swc-darwin-x64": "^16.2.6",
     "@next/swc-linux-arm64-gnu": "^16.2.6",
     "@next/swc-linux-arm64-musl": "^16.2.6",
-    "@next/swc-win32-x64-msvc": "^16.2.6",
-    "@next/swc-win32-arm64-msvc": "^16.2.6"
+    "@next/swc-linux-x64-gnu": "^16.2.6",
+    "@next/swc-linux-x64-musl": "^16.2.6",
+    "@next/swc-win32-arm64-msvc": "^16.2.6",
+    "@next/swc-win32-x64-msvc": "^16.2.6"
   }
 }

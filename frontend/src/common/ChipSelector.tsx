@@ -1,4 +1,4 @@
-import { ExpandMore } from '@mui/icons-material'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -108,7 +108,12 @@ export default function ChipSelector({
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
             {allOptions.length === 0 && (
-              <Typography color='text.secondary' textAlign='center'>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                  textAlign: 'center',
+                }}
+              >
                 No items available
               </Typography>
             )}
@@ -125,7 +130,14 @@ export default function ChipSelector({
   return (
     <>
       {label && (
-        <Typography component='h2' variant='h6' alignContent='center' sx={{ height: '56px' }}>{`${label}`}</Typography>
+        <Typography
+          component='h2'
+          variant='h6'
+          sx={{
+            alignContent: 'center',
+            height: '56px',
+          }}
+        >{`${label}`}</Typography>
       )}
       {!expanded && allOptions.slice(0, expandThreshold)}
       {expanded && allOptions}

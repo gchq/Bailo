@@ -29,21 +29,29 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
   )
 
   return entry.kind === EntryKind.MIRRORED_MODEL && !entry.mirroredCard?.metadata ? (
-    <>
-      <MessageAlert
-        severity='warning'
-        message='This mirrored model has no model card. Please export the model card from the source model.'
-      />
-    </>
+    <MessageAlert
+      severity='warning'
+      message='This mirrored model has no model card. Please export the model card from the source model.'
+    />
   ) : (
-    <Grid container maxWidth='xl' sx={{ py: 2 }}>
+    <Grid
+      container
+      sx={{
+        maxWidth: 'xl',
+        py: 2,
+      }}
+    >
       <Grid size={{ md: 3, sm: 12 }}>
         <Box sx={{ m: 2 }}>
           <EntryOverviewDetails entry={entry} />
         </Box>
       </Grid>
       <Grid size={{ md: 9, sm: 12 }}>
-        <Box width='100%'>
+        <Box
+          sx={{
+            width: '100%',
+          }}
+        >
           <Container sx={{ m: 'auto' }} maxWidth='xl'>
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
             {page === OverviewPage.FORM && <FormEditPage entry={entry} mutateEntry={mutateEntry} />}

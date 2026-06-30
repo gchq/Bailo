@@ -1,4 +1,4 @@
-import { ExpandMore } from '@mui/icons-material'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
   AccordionDetails,
@@ -134,15 +134,29 @@ export default function ReviewRoleFormContainer<
             </FormControl>
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                <Typography fontWeight='bold'>Default collaborators</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Default collaborators
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Box sx={{ mt: 1 }}>{displayEntryAccessInput}</Box>
               </AccordionDetails>
             </Accordion>
           </Stack>
-          <Box display='flex'>
-            <Box ml='auto'>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <Box
+              sx={{
+                ml: 'auto',
+              }}
+            >
               <Stack direction='row' spacing={2}>
                 <Button loading={loading} type='button' variant='outlined' color='primary' onClick={handleCancel}>
                   Cancel

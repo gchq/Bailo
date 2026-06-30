@@ -116,7 +116,12 @@ export default function AccessRequest() {
                       Back to model
                     </Button>
                   </Link>
-                  <Stack direction='row' alignItems='center'>
+                  <Stack
+                    direction='row'
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <Typography variant='h6' color='primary' component='h1'>
                       {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                     </Typography>
