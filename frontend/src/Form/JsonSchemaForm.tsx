@@ -1,4 +1,4 @@
-import { Circle } from '@mui/icons-material'
+import { ErrorOutline } from '@mui/icons-material'
 import {
   Box,
   Chip,
@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -241,17 +241,15 @@ export default function JsonSchemaForm({
                 <ListItem
                   key={step.schema.title}
                   disablePadding
-                  secondaryAction={
-                    canEdit &&
-                    sectionCompletion[step.schema.title] > 0 && (
-                      <ListItemIcon>
-                        <Circle color='error' sx={{ fontSize: 12 }} />
-                      </ListItemIcon>
-                    )
-                  }
+                  sx={{
+                    backgroundColor:
+                      canEdit && sectionCompletion[step.schema.title]
+                        ? alpha(theme.palette.error.main, 0.1)
+                        : undefined,
+                  }}
                 >
                   <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                    <ListItemText>
+                    <ListItemText sx={{ pr: 1 }}>
                       <Typography
                         sx={{
                           wordBreak: 'break-word',
@@ -265,6 +263,11 @@ export default function JsonSchemaForm({
                         {step.schema.title}
                       </Typography>
                     </ListItemText>
+                    {canEdit && sectionCompletion[step.schema.title] ? (
+                      <ListItemIcon sx={{ minWidth: 'auto', flexShrink: 0, ml: 'auto' }}>
+                        <ErrorOutline color='error' />
+                      </ListItemIcon>
+                    ) : null}
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
                   </ListItemButton>
                 </ListItem>
