@@ -69,7 +69,7 @@ export async function verifyArgon2Hash(key: string, stored: string) {
 
 /**
  * Creates a bcrypt hash for the provided key using the configured cost factor.
- * Throws if hashing fails.
+ * Throws if the hashing fails.
  */
 export async function createBcryptHash(key: string): Promise<string> {
   return await bcrypt.hash(key, BCRYPT_CONFIG.rounds)
