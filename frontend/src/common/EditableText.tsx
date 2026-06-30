@@ -41,7 +41,14 @@ export default function EditableText({
 
   const submitButtons = useMemo(() => {
     return (
-      <Stack direction='row' spacing={1} sx={{ py: 1 }} justifyContent='flex-end'>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'flex-end',
+          py: 1,
+        }}
+      >
         <Button variant='contained' type='submit' size='small'>
           {submitButtonText}
         </Button>
@@ -65,7 +72,13 @@ export default function EditableText({
             {submitButtons}
           </Stack>
         ) : (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <TextField
               sx={{ width: '100%' }}
               value={newValue}
@@ -81,7 +94,13 @@ export default function EditableText({
   } else {
     return (
       <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
-        <Stack direction='row' spacing={1} alignItems='center'>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Tooltip title={tooltipText}>
             <IconButton onClick={() => setIsEditMode(true)}>
               {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
@@ -90,7 +109,13 @@ export default function EditableText({
           {richText ? (
             value && <MarkdownDisplay>{value}</MarkdownDisplay>
           ) : (
-            <Typography fontStyle={!value ? 'italic' : 'normal'}>{value || 'Empty'}</Typography>
+            <Typography
+              sx={{
+                fontStyle: !value ? 'italic' : 'normal',
+              }}
+            >
+              {value || 'Empty'}
+            </Typography>
           )}
         </Stack>
       </Box>

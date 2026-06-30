@@ -134,7 +134,13 @@ export default function ReleaseForm({
   )
 
   const releaseNotesLabel = (
-    <Typography fontWeight='bold' component='label' htmlFor='release-notes-input'>
+    <Typography
+      component='label'
+      htmlFor='release-notes-input'
+      sx={{
+        fontWeight: 'bold',
+      }}
+    >
       Release notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
@@ -142,7 +148,13 @@ export default function ReleaseForm({
   const modelCardVersionList = useMemo(() => {
     return entryCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
       <MenuItem key={revision.version} value={revision.version}>
-        <Stack direction='row' spacing={1} alignItems='center'>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Typography>{revision.version} -</Typography>
           <Typography variant='caption'>{formatDateString(revision.createdAt)}</Typography>
         </Stack>
@@ -208,13 +220,30 @@ export default function ReleaseForm({
     <Stack spacing={2}>
       {isReadOnly && (
         <Stack>
-          <Typography fontWeight='bold'>Latest version</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Latest version
+          </Typography>
           <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack overflow='hidden' spacing={2}>
+      <Stack
+        spacing={2}
+        sx={{
+          overflow: 'hidden',
+        }}
+      >
         <Stack sx={{ width: '100%' }}>
-          <Typography fontWeight='bold' component='label' htmlFor='semantic-version-input'>
+          <Typography
+            component='label'
+            htmlFor='semantic-version-input'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
           <Typography variant='caption'>For example: 1.0.0</Typography>
@@ -238,10 +267,16 @@ export default function ReleaseForm({
         </Stack>
         <Stack sx={{ width: '100%' }}>
           <Stack direction='row' spacing={1}>
-            <Typography fontWeight='bold' component='label' htmlFor='model-card-version-input'>
+            <Typography
+              component='label'
+              htmlFor='model-card-version-input'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
             </Typography>
-            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
+            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version.</HelpPopover>}
           </Stack>
           {isReadOnly ? (
             <Typography>
@@ -296,7 +331,13 @@ export default function ReleaseForm({
       <Stack>
         {isReadOnly || isEdit ? (
           <>
-            <Typography fontWeight='bold'>Minor Release</Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Minor Release
+            </Typography>
             <ReadOnlyAnswer value={formData.isMinorRelease ? 'Yes' : 'No'} />
           </>
         ) : (
@@ -311,7 +352,11 @@ export default function ReleaseForm({
       <Stack>
         <Accordion defaultExpanded sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography fontWeight='bold'>{`Files (${formData.files.length})`}</Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >{`Files (${formData.files.length})`}</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <>
@@ -351,7 +396,12 @@ export default function ReleaseForm({
                     </>
                   )}
                   {formData.files.length > 0 && (
-                    <Stack spacing={1} mt={1}>
+                    <Stack
+                      spacing={1}
+                      sx={{
+                        mt: 1,
+                      }}
+                    >
                       {formData.files.map((file, index) => (
                         <div key={`${file.name}-${file.size}-${index}`}>
                           <MultiFileInputFileDisplay
@@ -392,7 +442,7 @@ export default function ReleaseForm({
           <Accordion defaultExpanded sx={{ p: 0 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
               <Typography
-                fontWeight='bold'
+                sx={{ fontWeight: 'bold' }}
                 component='label'
                 htmlFor='image-input'
               >{`Images (${formData.imageList.length})`}</Typography>

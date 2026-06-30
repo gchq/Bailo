@@ -1,4 +1,5 @@
-import { Add, RestartAlt } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
@@ -48,12 +49,31 @@ const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 const ALL_KINDS = 'All'
 
 export default function Marketplace() {
-  const [filter, setFilter] = useState('')
+  const router = useRouter()
+
+  const {
+    filter: filterFromQuery,
+    peers: peersFromQuery,
+    organisations: organisationsFromQuery,
+    states: statesFromQuery,
+    tags: tagsFromQuery,
+    titleOnly: titleOnlyFromQuery,
+    kinds: kindsFromQuery,
+  } = router.query
+
+  function parseQueryArray(value?: string | string[]): string[] {
+    if (!value) {
+      return []
+    }
+    return Array.isArray(value) ? [...value] : [value]
+  }
+
+  const [filter, setFilter] = useState((filterFromQuery as string) || '')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
-  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
-  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
-  const [selectedStates, setSelectedStates] = useState<string[]>([])
-  const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
+  const [selectedPeers, setSelectedPeers] = useState<string[]>(parseQueryArray(peersFromQuery))
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>(parseQueryArray(organisationsFromQuery))
+  const [selectedStates, setSelectedStates] = useState<string[]>(parseQueryArray(statesFromQuery))
+
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
   const [availableModelKinds, setAvailableModelKinds] = useState<EntryKindKeys[]>([])
@@ -158,19 +178,16 @@ export default function Marketplace() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
-  const theme = useTheme()
-  const router = useRouter()
+  const roleOptions = useMemo(() => {
+    return [
+      ...defaultRoleOptions,
+      ...reviewRoles.map((role) => {
+        return { key: role.shortName, label: `${role.name}` }
+      }),
+    ]
+  }, [reviewRoles])
 
-  const {
-    filter: filterFromQuery,
-    task: taskFromQuery,
-    peers: peersFromQuery,
-    organisations: organisationsFromQuery,
-    states: statesFromQuery,
-    kinds: kindsFromQuery,
-    tags: tagsFromQuery,
-    titleOnly: titleOnlyFromQuery,
-  } = router.query
+  const theme = useTheme()
 
   useEffect(() => {
     if (filterFromQuery) {
@@ -221,14 +238,11 @@ export default function Marketplace() {
         kindsAsArray = [...kindsFromQuery]
       }
       setSelectedKinds(kindsAsArray as EntryKindKeys[])
-    } else {
-      setSelectedKinds(availableModelKinds)
     }
 
     setTitleOnly(titleOnlyFromQuery === 'true')
   }, [
     filterFromQuery,
-    taskFromQuery,
     tagsFromQuery,
     organisationsFromQuery,
     statesFromQuery,
@@ -395,17 +409,6 @@ export default function Marketplace() {
     return errorMessage
   }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
 
-  useEffect(() => {
-    if (reviewRoles) {
-      setRoleOptions([
-        ...defaultRoleOptions,
-        ...reviewRoles.map((role) => {
-          return { key: role.shortName, label: `${role.name}` }
-        }),
-      ])
-    }
-  }, [reviewRoles])
-
   if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
@@ -443,8 +446,8 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-                <Typography component='h2' variant='h5' fontWeight='bold'>
+              <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
+                <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
                   Filters
                 </Typography>
                 <HelpDialog title='Search Information' content={<SearchInfo />} />
@@ -582,7 +585,12 @@ export default function Marketplace() {
                   />
                 </Box>
               </Stack>
-              <Box justifySelf='center' marginTop={1}>
+              <Box
+                sx={{
+                  justifySelf: 'center',
+                  marginTop: 1,
+                }}
+              >
                 <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
                   Reset filters
                 </Button>

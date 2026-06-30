@@ -133,7 +133,11 @@ export default function NewAccessRequest() {
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList
                 />
-                <Stack alignItems='flex-end'>
+                <Stack
+                  sx={{
+                    alignItems: 'flex-end',
+                  }}
+                >
                   <Button
                     sx={{ width: 'fit-content' }}
                     variant='contained'

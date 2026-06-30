@@ -1,5 +1,5 @@
-import { Save } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Save from '@mui/icons-material/Save'
 import {
   Accordion,
   AccordionDetails,

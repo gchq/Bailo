@@ -1,6 +1,6 @@
 import { Container, Divider, List, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ReviewsList from 'src/reviews/ReviewsList'
 import { isReviewKind, ReviewKind, ReviewKindKeys, ReviewListStatusKeys } from 'types/types'
@@ -13,17 +13,9 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
   const router = useRouter()
   const { category } = router.query
 
-  const [selectedCategory, setSelectedCategory] = useState<ReviewKindKeys>(ReviewKind.ACCESS)
-
-  const onSetSelectedCategoryChange = useEffectEvent((category: ReviewKindKeys) => {
-    setSelectedCategory(category)
-  })
-
-  useEffect(() => {
-    if (isReviewKind(category)) {
-      onSetSelectedCategoryChange(category)
-    }
-  }, [category])
+  const [selectedCategory, setSelectedCategory] = useState<ReviewKindKeys>(
+    isReviewKind(category) ? category : ReviewKind.ACCESS,
+  )
 
   const handleListItemClick = (category: ReviewKindKeys) => {
     setSelectedCategory(category)

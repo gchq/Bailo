@@ -1,4 +1,6 @@
-import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
+import CloudQueue from '@mui/icons-material/CloudQueue'
+import CorporateFare from '@mui/icons-material/CorporateFare'
+import LaunchOutlined from '@mui/icons-material/LaunchOutlined'
 import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/entry'
@@ -73,15 +75,15 @@ export default function EntryListRow({
 
   return (
     <Box
-      justifyContent='flex-start'
-      alignItems='center'
+      key={entry.id}
       sx={{
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         px: 3,
         py: 1,
         margin: 'auto',
         ...style,
       }}
-      key={entry.id}
     >
       <Stack spacing={1}>
         <Link
@@ -89,7 +91,14 @@ export default function EntryListRow({
           href={href}
           target={isExternal ? '_blank' : '_self'}
         >
-          <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
+          <Stack
+            spacing={1}
+            direction='row'
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <Typography
               variant='h5'
               component='h2'

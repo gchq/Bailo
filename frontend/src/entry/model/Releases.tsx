@@ -1,10 +1,9 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
 import semver from 'semver'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
@@ -22,7 +21,14 @@ type ReleasesProps = {
 
 export default function Releases({ model, currentUserRoles, readOnly = false }: ReleasesProps) {
   const router = useRouter()
-  const [latestRelease, setLatestRelease] = useState('')
+
+  function getLatestRelease() {
+    if (model && releases.length > 0) {
+      return semver.sort(releases.map((release) => release.semver))[releases.length - 1]
+    } else {
+      return ''
+    }
+  }
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
@@ -32,7 +38,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
       key={data.semver}
       model={model}
       release={data}
-      latestRelease={latestRelease}
+      latestRelease={getLatestRelease()}
       hideReviewBanner={
         !hasRole(
           currentUserRoles,
@@ -41,16 +47,6 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
       }
     />
   ))
-
-  const onLatestReleaseChange = useEffectEvent((release: string) => {
-    setLatestRelease(release)
-  })
-
-  useEffect(() => {
-    if (model && releases.length > 0) {
-      onLatestReleaseChange(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
-    }
-  }, [latestRelease, model, releases])
 
   function handleDraftNewRelease() {
     router.push(`/model/${model.id}/release/new`)
@@ -72,8 +68,16 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         {!readOnly && (
-          <Box display='flex'>
-            <Box ml='auto'>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <Box
+              sx={{
+                ml: 'auto',
+              }}
+            >
               <Restricted action='createRelease' fallback={<Button disabled>Draft new Release</Button>}>
                 <Button
                   variant='outlined'

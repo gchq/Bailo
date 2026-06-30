@@ -84,7 +84,13 @@ export default function ReviewCommentDisplay({
 
   return (
     <>
-      <Stack direction='row' spacing={2} alignItems='flex-start'>
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
         <Box sx={{ pt: 2, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
@@ -94,13 +100,33 @@ export default function ReviewCommentDisplay({
             p: 1,
           }}
         >
-          <Stack direction='row' spacing={1} alignItems='center' sx={{ width: '100%' }} justifyContent='space-between'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
+          >
             <Stack direction='row' spacing={1}>
               <UserDisplay dn={username} />
               <span>{' has left a comment'}</span>
             </Stack>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {formatDateString(response.createdAt)}
+              </Typography>
               <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
                 <MoreHorizIcon />
               </IconButton>

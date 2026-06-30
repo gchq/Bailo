@@ -1,4 +1,5 @@
-import { HourglassEmpty, Refresh } from '@mui/icons-material'
+import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
+import Refresh from '@mui/icons-material/Refresh'
 import { Button, Stack, Typography } from '@mui/material'
 import { postNotifyReviewer } from 'actions/review'
 import { useState } from 'react'
