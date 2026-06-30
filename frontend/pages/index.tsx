@@ -55,11 +55,7 @@ export default function Marketplace() {
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
-  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([
-    EntryKind.MODEL,
-    EntryKind.MIRRORED_MODEL,
-    EntryKind.UNTRUSTED_MODEL,
-  ])
+  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [titleOnly, setTitleOnly] = useState(false)
   const debouncedFilter = useDebounce(filter, 250)
@@ -164,6 +160,17 @@ export default function Marketplace() {
     titleOnly: titleOnlyFromQuery,
   } = router.query
 
+  const availableModelKinds = useMemo((): EntryKindKeys[] => {
+    const kinds: EntryKindKeys[] = [EntryKind.MODEL]
+    if (isMirroredModelEnabled) {
+      kinds.push(EntryKind.MIRRORED_MODEL)
+    }
+    if (isUntrustedModelEnabled) {
+      kinds.push(EntryKind.UNTRUSTED_MODEL)
+    }
+    return kinds
+  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
+
   useEffect(() => {
     if (filterFromQuery) {
       setFilter(filterFromQuery as string)
@@ -213,6 +220,8 @@ export default function Marketplace() {
         kindsAsArray = [...kindsFromQuery]
       }
       setSelectedKinds(kindsAsArray as EntryKindKeys[])
+    } else {
+      setSelectedKinds(availableModelKinds)
     }
 
     setTitleOnly(titleOnlyFromQuery === 'true')
@@ -225,6 +234,7 @@ export default function Marketplace() {
     kindsFromQuery,
     peersFromQuery,
     titleOnlyFromQuery,
+    availableModelKinds,
   ])
 
   const updateQueryParams = useCallback(
@@ -271,17 +281,6 @@ export default function Marketplace() {
     return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
   }, [uiConfig])
 
-  const availableModelKinds = useMemo((): EntryKindKeys[] => {
-    const kinds: EntryKindKeys[] = [EntryKind.MODEL]
-    if (isMirroredModelEnabled) {
-      kinds.push(EntryKind.MIRRORED_MODEL)
-    }
-    if (isUntrustedModelEnabled) {
-      kinds.push(EntryKind.UNTRUSTED_MODEL)
-    }
-    return kinds
-  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
-
   const modelKindOptions = useMemo((): string[] => {
     if (availableModelKinds.length <= 1) {
       return availableModelKinds.map(toTitleCase)
@@ -325,17 +324,15 @@ export default function Marketplace() {
     (kinds: string[]) => {
       const wasAllSelected = selectedKinds.length === availableModelKinds.length
       const isAllNowSelected = kinds.includes(ALL_KINDS)
-
-      if (isAllNowSelected && !wasAllSelected) {
-        setSelectedKinds(availableModelKinds)
-        updateQueryParams('kinds', availableModelKinds)
-      } else if (!isAllNowSelected && wasAllSelected) {
-        setSelectedKinds([])
-        updateQueryParams('kinds', [])
-      } else {
-        const filteredKinds = kinds.filter((kind) => kind !== ALL_KINDS).map(toKebabCase) as EntryKindKeys[]
-        setSelectedKinds(filteredKinds)
-        updateQueryParams('kinds', filteredKinds)
+      if (kinds.length >= 1) {
+        if (isAllNowSelected && !wasAllSelected) {
+          setSelectedKinds(availableModelKinds)
+          updateQueryParams('kinds', availableModelKinds)
+        } else {
+          const filteredKinds = kinds.filter((kind) => kind !== ALL_KINDS).map(toKebabCase) as EntryKindKeys[]
+          setSelectedKinds(filteredKinds)
+          updateQueryParams('kinds', filteredKinds)
+        }
       }
     },
     [updateQueryParams, selectedKinds, availableModelKinds],
