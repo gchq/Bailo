@@ -1,4 +1,4 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
@@ -15,9 +15,22 @@ export default function SchemaMigrationList() {
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
   const SchemaMigrationList = memoize(({ data }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
-      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} justifyContent='space-between'>
+      <Stack
+        direction={{ sm: 'column', md: 'row' }}
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+        }}
+      >
         <Link href={`/schemas/migrations/${data.id}`} noLinkStyle aria-label={`go to the ${data.name} migration plan`}>
-          <Typography fontWeight='bold' color='primary' variant='h6' component='h2'>
+          <Typography
+            color='primary'
+            variant='h6'
+            component='h2'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {`${data.name}`}
             <em style={{ color: theme.palette.secondary.main }}>{` ${data.draft ? '(draft)' : ''}`}</em>
           </Typography>
@@ -26,8 +39,18 @@ export default function SchemaMigrationList() {
           Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data.createdAt)}</span>
         </Typography>
       </Stack>
-      <Stack direction='row' alignItems='center'>
-        <Typography fontWeight='bold' color='primary'>
+      <Stack
+        direction='row'
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          color='primary'
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           {data.id}
         </Typography>
         <CopyToClipboardButton

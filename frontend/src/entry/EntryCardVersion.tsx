@@ -1,7 +1,7 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { Button, Container, Paper } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useState } from 'react'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import { EntryCardInterface, EntryKindKeys, EntryKindLabel, SchemaInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
@@ -14,26 +14,15 @@ type EntryCardVersionProps = {
 }
 
 export default function EntryCardVersion({ entryCard, schema, entryId, entryKind }: EntryCardVersionProps) {
+  const metadata = entryCard.metadata
+  const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
+
+  for (const step of steps) {
+    step.steps = steps
+  }
+
   const router = useRouter()
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-
-  const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
-    setSplitSchema(newSplitSchema)
-  })
-
-  useEffect(() => {
-    if (!entryCard || !schema) {
-      return
-    }
-    const metadata = entryCard.metadata
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
-
-    for (const step of steps) {
-      step.steps = steps
-    }
-
-    onSplitSchemaChange({ reference: schema.id, steps })
-  }, [schema, entryCard])
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: schema.id, steps })
 
   return (
     <Container>

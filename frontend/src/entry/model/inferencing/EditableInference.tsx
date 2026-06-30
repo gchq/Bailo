@@ -96,7 +96,13 @@ export default function EditableInference({ inference }: EditableInferenceProps)
       <EditableFormHeading
         heading={
           <Stack>
-            <Typography fontWeight='bold'>Deployed Image </Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Deployed Image{' '}
+            </Typography>
             <Typography>{`${model.name} - ${inference.image}:${inference.tag}`}</Typography>
           </Stack>
         }

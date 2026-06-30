@@ -1,4 +1,8 @@
-import { BlockOutlined, Done, Error as ErrorIcon, HourglassTop, Warning } from '@mui/icons-material'
+import BlockOutlined from '@mui/icons-material/BlockOutlined'
+import Done from '@mui/icons-material/Done'
+import ErrorIcon from '@mui/icons-material/Error'
+import HourglassTop from '@mui/icons-material/HourglassTop'
+import Warning from '@mui/icons-material/Warning'
 import { Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
 import { ReactElement } from 'react'
 import { ArtefactScanState, ClamAVSummary, ModelScanSummary, ScanResultInterface } from 'types/types'
@@ -112,7 +116,7 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
 
   return (
     <Stack spacing={2}>
-      <Stack spacing={1} direction='row' alignItems='center'>
+      <Stack spacing={1} direction='row' sx={{ alignItems: 'center' }}>
         {renderHeader()}
       </Stack>
       {scannerVersion && (

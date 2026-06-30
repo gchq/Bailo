@@ -1,4 +1,4 @@
-import { Done } from '@mui/icons-material'
+import Done from '@mui/icons-material/Done'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
 import { useGetUiConfig } from 'actions/uiConfig'

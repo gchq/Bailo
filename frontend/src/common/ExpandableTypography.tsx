@@ -11,7 +11,7 @@ export default function ExpandableTypography({ children: text, maxLength = 100, 
 
   if (text.length > maxLength) {
     return (
-      <Stack sx={{ mb: 1 }} direction={expanded ? 'column' : 'row'} alignItems='center' spacing={1}>
+      <Stack sx={{ mb: 1, alignItems: 'center' }} direction={expanded ? 'column' : 'row'} spacing={1}>
         <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength).trimEnd()}...`}</Typography>
         <Button size='small' onClick={() => setExpanded(!expanded)}>
           {expanded ? 'Show less' : 'Show more'}

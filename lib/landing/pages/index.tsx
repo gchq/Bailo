@@ -38,11 +38,11 @@ export default function Home() {
             textAlign: 'center',
             pt: 2,
             minHeight: '100vh',
+            alignItems: 'center',
           }}
-          alignItems='center'
           spacing={1}
         >
-          <Stack justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 2 }}>
+          <Stack spacing={1} sx={{ mb: 2, alignItems: 'center', justifyContent: 'center' }}>
             <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={250} height={350} />
             <Typography variant='h5' sx={{ color: 'white' }}>
               Making it easy to compliantly manage the machine learning lifecycle
@@ -50,10 +50,8 @@ export default function Home() {
           </Stack>
           <Stack
             direction={{ xs: 'column', md: 'row' }}
-            justifyContent='center'
-            alignItems='center'
             spacing={2}
-            sx={{ p: 4, maxWidth: '100%' }}
+            sx={{ p: 4, maxWidth: '100%', justifyContent: 'center', alignItems: 'center' }}
           >
             <Button
               onClick={scrollToContent}
@@ -87,13 +85,15 @@ export default function Home() {
         }}
       />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
-        <Grid container alignItems='center' spacing={4}>
+        <Grid container sx={{ alignItems: 'center' }} spacing={4}>
           <Grid size={{ lg: 6 }}>
             <Box sx={{ px: 10, py: 4, textAlign: 'center', height: '100%' }}>
               <Stack
                 spacing={4}
-                justifyContent='center'
-                alignItems='center'
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
                 divider={
                   <Divider flexItem>
                     <StarPurple500Icon color='secondary' />

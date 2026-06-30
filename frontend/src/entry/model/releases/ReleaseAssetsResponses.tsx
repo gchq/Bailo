@@ -3,11 +3,10 @@ import ListAltIcon from '@mui/icons-material/ListAlt'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import { EntryInterface, ReleaseInterface, ResponseInterface } from 'types/types'
+import { EntryInterface, ReleaseInterface } from 'types/types'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 export interface ReleaseAssetsResponsesProps {
@@ -37,15 +36,6 @@ export default function ReleaseAssetsResponses({
     isResponsesError: isReviewResponsesError,
   } = useGetResponses([...reviews.map((review) => review._id)])
 
-  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
-
-  useEffect(() => {
-    if (!isReviewsLoading && reviews) {
-      const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
-      setReviewsWithLatestResponses(latestReviews)
-    }
-  }, [reviews, isReviewsLoading, reviewResponses])
-
   const error = MultipleErrorWrapper('Unable to load release', {
     isReviewResponsesError,
     isReviewsError,
@@ -61,8 +51,17 @@ export default function ReleaseAssetsResponses({
 
   return (
     <>
-      <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
-        {!release.minor && <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />}
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {!release.minor && (
+          <ReviewDisplay modelId={model.id} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
+        )}
         {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
           <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
             <Stack direction='row' spacing={2}>
