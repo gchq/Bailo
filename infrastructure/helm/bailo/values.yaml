@@ -348,9 +348,6 @@ modelMirror:
         accessKey: ''
         secretKey: ''
 
-untrustedModels:
-  defaultState: 'Production'
-
 # Inferencing cluster reference
 inference:
   enabled: false
