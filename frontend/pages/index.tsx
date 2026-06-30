@@ -76,7 +76,6 @@ export default function Marketplace() {
     if (isUntrustedModelEnabled) {
       kinds.push(EntryKind.UNTRUSTED_MODEL)
     }
-    setSelectedKinds(kinds)
     setAvailableModelKinds(kinds)
   }, [isMirroredModelEnabled, isUntrustedModelEnabled])
 
@@ -222,6 +221,8 @@ export default function Marketplace() {
         kindsAsArray = [...kindsFromQuery]
       }
       setSelectedKinds(kindsAsArray as EntryKindKeys[])
+    } else {
+      setSelectedKinds(availableModelKinds)
     }
 
     setTitleOnly(titleOnlyFromQuery === 'true')
@@ -234,6 +235,7 @@ export default function Marketplace() {
     kindsFromQuery,
     peersFromQuery,
     titleOnlyFromQuery,
+    availableModelKinds,
   ])
 
   const updateQueryParams = useCallback(
