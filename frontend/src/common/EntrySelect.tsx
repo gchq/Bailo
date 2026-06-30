@@ -48,6 +48,7 @@ export default function EntrySelect({
         })
       }
       setErrorMessage(await getErrorMessage(response))
+      setIsEdit(true)
     } else {
       if (field === 'state') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -57,8 +58,8 @@ export default function EntrySelect({
         })
       }
       mutate()
+      setIsEdit(false)
     }
-    setIsEdit(false)
   }
 
   return (
@@ -76,7 +77,7 @@ export default function EntrySelect({
               value={value ?? ''}
               onChange={handleSelectOption}
               displayEmpty
-              renderValue={(value: any) => (value ? value : <em>Unset</em>)}
+              renderValue={(value: string) => (value ? value : <em>Unset</em>)}
             >
               {options.map((option: string) => (
                 <MenuItem key={option} value={option}>

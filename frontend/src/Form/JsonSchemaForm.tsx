@@ -1,20 +1,38 @@
-import { Box, Grid, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { ErrorOutline } from '@mui/icons-material'
+import {
+  Box,
+  Chip,
+  Grid,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Stepper,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
+import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
   DescriptionFieldTemplate,
+  ErrorListTemplate,
+  FieldTemplate,
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
@@ -24,6 +42,12 @@ import {
   setStepState,
   widgets,
 } from 'utils/formUtils'
+import { toSentenceCase } from 'utils/stringUtils'
+
+type RouterQueryParams = {
+  page?: number
+  requiredByModelState?: string
+}
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -34,6 +58,7 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
+  stateList,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -43,11 +68,53 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
+  stateList?: string[]
 }) {
-  const [activeStep, setActiveStep] = useState(0)
-  const [sharedSection, setSharedSection] = useState('')
   const theme = useTheme()
   const router = useRouter()
+  const [activeStep, setActiveStep] = useState(0)
+  const [sharedSection, setSharedSection] = useState('')
+  const requiredByModelState = useSearchParams().get('requiredByModelState')
+  const [sectionCompletion, setSectionCompletion] = useState<Record<string, number>>(() =>
+    splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+      acc[step.schema.title] = 0
+      return acc
+    }, {}),
+  )
+
+  useEffect(() => {
+    if (!canEdit) {
+      return
+    }
+    if (!requiredByModelState) {
+      setSectionCompletion((prev) => {
+        const resetCompletion = splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+          acc[step.schema.title] = 0
+          return acc
+        }, {})
+        const prevKeys = Object.keys(prev)
+        const nextKeys = Object.keys(resetCompletion)
+        const unchanged =
+          prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key] === resetCompletion[key])
+        return unchanged ? prev : resetCompletion
+      })
+      return
+    }
+    const nextCompletion = splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+      const { totalQuestions, totalAnswers } = getFormStats(step, mirroredModel, requiredByModelState)
+      acc[step.schema.title] = Math.max(0, totalQuestions - totalAnswers)
+      return acc
+    }, {})
+
+    setSectionCompletion((prev) => {
+      const prevKeys = Object.keys(prev)
+      const nextKeys = Object.keys(nextCompletion)
+      const unchanged =
+        prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key] === nextCompletion[key])
+      return unchanged ? prev : nextCompletion
+    })
+  }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
+
   const ref = useRef<HTMLDivElement | null>(null)
 
   const copyToClipboard = useCopyToClipboard()
@@ -61,16 +128,17 @@ export default function JsonSchemaForm({
 
   const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
-
-  const collatedStats = useMemo(
-    () => getOverallCompletionStats(splitSchema.steps, mirroredModel),
+  const formStats = useMemo(
+    () => getFormStats(currentStep, mirroredModel, requiredByModelState || undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [splitSchema, calculateStats, mirroredModel],
+    [currentStep, currentStep?.state, mirroredModel, requiredByModelState],
   )
 
-  // const requiredStatesUsed = useMemo(() => {}, [])
+  const collatedStats = useMemo(
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, requiredByModelState || undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [splitSchema, calculateStats, mirroredModel, requiredByModelState],
+  )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
@@ -112,16 +180,8 @@ export default function JsonSchemaForm({
   function handleListItemClick(index: number) {
     setActiveStep(index)
     router.replace({
-      query: { ...router.query, page: index },
+      query: { ...router.query, page: index } as RouterQueryParams,
     })
-  }
-
-  function ErrorListTemplate() {
-    return (
-      <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
-        Please make sure that all errors listed below have been resolved.
-      </Typography>
-    )
   }
 
   function onShareSectionOnClick(sectionId: string) {
@@ -131,6 +191,29 @@ export default function JsonSchemaForm({
       horizontal: 'center',
       vertical: 'bottom',
     })
+  }
+
+  const handleHighlightStateClick = (state: string) => {
+    if (state === requiredByModelState) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { requiredByModelState, ...queryWithoutHighlighted } = router.query
+      router.replace({
+        query: queryWithoutHighlighted,
+      }) as RouterQueryParams
+    } else {
+      router.replace({
+        query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
+      })
+    }
+  }
+
+  if (requiredByModelState && !stateList?.includes(requiredByModelState)) {
+    return (
+      <MessageAlert
+        message={`Invalid query parameter requiredByModelState ("${requiredByModelState}")`}
+        severity='error'
+      />
+    )
   }
 
   return (
@@ -158,21 +241,33 @@ export default function JsonSchemaForm({
                 <ListItem
                   key={step.schema.title}
                   disablePadding
-                  sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
+                  sx={{
+                    backgroundColor:
+                      canEdit && sectionCompletion[step.schema.title]
+                        ? alpha(theme.palette.error.main, 0.1)
+                        : undefined,
+                  }}
                 >
                   <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                    <Typography
-                      sx={{
-                        wordBreak: 'break-word',
-                        color:
-                          !step.isComplete(step) && displayLabelValidation
-                            ? theme.palette.error.main
-                            : theme.palette.common.black,
-                      }}
-                      width='100%'
-                    >
-                      {step.schema.title}
-                    </Typography>
+                    <ListItemText sx={{ pr: 1 }}>
+                      <Typography
+                        sx={{
+                          wordBreak: 'break-word',
+                          color:
+                            !step.isComplete(step) && displayLabelValidation
+                              ? theme.palette.error.main
+                              : theme.palette.common.black,
+                        }}
+                        width='100%'
+                      >
+                        {step.schema.title}
+                      </Typography>
+                    </ListItemText>
+                    {canEdit && sectionCompletion[step.schema.title] ? (
+                      <ListItemIcon sx={{ minWidth: 'auto', flexShrink: 0, ml: 'auto' }}>
+                        <ErrorOutline color='error' />
+                      </ListItemIcon>
+                    ) : null}
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
                   </ListItemButton>
                 </ListItem>
@@ -184,16 +279,35 @@ export default function JsonSchemaForm({
           {displayStats && (
             <Box>
               <Box>
-                Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
+                {toSentenceCase(
+                  `${requiredByModelState ? `${requiredByModelState} ` : ''}fields completed: ${formStats.totalAnswers}/${formStats.totalQuestions}`,
+                )}
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
           )}
           {canEdit && (
-            <Typography sx={{ pt: 1 }}>
-              Required fields for this state are marked with an asterisk
-              <span style={{ color: theme.palette.error.main }}>*</span>
-            </Typography>
+            <Stack direction={'column'} spacing={1}>
+              {stateList && stateList.length > 0 && (
+                <Stack spacing={2} direction={'row'} alignItems={'center'}>
+                  <Typography>Highlight fields by: </Typography>
+                  {stateList.map((state) => (
+                    <Tooltip key={state} title={`Highlight questions required for ${state}`}>
+                      <Chip
+                        key={state}
+                        label={state}
+                        onClick={() => handleHighlightStateClick(state)}
+                        color={requiredByModelState === state ? 'primary' : 'default'}
+                      />
+                    </Tooltip>
+                  ))}
+                </Stack>
+              )}
+              <Typography sx={{ pt: 1 }}>
+                Required fields for this state are marked with an asterisk
+                <span style={{ color: theme.palette.error.main }}> *</span>
+              </Typography>
+            </Stack>
           )}
           <Form
             schema={currentStep.schema}
@@ -214,6 +328,7 @@ export default function JsonSchemaForm({
               state: currentStep.state,
               mirroredModel,
               onShare: onShareSectionOnClick,
+              requiredByModelState: requiredByModelState,
             }}
             templates={
               !canEdit
@@ -229,6 +344,7 @@ export default function JsonSchemaForm({
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,
                     ErrorListTemplate,
+                    FieldTemplate,
                   }
             }
           >
