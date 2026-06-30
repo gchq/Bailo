@@ -10,6 +10,7 @@ export default defineConfig({
       './test/testUtils/setupTestConfig.ts',
       './test/testUtils/clearMocks.ts',
       './test/testUtils/setupMongooseModelMocks.ts',
+      './test/testUtils/setupAgendaMocks.ts',
     ],
     include: ['test/**/*.spec.ts'],
     coverage: {
