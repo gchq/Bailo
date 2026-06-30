@@ -232,24 +232,6 @@ function isAnswered(value: any): boolean {
   return true
 }
 
-/**
- * Checks whether a single field/question in the form has been filled out.
- *
- * Uses the field's `id` (e.g. `root_someProperty_subProperty`) to walk the
- * current form state held on the `formContext`, then evaluates whether the
- * resolved value satisfies the given schema.
- *
- * - For primitive schemas (string/number/boolean/$ref) the value just needs
- *   to be non-empty.
- * - For array schemas the array needs to contain at least one entry and, if
- *   the array items are themselves an object schema, the first entry needs
- *   to have all of its non-metrics primitive children answered.
- *
- * @param id           The RJSF field id (from `FieldTemplateProps`).
- * @param schema       The schema fragment associated with the field.
- * @param formContext  The RJSF form context (must contain `state`).
- * @returns true when the question is considered filled out, false otherwise.
- */
 export function isQuestionAnswered(id: string, schema: any, formContext: Registry['formContext']): boolean {
   if (!schema || typeof schema !== 'object') {
     return false
