@@ -32,7 +32,7 @@ export default function ConfirmationDialogue({
   confirmLoading,
 }: ConfirmationDialogProps) {
   return (
-    <Dialog fullWidth open={open} onClose={onCancel} TransitionComponent={Transition}>
+    <Dialog fullWidth open={open} onClose={onCancel} slots={{ transition: Transition }}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>{dialogMessage}</Typography>

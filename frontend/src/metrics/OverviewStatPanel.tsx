@@ -22,7 +22,7 @@ export default function OverviewStatPanel({ label, value, minWidth }: OverviewSt
       }}
     >
       <Stack spacing={2}>
-        <Typography variant='h5' fontWeight='bold' color='primary'>
+        <Typography variant='h5' sx={{ fontWeight: 'bold' }} color='primary'>
           {value}
         </Typography>
         <Typography variant='h6'>{label}</Typography>

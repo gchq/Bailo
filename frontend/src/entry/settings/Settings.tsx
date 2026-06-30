@@ -1,8 +1,13 @@
-import { Delete, Edit, FileCopy, ImportExport, Key, ManageAccounts } from '@mui/icons-material'
+import Delete from '@mui/icons-material/Delete'
+import Edit from '@mui/icons-material/Edit'
+import FileCopy from '@mui/icons-material/FileCopy'
+import ImportExport from '@mui/icons-material/ImportExport'
+import Key from '@mui/icons-material/Key'
+import ManageAccounts from '@mui/icons-material/ManageAccounts'
 import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
@@ -73,17 +78,12 @@ export default function Settings({ entry }: SettingsProps) {
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
-
-  const onSelectedCategoryChange = useEffectEvent((category: SettingsCategoryKeys) => {
-    setSelectedCategory(category)
-  })
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(
+    isSettingsCategory(category, entry) ? category : SettingsCategory.DETAILS,
+  )
 
   useEffect(() => {
-    if (isSettingsCategory(category, entry)) {
-      onSelectedCategoryChange(category)
-    } else if (category) {
-      onSelectedCategoryChange(SettingsCategory.DETAILS)
+    if (!isSettingsCategory(category, entry)) {
       router.replace({
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })

@@ -1,4 +1,4 @@
-import { FileUpload } from '@mui/icons-material'
+import FileUpload from '@mui/icons-material/FileUpload'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'

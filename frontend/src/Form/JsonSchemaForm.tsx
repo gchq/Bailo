@@ -5,7 +5,7 @@ import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -44,10 +44,16 @@ export default function JsonSchemaForm({
   mirroredModel?: boolean
   displayStats?: boolean
 }) {
-  const [activeStep, setActiveStep] = useState(0)
-  const [sharedSection, setSharedSection] = useState('')
-  const theme = useTheme()
   const router = useRouter()
+  const [activeStep, setActiveStep] = useState<number>(
+    router.query && router.query.page !== undefined && typeof router.query.page === 'string'
+      ? Number(router.query.page)
+      : 0,
+  )
+  const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
+
+  const theme = useTheme()
+
   const ref = useRef<HTMLDivElement | null>(null)
 
   const copyToClipboard = useCopyToClipboard()
@@ -69,25 +75,6 @@ export default function JsonSchemaForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [splitSchema, calculateStats, mirroredModel],
   )
-
-  // const requiredStatesUsed = useMemo(() => {}, [])
-
-  const updatePageByRouterQuery = useEffectEvent((page: string) => {
-    setActiveStep(Number(page) || 0)
-  })
-
-  const updatedSharedStateEvent = useEffectEvent((id: string) => {
-    setSharedSection(id)
-  })
-
-  useEffect(() => {
-    if (router.query.page !== undefined && typeof router.query.page === 'string') {
-      updatePageByRouterQuery(router.query.page)
-    }
-    if (router.asPath.split('#')[1]) {
-      updatedSharedStateEvent(router.asPath.split('#')[1] as string)
-    }
-  }, [router])
 
   useEffect(() => {
     if (ref && sharedSection) {
@@ -163,13 +150,14 @@ export default function JsonSchemaForm({
                   <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                     <Typography
                       sx={{
+                        width: '100%',
                         wordBreak: 'break-word',
+
                         color:
                           !step.isComplete(step) && displayLabelValidation
                             ? theme.palette.error.main
                             : theme.palette.common.black,
                       }}
-                      width='100%'
                     >
                       {step.schema.title}
                     </Typography>

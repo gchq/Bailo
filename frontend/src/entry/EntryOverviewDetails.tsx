@@ -1,4 +1,4 @@
-import { LocalOffer } from '@mui/icons-material'
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -59,9 +59,15 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const collaboratorList = useMemo(() => {
     return (
-      <Stack direction='row' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         {entry.collaborators.slice(0, 5).map((collaborator) => {
-          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar smallAvatars />
+          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar />
         })}
         {entry.collaborators.length > 5 && <Typography>...and {entry.collaborators.length - 5} more</Typography>}
       </Stack>
@@ -143,7 +149,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Stack>
         {entry.card && (
           <Stack spacing={1}>
-            <Typography fontWeight='bold' color='primary'>
+            <Typography sx={{ fontWeight: 'bold' }} color='primary'>
               Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (
