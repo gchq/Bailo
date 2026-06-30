@@ -1,11 +1,12 @@
-import { ArrowBack, DesignServices } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import DesignServices from '@mui/icons-material/DesignServices'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntry } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -44,13 +45,28 @@ export default function NewRelease() {
   const { modelId }: { modelId?: string } = router.query
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
 
+  const updateModelCardVersionEffectEvent = useEffectEvent((cardVersion: number) => {
+    setModelCardVersion(cardVersion)
+  })
+
+  useEffect(() => {
+    if (model && !modelCardVersion) {
+      updateModelCardVersionEffectEvent(model.card.version)
+    }
+  }, [model, setModelCardVersion, modelCardVersion])
+
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   const failedFileList = useMemo(
     () =>
       failedFileUploads.map((file) => (
         <div key={file.fileName}>
-          <Box component='span' fontWeight='bold'>
+          <Box
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {file.fileName}
           </Box>
           {` - ${file.error}`}
@@ -194,7 +210,13 @@ export default function NewRelease() {
                     Back to model
                   </Button>
                 </Link>
-                <Stack spacing={2} alignItems='center' justifyContent='center'>
+                <Stack
+                  spacing={2}
+                  sx={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   <Typography variant='h6' component='h1' color='primary'>
                     Draft New Release
                   </Typography>
@@ -227,7 +249,11 @@ export default function NewRelease() {
                   uploadedFiles={uploadedFiles}
                   filesToUploadCount={files.length}
                 />
-                <Stack alignItems='flex-end'>
+                <Stack
+                  sx={{
+                    alignItems: 'flex-end',
+                  }}
+                >
                   <Button
                     variant='contained'
                     loading={loading}

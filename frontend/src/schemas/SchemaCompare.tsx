@@ -1,4 +1,4 @@
-import { Forward } from '@mui/icons-material'
+import Forward from '@mui/icons-material/Forward'
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
@@ -54,7 +54,14 @@ export default function SchemaCompare() {
   return (
     <Box sx={{ p: 4 }}>
       <Stack spacing={4}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='center' alignItems='center'>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 2, sm: 6 }}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Autocomplete
             disablePortal
             options={schemas}

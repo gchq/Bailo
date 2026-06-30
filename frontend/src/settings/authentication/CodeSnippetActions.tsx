@@ -1,4 +1,6 @@
-import { Close, Visibility, VisibilityOff } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { IconButton, Stack, Tooltip } from '@mui/material'
 
 type CodeSnippetActionsProps = {

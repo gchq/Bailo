@@ -34,16 +34,32 @@ export default function ReleaseAssetsMainText({
 
   return (
     <>
-      <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' alignItems='center' spacing={2}>
+      <Stack
+        direction={{ sm: 'row', xs: 'column' }}
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Stack
           direction={{ sm: 'row', xs: 'column' }}
-          justifyContent='space-between'
-          alignItems='center'
           spacing={1}
-          sx={{ minWidth: 0 }}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            minWidth: 0,
+          }}
         >
           <Link inert={!includeLinks} noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
-            <Stack direction='row' alignItems='center' spacing={1} width='100%'>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
               <Typography component='h2' variant='h6' color='primary' noWrap>
                 {release.semver}
               </Typography>
@@ -70,7 +86,13 @@ export default function ReleaseAssetsMainText({
           </Button>
         )}
       </Stack>
-      <Stack direction='row' alignItems='center' spacing={0.5}>
+      <Stack
+        direction='row'
+        spacing={0.5}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Typography variant='caption' sx={{ mb: 2 }}>
           Created by
         </Typography>
@@ -78,7 +100,12 @@ export default function ReleaseAssetsMainText({
         <Typography variant='caption' sx={{ mb: 2 }}>
           on
         </Typography>
-        <Typography variant='caption' fontWeight='bold'>
+        <Typography
+          variant='caption'
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           {` ${formatDateString(release.createdAt)}`}
         </Typography>
       </Stack>

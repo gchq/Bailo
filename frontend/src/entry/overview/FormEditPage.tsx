@@ -1,6 +1,9 @@
-import { ExpandLess, ExpandMore, Info, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import HistoryIcon from '@mui/icons-material/History'
+import Info from '@mui/icons-material/Info'
+import MenuIcon from '@mui/icons-material/Menu'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import {
   Box,
@@ -50,7 +53,6 @@ type FormEditPageProps = {
 export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const [migrationErrorMessage, setMigrationErrorMessage] = useState('')
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
@@ -75,6 +77,28 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const { uiConfig } = useGetUiConfig()
   const sendNotification = useNotification()
   const { mutateEntryCardRevisions } = useGetEntryCardRevisions(entry.id)
+
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: schema ? schema.id : '', steps: [] })
+
+  const updateSplitSchema = useEffectEvent((newValue: SplitSchemaNoRender) => {
+    setSplitSchema(newValue)
+  })
+
+  useEffect(() => {
+    if (schema) {
+      const steps = getStepsFromSchema(
+        schema,
+        {},
+        ['properties.contacts'],
+        entry.card.metadata,
+        entry.mirroredCard?.metadata || {},
+      )
+      for (const step of steps) {
+        step.steps = steps
+      }
+      updateSplitSchema({ reference: schema ? schema.id : '', steps })
+    }
+  }, [entry.card.metadata, entry.mirroredCard?.metadata, schema])
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -125,27 +149,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       setIsEdit(false)
     }
   }
-
-  const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
-    setSplitSchema(newSplitSchema)
-  })
-
-  useEffect(() => {
-    if (!entry || !schema) {
-      return
-    }
-    const steps = getStepsFromSchema(
-      schema,
-      {},
-      ['properties.contacts'],
-      entry.card.metadata,
-      entry.mirroredCard?.metadata || {},
-    )
-    for (const step of steps) {
-      step.steps = steps
-    }
-    onSplitSchemaChange({ reference: schema.id, steps })
-  }, [schema, entry])
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -265,19 +268,19 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' spacing={1}>
+            <Stack direction={{ sm: 'row', xs: 'column' }} sx={{ justifyContent: 'space-between' }} spacing={1}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
-                alignItems='center'
+                sx={{ alignItems: 'center' }}
                 spacing={2}
                 divider={<Divider flexItem orientation='vertical' />}
               >
                 {schema && (
                   <Stack>
-                    <Typography variant='caption' fontWeight='bold' color='primary'>
+                    <Typography variant='caption' sx={{ fontWeight: 'bold' }} color='primary'>
                       Schema:
                     </Typography>
-                    <Stack direction='row' alignItems='center'>
+                    <Stack direction='row' sx={{ alignItems: 'center' }}>
                       <Typography variant='caption'>{schema.name}</Typography>
                       <IconButton onClick={() => setSchemaInformationOpen(true)}>
                         <Info color='primary' fontSize='small' />
@@ -369,7 +372,13 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             </Stack>
           )}
           {isEdit && (
-            <Stack direction='row' spacing={1} justifyContent='space-between'>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                justifyContent: 'space-between',
+              }}
+            >
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}

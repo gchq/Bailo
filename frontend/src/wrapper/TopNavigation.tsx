@@ -1,7 +1,12 @@
 import '@fontsource/pacifico'
 
-import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import LogoutIcon from '@mui/icons-material/Logout'
+import MenuIcon from '@mui/icons-material/Menu'
+import Person from '@mui/icons-material/Person'
+import Settings from '@mui/icons-material/Settings'
 import {
   Box,
   Button,
@@ -107,7 +112,15 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           pr: '24px', // keep right padding when drawer closed
         }}
       >
-        <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' sx={{ width: '100%' }}>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
           {!isSmOrLarger && (
             <Box>
               <IconButton onClick={handleNavMenuClicked}>
@@ -151,13 +164,25 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             underline='none'
             style={{ color: 'inherit', textDecoration: 'inherit', cursor: 'pointer' }}
           >
-            <Stack justifyContent='center' alignItems='left'>
+            <Stack
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'left',
+              }}
+            >
               <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
           {isSmOrLarger && (
             <Box>
-              <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
+              <Stack
+                direction='row'
+                spacing={1}
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <ExpandableButton
                   label='Create'
                   icon={<Add />}

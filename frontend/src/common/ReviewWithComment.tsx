@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useEffectEvent, useState } from 'react'
+import { SyntheticEvent, useEffect, useState } from 'react'
 import { increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -37,7 +37,20 @@ export default function ReviewWithComment({
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
-  const [showUndoButton, setShowUndoButton] = useState(false)
+
+  function showUndoButton() {
+    if (reviewRequest) {
+      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
+        (latestReview) => latestReview.role === reviewRequest.role,
+      )
+      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
+        return true
+      } else {
+        return false
+      }
+    }
+    return false
+  }
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
@@ -49,23 +62,6 @@ export default function ReviewWithComment({
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
   }
-
-  const updateUndoButton = useEffectEvent((show: boolean) => {
-    setShowUndoButton(show)
-  })
-
-  useEffect(() => {
-    if (reviewRequest) {
-      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
-        (latestReview) => latestReview.role === reviewRequest.role,
-      )
-      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
-        updateUndoButton(true)
-      } else {
-        updateUndoButton(false)
-      }
-    }
-  }, [responses, reviewRequest])
 
   useEffect(() => {
     if (reviewRequest && !router.query.role) {
@@ -143,7 +139,7 @@ export default function ReviewWithComment({
             />
             {includeDueDate && (
               <Stack spacing={0.5}>
-                <Typography fontWeight='bold'>Next review date</Typography>
+                <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
                 <DatePicker
                   value={dueDate}
                   onChange={(newValue) => {
@@ -156,11 +152,13 @@ export default function ReviewWithComment({
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
               <Stack spacing={1} direction={{ sm: 'row', xs: 'column' }}>
-                {showUndoButton && (
+                {showUndoButton() && (
                   <>
                     <Button
                       onClick={() => submitForm(Decision.Undo)}

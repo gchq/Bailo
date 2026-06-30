@@ -15,7 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { patchSchema } from 'actions/schema'
-import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -42,16 +42,6 @@ export default function UpdateReviewRolesForSchemaDialog({
   const [warningDialogMessage, setWarningDialogMessage] = useState('')
 
   const theme = useTheme()
-
-  const onSetCheckedEvent = useEffectEvent((newReviewRoles: string[]) => {
-    setChecked(newReviewRoles)
-  })
-
-  useEffect(() => {
-    if (schema) {
-      onSetCheckedEvent(schema.reviewRoles)
-    }
-  }, [schema])
 
   const handleToggle = useCallback(
     (value: string) => () => {

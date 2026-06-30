@@ -1,4 +1,5 @@
-import { Add, RestartAlt } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
@@ -25,7 +26,7 @@ import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -48,20 +49,39 @@ const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 const ALL_KINDS = 'All'
 
 export default function Marketplace() {
-  const [filter, setFilter] = useState('')
+  const router = useRouter()
+
+  const {
+    filter: filterFromQuery,
+    peers: peersFromQuery,
+    organisations: organisationsFromQuery,
+    states: statesFromQuery,
+    tags: tagsFromQuery,
+    titleOnly: titleOnlyFromQuery,
+    kinds: kindsFromQuery,
+  } = router.query
+
+  function parseQueryArray(value?: string | string[]): string[] {
+    if (!value) {
+      return []
+    }
+    return Array.isArray(value) ? [...value] : [value]
+  }
+
+  const [filter, setFilter] = useState((filterFromQuery as string) || '')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
-  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
-  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
-  const [selectedStates, setSelectedStates] = useState<string[]>([])
-  const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
+  const [selectedPeers, setSelectedPeers] = useState<string[]>(parseQueryArray(peersFromQuery))
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>(parseQueryArray(organisationsFromQuery))
+  const [selectedStates, setSelectedStates] = useState<string[]>(parseQueryArray(statesFromQuery))
+
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
-  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([
-    EntryKind.MODEL,
-    EntryKind.MIRRORED_MODEL,
-    EntryKind.UNTRUSTED_MODEL,
-  ])
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [titleOnly, setTitleOnly] = useState(false)
+  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>(
+    kindsFromQuery
+      ? (parseQueryArray(kindsFromQuery) as EntryKindKeys[])
+      : [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.MIRRORED_MODEL],
+  )
+  const [selectedTags, setSelectedTags] = useState<string[]>(parseQueryArray(tagsFromQuery))
+  const [titleOnly, setTitleOnly] = useState(titleOnlyFromQuery === 'true')
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -150,82 +170,16 @@ export default function Marketplace() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
+  const roleOptions = useMemo(() => {
+    return [
+      ...defaultRoleOptions,
+      ...reviewRoles.map((role) => {
+        return { key: role.shortName, label: `${role.name}` }
+      }),
+    ]
+  }, [reviewRoles])
+
   const theme = useTheme()
-  const router = useRouter()
-
-  const {
-    filter: filterFromQuery,
-    task: taskFromQuery,
-    peers: peersFromQuery,
-    organisations: organisationsFromQuery,
-    states: statesFromQuery,
-    kinds: kindsFromQuery,
-    tags: tagsFromQuery,
-    titleOnly: titleOnlyFromQuery,
-  } = router.query
-
-  useEffect(() => {
-    if (filterFromQuery) {
-      setFilter(filterFromQuery as string)
-    }
-    if (tagsFromQuery) {
-      let tagsAsArray: string[] = []
-      if (typeof tagsFromQuery === 'string') {
-        tagsAsArray.push(tagsFromQuery)
-      } else {
-        tagsAsArray = [...tagsFromQuery]
-      }
-      setSelectedTags([...tagsAsArray])
-    }
-    if (organisationsFromQuery) {
-      let organisationsAsArray: string[] = []
-      if (typeof organisationsFromQuery === 'string') {
-        organisationsAsArray.push(organisationsFromQuery)
-      } else {
-        organisationsAsArray = [...organisationsFromQuery]
-      }
-      setSelectedOrganisations([...organisationsAsArray])
-    }
-    if (statesFromQuery) {
-      let statesAsArray: string[] = []
-      if (typeof statesFromQuery === 'string') {
-        statesAsArray.push(statesFromQuery)
-      } else {
-        statesAsArray = [...statesFromQuery]
-      }
-      setSelectedStates([...statesAsArray])
-    }
-
-    if (peersFromQuery) {
-      let peersAsArray: string[] = []
-      if (typeof peersFromQuery === 'string') {
-        peersAsArray.push(peersFromQuery)
-      } else {
-        peersAsArray = [...peersFromQuery]
-      }
-      setSelectedPeers([...peersAsArray])
-    }
-    if (kindsFromQuery) {
-      let kindsAsArray: string[] = []
-      if (typeof kindsFromQuery === 'string') {
-        kindsAsArray.push(kindsFromQuery)
-      } else {
-        kindsAsArray = [...kindsFromQuery]
-      }
-      setSelectedKinds(kindsAsArray as EntryKindKeys[])
-    }
-
-    setTitleOnly(titleOnlyFromQuery === 'true')
-  }, [
-    filterFromQuery,
-    taskFromQuery,
-    tagsFromQuery,
-    organisationsFromQuery,
-    statesFromQuery,
-    kindsFromQuery,
-    peersFromQuery,
-    titleOnlyFromQuery,
-  ])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -396,17 +350,6 @@ export default function Marketplace() {
     return errorMessage
   }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
 
-  useEffect(() => {
-    if (reviewRoles) {
-      setRoleOptions([
-        ...defaultRoleOptions,
-        ...reviewRoles.map((role) => {
-          return { key: role.shortName, label: `${role.name}` }
-        }),
-      ])
-    }
-  }, [reviewRoles])
-
   if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
@@ -444,8 +387,8 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-                <Typography component='h2' variant='h5' fontWeight='bold'>
+              <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
+                <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
                   Filters
                 </Typography>
                 <HelpDialog title='Search Information' content={<SearchInfo />} />
@@ -583,7 +526,12 @@ export default function Marketplace() {
                   />
                 </Box>
               </Stack>
-              <Box justifySelf='center' marginTop={1}>
+              <Box
+                sx={{
+                  justifySelf: 'center',
+                  marginTop: 1,
+                }}
+              >
                 <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
                   Reset filters
                 </Button>
