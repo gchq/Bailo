@@ -97,8 +97,7 @@ export default function Marketplace() {
       kinds.push(EntryKind.UNTRUSTED_MODEL)
     }
     setAvailableModelKinds(kinds)
-    setSelectedKinds(availableModelKinds)
-  }, [isMirroredModelEnabled, isUntrustedModelEnabled, availableModelKinds])
+  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
 
   const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
@@ -239,6 +238,8 @@ export default function Marketplace() {
         kindsAsArray = [...kindsFromQuery]
       }
       setSelectedKinds(kindsAsArray as EntryKindKeys[])
+    } else {
+      setSelectedKinds(availableModelKinds)
     }
 
     setTitleOnly(titleOnlyFromQuery === 'true')
@@ -250,6 +251,7 @@ export default function Marketplace() {
     kindsFromQuery,
     peersFromQuery,
     titleOnlyFromQuery,
+    availableModelKinds,
   ])
 
   const updateQueryParams = useCallback(
