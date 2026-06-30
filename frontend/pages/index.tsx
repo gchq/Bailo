@@ -97,7 +97,8 @@ export default function Marketplace() {
       kinds.push(EntryKind.UNTRUSTED_MODEL)
     }
     setAvailableModelKinds(kinds)
-  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
+    setSelectedKinds(availableModelKinds)
+  }, [isMirroredModelEnabled, isUntrustedModelEnabled, availableModelKinds])
 
   const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
@@ -249,7 +250,6 @@ export default function Marketplace() {
     kindsFromQuery,
     peersFromQuery,
     titleOnlyFromQuery,
-    availableModelKinds,
   ])
 
   const updateQueryParams = useCallback(
