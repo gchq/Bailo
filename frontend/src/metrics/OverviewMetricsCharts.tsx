@@ -2,6 +2,7 @@ import dayjs, { Dayjs } from '@dayjs'
 import { Stack, Typography } from '@mui/material'
 import { cheerfulFiestaPaletteDark, mangoFusionPaletteDark } from '@mui/x-charts'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
+import { DefaultizedPieValueType } from '@mui/x-charts/models'
 import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
@@ -17,6 +18,8 @@ interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
   organisationList: string[]
   selectedOrganisation: string
+  selectedState: string | null
+  onStateClick: (state: string | null) => void
 }
 
 interface PieChartData {
@@ -32,6 +35,8 @@ export default function OverviewMetricsCharts({
   data,
   organisationList,
   selectedOrganisation,
+  selectedState,
+  onStateClick,
 }: OverviewMetricsChartsProps) {
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
   const [structuredModelVolume, setStructuredModelVolume] = useState<BarChartRow[]>([])
@@ -143,6 +148,18 @@ export default function OverviewMetricsCharts({
     return <Loading />
   }
 
+  const handleStateItemClick = (
+    _event: React.MouseEvent<SVGPathElement, MouseEvent>,
+    _identifier: unknown,
+    item: DefaultizedPieValueType,
+  ) => {
+    const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
+    onStateClick(label === selectedState ? null : label)
+  }
+
+  // Derive the highlighted data index so the selected slice stays visually active
+  const selectedStateIndex = selectedState ? stateData.findIndex((s) => s.label === selectedState) : -1
+
   return (
     <Stack spacing={4}>
       <Stack spacing={2}>
@@ -211,6 +228,7 @@ export default function OverviewMetricsCharts({
               <PieChart
                 series={[
                   {
+                    id: 'life-cycle-status',
                     innerRadius: 50,
                     outerRadius: 100,
                     data: stateData,
@@ -220,16 +238,24 @@ export default function OverviewMetricsCharts({
                     highlightScope: { fade: 'global', highlight: 'item' },
                   },
                 ]}
+                highlightedItem={
+                  selectedStateIndex >= 0 ? { seriesId: 'life-cycle-status', dataIndex: selectedStateIndex } : null
+                }
+                onItemClick={handleStateItemClick}
                 slotProps={{
                   legend: {
                     direction: 'horizontal',
-                    position: {
-                      vertical: 'bottom',
-                      horizontal: 'center',
-                    },
+                    position: { vertical: 'bottom', horizontal: 'center' },
                   },
                 }}
-                {...pieChartSettings}
+                sx={{
+                  ...pieChartSettings.sx,
+                  '& path': { cursor: 'pointer' },
+                }}
+                margin={pieChartSettings.margin}
+                width={pieChartSettings.width}
+                height={pieChartSettings.height}
+                colors={pieChartSettings.colors}
               />
             </Stack>
             <Stack spacing={2} sx={{ alignItems: 'center' }}>

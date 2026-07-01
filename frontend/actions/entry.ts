@@ -3,6 +3,7 @@ import useSWR from 'swr'
 
 import {
   BailoError,
+  CollaboratorEntry,
   EntryForm,
   EntryInterface,
   EntryKindKeys,
@@ -24,6 +25,7 @@ export interface EntrySearchResult {
   tags: Array<string>
   kind: EntryKindKeys
   organisation?: string
+  collaborators?: CollaboratorEntry[]
   state?: string
   peerId?: string
   visibility: EntryVisibilityKeys
