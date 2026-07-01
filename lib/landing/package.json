@@ -41,7 +41,7 @@
     "swiper": "^14.0.1"
   },
   "devDependencies": {
-    "@types/node": "26.0.0",
+    "@types/node": "26.1.0",
     "@types/react": "19.2.17",
     "@types/styled-components": "^5.1.36",
     "@types/swagger-ui-dist": "^3.30.6",
