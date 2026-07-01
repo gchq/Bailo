@@ -38,6 +38,13 @@ export const isValidPortNumber = (portNumber: string) => {
   )
 }
 
+export const parseNat = (numberOrString: string) => {
+  if (isNaN(Number(numberOrString)) || Number(numberOrString) < 0) {
+    return NaN
+  }
+  return parseInt(numberOrString)
+}
+
 export const isValidNumber = (numberOrString: string) => {
   return !(isNaN(Number(numberOrString)) || isNaN(parseFloat(numberOrString)))
 }
