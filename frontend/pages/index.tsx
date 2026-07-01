@@ -26,7 +26,7 @@ import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -51,16 +51,6 @@ const ALL_KINDS = 'All'
 export default function Marketplace() {
   const router = useRouter()
 
-  const {
-    filter: filterFromQuery,
-    peers: peersFromQuery,
-    organisations: organisationsFromQuery,
-    states: statesFromQuery,
-    tags: tagsFromQuery,
-    titleOnly: titleOnlyFromQuery,
-    kinds: kindsFromQuery,
-  } = router.query
-
   function parseQueryArray(value?: string | string[]): string[] {
     if (!value) {
       return []
@@ -68,28 +58,62 @@ export default function Marketplace() {
     return Array.isArray(value) ? [...value] : [value]
   }
 
-  const [filter, setFilter] = useState((filterFromQuery as string) || '')
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
-  const [selectedPeers, setSelectedPeers] = useState<string[]>(parseQueryArray(peersFromQuery))
-  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>(parseQueryArray(organisationsFromQuery))
-  const [selectedStates, setSelectedStates] = useState<string[]>(parseQueryArray(statesFromQuery))
-
-  const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
-  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>(
-    kindsFromQuery
-      ? (parseQueryArray(kindsFromQuery) as EntryKindKeys[])
-      : [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.MIRRORED_MODEL],
-  )
-  const [selectedTags, setSelectedTags] = useState<string[]>(parseQueryArray(tagsFromQuery))
-  const [titleOnly, setTitleOnly] = useState(titleOnlyFromQuery === 'true')
-  const debouncedFilter = useDebounce(filter, 250)
-
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { peers, isPeersLoading, isPeersError } = useGetPeers()
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
   const isMirroredModelEnabled = !!uiConfig?.modelMirror.import.enabled
   const isUntrustedModelEnabled = !!uiConfig?.untrustedModel.enabled
+
+  const [availableModelKinds, setAvailableModelKinds] = useState<EntryKindKeys[]>([])
+  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
+  const [filter, setFilter] = useState('')
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
+  const [selectedStates, setSelectedStates] = useState<string[]>([])
+  const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [titleOnly, setTitleOnly] = useState(false)
+
+  useEffect(() => {
+    if (!router.isReady) {
+      return
+    }
+    const {
+      filter: filterFromQuery,
+      peers: peersFromQuery,
+      organisations: organisationsFromQuery,
+      states: statesFromQuery,
+      tags: tagsFromQuery,
+      titleOnly: titleOnlyFromQuery,
+      kinds: kindsFromQuery,
+    } = router.query
+
+    setFilter((filterFromQuery as string) || '')
+    setSelectedPeers(parseQueryArray(peersFromQuery))
+    setSelectedOrganisations(parseQueryArray(organisationsFromQuery))
+    setSelectedStates(parseQueryArray(statesFromQuery))
+    setSelectedTags(parseQueryArray(tagsFromQuery))
+    setTitleOnly(titleOnlyFromQuery === 'true')
+    if (kindsFromQuery) {
+      setSelectedKinds(parseQueryArray(kindsFromQuery) as EntryKindKeys[])
+    }
+  }, [router.isReady, router.query, availableModelKinds])
+
+  useEffect(() => {
+    const kinds: EntryKindKeys[] = [EntryKind.MODEL]
+    if (isMirroredModelEnabled) {
+      kinds.push(EntryKind.MIRRORED_MODEL)
+    }
+    if (isUntrustedModelEnabled) {
+      kinds.push(EntryKind.UNTRUSTED_MODEL)
+    }
+    setAvailableModelKinds(kinds)
+    setSelectedKinds(kinds)
+  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
+
+  const debouncedFilter = useDebounce(filter, 250)
 
   const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
@@ -225,17 +249,6 @@ export default function Marketplace() {
     return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
   }, [uiConfig])
 
-  const availableModelKinds = useMemo((): EntryKindKeys[] => {
-    const kinds: EntryKindKeys[] = [EntryKind.MODEL]
-    if (isMirroredModelEnabled) {
-      kinds.push(EntryKind.MIRRORED_MODEL)
-    }
-    if (isUntrustedModelEnabled) {
-      kinds.push(EntryKind.UNTRUSTED_MODEL)
-    }
-    return kinds
-  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
-
   const modelKindOptions = useMemo((): string[] => {
     if (availableModelKinds.length <= 1) {
       return availableModelKinds.map(toTitleCase)
@@ -279,7 +292,6 @@ export default function Marketplace() {
     (kinds: string[]) => {
       const wasAllSelected = selectedKinds.length === availableModelKinds.length
       const isAllNowSelected = kinds.includes(ALL_KINDS)
-
       if (isAllNowSelected && !wasAllSelected) {
         setSelectedKinds(availableModelKinds)
         updateQueryParams('kinds', availableModelKinds)
