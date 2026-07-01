@@ -178,7 +178,8 @@ export abstract class BaseExporter {
    * Provides parameters for `initialiseTarGzUpload()`.
    */
   protected abstract getInitialiseTarGzUploadParams():
-    Promise<Parameters<typeof initialiseTarGzUpload>> | Parameters<typeof initialiseTarGzUpload>
+    | Promise<Parameters<typeof initialiseTarGzUpload>>
+    | Parameters<typeof initialiseTarGzUpload>
 
   protected readonly logData: MirrorExportLogData
   protected readonly user: UserInterface
