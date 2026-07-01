@@ -1,8 +1,10 @@
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
+import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetCurrentUserV3 } from 'actions/user'
 import { ReactNode, useEffect } from 'react'
 import Loading from 'src/common/Loading'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import useUserPermissions from 'src/hooks/UserPermissionsHook'
 import MessageAlert from 'src/MessageAlert'
 
@@ -21,6 +23,7 @@ export default function AppContextProvider({ children }: AppContextProviderProps
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
   const userPermissionsValue = useUserPermissions()
+  const { scanners, isScannersError, isScannersLoading } = useGetArtefactScannerInfo()
   const {
     currentUser: currentUserV3,
     isCurrentUserLoading: isCurrentUserV3Loading,
@@ -39,18 +42,24 @@ export default function AppContextProvider({ children }: AppContextProviderProps
       return <MessageAlert message={isCurrentUserV3Error.info.message} severity='error' />
     }
 
-    if (isCurrentUserV3Loading || !currentUserV3) {
+    if (isScannersError) {
+      return <MessageAlert message={isScannersError.info.message} severity='error' />
+    }
+
+    if (isCurrentUserV3Loading || !currentUserV3 || isScannersLoading) {
       return <Loading />
     }
 
     return (
-      <ThemeModeContext.Provider value={themeModeValue}>
-        <UnsavedChangesContext.Provider value={unsavedChangesValue}>
-          <UserPermissionsContext.Provider value={userPermissionsValue}>
-            <CurrentUserContext.Provider value={currentUserV3}>{children}</CurrentUserContext.Provider>
-          </UserPermissionsContext.Provider>
-        </UnsavedChangesContext.Provider>
-      </ThemeModeContext.Provider>
+      <ArtefactScanningInfoContext.Provider value={scanners}>
+        <ThemeModeContext.Provider value={themeModeValue}>
+          <UnsavedChangesContext.Provider value={unsavedChangesValue}>
+            <UserPermissionsContext.Provider value={userPermissionsValue}>
+              <CurrentUserContext.Provider value={currentUserV3}>{children}</CurrentUserContext.Provider>
+            </UserPermissionsContext.Provider>
+          </UnsavedChangesContext.Provider>
+        </ThemeModeContext.Provider>
+      </ArtefactScanningInfoContext.Provider>
     )
   }
 

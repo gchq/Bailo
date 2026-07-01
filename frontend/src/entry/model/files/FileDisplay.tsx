@@ -20,15 +20,25 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { rerunArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
+import { rerunArtefactScan } from 'actions/artefactScanning'
 import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { CSSProperties, Fragment, MouseEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import {
+  CSSProperties,
+  Fragment,
+  MouseEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useState,
+} from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
@@ -159,7 +169,7 @@ export default function FileDisplay({
     return buildChipDetails(file.scanResults)
   }, [file])
 
-  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
+  const { scanners } = useContext(ArtefactScanningInfoContext)
 
   const openMore = Boolean(anchorElMore)
   const openScan = Boolean(anchorElScan)
@@ -186,7 +196,7 @@ export default function FileDisplay({
   }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
-    if (!scanners || isScannersError) {
+    if (!scanners) {
       return null
     }
     if (!scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE)) {
@@ -200,7 +210,7 @@ export default function FileDisplay({
         <ListItemText>Rerun file scan</ListItemText>
       </MenuItem>
     )
-  }, [handleRerunFileScanOnClick, scanners, isScannersError, showMenuItems.rescanFile])
+  }, [handleRerunFileScanOnClick, scanners, showMenuItems.rescanFile])
 
   const scanResults = isFileInterface(file) ? file.scanResults : undefined
   const scanInProgress = isAnyScanInProgress(scanResults)
@@ -274,10 +284,6 @@ export default function FileDisplay({
 
   const showMenu = () =>
     Object.keys(showMenuItems).length > 0 && Object.values(showMenuItems).some((item) => item === true)
-
-  if (isScannersLoading) {
-    return <Loading />
-  }
 
   return (
     <Box sx={{ ...style, p: 1 }} key={key}>

@@ -3,13 +3,14 @@ import Info from '@mui/icons-material/Info'
 import MoreVert from '@mui/icons-material/MoreVert'
 import Refresh from '@mui/icons-material/Refresh'
 import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material'
-import { rerunImageArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
+import { rerunImageArtefactScan } from 'actions/artefactScanning'
 import { deleteEntryImage } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useCallback, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
@@ -59,7 +60,7 @@ interface ModelImageTagDisplayProps {
 
 export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelImageTagDisplayProps) {
   const sendNotification = useNotification()
-  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
+  const { scanners } = useContext(ArtefactScanningInfoContext)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
@@ -165,7 +166,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
-  if (isUiConfigLoading || isScannersLoading) {
+  if (isUiConfigLoading) {
     return <Loading />
   }
 
@@ -244,16 +245,14 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
               </ListItemIcon>
               <ListItemText>Delete image</ListItemText>
             </MenuItem>
-            {scanners &&
-              !isScannersError &&
-              scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
-                <MenuItem onClick={() => handleRescan(tag)}>
-                  <ListItemIcon>
-                    <Refresh color='primary' fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Rerun image scan</ListItemText>
-                </MenuItem>
-              )}
+            {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.IMAGE) && (
+              <MenuItem onClick={() => handleRescan(tag)}>
+                <ListItemIcon>
+                  <Refresh color='primary' fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Rerun image scan</ListItemText>
+              </MenuItem>
+            )}
           </Menu>
           <ConfirmationDialogue
             open={deleteImageOpen}
