@@ -93,7 +93,7 @@ export default function ImportModelCardTextDialog({
           disabled={text.length === 0 || loading}
           onClick={handleExtract}
           loading={loading}
-          data-test='importModelCardTextButton'
+          data-test='extractModelCardTextButton'
           startIcon={<AutoAwesomeIcon />}
         >
           Extract
