@@ -16,7 +16,6 @@ const compat = new FlatCompat({
   recommendedConfig: js.configs.recommended,
   allConfig: js.configs.all,
 })
-
 const eslintConfig = [
   {
     ignores: ['**/node_modules', '**/dist', '**/docs/_build', '**/docs/python-docs', '**/docs/backenddocsvenv'],
@@ -37,10 +36,7 @@ const eslintConfig = [
       globals: {
         ...globals.node,
       },
-
-      parser: tsParser,
     },
-
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -50,7 +46,6 @@ const eslintConfig = [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-
       'no-unused-vars': 'off',
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
@@ -61,7 +56,29 @@ const eslintConfig = [
       curly: ['error', 'all'],
     },
   },
-
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    ignores: ['**/*.config.ts', 'vitest.config.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: ['./tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-deprecated': 'warn',
+    },
+  },
+  {
+    files: ['**/*.config.ts', 'vitest.config.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: null,
+      },
+    },
+  },
   // Restrict Zod imports in src/
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
