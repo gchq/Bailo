@@ -236,10 +236,6 @@ export interface Config {
     authorisationToken: string
   }
 
-  untrustedModels: {
-    defaultState: string
-  }
-
   llm: {
     enabled: boolean
     endpoint: string

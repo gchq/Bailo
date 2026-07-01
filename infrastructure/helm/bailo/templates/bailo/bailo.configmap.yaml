@@ -316,10 +316,6 @@ data:
         version: '{{ .Values.stroom.version }}',
       },
 
-      untrustedModels: {
-        defaultState: '{{ .Values.untrustedModels.defaultState }}'
-      },
-
       llm: {
         enabled: {{ .Values.llm.enabled }},
         endpoint: '{{ .Values.llm.endpoint }}',

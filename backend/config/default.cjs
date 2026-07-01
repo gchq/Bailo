@@ -374,10 +374,6 @@ module.exports = {
     authorisationToken: '',
   },
 
-  untrustedModels: {
-    defaultState: 'Production',
-  },
-
   llm: {
     enabled: false,
     endpoint: '',
