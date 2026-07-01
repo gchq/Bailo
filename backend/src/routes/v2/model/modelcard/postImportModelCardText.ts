@@ -31,7 +31,12 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            metadata: z.unknown(),
+            metadata: z.record(z.string(), z.unknown()).openapi({
+              example: { overview: { name: 'My Model', description: 'A machine learning model.' } },
+            }),
+            warnings: z.array(z.string()).openapi({
+              example: ['instance.overview.version is not of a type(s) string'],
+            }),
           }),
         },
       },
