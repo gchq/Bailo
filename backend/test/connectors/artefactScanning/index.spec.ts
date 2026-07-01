@@ -3,29 +3,48 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ArtefactScanKind } from '../../../src/connectors/artefactScanning/index.js'
 import config from '../../../src/utils/config.js'
 
+vi.mock('../../../src/services/log.js')
+
 const clamAvMocks = vi.hoisted(() => ({
-  ClamAvFileScanningConnector: vi.fn(function () {}),
+  ClamAvFileScanningConnector: vi.fn(function () {
+    return { name: 'clamAV' }
+  }),
 }))
 vi.mock('../../../src/connectors/artefactScanning/clamAv.js', () => clamAvMocks)
 
-vi.mock('../../../src/connectors/artefactScanning/artefactScan.js', () => ({
-  ModelScanFileScanningConnector: vi.fn(function () {}),
-  TrivyImageScanningConnector: vi.fn(function () {}),
+const trivyMocks = vi.hoisted(() => ({
+  TrivyImageScanningConnector: vi.fn(function () {
+    return { name: 'tryScanning' }
+  }),
 }))
+vi.mock('../../../src/connectors/artefactScanning/trivy.js', () => trivyMocks)
+
+const modelScanMocks = vi.hoisted(() => ({
+  ModelScanFileScanningConnector: vi.fn(function () {
+    return { name: 'modelScan' }
+  }),
+}))
+vi.mock('../../../src/connectors/artefactScanning/modelScan.js', () => modelScanMocks)
+
 vi.mock('../../../src/connectors/artefactScanning/wrapper.js', () => ({
-  ArtefactScanningWrapper: vi.fn(function () {
+  ArtefactScanningWrapper: vi.fn(function (input) {
     return {
       initialiseScanners: vi.fn(),
+      scanners: Array.from(input),
     }
   }),
 }))
 
-vi.mock('../../../src/utils/config.js', async () => {
-  const actual = await vi.importActual<typeof import('../../../src/utils/config.js')>('../../../src/utils/config.js')
-  const mutableConfig = structuredClone(actual.default)
+const configMock = vi.hoisted(() => ({ kinds: [] as Array<string> }))
 
-  return { __esModule: true, default: mutableConfig }
-})
+vi.mock('../../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: {
+    connectors: {
+      artefactScanners: configMock,
+    },
+  },
+}))
 
 async function loadModule() {
   return await import('../../../src/connectors/artefactScanning/index.js')
@@ -40,14 +59,25 @@ describe('connectors > artefactScanning > index', () => {
     config.connectors.artefactScanners.kinds = [ArtefactScanKind.ClamAv]
     const mod = await loadModule()
 
-    expect(mod.default).toBeDefined()
+    expect(mod.default.scanners).toStrictEqual([
+      {
+        name: 'clamAV',
+      },
+    ])
   })
 
   test('initialise ModelScan and Trivy scanners when enabled', async () => {
-    config.connectors.artefactScanners.kinds = [ArtefactScanKind.ModelScan, ArtefactScanKind.Trivy]
+    vi.spyOn(configMock, 'kinds', 'get').mockReturnValueOnce([ArtefactScanKind.ModelScan, ArtefactScanKind.Trivy])
     const mod = await loadModule()
 
-    expect(mod.default).toBeDefined()
+    expect(mod.default.scanners).toStrictEqual([
+      {
+        name: 'modelScan',
+      },
+      {
+        name: 'tryScanning',
+      },
+    ])
   })
 
   test('throw when scanner constructor throws', async () => {
