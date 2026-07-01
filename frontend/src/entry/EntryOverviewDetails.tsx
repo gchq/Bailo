@@ -18,7 +18,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -138,7 +138,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL && updateEntryPermission.hasPermission}
+              editable={updateEntryPermission.hasPermission}
               value={entry.state}
               entryId={entry.id}
               field='state'
