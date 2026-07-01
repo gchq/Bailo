@@ -16,7 +16,7 @@ export interface ChatMessage {
 }
 
 export async function callLlmChatCompletion(messages: ChatMessage[]): Promise<string> {
-  if (!config.llm.enabled) {
+  if (!config.ui.llmImport.enabled) {
     throw ConfigurationError('LLM integration is not enabled.')
   }
 

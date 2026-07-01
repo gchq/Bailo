@@ -71,7 +71,6 @@ is disabled by default and requires an OpenAI-compatible chat completions endpoi
 // for the llm and also schema that you are using for model cards.
 {
   llm: {
-    enabled: true,
     endpoint: 'https://api.openai.com/v1/chat/completions', // Any OpenAI-compatible endpoint
     apiKey: 'your-api-key',
     model: 'gpt-4o',          // Model identifier for the LLM provider
@@ -93,13 +92,13 @@ CRITICAL RULES:
 
   ui: {
     llmImport: {
-      enabled: true,          // Shows the "Import from Text" button in the UI
+      enabled: true,          // Enables the feature and shows the "Import from Text" button in the UI
     },
   },
 }
 ```
 
-When `llm.enabled` is `false` (the default) or the configuration is absent, the import feature is completely hidden from
-the user interface.
+When `ui.llmImport.enabled` is `false` (the default) or the configuration is absent, the import feature is completely
+hidden from the user interface and the backend will reject any import requests.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

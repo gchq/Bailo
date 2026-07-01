@@ -78,7 +78,7 @@ spec:
                   name: {{ include "bailo.fullname" . }}-inference
                   key: auth-token
             {{- end }}
-            {{- if .Values.llm.enabled }}
+            {{- if .Values.ui.llmImport.enabled }}
             - name: LLM_API_KEY
               valueFrom:
                 secretKeyRef:

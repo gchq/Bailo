@@ -237,7 +237,6 @@ export interface Config {
   }
 
   llm: {
-    enabled: boolean
     endpoint: string
     apiKey: string
     model: string

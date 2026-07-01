@@ -375,7 +375,6 @@ module.exports = {
   },
 
   llm: {
-    enabled: false,
     endpoint: '',
     apiKey: '',
     model: '',

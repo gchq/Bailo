@@ -317,7 +317,6 @@ data:
       },
 
       llm: {
-        enabled: {{ .Values.llm.enabled }},
         endpoint: '{{ .Values.llm.endpoint }}',
         model: '{{ .Values.llm.model }}',
         maxTokens: {{ .Values.llm.maxTokens }},

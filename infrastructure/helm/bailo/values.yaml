@@ -409,7 +409,6 @@ artefactscan:
     # TRIVY_DB_HOSTNAME: ghcr.io
 
 llm:
-  enabled: false
   endpoint: ''
   model: ''
   maxTokens: 16384
