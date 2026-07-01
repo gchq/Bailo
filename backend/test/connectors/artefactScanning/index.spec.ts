@@ -35,13 +35,13 @@ vi.mock('../../../src/connectors/artefactScanning/wrapper.js', () => ({
   }),
 }))
 
-const configMock = vi.hoisted(() => ({ kinds: [] as Array<string> }))
+const mockArtefactScannerKind = vi.hoisted(() => ({ kinds: [] as Array<string> }))
 
 vi.mock('../../../src/utils/config.js', () => ({
   __esModule: true,
   default: {
     connectors: {
-      artefactScanners: configMock,
+      artefactScanners: mockArtefactScannerKind,
     },
   },
 }))
@@ -67,7 +67,10 @@ describe('connectors > artefactScanning > index', () => {
   })
 
   test('initialise ModelScan and Trivy scanners when enabled', async () => {
-    vi.spyOn(configMock, 'kinds', 'get').mockReturnValueOnce([ArtefactScanKind.ModelScan, ArtefactScanKind.Trivy])
+    vi.spyOn(mockArtefactScannerKind, 'kinds', 'get').mockReturnValueOnce([
+      ArtefactScanKind.ModelScan,
+      ArtefactScanKind.Trivy,
+    ])
     const mod = await loadModule()
 
     expect(mod.default.scanners).toStrictEqual([
