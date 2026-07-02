@@ -12,12 +12,13 @@ import {
 import Dialog from '@mui/material/Dialog'
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
-import { useMemo } from 'react'
+import { useRouter } from 'next/router'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
 import MessageAlert from 'src/MessageAlert'
-import { EntryCardKindLabel, EntryInterface } from 'types/types'
+import { EntryCardKindLabel, EntryCardRevisionInterface, EntryInterface, EntryKind } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -28,17 +29,49 @@ type EntryCardHistoryDialogProps = {
 
 export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()
+  const router = useRouter()
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     entry.id,
   )
+  const [compareWithVersion, setCompareWithVersion] = useState<number | undefined>(undefined)
+
+  const entryKindPath =
+    entry.kind === EntryKind.MIRRORED_MODEL || entry.kind === EntryKind.MODEL ? EntryKind.MODEL : entry.kind
+
+  const buildHref = (entryCardRevision: EntryCardRevisionInterface) => {
+    const queryParams = new URLSearchParams()
+    if (compareWithVersion !== undefined) {
+      queryParams.set('compareWith', String(compareWithVersion))
+    }
+    if (entryCardRevision.mirrored) {
+      queryParams.set('mirrored', 'true')
+    }
+    const queryString = queryParams.toString()
+    return `/${entryKindPath}/${entry.id}/history/${entryCardRevision.version}${queryString ? `?${queryString}` : ''}`
+  }
+
   const sortedEntryCardRevisions = useMemo(
     () =>
-      entryCardRevisions
-        .sort(sortByCreatedAtDescending)
-        .map((entryCardRevision) => (
-          <EntryCardRevision key={entryCardRevision.version} entryCard={entryCardRevision} entryKind={entry.kind} />
-        )),
-    [entry.kind, entryCardRevisions],
+      entryCardRevisions.sort(sortByCreatedAtDescending).map((entryCardRevision) => (
+        <EntryCardRevision
+          onRowClick={() => {
+            router.push(buildHref(entryCardRevision))
+          }}
+          onCompareSelect={() => {
+            if (compareWithVersion === entryCardRevision.version) {
+              setCompareWithVersion(undefined)
+            } else {
+              setCompareWithVersion(entryCardRevision.version)
+            }
+          }}
+          isCompareSelected={compareWithVersion === entryCardRevision.version}
+          key={entryCardRevision.version}
+          entryCard={entryCardRevision}
+          entryKind={entry.kind}
+        />
+      )),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [entry.id, entry.kind, entryKindPath, entryCardRevisions, compareWithVersion, router],
   )
 
   if (isEntryCardRevisionsError) {
@@ -60,6 +93,7 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
                 <TableCell>Version</TableCell>
                 <TableCell>Created By</TableCell>
                 <TableCell>Created At</TableCell>
+                <TableCell>Compare</TableCell>
               </TableRow>
             </TableHead>
             {sortedEntryCardRevisions}
