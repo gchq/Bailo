@@ -60,7 +60,7 @@ interface ModelImageTagDisplayProps {
 
 export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelImageTagDisplayProps) {
   const sendNotification = useNotification()
-  const { scanners } = useContext(ArtefactScanningInfoContext)
+  const scanners = useContext(ArtefactScanningInfoContext)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
