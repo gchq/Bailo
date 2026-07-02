@@ -23,7 +23,7 @@ vi.mock('../../../../src/connectors/authentication/index.js', () => ({
 }))
 
 const mockMetricsConnector = vi.hoisted(() => ({
-  getComplianceMetrics: vi.fn(),
+  getRoleComplianceMetrics: vi.fn(),
 }))
 
 vi.mock('../../../../src/connectors/metrics/index.js', () => ({
@@ -32,7 +32,7 @@ vi.mock('../../../../src/connectors/metrics/index.js', () => ({
 
 describe('routes > metrics > getComplianceMetrics', () => {
   test('200 > returns compliance metrics when user is Admin', async () => {
-    mockMetricsConnector.getComplianceMetrics.mockResolvedValue({
+    mockMetricsConnector.getRoleComplianceMetrics.mockResolvedValue({
       global: {
         summary: [
           { role: 'Reviewer', count: 2 },
@@ -43,7 +43,7 @@ describe('routes > metrics > getComplianceMetrics', () => {
       byOrganisation: [],
     })
 
-    const res = await testGet('/api/v3/metrics/compliance')
+    const res = await testGet('/api/v3/metrics/compliance/roles')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
@@ -57,7 +57,7 @@ describe('routes > metrics > getComplianceMetrics', () => {
       byOrganisation: [],
     })
 
-    expect(mockMetricsConnector.getComplianceMetrics).toHaveBeenCalled()
+    expect(mockMetricsConnector.getRoleComplianceMetrics).toHaveBeenCalled()
     expect(audit.onViewMetric).toHaveBeenCalled()
   })
 })
