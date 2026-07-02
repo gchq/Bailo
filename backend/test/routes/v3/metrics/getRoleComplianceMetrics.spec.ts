@@ -30,7 +30,7 @@ vi.mock('../../../../src/connectors/metrics/index.js', () => ({
   default: mockMetricsConnector,
 }))
 
-describe('routes > metrics > getComplianceMetrics', () => {
+describe('routes > metrics > getRoleComplianceMetrics', () => {
   test('200 > returns compliance metrics when user is Admin', async () => {
     mockMetricsConnector.getRoleComplianceMetrics.mockResolvedValue({
       global: {
