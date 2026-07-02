@@ -147,7 +147,17 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             />
           )}
         </Stack>
-        {entry.card && (
+        <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>
+          <Button
+            size='small'
+            onClick={() => setRolesDialogOpen(true)}
+            sx={{ width: 'max-content', fontWeight: 'bold' }}
+          >
+            View collaborators
+          </Button>
+          {collaboratorList}
+        </Stack>
+        {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
             <Typography sx={{ fontWeight: 'bold' }} color='primary'>
               Model card review
