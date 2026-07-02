@@ -293,28 +293,26 @@ type RoleComplianceMetricsResult = {
   }[]
 }
 
-type NoReleasesComplianceMetricsResult = {
-  global: {
-    summary: {
-      modelsWithNoReleases: number
-    }
-    models: {
-      id: string
-      organisation: string
-      owners: string[]
-    }[]
+type ModelWithNoRelease = {
+  id: string
+  organisation: string
+  owners: string[]
+}
+
+type NoReleasesComplianceMetricsResultSubset = {
+  summary: {
+    modelsWithNoReleases: number
   }
-  byOrganisation: {
-    organisation: string
-    summary: {
-      modelsWithNoReleases: number
-    }
-    models: {
-      id: string
-      organisation: string
-      owners: string[]
-    }[]
-  }[]
+  models: ModelWithNoRelease[]
+}
+
+type NoReleasesComplianceMetricsResultByOrgSubset = {
+  organisation: string
+} & NoReleasesComplianceMetricsResultSubset
+
+type NoReleasesComplianceMetricsResult = {
+  global: NoReleasesComplianceMetricsResultSubset
+  byOrganisation: NoReleasesComplianceMetricsResultByOrgSubset[]
 }
 
 /**
@@ -393,7 +391,7 @@ async function calculateMissingEntryRoles(
   }
 }
 
-async function calculateModelsMissingReleases(org?: string) {
+async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesComplianceMetricsResultSubset> {
   const filter: ModelFilter = {}
 
   // Only undefined means global
@@ -421,11 +419,15 @@ async function calculateModelsMissingReleases(org?: string) {
     {
       $project: {
         id: 1,
-        organisation: 1,
+        organisation: { $ifNull: ['$organisation', ''] },
         owners: {
           $map: {
             input: {
-              $filter: { input: '$collaborators', as: 'item', cond: { $in: ['owner', '$$item.roles'] } },
+              $filter: {
+                input: '$collaborators',
+                as: 'item',
+                cond: { $in: ['owner', { $ifNull: ['$$item.roles', []] }] },
+              },
             },
             as: 'owner',
             in: '$$owner.entity',
@@ -436,7 +438,7 @@ async function calculateModelsMissingReleases(org?: string) {
   ]
 
   // Gets models by the specified organisation | no organisation
-  const models = await ModelModel.aggregate(pipeline)
+  const models = await ModelModel.aggregate<ModelWithNoRelease>(pipeline)
 
   return {
     summary: {

@@ -45,11 +45,11 @@ registerPath(
     method: 'get',
     path: '/api/v3/metrics/compliance/roles',
     tags: ['metrics'],
-    description: 'Retrieve current point-in-time system and usage metrics.',
+    description: 'Retrieve compliance metrics for entries missing required review roles.',
     schema: getRoleComplianceMetricsSchema,
     responses: {
       200: {
-        description: 'Current snapshot of system metrics.',
+        description: 'Current snapshot of models with missing releases.',
         content: {
           'application/json': {
             schema: GetRoleComplianceMetricsResponseSchema,

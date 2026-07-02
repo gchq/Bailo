@@ -7,9 +7,7 @@ import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const getNoReleaseComplianceMetricsSchema = z.object({
-  query: z.object({}).strict(),
-})
+export const getNoReleaseComplianceMetricsSchema = z.object({})
 
 export const NoReleaseSummaryMetricsSchema = z.object({
   modelsWithNoReleases: z.number(),
@@ -43,11 +41,11 @@ registerPath(
     method: 'get',
     path: '/api/v3/metrics/compliance/no-releases',
     tags: ['metrics'],
-    description: 'Retrieve current point-in-time system and usage metrics.',
+    description: 'Retrieve compliance metrics for models that do not have any releases.',
     schema: getNoReleaseComplianceMetricsSchema,
     responses: {
       200: {
-        description: 'Current snapshot of system metrics.',
+        description: 'Current snapshot of all models with no releases attached to them.',
         content: {
           'application/json': {
             schema: BaseNoReleaseMetricsSchema,
