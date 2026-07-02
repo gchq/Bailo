@@ -84,7 +84,7 @@ export default function SchemaMigrationList() {
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/schemas/migrations/new`}>
-            <Button variant='outlined' data-test='createNewSchemaMigration' startIcon={<Create />}>
+            <Button variant='contained' data-test='createNewSchemaMigration' startIcon={<Create />}>
               New schema migration plan
             </Button>
           </Link>

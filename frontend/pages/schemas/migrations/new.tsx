@@ -151,7 +151,7 @@ export default function SchemaMigrationSelector() {
               }}
             >
               <Box sx={{ textAlign: 'left', width: '100%' }}>
-                <Link href={`/schemas/list?tab=migrations`}>
+                <Link href={`/admin?section=migration`}>
                   <Button
                     size='small'
                     sx={{ width: 'fit-content', pb: 2 }}
