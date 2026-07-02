@@ -154,8 +154,14 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
-          <label htmlFor='add-files-button'>
-            <Button loading={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
+          <label htmlFor='add-files-button' style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <Button
+              loading={isFilesUploading}
+              endIcon={<FileUpload />}
+              component='span'
+              variant='outlined'
+              sx={{ width: '40%' }}
+            >
               Select files
             </Button>
           </label>
