@@ -274,6 +274,7 @@ module.exports = {
     untrustedModel: {
       enabled: false,
       untrustedModelDescription: 'These are private only models.',
+      fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.',
     },
   },
 

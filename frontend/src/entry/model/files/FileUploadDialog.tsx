@@ -3,11 +3,13 @@ import FileUpload from '@mui/icons-material/FileUpload'
 import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
-import { EntryInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import MessageAlert from 'src/MessageAlert'
+import { EntryInterface, EntryKind, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 interface FileUploadDialogProps {
@@ -22,6 +24,7 @@ const Input = styled('input')({
 })
 
 export default function FileUploadDialog({ open, onDialogClose, model, mutateModelFiles }: FileUploadDialogProps) {
+  const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
@@ -156,10 +159,15 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               Select files
             </Button>
           </label>
-          <Typography>
-            Select one or more files to upload. You can optionally add a description and tags to each file before
-            uploading.
-          </Typography>
+          {model.kind === EntryKind.MODEL && (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <MessageAlert
+                message={uiConfig.untrustedModel.fileUploadGuidance}
+                severity='warning'
+                style={{ width: 'fit-content' }}
+              />
+            </Box>
+          )}
           <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
           {filesToBeUploaded.length === 0 && <EmptyBlob text='No files selected.' />}
           {filesToBeUploaded.length > 0 && (
