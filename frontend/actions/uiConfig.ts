@@ -26,7 +26,6 @@ export function useGetUiConfig() {
   if (!data || !data.uiConfig) {
     return {
       isUiConfigError: {
-        ...new Error('Unable to get data for the current user'),
         info: { message: 'Unable to get data for the current user' },
         status: 500,
       },

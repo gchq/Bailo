@@ -151,7 +151,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
   )
 
   return (
-    <Dialog disableAutoFocus open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
+    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
           <label htmlFor='add-files-button'>
