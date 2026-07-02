@@ -361,7 +361,7 @@ export default function ReleaseForm({
             >{`Files (${formData.files.length})`}</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            {!isReadOnly && model.kind === EntryKind.MODEL && (
+            {!isReadOnly && model.kind === EntryKind.UNTRUSTED_MODEL && (
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <MessageAlert
                   message={uiConfig.untrustedModel.fileUploadGuidance}
