@@ -21,6 +21,7 @@ import { debounce } from 'lodash-es'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { RouterQueryParams } from 'src/entry/overview/FormEditPage'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -43,11 +44,6 @@ import {
   widgets,
 } from 'utils/formUtils'
 import { toSentenceCase } from 'utils/stringUtils'
-
-type RouterQueryParams = {
-  page?: number
-  requiredByModelState?: string
-}
 
 export default function JsonSchemaForm({
   splitSchema,

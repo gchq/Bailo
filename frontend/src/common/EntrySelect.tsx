@@ -44,11 +44,10 @@ export default function EntrySelect({
     if (!response.ok) {
       if (field === 'state') {
         router.replace({
-          query: { ...router.query, requiredByModelState: event.target.value },
+          query: { ...router.query, requiredByModelState: event.target.value, isEdit: 'true' },
         })
       }
       setErrorMessage(await getErrorMessage(response))
-      setIsEdit(true)
     } else {
       if (field === 'state') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

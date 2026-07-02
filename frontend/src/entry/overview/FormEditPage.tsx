@@ -19,6 +19,7 @@ import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
+import { useRouter } from 'next/router'
 import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
@@ -42,8 +43,17 @@ type FormEditPageProps = {
   entry: EntryInterface
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
+
+export type RouterQueryParams = {
+  page?: number
+  requiredByModelState?: string
+  isEdit?: boolean
+}
+
 export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
-  const [isEdit, setIsEdit] = useState(false)
+  const router = useRouter()
+  const isEdit = router.query.isEdit === 'true'
+
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
@@ -86,11 +96,11 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       const data = getStepsData(splitSchema, true)
 
       if (getChangedFields(oldData, data).length === 0) {
-        setIsEdit(false)
+        handleChangeEditMode(false)
       } else {
         const res = await putEntryCard(entry.id, data)
         if (res.status && res.status < 400) {
-          setIsEdit(false)
+          handleChangeEditMode(false)
           mutateEntryCardRevisions()
         } else {
           setErrorMessage(res.data)
@@ -115,7 +125,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         step.steps = steps
       }
       setSplitSchema({ reference: schema.id, steps })
-      setIsEdit(false)
+      handleChangeEditMode(false)
     }
   }
 
@@ -195,6 +205,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     saveDisplayFormStats(event.target.checked)
   }
 
+  function handleChangeEditMode(isEdit: boolean) {
+    router.replace({
+      query: { ...router.query, isEdit },
+    })
+  }
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -248,7 +264,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     sx={{ width: 'fit-content' }}
                     onClick={() => {
                       handleActionButtonClose()
-                      setIsEdit(!isEdit)
+                      handleChangeEditMode(!isEdit)
                       setOldSchema(_.cloneDeep(splitSchema))
                     }}
                     data-test='editEntryCardButton'
