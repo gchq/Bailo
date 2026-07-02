@@ -1,0 +1,41 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Importing a Model Card from Text
+
+If your model already has documentation — such as a HuggingFace model card, a system card, or other written
+documentation — you can use Bailo's text import feature to automatically extract relevant information into your model
+card form.
+
+> **Note:** This feature requires an administrator to configure an LLM endpoint. If you do not see the "Import from
+> Text" button, contact your Bailo administrator.
+
+## How to use
+
+1. **Create your model** following the normal workflow — provide a name, description, and select a schema.
+2. Navigate to your model's **Overview** tab and click **Edit Model Card**.
+3. Click the **Import from Text** button in the toolbar.
+4. In the dialog that appears, **paste the full text** of your existing model card or documentation.
+5. Click **Extract**. The system will analyse the text and extract information into the schema fields.
+6. **Review the extracted data** — the form will be populated with any information that was found. Fields that could not
+   be populated from the source text will remain blank.
+7. Make any corrections or additions, then click **Save**.
+
+## What to expect
+
+- The extraction only uses information that is **explicitly present** in your source text. It will not guess or infer
+  values.
+- Some fields (such as internal references to data cards or user entities) cannot be populated from text and will always
+  remain blank.
+- You can run the import multiple times if needed — each import replaces the current form data.
+- The extracted data is always presented for your review before saving. Nothing is saved automatically.
+
+## Supported formats
+
+The import works with any plain text model documentation, including:
+
+- HuggingFace model card README files
+- AI system cards (e.g. Claude, GPT model cards)
+- Internal model documentation
+- Any structured or unstructured text describing a model
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
