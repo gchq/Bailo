@@ -11,10 +11,30 @@ export function useGetUiConfig() {
     ErrorInfo
   >('/api/v2/config/ui', fetcher)
 
+  if (isLoading) {
+    return {
+      isUiConfigLoading: isLoading,
+    }
+  }
+
+  if (error) {
+    return {
+      isUiConfigError: error,
+    }
+  }
+
+  if (!data || !data.uiConfig) {
+    return {
+      isUiConfigError: {
+        ...new Error('Unable to get data for the current user'),
+        info: { message: 'Unable to get data for the current user' },
+        status: 500,
+      },
+    }
+  }
+
   return {
     mutateUiConfig: mutate,
-    uiConfig: data?.uiConfig,
-    isUiConfigLoading: isLoading,
-    isUiConfigError: error,
+    uiConfig: data.uiConfig,
   }
 }
