@@ -7,7 +7,7 @@ import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const getUsageMetricsSchema = z.object({
+export const getRoleComplianceMetricsSchema = z.object({
   query: z.object({}).strict(),
 })
 
@@ -25,34 +25,34 @@ export const EntryRoleMetricsSchema = z.object({
   missingRoles: z.array(RoleIdentitySchema),
 })
 
-export const ComplianceBaseMetricsSchema = z.object({
+export const RoleComplianceBaseMetricsSchema = z.object({
   summary: z.array(RoleSummarySchema),
   entries: z.array(EntryRoleMetricsSchema),
 })
 
-export const ComplianceOrganisationMetricsSchema = ComplianceBaseMetricsSchema.extend({
+export const RoleComplianceOrganisationMetricsSchema = RoleComplianceBaseMetricsSchema.extend({
   organisation: z.string(),
 })
 
-export const GetComplianceMetricsResponseSchema = z.object({
+export const GetRoleComplianceMetricsResponseSchema = z.object({
   lastUpdated: z.string(),
-  global: ComplianceBaseMetricsSchema,
-  byOrganisation: z.array(ComplianceOrganisationMetricsSchema),
+  global: RoleComplianceBaseMetricsSchema,
+  byOrganisation: z.array(RoleComplianceOrganisationMetricsSchema),
 })
 
 registerPath(
   {
     method: 'get',
-    path: '/api/v3/metrics/compliance',
+    path: '/api/v3/metrics/compliance/roles',
     tags: ['metrics'],
-    description: 'Retrieve current point-in-time system and usage metrics.',
-    schema: getUsageMetricsSchema,
+    description: 'Retrieve compliance metrics for entries missing required review roles.',
+    schema: getRoleComplianceMetricsSchema,
     responses: {
       200: {
-        description: 'Current snapshot of system metrics.',
+        description: 'Current snapshot of models with missing releases.',
         content: {
           'application/json': {
-            schema: GetComplianceMetricsResponseSchema,
+            schema: GetRoleComplianceMetricsResponseSchema,
           },
         },
       },
@@ -61,15 +61,15 @@ registerPath(
   'v3',
 )
 
-export type GetComplianceMetricsResponse = z.infer<typeof GetComplianceMetricsResponseSchema>
+export type GetRoleComplianceMetricsResponse = z.infer<typeof GetRoleComplianceMetricsResponseSchema>
 
-export const getComplianceMetrics = [
-  async (req: Request, res: Response<GetComplianceMetricsResponse>): Promise<void> => {
+export const getRoleComplianceMetrics = [
+  async (req: Request, res: Response<GetRoleComplianceMetricsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewMetric
 
-    parse(req, getUsageMetricsSchema)
+    parse(req, getRoleComplianceMetricsSchema)
 
-    const complianceMetrics = await metrics.getComplianceMetrics(req.user)
+    const complianceMetrics = await metrics.getRoleComplianceMetrics(req.user)
 
     await audit.onViewMetric(req)
 

@@ -23,27 +23,28 @@ vi.mock('../../../../src/connectors/authentication/index.js', () => ({
 }))
 
 const mockMetricsConnector = vi.hoisted(() => ({
-  getComplianceMetrics: vi.fn(),
+  getRoleComplianceMetrics: vi.fn(),
+  getNoReleasesMetrics: vi.fn(),
 }))
 
 vi.mock('../../../../src/connectors/metrics/index.js', () => ({
   default: mockMetricsConnector,
 }))
 
-describe('routes > metrics > getComplianceMetrics', () => {
+describe('routes > metrics > getNoReleasesComplianceMetrics', () => {
   test('200 > returns compliance metrics when user is Admin', async () => {
-    mockMetricsConnector.getComplianceMetrics.mockResolvedValue({
+    mockMetricsConnector.getNoReleasesMetrics.mockResolvedValue({
       global: {
         summary: [
           { role: 'Reviewer', count: 2 },
           { role: 'Owner', count: 1 },
         ],
-        entries: [{ entryId: 'model-1', missingRoles: ['Reviewer'] }],
+        models: [{ id: 'model-1', organisation: 'Example Organisation', owners: ['user:user'] }],
       },
       byOrganisation: [],
     })
 
-    const res = await testGet('/api/v3/metrics/compliance')
+    const res = await testGet('/api/v3/metrics/compliance/no-releases')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
@@ -52,12 +53,12 @@ describe('routes > metrics > getComplianceMetrics', () => {
           { role: 'Reviewer', count: 2 },
           { role: 'Owner', count: 1 },
         ],
-        entries: [{ entryId: 'model-1', missingRoles: ['Reviewer'] }],
+        models: [{ id: 'model-1', organisation: 'Example Organisation', owners: ['user:user'] }],
       },
       byOrganisation: [],
     })
 
-    expect(mockMetricsConnector.getComplianceMetrics).toHaveBeenCalled()
+    expect(mockMetricsConnector.getNoReleasesMetrics).toHaveBeenCalled()
     expect(audit.onViewMetric).toHaveBeenCalled()
   })
 })

@@ -33,13 +33,16 @@ export function useGetOverviewMetrics() {
   }
 }
 
-export function useGetPolicyMetrics() {
-  const { data, isLoading, error, mutate } = useSWR<PolicyMetrics, ErrorInfo>('/api/v3/metrics/compliance', fetcher)
+export function useGetRolePolicyMetrics() {
+  const { data, isLoading, error, mutate } = useSWR<PolicyMetrics, ErrorInfo>(
+    '/api/v3/metrics/compliance/roles',
+    fetcher,
+  )
 
   return {
-    mutatePolicyMetrics: mutate,
-    policyMetrics: data,
-    isPolicyMetricsLoading: isLoading,
-    isPolicyMetricsError: error,
+    mutateRolePolicyMetrics: mutate,
+    rolePolicyMetrics: data,
+    isRolePolicyMetricsLoading: isLoading,
+    isRolePolicyMetricsError: error,
   }
 }
