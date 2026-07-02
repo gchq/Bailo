@@ -31,6 +31,7 @@ import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
@@ -105,6 +106,7 @@ export default function ReleaseForm({
   uploadedFiles,
   filesToUploadCount,
 }: ReleaseFormProps) {
+  const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
@@ -359,6 +361,15 @@ export default function ReleaseForm({
             >{`Files (${formData.files.length})`}</Typography>
           </AccordionSummary>
           <AccordionDetails>
+            {!isReadOnly && model.kind === EntryKind.MODEL && (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <MessageAlert
+                  message={uiConfig.untrustedModel.fileUploadGuidance}
+                  severity='warning'
+                  style={{ width: 'fit-content' }}
+                />
+              </Box>
+            )}
             <>
               {!isReadOnly && (
                 <Stack spacing={2}>
