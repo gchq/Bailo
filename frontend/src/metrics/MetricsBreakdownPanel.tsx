@@ -3,93 +3,14 @@ import { Box, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/materia
 import { useGetModelBreakdown } from 'actions/metrics'
 import { type RefObject, useMemo } from 'react'
 import MetricsBreakdownTable from 'src/metrics/MetricsBreakdownTable'
-import { BreakdownQueryType } from 'src/metrics/metricsUtils'
+import { breakdownDefinitions, BreakdownQueryType } from 'src/metrics/metricsUtils'
 import { SchemaInterface, SystemRole } from 'types/types'
 
-function ModelsByStateBreakdown({
-  selectedOrganisation,
-  selectedState,
-}: {
-  selectedOrganisation: string
-  selectedState: string
-}) {
-  const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown({
-    organisation: selectedOrganisation,
-    state: selectedState,
-  })
-
-  const tableData = useMemo(
-    () =>
-      (entries ?? []).map((entry) => ({
-        entryId: entry.entryId,
-        entryName: entry.entryName,
-        modelOwners:
-          entry.collaborators
-            ?.filter((person) => person.roles.includes(SystemRole.Owner))
-            .map((person) => person.entity) ?? [],
-      })),
-    [entries],
-  )
-
-  if (isEntriesError) {
-    return (
-      <Typography color='error'>
-        Failed to load models in state &ldquo;{selectedState}&rdquo;. Please try again.
-      </Typography>
-    )
-  }
-
-  const tableTitle =
-    selectedState.toLowerCase() === 'none' ? `Models with no state selected` : `Models in state: ${selectedState}`
-
-  return <MetricsBreakdownTable title={tableTitle} data={tableData ?? []} isLoading={isEntriesLoading} />
-}
-
-function ModelsBySchemaBreakdown({
-  schemas,
-  selectedOrganisation,
-  selectedSchemaName,
-}: {
-  schemas: SchemaInterface[]
-  selectedOrganisation: string
-  selectedSchemaName: string
-}) {
-  const selectedSchemaId = schemas.find((schema) => schema.name === selectedSchemaName)?.id ?? 'none'
-  const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown({
-    organisation: selectedOrganisation,
-    schemaId: selectedSchemaId,
-  })
-
-  const tableData = useMemo(
-    () =>
-      (entries ?? []).map((entry) => ({
-        entryId: entry.entryId,
-        entryName: entry.entryName,
-        modelOwners:
-          entry.collaborators
-            ?.filter((person) => person.roles.includes(SystemRole.Owner))
-            .map((person) => person.entity) ?? [],
-      })),
-    [entries],
-  )
-
-  if (isEntriesError) {
-    return (
-      <Typography color='error'>
-        Failed to load models in state &ldquo;{selectedSchemaName}&rdquo;. Please try again.
-      </Typography>
-    )
-  }
-
-  const tableTitle =
-    selectedSchemaName.toLowerCase() === 'none'
-      ? `Models with no schema selected`
-      : `Models with schema: ${selectedSchemaName}`
-
-  return <MetricsBreakdownTable title={tableTitle} data={tableData ?? []} isLoading={isEntriesLoading} />
-}
-
-function BreakdownContent({
+/**
+ * Takes the selected query parameters, fetches the data and renders it in the table,
+ * where the query parameters are taken from which ever chart segment has been selected.
+ */
+function ModelBreakdown({
   schemas,
   organisation,
   queryType,
@@ -100,22 +21,38 @@ function BreakdownContent({
   queryType: BreakdownQueryType
   queryValue: string
 }) {
-  switch (queryType) {
-    case 'byState':
-      return <ModelsByStateBreakdown selectedOrganisation={organisation} selectedState={queryValue} />
-    case 'bySchema':
-      return (
-        <ModelsBySchemaBreakdown
-          schemas={schemas}
-          selectedOrganisation={organisation}
-          selectedSchemaName={queryValue}
-        />
-      )
-    default:
-      return null
+  const definition = breakdownDefinitions[queryType]
+
+  const query = useMemo(
+    () => definition.buildQuery(queryValue, { organisation, schemas }),
+    [definition, queryValue, organisation, schemas],
+  )
+
+  const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown(query)
+
+  const tableData = useMemo(
+    () =>
+      (entries ?? []).map((entry) => ({
+        entryId: entry.entryId,
+        entryName: entry.entryName,
+        modelOwners:
+          entry.collaborators
+            ?.filter((person) => person.roles.includes(SystemRole.Owner))
+            .map((person) => person.entity) ?? [],
+      })),
+    [entries],
+  )
+
+  if (isEntriesError) {
+    return <Typography color='error'>{definition.getErrorMessage(queryValue)}</Typography>
   }
+
+  return <MetricsBreakdownTable title={definition.getTitle(queryValue)} data={tableData} isLoading={isEntriesLoading} />
 }
 
+/**
+ * Displays the selected breakdown data in a table.
+ */
 export default function MetricsBreakdownPanel({
   schemas,
   queryType,
@@ -144,7 +81,7 @@ export default function MetricsBreakdownPanel({
             </IconButton>
           </Tooltip>
         </Box>
-        <BreakdownContent schemas={schemas} organisation={organisation} queryType={queryType} queryValue={queryValue} />
+        <ModelBreakdown schemas={schemas} organisation={organisation} queryType={queryType} queryValue={queryValue} />
       </Stack>
     </Paper>
   )

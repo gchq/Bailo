@@ -707,7 +707,7 @@ export class BaseMetricsConnector {
 
     // Filter by organisation only if provided and not 'all' - if 'none' then query any with empty string
     if (query.organisation !== undefined && query.organisation.toLowerCase() !== 'all') {
-      mongoQuery.organisation = query.organisation.toLowerCase() === 'none' ? '' : query.organisation
+      mongoQuery.organisation = query.organisation.toLowerCase() === 'unset' ? '' : query.organisation
     }
 
     if (query.state !== undefined) {

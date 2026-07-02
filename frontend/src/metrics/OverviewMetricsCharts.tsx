@@ -2,7 +2,7 @@ import dayjs, { Dayjs } from '@dayjs'
 import { Stack, Typography } from '@mui/material'
 import { cheerfulFiestaPaletteDark, mangoFusionPaletteDark } from '@mui/x-charts'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
-import { DefaultizedPieValueType } from '@mui/x-charts/models'
+import { DefaultizedPieValueType, PieItemIdentifier } from '@mui/x-charts/models'
 import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
@@ -10,6 +10,13 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
+import {
+  BreakdownQueryType,
+  BreakdownSelection,
+  NONE_COLOR,
+  PieChartData,
+  withConsistentColours,
+} from 'src/metrics/metricsUtils'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { ModelVolume, ModelVolumeData, OverviewBaseMetrics } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
@@ -18,15 +25,8 @@ interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
   organisationList: string[]
   selectedOrganisation: string
-  selectedState: string | null
-  selectedSchema: string | null
-  onStateClick: (state: string | null) => void
-  onSchemaClick: (schema: string | null) => void
-}
-
-interface PieChartData {
-  label: string
-  value: number
+  selection: BreakdownSelection
+  onSelect: (type: BreakdownQueryType, value: string) => void
 }
 
 type BarChartRow = {
@@ -37,10 +37,8 @@ export default function OverviewMetricsCharts({
   data,
   organisationList,
   selectedOrganisation,
-  selectedState,
-  selectedSchema,
-  onStateClick,
-  onSchemaClick,
+  selection,
+  onSelect,
 }: OverviewMetricsChartsProps) {
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
   const [structuredModelVolume, setStructuredModelVolume] = useState<BarChartRow[]>([])
@@ -79,6 +77,7 @@ export default function OverviewMetricsCharts({
       data.entryState?.map((state) => ({
         label: state.state,
         value: state.count,
+        color: state.state.toLowerCase() === 'none' ? NONE_COLOR : undefined,
       })) ?? []
     )
   }, [data.entryState])
@@ -106,6 +105,7 @@ export default function OverviewMetricsCharts({
           return {
             label: schemaItem.schemaName,
             value: schemaItem.count,
+            color: schemaItem.schemaName.toLowerCase() === 'none' ? NONE_COLOR : undefined,
           }
         }),
       )
@@ -152,26 +152,33 @@ export default function OverviewMetricsCharts({
     return <Loading />
   }
 
+  const selectedStateValue = selection?.type === 'byState' ? selection.value : null
+  const selectedSchemaValue = selection?.type === 'bySchema' ? selection.value : null
+
   const handleStateItemClick = (
     _event: React.MouseEvent<SVGPathElement, MouseEvent>,
-    _identifier: unknown,
+    _identifier: PieItemIdentifier,
     item: DefaultizedPieValueType,
   ) => {
     const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
-    onStateClick(label === selectedState ? null : label)
+    if (label) {
+      onSelect('byState', label)
+    }
   }
 
   const handleSchemaItemClick = (
     _event: React.MouseEvent<SVGPathElement, MouseEvent>,
-    _identifier: unknown,
+    _identifier: PieItemIdentifier,
     item: DefaultizedPieValueType,
   ) => {
     const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
-    onSchemaClick(label === selectedSchema ? null : label)
+    if (label) {
+      onSelect('bySchema', label)
+    }
   }
 
-  const selectedStateIndex = selectedState ? stateData.findIndex((s) => s.label === selectedState) : -1
-  const selectedSchemaIndex = selectedSchema ? schemaData.findIndex((s) => s.label === selectedSchema) : -1
+  const selectedStateIndex = selectedStateValue ? stateData.findIndex((s) => s.label === selectedStateValue) : -1
+  const selectedSchemaIndex = selectedSchemaValue ? schemaData.findIndex((s) => s.label === selectedSchemaValue) : -1
 
   return (
     <Stack spacing={4}>
@@ -244,7 +251,7 @@ export default function OverviewMetricsCharts({
                     id: 'life-cycle-status',
                     innerRadius: 50,
                     outerRadius: 100,
-                    data: stateData,
+                    data: withConsistentColours(stateData),
                     arcLabel: 'value',
                     paddingAngle: 1,
                     cornerRadius: 4,
@@ -281,7 +288,7 @@ export default function OverviewMetricsCharts({
                     id: 'schema-usage',
                     innerRadius: 50,
                     outerRadius: 100,
-                    data: schemaData,
+                    data: withConsistentColours(schemaData),
                     arcLabel: 'value',
                     paddingAngle: 1,
                     cornerRadius: 4,

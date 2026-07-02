@@ -1,18 +1,7 @@
-/**
- * TODO
- * - Reuse this table with the one in PolicyMetricsCharts ? Maybe as long as it doesn't become too abstract...
- * - Clean up code
- * - Could write some render tests ?
- * - Any code we can pull out to utility functions?
- * - Any tests we can write?
- * - Add selected segment colour to top of table
- */
-
 import { Box, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import { SettingsCategory } from 'src/entry/settings/Settings'
 import Link from 'src/Link'
 import { ModelBreakdown } from 'types/types'
 
@@ -64,7 +53,7 @@ export default function MetricsBreakdownTable({ title, data, isLoading = false }
       <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
+            <Link href={`/model/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
               {row.entryId}
             </Link>
           </Typography>

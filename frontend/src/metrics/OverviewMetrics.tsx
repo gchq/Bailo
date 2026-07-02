@@ -6,6 +6,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsBreakdownPanel from 'src/metrics/MetricsBreakdownPanel'
 import MetricsHeader from 'src/metrics/MetricsHeader'
+import { BreakdownQueryType, BreakdownSelection } from 'src/metrics/metricsUtils'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
 
 export default function OverviewMetrics() {
@@ -13,8 +14,7 @@ export default function OverviewMetrics() {
   const { schemas } = useGetSchemas()
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
-  const [selectedState, setSelectedState] = useState<string | null>(null)
-  const [selectedSchema, setSelectedSchema] = useState<string | null>(null)
+  const [selection, setSelection] = useState<BreakdownSelection>(null)
 
   const filteredDataset = useMemo(() => {
     if (!overviewMetrics) {
@@ -34,27 +34,23 @@ export default function OverviewMetrics() {
     }, 0)
   }, [])
 
-  const handleStateClick = useCallback(
-    (state: string | null) => {
-      setSelectedSchema(null) // clear the other selection
-      setSelectedState((prev) => (state === prev ? null : state))
-      if (state) {
-        scrollToBreakdown()
-      }
+  const handleBreakdownSelection = useCallback(
+    (type: BreakdownQueryType, value: string) => {
+      setSelection((prev) => {
+        if (prev && prev.type === type && prev.value === value) {
+          return null
+        }
+        return { type, value }
+      })
+      scrollToBreakdown()
     },
     [scrollToBreakdown],
   )
 
-  const handleSchemaClick = useCallback(
-    (schema: string | null) => {
-      setSelectedState(null) // clear the other selection
-      setSelectedSchema((prev) => (schema === prev ? null : schema))
-      if (schema) {
-        scrollToBreakdown()
-      }
-    },
-    [scrollToBreakdown],
-  )
+  const handleOrganisationChange = useCallback((newOrganisation: string) => {
+    setSelectedOrganisation(newOrganisation)
+    setSelection(null)
+  }, [])
 
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
@@ -66,11 +62,11 @@ export default function OverviewMetrics() {
 
   return (
     <Container maxWidth='lg'>
-      <Stack spacing={4} sx={{ mt: 2 }}>
+      <Stack spacing={4} sx={{ mt: 2, mb: 4 }}>
         {filteredDataset && overviewMetrics && (
           <MetricsHeader
             data={overviewMetrics}
-            onOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
+            onOrganisationChange={handleOrganisationChange}
             selectedOrganisation={selectedOrganisation}
             exportDocumentTitle='Bailo overview metrics'
           >
@@ -81,20 +77,18 @@ export default function OverviewMetrics() {
                   (organisationSubset) => organisationSubset.organisation,
                 )}
                 selectedOrganisation={selectedOrganisation}
-                selectedState={selectedState}
-                selectedSchema={selectedSchema}
-                onStateClick={handleStateClick}
-                onSchemaClick={handleSchemaClick}
+                selection={selection}
+                onSelect={handleBreakdownSelection}
               />
-              {(selectedState || selectedSchema) && (
+              {selection && (
                 <>
                   <Divider />
                   <MetricsBreakdownPanel
                     schemas={schemas}
-                    queryType={selectedState ? 'byState' : 'bySchema'}
-                    queryValue={(selectedState ?? selectedSchema) as string}
+                    queryType={selection.type}
+                    queryValue={selection.value}
                     organisation={selectedOrganisation}
-                    onClose={() => handleStateClick(null)}
+                    onClose={() => setSelection(null)}
                     panelRef={breakdownPanelRef}
                   />
                 </>
