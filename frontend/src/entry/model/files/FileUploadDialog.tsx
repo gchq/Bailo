@@ -159,7 +159,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               Select files
             </Button>
           </label>
-          {model.kind === EntryKind.MODEL && (
+          {model.kind === EntryKind.UNTRUSTED_MODEL && (
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <MessageAlert
                 message={uiConfig.untrustedModel.fileUploadGuidance}
