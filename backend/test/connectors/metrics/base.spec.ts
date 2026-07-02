@@ -275,7 +275,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
   })
 })
 
-await describe('connectors > metrics > simple > getComplianceMetrics', async () => {
+await describe('connectors > metrics > simple > getRoleComplianceMetrics', async () => {
   let connector
   await beforeEach(async () => {
     vi.resetModules()
@@ -432,6 +432,42 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
     authenticationMocks.hasRole.mockResolvedValue(false)
 
     await expect(connector.getRoleComplianceMetrics(mockUser)).rejects.toThrow()
+  })
+})
+
+await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', async () => {
+  let connector
+  await beforeEach(async () => {
+    vi.resetModules()
+    vi.clearAllMocks()
+
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['a corp', 'b corp'])
+  })
+
+  test('groups results by organisation correctly', async () => {
+    modelMocks.distinct.mockResolvedValue(['a corp', 'b corp'])
+
+    modelMocks.aggregate.mockImplementation(() => {
+      const allModels = [
+        {
+          id: 'orgB-model',
+          organisation: 'b corp',
+          owners: ['user:user'],
+        },
+      ]
+      return allModels
+    })
+
+    const result = await connector.getNoReleasesMetrics(mockUser)
+
+    expect(result.byOrganisation).toHaveLength(3)
+  })
+
+  test('throws Forbidden if user is not admin', async () => {
+    authenticationMocks.hasRole.mockResolvedValue(false)
+
+    await expect(connector.getNoReleasesMetrics(mockUser)).rejects.toThrow()
   })
 })
 
