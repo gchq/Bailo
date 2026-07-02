@@ -508,7 +508,7 @@ export default function Marketplace() {
                 {uiConfig && selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
                   <Box>
                     <ChipSelector
-                      label='Model Kinds'
+                      label='Model kinds'
                       chipTooltipTitle={'Filter by model kinds'}
                       options={modelKindOptions}
                       expandThreshold={10}
