@@ -239,8 +239,9 @@ data:
 
         untrustedModel: {
           enabled: {{ .Values.config.ui.untrustedModel.enabled }},
-          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}'
-        }
+          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}',
+          fileUploadGuidance: '{{ .Values.config.ui.untrustedModel.fileUploadGuidance }}',
+        },
       },
 
       connectors: {
