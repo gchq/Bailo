@@ -326,7 +326,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
       ]),
     )
 
-    const result = await connector.getComplianceMetrics(mockUser)
+    const result = await connector.getRoleComplianceMetrics(mockUser)
 
     expect(result.global.entries).toHaveLength(2)
 
@@ -378,7 +378,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
       return mockCursorQuery(filtered)
     })
 
-    const result = await connector.getComplianceMetrics(mockUser)
+    const result = await connector.getRoleComplianceMetrics(mockUser)
 
     expect(result.byOrganisation).toHaveLength(2)
 
@@ -419,7 +419,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
       return mockCursorQuery(filtered)
     })
 
-    const result = await connector.getComplianceMetrics(mockUser)
+    const result = await connector.getRoleComplianceMetrics(mockUser)
 
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
 
@@ -431,7 +431,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
-    await expect(connector.getComplianceMetrics(mockUser)).rejects.toThrow()
+    await expect(connector.getRoleComplianceMetrics(mockUser)).rejects.toThrow()
   })
 })
 
