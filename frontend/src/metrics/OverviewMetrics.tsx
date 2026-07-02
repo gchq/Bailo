@@ -1,5 +1,6 @@
 import { Container, Divider, Stack } from '@mui/material'
 import { useGetOverviewMetrics } from 'actions/metrics'
+import { useGetSchemas } from 'actions/schema'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -9,9 +10,11 @@ import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
 
 export default function OverviewMetrics() {
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
+  const { schemas } = useGetSchemas()
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
   const [selectedState, setSelectedState] = useState<string | null>(null)
+  const [selectedSchema, setSelectedSchema] = useState<string | null>(null)
 
   const filteredDataset = useMemo(() => {
     if (!overviewMetrics) {
@@ -24,14 +27,34 @@ export default function OverviewMetrics() {
   }, [overviewMetrics, selectedOrganisation])
 
   const breakdownPanelRef = useRef<HTMLDivElement>(null)
-  const handleStateClick = useCallback((state: string | null) => {
-    setSelectedState(state)
-    if (state) {
-      setTimeout(() => {
-        breakdownPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 0)
-    }
+
+  const scrollToBreakdown = useCallback(() => {
+    setTimeout(() => {
+      breakdownPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 0)
   }, [])
+
+  const handleStateClick = useCallback(
+    (state: string | null) => {
+      setSelectedSchema(null) // clear the other selection
+      setSelectedState((prev) => (state === prev ? null : state))
+      if (state) {
+        scrollToBreakdown()
+      }
+    },
+    [scrollToBreakdown],
+  )
+
+  const handleSchemaClick = useCallback(
+    (schema: string | null) => {
+      setSelectedState(null) // clear the other selection
+      setSelectedSchema((prev) => (schema === prev ? null : schema))
+      if (schema) {
+        scrollToBreakdown()
+      }
+    },
+    [scrollToBreakdown],
+  )
 
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
@@ -59,14 +82,18 @@ export default function OverviewMetrics() {
                 )}
                 selectedOrganisation={selectedOrganisation}
                 selectedState={selectedState}
+                selectedSchema={selectedSchema}
                 onStateClick={handleStateClick}
+                onSchemaClick={handleSchemaClick}
               />
-              {selectedState && (
+              {(selectedState || selectedSchema) && (
                 <>
                   <Divider />
                   <MetricsBreakdownPanel
-                    queryType='byState'
-                    queryValue={selectedState}
+                    schemas={schemas}
+                    queryType={selectedState ? 'byState' : 'bySchema'}
+                    queryValue={(selectedState ?? selectedSchema) as string}
+                    organisation={selectedOrganisation}
                     onClose={() => handleStateClick(null)}
                     panelRef={breakdownPanelRef}
                   />

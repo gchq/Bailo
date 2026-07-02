@@ -5,6 +5,7 @@
  * - Could write some render tests ?
  * - Any code we can pull out to utility functions?
  * - Any tests we can write?
+ * - Add selected segment colour to top of table
  */
 
 import { Box, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
@@ -13,16 +14,11 @@ import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import { SettingsCategory } from 'src/entry/settings/Settings'
 import Link from 'src/Link'
-
-interface BreakdownTableData {
-  entryId: string
-  entryName: string
-  modelOwners: string[]
-}
+import { ModelBreakdown } from 'types/types'
 
 interface MetricsBreakdownTableProps {
   title: string
-  data: BreakdownTableData[]
+  data: ModelBreakdown[]
   isLoading?: boolean
 }
 

@@ -1031,6 +1031,12 @@ export interface PolicyMetrics {
   lastUpdated: string
 }
 
+export interface ModelBreakdown {
+  entryId: string
+  entryName: string
+  modelOwners: string[]
+}
+
 export const Roles = {
   Admin: 'admin',
   Compliance: 'compliance',

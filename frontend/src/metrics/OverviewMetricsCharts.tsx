@@ -19,7 +19,9 @@ interface OverviewMetricsChartsProps {
   organisationList: string[]
   selectedOrganisation: string
   selectedState: string | null
+  selectedSchema: string | null
   onStateClick: (state: string | null) => void
+  onSchemaClick: (schema: string | null) => void
 }
 
 interface PieChartData {
@@ -36,7 +38,9 @@ export default function OverviewMetricsCharts({
   organisationList,
   selectedOrganisation,
   selectedState,
+  selectedSchema,
   onStateClick,
+  onSchemaClick,
 }: OverviewMetricsChartsProps) {
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
   const [structuredModelVolume, setStructuredModelVolume] = useState<BarChartRow[]>([])
@@ -157,8 +161,17 @@ export default function OverviewMetricsCharts({
     onStateClick(label === selectedState ? null : label)
   }
 
-  // Derive the highlighted data index so the selected slice stays visually active
+  const handleSchemaItemClick = (
+    _event: React.MouseEvent<SVGPathElement, MouseEvent>,
+    _identifier: unknown,
+    item: DefaultizedPieValueType,
+  ) => {
+    const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
+    onSchemaClick(label === selectedSchema ? null : label)
+  }
+
   const selectedStateIndex = selectedState ? stateData.findIndex((s) => s.label === selectedState) : -1
+  const selectedSchemaIndex = selectedSchema ? schemaData.findIndex((s) => s.label === selectedSchema) : -1
 
   return (
     <Stack spacing={4}>
@@ -265,6 +278,7 @@ export default function OverviewMetricsCharts({
               <PieChart
                 series={[
                   {
+                    id: 'schema-usage',
                     innerRadius: 50,
                     outerRadius: 100,
                     data: schemaData,
@@ -275,16 +289,24 @@ export default function OverviewMetricsCharts({
                     highlightScope: { fade: 'global', highlight: 'item' },
                   },
                 ]}
+                highlightedItem={
+                  selectedSchemaIndex >= 0 ? { seriesId: 'schema-usage', dataIndex: selectedSchemaIndex } : null
+                }
+                onItemClick={handleSchemaItemClick}
                 slotProps={{
                   legend: {
                     direction: 'horizontal',
-                    position: {
-                      vertical: 'bottom',
-                      horizontal: 'center',
-                    },
+                    position: { vertical: 'bottom', horizontal: 'center' },
                   },
                 }}
-                {...pieChartSettings}
+                sx={{
+                  ...pieChartSettings.sx,
+                  '& path': { cursor: 'pointer' },
+                }}
+                margin={pieChartSettings.margin}
+                width={pieChartSettings.width}
+                height={pieChartSettings.height}
+                colors={pieChartSettings.colors}
               />
             </Stack>
           </Stack>
