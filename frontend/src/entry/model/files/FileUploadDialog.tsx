@@ -1,8 +1,10 @@
 import styled from '@emotion/styled'
+import FileUpload from '@mui/icons-material/FileUpload'
 import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import { EntryInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
@@ -146,15 +148,20 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
   )
 
   return (
-    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
+    <Dialog disableAutoFocus open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
           <label htmlFor='add-files-button'>
-            <Button loading={isFilesUploading} component='span' variant='outlined' sx={{ width: '100%' }}>
+            <Button loading={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
               Select files
             </Button>
           </label>
+          <Typography>
+            Select one or more files to upload. You can optionally add a description and tags to each file before
+            uploading.
+          </Typography>
           <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
+          {filesToBeUploaded.length === 0 && <EmptyBlob text='No files selected.' />}
           {filesToBeUploaded.length > 0 && (
             <Typography
               sx={{
@@ -182,6 +189,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
           )}
           <Box sx={{ width: '100%' }}>
             <Button
+              disabled={filesToBeUploaded.length === 0}
               loading={isFilesUploading}
               onClick={handleFileUpload}
               variant='contained'

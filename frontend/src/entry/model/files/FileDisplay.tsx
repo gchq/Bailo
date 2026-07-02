@@ -169,7 +169,7 @@ export default function FileDisplay({
     return buildChipDetails(file.scanResults)
   }, [file])
 
-  const { scanners } = useContext(ArtefactScanningInfoContext)
+  const scanners = useContext(ArtefactScanningInfoContext)
 
   const openMore = Boolean(anchorElMore)
   const openScan = Boolean(anchorElScan)
