@@ -13,7 +13,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 5000,
-          "requiredByModelStates": ["Production", "Review"]
+          "requiredByModelStates": ["Development", "Production", "Review"]
         },
         "datasets": {
           "title": "Are there any datasets related to this model?",
@@ -22,8 +22,7 @@
           "items": {
             "type": "string"
           },
-          "uniqueItems": true,
-          "requiredByModelStates": ["Development"]
+          "uniqueItems": true
         },
         "metrics": {
           "type": "array",
