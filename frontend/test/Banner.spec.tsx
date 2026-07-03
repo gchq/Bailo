@@ -1,12 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { useContext } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import Banner from '../src/Banner'
-
-vi.mock('../actions/uiConfig', () => ({
-  useGetUiConfig: vi.fn(),
-}))
+import UiConfigContext from '../src/contexts/uiConfigContext'
 
 describe('Banner', () => {
   it('renders a Banner component', async () => {
@@ -18,9 +14,11 @@ describe('Banner', () => {
       },
     }
 
-    vi.mocked(useContext).mockReturnValueOnce(mockedConfig)
-
-    render(<Banner />)
+    render(
+      <UiConfigContext.Provider value={mockedConfig}>
+        <Banner />
+      </UiConfigContext.Provider>,
+    )
 
     await waitFor(async () => {
       expect(await screen.findByText('TEST')).not.toBeUndefined()

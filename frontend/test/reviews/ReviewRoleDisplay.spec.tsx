@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetEntryRoles } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
-import { useContext } from 'react'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import {
   testAccessRequestReview,
@@ -10,7 +9,6 @@ import {
   testReleaseReview,
   testReleaseReviewNoResponses,
   testReviewResponse,
-  testUiConfig,
 } from 'utils/test/testModels'
 import { describe, expect, vi } from 'vitest'
 
@@ -27,10 +25,6 @@ vi.mock('actions/entry', () => ({
 
 vi.mock('actions/response', () => ({
   useGetResponses: vi.fn(),
-}))
-
-vi.mock('actions/uiConfig', () => ({
-  useGetUiConfig: vi.fn(),
 }))
 
 describe('ReviewRoleDisplay', () => {
@@ -50,7 +44,6 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
     await waitFor(async () => {
@@ -71,7 +64,6 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReviewNoResponses} />)
     await waitFor(async () => {
@@ -92,7 +84,6 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReview} />)
 
@@ -114,7 +105,6 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReview} />)
 
