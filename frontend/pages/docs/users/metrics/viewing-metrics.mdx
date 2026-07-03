@@ -1,0 +1,48 @@
+import Image from 'next/legacy/image'
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import breakdownTable from 'public/docs/metrics-breakdown-table.png'
+import compliance from 'public/docs/metrics-compliance.png'
+import overview from 'public/docs/metrics-overview.png'
+
+# Viewing Usage Metrics
+
+> **Common questions this page answers:**
+>
+> - How do I view usage metrics in Bailo?
+> - How do I view compliance metrics in Bailo?
+
+## Access roles
+
+Only users with the correct access role can view the metrics page in Bailo. A user must have either the **admin** or
+**compliance** roles.
+
+## Viewing usage metrics
+
+To view usage metrics, click the chart icon at the bottom of the side menu bar. This will take you to the metrics page.
+
+Within this page you have the option to view system-wide metrics, or filter down to a specific organisation.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of the metrics overview' src={overview} />
+</Box>
+
+You can click either of the two pie charts to see a more in-depth breakdown of the models. Doing so will display a table
+below, where you can view the models and their basic information.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of the breakdown table' src={breakdownTable} />
+</Box>
+
+## Viewing compliance metrics
+
+To view compliance metrics, you can change tab by clicking the **Policy** tab button at the top of the page.
+
+This will show you the breakdown of models in Bailo, detailing which roles are missing from each. You can filter this
+down to a specific organisation, as well as selecting a specific role to focus on.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of the compliance metrics' src={compliance} />
+</Box>
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
