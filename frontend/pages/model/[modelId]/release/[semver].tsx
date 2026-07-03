@@ -11,6 +11,7 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
+import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -90,7 +91,7 @@ export default function Release() {
         <Paper>
           <>
             {userCanReview && <ReviewBanner release={release} />}
-            <Stack spacing={2} sx={{ p: 4 }}>
+            <Stack spacing={2} sx={{ px: 4, py: 2 }}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
                 spacing={2}
@@ -101,8 +102,22 @@ export default function Release() {
                     Back to model
                   </Button>
                 </Link>
-                <Stack overflow='hidden' direction='row' alignItems='center'>
-                  <Typography overflow='hidden' textOverflow='ellipsis' variant='h6' component='h1' color='primary'>
+                <Stack
+                  direction='row'
+                  sx={{
+                    overflow: 'hidden',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography
+                    variant='h6'
+                    component='h1'
+                    color='primary'
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
                     {release ? release.semver : 'Loading...'}
                   </Typography>
                   <CopyToClipboardButton
@@ -112,6 +127,7 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
+              <ReleaseAssetsResponses model={model} release={release} />
               {release && (
                 <EditableRelease
                   release={release}

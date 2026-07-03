@@ -18,11 +18,10 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
-import { ChangeEvent, useCallback, useMemo } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
@@ -31,6 +30,8 @@ import MultiFileInput from 'src/common/MultiFileInput'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
@@ -105,6 +106,7 @@ export default function ReleaseForm({
   uploadedFiles,
   filesToUploadCount,
 }: ReleaseFormProps) {
+  const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
@@ -113,7 +115,7 @@ export default function ReleaseForm({
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
-  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
+  const scanners = useContext(ArtefactScanningInfoContext)
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -134,7 +136,13 @@ export default function ReleaseForm({
   )
 
   const releaseNotesLabel = (
-    <Typography fontWeight='bold' component='label' htmlFor='release-notes-input'>
+    <Typography
+      component='label'
+      htmlFor='release-notes-input'
+      sx={{
+        fontWeight: 'bold',
+      }}
+    >
       Release notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
@@ -142,7 +150,13 @@ export default function ReleaseForm({
   const modelCardVersionList = useMemo(() => {
     return entryCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
       <MenuItem key={revision.version} value={revision.version}>
-        <Stack direction='row' spacing={1} alignItems='center'>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Typography>{revision.version} -</Typography>
           <Typography variant='caption'>{formatDateString(revision.createdAt)}</Typography>
         </Stack>
@@ -173,7 +187,7 @@ export default function ReleaseForm({
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
   const FileRowItem = memoize(({ data }) =>
-    isFileInterface(data) && !isScannersLoading && !isScannersError ? (
+    isFileInterface(data) ? (
       <FileDisplay
         key={data.name}
         file={data}
@@ -208,13 +222,30 @@ export default function ReleaseForm({
     <Stack spacing={2}>
       {isReadOnly && (
         <Stack>
-          <Typography fontWeight='bold'>Latest version</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Latest version
+          </Typography>
           <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack overflow='hidden' spacing={2}>
+      <Stack
+        spacing={2}
+        sx={{
+          overflow: 'hidden',
+        }}
+      >
         <Stack sx={{ width: '100%' }}>
-          <Typography fontWeight='bold' component='label' htmlFor='semantic-version-input'>
+          <Typography
+            component='label'
+            htmlFor='semantic-version-input'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
           <Typography variant='caption'>For example: 1.0.0</Typography>
@@ -238,10 +269,16 @@ export default function ReleaseForm({
         </Stack>
         <Stack sx={{ width: '100%' }}>
           <Stack direction='row' spacing={1}>
-            <Typography fontWeight='bold' component='label' htmlFor='model-card-version-input'>
+            <Typography
+              component='label'
+              htmlFor='model-card-version-input'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
             </Typography>
-            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
+            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version.</HelpPopover>}
           </Stack>
           {isReadOnly ? (
             <Typography>
@@ -296,7 +333,13 @@ export default function ReleaseForm({
       <Stack>
         {isReadOnly || isEdit ? (
           <>
-            <Typography fontWeight='bold'>Minor Release</Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Minor Release
+            </Typography>
             <ReadOnlyAnswer value={formData.isMinorRelease ? 'Yes' : 'No'} />
           </>
         ) : (
@@ -311,9 +354,22 @@ export default function ReleaseForm({
       <Stack>
         <Accordion defaultExpanded sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography fontWeight='bold'>{`Files (${formData.files.length})`}</Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >{`Files (${formData.files.length})`}</Typography>
           </AccordionSummary>
           <AccordionDetails>
+            {!isReadOnly && model.kind === EntryKind.UNTRUSTED_MODEL && (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <MessageAlert
+                  message={uiConfig.untrustedModel.fileUploadGuidance}
+                  severity='warning'
+                  style={{ width: 'fit-content' }}
+                />
+              </Box>
+            )}
             <>
               {!isReadOnly && (
                 <Stack spacing={2}>
@@ -351,7 +407,12 @@ export default function ReleaseForm({
                     </>
                   )}
                   {formData.files.length > 0 && (
-                    <Stack spacing={1} mt={1}>
+                    <Stack
+                      spacing={1}
+                      sx={{
+                        mt: 1,
+                      }}
+                    >
                       {formData.files.map((file, index) => (
                         <div key={`${file.name}-${file.size}-${index}`}>
                           <MultiFileInputFileDisplay
@@ -387,29 +448,31 @@ export default function ReleaseForm({
           </AccordionDetails>
         </Accordion>
       </Stack>
-      <Box>
-        <Accordion defaultExpanded sx={{ p: 0 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography
-              fontWeight='bold'
-              component='label'
-              htmlFor='image-input'
-            >{`Images (${formData.imageList.length})`}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <ModelImageList
-              multiple
-              model={model}
-              value={formData.imageList}
-              readOnly={isReadOnly}
-              onChange={onImageListChange}
-              onRegistryError={onRegistryError}
-              id='image-input'
-            />
-            {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
-          </AccordionDetails>
-        </Accordion>
-      </Box>
+      {model.kind !== EntryKind.UNTRUSTED_MODEL && (
+        <Box>
+          <Accordion defaultExpanded sx={{ p: 0 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+              <Typography
+                sx={{ fontWeight: 'bold' }}
+                component='label'
+                htmlFor='image-input'
+              >{`Images (${formData.imageList.length})`}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <ModelImageList
+                multiple
+                model={model}
+                value={formData.imageList}
+                readOnly={isReadOnly}
+                onChange={onImageListChange}
+                onRegistryError={onRegistryError}
+                id='image-input'
+              />
+              {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
+            </AccordionDetails>
+          </Accordion>
+        </Box>
+      )}
     </Stack>
   )
 }

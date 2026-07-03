@@ -1,10 +1,10 @@
+import dayjs from '@dayjs'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
 import { useGetEntry } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -133,7 +133,11 @@ export default function NewAccessRequest() {
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList
                 />
-                <Stack alignItems='flex-end'>
+                <Stack
+                  sx={{
+                    alignItems: 'flex-end',
+                  }}
+                >
                   <Button
                     sx={{ width: 'fit-content' }}
                     variant='contained'

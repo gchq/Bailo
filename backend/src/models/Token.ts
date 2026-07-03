@@ -1,8 +1,15 @@
-import bcrypt from 'bcryptjs'
-import { createHash } from 'crypto'
 import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
-import { BadReq } from '../utils/error.js'
+import {
+  createArgon2Hash,
+  createBcryptHash,
+  createSHA256Hash,
+  HashType,
+  HashTypeKeys,
+  verifyArgon2Hash,
+  verifyBcryptHash,
+  verifySHA256Hash,
+} from '../services/hash.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TokenScope = {
@@ -55,13 +62,6 @@ export const tokenActionIds = Object.values(TokenActions).map((tokenAction) => t
 
 export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]['id']
 
-export const HashType = {
-  Bcrypt: 'bcrypt',
-  SHA256: 'sha-256',
-}
-
-export type HashTypeKeys = (typeof HashType)[keyof typeof HashType]
-
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -103,7 +103,7 @@ const TokenSchema = new Schema<TokenDoc>(
 
     accessKey: { type: String, required: true, unique: true, index: true },
     secretKey: { type: String, required: true, select: false },
-    hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.SHA256 },
+    hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.ARGON2 },
   },
   {
     timestamps: true,
@@ -111,63 +111,40 @@ const TokenSchema = new Schema<TokenDoc>(
   },
 )
 
-TokenSchema.pre('save', function userPreSave() {
+TokenSchema.pre('save', async function userPreSave() {
   if (!this.isModified('secretKey') || !this.secretKey) {
     return
   }
 
   if (!this.hashMethod) {
-    this.hashMethod = HashType.SHA256
+    this.hashMethod = HashType.ARGON2
   }
 
-  if (this.hashMethod === HashType.Bcrypt) {
-    bcrypt.hash(this.secretKey, 8, (err: Error | null, result: string | undefined) => {
-      if (err) {
-        throw err
-      }
-      if (!result) {
-        throw BadReq('Unable to create token')
-      }
-      this.secretKey = result
-    })
+  if (this.hashMethod === HashType.ARGON2) {
+    this.secretKey = await createArgon2Hash(this.secretKey)
+  } else if (this.hashMethod === HashType.Bcrypt) {
+    this.secretKey = await createBcryptHash(this.secretKey)
   } else if (this.hashMethod === HashType.SHA256) {
-    const hash = createHash('sha256').update(this.secretKey).digest('hex')
-    this.secretKey = hash
+    this.secretKey = createSHA256Hash(this.secretKey)
   } else {
     throw new Error('Unexpected hash type: ' + this.hashMethod)
   }
 })
 
-TokenSchema.methods.compareToken = function compareToken(candidateToken: string) {
-  return new Promise((resolve, reject) => {
-    if (!this.secretKey) {
-      resolve(false)
-      return
-    }
+TokenSchema.methods.compareToken = async function compareToken(candidateToken: string): Promise<boolean> {
+  if (!this.secretKey) {
+    return false
+  }
 
-    if (this.hashMethod === HashType.Bcrypt) {
-      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, result: boolean | undefined) => {
-        if (err) {
-          reject(err)
-          return
-        }
-        if (!result) {
-          BadReq('Unable to compare token')
-        }
-        resolve(result)
-      })
-    } else if (this.hashMethod === HashType.SHA256) {
-      const candidateHash = createHash('sha256').update(candidateToken).digest('hex')
-      if (candidateHash !== this.secretKey) {
-        resolve(false)
-        return
-      }
-
-      resolve(true)
-    } else {
-      throw new Error('Unexpected hash type: ' + this.hashMethod)
-    }
-  })
+  if (this.hashMethod === HashType.ARGON2) {
+    return verifyArgon2Hash(candidateToken, this.secretKey)
+  } else if (this.hashMethod === HashType.Bcrypt) {
+    return verifyBcryptHash(candidateToken, this.secretKey)
+  } else if (this.hashMethod === HashType.SHA256) {
+    return verifySHA256Hash(candidateToken, this.secretKey)
+  } else {
+    throw new Error('Unexpected hash type: ' + this.hashMethod)
+  }
 }
 
 TokenSchema.plugin(softDeletionPlugin)

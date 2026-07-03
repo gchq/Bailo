@@ -1,19 +1,14 @@
-import { Add, ExpandMore, RestartAlt } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Button,
-  Checkbox,
   Container,
   Divider,
   FilledInput,
   FormControl,
-  FormControlLabel,
-  FormGroup,
   IconButton,
   InputLabel,
   Paper,
@@ -43,6 +38,7 @@ import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
 import { isEnabled, isReachable } from 'utils/peerUtils'
+import { toKebabCase, toTitleCase } from 'utils/stringUtils'
 
 interface KeyAndLabel {
   key: string
@@ -50,23 +46,76 @@ interface KeyAndLabel {
 }
 
 const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
+const ALL_KINDS = 'All'
 
 export default function Marketplace() {
+  const router = useRouter()
+
+  function parseQueryArray(value?: string | string[]): string[] {
+    if (!value) {
+      return []
+    }
+    return Array.isArray(value) ? [...value] : [value]
+  }
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { peers, isPeersLoading, isPeersError } = useGetPeers()
+  const { status, isStatusLoading, isStatusError } = useGetStatus()
+
+  const isMirroredModelEnabled = !!uiConfig?.modelMirror.import.enabled
+  const isUntrustedModelEnabled = !!uiConfig?.untrustedModel.enabled
+
+  const [availableModelKinds, setAvailableModelKinds] = useState<EntryKindKeys[]>([])
+  const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
   const [filter, setFilter] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedPeers, setSelectedPeers] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [selectedStates, setSelectedStates] = useState<string[]>([])
-  const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
-  const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [titleOnly, setTitleOnly] = useState(false)
+
+  useEffect(() => {
+    if (!router.isReady) {
+      return
+    }
+    const {
+      filter: filterFromQuery,
+      peers: peersFromQuery,
+      organisations: organisationsFromQuery,
+      states: statesFromQuery,
+      tags: tagsFromQuery,
+      titleOnly: titleOnlyFromQuery,
+      kinds: kindsFromQuery,
+    } = router.query
+
+    setFilter((filterFromQuery as string) || '')
+    setSelectedPeers(parseQueryArray(peersFromQuery))
+    setSelectedOrganisations(parseQueryArray(organisationsFromQuery))
+    setSelectedStates(parseQueryArray(statesFromQuery))
+    setSelectedTags(parseQueryArray(tagsFromQuery))
+    setTitleOnly(titleOnlyFromQuery === 'true')
+    if (kindsFromQuery) {
+      setSelectedKinds(parseQueryArray(kindsFromQuery) as EntryKindKeys[])
+    }
+  }, [router.isReady, router.query, availableModelKinds])
+
+  useEffect(() => {
+    const kinds: EntryKindKeys[] = [EntryKind.MODEL]
+    if (isMirroredModelEnabled) {
+      kinds.push(EntryKind.MIRRORED_MODEL)
+    }
+    if (isUntrustedModelEnabled) {
+      kinds.push(EntryKind.UNTRUSTED_MODEL)
+    }
+    setAvailableModelKinds(kinds)
+    setSelectedKinds(kinds)
+  }, [isMirroredModelEnabled, isUntrustedModelEnabled])
+
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-  const { peers, isPeersLoading, isPeersError } = useGetPeers()
-  const { status, isStatusLoading, isStatusError } = useGetStatus()
+  const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
   const {
     entries: models,
@@ -81,7 +130,7 @@ export default function Marketplace() {
     selectedOrganisations,
     selectedStates,
     selectedPeers,
-    debouncedFilter.length >= 3 ? debouncedFilter : '',
+    searchFilter,
     false,
     '',
     titleOnly,
@@ -100,7 +149,7 @@ export default function Marketplace() {
     selectedOrganisations,
     selectedStates,
     selectedPeers,
-    debouncedFilter.length >= 3 ? debouncedFilter : '',
+    searchFilter,
     false,
     '',
     titleOnly,
@@ -118,7 +167,7 @@ export default function Marketplace() {
     selectedOrganisations,
     selectedStates,
     selectedPeers,
-    debouncedFilter.length >= 3 ? debouncedFilter : '',
+    searchFilter,
     false,
     '',
     titleOnly,
@@ -136,7 +185,7 @@ export default function Marketplace() {
     selectedOrganisations,
     selectedStates,
     selectedPeers,
-    debouncedFilter.length >= 3 ? debouncedFilter : '',
+    searchFilter,
     false,
     '',
     titleOnly,
@@ -145,70 +194,16 @@ export default function Marketplace() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
+  const roleOptions = useMemo(() => {
+    return [
+      ...defaultRoleOptions,
+      ...reviewRoles.map((role) => {
+        return { key: role.shortName, label: `${role.name}` }
+      }),
+    ]
+  }, [reviewRoles])
+
   const theme = useTheme()
-  const router = useRouter()
-
-  const {
-    filter: filterFromQuery,
-    task: taskFromQuery,
-    peers: peersFromQuery,
-    organisations: organisationsFromQuery,
-    states: statesFromQuery,
-    tags: tagsFromQuery,
-    titleOnly: titleOnlyFromQuery,
-  } = router.query
-
-  useEffect(() => {
-    if (filterFromQuery) {
-      setFilter(filterFromQuery as string)
-    }
-    if (tagsFromQuery) {
-      let tagsAsArray: string[] = []
-      if (typeof tagsFromQuery === 'string') {
-        tagsAsArray.push(tagsFromQuery)
-      } else {
-        tagsAsArray = [...tagsFromQuery]
-      }
-      setSelectedTags([...tagsAsArray])
-    }
-    if (organisationsFromQuery) {
-      let organisationsAsArray: string[] = []
-      if (typeof organisationsFromQuery === 'string') {
-        organisationsAsArray.push(organisationsFromQuery)
-      } else {
-        organisationsAsArray = [...organisationsFromQuery]
-      }
-      setSelectedOrganisations([...organisationsAsArray])
-    }
-    if (statesFromQuery) {
-      let statesAsArray: string[] = []
-      if (typeof statesFromQuery === 'string') {
-        statesAsArray.push(statesFromQuery)
-      } else {
-        statesAsArray = [...statesFromQuery]
-      }
-      setSelectedStates([...statesAsArray])
-    }
-
-    if (peersFromQuery) {
-      let peersAsArray: string[] = []
-      if (typeof peersFromQuery === 'string') {
-        peersAsArray.push(peersFromQuery)
-      } else {
-        peersAsArray = [...peersFromQuery]
-      }
-      setSelectedPeers([...peersAsArray])
-    }
-    setTitleOnly(titleOnlyFromQuery === 'true')
-  }, [
-    filterFromQuery,
-    taskFromQuery,
-    tagsFromQuery,
-    organisationsFromQuery,
-    statesFromQuery,
-    peersFromQuery,
-    titleOnlyFromQuery,
-  ])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -254,6 +249,13 @@ export default function Marketplace() {
     return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
   }, [uiConfig])
 
+  const modelKindOptions = useMemo((): string[] => {
+    if (availableModelKinds.length <= 1) {
+      return availableModelKinds.map(toTitleCase)
+    }
+    return [ALL_KINDS, ...availableModelKinds.map(toTitleCase)]
+  }, [availableModelKinds])
+
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
@@ -286,6 +288,25 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
+  const handleModelKindsOnChange = useCallback(
+    (kinds: string[]) => {
+      const wasAllSelected = selectedKinds.length === availableModelKinds.length
+      const isAllNowSelected = kinds.includes(ALL_KINDS)
+      if (isAllNowSelected && !wasAllSelected) {
+        setSelectedKinds(availableModelKinds)
+        updateQueryParams('kinds', availableModelKinds)
+      } else if (!isAllNowSelected && wasAllSelected) {
+        setSelectedKinds([])
+        updateQueryParams('kinds', [])
+      } else {
+        const filteredKinds = kinds.filter((kind) => kind !== ALL_KINDS).map(toKebabCase) as EntryKindKeys[]
+        setSelectedKinds(filteredKinds)
+        updateQueryParams('kinds', filteredKinds)
+      }
+    },
+    [updateQueryParams, selectedKinds, availableModelKinds],
+  )
+
   const handlePopularTagsOnChange = useCallback(
     (selectedTags: string[]) => {
       setSelectedTags(selectedTags as string[])
@@ -303,7 +324,7 @@ export default function Marketplace() {
     updateQueryParams('titleOnly', (!titleOnly).toString())
   }, [updateQueryParams, titleOnly])
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setSelectedOrganisations([])
     setSelectedTags([])
     setSelectedStates([])
@@ -311,8 +332,21 @@ export default function Marketplace() {
     setSelectedPeers([])
     setFilter('')
     setTitleOnly(false)
+    setSelectedKinds(availableModelKinds)
     router.replace('/', undefined, { shallow: true })
-  }
+  }, [availableModelKinds, router])
+
+  const filteredModels = useMemo(() => {
+    return [
+      ...(selectedKinds.includes(EntryKind.MODEL) ? models : []),
+      ...(availableModelKinds.includes(EntryKind.MIRRORED_MODEL) && selectedKinds.includes(EntryKind.MIRRORED_MODEL)
+        ? mirroredModels
+        : []),
+      ...(availableModelKinds.includes(EntryKind.UNTRUSTED_MODEL) && selectedKinds.includes(EntryKind.UNTRUSTED_MODEL)
+        ? untrustedModels
+        : []),
+    ]
+  }, [models, mirroredModels, untrustedModels, selectedKinds, availableModelKinds])
 
   const combinedModelErrorMessage = useMemo(() => {
     let errorMessage = ''
@@ -327,17 +361,6 @@ export default function Marketplace() {
     }
     return errorMessage
   }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
-
-  useEffect(() => {
-    if (reviewRoles) {
-      setRoleOptions([
-        ...defaultRoleOptions,
-        ...reviewRoles.map((role) => {
-          return { key: role.shortName, label: `${role.name}` }
-        }),
-      ])
-    }
-  }, [reviewRoles])
 
   if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
@@ -376,8 +399,8 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-                <Typography component='h2' variant='h5' fontWeight='bold'>
+              <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
+                <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
                   Filters
                 </Typography>
                 <HelpDialog title='Search Information' content={<SearchInfo />} />
@@ -482,22 +505,25 @@ export default function Marketplace() {
                     accordion
                   />
                 </Box>
-                {uiConfig && uiConfig.modelMirror.import.enabled && (
-                  <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
-                    <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                      <Typography component='h2' variant='h6'>
-                        Mirrored models
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ p: 1 }}>
-                      <FormGroup>
-                        <FormControlLabel
-                          control={<Checkbox onChange={(e) => setMirroredModelsOnly(e.target.checked)} />}
-                          label='Only display mirrored models'
-                        />
-                      </FormGroup>
-                    </AccordionDetails>
-                  </Accordion>
+                {uiConfig && selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
+                  <Box>
+                    <ChipSelector
+                      label='Model kinds'
+                      chipTooltipTitle={'Filter by model kinds'}
+                      options={modelKindOptions}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={
+                        selectedKinds.length === availableModelKinds.length
+                          ? [ALL_KINDS, ...selectedKinds.map(toTitleCase)]
+                          : selectedKinds.map(toTitleCase)
+                      }
+                      onChange={handleModelKindsOnChange}
+                      size='small'
+                      ariaLabel='add model kind to search filter'
+                      accordion
+                    />
+                  </Box>
                 )}
                 <Box>
                   <ChipSelector
@@ -512,7 +538,12 @@ export default function Marketplace() {
                   />
                 </Box>
               </Stack>
-              <Box justifySelf='center' marginTop={1}>
+              <Box
+                sx={{
+                  justifySelf: 'center',
+                  marginTop: 1,
+                }}
+              >
                 <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
                   Reset filters
                 </Button>
@@ -530,7 +561,7 @@ export default function Marketplace() {
                   variant='scrollable'
                 >
                   <Tab
-                    label={`Models ${models ? `(${models.length})` : ''}`}
+                    label={`Models ${models ? `(${filteredModels.length})` : ''}`}
                     value={EntryKind.MODEL}
                     onClick={() => setSelectedTab(EntryKind.MODEL)}
                   />
@@ -541,12 +572,14 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {(isModelsLoading || isMirroredModelsLoading || isUntrustedModelsLoading) && <Loading />}
+              {(isModelsLoading ||
+                (isMirroredModelEnabled && isMirroredModelsLoading) ||
+                (isUntrustedModelEnabled && isUntrustedModelsLoading)) && <Loading />}
               {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
-                    entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels, ...untrustedModels]}
+                    entries={filteredModels}
                     entriesErrorMessage={combinedModelErrorMessage || ''}
                     selectedChips={selectedTags}
                     onSelectedChipsChange={handlePopularTagsOnChange}

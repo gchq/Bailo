@@ -5,11 +5,14 @@ exports[`routes > review > postReview > audit > expected call 1`] = `"expedita"`
 exports[`routes > review > postReview > successfully create a lifecycle review 1`] = `
 {
   "review": {
+    "_id": "6776901b879d08e34b599d7e",
     "comment": "test comment",
     "createdAt": "2024-05-17T06:13:41.690Z",
     "decision": "approve",
+    "entity": "user:user",
     "kind": "release",
     "parentId": "66854110aab20df2b7481a82",
+    "reactions": [],
     "role": "mtr",
     "updatedAt": "2024-05-17T06:13:41.690Z",
     "user": "user",

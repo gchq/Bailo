@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 from io import BytesIO
+from json import JSONDecodeError
 from typing import Any
+
+import requests
+
+# isort: split
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
+from bailo.core.exceptions import BailoException, ResponseException
 from bailo.core.utils import filter_none, normalise_query_params
 
 
@@ -23,6 +29,30 @@ class Client:
         """
         self.url = url.rstrip("/") + "/api"
         self.agent = agent or Agent()
+
+    @staticmethod
+    def _parse_json(res: requests.Response) -> dict[str, Any]:
+        """Parse a JSON response, raising BailoException if the body contains an error.
+
+        :param res: Response object from the agent.
+        :raises BailoException: If the response body contains an error key.
+        :raises ResponseException: If the response body is not valid JSON.
+        :return: Parsed JSON as a dictionary.
+        """
+        try:
+            data = res.json()
+        except (JSONDecodeError, ValueError) as e:
+            raise ResponseException(
+                f"{res.status_code} Response from {res.request.method} {res.request.url} is not valid JSON"
+            ) from e
+
+        if isinstance(data, dict) and "error" in data:
+            error_body = data["error"] if isinstance(data["error"], dict) else {}
+            message = error_body.get("message", "Unknown API error")
+            context = error_body.get("context")
+            raise BailoException(message=message, status_code=res.status_code, context=context)
+
+        return data
 
     def post_model(
         self,
@@ -78,10 +108,12 @@ class Client:
         )
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.post(
-            f"{self.url}/v2/models",
-            json=normalised_params,
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/models",
+                json=normalised_params,
+            )
+        )
 
     def get_models(
         self,
@@ -142,10 +174,12 @@ class Client:
         )
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.get(
-            f"{self.url}/v2/models/search",
-            params=normalised_params,
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/models/search",
+                params=normalised_params,
+            )
+        )
 
     def get_model(
         self,
@@ -156,9 +190,11 @@ class Client:
         :param model_id: Unique model ID
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}",
+            )
+        )
 
     def patch_model(
         self,
@@ -199,7 +235,7 @@ class Client:
         )
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=normalised_params).json()
+        return self._parse_json(self.agent.patch(f"{self.url}/v2/model/{model_id}", json=normalised_params))
 
     def delete_model(
         self,
@@ -211,9 +247,11 @@ class Client:
         :param model_id: Unique model ID
         :return: JSON response object
         """
-        return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}",
-        ).json()
+        return self._parse_json(
+            self.agent.delete(
+                f"{self.url}/v2/model/{model_id}",
+            )
+        )
 
     def get_model_card(
         self,
@@ -228,9 +266,9 @@ class Client:
         :param mirrored: Whether to get the read only model card
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/model-card/{version}", params={"mirrored": mirrored}
-        ).json()
+        return self._parse_json(
+            self.agent.get(f"{self.url}/v2/model/{model_id}/model-card/{version}", params={"mirrored": mirrored})
+        )
 
     def put_model_card(
         self,
@@ -243,12 +281,14 @@ class Client:
         :param metadata: Metadata object, defined by model card schema
         :return: JSON response object
         """
-        return self.agent.put(
-            f"{self.url}/v2/model/{model_id}/model-cards",
-            json={
-                "metadata": metadata,
-            },
-        ).json()
+        return self._parse_json(
+            self.agent.put(
+                f"{self.url}/v2/model/{model_id}/model-cards",
+                json={
+                    "metadata": metadata,
+                },
+            )
+        )
 
     def model_card_from_schema(
         self,
@@ -262,23 +302,27 @@ class Client:
         :param schema_id: Unique model card schema ID
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/setup/from-schema",
-            json={
-                "schemaId": schema_id,
-            },
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/setup/from-schema",
+                json={
+                    "schemaId": schema_id,
+                },
+            )
+        )
 
     def model_card_from_template(self, model_id: str, template_id: str | None):
         """Create a model card using a given template ID (previously created models, model ID)
         :param model_id: Unique model ID
-        :param template_id Previous model's unique ID to be used as template for new model card
+        :param template_id: Previous model's unique ID to be used as template for new model card
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/setup/from-template",
-            json={"templateId": template_id},
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/setup/from-template",
+                json={"templateId": template_id},
+            )
+        )
 
     def post_release(
         self,
@@ -317,7 +361,7 @@ class Client:
         )
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=normalised_params).json()
+        return self._parse_json(self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=normalised_params))
 
     def put_release(
         self,
@@ -330,28 +374,29 @@ class Client:
         images: list[str],
     ):
         """
-        Create a new model release.
+        Update a model release.
 
         :param model_id: Unique model ID
         :param model_card_version: Model card version
         :param release_version: Release version
         :param notes: Notes on release
+        :param draft: Signifies a draft release
         :param file_ids: Files for release
         :param images: Images for release
-        :param minor: Signifies a minor release, defaults to False
-        :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
         """
-        return self.agent.put(
-            f"{self.url}/v2/model/{model_id}/release/{release_version}",
-            json={
-                "notes": notes,
-                "draft": draft,
-                "fileIds": file_ids,
-                "images": images,
-                "modelCardVersion": model_card_version,
-            },
-        ).json()
+        return self._parse_json(
+            self.agent.put(
+                f"{self.url}/v2/model/{model_id}/release/{release_version}",
+                json={
+                    "notes": notes,
+                    "draft": draft,
+                    "fileIds": file_ids,
+                    "images": images,
+                    "modelCardVersion": model_card_version,
+                },
+            )
+        )
 
     def get_all_releases(
         self,
@@ -363,9 +408,11 @@ class Client:
         :param model_id: Unique model ID
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/releases",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/releases",
+            )
+        )
 
     def get_release(self, model_id: str, release_version: str):
         """
@@ -375,9 +422,11 @@ class Client:
         :param release_version: Release version
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/release/{release_version}",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/release/{release_version}",
+            )
+        )
 
     def delete_release(
         self,
@@ -391,9 +440,11 @@ class Client:
         :param release_version: Release version
         :return: JSON response object
         """
-        return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/release/{release_version}",
-        ).json()
+        return self._parse_json(
+            self.agent.delete(
+                f"{self.url}/v2/model/{model_id}/release/{release_version}",
+            )
+        )
 
     def get_files(
         self,
@@ -405,9 +456,11 @@ class Client:
         :param model_id: Unique model ID
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/files",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/files",
+            )
+        )
 
     def get_download_file(
         self,
@@ -418,7 +471,7 @@ class Client:
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
-        :return: The unique file ID
+        :return: Response object
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
@@ -444,7 +497,7 @@ class Client:
         :param model_id: Unique model ID
         :param semver: Semver of the release
         :param filename: The filename trying to download from
-        :return: The filename
+        :return: Response object
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
@@ -490,9 +543,11 @@ class Client:
         :param file_id: Unique file ID
         :return: JSON response object
         """
-        return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/file/{file_id}",
-        ).json()
+        return self._parse_json(
+            self.agent.delete(
+                f"{self.url}/v2/model/{model_id}/file/{file_id}",
+            )
+        )
 
     def get_all_images(
         self,
@@ -503,7 +558,7 @@ class Client:
         :param model_id: A unique model ID
         :return: JSON response object
         """
-        return self.agent.get(f"{self.url}/v2/model/{model_id}/images").json()
+        return self._parse_json(self.agent.get(f"{self.url}/v2/model/{model_id}/images"))
 
     def get_all_schemas(
         self,
@@ -514,10 +569,12 @@ class Client:
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/schemas",
-            params={"kind": kind},
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/schemas",
+                params={"kind": kind},
+            )
+        )
 
     def get_schema(
         self,
@@ -528,9 +585,11 @@ class Client:
         :param schema_id: Unique schema ID
         :return: JSON response object.
         """
-        return self.agent.get(
-            f"{self.url}/v2/schema/{schema_id}",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/schema/{schema_id}",
+            )
+        )
 
     def post_schema(
         self,
@@ -551,17 +610,19 @@ class Client:
         :param review_roles: List made up of the "shortName" property from a Review Role object
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/schemas",
-            json={
-                "id": schema_id,
-                "name": name,
-                "description": description,
-                "kind": str(kind),
-                "jsonSchema": json_schema,
-                "reviewRoles": review_roles,
-            },
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/schemas",
+                json={
+                    "id": schema_id,
+                    "name": name,
+                    "description": description,
+                    "kind": str(kind),
+                    "jsonSchema": json_schema,
+                    "reviewRoles": review_roles,
+                },
+            )
+        )
 
     def get_reviews(
         self,
@@ -578,14 +639,16 @@ class Client:
         """
         _active = str(active).lower()
 
-        return self.agent.get(
-            f"{self.url}/v2/reviews",
-            params={
-                "active": _active,
-                "modelId": model_id,
-                "semver": version,
-            },
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/reviews",
+                params={
+                    "active": _active,
+                    "modelId": model_id,
+                    "semver": version,
+                },
+            )
+        )
 
     def post_release_review(
         self,
@@ -606,10 +669,12 @@ class Client:
         filtered_params = filter_none({"role": role, "decision": decision, "comment": comment})
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/release/{version}/review",
-            json=normalised_params,
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/release/{version}/review",
+                json=normalised_params,
+            )
+        )
 
     def get_model_roles(
         self,
@@ -621,9 +686,11 @@ class Client:
         :param model_id: Unique model ID
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/roles",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/roles",
+            )
+        )
 
     def get_access_request(self, model_id: str, access_request_id: str):
         """Retrieve a specific access request given its unique ID.
@@ -632,9 +699,11 @@ class Client:
         :param access_request_id: Unique access request ID
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            )
+        )
 
     def get_access_requests(
         self,
@@ -643,12 +712,13 @@ class Client:
         """Retrieve all access requests given a specific model.
 
         :param model_id: Unique model ID
-        :param access_request_id: Unique access request ID
         :return: JSON response object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/access-requests",
-        ).json()
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/access-requests",
+            )
+        )
 
     def post_access_request(self, model_id: str, metadata: Any, schema_id: str):
         """Create an access request given a model ID.
@@ -658,10 +728,12 @@ class Client:
         :param schema_id: Unique schema ID
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/access-requests",
-            json={"schemaId": schema_id, "metadata": metadata},
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/access-requests",
+                json={"schemaId": schema_id, "metadata": metadata},
+            )
+        )
 
     def delete_access_request(self, model_id: str, access_request_id: str):
         """Delete a specific access request associated with a model.
@@ -670,9 +742,11 @@ class Client:
         :param access_request_id: Unique access request ID
         :return: JSON response object
         """
-        return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-        ).json()
+        return self._parse_json(
+            self.agent.delete(
+                f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            )
+        )
 
     def patch_access_request(
         self,
@@ -685,16 +759,19 @@ class Client:
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID
-        :metadata: Metadata object, defined by access request schemas
+        :param metadata: Metadata object, defined by access request schemas
+        :param schema_id: Unique schema ID, defaults to None
         :return: JSON response object
         """
         filtered_params = filter_none({"schemaId": schema_id, "metadata": metadata})
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.patch(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-            json=normalised_params,
-        ).json()
+        return self._parse_json(
+            self.agent.patch(
+                f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+                json=normalised_params,
+            )
+        )
 
     def put_file_scan(
         self,
@@ -708,7 +785,9 @@ class Client:
         :param file_id: Unique file ID
         :return: JSON response object
         """
-        return self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan", json={}).json()
+        return self._parse_json(
+            self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan", json={})
+        )
 
     def put_image_scan(
         self,
@@ -724,9 +803,9 @@ class Client:
         :param image_tag: Unique tag of the image
         :return: JSON response object
         """
-        return self.agent.put(
-            f"{self.url}/v2/filescanning/model/{model_id}/image/{image_name}/{image_tag}/scan", json={}
-        ).json()
+        return self._parse_json(
+            self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/image/{image_name}/{image_tag}/scan", json={})
+        )
 
     def post_access_request_review(
         self,
@@ -736,7 +815,7 @@ class Client:
         decision: str,
         comment: str | None = None,
     ):
-        """Create a review for a release.
+        """Create a review for an access request.
 
         :param model_id: A unique model ID
         :param access_request_id: Unique access request ID
@@ -747,7 +826,9 @@ class Client:
         filtered_params = filter_none({"role": role, "decision": decision, "comment": comment})
         normalised_params = normalise_query_params(filtered_params)
 
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
-            json=normalised_params,
-        ).json()
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
+                json=normalised_params,
+            )
+        )

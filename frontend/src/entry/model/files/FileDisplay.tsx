@@ -1,4 +1,8 @@
-import { Delete, Info, LocalOffer, MoreVert, Refresh } from '@mui/icons-material'
+import Delete from '@mui/icons-material/Delete'
+import Info from '@mui/icons-material/Info'
+import LocalOffer from '@mui/icons-material/LocalOffer'
+import MoreVert from '@mui/icons-material/MoreVert'
+import Refresh from '@mui/icons-material/Refresh'
 import {
   Box,
   Button,
@@ -16,15 +20,25 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { rerunArtefactScan, useGetArtefactScannerInfo } from 'actions/artefactScanning'
+import { rerunArtefactScan } from 'actions/artefactScanning'
 import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { CSSProperties, Fragment, MouseEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import {
+  CSSProperties,
+  Fragment,
+  MouseEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useState,
+} from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
@@ -88,12 +102,11 @@ export default function FileDisplay({
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
+  const [latestRelease, setLatestRelease] = useState('')
 
   const sendNotification = useNotification()
   const { mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
-
-  const [latestRelease, setLatestRelease] = useState('')
 
   const sortedAssociatedReleases = useMemo(
     () =>
@@ -156,7 +169,7 @@ export default function FileDisplay({
     return buildChipDetails(file.scanResults)
   }, [file])
 
-  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
+  const scanners = useContext(ArtefactScanningInfoContext)
 
   const openMore = Boolean(anchorElMore)
   const openScan = Boolean(anchorElScan)
@@ -183,7 +196,7 @@ export default function FileDisplay({
   }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
-    if (!scanners || isScannersError) {
+    if (!scanners) {
       return null
     }
     if (!scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE)) {
@@ -197,7 +210,7 @@ export default function FileDisplay({
         <ListItemText>Rerun file scan</ListItemText>
       </MenuItem>
     )
-  }, [handleRerunFileScanOnClick, scanners, isScannersError, showMenuItems.rescanFile])
+  }, [handleRerunFileScanOnClick, scanners, showMenuItems.rescanFile])
 
   const scanResults = isFileInterface(file) ? file.scanResults : undefined
   const scanInProgress = isAnyScanInProgress(scanResults)
@@ -272,20 +285,25 @@ export default function FileDisplay({
   const showMenu = () =>
     Object.keys(showMenuItems).length > 0 && Object.values(showMenuItems).some((item) => item === true)
 
-  if (isScannersLoading) {
-    return <Loading />
-  }
-
   return (
     <Box sx={{ ...style, p: 1 }} key={key}>
       {isFileInterface(file) && (
         <Stack spacing={1}>
-          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+          <Stack
+            direction={{ sm: 'column', md: 'row' }}
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <Stack
               direction={{ sm: 'column', md: 'row' }}
               spacing={2}
-              alignItems='center'
-              sx={{ wordBreak: 'break-word' }}
+              sx={{
+                alignItems: 'center',
+                wordBreak: 'break-word',
+              }}
             >
               <Tooltip title={file.name}>
                 <Link
@@ -293,7 +311,13 @@ export default function FileDisplay({
                   href={`/api/v2/model/${modelId}/file/${file._id}/download`}
                   data-test={`fileLink-${file.name}`}
                 >
-                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
+                  <Typography
+                    variant='h6'
+                    sx={{
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
                     {file.name}
                   </Typography>
                 </Link>
@@ -306,9 +330,21 @@ export default function FileDisplay({
                 <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
               </Typography>
             </Stack>
-            <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
+            <Stack
+              direction={{ sm: 'column', md: 'row' }}
+              spacing={2}
+              sx={{
+                alignItems: { sm: 'center' },
+              }}
+            >
               {scanners && scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) && (
-                <Stack direction='row' spacing={1} alignItems='center'>
+                <Stack
+                  direction='row'
+                  spacing={1}
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   {scanResultChip}
                 </Stack>
               )}
@@ -353,7 +389,13 @@ export default function FileDisplay({
               </Stack>
             </Stack>
           </Stack>
-          <Stack spacing={2} direction='row' alignItems='center'>
+          <Stack
+            spacing={2}
+            direction='row'
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             {!hideTags && (
               <>
                 <Restricted action='editEntry' fallback={<></>}>
@@ -419,7 +461,11 @@ export default function FileDisplay({
         }
       >
         <Box sx={{ pt: 2 }}>
-          <AssociatedReleasesList modelId={modelId} latestRelease={latestRelease} releases={sortedAssociatedReleases} />
+          <AssociatedReleasesList
+            modelId={modelId}
+            latestRelease={releases.length > 0 ? releases[0].semver : ''}
+            releases={sortedAssociatedReleases}
+          />
         </Box>
       </ConfirmationDialogue>
     </Box>

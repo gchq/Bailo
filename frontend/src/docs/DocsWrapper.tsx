@@ -29,20 +29,20 @@ enum DirectionalNavigation {
 
 const paddingIncrement = 2
 
+const StyledList = styled(List)(({ theme }) => ({
+  paddingTop: 0,
+  paddingBottom: 0,
+  '&& .Mui-selected, && .Mui-selected:hover': {
+    '&, & .MuiListItemIcon-root': {
+      color: theme.palette.secondary.main,
+    },
+  },
+}))
+
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
   const { pathname, push } = useRouter()
   const ref = useRef(null)
-
-  const StyledList = styled(List)({
-    paddingTop: 0,
-    paddingBottom: 0,
-    '&& .Mui-selected, && .Mui-selected:hover': {
-      '&, & .MuiListItemIcon-root': {
-        color: theme.palette.secondary.main,
-      },
-    },
-  })
 
   useEffect(() => {
     if (ref && pathname) {
@@ -82,10 +82,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <ListItemText
                 primary={doc.title}
                 slotProps={{
-                  primary: {
-                    fontWeight: 'bold',
-                    fontSize: headerFontSize,
-                  },
+                  primary: { sx: { fontSize: headerFontSize, fontWeight: 'bold' } },
                 }}
               />
             </ListItem>
@@ -96,7 +93,9 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
-                      primary: { fontWeight: doc.slug ? 'normal' : 'bold', fontSize: doc.header ? headerFontSize : '' },
+                      primary: {
+                        sx: { fontWeight: doc.slug ? 'normal' : 'bold', fontSize: doc.header ? headerFontSize : '' },
+                      },
                     }}
                   />
                 </ListItemButton>
@@ -146,19 +145,35 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       <Title text='Documentation' />
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Box
-          sx={(theme) => ({
-            backgroundColor: theme.palette.background.paper,
-            borderRight: `1px solid ${theme.palette.divider}`,
-            overflow: 'auto',
-            py: 2,
-          })}
-          position={{ xs: 'relative', sm: 'fixed' }}
-          height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
+          sx={[
+            {
+              position: { xs: 'relative', sm: 'fixed' },
+              height: { xs: '250px', sm: 'calc(100vh - 80px)' },
+            },
+            (theme) => ({
+              backgroundColor: theme.palette.background.paper,
+              borderRight: `1px solid ${theme.palette.divider}`,
+              overflow: 'auto',
+              py: 2,
+            }),
+          ]}
         >
           {docList()}
         </Box>
-        <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
-          <Box display='flex' flexDirection='column'>
+        <Box
+          sx={{
+            flex: 1,
+            overflow: 'auto',
+            paddingLeft: { sm: '350px' },
+            height: '100%',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <Container
               maxWidth='lg'
               sx={{
@@ -183,7 +198,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <Divider flexItem />
               {flatDirectory.length > 0 && (
                 <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
-                  <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-around'>
+                  <Stack
+                    direction={{ sm: 'column', md: 'row' }}
+                    sx={{
+                      justifyContent: 'space-around',
+                    }}
+                  >
                     {currentIndex === 0 && (
                       <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
                         Home

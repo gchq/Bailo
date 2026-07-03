@@ -11,7 +11,7 @@ The landing page is a static NextJS application used for our GitHub Pages webpag
 
 ### Requirements
 
-- Node v24
+- Node v26
 
 ### Development Build
 

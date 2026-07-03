@@ -1,8 +1,8 @@
-import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import Error from '@mui/icons-material/ErrorOutline'
+import Share from '@mui/icons-material/Share'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import {
@@ -21,7 +21,13 @@ import { isQuestionAnswered } from 'utils/formUtils'
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
     <Card sx={{ p: 2 }}>
-      <Typography fontWeight='bold' variant='h5' component='h2'>
+      <Typography
+        variant='h5'
+        component='h2'
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         {title}
       </Typography>
       {canAdd && registry.formContext.editMode && !registry.formContext.mirroredModel && (
@@ -107,8 +113,20 @@ export function ObjectFieldTemplate({
     <Box sx={{ p: 2, scrollMarginTop: 100 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
         <div>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <Typography fontWeight='bold' variant='h6' component='h3'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              variant='h6'
+              component='h3'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {title}
             </Typography>
             <Tooltip title='Share'>
@@ -165,7 +183,14 @@ export function ObjectFieldTemplateForQuestionViewer({
       <Stack spacing={2}>
         <Stack>
           <Button size='large' sx={{ textTransform: 'none', textAlign: 'left', width: 'fit-content' }}>
-            <Typography fontWeight='bold' variant='h6' component='h3' onClick={handleOnClick}>
+            <Typography
+              variant='h6'
+              component='h3'
+              onClick={handleOnClick}
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {title}
             </Typography>
           </Button>
@@ -187,11 +212,22 @@ export function ObjectFieldTemplateForQuestionViewer({
 
 export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
   return id === 'root__title' ? (
-    <Typography variant='h5' fontWeight='bold'>
+    <Typography
+      variant='h5'
+      sx={{
+        fontWeight: 'bold',
+      }}
+    >
       {title}
     </Typography>
   ) : (
-    <Typography variant='h6' fontWeight='bold' sx={{ pt: 2 }}>
+    <Typography
+      variant='h6'
+      sx={{
+        fontWeight: 'bold',
+        pt: 2,
+      }}
+    >
       test {title}
     </Typography>
   )

@@ -2,15 +2,20 @@ import nodemailer, { Transporter } from 'nodemailer'
 
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { SystemRoles } from '../../models/Model.js'
+import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
-import { ReviewDoc } from '../../models/Review.js'
+import { ReviewDoc, ReviewInterface } from '../../models/Review.js'
+import { UserInterface } from '../../models/User.js'
+import { ReviewKind } from '../../types/enums.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
+import { BadReq, NotFound } from '../../utils/error.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
+import { checkAccessRequestsApproved } from '../response.js'
 import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -74,6 +79,17 @@ async function dispatchEmail(entities: string[], emailContent: EmailContent) {
     log.warn({ content, error }, `Unable to send email`)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
+}
+
+export async function getApprovedAccessRequests(modelId: string) {
+  const accessRequests = await AccessRequestModel.find({
+    modelId,
+  })
+  const approvalResults = await Promise.all(
+    accessRequests.map((accessRequest) => checkAccessRequestsApproved([accessRequest.id])),
+  )
+  const approvedAccessRequests = accessRequests.filter((_, index) => approvalResults[index])
+  return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
@@ -245,10 +261,65 @@ export async function notifyReviewResponseForAccess(
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
-
   const model = await getModelByIdNoAuth(accessRequest.modelId)
   const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
   await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], await emailContent)
+}
+
+export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent) {
+  const model = await getModelByIdNoAuth(modelId)
+  const reviewRoleEntities = getRoleEntities([role], model.collaborators)[role]
+  await dispatchEmail(reviewRoleEntities, await emailContent)
+}
+
+async function notifyRole(review: ReviewInterface, title: string, fields: Info[], actionUrl: string) {
+  const emailContent = await buildEmail(title, fields, [
+    { name: 'Open item', url: actionUrl },
+    { name: 'See Reviews', url: `${appBaseUrl}/review` },
+  ])
+
+  await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
+}
+
+export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
+  if (review.kind === ReviewKind.Release) {
+    const release = await ReleaseModel.findOne({
+      modelId: review.modelId,
+      semver: review.semver,
+    })
+
+    if (!release) {
+      throw NotFound(`The requested release was not found.`, { modelId: review.modelId, semver: review.semver })
+    }
+    await notifyRole(
+      review,
+      `${user.dn} has requested an additional review on a release.`,
+      [
+        { title: 'Model ID', data: review.modelId },
+        { title: 'Release version', data: review.semver },
+        { title: 'Review Role', data: review.role.toUpperCase() },
+      ],
+      getReleaseUrl(release),
+    )
+  } else if (review.kind === ReviewKind.Access) {
+    const accessRequest = await AccessRequestModel.findOne({ id: review.accessRequestId })
+    if (!accessRequest) {
+      throw NotFound('The requested access request was not found.', { accessRequestId: review.accessRequestId })
+    }
+    await notifyRole(
+      review,
+      `${user.dn} has requested an additional review on an access request.`,
+      [
+        { title: 'Model ID', data: review.modelId },
+        { title: 'Access request ID', data: review.accessRequestId },
+        { title: 'Review Role', data: review.role.toUpperCase() },
+      ],
+      getAccessRequestUrl(accessRequest),
+    )
+  } else {
+    throw BadReq('Unknown review kind given, unable to notify reviewer.', { kind: review.kind })
+  }
+  return
 }
 
 export async function startImportNotification(modelId: string) {
@@ -270,6 +341,32 @@ export async function startImportNotification(modelId: string) {
   const model = await getModelByIdNoAuth(modelId)
   const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
   await dispatchEmail(ownerEntities, await emailContent)
+}
+
+export async function notifyReleaseOnApproval(modelId: string, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `A new release has been approved`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Semver', data: release.semver },
+    ],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Release', url: getReleaseUrl(release) },
+    ],
+  )
+  const model = await getModelByIdNoAuth(modelId)
+  const entries = Object.values(
+    getRoleEntities([SystemRoles.Consumer, SystemRoles.Owner, SystemRoles.Contributor], model.collaborators),
+  )
+    .flat()
+    .concat(await getApprovedAccessRequests(modelId))
+  await dispatchEmail(entries, await emailContent)
 }
 
 export async function transferCompleteNotification(

@@ -1,5 +1,10 @@
-import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import FileUpload from '@mui/icons-material/FileUpload'
+import FolderCopy from '@mui/icons-material/FolderCopy'
+import Gavel from '@mui/icons-material/Gavel'
+import Lock from '@mui/icons-material/Lock'
+import LockOpen from '@mui/icons-material/LockOpen'
 import {
   Accordion,
   AccordionDetails,
@@ -19,7 +24,7 @@ import {
 import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
@@ -86,7 +91,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       : createEntryKind
   }, [createEntryKind])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
     setErrorMessage('')
@@ -120,10 +125,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const privateLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Private</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Private
+          </Typography>
           <Typography variant='caption'>
             {`Only named individuals will be able to view this ${EntryKindLabel[createEntryKind]}`}
           </Typography>
@@ -134,10 +152,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const publicLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Public</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Public
+          </Typography>
           <Typography variant='caption'>
             {`Any authorised user will be able to see this ${EntryKindLabel[createEntryKind]}`}
           </Typography>
@@ -148,10 +179,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const allowTemplatingLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <FolderCopy />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Templating</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Templating
+          </Typography>
           <Typography variant='caption'>
             {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
           </Typography>
@@ -162,10 +206,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const ungovernedAccessLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Gavel />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Ungoverned Access Requests
+          </Typography>
           <Typography variant='caption'>
             {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
           </Typography>
@@ -190,7 +247,13 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
           <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
             Back
           </Button>
-          <Stack spacing={2} alignItems='center' justifyContent='center'>
+          <Stack
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <Typography variant='h6' component='h1' color='primary'>
               {`Create ${toTitleCase(createEntryKind)}`}
             </Typography>
@@ -209,10 +272,16 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 Overview
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                <EntryNameInput autoFocus value={name} kind={createEntryKind} onChange={(value) => setName(value)} />
-                <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
+                <Box sx={{ width: '100%' }}>
+                  <EntryNameInput autoFocus value={name} kind={createEntryKind} onChange={(value) => setName(value)} />
+                </Box>
+                <Box sx={{ width: '100%' }}>
+                  <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
+                </Box>
                 {createEntryKind === EntryKind.MIRRORED_MODEL && (
-                  <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                  <Box sx={{ width: '100%' }}>
+                    <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                  </Box>
                 )}
               </Stack>
               <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />

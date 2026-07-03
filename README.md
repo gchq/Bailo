@@ -43,7 +43,7 @@ sharing.
 
 #### Requirements
 
-- Node v24
+- Node v26
 - Docker / Docker Compose
 
 #### Development Build

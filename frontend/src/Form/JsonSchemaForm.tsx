@@ -1,4 +1,4 @@
-import { ErrorOutline } from '@mui/icons-material'
+import ErrorOutline from '@mui/icons-material/ErrorOutline'
 import {
   Box,
   Chip,
@@ -68,8 +68,11 @@ export default function JsonSchemaForm({
 }) {
   const theme = useTheme()
   const router = useRouter()
-  const [activeStep, setActiveStep] = useState(0)
-  const [sharedSection, setSharedSection] = useState('')
+  const [activeStep, setActiveStep] = useState<number>(
+    router.query && router.query.page !== undefined && typeof router.query.page === 'string'
+      ? Number(router.query.page)
+      : 0,
+  )
   const requiredByModelState = useSearchParams().get('requiredByModelState')
   const [sectionCompletion, setSectionCompletion] = useState<Record<string, number>>(() =>
     splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
@@ -110,6 +113,7 @@ export default function JsonSchemaForm({
       return unchanged ? prev : nextCompletion
     })
   }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
+  const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
 
   const ref = useRef<HTMLDivElement | null>(null)
 
@@ -140,16 +144,9 @@ export default function JsonSchemaForm({
     setActiveStep(Number(page) || 0)
   })
 
-  const updatedSharedStateEvent = useEffectEvent((id: string) => {
-    setSharedSection(id)
-  })
-
   useEffect(() => {
     if (router.query.page !== undefined && typeof router.query.page === 'string') {
       updatePageByRouterQuery(router.query.page)
-    }
-    if (router.asPath.split('#')[1]) {
-      updatedSharedStateEvent(router.asPath.split('#')[1] as string)
     }
   }, [router])
 

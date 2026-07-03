@@ -1,11 +1,12 @@
-import { Add } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import MessageAlert from 'src/MessageAlert'
@@ -16,6 +17,7 @@ type FilesProps = {
 }
 
 export default function Files({ model }: FilesProps) {
+  const scanners = useContext(ArtefactScanningInfoContext)
   const { modelFiles, isModelFilesLoading, isModelFilesError, mutateModelFiles } = useGetModelFiles(model.id)
   const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false)
   const [activeFileTag, setActiveFileTag] = useState('')
@@ -24,7 +26,12 @@ export default function Files({ model }: FilesProps) {
 
   const EntryListItem = ({ data }) => (
     <Box key={data._id} sx={{ width: '100%' }}>
-      <Stack spacing={1} p={2}>
+      <Stack
+        spacing={1}
+        sx={{
+          p: 2,
+        }}
+      >
         <FileDisplay
           showMenuItems={{ associatedReleases: true, deleteFile: model.kind == EntryKind.MODEL, rescanFile: true }}
           file={data}
@@ -50,16 +57,26 @@ export default function Files({ model }: FilesProps) {
   return (
     <>
       <Container sx={{ my: 2 }}>
-        <Stack spacing={2} justifyContent='center' alignItems='center'>
+        <Stack
+          spacing={2}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Typography>
             Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
-            that are no longer needed, and also manually retrigger file scanning (if file scanning is enabled).
+            that are no longer needed
+            {scanners.length > 0 && ', and also manually retrigger file scanning (if file scanning is enabled)'}.
           </Typography>
           <Stack
-            width='100%'
             direction={{ sm: 'column', md: 'row' }}
-            justifyContent='flex-end'
-            sx={{ py: 0.5, width: '100%', px: 2 }}
+            sx={{
+              width: '100%',
+              justifyContent: 'flex-end',
+              py: 0.5,
+              px: 2,
+            }}
           >
             {model.kind !== EntryKind.MIRRORED_MODEL && (
               <Restricted
@@ -88,7 +105,15 @@ export default function Files({ model }: FilesProps) {
             />
           </Stack>
           {activeFileTag !== '' && (
-            <Stack sx={{ width: '100%' }} direction='row' justifyContent='flex-start' alignItems='center' spacing={1}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
               <Typography>Active filter:</Typography>
               <Chip label={activeFileTag} onDelete={() => setActiveFileTag('')} />
             </Stack>
