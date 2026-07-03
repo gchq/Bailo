@@ -222,14 +222,6 @@ async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): 
   // Entries with no schema
   const noneCount = Math.max(totalEntries - schemaTotal, 0)
 
-  // const schemaBreakdown: SchemaInfo[] = [
-  //   ...schemaMetrics,
-  //   {
-  //     schemaId: 'unset',
-  //     schemaName: 'unset',
-  //     count: unsetCount,
-  //   },
-  // ]
   const schemaBreakdown: SchemaInfo[] = [
     ...schemaMetrics,
     {
