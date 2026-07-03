@@ -33,6 +33,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Uploading Files', slug: 'users/models/uploading-files' },
   { title: 'Uploading Images', slug: 'users/models/uploading-images' },
   { title: 'Model Templating', slug: 'users/models/model-templating' },
+  {
+    title: 'Importing Model Card Text',
+    slug: 'users/managing-models-and-releases/upload-to-bailo/importing-model-card-text',
+  },
 
   { title: 'Data Cards', slug: 'users/data-cards', header: true },
   { title: 'Creating a Data Card', slug: 'users/data-cards/creating-a-data-card' },
