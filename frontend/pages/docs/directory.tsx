@@ -28,15 +28,16 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   { title: 'Models', slug: 'users/models', header: true },
   { title: 'Creating a Model', slug: 'users/models/creating-a-model' },
-  { title: 'Model Card', slug: 'users/models/model-card' },
+  { title: 'Model Card', slug: 'users/models/model-card', header: true },
+  { title: 'Model Card', slug: 'users/models/model-card/model-card' },
+  {
+    title: 'Importing Model Card Text',
+    slug: 'users/models/model-card/importing-model-card-text',
+  },
   { title: 'Creating a Release', slug: 'users/models/creating-a-release' },
   { title: 'Uploading Files', slug: 'users/models/uploading-files' },
   { title: 'Uploading Images', slug: 'users/models/uploading-images' },
   { title: 'Model Templating', slug: 'users/models/model-templating' },
-  {
-    title: 'Importing Model Card Text',
-    slug: 'users/managing-models-and-releases/upload-to-bailo/importing-model-card-text',
-  },
 
   { title: 'Data Cards', slug: 'users/data-cards', header: true },
   { title: 'Creating a Data Card', slug: 'users/data-cards/creating-a-data-card' },
