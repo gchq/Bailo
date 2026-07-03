@@ -93,6 +93,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
   { title: 'Model Lifecycle Configuration', slug: 'administration/getting-started/model-lifecycle-configuration' },
 
+  /// LLM
+  { title: 'LLM', slug: 'administration/llm', header: true },
+  { title: 'LLM Import', slug: 'administration/llm/llm-import' },
+
   /// Schema Management
   { title: 'Schemas', slug: 'administration/schemas', header: true },
   { title: 'Understanding Schemas', slug: 'administration/schemas/understanding-schemas' },
