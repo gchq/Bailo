@@ -46,7 +46,11 @@ export default function AppContextProvider({ children }: AppContextProviderProps
     }
 
     if (isUiConfigError) {
-      return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+      if (isUiConfigError.status === 403) {
+        return <MessageAlert message='Error authenticating user.' severity='error' />
+      }
+
+      return <MessageAlert message={`Error loading UI Config: ${isUiConfigError.info.message}`} severity='error' />
     }
 
     if (isScannersError) {

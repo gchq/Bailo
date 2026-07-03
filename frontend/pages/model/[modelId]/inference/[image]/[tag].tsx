@@ -1,23 +1,23 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Link, Paper, Stack, Typography } from '@mui/material'
 import { useGetEntry } from 'actions/entry'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 
 export default function InferenceApp() {
   const router = useRouter()
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const [isSpinningUp, setIsSpinningUp] = useState(true)
 
   const serviceEndpoint = useMemo(
-    () => `${uiConfig?.inference.connection.host}/inference/${modelId}/${image}/${tag}`,
+    () => `${uiConfig.inference.connection.host}/inference/${modelId}/${image}/${tag}`,
     [uiConfig, modelId, image, tag],
   )
 
@@ -25,18 +25,14 @@ export default function InferenceApp() {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isModelLoading || isUiConfigLoading) {
+  if (isModelLoading) {
     return <Loading />
   }
 
   return (
     <>
       <Title text='Inferencing Service' />
-      {(isModelLoading || isUiConfigLoading) && <Loading />}
+      {isModelLoading && <Loading />}
       <Container maxWidth='lg'>
         <Paper sx={{ my: 4, p: 4 }}>
           {model && (

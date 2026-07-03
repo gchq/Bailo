@@ -1,7 +1,6 @@
 import { Box, Divider, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { useGetUiConfig } from 'actions/uiConfig'
 import Loading from 'src/common/Loading'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
@@ -32,18 +31,15 @@ export default function ReleaseDisplay({
 
   const { isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const { isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
   const error = MultipleErrorWrapper('Unable to load release', {
     isReviewsError,
-    isUiConfigError,
     isReleasesError,
   })
   if (error) {
     return error
   }
 
-  if (isReviewsLoading || isReleasesLoading || isUiConfigLoading) {
+  if (isReviewsLoading || isReleasesLoading) {
     return <Loading />
   }
 

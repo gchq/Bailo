@@ -1,10 +1,10 @@
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { memoize } from 'lodash-es'
 import { useContext, useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import { ArtefactKind, EntryInterface, ReleaseInterface } from 'types/types'
@@ -26,7 +26,7 @@ export default function ReleaseAssetsAccordion({
   const [expanded, setExpanded] = useState<'files' | 'images' | false>(false)
 
   const scanners = useContext(ArtefactScanningInfoContext)
-  const { uiConfig } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const handleAccordionChange = (panel: 'files' | 'images') => (_: unknown, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false)
@@ -108,7 +108,7 @@ export default function ReleaseAssetsAccordion({
               <Stack spacing={1}>
                 {release.images.map((image) => (
                   <Box key={`${image.repository}-${image.name}-${image.tag}`}>
-                    {uiConfig && <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
+                    {<CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
                   </Box>
                 ))}
               </Stack>

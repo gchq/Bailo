@@ -4,26 +4,17 @@ import { Container, Divider, Paper, Stack } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import { useGetUiConfig } from 'actions/uiConfig'
-import Loading from 'src/common/Loading'
+import { useContext } from 'react'
 import Title from 'src/common/Title'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 
 export default function Help() {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
-  const error = MultipleErrorWrapper(`Unable to load help page`, {
-    isUiConfigError,
-  })
-  if (error) {
-    return error
-  }
+  const uiConfig = useContext(UiConfigContext)
 
   return (
     <Container maxWidth='xl' sx={{ pb: 2 }}>
       <Title text='Help' />
-      {isUiConfigLoading && <Loading />}
-      {uiConfig && (
+      {
         <Paper sx={{ py: 5, px: 5 }}>
           <Stack direction={{ md: 'row', sm: 'column' }} divider={<Divider flexItem orientation='vertical' />}>
             <Box sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550, minHeight: '320px' }}>
@@ -52,7 +43,7 @@ export default function Help() {
             </Box>
           </Stack>
         </Paper>
-      )}
+      }
     </Container>
   )
 }

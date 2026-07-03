@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetEntryRoles } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
-import { useGetUiConfig } from 'actions/uiConfig'
+import { useContext } from 'react'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import {
   testAccessRequestReview,
@@ -50,12 +50,7 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useGetUiConfig).mockReturnValue({
-      uiConfig: testUiConfig,
-      isUiConfigLoading: false,
-      isUiConfigError: undefined,
-      mutateUiConfig: vi.fn(),
-    })
+    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
     await waitFor(async () => {
@@ -76,12 +71,7 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useGetUiConfig).mockReturnValue({
-      uiConfig: testUiConfig,
-      isUiConfigLoading: false,
-      isUiConfigError: undefined,
-      mutateUiConfig: vi.fn(),
-    })
+    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReviewNoResponses} />)
     await waitFor(async () => {
@@ -102,12 +92,7 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useGetUiConfig).mockReturnValue({
-      uiConfig: testUiConfig,
-      isUiConfigLoading: false,
-      isUiConfigError: undefined,
-      mutateUiConfig: vi.fn(),
-    })
+    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReview} />)
 
@@ -129,12 +114,7 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    vi.mocked(useGetUiConfig).mockReturnValue({
-      uiConfig: testUiConfig,
-      isUiConfigLoading: false,
-      isUiConfigError: undefined,
-      mutateUiConfig: vi.fn(),
-    })
+    vi.mocked(useContext).mockReturnValue(testUiConfig)
     mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReview} />)
 

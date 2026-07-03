@@ -15,15 +15,15 @@ import {
 import { useGetEntry } from 'actions/entry'
 import { useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
-import { useGetUiConfig } from 'actions/uiConfig'
 import Markdown from 'markdown-to-jsx'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -43,7 +43,7 @@ export default function ReleaseReview() {
 
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const { mutateReleases } = useGetReleasesForModelId(modelId)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: modelId as string,
@@ -129,7 +129,7 @@ export default function ReleaseReview() {
             alignItems: 'center',
           }}
         >
-          {uiConfig && <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
+          {<CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
         </Stack>
       ))
     }
@@ -138,23 +138,13 @@ export default function ReleaseReview() {
   const error = MultipleErrorWrapper('Unable to load release review page', {
     isReleaseError,
     isModelError,
-    isUiConfigError,
     isReviewsError,
   })
   if (error) {
     return error
   }
 
-  if (
-    !release ||
-    !model ||
-    !uiConfig ||
-    !reviews ||
-    isReviewsLoading ||
-    isReleaseLoading ||
-    isModelLoading ||
-    isUiConfigLoading
-  ) {
+  if (!release || !model || !reviews || isReviewsLoading || isReleaseLoading || isModelLoading) {
     return <Loading />
   }
 

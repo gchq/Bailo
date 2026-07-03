@@ -1,11 +1,11 @@
 import { useGetEntry } from 'actions/entry'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
@@ -24,7 +24,7 @@ export default function Model() {
   const { modelId: entryId }: { modelId?: string } = router.query
   const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetEntry(entryId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const { userPermissions } = useContext(UserPermissionsContext)
 
@@ -34,7 +34,7 @@ export default function Model() {
 
   const tabs: PageTab[] = useMemo(
     () =>
-      entry && uiConfig
+      entry
         ? [
             {
               title: 'Overview',
@@ -103,7 +103,6 @@ export default function Model() {
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isEntryError,
     isCurrentUserError,
-    isUiConfigError,
   })
   if (error) {
     return error
@@ -112,7 +111,7 @@ export default function Model() {
   return (
     <>
       <Title text={entry ? entry.name : 'Loading...'} />
-      {!entry || isEntryLoading || isCurrentUserLoading || isUiConfigLoading ? (
+      {!entry || isEntryLoading || isCurrentUserLoading ? (
         <Loading />
       ) : (
         <PageWithTabs

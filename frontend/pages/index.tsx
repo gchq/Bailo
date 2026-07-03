@@ -23,15 +23,15 @@ import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
-import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
 import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
@@ -58,12 +58,12 @@ export default function Marketplace() {
     return Array.isArray(value) ? [...value] : [value]
   }
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const { peers, isPeersLoading, isPeersError } = useGetPeers()
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
-  const isMirroredModelEnabled = !!uiConfig?.modelMirror.import.enabled
-  const isUntrustedModelEnabled = !!uiConfig?.untrustedModel.enabled
+  const isMirroredModelEnabled = !!uiConfig.modelMirror.import.enabled
+  const isUntrustedModelEnabled = !!uiConfig.untrustedModel.enabled
 
   const [availableModelKinds, setAvailableModelKinds] = useState<EntryKindKeys[]>([])
   const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
@@ -242,11 +242,11 @@ export default function Marketplace() {
   }, [peers])
 
   const organisationList = useMemo(() => {
-    return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
+    return uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem)
   }, [uiConfig])
 
   const stateList = useMemo(() => {
-    return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
+    return uiConfig.modelDetails.states.map((stateItem) => stateItem)
   }, [uiConfig])
 
   const modelKindOptions = useMemo((): string[] => {
@@ -362,7 +362,7 @@ export default function Marketplace() {
     return errorMessage
   }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
 
-  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
+  if (isReviewRolesLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
 
@@ -376,10 +376,6 @@ export default function Marketplace() {
 
   if (isReviewRolesError) {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
-  }
-
-  if (isUiConfigError) {
-    return <ErrorWrapper message={isUiConfigError.info.message} />
   }
 
   if (isTagsError) {
@@ -441,7 +437,7 @@ export default function Marketplace() {
                 )}
               </FormControl>
               <Stack divider={<Divider flexItem />} spacing={0}>
-                {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
+                {uiConfig.modelDetails.organisations.length > 0 && (
                   <Box>
                     <ChipSelector
                       label='Organisations'
@@ -457,7 +453,7 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
-                {uiConfig && uiConfig.modelDetails.states.length > 0 && (
+                {uiConfig.modelDetails.states.length > 0 && (
                   <Box>
                     <ChipSelector
                       label='States'
@@ -505,7 +501,7 @@ export default function Marketplace() {
                     accordion
                   />
                 </Box>
-                {uiConfig && selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
+                {selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
                   <Box>
                     <ChipSelector
                       label='Model Kinds'
@@ -589,8 +585,8 @@ export default function Marketplace() {
                     onSelectedStatesChange={handleStatesOnChange}
                     selectedPeers={selectedPeers}
                     onSelectedPeersChange={handlePeersOnChange}
-                    displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
-                    displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
+                    displayOrganisation={uiConfig.modelDetails.organisations.length > 0}
+                    displayState={uiConfig.modelDetails.states.length > 0}
                     displayPeers={federationEnabled}
                     peers={peers}
                   />
