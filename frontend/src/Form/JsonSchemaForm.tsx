@@ -187,11 +187,9 @@ export default function JsonSchemaForm({
 
   const handleHighlightStateClick = (state: string) => {
     if (state === requiredByModelState) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { requiredByModelState, ...queryWithoutHighlighted } = router.query
-      router.replace({
-        query: queryWithoutHighlighted,
-      }) as RouterQueryParams
+      const { ...queries } = router.query
+      delete queries.requiredByModelState
+      router.replace({ query: queries })
     } else {
       router.replace({
         query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
@@ -246,9 +244,7 @@ export default function JsonSchemaForm({
                         sx={{
                           wordBreak: 'break-word',
                           color:
-                            !step.isComplete(step) && displayLabelValidation
-                              ? theme.palette.error.main
-                              : theme.palette.common.black,
+                            !step.isComplete(step) && displayLabelValidation ? 'error' : theme.palette.common.black,
                         }}
                       >
                         {step.schema.title}
@@ -278,7 +274,7 @@ export default function JsonSchemaForm({
             </Box>
           )}
           {canEdit && (
-            <Stack direction={'column'} spacing={1}>
+            <Stack spacing={1}>
               {stateList && stateList.length > 0 && (
                 <Stack spacing={2} direction={'row'} sx={{ alignItems: 'center' }}>
                   <Typography>Highlight fields by: </Typography>

@@ -73,13 +73,14 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
 
   if (requiredByState) {
     return (
-      <Box
+      <Stack
+        spacing={0.5}
         sx={{
           backgroundColor: alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1),
-          p: 0.5,
+          p: 1,
         }}
       >
-        <Stack direction='row' sx={{ alignItems: 'center' }}>
+        <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
           {answered ? (
             <Done
               color='success'
@@ -93,12 +94,12 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
               aria-label={`Unanswered field required for ${registry.formContext.requiredByModelState}`}
             />
           )}
-          <Typography sx={{ fontSize: 12 }} color={answered ? 'success' : 'error'}>
+          <Typography variant='caption' color={answered ? 'success' : 'error'}>
             {`Required for ${registry.formContext.requiredByModelState}`}
           </Typography>
         </Stack>
         {children}
-      </Box>
+      </Stack>
     )
   }
 
@@ -106,9 +107,8 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
 }
 
 export function ErrorListTemplate() {
-  const theme = useTheme()
   return (
-    <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
+    <Typography color='error' sx={{ mb: 2 }}>
       Please make sure that all errors listed below have been resolved.
     </Typography>
   )
