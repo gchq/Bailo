@@ -26,8 +26,26 @@ def test_create_experiment_from_model(local_model):
 @pytest.mark.parametrize(
     ("name", "description", "organisation", "state", "tags", "visibility", "collaborators", "metadata"),
     [
-        ("test-model", "test", None, None, None, ModelVisibility.PUBLIC, None),
-        ("test-model", "test", None, None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        (
+            "test-model",
+            "test",
+            None,
+            None,
+            None,
+            ModelVisibility.PUBLIC,
+            None,
+            None,
+        ),
+        (
+            "test-model",
+            "test",
+            None,
+            None,
+            None,
+            None,
+            [CollaboratorEntry("user:user", ["owner", "contributor"])],
+            None,
+        ),
         (
             "test-model",
             "test",
@@ -36,6 +54,7 @@ def test_create_experiment_from_model(local_model):
             ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
+            None,
         ),
         (
             "test-model",
