@@ -95,6 +95,9 @@ def test_create_get_from_id_update_and_delete_model(
     model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)
 
+    if metadata is not None:
+        model.update_model_card(model_card=metadata)
+
     # Check that a model can be changed
     model.description = "testing-1234"
 
