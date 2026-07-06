@@ -276,7 +276,7 @@ export default function JsonSchemaForm({
           {canEdit && (
             <Stack spacing={1}>
               {stateList && stateList.length > 0 && (
-                <Stack spacing={2} direction={'row'} sx={{ alignItems: 'center' }}>
+                <Stack spacing={2} direction='row' sx={{ alignItems: 'center' }}>
                   <Typography>Highlight fields by: </Typography>
                   {stateList.map((state) => (
                     <Tooltip key={state} title={`Highlight questions required for ${state}`}>
