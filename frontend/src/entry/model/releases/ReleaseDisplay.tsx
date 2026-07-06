@@ -1,5 +1,4 @@
 import { Box, Divider, Stack } from '@mui/material'
-import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -33,7 +32,6 @@ export default function ReleaseDisplay({
 
   const { isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const { isScannersLoading } = useGetArtefactScannerInfo()
   const { isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const error = MultipleErrorWrapper('Unable to load release', {
@@ -45,7 +43,7 @@ export default function ReleaseDisplay({
     return error
   }
 
-  if (isReviewsLoading || isReleasesLoading || isUiConfigLoading || isScannersLoading) {
+  if (isReviewsLoading || isReleasesLoading || isUiConfigLoading) {
     return <Loading />
   }
 
