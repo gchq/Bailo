@@ -1,12 +1,9 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
+import Mail from 'nodemailer/lib/mailer/index.js'
 import sanitizeHtml from 'sanitize-html'
 
-export type EmailContent = {
-  subject: string
-  text: string
-  html: string
-}
+export type EmailContent = Pick<Mail.Options, 'subject' | 'text' | 'html' | 'attachments'>
 
 export type Info = {
   title: string
@@ -58,7 +55,7 @@ export async function buildEmail(
   }
 }
 
-function emailText(title, reviewMetadata: Info[], reviewActions: actions[]) {
+function emailText(title: string, reviewMetadata: Info[], reviewActions: actions[]) {
   return dedent(`
     ${title}
 
@@ -76,7 +73,7 @@ function textActions(actionsList: actions[]) {
   return `${actionsList.map((action) => `${action.name}: '${action.url}'\n`).join('')}`
 }
 
-async function emailHtml(title, reviewMetadata, reviewActions) {
+async function emailHtml(title: string, reviewMetadata: Info[], reviewActions: actions[]) {
   const email = await mjml2html(
     wrapper(`
     <mj-section padding-bottom="5px" css-class='gradient-bg' padding-bottom="5px">
