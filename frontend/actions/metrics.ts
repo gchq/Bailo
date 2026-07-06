@@ -1,6 +1,6 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { ModelVolume, OverviewMetrics, PolicyMetrics } from 'types/types'
+import { BaseNoReleaseMetrics, ModelVolume, OverviewMetrics, PolicyRoleMetrics } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
@@ -34,7 +34,7 @@ export function useGetOverviewMetrics() {
 }
 
 export function useGetRolePolicyMetrics() {
-  const { data, isLoading, error, mutate } = useSWR<PolicyMetrics, ErrorInfo>(
+  const { data, isLoading, error, mutate } = useSWR<PolicyRoleMetrics, ErrorInfo>(
     '/api/v3/metrics/compliance/roles',
     fetcher,
   )
@@ -44,5 +44,19 @@ export function useGetRolePolicyMetrics() {
     rolePolicyMetrics: data,
     isRolePolicyMetricsLoading: isLoading,
     isRolePolicyMetricsError: error,
+  }
+}
+
+export function useGetNoReleasesPolicyMetrics() {
+  const { data, isLoading, error, mutate } = useSWR<BaseNoReleaseMetrics, ErrorInfo>(
+    '/api/v3/metrics/compliance/no-releases',
+    fetcher,
+  )
+
+  return {
+    mutateNoReleasesPolicyMetrics: mutate,
+    noReleasesPolicyMetrics: data,
+    isNoReleasesPolicyMetricsLoading: isLoading,
+    isNoReleasesPolicyMetricsError: error,
   }
 }

@@ -1,45 +1,102 @@
 import { Container, Stack } from '@mui/material'
-import { useGetRolePolicyMetrics } from 'actions/metrics'
-import { useMemo, useState } from 'react'
+import { useGetNoReleasesPolicyMetrics, useGetRolePolicyMetrics } from 'actions/metrics'
+import { ReactElement, useCallback, useEffect, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsHeader from 'src/metrics/MetricsHeader'
-import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
+import PolicyNoReleasesMetricsCharts from 'src/metrics/PolicyNoReleasesMetricsCharts'
+import PolicyRoleMetricsCharts from 'src/metrics/PolicyRoleMetricsCharts'
+import { BaseNoReleaseMetrics, PolicyRoleMetrics } from 'types/types'
+
+export const SelectedMetricKind = {
+  MISSING_ROLES: 'role',
+  NO_RELEASES: 'noReleases',
+} as const
+export type SelectedMetricKindKeys = (typeof SelectedMetricKind)[keyof typeof SelectedMetricKind]
 
 export default function PolicyMetrics() {
   const { rolePolicyMetrics, isRolePolicyMetricsLoading, isRolePolicyMetricsError } = useGetRolePolicyMetrics()
+  const { noReleasesPolicyMetrics, isNoReleasesPolicyMetricsLoading, isNoReleasesPolicyMetricsError } =
+    useGetNoReleasesPolicyMetrics()
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const [selectedMetric, setSelectedMetric] = useState<SelectedMetricKindKeys>(SelectedMetricKind.MISSING_ROLES)
+  const [selectedData, setSelectedData] = useState<undefined | PolicyRoleMetrics | BaseNoReleaseMetrics>(undefined)
+  const [selectedChart, setSelectedChart] = useState<ReactElement>(<></>)
 
-  const filteredDataset = useMemo(() => {
-    if (!rolePolicyMetrics) {
-      return undefined
+  const filteredDataset = useCallback(
+    (metricData) => {
+      if (selectedOrganisation === 'All') {
+        return metricData.global
+      }
+      return metricData.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
+    },
+    [selectedOrganisation],
+  )
+
+  useEffect(() => {
+    if (!selectedMetric) {
+      setSelectedData(rolePolicyMetrics)
+    } else {
+      if (!filteredDataset) {
+        return
+      }
+      switch (selectedMetric) {
+        case SelectedMetricKind.MISSING_ROLES:
+          setSelectedData(rolePolicyMetrics)
+          if (rolePolicyMetrics) {
+            setSelectedChart(
+              filteredDataset(rolePolicyMetrics).entries.length > 0 ? (
+                <PolicyRoleMetricsCharts data={filteredDataset(rolePolicyMetrics)} />
+              ) : (
+                <EmptyBlob text='No items to display.' />
+              ),
+            )
+          }
+          break
+        case SelectedMetricKind.NO_RELEASES:
+          setSelectedData(noReleasesPolicyMetrics)
+          if (noReleasesPolicyMetrics) {
+            setSelectedChart(
+              filteredDataset(noReleasesPolicyMetrics).entries.length > 0 ? (
+                <PolicyNoReleasesMetricsCharts data={filteredDataset(noReleasesPolicyMetrics)} />
+              ) : (
+                <EmptyBlob text='No items to display.' />
+              ),
+            )
+          }
+          break
+      }
     }
-    if (selectedOrganisation === 'All') {
-      return rolePolicyMetrics.global
-    }
-    return rolePolicyMetrics.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
-  }, [rolePolicyMetrics, selectedOrganisation])
+  }, [selectedMetric, rolePolicyMetrics, noReleasesPolicyMetrics, filteredDataset])
 
   if (isRolePolicyMetricsError) {
     return <MessageAlert message={isRolePolicyMetricsError.info.message} />
   }
 
-  if (isRolePolicyMetricsLoading) {
+  if (isNoReleasesPolicyMetricsError) {
+    return <MessageAlert message={isNoReleasesPolicyMetricsError.info.message} />
+  }
+
+  if (isRolePolicyMetricsLoading || isNoReleasesPolicyMetricsLoading) {
     return <Loading />
   }
 
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        {filteredDataset && rolePolicyMetrics && (
+        {selectedData && selectedChart && (
           <MetricsHeader
-            data={rolePolicyMetrics}
+            organisations={selectedData.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={selectedData.lastUpdated}
             onOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
             selectedOrganisation={selectedOrganisation}
+            onMetricChange={(newMetric) => setSelectedMetric(newMetric)}
+            selectedMetric={selectedMetric}
             exportDocumentTitle='Bailo policy metrics'
           >
-            <PolicyMetricsCharts data={filteredDataset} />
+            {selectedChart}
           </MetricsHeader>
         )}
       </Stack>

@@ -1,46 +1,46 @@
 import { Box, Button, Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
-import { ReactElement, useCallback, useMemo, useState } from 'react'
+import { ReactElement, useCallback, useState } from 'react'
 import MetricsExportPreview from 'src/metrics/MetricsExportPreview'
-import { OverviewMetrics, PolicyMetrics } from 'types/types'
+import { SelectedMetricKind, SelectedMetricKindKeys } from 'src/metrics/PolicyMetrics'
 import { formatDateStringWithMinutes } from 'utils/dateUtils'
 
 interface MetricsHeaderProps {
-  data: OverviewMetrics | PolicyMetrics
+  organisations: string[]
+  lastUpdated: string
   children: ReactElement
   selectedOrganisation: string
   onOrganisationChange: (newOrganisation: string) => void
+  selectedMetric?: SelectedMetricKindKeys
+  onMetricChange?: (newMetric: SelectedMetricKindKeys) => void
   exportDocumentTitle: string
 }
 
 export default function MetricsHeader({
-  data,
+  organisations,
+  lastUpdated,
   children,
   selectedOrganisation,
   onOrganisationChange,
+  selectedMetric,
+  onMetricChange,
   exportDocumentTitle,
 }: MetricsHeaderProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  const listItems = useMemo(() => {
-    if (!data) {
-      return []
-    }
-    return new Set(
-      data.byOrganisation
-        .map((organisationSubset) => organisationSubset.organisation)
-        .map((organisation) => (
-          <MenuItem key={organisation} value={organisation}>
-            {organisation === 'unset' ? <em>No organisation</em> : organisation}
-          </MenuItem>
-        )),
-    )
-  }, [data])
 
   const handleOrganisationSelectOnChange = useCallback(
     (event: SelectChangeEvent) => {
       onOrganisationChange(event.target.value as string)
     },
     [onOrganisationChange],
+  )
+
+  const handleMetricSelectOnChange = useCallback(
+    (event: SelectChangeEvent) => {
+      if (onMetricChange) {
+        onMetricChange(event.target.value as SelectedMetricKindKeys)
+      }
+    },
+    [onMetricChange],
   )
 
   return (
@@ -50,7 +50,25 @@ export default function MetricsHeader({
           <Stack spacing={1}>
             <Box>
               <Stack direction={{ sm: 'column', md: 'row' }} spacing={1} sx={{ alignItems: 'center' }}>
-                <em>Showing results for</em>
+                <em>Showing metrics for</em>
+                {selectedMetric && (
+                  <>
+                    <Select
+                      sx={{ maxWidth: '300px' }}
+                      value={selectedMetric}
+                      onChange={handleMetricSelectOnChange}
+                      variant='standard'
+                    >
+                      <MenuItem key={SelectedMetricKind.MISSING_ROLES} value={SelectedMetricKind.MISSING_ROLES}>
+                        missing review roles
+                      </MenuItem>
+                      <MenuItem key={SelectedMetricKind.NO_RELEASES} value={SelectedMetricKind.NO_RELEASES}>
+                        models with no releases
+                      </MenuItem>
+                    </Select>
+                    <em>for</em>
+                  </>
+                )}
                 <Select
                   sx={{ maxWidth: '300px' }}
                   value={selectedOrganisation}
@@ -60,15 +78,17 @@ export default function MetricsHeader({
                   <MenuItem key='all' value='All'>
                     All organisations
                   </MenuItem>
-                  {listItems}
+                  {organisations.map((organisation) => (
+                    <MenuItem key={organisation} value={organisation}>
+                      {organisation === 'unset' ? <em>No organisation</em> : organisation}
+                    </MenuItem>
+                  ))}
                 </Select>
               </Stack>
             </Box>
-            {data && (
-              <Typography variant='caption'>
-                <em>Last updated {formatDateStringWithMinutes(data.lastUpdated)}</em>
-              </Typography>
-            )}
+            <Typography variant='caption'>
+              <em>Last updated {formatDateStringWithMinutes(lastUpdated)}</em>
+            </Typography>
           </Stack>
           <Stack>
             <Button variant='contained' onClick={() => setDialogOpen(true)}>

@@ -19,13 +19,13 @@ import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { PolicyBaseMetrics } from 'types/types'
+import { PolicyRoleBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
-  data: PolicyBaseMetrics
+  data: PolicyRoleBaseMetrics
 }
 
-export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) {
+export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
   const [missingRoleFilters, setMissingRolesFilters] = useState<string[]>([])

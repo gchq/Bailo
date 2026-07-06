@@ -294,16 +294,16 @@ type RoleComplianceMetricsResult = {
 }
 
 type ModelWithNoReleases = {
-  id: string
+  entryId: string
   organisation: string
-  owners: string[]
+  modelOwners: string[]
 }
 
 type NoReleasesComplianceMetricsResultSubset = {
   summary: {
     modelsWithNoReleases: number
   }
-  models: ModelWithNoReleases[]
+  entries: ModelWithNoReleases[]
 }
 
 type NoReleasesComplianceMetricsResultByOrgSubset = {
@@ -426,9 +426,9 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
     },
     {
       $project: {
-        id: 1,
+        entryId: '$id',
         organisation: { $ifNull: ['$organisation', 'unset'] },
-        owners: {
+        modelOwners: {
           $map: {
             input: {
               $filter: {
@@ -446,13 +446,13 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   ]
 
   // Gets models by the specified organisation | no organisation
-  const models = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
+  const entries = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
 
   return {
     summary: {
-      modelsWithNoReleases: models.length,
+      modelsWithNoReleases: entries.length,
     },
-    models,
+    entries,
   }
 }
 

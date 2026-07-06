@@ -14,20 +14,20 @@ export const NoReleasesSummaryMetricsSchema = z.object({
 })
 
 export const ModelsNoReleasesSchema = z.object({
-  id: z.string(),
+  entryId: z.string(),
   organisation: z.string(),
-  owners: z.array(z.string()),
+  modelOwners: z.array(z.string()),
 })
 
 export const GlobalNoReleasesMetricsSchema = z.object({
   summary: NoReleasesSummaryMetricsSchema,
-  models: z.array(ModelsNoReleasesSchema),
+  entries: z.array(ModelsNoReleasesSchema),
 })
 
 export const NoReleaseMetricsByOrgSchema = z.object({
   organisation: z.string(),
   summary: NoReleasesSummaryMetricsSchema,
-  models: z.array(ModelsNoReleasesSchema),
+  entries: z.array(ModelsNoReleasesSchema),
 })
 
 export const BaseNoReleaseMetricsSchema = z.object({
