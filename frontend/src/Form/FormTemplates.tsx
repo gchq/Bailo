@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
-import Error from '@mui/icons-material/ErrorOutline'
+import Error from '@mui/icons-material/ErrorOutlineOutlined'
 import Share from '@mui/icons-material/Share'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
@@ -74,14 +74,14 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
   if (requiredByState) {
     return (
       <Box
-        p={0.5}
         sx={{
           backgroundColor: alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1),
+          p: 0.5,
         }}
       >
-        <Stack direction='row' alignItems='center'>
+        <Stack direction='row' sx={{ alignItems: 'center' }}>
           {answered ? <Done color='success' fontSize='small' /> : <Error color='error' fontSize='small' />}
-          <Typography fontSize={12} color={answered ? 'success' : 'error'}>
+          <Typography sx={{ fontSize: 12 }} color={answered ? 'success' : 'error'}>
             {`Required for ${registry.formContext.requiredByModelState}`}
           </Typography>
         </Stack>

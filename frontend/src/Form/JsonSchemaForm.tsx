@@ -1,4 +1,4 @@
-import ErrorOutline from '@mui/icons-material/ErrorOutline'
+import Error from '@mui/icons-material/ErrorOutlineOutlined'
 import {
   Box,
   Chip,
@@ -251,14 +251,13 @@ export default function JsonSchemaForm({
                               ? theme.palette.error.main
                               : theme.palette.common.black,
                         }}
-                        width='100%'
                       >
                         {step.schema.title}
                       </Typography>
                     </ListItemText>
                     {canEdit && sectionCompletion[step.schema.title] ? (
                       <ListItemIcon sx={{ minWidth: 'auto', flexShrink: 0, ml: 'auto' }}>
-                        <ErrorOutline color='error' />
+                        <Error color='error' />
                       </ListItemIcon>
                     ) : null}
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
@@ -282,7 +281,7 @@ export default function JsonSchemaForm({
           {canEdit && (
             <Stack direction={'column'} spacing={1}>
               {stateList && stateList.length > 0 && (
-                <Stack spacing={2} direction={'row'} alignItems={'center'}>
+                <Stack spacing={2} direction={'row'} sx={{ alignItems: 'center' }}>
                   <Typography>Highlight fields by: </Typography>
                   {stateList.map((state) => (
                     <Tooltip key={state} title={`Highlight questions required for ${state}`}>
