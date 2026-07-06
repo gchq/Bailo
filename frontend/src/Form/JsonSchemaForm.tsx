@@ -24,6 +24,7 @@ import {
   setStepState,
   widgets,
 } from 'utils/formUtils'
+import { parseNat } from 'utils/stringUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -34,6 +35,7 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
+  compareMode = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -43,11 +45,12 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
+  compareMode?: boolean
 }) {
   const router = useRouter()
   const [activeStep, setActiveStep] = useState<number>(
     router.query && router.query.page !== undefined && typeof router.query.page === 'string'
-      ? Number(router.query.page)
+      ? parseNat(router.query.page)
       : 0,
   )
   const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
@@ -200,7 +203,10 @@ export default function JsonSchemaForm({
               defaultCurrentUser: defaultCurrentUserInEntityList,
               mirroredState: currentStep.mirroredState,
               state: currentStep.state,
+              compareFromState: currentStep.compareFromState,
+              compareFromMirroredState: currentStep.compareFromMirroredState,
               mirroredModel,
+              compareMode,
               onShare: onShareSectionOnClick,
             }}
             templates={

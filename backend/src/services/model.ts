@@ -363,8 +363,8 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind) {
-    query['kind'] = { $all: opts.kind }
+  if (opts.kind?.length) {
+    query['kind'] = { $in: opts.kind }
   }
 
   if (opts.organisations?.length) {

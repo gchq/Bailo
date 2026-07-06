@@ -1,11 +1,12 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
+import InlineDiff from 'src/common/InlineDiff'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState } from 'utils/formUtils'
+import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface CustomTextInputProps {
   label?: string
@@ -51,19 +52,48 @@ export default function CustomTextInput({
   }
 
   const mirroredState = getMirroredState(id, registry.formContext)
+  const compareFromState = getCompareFromState(id, registry.formContext) as string | undefined
+  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string | undefined
+  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+
+  if (inCompareMode && !registry.formContext.mirroredModel) {
+    const from = compareFromState !== undefined ? compareFromState : (mirroredState as string | undefined)
+    return (
+      <Stack spacing={1}>
+        <Typography
+          id={`${id}-label`}
+          aria-label={`Label for ${label}`}
+          component='label'
+          htmlFor={id}
+          sx={{ fontWeight: 'bold' }}
+        >
+          {label}
+          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+        </Typography>
+        <InlineDiff from={from} to={value} />
+      </Stack>
+    )
+  }
+
+  const mirroredCompareContent = inCompareMode && registry.formContext.mirroredModel && (
+    <InlineDiff from={compareFromMirroredState} to={mirroredState as string | undefined} />
+  )
+  const displayPanel =
+    inCompareMode && registry.formContext.mirroredModel ? true : (registry.formContext.mirroredModel && value) || false
 
   return (
     <AdditionalInformation
       editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value}
+      mirroredState={mirroredCompareContent || mirroredState}
+      display={displayPanel}
       label={label}
       id={id}
       required={required}
       mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
     >
-      {registry.formContext.editMode && (
+      {inCompareMode && registry.formContext.mirroredModel && <InlineDiff from={compareFromState} to={value} />}
+      {!inCompareMode && registry.formContext.editMode && (
         <TextField
           size='small'
           error={rawErrors && rawErrors.length > 0}
@@ -110,7 +140,7 @@ export default function CustomTextInput({
           }}
         />
       )}
-      {!registry.formContext.editMode && (
+      {!inCompareMode && !registry.formContext.editMode && (
         <Box sx={{ wordBreak: 'break-word' }}>
           {value || (
             <Typography

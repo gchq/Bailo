@@ -36,6 +36,8 @@ export function createStep({
   uiSchema,
   state,
   mirroredState,
+  compareFromState,
+  compareFromMirroredState,
   type,
   section,
   index,
@@ -46,6 +48,8 @@ export function createStep({
   uiSchema?: any
   state: unknown
   mirroredState?: unknown
+  compareFromState?: unknown
+  compareFromMirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -57,14 +61,13 @@ export function createStep({
     uiSchema,
     state,
     mirroredState,
+    compareFromState,
+    compareFromMirroredState,
     type,
     index,
-
     section,
     schemaRef,
-
     shouldValidate: false,
-
     isComplete,
   }
 }
@@ -116,6 +119,8 @@ export function getStepsFromSchema(
   omitFields: Array<string> = [],
   state: any = {},
   mirroredState: any = {},
+  compareFromState?: any,
+  compareFromMirroredState?: any,
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -139,6 +144,11 @@ export function getStepsFromSchema(
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
       mirroredState: mirroredState ? mirroredState[prop] || {} : {},
+      // Slice compare-mode "from" states per section to match `state` / `mirroredState`. Left
+      // `undefined` (rather than defaulted to `{}`) when the caller didn't provide them, so the
+      // widgets can distinguish "not in compare mode" from "compare mode with an empty section".
+      compareFromState: compareFromState ? compareFromState[prop] || {} : undefined,
+      compareFromMirroredState: compareFromMirroredState ? compareFromMirroredState[prop] || {} : undefined,
       type: 'Form',
       index,
       schemaRef: schema.reference,
@@ -216,6 +226,38 @@ export const getState = (id: string, formContext: Registry['formContext']) => {
     .split('.')
     .filter((t) => t !== '')
     .reduce((prev, cur) => prev && prev[cur], formContext.state)
+}
+
+/**
+ * Look up the compare-mode "from" local-card value for a field, mirroring `getState`. Returns
+ * `undefined` when the current form isn't running in compare mode (i.e. no `compareFromState` was
+ * placed on the `formContext`), which callers use to detect single-vs-double-diff rendering.
+ */
+export const getCompareFromState = (id: string, formContext: Registry['formContext']) => {
+  if (formContext.compareFromState === undefined) {
+    return undefined
+  }
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromState)
+}
+
+/**
+ * Look up the compare-mode "from" mirrored-card value for a field, mirroring `getMirroredState`.
+ */
+export const getCompareFromMirroredState = (id: string, formContext: Registry['formContext']) => {
+  if (formContext.compareFromMirroredState === undefined) {
+    return undefined
+  }
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromMirroredState)
 }
 
 function isMetricsKey(key: string): boolean {

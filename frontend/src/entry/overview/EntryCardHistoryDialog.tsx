@@ -27,27 +27,77 @@ type EntryCardHistoryDialogProps = {
   setOpen: (isOpen: boolean) => void
 }
 
+type CompareSelection = {
+  version: number
+  mirrored: boolean
+}
+
 export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()
   const router = useRouter()
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     entry.id,
   )
-  const [compareWithVersion, setCompareWithVersion] = useState<number | undefined>(undefined)
+  const [compareWith, setCompareWith] = useState<CompareSelection | undefined>(undefined)
 
   const entryKindPath =
     entry.kind === EntryKind.MIRRORED_MODEL || entry.kind === EntryKind.MODEL ? EntryKind.MODEL : entry.kind
 
-  const buildHref = (entryCardRevision: EntryCardRevisionInterface) => {
-    const queryParams = new URLSearchParams()
-    if (compareWithVersion !== undefined) {
-      queryParams.set('compareWith', String(compareWithVersion))
+  const comparePath = entry.kind === EntryKind.DATA_CARD ? '/data-card/compare' : '/model-card/compare'
+
+  const isMirroredEntry = !!entry.settings.mirror?.sourceModelId
+
+  const latestLocalRevision = useMemo(
+    () =>
+      [...entryCardRevisions]
+        .filter((revision) => revision.version !== 1 && !revision.mirrored)
+        .sort(sortByCreatedAtDescending)[0],
+    [entryCardRevisions],
+  )
+  const latestMirroredRevision = useMemo(
+    () =>
+      [...entryCardRevisions]
+        .filter((revision) => revision.version !== 1 && revision.mirrored)
+        .sort(sortByCreatedAtDescending)[0],
+    [entryCardRevisions],
+  )
+
+  const buildHref = (revision: EntryCardRevisionInterface) => {
+    const query = new URLSearchParams()
+    query.set('fromModel', entry.id)
+    query.set('toModel', entry.id)
+
+    // Start each side pinned to the latest of each stream so the diff opens with both mirrored
+    // and additional-information cards populated.
+    const fromLocal = latestLocalRevision?.version
+    const fromMirrored = latestMirroredRevision?.version
+    let toLocal = latestLocalRevision?.version
+    let toMirrored = latestMirroredRevision?.version
+
+    // The clicked row overrides the "to" side of the matching stream.
+    if (revision.mirrored) {
+      toMirrored = revision.version
+    } else {
+      toLocal = revision.version
     }
-    if (entryCardRevision.mirrored) {
-      queryParams.set('mirrored', 'true')
+
+    // A selected "compare with" row overrides the "from" side of the matching stream.
+    const fromLocalOverride = compareWith && !compareWith.mirrored ? compareWith.version : fromLocal
+    const fromMirroredOverride = compareWith && compareWith.mirrored ? compareWith.version : fromMirrored
+
+    if (fromLocalOverride !== undefined) {
+      query.set('fromVersion', String(fromLocalOverride))
     }
-    const queryString = queryParams.toString()
-    return `/${entryKindPath}/${entry.id}/history/${entryCardRevision.version}${queryString ? `?${queryString}` : ''}`
+    if (fromMirroredOverride !== undefined) {
+      query.set('fromMirroredVersion', String(fromMirroredOverride))
+    }
+    if (toLocal !== undefined) {
+      query.set('toVersion', String(toLocal))
+    }
+    if (toMirrored !== undefined) {
+      query.set('toMirroredVersion', String(toMirrored))
+    }
+    return `${comparePath}?${query.toString()}`
   }
 
   const sortedEntryCardRevisions = useMemo(
@@ -58,20 +108,30 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
             router.push(buildHref(entryCardRevision))
           }}
           onCompareSelect={() => {
-            if (compareWithVersion === entryCardRevision.version) {
-              setCompareWithVersion(undefined)
+            if (
+              compareWith &&
+              compareWith.version === entryCardRevision.version &&
+              compareWith.mirrored === entryCardRevision.mirrored
+            ) {
+              setCompareWith(undefined)
             } else {
-              setCompareWithVersion(entryCardRevision.version)
+              setCompareWith({ version: entryCardRevision.version, mirrored: entryCardRevision.mirrored })
             }
           }}
-          isCompareSelected={compareWithVersion === entryCardRevision.version}
-          key={entryCardRevision.version}
+          isMirrored={isMirroredEntry}
+          hasCompareSelected={compareWith !== undefined}
+          isCompareSelected={
+            !!compareWith &&
+            compareWith.version === entryCardRevision.version &&
+            compareWith.mirrored === entryCardRevision.mirrored
+          }
+          key={`${entryCardRevision.mirrored ? 'mirrored-' : ''}${entryCardRevision.version}`}
           entryCard={entryCardRevision}
           entryKind={entry.kind}
         />
       )),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [entry.id, entry.kind, entryKindPath, entryCardRevisions, compareWithVersion, router],
+    [entry.id, entry.kind, entryKindPath, entryCardRevisions, compareWith, router],
   )
 
   if (isEntryCardRevisionsError) {

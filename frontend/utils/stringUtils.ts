@@ -45,6 +45,10 @@ export const parseNat = (numberOrString: string) => {
   return parseInt(numberOrString)
 }
 
+export const parseVersion = (version?: string): number | undefined => {
+  return version === undefined ? undefined : parseNat(version)
+}
+
 export const isValidNumber = (numberOrString: string) => {
   return !(isNaN(Number(numberOrString)) || isNaN(parseFloat(numberOrString)))
 }

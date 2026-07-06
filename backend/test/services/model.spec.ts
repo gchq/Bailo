@@ -333,7 +333,7 @@ describe('services > model', () => {
     ModelModelMock.sort.mockResolvedValueOnce([])
 
     const searchParams: EntrySearchOptionsParams = {
-      kind: 'model',
+      kind: ['model'],
       libraries: [],
       filters: [],
       organisations: [],
@@ -349,7 +349,7 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     ModelModelMock.sort.mockResolvedValue([])
     const searchParams: EntrySearchOptionsParams = {
-      kind: 'model',
+      kind: ['model'],
       libraries: ['library'],
       filters: ['mine'],
       organisations: ['example organisation'],
@@ -366,7 +366,7 @@ describe('services > model', () => {
     ModelModelMock.sort.mockResolvedValueOnce([])
 
     const searchParams: EntrySearchOptionsParams = {
-      kind: 'model',
+      kind: ['model'],
       libraries: [],
       filters: [],
       organisations: [],
@@ -384,7 +384,7 @@ describe('services > model', () => {
     authenticationMocks.hasRole.mockImplementation(() => false)
 
     const searchParams: EntrySearchOptionsParams = {
-      kind: 'model',
+      kind: ['model'],
       libraries: [],
       filters: [],
       organisations: [],
@@ -404,7 +404,7 @@ describe('services > model', () => {
     authenticationMocks.hasRole.mockImplementation(() => true)
 
     const searchParams: EntrySearchOptionsParams = {
-      kind: 'model',
+      kind: ['model'],
       libraries: [],
       filters: [],
       organisations: [],
