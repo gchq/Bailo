@@ -16,10 +16,9 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
-import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
+import EntryCardRevision, { EntryCardSnapshot } from 'src/entry/overview/EntryCardRevision'
 import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryCardRevisionInterface, EntryInterface, EntryKind } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryCardHistoryDialogProps = {
@@ -27,9 +26,33 @@ type EntryCardHistoryDialogProps = {
   setOpen: (isOpen: boolean) => void
 }
 
-type CompareSelection = {
-  version: number
-  mirrored: boolean
+const MAX_SELECTED = 2
+
+export function buildSnapshots(revisions: EntryCardRevisionInterface[]): EntryCardSnapshot[] {
+  const ordered = [...revisions].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+
+  let currentLocal: number | undefined
+  let currentMirrored: number | undefined
+  const snapshots: EntryCardSnapshot[] = []
+
+  for (const revision of ordered) {
+    if (revision.mirrored) {
+      currentMirrored = revision.version
+    } else {
+      currentLocal = revision.version
+    }
+    snapshots.push({
+      key: `local${currentLocal ?? '_'}-mirrored${currentMirrored ?? '_'}-@${revision.createdAt}`,
+      local: currentLocal,
+      mirrored: currentMirrored,
+      createdAt: revision.createdAt,
+      createdBy: revision.createdBy,
+      changedStream: revision.mirrored ? 'mirrored' : 'local',
+      changedVersion: revision.version,
+    })
+  }
+
+  return snapshots
 }
 
 export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHistoryDialogProps) {
@@ -38,100 +61,84 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     entry.id,
   )
-  const [compareWith, setCompareWith] = useState<CompareSelection | undefined>(undefined)
-
-  const entryKindPath =
-    entry.kind === EntryKind.MIRRORED_MODEL || entry.kind === EntryKind.MODEL ? EntryKind.MODEL : entry.kind
+  const [selected, setSelected] = useState<EntryCardSnapshot[]>([])
 
   const comparePath = entry.kind === EntryKind.DATA_CARD ? '/data-card/compare' : '/model-card/compare'
 
-  const isMirroredEntry = !!entry.settings.mirror?.sourceModelId
+  // Oldest-first snapshot list.
+  const snapshotsOldestFirst = useMemo(() => buildSnapshots(entryCardRevisions), [entryCardRevisions])
 
-  const latestLocalRevision = useMemo(
-    () =>
-      [...entryCardRevisions]
-        .filter((revision) => revision.version !== 1 && !revision.mirrored)
-        .sort(sortByCreatedAtDescending)[0],
-    [entryCardRevisions],
-  )
-  const latestMirroredRevision = useMemo(
-    () =>
-      [...entryCardRevisions]
-        .filter((revision) => revision.version !== 1 && revision.mirrored)
-        .sort(sortByCreatedAtDescending)[0],
-    [entryCardRevisions],
-  )
+  // Newest-first for display in the table.
+  const snapshotsNewestFirst = useMemo(() => [...snapshotsOldestFirst].reverse(), [snapshotsOldestFirst])
 
-  const buildHref = (revision: EntryCardRevisionInterface) => {
+  const buildHref = (from: EntryCardSnapshot, to: EntryCardSnapshot): string => {
     const query = new URLSearchParams()
     query.set('fromModel', entry.id)
     query.set('toModel', entry.id)
 
-    // Start each side pinned to the latest of each stream so the diff opens with both mirrored
-    // and additional-information cards populated.
-    const fromLocal = latestLocalRevision?.version
-    const fromMirrored = latestMirroredRevision?.version
-    let toLocal = latestLocalRevision?.version
-    let toMirrored = latestMirroredRevision?.version
-
-    // The clicked row overrides the "to" side of the matching stream.
-    if (revision.mirrored) {
-      toMirrored = revision.version
-    } else {
-      toLocal = revision.version
+    if (from.local !== undefined) {
+      query.set('fromVersion', String(from.local))
+    }
+    if (from.mirrored !== undefined) {
+      query.set('fromMirroredVersion', String(from.mirrored))
+    }
+    if (to.local !== undefined) {
+      query.set('toVersion', String(to.local))
+    }
+    if (to.mirrored !== undefined) {
+      query.set('toMirroredVersion', String(to.mirrored))
     }
 
-    // A selected "compare with" row overrides the "from" side of the matching stream.
-    const fromLocalOverride = compareWith && !compareWith.mirrored ? compareWith.version : fromLocal
-    const fromMirroredOverride = compareWith && compareWith.mirrored ? compareWith.version : fromMirrored
-
-    if (fromLocalOverride !== undefined) {
-      query.set('fromVersion', String(fromLocalOverride))
-    }
-    if (fromMirroredOverride !== undefined) {
-      query.set('fromMirroredVersion', String(fromMirroredOverride))
-    }
-    if (toLocal !== undefined) {
-      query.set('toVersion', String(toLocal))
-    }
-    if (toMirrored !== undefined) {
-      query.set('toMirroredVersion', String(toMirrored))
-    }
     return `${comparePath}?${query.toString()}`
   }
 
-  const sortedEntryCardRevisions = useMemo(
+  const isSelected = (snapshot: EntryCardSnapshot) => selected.some((s) => s.key === snapshot.key)
+
+  const toggleSelection = (snapshot: EntryCardSnapshot) => {
+    setSelected((current) => {
+      const alreadySelected = current.some((s) => s.key === snapshot.key)
+      if (alreadySelected) {
+        return current.filter((s) => s.key !== snapshot.key)
+      }
+      if (current.length >= MAX_SELECTED) {
+        // Defensive — unchecked checkboxes are hidden once MAX_SELECTED is reached.
+        return current
+      }
+      return [...current, snapshot]
+    })
+  }
+
+  const compareEnabled = selected.length === MAX_SELECTED
+
+  const onCompareSelected = () => {
+    if (!compareEnabled) {
+      return
+    }
+    const sorted = [...selected].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    router.push(buildHref(sorted[0], sorted[1]))
+  }
+
+  const renderedSnapshots = useMemo(
     () =>
-      entryCardRevisions.sort(sortByCreatedAtDescending).map((entryCardRevision) => (
-        <EntryCardRevision
-          onRowClick={() => {
-            router.push(buildHref(entryCardRevision))
-          }}
-          onCompareSelect={() => {
-            if (
-              compareWith &&
-              compareWith.version === entryCardRevision.version &&
-              compareWith.mirrored === entryCardRevision.mirrored
-            ) {
-              setCompareWith(undefined)
-            } else {
-              setCompareWith({ version: entryCardRevision.version, mirrored: entryCardRevision.mirrored })
-            }
-          }}
-          isMirrored={isMirroredEntry}
-          hasCompareSelected={compareWith !== undefined}
-          isCompareSelected={
-            !!compareWith &&
-            compareWith.version === entryCardRevision.version &&
-            compareWith.mirrored === entryCardRevision.mirrored
-          }
-          key={`${entryCardRevision.mirrored ? 'mirrored-' : ''}${entryCardRevision.version}`}
-          entryCard={entryCardRevision}
-          entryKind={entry.kind}
-        />
-      )),
+      snapshotsNewestFirst.map((snapshot) => {
+        const checked = isSelected(snapshot)
+        const hideCheckbox = selected.length >= MAX_SELECTED && !checked
+        return (
+          <EntryCardRevision
+            key={snapshot.key}
+            snapshot={snapshot}
+            entryKind={entry.kind}
+            isChecked={checked}
+            hideCheckbox={hideCheckbox}
+            onRowClick={() => {
+              router.push(buildHref(snapshot, snapshot))
+            }}
+            onCheckToggle={() => toggleSelection(snapshot)}
+          />
+        )
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [entry.id, entry.kind, entryKindPath, entryCardRevisions, compareWith, router],
+    [snapshotsNewestFirst, selected, entry.id, entry.kind, router],
   )
 
   if (isEntryCardRevisionsError) {
@@ -156,10 +163,13 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
                 <TableCell>Compare</TableCell>
               </TableRow>
             </TableHead>
-            {sortedEntryCardRevisions}
+            {renderedSnapshots}
           </Table>
         </TableContainer>
         <DialogActions>
+          <Button color='primary' variant='contained' disabled={!compareEnabled} onClick={onCompareSelected}>
+            Compare selected
+          </Button>
           <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>
             Close
           </Button>

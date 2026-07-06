@@ -1,89 +1,69 @@
-import CheckIcon from '@mui/icons-material/Check'
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
-import { IconButton, Stack, TableBody, TableCell, TableRow, Tooltip, Typography } from '@mui/material'
+import { Checkbox, Stack, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntryCardRevisionInterface, EntryKindKeys } from 'types/types'
+import { EntryKindKeys } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
+export type EntryCardSnapshot = {
+  key: string
+  local?: number
+  mirrored?: number
+  createdAt: string
+  createdBy: string
+  changedStream: 'local' | 'mirrored'
+  changedVersion: number
+}
+
 type EntryCardRevisionProps = {
-  entryCard: EntryCardRevisionInterface
+  snapshot: EntryCardSnapshot
   entryKind: EntryKindKeys
   onRowClick: () => void
-  onCompareSelect: () => void
-  isCompareSelected?: boolean
-  hasCompareSelected?: boolean
-  isMirrored: boolean
+  onCheckToggle: () => void
+  isChecked: boolean
+  hideCheckbox: boolean
 }
 
 export default function EntryCardRevision({
-  entryCard,
+  snapshot,
   onRowClick,
-  onCompareSelect,
-  isMirrored,
-  isCompareSelected = false,
-  hasCompareSelected = false,
+  onCheckToggle,
+  isChecked,
+  hideCheckbox,
 }: EntryCardRevisionProps) {
   const theme = useTheme()
 
-  const compareTooltipText = useMemo(() => {
-    if (isCompareSelected) {
-      return 'Selected to compare'
-    }
-    if (!hasCompareSelected) {
-      return 'Select to compare'
-    }
-    return
-  }, [hasCompareSelected, isCompareSelected])
-
-  const canCompare = (isMirrored || entryCard.version !== 1) && !isCompareSelected
+  const changedIsLocal = snapshot.changedStream === 'local'
+  const primaryColor = theme.palette.secondary.main
+  const mutedColor = theme.palette.text.secondary
 
   return (
     <TableBody>
-      <Tooltip
-        title={
-          isCompareSelected || !hasCompareSelected || entryCard.version === 1 ? undefined : 'Compare with selected'
-        }
-      >
-        <TableRow
-          hover={canCompare}
-          selected={isCompareSelected}
-          onClick={canCompare ? onRowClick : undefined}
-          sx={canCompare ? { '&:hover': { cursor: 'pointer' } } : undefined}
-        >
-          <TableCell>
-            <Stack
-              direction='row'
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-              }}
-            >
-              <Typography sx={{ color: theme.palette.secondary.main }}>{entryCard.version}</Typography>
-              <Typography variant='caption'>{entryCard.mirrored && `(Mirrored)`}</Typography>
-            </Stack>
-          </TableCell>
-          <TableCell sx={{ color: theme.palette.primary.main }}>
-            <UserDisplay dn={entryCard.createdBy} />
-          </TableCell>
-          <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateString(entryCard.createdAt)}</TableCell>
-          {!!entryCard.metadata && (
-            <TableCell sx={{ color: theme.palette.primary.main }}>
-              <Tooltip title={compareTooltipText}>
-                <IconButton
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    onCompareSelect()
-                  }}
-                >
-                  {isCompareSelected ? <CheckIcon /> : <CompareArrowsIcon />}
-                </IconButton>
-              </Tooltip>
-            </TableCell>
-          )}
-        </TableRow>
-      </Tooltip>
+      <TableRow hover selected={isChecked} onClick={onRowClick} sx={{ '&:hover': { cursor: 'pointer' } }}>
+        <TableCell>
+          <Stack direction='column' spacing={0}>
+            {snapshot.local !== undefined && (
+              <Typography sx={{ color: changedIsLocal ? primaryColor : mutedColor }}>{`v${snapshot.local}`}</Typography>
+            )}
+            {snapshot.mirrored !== undefined && (
+              <Typography sx={{ color: !changedIsLocal ? primaryColor : mutedColor }}>
+                {`Mirrored v${snapshot.mirrored}`}
+              </Typography>
+            )}
+          </Stack>
+        </TableCell>
+        <TableCell sx={{ color: theme.palette.primary.main }}>
+          <UserDisplay dn={snapshot.createdBy} />
+        </TableCell>
+        <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateString(snapshot.createdAt)}</TableCell>
+        <TableCell sx={{ color: theme.palette.primary.main }}>
+          <Checkbox
+            checked={isChecked}
+            onClick={(event) => event.stopPropagation()}
+            onChange={onCheckToggle}
+            disabled={hideCheckbox}
+          />
+        </TableCell>
+      </TableRow>
     </TableBody>
   )
 }
