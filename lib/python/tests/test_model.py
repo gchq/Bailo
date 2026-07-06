@@ -77,10 +77,9 @@ def test_create_get_from_id_update_and_delete_model(
     # Check that a model can be changed
     model.description = "testing-1234"
 
-    if state is not None:
-        if metadata is None:
-            with pytest.raises(BailoException):
-                model.update()
+    if state is not None and metadata is None:
+        with pytest.raises(BailoException):
+            model.update()
     else:
         model.update()
         get_model = Model.from_id(integration_client, model.model_id)
