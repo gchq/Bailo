@@ -26,11 +26,12 @@ import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useState } from 'react'
+import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import MigrationListDialog from 'src/entry/overview/MigrationListDialog'
@@ -58,7 +59,12 @@ export type RouterQueryParams = {
 
 export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
   const router = useRouter()
-  const isEdit = router.query.isEdit === 'true'
+  const { userPermissions } = useContext(UserPermissionsContext)
+
+  const isEdit = useMemo(
+    () => router.query.isEdit === 'true' && userPermissions.editEntryCard.hasPermission,
+    [router.query.isEdit, userPermissions.editEntryCard.hasPermission],
+  )
 
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')

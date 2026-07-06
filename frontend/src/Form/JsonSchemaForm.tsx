@@ -18,7 +18,6 @@ import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
-import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { RouterQueryParams } from 'src/entry/overview/FormEditPage'
@@ -73,7 +72,7 @@ export default function JsonSchemaForm({
       ? Number(router.query.page)
       : 0,
   )
-  const requiredByModelState = useSearchParams().get('requiredByModelState')
+  const requiredByModelState = router.query.requiredByModelState as string
   const [sectionCompletion, setSectionCompletion] = useState<Record<string, number>>(() =>
     splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
       acc[step.schema.title] = 0

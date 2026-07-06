@@ -80,7 +80,19 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
         }}
       >
         <Stack direction='row' sx={{ alignItems: 'center' }}>
-          {answered ? <Done color='success' fontSize='small' /> : <Error color='error' fontSize='small' />}
+          {answered ? (
+            <Done
+              color='success'
+              fontSize='small'
+              aria-label={`Answered field required for ${registry.formContext.requiredByModelState}`}
+            />
+          ) : (
+            <Error
+              color='error'
+              fontSize='small'
+              aria-label={`Unanswered field required for ${registry.formContext.requiredByModelState}`}
+            />
+          )}
           <Typography sx={{ fontSize: 12 }} color={answered ? 'success' : 'error'}>
             {`Required for ${registry.formContext.requiredByModelState}`}
           </Typography>
