@@ -14,7 +14,7 @@ import {
   EntryVolumeInterval,
   GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
-import { GetNoReleaseComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleaseComplianceMetrics.js'
+import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { SchemaKind } from '../../types/enums.js'
@@ -32,7 +32,7 @@ import {
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
 const USAGE_METRICS_CACHE_KEY = 'usageMetrics'
 const ROLE_COMPLIANCE_METRICS_CACHE_KEY = 'roleComplianceMetrics'
-const NO_RELEASE_COMPLIANCE_METRICS_CACHE_KEY = 'noReleaseComplianceMetrics'
+const NO_RELEASES_COMPLIANCE_METRICS_CACHE_KEY = 'noReleasesComplianceMetrics'
 
 const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
@@ -293,7 +293,7 @@ type RoleComplianceMetricsResult = {
   }[]
 }
 
-type ModelWithNoRelease = {
+type ModelWithNoReleases = {
   id: string
   organisation: string
   owners: string[]
@@ -303,7 +303,7 @@ type NoReleasesComplianceMetricsResultSubset = {
   summary: {
     modelsWithNoReleases: number
   }
-  models: ModelWithNoRelease[]
+  models: ModelWithNoReleases[]
 }
 
 type NoReleasesComplianceMetricsResultByOrgSubset = {
@@ -404,22 +404,30 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
     {
       $lookup: {
         from: 'v2_releases',
-        localField: 'id',
-        foreignField: 'modelId',
-        as: 'releases',
+        let: { modelId: '$id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$modelId', '$$modelId'],
+              },
+            },
+          },
+          { $limit: 1 },
+          { $project: { _id: 1 } },
+        ],
+        as: 'releaseMatch',
       },
     },
     {
       $match: {
-        releases: {
-          $size: 0,
-        },
+        'releaseMatch.0': { $exists: false },
       },
     },
     {
       $project: {
         id: 1,
-        organisation: { $ifNull: ['$organisation', ''] },
+        organisation: { $ifNull: ['$organisation', 'unset'] },
         owners: {
           $map: {
             input: {
@@ -438,7 +446,7 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   ]
 
   // Gets models by the specified organisation | no organisation
-  const models = await ModelModel.aggregate<ModelWithNoRelease>(pipeline)
+  const models = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
 
   return {
     summary: {
@@ -768,11 +776,11 @@ export class BaseMetricsConnector {
   /**
    * Gets compliance metrics for models without releases.
    */
-  async getNoReleasesMetrics(user: UserInterface): Promise<GetNoReleaseComplianceMetricsResponse> {
+  async getNoReleasesMetrics(user: UserInterface): Promise<GetNoReleasesComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
-    const cached = getCached<CachedMetrics<GetNoReleaseComplianceMetricsResponse>>(
-      NO_RELEASE_COMPLIANCE_METRICS_CACHE_KEY,
+    const cached = getCached<CachedMetrics<GetNoReleasesComplianceMetricsResponse>>(
+      NO_RELEASES_COMPLIANCE_METRICS_CACHE_KEY,
     )
     if (cached !== undefined) {
       return {
@@ -796,7 +804,7 @@ export class BaseMetricsConnector {
 
     const lastUpdated = new Date().toISOString()
 
-    setCached(NO_RELEASE_COMPLIANCE_METRICS_CACHE_KEY, {
+    setCached(NO_RELEASES_COMPLIANCE_METRICS_CACHE_KEY, {
       data: result,
       lastUpdated,
     })
