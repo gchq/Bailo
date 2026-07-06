@@ -58,13 +58,15 @@ def test_create_experiment_from_model(local_model):
         ),
         (
             "test-model",
-            "test",
+            "test-description",
             "Example Organisation",
             "Development",
             ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
-            {"overview": {"modelSummary": "I am filled."}},
+            {
+                "overview": {"modelSummary": "I am filled."},
+            },
         ),
     ],
 )
