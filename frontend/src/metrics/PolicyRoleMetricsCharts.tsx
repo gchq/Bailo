@@ -1,8 +1,14 @@
+import Check from '@mui/icons-material/Check'
 import {
+  Badge,
   Box,
-  Chip,
+  Button,
   List,
   ListItem,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -29,6 +35,14 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
   const theme = useTheme()
 
   const [missingRoleFilters, setMissingRolesFilters] = useState<string[]>([])
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
@@ -51,18 +65,51 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
   )
 
   const displayMissingRoleCountChips = useMemo(() => {
-    return data.summary.map((roleSummary) => {
-      return (
-        <Chip
-          key={roleSummary.roleId}
-          label={`${roleSummary.count} entries missing ${roleSummary.roleName}`}
-          variant={missingRoleFilters.includes(roleSummary.roleId) ? 'filled' : 'outlined'}
-          onClick={() => handleChipFilterOnClick(roleSummary.roleId)}
-          color='primary'
-        />
-      )
-    })
-  }, [data.summary, handleChipFilterOnClick, missingRoleFilters])
+    return (
+      <Stack direction='row' spacing={1}>
+        <Badge color='secondary' badgeContent={missingRoleFilters.length}>
+          <Button
+            id='menu-button'
+            aria-label='filter-menu-button'
+            onClick={handleClick}
+            sx={{ width: 'fit-content' }}
+            variant='outlined'
+            size='small'
+          >
+            Filter by missing role
+          </Button>
+        </Badge>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          slotProps={{
+            list: {
+              'aria-labelledby': 'menu-button',
+            },
+          }}
+        >
+          {data.summary.map((roleSummary) => (
+            <MenuItem key={roleSummary.roleId} onClick={() => handleChipFilterOnClick(roleSummary.roleId)}>
+              {missingRoleFilters.includes(roleSummary.roleId) ? (
+                <ListItemIcon>
+                  <Check />
+                </ListItemIcon>
+              ) : (
+                <></>
+              )}
+              <ListItemText
+                inset={!missingRoleFilters.includes(roleSummary.roleId)}
+              >{`${roleSummary.roleName} (${roleSummary.count})`}</ListItemText>
+            </MenuItem>
+          ))}
+        </Menu>
+        <Button disabled={missingRoleFilters.length === 0} onClick={() => setMissingRolesFilters([])}>
+          Clear filters
+        </Button>
+      </Stack>
+    )
+  }, [anchorEl, data.summary, handleChipFilterOnClick, missingRoleFilters, open])
 
   const tableRows = useMemo(() => {
     return data.entries
@@ -110,10 +157,8 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
   }
 
   return (
-    <Stack spacing={4}>
-      <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
-        {displayMissingRoleCountChips}
-      </Stack>
+    <Stack spacing={2}>
+      {displayMissingRoleCountChips}
       <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
           Entries missing review roles

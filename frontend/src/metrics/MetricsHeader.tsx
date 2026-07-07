@@ -76,11 +76,11 @@ export default function MetricsHeader({
                   variant='standard'
                 >
                   <MenuItem key='all' value='All'>
-                    All organisations
+                    all organisations
                   </MenuItem>
                   {organisations.map((organisation) => (
                     <MenuItem key={organisation} value={organisation}>
-                      {organisation === 'unset' ? <em>No organisation</em> : organisation}
+                      {organisation === 'unset' ? <em>no organisation</em> : organisation}
                     </MenuItem>
                   ))}
                 </Select>
