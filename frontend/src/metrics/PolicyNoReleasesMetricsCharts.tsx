@@ -34,13 +34,15 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
           </Typography>
         </TableCell>
         <TableCell>
-          {row.modelOwners.map((owner) => (
-            <UserDisplay key={owner} dn={owner} />
-          ))}
+          {row.modelOwners.length > 0 ? (
+            row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
+          ) : (
+            <em>{`No ${ownerRoleDisplayName}s set`}</em>
+          )}
         </TableCell>
       </TableRow>
     ))
-  }, [data])
+  }, [data.entries, ownerRoleDisplayName])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
@@ -61,7 +63,7 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
           Entries with no releases
         </Typography>
         <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-          <Table sx={{ minWidth: 650 }} size='small'>
+          <Table size='small'>
             <TableHead>
               <TableRow>
                 <TableCell>Model ID</TableCell>

@@ -78,9 +78,11 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
             </Typography>
           </TableCell>
           <TableCell>
-            {row.modelOwners.map((owner) => (
-              <UserDisplay key={owner} dn={owner} />
-            ))}
+            {row.modelOwners.length > 0 ? (
+              row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
+            ) : (
+              <em>{`No ${ownerRoleDisplayName}s set`}</em>
+            )}
           </TableCell>
           <TableCell>
             <List dense>
@@ -93,7 +95,7 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
           </TableCell>
         </TableRow>
       ))
-  }, [data.entries, missingRoleFilters])
+  }, [data.entries, missingRoleFilters, ownerRoleDisplayName])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
@@ -116,8 +118,8 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
           Entries missing review roles
         </Typography>
-        <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-          <Table sx={{ minWidth: 650 }} size='small'>
+        <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1, overflow: 'auto' }}>
+          <Table size='small'>
             <TableHead>
               <TableRow>
                 <TableCell>Model ID</TableCell>
