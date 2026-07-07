@@ -18,7 +18,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -147,7 +147,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             />
           )}
         </Stack>
-        {entry.card && (
+        {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
             <Typography sx={{ fontWeight: 'bold' }} color='primary'>
               Model card review
