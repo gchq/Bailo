@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntityObject } from 'types/types'
@@ -37,7 +37,6 @@ export default function EntitySelector({
 }: EntitySelectorProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
-  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
   const { users, isUsersLoading, isUsersError } = useListEntities(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -46,25 +45,21 @@ export default function EntitySelector({
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
-  const onSelectedEntitiesChanged = useEffectEvent((newEntities: EntityObject[]) => {
-    setSelectedEntities(newEntities)
-  })
-
-  useEffect(() => {
+  function defaultSelectedEntities(): EntityObject[] {
     if (registry && registry.formContext && registry.formContext.defaultCurrentUser) {
-      onSelectedEntitiesChanged([{ id: currentUserId, kind: 'user' }])
+      return [{ id: currentUserId, kind: 'user' }]
     }
-  }, [currentUserId, registry])
-
-  useEffect(() => {
     if (currentValue) {
       const updatedEntities: EntityObject[] = currentValue.map((value) => {
         const [kind, id] = value.split(':')
         return { kind, id }
       })
-      onSelectedEntitiesChanged(updatedEntities)
+      return updatedEntities
     }
-  }, [currentValue])
+    return []
+  }
+
+  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>(defaultSelectedEntities())
 
   const handleUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
@@ -154,9 +149,6 @@ export default function EntitySelector({
               <TextField
                 {...params}
                 placeholder='Username or group name'
-                slotProps={{
-                  htmlInput: { ...params.inputProps, 'aria-label': `input field for ${label}` },
-                }}
                 error={rawErrors && rawErrors.length > 0}
                 id={id}
                 onKeyDown={(event: KeyboardEvent) => {

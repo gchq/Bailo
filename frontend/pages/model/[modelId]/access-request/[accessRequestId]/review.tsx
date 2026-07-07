@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Card, Container, Dialog, DialogContent, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetModel } from 'actions/entry'
@@ -115,17 +115,35 @@ export default function AccessRequestReview() {
             />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
-            <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
+            <Stack
+              spacing={1}
+              direction='row'
+              sx={{
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
               <Typography variant='caption'>
                 Created by {<UserDisplay dn={accessRequest.createdBy} />} on
-                <Typography variant='caption' fontWeight='bold'>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
               </Typography>
               {accessRequest.metadata.overview.endDate && (
                 <Typography variant='caption'>
                   End Date:
-                  <Typography variant='caption' fontWeight='bold' data-test='accessRequestEndDate'>
+                  <Typography
+                    variant='caption'
+                    data-test='accessRequestEndDate'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
                   </Typography>
                 </Typography>
@@ -133,9 +151,11 @@ export default function AccessRequestReview() {
             </Stack>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
-              alignItems='flex-end'
-              justifyContent='space-between'
               spacing={4}
+              sx={{
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+              }}
             >
               <Card
                 sx={{
@@ -145,7 +165,13 @@ export default function AccessRequestReview() {
                   width: '100%',
                 }}
               >
-                <Typography variant='subtitle2' component='h3' mb={1}>
+                <Typography
+                  variant='subtitle2'
+                  component='h3'
+                  sx={{
+                    mb: 1,
+                  }}
+                >
                   Users
                 </Typography>
                 <Grid container>{accessRequestEntities}</Grid>

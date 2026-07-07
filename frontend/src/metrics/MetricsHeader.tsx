@@ -46,11 +46,11 @@ export default function MetricsHeader({
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-between'>
+        <Stack direction={{ sm: 'column', md: 'row' }} sx={{ justifyContent: 'space-between' }}>
           <Stack spacing={1}>
             <Box>
-              <Stack direction={{ sm: 'column', md: 'row' }} spacing={1} alignItems='center'>
-                <Typography fontStyle='italic'>Showing results for</Typography>
+              <Stack direction={{ sm: 'column', md: 'row' }} spacing={1} sx={{ alignItems: 'center' }}>
+                <em>Showing results for</em>
                 <Select
                   sx={{ maxWidth: '300px' }}
                   value={selectedOrganisation}

@@ -1,4 +1,4 @@
-import { LocalOffer } from '@mui/icons-material'
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -18,7 +18,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -59,9 +59,15 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const collaboratorList = useMemo(() => {
     return (
-      <Stack direction='row' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         {entry.collaborators.slice(0, 5).map((collaborator) => {
-          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar smallAvatars />
+          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar />
         })}
         {entry.collaborators.length > 5 && <Typography>...and {entry.collaborators.length - 5} more</Typography>}
       </Stack>
@@ -132,7 +138,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL && updateEntryPermission.hasPermission}
+              editable={updateEntryPermission.hasPermission}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -153,7 +159,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Stack>
         {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
-            <Typography fontWeight='bold' color='primary'>
+            <Typography sx={{ fontWeight: 'bold' }} color='primary'>
               Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (

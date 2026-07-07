@@ -67,7 +67,14 @@ export default function SchemaListItem({
           />
         }
       />
-      <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center' sx={{ ml: 2 }}>
+      <Stack
+        spacing={1}
+        direction={{ xs: 'column', md: 'row' }}
+        sx={{
+          alignItems: 'center',
+          ml: 2,
+        }}
+      >
         <Chip
           label={schema.active ? 'Active' : 'Inactive'}
           size='small'
@@ -91,8 +98,10 @@ export default function SchemaListItem({
           id={`schema-actions-menu-${schema.id}`}
           open={open}
           anchorEl={anchorEl}
-          MenuListProps={{
-            'aria-label': `schema-actions-button-${schema.id}`,
+          slotProps={{
+            list: {
+              'aria-label': `schema-actions-button-${schema.id}`,
+            },
           }}
           anchorOrigin={{
             vertical: 'bottom',

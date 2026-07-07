@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import ExpandableTypography from 'src/common/ExpandableTypography'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -50,20 +50,11 @@ export default function PageWithTabs({
   const router = useRouter()
   const { tab } = router.query
 
-  const [currentTab, setCurrentTab] = useState('')
+  const [currentTab, setCurrentTab] = useState(
+    tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path || '',
+  )
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
   const theme = useTheme()
-
-  const currentTabChanged = useEffectEvent((newTab: string) => {
-    setCurrentTab(newTab)
-  })
-
-  useEffect(() => {
-    if (!tabs.length) {
-      return
-    }
-    currentTabChanged(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
-  }, [tab, tabs])
 
   const tabsList = useMemo(
     () =>
@@ -130,13 +121,27 @@ export default function PageWithTabs({
     <>
       <Stack
         divider={<Divider flexItem orientation='vertical' />}
-        alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
-        sx={{ pb: 2, px: 2 }}
         direction={{ xs: 'column', sm: 'row' }}
+        sx={{
+          alignItems: 'center',
+          pb: 2,
+          px: 2,
+        }}
       >
-        <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
-          <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
+        <Stack
+          sx={{
+            overflow: 'auto',
+            maxWidth: 'md',
+          }}
+        >
+          <Stack
+            direction='row'
+            sx={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+            }}
+          >
             <Tooltip title={title}>
               <Typography component='h1' color='primary' variant='h6' noWrap>
                 {title}
@@ -151,7 +156,12 @@ export default function PageWithTabs({
             )}
           </Stack>
           {subheading && (
-            <Stack direction='row' alignItems='center'>
+            <Stack
+              direction='row'
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Typography
                 variant='caption'
                 sx={{ color: theme.palette.primary.main, textOverflow: 'ellipsis', overflow: 'hidden' }}
@@ -203,6 +213,7 @@ export default function PageWithTabs({
         scrollButtons='auto'
         variant='scrollable'
         allowScrollButtonsMobile
+        sx={{ height: '20px' }}
       >
         {tabsList}
       </Tabs>

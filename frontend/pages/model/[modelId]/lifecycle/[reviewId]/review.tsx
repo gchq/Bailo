@@ -1,5 +1,5 @@
 import { Dayjs } from '@dayjs'
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Dialog, DialogContent, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { useGetResponses } from 'actions/response'

@@ -28,7 +28,6 @@ import {
   EntryUserPermissions,
   MirrorImportLogData,
 } from '../types/types.js'
-import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -61,9 +60,6 @@ function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel:
   if (modelKind === EntryKind.UntrustedModel) {
     if (partialModel.visibility === EntryVisibility.Public) {
       throw BadReq('Untrusted models cannot be made public.')
-    }
-    if (partialModel.state) {
-      throw BadReq('Untrusted models can not have their state manually changed.')
     }
   }
 }
@@ -115,10 +111,6 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     id: modelId,
     collaborators,
   })
-
-  if (modelParams.kind === EntryKind.UntrustedModel) {
-    model.state = config.untrustedModels.defaultState || ''
-  }
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
 

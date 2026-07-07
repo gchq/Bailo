@@ -1,4 +1,4 @@
-import { LocalOffer } from '@mui/icons-material'
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useState } from 'react'
@@ -48,8 +48,19 @@ export default function FileToBeUploaded({
   )
 
   return (
-    <Grid container spacing={1} alignItems='center'>
-      <Grid size={{ xs: 9 }} textOverflow='ellipsis'>
+    <Grid
+      container
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
+      <Grid
+        size={{ xs: 9 }}
+        sx={{
+          textOverflow: 'ellipsis',
+        }}
+      >
         <Tooltip title={fileWithMetadata.file.name}>
           <Chip
             color='primary'
@@ -80,7 +91,12 @@ export default function FileToBeUploaded({
           <TextField size='small' value={fileWithMetadata.metadata?.text} onChange={handleMetadataTextOnChange} />
         )}
       </Grid>
-      <Grid size={{ xs: 1 }} textAlign='right'>
+      <Grid
+        size={{ xs: 1 }}
+        sx={{
+          textAlign: 'right',
+        }}
+      >
         <Typography variant='caption'>{prettyBytes(fileWithMetadata.file.size)}</Typography>
       </Grid>
     </Grid>

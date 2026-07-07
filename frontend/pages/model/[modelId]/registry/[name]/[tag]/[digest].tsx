@@ -1,5 +1,7 @@
-import { Clear, ExpandMore, Refresh } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
+import Clear from '@mui/icons-material/Clear'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import Refresh from '@mui/icons-material/Refresh'
 import {
   Accordion,
   AccordionDetails,
@@ -32,7 +34,7 @@ import { rerunImageArtefactScan, useGetImageScanResults } from 'actions/artefact
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -68,24 +70,19 @@ export default function ImageTagInformation() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const sendNotification = useNotification()
 
-  const [formattedData, setFormattedData] = useState<VulnerabilityResultItem[]>([])
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [open, setOpen] = useState(false)
   const [modelContent, setModalContent] = useState('')
   const [modalTitle, setModalTitle] = useState('')
   const [filterList, setFilterList] = useState<string[]>([])
-  const [toolName, setToolName] = useState('')
+
+  const toolName = modelImage && modelImage.scanResults ? modelImage.scanResults[0].toolName : ''
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
   const theme = useTheme()
-
-  const setFormattedDataEvent = useEffectEvent((data: VulnerabilityResultItem[]) => {
-    setFormattedData(data)
-    setPage(0)
-  })
 
   const handleFilterListChipOnClick = useCallback(
     (filter: string) => {
@@ -98,10 +95,6 @@ export default function ImageTagInformation() {
     [filterList],
   )
 
-  const updateToolName = useEffectEvent((resultToolName: string) => {
-    setToolName(resultToolName)
-  })
-
   const chipFilters = useMemo(() => {
     return ['Critical', 'High', 'Medium', 'Low', 'Unknown'].map((filter) => (
       <Chip
@@ -113,16 +106,15 @@ export default function ImageTagInformation() {
     ))
   }, [filterList, handleFilterListChipOnClick])
 
-  useEffect(() => {
+  const formattedData = useCallback(() => {
     let resultList: VulnerabilityResultItem[] = []
 
     if (!modelImage) {
-      return
+      return []
     }
 
     if (modelImage.scanResults !== undefined) {
       for (const results of modelImage.scanResults) {
-        updateToolName(results.toolName)
         if (
           results.additionalInfo !== undefined &&
           'Results' in results.additionalInfo &&
@@ -153,8 +145,8 @@ export default function ImageTagInformation() {
     if (filterList.length > 0) {
       resultList = resultList.filter((resultListItem) => filterList.includes(resultListItem.severity))
     }
-    setFormattedDataEvent(resultList)
-  }, [filterList, name, modelImage, modelId])
+    return resultList
+  }, [filterList, modelImage])
 
   const handleModalOpen = useCallback((cve: string, description: string) => {
     handleOpen()
@@ -176,31 +168,33 @@ export default function ImageTagInformation() {
   }
 
   const tableRows = useCallback(() => {
-    return formattedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-      <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-        <TableCell component='th' scope='row'>
-          {row.cve}
-        </TableCell>
-        <TableCell>{row.severity.toUpperCase()}</TableCell>
-        <TableCell>
-          <List dense>
-            {row.packageList.map((packageId) => (
-              <ListItem key={packageId} sx={{ pl: 0 }}>
-                {packageId}
-              </ListItem>
-            ))}
-          </List>
-        </TableCell>
-        <TableCell>
-          <Stack spacing={2}>
-            <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
-            {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
-              <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
-            )}
-          </Stack>
-        </TableCell>
-      </TableRow>
-    ))
+    return formattedData()
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      .map((row, index) => (
+        <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+          <TableCell component='th' scope='row'>
+            {row.cve}
+          </TableCell>
+          <TableCell>{row.severity.toUpperCase()}</TableCell>
+          <TableCell>
+            <List dense>
+              {row.packageList.map((packageId) => (
+                <ListItem key={packageId} sx={{ pl: 0 }}>
+                  {packageId}
+                </ListItem>
+              ))}
+            </List>
+          </TableCell>
+          <TableCell>
+            <Stack spacing={2}>
+              <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
+              {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
+                <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+              )}
+            </Stack>
+          </TableCell>
+        </TableRow>
+      ))
   }, [formattedData, page, rowsPerPage, handleModalOpen])
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
@@ -265,8 +259,22 @@ export default function ImageTagInformation() {
                   Back to model
                 </Button>
               </Link>
-              <Stack overflow='hidden' direction='row' alignItems='center'>
-                <Typography overflow='hidden' textOverflow='ellipsis' variant='h6' component='h1' color='primary'>
+              <Stack
+                direction='row'
+                sx={{
+                  overflow: 'hidden',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography
+                  variant='h6'
+                  component='h1'
+                  color='primary'
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {name && modelImage.tag ? `${name}:${modelImage.tag}` : 'Loading...'}
                 </Typography>
                 <CopyToClipboardButton
@@ -278,8 +286,18 @@ export default function ImageTagInformation() {
             </Stack>
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={4}>
               <Stack direction='column'>
-                <Typography fontWeight='bold'>URI</Typography>
-                <Box width='fit-content'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  URI
+                </Typography>
+                <Box
+                  sx={{
+                    width: 'fit-content',
+                  }}
+                >
                   <CodeLine
                     line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${modelImage.tag}`}
                   />
@@ -287,8 +305,18 @@ export default function ImageTagInformation() {
               </Stack>
               {modelImage.platform && (
                 <Stack>
-                  <Typography fontWeight='bold'>Platform</Typography>
-                  <Box pt={1}>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Platform
+                  </Typography>
+                  <Box
+                    sx={{
+                      pt: 1,
+                    }}
+                  >
                     <Typography>{modelImage.platform ?? ''}</Typography>
                   </Box>
                 </Stack>
@@ -297,17 +325,29 @@ export default function ImageTagInformation() {
             <Stack
               direction={{ md: 'row', sm: 'column' }}
               spacing={{ md: 4, sm: 1 }}
-              alignItems='flex-start'
               divider={<Divider flexItem orientation='vertical' />}
+              sx={{
+                alignItems: 'flex-start',
+              }}
             >
               <Stack spacing={1}>
-                <Typography variant='h6' fontWeight='bold'>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Compressed image size
                 </Typography>
                 <Typography>{prettyBytes(modelImage.imageSize)}</Typography>
               </Stack>
               <Stack spacing={1}>
-                <Typography variant='h6' fontWeight='bold'>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Vulnerabilities
                 </Typography>
                 <Stack direction='row'>
@@ -320,7 +360,12 @@ export default function ImageTagInformation() {
                 </Stack>
               </Stack>
               <Stack spacing={1}>
-                <Typography variant='h6' fontWeight='bold'>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Scanning tool
                 </Typography>
                 <Typography>{toolName}</Typography>
@@ -328,13 +373,24 @@ export default function ImageTagInformation() {
             </Stack>
             <Accordion defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                <Typography variant='h6' fontWeight='bold'>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Vulnerability report
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={2}>
-                  <Stack direction='row' spacing={1} alignItems='center'>
+                  <Stack
+                    direction='row'
+                    spacing={1}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <Typography>Filters:</Typography>
                     {chipFilters}
                     {filterList.length > 0 && (

@@ -315,10 +315,6 @@ data:
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
       },
-
-      untrustedModels: {
-        defaultState: '{{ .Values.untrustedModels.defaultState }}'
-      }
     }
 
   custom-environment-variables.cjs: |

@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import { Box, Button, Container, Link, Paper, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
@@ -88,7 +88,13 @@ export default function NewInference() {
                     Back to model
                   </Button>
                 </Link>
-                <Stack spacing={2} alignItems='center' justifyContent='center'>
+                <Stack
+                  spacing={2}
+                  sx={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   <Typography variant='h6' component='h1' color='primary'>
                     New Inferencing Service
                   </Typography>
@@ -109,7 +115,12 @@ export default function NewInference() {
                   onPortChange={(value) => setPort(value)}
                 />
               </Stack>
-              <Stack alignItems='flex-end' padding={2}>
+              <Stack
+                sx={{
+                  alignItems: 'flex-end',
+                  padding: 2,
+                }}
+              >
                 <Button
                   variant='contained'
                   type='submit'

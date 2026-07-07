@@ -22,7 +22,7 @@ export default function LastReviewOverviewDetails({ reviewId }: LastReviewOvervi
 
   return (
     <>
-      <Typography fontWeight='bold' color='primary'>
+      <Typography sx={{ fontWeight: 'bold' }} color='primary'>
         Last reviewed:
       </Typography>
       <Typography>
