@@ -3,7 +3,7 @@ import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import { patchEntry, useGetEntry } from 'actions/entry'
+import { patchEntry, useGetModel } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useContext, useMemo, useState } from 'react'
@@ -36,7 +36,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const sendNotification = useNotification()
 
-  const { mutateEntry } = useGetEntry(entry.id)
+  const { mutateEntry } = useGetModel(entry.id)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: entry.id,
     kind: ReviewKind.LIFECYCLE,
@@ -138,7 +138,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={updateEntryPermission.hasPermission}
+              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL && updateEntryPermission.hasPermission}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -149,7 +149,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
         </Stack>
         {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
-            <Typography sx={{ fontWeight: 'bold' }} color='primary'>
+            <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (
