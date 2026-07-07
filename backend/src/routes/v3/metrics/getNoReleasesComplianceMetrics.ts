@@ -14,9 +14,9 @@ export const NoReleasesSummaryMetricsSchema = z.object({
 })
 
 export const ModelsNoReleasesSchema = z.object({
-  entryId: z.string(),
-  organisation: z.string(),
-  modelOwners: z.array(z.string()),
+  entryId: z.string().openapi({ example: 'my-model-213gj' }),
+  organisation: z.string().openapi({ example: 'Example Organisation' }),
+  modelOwners: z.array(z.string()).openapi({ example: ['user:user'] }),
 })
 
 export const GlobalNoReleasesMetricsSchema = z.object({
@@ -25,7 +25,7 @@ export const GlobalNoReleasesMetricsSchema = z.object({
 })
 
 export const NoReleaseMetricsByOrgSchema = z.object({
-  organisation: z.string(),
+  organisation: z.string().openapi({ example: 'Example Organisation' }),
   summary: NoReleasesSummaryMetricsSchema,
   entries: z.array(ModelsNoReleasesSchema),
 })
@@ -33,7 +33,7 @@ export const NoReleaseMetricsByOrgSchema = z.object({
 export const BaseNoReleaseMetricsSchema = z.object({
   global: GlobalNoReleasesMetricsSchema,
   byOrganisation: z.array(NoReleaseMetricsByOrgSchema),
-  lastUpdated: z.string(),
+  lastUpdated: z.string().openapi({ example: new Date().toISOString() }),
 })
 
 registerPath(

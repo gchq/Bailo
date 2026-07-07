@@ -17,7 +17,7 @@ import {
 import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
-import { SchemaKind } from '../../types/enums.js'
+import { MetricsCacheKeys, SchemaKind } from '../../types/enums.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import {
@@ -30,9 +30,6 @@ import {
 } from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
-const USAGE_METRICS_CACHE_KEY = 'usageMetrics'
-const ROLE_COMPLIANCE_METRICS_CACHE_KEY = 'roleComplianceMetrics'
-const NO_RELEASES_COMPLIANCE_METRICS_CACHE_KEY = 'noReleasesComplianceMetrics'
 
 const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
@@ -426,6 +423,7 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
     },
     {
       $project: {
+        _id: 0,
         entryId: '$id',
         organisation: { $ifNull: ['$organisation', 'unset'] },
         modelOwners: {
@@ -483,7 +481,7 @@ export class BaseMetricsConnector {
    * Gets metrics around general model usage within Bailo.
    */
   async getUsageMetrics(user: UserInterface): Promise<GetUsageMetricsResponse> {
-    const cacheKey = `${USAGE_METRICS_CACHE_KEY}:${user.dn}`
+    const cacheKey = `${MetricsCacheKeys.USAGE}:${user.dn}`
 
     const cached = getCached<CachedMetrics<GetUsageMetricsResponse>>(cacheKey)
     if (cached !== undefined) {
@@ -571,7 +569,7 @@ export class BaseMetricsConnector {
   async getRoleComplianceMetrics(user: UserInterface): Promise<GetRoleComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
-    const cached = getCached<CachedMetrics<GetRoleComplianceMetricsResponse>>(ROLE_COMPLIANCE_METRICS_CACHE_KEY)
+    const cached = getCached<CachedMetrics<GetRoleComplianceMetricsResponse>>(MetricsCacheKeys.ROLE_COMPLIANCE)
     if (cached !== undefined) {
       return {
         ...cached.data,
@@ -596,7 +594,7 @@ export class BaseMetricsConnector {
 
     const lastUpdated = new Date().toISOString()
 
-    setCached(ROLE_COMPLIANCE_METRICS_CACHE_KEY, {
+    setCached(MetricsCacheKeys.ROLE_COMPLIANCE, {
       data: result,
       lastUpdated,
     })
@@ -780,7 +778,7 @@ export class BaseMetricsConnector {
     await checkUserIsAuthorised(user)
 
     const cached = getCached<CachedMetrics<GetNoReleasesComplianceMetricsResponse>>(
-      NO_RELEASES_COMPLIANCE_METRICS_CACHE_KEY,
+      MetricsCacheKeys.NO_RELEASES_COMPLIANCE,
     )
     if (cached !== undefined) {
       return {
@@ -804,7 +802,7 @@ export class BaseMetricsConnector {
 
     const lastUpdated = new Date().toISOString()
 
-    setCached(NO_RELEASES_COMPLIANCE_METRICS_CACHE_KEY, {
+    setCached(MetricsCacheKeys.NO_RELEASES_COMPLIANCE, {
       data: result,
       lastUpdated,
     })
