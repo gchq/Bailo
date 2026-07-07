@@ -1,6 +1,5 @@
 import Check from '@mui/icons-material/Check'
 import {
-  Badge,
   Box,
   Button,
   List,
@@ -67,18 +66,16 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
   const displayMissingRoleCountChips = useMemo(() => {
     return (
       <Stack direction='row' spacing={1}>
-        <Badge color='secondary' badgeContent={missingRoleFilters.length}>
-          <Button
-            id='menu-button'
-            aria-label='filter-menu-button'
-            onClick={handleClick}
-            sx={{ width: 'fit-content' }}
-            variant='outlined'
-            size='small'
-          >
-            Filter by missing role
-          </Button>
-        </Badge>
+        <Button
+          id='menu-button'
+          aria-label='filter-menu-button'
+          onClick={handleClick}
+          sx={{ width: 'fit-content' }}
+          variant='outlined'
+          size='small'
+        >
+          Filter by missing role {missingRoleFilters.length > 0 ? `(${missingRoleFilters.length})` : ''}
+        </Button>
         <Menu
           anchorEl={anchorEl}
           open={open}
