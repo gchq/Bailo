@@ -20,8 +20,23 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
       e.preventDefault()
       return (e.returnValue = warningText)
     }
-    const handleBrowseAway = () => {
+
+    const getComparableUrl = (url: string) => {
+      const [pathname, queryString = ''] = url.split('?')
+      const params = new URLSearchParams(queryString)
+      // Ignore the 'page' query param when determining if the URL has meaningfully changed
+      params.delete('page')
+      params.delete('requiredByModelState')
+      params.sort()
+      const remaining = params.toString()
+      return remaining ? `${pathname}?${remaining}` : pathname
+    }
+    const handleBrowseAway = (newUrl: string) => {
       if (!unsavedChanges) {
+        return
+      }
+      // Skip warning if the only difference between the URLs is the 'page' query param
+      if (getComparableUrl(router.asPath) === getComparableUrl(newUrl)) {
         return
       }
       const res = window.confirm(warningText)
