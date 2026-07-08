@@ -10,13 +10,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import {
-  BreakdownQueryType,
-  BreakdownSelection,
-  NONE_COLOR,
-  PieChartData,
-  withConsistentColours,
-} from 'src/metrics/metricsUtils'
+import { BreakdownQueryType, NONE_COLOR, PieChartData, withConsistentColours } from 'src/metrics/metricsUtils'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { ModelVolume, ModelVolumeData, OverviewBaseMetrics } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
@@ -25,7 +19,6 @@ interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
   organisationList: string[]
   selectedOrganisation: string
-  selection: BreakdownSelection
   onSelect: (type: BreakdownQueryType, value: string) => void
 }
 
@@ -37,7 +30,6 @@ export default function OverviewMetricsCharts({
   data,
   organisationList,
   selectedOrganisation,
-  selection,
   onSelect,
 }: OverviewMetricsChartsProps) {
   const [schemaData, setSchemaData] = useState<PieChartData[]>([])
@@ -152,9 +144,6 @@ export default function OverviewMetricsCharts({
     return <Loading />
   }
 
-  const selectedStateValue = selection?.type === 'byState' ? selection.value : null
-  const selectedSchemaValue = selection?.type === 'bySchema' ? selection.value : null
-
   const handleStateItemClick = (
     _event: React.MouseEvent<SVGPathElement, MouseEvent>,
     _identifier: PieItemIdentifier,
@@ -176,9 +165,6 @@ export default function OverviewMetricsCharts({
       onSelect('bySchema', label)
     }
   }
-
-  const selectedStateIndex = selectedStateValue ? stateData.findIndex((s) => s.label === selectedStateValue) : -1
-  const selectedSchemaIndex = selectedSchemaValue ? schemaData.findIndex((s) => s.label === selectedSchemaValue) : -1
 
   return (
     <Stack spacing={4}>
@@ -258,9 +244,6 @@ export default function OverviewMetricsCharts({
                     highlightScope: { fade: 'global', highlight: 'item' },
                   },
                 ]}
-                highlightedItem={
-                  selectedStateIndex >= 0 ? { seriesId: 'life-cycle-status', dataIndex: selectedStateIndex } : null
-                }
                 onItemClick={handleStateItemClick}
                 slotProps={{
                   legend: {
@@ -296,9 +279,6 @@ export default function OverviewMetricsCharts({
                     highlightScope: { fade: 'global', highlight: 'item' },
                   },
                 ]}
-                highlightedItem={
-                  selectedSchemaIndex >= 0 ? { seriesId: 'schema-usage', dataIndex: selectedSchemaIndex } : null
-                }
                 onItemClick={handleSchemaItemClick}
                 slotProps={{
                   legend: {

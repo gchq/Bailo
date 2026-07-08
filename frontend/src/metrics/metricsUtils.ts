@@ -4,13 +4,14 @@ import { SchemaInterface } from 'types/types'
 export const breakdownQueryTypes = ['byState', 'bySchema'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
 
-export type BreakdownSelection = {
-  type: BreakdownQueryType
-  value: string
-} | null
-
 export type ModelBreakdownRequest = {
   organisation: string
+  state?: string
+  schemaId?: string
+}
+
+export type EntriesFilterQuery = {
+  organisation?: string
   state?: string
   schemaId?: string
 }
@@ -22,33 +23,57 @@ export type BreakdownContext = {
 
 export type BreakdownDefinition = {
   buildQuery: (value: string, context: BreakdownContext) => ModelBreakdownRequest
-  getTitle: (value: string) => string
-  getErrorMessage: (value: string) => string
 }
 
 function resolveSchemaId(schemaName: string, schemas: SchemaInterface[]): string {
   return schemas.find((schema) => schema.name === schemaName)?.id ?? 'none'
 }
 
-export const breakdownDefinitions: Record<BreakdownQueryType, BreakdownDefinition> = {
+const breakdownDefinitions: Record<BreakdownQueryType, BreakdownDefinition> = {
   byState: {
     buildQuery: (value, context) => ({
       organisation: context.organisation,
       state: value,
     }),
-    getTitle: (value) =>
-      value.toLowerCase() === 'none' ? 'Models with no state selected' : `Models in state: ${value}`,
-    getErrorMessage: (value) => `Failed to load models in state "${value}". Please try again.`,
   },
   bySchema: {
     buildQuery: (value, context) => ({
       organisation: context.organisation,
       schemaId: resolveSchemaId(value, context.schemas),
     }),
-    getTitle: (value) =>
-      value.toLowerCase() === 'none' ? 'Models with no schema selected' : `Models with schema: ${value}`,
-    getErrorMessage: (value) => `Failed to load models with schema "${value}". Please try again.`,
   },
+}
+
+/**
+ * Builds an Entries tab URL from a set of filters, omitting anything unset
+ * or equal to 'All' so the URL stays clean and shareable.
+ */
+export function buildEntriesHref(filters: EntriesFilterQuery): string {
+  const params = new URLSearchParams()
+  if (filters.organisation && filters.organisation !== 'All') {
+    params.set('organisation', filters.organisation)
+  }
+  if (filters.state) {
+    params.set('state', filters.state)
+  }
+  if (filters.schemaId) {
+    params.set('schemaId', filters.schemaId)
+  }
+  const queryString = params.toString()
+  return `/metrics?tab=entries${queryString ? `&${queryString}` : ''}`
+}
+
+/**
+ * Builds a deep link to the Entries tab pre-filtered based on a chart selection,
+ * reusing the same buildQuery logic as the (now removed) inline breakdown panel.
+ */
+export function buildEntriesTabHref(type: BreakdownQueryType, value: string, context: BreakdownContext): string {
+  const request = breakdownDefinitions[type].buildQuery(value, context)
+  return buildEntriesHref({
+    organisation: request.organisation,
+    state: request.state,
+    schemaId: request.schemaId,
+  })
 }
 
 export interface PieChartData {
@@ -61,7 +86,7 @@ export interface PieChartData {
 export const NONE_COLOR = mangoFusionPaletteDark[0]
 
 // Remaining palette, used for everything else
-export const remainingPalette = mangoFusionPaletteDark.filter((c) => c !== NONE_COLOR)
+export const remainingPalette = mangoFusionPaletteDark.filter((colour) => colour !== NONE_COLOR)
 
 /**
  * Maps each pie data item to a colour, pinning 'none' to a
