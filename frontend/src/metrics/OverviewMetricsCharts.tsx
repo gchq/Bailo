@@ -10,10 +10,10 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { BreakdownQueryType, NONE_COLOR, PieChartData, withConsistentColours } from 'src/metrics/metricsUtils'
 import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
 import { ModelVolume, ModelVolumeData, OverviewBaseMetrics } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
+import { BreakdownQueryType, NONE_COLOR, PieChartData, withConsistentColours } from 'utils/metricsUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
@@ -222,79 +222,84 @@ export default function OverviewMetricsCharts({
             <OverviewStatPanel label='entries with releases' value={data.withReleases} minWidth='300px' />
             <OverviewStatPanel label='entries with access requests' value={data.withAccessRequest} minWidth='320px' />
           </Stack>
-          <Stack
-            spacing={2}
-            direction={{ lg: 'row', md: 'column' }}
-            sx={{ width: '100%', justifyContent: 'space-around' }}
-          >
-            <Stack spacing={2} sx={{ alignItems: 'center' }}>
-              <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-                Life cycle status
-              </Typography>
-              <PieChart
-                series={[
-                  {
-                    id: 'life-cycle-status',
-                    innerRadius: 50,
-                    outerRadius: 100,
-                    data: withConsistentColours(stateData),
-                    arcLabel: 'value',
-                    paddingAngle: 1,
-                    cornerRadius: 4,
-                    highlightScope: { fade: 'global', highlight: 'item' },
-                  },
-                ]}
-                onItemClick={handleStateItemClick}
-                slotProps={{
-                  legend: {
-                    direction: 'horizontal',
-                    position: { vertical: 'bottom', horizontal: 'center' },
-                  },
-                }}
-                sx={{
-                  ...pieChartSettings.sx,
-                  '& path': { cursor: 'pointer' },
-                }}
-                margin={pieChartSettings.margin}
-                width={pieChartSettings.width}
-                height={pieChartSettings.height}
-                colors={pieChartSettings.colors}
-              />
-            </Stack>
-            <Stack spacing={2} sx={{ alignItems: 'center' }}>
-              <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-                Schema usage
-              </Typography>
-              <PieChart
-                series={[
-                  {
-                    id: 'schema-usage',
-                    innerRadius: 50,
-                    outerRadius: 100,
-                    data: withConsistentColours(schemaData),
-                    arcLabel: 'value',
-                    paddingAngle: 1,
-                    cornerRadius: 4,
-                    color: 'red',
-                    highlightScope: { fade: 'global', highlight: 'item' },
-                  },
-                ]}
-                onItemClick={handleSchemaItemClick}
-                slotProps={{
-                  legend: {
-                    direction: 'horizontal',
-                    position: { vertical: 'bottom', horizontal: 'center' },
-                  },
-                }}
-                sx={{
-                  ...pieChartSettings.sx,
-                  '& path': { cursor: 'pointer' },
-                }}
-                margin={pieChartSettings.margin}
-                width={pieChartSettings.width}
-                height={pieChartSettings.height}
-                colors={pieChartSettings.colors}
-              />
+          <Stack>
+            {/** TODO - Currently only the pie charts are clickable.
+             *          Once all charts in this page are clickable, move this text to above the top chart and update the text */}
+            <Typography sx={{ mb: 2 }}>Click on either of the pie charts below to view the model breakdown</Typography>
+            <Stack
+              spacing={2}
+              direction={{ lg: 'row', md: 'column' }}
+              sx={{ width: '100%', justifyContent: 'space-around' }}
+            >
+              <Stack spacing={2} sx={{ alignItems: 'center' }}>
+                <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
+                  Life cycle status
+                </Typography>
+                <PieChart
+                  series={[
+                    {
+                      id: 'life-cycle-status',
+                      innerRadius: 50,
+                      outerRadius: 100,
+                      data: withConsistentColours(stateData),
+                      arcLabel: 'value',
+                      paddingAngle: 1,
+                      cornerRadius: 4,
+                      highlightScope: { fade: 'global', highlight: 'item' },
+                    },
+                  ]}
+                  onItemClick={handleStateItemClick}
+                  slotProps={{
+                    legend: {
+                      direction: 'horizontal',
+                      position: { vertical: 'bottom', horizontal: 'center' },
+                    },
+                  }}
+                  sx={{
+                    ...pieChartSettings.sx,
+                    '& path': { cursor: 'pointer' },
+                  }}
+                  margin={pieChartSettings.margin}
+                  width={pieChartSettings.width}
+                  height={pieChartSettings.height}
+                  colors={pieChartSettings.colors}
+                />
+              </Stack>
+              <Stack spacing={2} sx={{ alignItems: 'center' }}>
+                <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
+                  Schema usage
+                </Typography>
+                <PieChart
+                  series={[
+                    {
+                      id: 'schema-usage',
+                      innerRadius: 50,
+                      outerRadius: 100,
+                      data: withConsistentColours(schemaData),
+                      arcLabel: 'value',
+                      paddingAngle: 1,
+                      cornerRadius: 4,
+                      color: 'red',
+                      highlightScope: { fade: 'global', highlight: 'item' },
+                    },
+                  ]}
+                  onItemClick={handleSchemaItemClick}
+                  slotProps={{
+                    legend: {
+                      direction: 'horizontal',
+                      position: { vertical: 'bottom', horizontal: 'center' },
+                    },
+                  }}
+                  sx={{
+                    ...pieChartSettings.sx,
+                    '& path': { cursor: 'pointer' },
+                  }}
+                  margin={pieChartSettings.margin}
+                  width={pieChartSettings.width}
+                  height={pieChartSettings.height}
+                  colors={pieChartSettings.colors}
+                />
+              </Stack>
             </Stack>
           </Stack>
         </Stack>

@@ -6,8 +6,8 @@ import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsHeader from 'src/metrics/MetricsHeader'
-import { BreakdownQueryType, buildEntriesTabHref } from 'src/metrics/metricsUtils'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
+import { BreakdownQueryType, buildEntriesTabHref } from 'utils/metricsUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()
@@ -62,7 +62,6 @@ export default function OverviewMetrics() {
                 (organisationSubset) => organisationSubset.organisation,
               )}
               selectedOrganisation={selectedOrganisation}
-              selection={null}
               onSelect={handleBreakdownSelection}
             />
           </MetricsHeader>

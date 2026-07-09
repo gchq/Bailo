@@ -1,14 +1,14 @@
-import { Container, Stack } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsBreakdownTable from 'src/metrics/MetricsBreakdownTable'
-import { buildEntriesHref, EntriesFilterQuery } from 'src/metrics/metricsUtils'
 import { SystemRole } from 'types/types'
+import { buildEntriesHref, EntriesFilterQuery } from 'utils/metricsUtils'
 
 const ALL_VALUE = 'All'
 const NONE_SCHEMA_VALUE = 'none'
@@ -20,8 +20,6 @@ function getQueryString(value: string | string[] | undefined): string {
 export default function EntryMetrics() {
   const router = useRouter()
 
-  // Used to populate the filter dropdowns, and re-fetched (deduped by SWR) rather
-  // than lifted from OverviewMetrics, since the two tabs are independent views.
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
@@ -36,20 +34,20 @@ export default function EntryMetrics() {
     schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
   })
 
-  const updateFilter = useCallback(
-    (key: keyof EntriesFilterQuery, value: string) => {
-      const current: EntriesFilterQuery = {
-        organisation: organisation !== ALL_VALUE ? organisation : undefined,
-        state: state !== ALL_VALUE ? state : undefined,
-        schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
-      }
-      const next = { ...current, [key]: value === ALL_VALUE ? undefined : value }
-      // shallow: true avoids a full page reload / re-run of data fetching methods,
-      // it just updates the URL and re-renders with the new router.query values.
-      router.push(buildEntriesHref(next), undefined, { shallow: true })
-    },
-    [router, organisation, state, schemaId],
-  )
+  function updateFilter(key: keyof EntriesFilterQuery, value: string) {
+    const current: EntriesFilterQuery = {
+      organisation: organisation !== ALL_VALUE ? organisation : undefined,
+      state: state !== ALL_VALUE ? state : undefined,
+      schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
+    }
+
+    const next = {
+      ...current,
+      [key]: value === ALL_VALUE ? undefined : value,
+    }
+
+    router.push(buildEntriesHref(next), undefined, { shallow: true })
+  }
 
   const organisationOptions = useMemo(
     () => [ALL_VALUE, ...(overviewMetrics?.byOrganisation.map((org) => org.organisation) ?? [])],
@@ -83,6 +81,17 @@ export default function EntryMetrics() {
     [entries],
   )
 
+  const resultCountLabel = useMemo(() => {
+    if (isEntriesLoading) {
+      return 'Loading entries…'
+    }
+    if (isEntriesError) {
+      return null
+    }
+    const count = tableData.length
+    return `${count} ${count === 1 ? 'entry' : 'entries'}`
+  }, [isEntriesLoading, isEntriesError, tableData.length])
+
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
@@ -96,6 +105,14 @@ export default function EntryMetrics() {
   return (
     <Container maxWidth='lg' sx={{ mb: 4 }}>
       <Stack spacing={2} sx={{ mt: 2, mb: 4 }}>
+        <Stack spacing={0.5}>
+          <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold' }}>
+            Entries
+          </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            Browse and filter individual entries by organisation, lifecycle state, and schema.
+          </Typography>
+        </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
           <Stack direction='row' spacing={1}>
             <FilterMenuButton
@@ -117,6 +134,11 @@ export default function EntryMetrics() {
               onSelect={(value) => updateFilter('schemaId', value)}
             />
           </Stack>
+          {resultCountLabel && (
+            <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
+              {resultCountLabel}
+            </Typography>
+          )}
         </Stack>
       </Stack>
       {isEntriesError ? (

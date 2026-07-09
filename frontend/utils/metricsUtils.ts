@@ -4,7 +4,7 @@ import { SchemaInterface } from 'types/types'
 export const breakdownQueryTypes = ['byState', 'bySchema'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
 
-export type ModelBreakdownRequest = {
+type ModelBreakdownRequest = {
   organisation: string
   state?: string
   schemaId?: string
@@ -16,12 +16,12 @@ export type EntriesFilterQuery = {
   schemaId?: string
 }
 
-export type BreakdownContext = {
+type BreakdownContext = {
   organisation: string
   schemas: SchemaInterface[]
 }
 
-export type BreakdownDefinition = {
+type BreakdownDefinition = {
   buildQuery: (value: string, context: BreakdownContext) => ModelBreakdownRequest
 }
 
