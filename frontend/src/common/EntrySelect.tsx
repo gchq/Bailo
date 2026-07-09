@@ -49,13 +49,12 @@ export default function EntrySelect({
       }
       setErrorMessage(await getErrorMessage(response))
     } else {
-      if (field === 'state') {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { requiredByModelState, ...queryWithoutFiltered } = router.query
-        router.replace({
-          query: queryWithoutFiltered,
-        })
-      }
+      const { ...queries } = router.query
+      delete queries.requiredByModelState
+      router.replace({
+        query: queries,
+      })
+
       mutate()
       setIsEdit(false)
     }
