@@ -81,6 +81,7 @@ export interface UiConfig {
   untrustedModel: {
     enabled: boolean
     untrustedModelDescription: string
+    fileUploadGuidance: string
   }
 }
 
@@ -466,6 +467,8 @@ export const EntryKind = {
   UNTRUSTED_MODEL: 'untrusted-model',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
+export const MODEL_ENTRY_KINDS = [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD || value === EntryKind.MIRRORED_MODEL)

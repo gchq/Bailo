@@ -11,6 +11,7 @@ import {
   EntryUserPermissions,
   EntryVisibilityKeys,
   FileInterface,
+  MODEL_ENTRY_KINDS,
   ModelImage,
   ReleaseInterface,
 } from '../types/types'
@@ -84,7 +85,7 @@ export function useListEntries(
   }
 }
 
-export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
+export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys[] | EntryKindKeys) {
   const queryParams = {
     ...(kind && { kind }),
   }
@@ -102,6 +103,9 @@ export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
     isEntryLoading: isLoading,
     isEntryError: error,
   }
+}
+export function useGetModel(entryId: string | undefined) {
+  return useGetEntry(entryId, MODEL_ENTRY_KINDS)
 }
 
 const emptyRolesList = []

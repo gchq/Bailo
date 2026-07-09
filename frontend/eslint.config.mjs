@@ -34,10 +34,8 @@ export default defineConfig([
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-
       'react/jsx-newline': [
         1,
         {
@@ -50,6 +48,25 @@ export default defineConfig([
       'no-console': 'warn',
       'react-hooks/set-state-in-effect': 'off',
       curly: ['error', 'all'],
+    },
+  },
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.json'],
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-deprecated': 'warn',
+    },
+  },
+  {
+    files: ['*.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
     },
   },
   {
@@ -86,7 +103,6 @@ export default defineConfig([
       ],
     },
   },
-
   {
     files: ['cypress/**/*.cy.ts'],
     plugins: {

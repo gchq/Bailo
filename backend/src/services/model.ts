@@ -28,7 +28,6 @@ import {
   EntryUserPermissions,
   MirrorImportLogData,
 } from '../types/types.js'
-import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -61,9 +60,6 @@ function checkUntrustedModelRestrictions(modelKind: EntryKindKeys, partialModel:
   if (modelKind === EntryKind.UntrustedModel) {
     if (partialModel.visibility === EntryVisibility.Public) {
       throw BadReq('Untrusted models cannot be made public.')
-    }
-    if (partialModel.state) {
-      throw BadReq('Untrusted models can not have their state manually changed.')
     }
   }
 }
@@ -116,10 +112,6 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     collaborators,
   })
 
-  if (modelParams.kind === EntryKind.UntrustedModel) {
-    model.state = config.untrustedModels.defaultState || ''
-  }
-
   const auth = await authorisation.model(user, model, ModelAction.Create)
 
   if (!auth.success) {
@@ -141,10 +133,12 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
  * @remarks
  * _Only_ use this function when an auth check would break expected functionality, otherwise use `getModelById`.
  */
-export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+export async function getModelByIdNoAuth(modelId: string, kinds?: EntryKindKeys[] | EntryKindKeys): Promise<ModelDoc> {
+  const kindArray = kinds ? (Array.isArray(kinds) ? kinds : [kinds]) : undefined
+
   const model = await ModelModel.findOne({
     id: modelId,
-    ...(kind && { kind }),
+    ...(kindArray && { kind: { $in: kindArray } }),
   })
 
   if (!model) {
@@ -154,7 +148,11 @@ export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys):
   return model
 }
 
-export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+export async function getModelById(
+  user: UserInterface,
+  modelId: string,
+  kind?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc> {
   const model = await getModelByIdNoAuth(modelId, kind)
 
   const auth = await authorisation.model(user, model, ModelAction.View)

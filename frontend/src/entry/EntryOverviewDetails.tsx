@@ -138,7 +138,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL && updateEntryPermission.hasPermission}
+              editable={updateEntryPermission.hasPermission}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -147,7 +147,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             />
           )}
         </Stack>
-        {entry.card && (
+        {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
             <Typography sx={{ fontWeight: 'bold' }} color='primary'>
               Model card review

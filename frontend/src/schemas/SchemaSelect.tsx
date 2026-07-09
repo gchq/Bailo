@@ -127,7 +127,8 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     [inactiveSchemas, selectionCallback, loading],
   )
 
-  const link = schemaKind === SchemaKind.ACCESS_REQUEST ? `/model/${entry.id}` : `/${schemaKind}/${entry.id}`
+  const link =
+    schemaKind === SchemaKind.ACCESS_REQUEST ? `/model/${entry.id}` : `/${entryKindForRedirect(entry.kind)}/${entry.id}`
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isSchemasError,

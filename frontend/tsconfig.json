@@ -15,9 +15,9 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@emotion/react",
     "incremental": true,
-    "baseUrl": ".",
     "paths": {
-      "@dayjs": ["src/dayjsConfig.ts"]
+      "@dayjs": ["./src/dayjsConfig.ts"],
+      "*": ["./*"]
     },
     "noImplicitAny": false
   },

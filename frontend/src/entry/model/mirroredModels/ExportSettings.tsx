@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { patchEntry } from 'actions/entry'
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'
 import useNotification from 'src/hooks/useNotification'
@@ -31,7 +31,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(destinationModelId === undefined || destinationModelId === '')
 
-  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSave = async (event: SyntheticEvent<HTMLFormElement>) => {
     setLoading(true)
     event.preventDefault()
 

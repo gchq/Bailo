@@ -176,6 +176,7 @@ export interface UiConfig {
   untrustedModel: {
     enabled: boolean
     untrustedModelDescription: string
+    fileUploadGuidance: string
   }
 }
 

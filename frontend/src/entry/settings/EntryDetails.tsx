@@ -3,7 +3,7 @@ import LockOpen from '@mui/icons-material/LockOpen'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchEntry, useGetEntry } from 'actions/entry'
-import { FormEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import useNotification from 'src/hooks/useNotification'
@@ -35,7 +35,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
     return ''
   }, [isFormValid])
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
     setIsLoading(true)
