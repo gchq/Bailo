@@ -1,0 +1,73 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# LLM Import
+
+> **Common questions this page answers:**
+>
+> - How do I enable LLM-powered model card import?
+> - What LLM providers are supported?
+> - What configuration options are available?
+> - How do users interact with the import feature?
+
+Bailo can optionally use a large language model (LLM) to extract model card data from free text, such as HuggingFace
+model cards or system cards. This page explains how to enable and configure the feature.
+
+## How to enable
+
+The feature is disabled by default and requires an OpenAI-compatible chat completions endpoint.
+
+To enable LLM import, set `ui.llmImport.enabled` to `true` and configure the `llm` section with your endpoint details in
+your configuration override (for example `production.cjs` or `local.js`):
+
+```javascript
+{
+  llm: {
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiKey: 'your-api-key',
+    model: 'gpt-4o',
+    maxTokens: 16384,
+    timeoutMs: 120000,
+    temperature: 0,
+  },
+
+  ui: {
+    llmImport: {
+      enabled: true,
+    },
+  },
+}
+```
+
+For Helm deployments, these values are set in `values.yaml` under `llm` and `config.ui.llmImport`. See
+[App Configuration](../app-configuration) for details on how configuration inheritance works.
+
+## Configuration options
+
+- `ui.llmImport.enabled` - Enables the feature and shows the "Import from Text" button in the model card editor. When
+  `false` (the default), the button is hidden and the backend rejects any import requests
+- `llm.endpoint` - URL of an OpenAI-compatible chat completions endpoint
+- `llm.apiKey` - API key for authenticating with the LLM provider
+- `llm.model` - Model identifier for the LLM provider (for example `gpt-4o` or `gpt-4.1-mini`)
+- `llm.maxTokens` - Maximum number of tokens in the LLM response. Default: `16384`
+- `llm.timeoutMs` - Timeout for LLM requests in milliseconds. Default: `120000`
+- `llm.temperature` - Controls response determinism. A low value produces more deterministic responses. Default: `0`
+- `llm.systemPrompt` - System prompt sent to the LLM. The default prompt instructs the model to extract only explicitly
+  stated information and avoid generating placeholder values. You may want to tune this for your specific LLM and schema
+
+## What to expect
+
+Once enabled, users see an **Import from Text** button when editing a model card. Clicking this opens a dialog where
+they can paste free text. Bailo sends the text and the model card schema to the configured LLM, which extracts
+structured data and populates matching fields in the model card.
+
+The extracted data is validated against the schema before being applied. Any fields that do not match the schema or
+contain placeholder values are automatically filtered out. Validation warnings are shown to the user so they can review
+the result before saving.
+
+## Related pages
+
+- [Importing Model Card Text](../../users/models/model-card/importing-model-card-text) - User guide for the import
+  feature
+- [App Configuration](../getting-started/app-configuration) - General application configuration
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
