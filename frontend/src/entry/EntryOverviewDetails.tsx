@@ -138,7 +138,7 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
           {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={entry.kind !== EntryKind.UNTRUSTED_MODEL && updateEntryPermission.hasPermission}
+              editable={updateEntryPermission.hasPermission}
               value={entry.state}
               entryId={entry.id}
               field='state'
