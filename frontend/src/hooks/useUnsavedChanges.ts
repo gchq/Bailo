@@ -7,6 +7,22 @@ export type UnsavedChangesHook = {
   sendWarning: () => boolean
 }
 
+/**
+ * Returns a deterministically ordered array of query parameter entries.
+ *
+ * Parameters are sorted first by key and then by value, producing a stable
+ * representation that can be safely compared regardless of the original
+ * query string ordering.
+ *
+ * @param params The URL search parameters to normalise.
+ * @returns An array of `[key, value]` tuples sorted by key and value.
+ */
+function normaliseParams(params: URLSearchParams): [string, string][] {
+  return [...params.entries()].sort(([keyA, valueA], [keyB, valueB]) =>
+    keyA === keyB ? valueA.localeCompare(valueB) : keyA.localeCompare(keyB),
+  )
+}
+
 export default function useUnsavedChanges(): UnsavedChangesHook {
   const [unsavedChanges, setUnsavedChanges] = useState(false)
 
@@ -20,9 +36,22 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
       e.preventDefault()
       return (e.returnValue = warningText)
     }
-    const handleBrowseAway = () => {
+    const handleBrowseAway = (url: string) => {
       if (!unsavedChanges) {
         return
+      }
+      // Suppress edge case for switching page in JsonSchemaForm
+      const currentUrl = new URL(router.asPath, window.location.origin)
+      const destinationUrl = new URL(url, window.location.origin)
+      if (currentUrl.pathname === destinationUrl.pathname) {
+        const currentParams = new URLSearchParams(currentUrl.search)
+        const destinationParams = new URLSearchParams(destinationUrl.search)
+        currentParams.delete('page')
+        destinationParams.delete('page')
+        // stable comparison
+        if (JSON.stringify(normaliseParams(currentParams)) === JSON.stringify(normaliseParams(destinationParams))) {
+          return
+        }
       }
       const res = window.confirm(warningText)
       if (res) {
