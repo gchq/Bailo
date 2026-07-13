@@ -1,7 +1,7 @@
 import { Dayjs } from '@dayjs'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Dialog, DialogContent, Divider, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
 import { postGenericReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
@@ -30,7 +30,7 @@ export default function LifecycleReview() {
   const [isModelCardDialogOpen, setIsModelCardDialogOpen] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: modelId as string,

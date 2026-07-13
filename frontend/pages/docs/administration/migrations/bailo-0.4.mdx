@@ -25,7 +25,7 @@ service.
 
 The code originally in `server` is now stored in the `backend` folder.
 
-### Turbo
+## Turbo
 
 Bailo v0.4 uses `turborepo` to manage the monorepo structure with separate frontend and backend apps. It provides us
 with high performance and reproducible builds, only compiling what has changed since the last compilation. The monorepo
@@ -59,7 +59,7 @@ Workspaces is a standard NPM function, read more about it on the
 [Workspaces page](https://docs.npmjs.com/cli/v7/using-npm/workspaces). In addition, the `turbopack` docs can be found
 [here](https://turbo.build/repo/docs).
 
-### ESM
+## ESM
 
 The 'backend' application now runs entirely as ESM. This requires a modern NodeJS version, at least v14+. Some changes
 are also made to how tests are written. Specifically, to mock dependencies there is now a need to mock the dependency
@@ -82,7 +82,7 @@ be read on how Jest works with ESM [here](https://jestjs.io/docs/ecmascript-modu
 within the application, beyond imports requiring a `.js` ending. We have `esModuleInterop` enabled, which should mean we
 remain compatible with both old and new packages.
 
-#### What is ESM?
+### What is ESM?
 
 ESM, or ECMAScript Modules, is the latest standard for packaging / modularising JS code, as opposed to CJS (CommonJS),
 or Common JavaScript. ESM has a number of benefits that include nicer import/export syntax, better code reusability, and
@@ -93,7 +93,7 @@ For more information about ESM, we recommend visiting:
 - [nodejs.org](https://nodejs.org/api/esm.html)
 - [webpack.js.org](https://webpack.js.org/guides/ecma-script-modules/)
 
-### Helm
+## Helm
 
 {/* Helm charts were updated to support the new two-container architecture. */}
 
@@ -109,7 +109,7 @@ minimal setup.
 The helm folder has changed, it is now stored in `infrastructure/helm`, this change was made to allow other deploy
 methods.
 
-### Config
+## Config
 
 Configuration options were reorganised and standardised in v0.4.
 

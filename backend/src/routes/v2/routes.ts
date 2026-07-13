@@ -42,6 +42,7 @@ import { getModelCardHtml } from './model/modelcard/getModelCardHtml.js'
 import { getModelCardRevisions } from './model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './model/modelcard/postFromSchema.js'
 import { postFromTemplate } from './model/modelcard/postFromTemplate.js'
+import { postImportModelCardText } from './model/modelcard/postImportModelCardText.js'
 import { putModelCard } from './model/modelcard/putModelCard.js'
 import { patchModel } from './model/patchModel.js'
 import { postMigrateModelSchema } from './model/postMigrateModelSchema.js'
@@ -114,6 +115,7 @@ router.get('/model/:modelId/model-card-revisions', ...getModelCardRevisions)
 router.put('/model/:modelId/model-cards', ...putModelCard)
 router.post(`/model/:modelId/setup/from-template`, ...postFromTemplate)
 router.post('/model/:modelId/setup/from-schema', ...postFromSchema)
+router.post('/model/:modelId/import-model-card-text', ...postImportModelCardText)
 
 router.post('/model/:modelId/releases', ...postRelease)
 router.get('/model/:modelId/releases', ...getReleases)
