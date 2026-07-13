@@ -1,4 +1,4 @@
-import Compare from '@mui/icons-material/Compare'
+import CompareArrows from '@mui/icons-material/CompareArrows'
 import PublishedWithChanges from '@mui/icons-material/PublishedWithChanges'
 import Schema from '@mui/icons-material/Schema'
 import SupervisorAccount from '@mui/icons-material/SupervisorAccount'
@@ -53,7 +53,7 @@ export default function Admin() {
               <SimpleListItemButton
                 selected={selectedSection === AdminSection.COMPARE}
                 onClick={() => handleListItemClick(AdminSection.COMPARE)}
-                icon={<Compare color={selectedSection === AdminSection.COMPARE ? 'secondary' : 'inherit'} />}
+                icon={<CompareArrows color={selectedSection === AdminSection.COMPARE ? 'secondary' : 'inherit'} />}
               >
                 Schema compare
               </SimpleListItemButton>

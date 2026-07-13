@@ -188,7 +188,7 @@ export default function SideNavigation({
             <NavMenuItem
               href='/admin'
               selectedPage={page}
-              primaryText='Schemas'
+              primaryText='Admin panel'
               drawerOpen={drawerOpen}
               menuPage='admin'
               title='Admin panel'
