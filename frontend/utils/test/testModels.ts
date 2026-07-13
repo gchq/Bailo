@@ -261,6 +261,10 @@ export const testUiConfig: UiConfig = {
     fileUploadGuidance: '',
   },
 
+  llmImport: {
+    enabled: false,
+  },
+
   announcement: {
     enabled: false,
     text: '',

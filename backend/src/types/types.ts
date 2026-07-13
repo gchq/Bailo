@@ -178,6 +178,10 @@ export interface UiConfig {
     untrustedModelDescription: string
     fileUploadGuidance: string
   }
+
+  llmImport: {
+    enabled: boolean
+  }
 }
 
 export interface EntrySearchResult {
