@@ -1,0 +1,17 @@
+name: Docs style check
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/pages/docs/**/*.mdx'
+      - 'frontend/scripts/check-docs-style.sh'
+      - '.github/workflows/docs-style.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check docs style guide compliance
+        run: bash frontend/scripts/check-docs-style.sh
