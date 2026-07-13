@@ -1,14 +1,17 @@
 name: Docs style check
 
 on:
+  push:
+    branches: [main]
   pull_request:
+    branches: [main]
     paths:
       - 'frontend/pages/docs/**/*.mdx'
       - 'frontend/scripts/check-docs-style.sh'
       - '.github/workflows/docs-style.yml'
 
 jobs:
-  check:
+  docs_style_check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

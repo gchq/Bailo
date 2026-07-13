@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'lib/artefactscan_api/**'
+      - 'lib/python/**'
+      - 'infrastructure/helm/bailo/**'
+      - '.github/workflows/build.js.yml'
   release:
     types: [published]
 

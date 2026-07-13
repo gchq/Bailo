@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - 'lib/python/**'
+      - '.github/workflows/python.yml'
 
 jobs:
   python_static_checks:

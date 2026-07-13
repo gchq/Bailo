@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - 'lib/artefactscan_api/**'
+      - '.github/workflows/artefactscan.yml'
 
 jobs:
   artefactscan_build:
