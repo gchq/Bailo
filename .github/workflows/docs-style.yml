@@ -1,14 +1,18 @@
 name: Docs style check
 
 on:
+  push:
+    branches: [main]
   pull_request:
+    branches: [main]
+    # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
     paths:
       - 'frontend/pages/docs/**/*.mdx'
       - 'frontend/scripts/check-docs-style.sh'
       - '.github/workflows/docs-style.yml'
 
 jobs:
-  check:
+  docs_style_check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
