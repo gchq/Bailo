@@ -108,6 +108,13 @@ Format list items consistently within the same list - either all fragments or al
 
 Avoid ending list items with punctuation (e.g. no full stops at the end of sentences).
 
+## Punctuation and characters
+
+- Use en dash (`-`) instead of em dash (`—`)
+- Use straight double speech marks (`"`) instead of curly speech marks
+- Use straight apostrophes (`'`) instead of curly apostrophes
+- Check copied text from external sources before committing documentation changes
+
 ---
 
 ## Code and technical terms
@@ -140,12 +147,16 @@ Create Model → Select Schema → Fill In Model Card → Add Collaborators
 
 - Use descriptive link text that reflects the destination page title
 - Do not use "click here" or bare URLs as link text
-- Internal links use root-relative paths starting with `/docs/`
+- Internal links use relative paths from the current page, not root-relative paths
 - External links use full URLs
 
+{/* prettier-ignore-start */}
 ```mdx
-[Quick Start Guide](getting-started/quick-start) [ClamAV](https://www.clamav.net/)
+[Quick Start Guide](getting-started/quick-start)
+[Roles & Permissions](../../reference/roles-and-permissions)
+[ClamAV](https://www.clamav.net/)
 ```
+{/* prettier-ignore-end */}
 
 ---
 
