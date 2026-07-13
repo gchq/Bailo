@@ -10,13 +10,23 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  registry: Registry
+  registry?: Registry
   required?: boolean
   id: string
   schema?: RJSFSchema
+  editable?: boolean
 }
 
-export default function TagSelector({ onChange, value, label, registry, required, id, schema }: TagSelectorProps) {
+export default function TagSelector({
+  onChange,
+  value,
+  label,
+  registry,
+  required,
+  id,
+  schema,
+  editable = false,
+}: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
@@ -45,24 +55,24 @@ export default function TagSelector({ onChange, value, label, registry, required
     onChange(updatedArray)
   }
 
-  if (!registry.formContext) {
+  if (!editable && registry && !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const mirroredState = registry ? getMirroredState(id, registry.formContext) : {}
 
   return (
     <AdditionalInformation
-      editMode={registry.formContext.editMode}
+      editMode={registry && registry.formContext.editMode}
       mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value}
+      display={registry && registry.formContext.mirroredModel && value}
       label={label}
       id={id}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
+      mirroredModel={registry && registry.formContext.mirroredModel}
       description={schema ? schema.description : ''}
     >
-      {registry.formContext && registry.formContext.editMode && (
+      {((registry && registry.formContext && registry.formContext.editMode) || editable) && (
         <Stack spacing={1}>
           <Stack
             direction={{ md: 'row', sm: 'column' }}
@@ -105,7 +115,7 @@ export default function TagSelector({ onChange, value, label, registry, required
                       color: theme.palette.customTextInput.main,
                     }}
                   >
-                    {registry.formContext && registry.formContext.emptyPlaceholderText
+                    {registry && registry.formContext && registry.formContext.emptyPlaceholderText
                       ? registry.formContext.emptyPlaceholderText
                       : 'Unanswered'}
                   </Typography>
@@ -129,8 +139,9 @@ export default function TagSelector({ onChange, value, label, registry, required
           </Typography>
         </Stack>
       )}
-      {!registry.formContext.editMode && (
+      {!(registry && registry.formContext.editMode) && !editable && (
         <Box sx={{ overflow: 'auto', p: 1 }}>
+          here
           <Stack spacing={1} direction='row'>
             {value.length === 0 ? (
               <Typography
@@ -139,7 +150,7 @@ export default function TagSelector({ onChange, value, label, registry, required
                   color: theme.palette.customTextInput.main,
                 }}
               >
-                {registry.formContext && registry.formContext.emptyPlaceholderText
+                {registry && registry.formContext && registry.formContext.emptyPlaceholderText
                   ? registry.formContext.emptyPlaceholderText
                   : 'Unanswered'}
               </Typography>
