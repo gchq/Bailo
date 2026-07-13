@@ -27,11 +27,15 @@ export default function EntryMetrics() {
   const organisation = getQueryString(router.query.organisation)
   const state = getQueryString(router.query.state)
   const schemaId = getQueryString(router.query.schemaId)
+  const release = getQueryString(router.query.release)
+  const accessRequest = getQueryString(router.query.accessRequest)
 
   const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown({
     organisation: organisation !== ALL_VALUE ? organisation : undefined,
     state: state !== ALL_VALUE ? state : undefined,
     schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
+    release: release !== ALL_VALUE ? release : undefined,
+    accessRequest: accessRequest !== ALL_VALUE ? accessRequest : undefined,
   })
 
   function updateFilter(key: keyof EntriesFilterQuery, value: string) {
@@ -39,6 +43,8 @@ export default function EntryMetrics() {
       organisation: organisation !== ALL_VALUE ? organisation : undefined,
       state: state !== ALL_VALUE ? state : undefined,
       schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
+      release: release !== ALL_VALUE ? release : undefined,
+      accessRequest: accessRequest !== ALL_VALUE ? accessRequest : undefined,
     }
 
     const next = {
@@ -61,12 +67,24 @@ export default function EntryMetrics() {
 
   const schemaOptions = useMemo(
     () => [
-      { value: ALL_VALUE, label: 'All' },
+      { value: ALL_VALUE, label: ALL_VALUE },
       { value: NONE_SCHEMA_VALUE, label: 'None' },
       ...(schemas ?? []).map((schema) => ({ value: schema.id, label: schema.name })),
     ],
     [schemas],
   )
+
+  const releaseOptions = [
+    { value: ALL_VALUE, label: ALL_VALUE },
+    { value: 'WITH', label: 'With releases' },
+    { value: 'WITHOUT', label: 'Without releases' },
+  ]
+
+  const accessRequestOptions = [
+    { value: ALL_VALUE, label: ALL_VALUE },
+    { value: 'WITH', label: 'With access request' },
+    { value: 'WITHOUT', label: 'Without access request' },
+  ]
 
   const tableData = useMemo(
     () =>
@@ -110,7 +128,7 @@ export default function EntryMetrics() {
             Entries
           </Typography>
           <Typography variant='body2' color='text.secondary'>
-            Browse and filter individual entries by organisation, lifecycle state, and schema.
+            Browse and filter individual entries by organisation, lifecycle state, schema and more.
           </Typography>
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
@@ -132,6 +150,20 @@ export default function EntryMetrics() {
               options={schemaOptions}
               selectedValue={schemaId}
               onSelect={(value) => updateFilter('schemaId', value)}
+            />
+            <FilterMenuButton
+              label='Release'
+              options={releaseOptions}
+              selectedValue={release}
+              // this onSelect needs updating, not sure how best to do this
+              onSelect={(value) => updateFilter('release', value)}
+            />
+            <FilterMenuButton
+              label='Access request'
+              options={accessRequestOptions}
+              selectedValue={accessRequest}
+              // this onSelect needs updating, not sure how best to do this
+              onSelect={(value) => updateFilter('accessRequest', value)}
             />
           </Stack>
           {resultCountLabel && (

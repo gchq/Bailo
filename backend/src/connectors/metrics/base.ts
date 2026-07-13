@@ -1,10 +1,10 @@
-import { Model, PipelineStage } from 'mongoose'
+import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { SystemRoles } from '../../models/Model.js'
+import ModelModel, { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -18,7 +18,7 @@ import {
 import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { SchemaKind } from '../../types/enums.js'
-import { MetricsEntrySearchOptionsParams } from '../../types/types.js'
+import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import {
@@ -695,23 +695,82 @@ export class BaseMetricsConnector {
   ): Promise<GetModelBreakdownResponse> {
     await checkUserIsAuthorised(user)
 
-    const mongoQuery: any = {}
+    // const mongoQuery: any = {}
+    const mongoQuery: QueryFilter<ModelInterface> = {}
+
+    const idFilter: {
+      $in?: string[]
+      $nin?: string[]
+    } = {}
 
     // Filter by organisation only if provided and not 'all' - if 'none' then query any with empty string
     if (query.organisation !== undefined && query.organisation.toLowerCase() !== 'all') {
       mongoQuery.organisation = query.organisation.toLowerCase() === 'unset' ? '' : query.organisation
     }
 
+    // Filter by model state if provided
     if (query.state !== undefined) {
       mongoQuery.state = query.state.toLowerCase() === 'none' ? '' : query.state
     }
 
+    // Filter by schemaId if provided
     if (query.schemaId !== undefined) {
       if (query.schemaId.toLowerCase() === 'none') {
         mongoQuery['card.schemaId'] = { $exists: false }
       } else {
         mongoQuery['card.schemaId'] = query.schemaId
       }
+    }
+
+    // Filter by models with releases if provided
+    // if (query.release !== undefined) {
+    //   const releaseModelIds = await ReleaseModel.distinct('modelId')
+    //   mongoQuery.id = {
+    //     ...mongoQuery.id,
+    //     ...(query.release === EntryFilter.WITH ? { $in: releaseModelIds } : { $nin: releaseModelIds }),
+    //   }
+    // }
+    if (query.release !== undefined) {
+      const releaseModelIds = await ReleaseModel.distinct('modelId')
+
+      if (query.release === EntryFilter.WITH) {
+        idFilter.$in = releaseModelIds
+      } else {
+        idFilter.$nin = releaseModelIds
+      }
+    }
+
+    // Filter by models with access requests if provided
+    // if (query.accessRequest !== undefined) {
+    //   const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
+    //   if (query.accessRequest === EntryFilter.WITH) {
+    //     mongoQuery.id = {
+    //       ...mongoQuery.id,
+    //       $in: mongoQuery.id?.$in
+    //         ? mongoQuery.id.$in.filter((id: string) => accessRequestModelIds.includes(id))
+    //         : accessRequestModelIds,
+    //     }
+    //   } else {
+    //     mongoQuery.id = {
+    //       ...mongoQuery.id,
+    //       $nin: [...(mongoQuery.id?.$nin ?? []), ...accessRequestModelIds],
+    //     }
+    //   }
+    // }
+    if (query.accessRequest !== undefined) {
+      const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
+
+      if (query.accessRequest === EntryFilter.WITH) {
+        idFilter.$in = idFilter.$in
+          ? idFilter.$in.filter((id) => accessRequestModelIds.includes(id))
+          : accessRequestModelIds
+      } else {
+        idFilter.$nin = [...(idFilter.$nin ?? []), ...accessRequestModelIds]
+      }
+    }
+
+    if (Object.keys(idFilter).length > 0) {
+      mongoQuery.id = idFilter
     }
 
     const models = await ModelModel.find(mongoQuery)

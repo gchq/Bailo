@@ -234,10 +234,17 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
 
+export const EntryFilter = {
+  WITH: 'with',
+  WITHOUT: 'without',
+} as const
+
 export interface MetricsEntrySearchOptions {
   organisation: string
   state: string
   schemaId: string
+  release: string
+  accessRequest: string
 }
 
 export type MetricsEntrySearchOptionsParams = Optional<MetricsEntrySearchOptions>
@@ -247,6 +254,8 @@ export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOption
     organisation: z.string().optional(),
     state: z.string().optional(),
     schemaId: z.string().optional(),
+    release: z.string().optional(),
+    accessRequest: z.string().optional(),
   })
 
 export type ModelImages = ModelImageTags[]

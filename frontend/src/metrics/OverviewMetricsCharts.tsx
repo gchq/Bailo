@@ -218,9 +218,24 @@ export default function OverviewMetricsCharts({
           direction={{ lg: 'row', md: 'column' }}
         >
           <Stack spacing={2}>
-            <OverviewStatPanel label='total entries' value={data.entries} minWidth='300px' />
-            <OverviewStatPanel label='entries with releases' value={data.withReleases} minWidth='300px' />
-            <OverviewStatPanel label='entries with access requests' value={data.withAccessRequest} minWidth='320px' />
+            <OverviewStatPanel
+              label='total entries'
+              value={data.entries}
+              onClick={() => onSelect('totalEntries', '')}
+              minWidth='300px'
+            />
+            <OverviewStatPanel
+              label='entries with releases'
+              value={data.withReleases}
+              onClick={() => onSelect('withReleases', '')}
+              minWidth='300px'
+            />
+            <OverviewStatPanel
+              label='entries with access requests'
+              value={data.withAccessRequest}
+              onClick={() => onSelect('withAccessRequest', '')}
+              minWidth='320px'
+            />
           </Stack>
           <Stack>
             {/** TODO - Currently only the pie charts are clickable.

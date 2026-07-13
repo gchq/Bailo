@@ -1,32 +1,44 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Card, CardActionArea, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 interface OverviewStatPanelProps {
   label: string
   value: number
+  onClick: () => void
   minWidth?: string
 }
 
-export default function OverviewStatPanel({ label, value, minWidth }: OverviewStatPanelProps) {
+export default function OverviewStatPanel({ label, value, onClick, minWidth }: OverviewStatPanelProps) {
   const theme = useTheme()
   return (
-    <Box
+    <Card
+      variant='outlined'
       sx={{
-        border: 'solid',
-        borderWidth: 1,
         borderRadius: 3,
-        borderColor: theme.palette.divider,
-        p: 2,
-        textAlign: 'center',
-        minWidth: minWidth,
+        minWidth,
+        transition: 'all 0.2s ease-in-out',
+
+        '&:hover': {
+          borderColor: theme.palette.primary.main,
+          boxShadow: theme.shadows[2],
+          transform: 'translateY(-2px)',
+        },
       }}
     >
-      <Stack spacing={2}>
-        <Typography variant='h5' sx={{ fontWeight: 'bold' }} color='primary'>
-          {value}
-        </Typography>
-        <Typography variant='h6'>{label}</Typography>
-      </Stack>
-    </Box>
+      <CardActionArea
+        onClick={onClick}
+        sx={{
+          p: 2,
+          textAlign: 'center',
+        }}
+      >
+        <Stack spacing={2}>
+          <Typography variant='h5' sx={{ fontWeight: 'bold' }} color='primary'>
+            {value}
+          </Typography>
+          <Typography variant='h6'>{label}</Typography>
+        </Stack>
+      </CardActionArea>
+    </Card>
   )
 }
