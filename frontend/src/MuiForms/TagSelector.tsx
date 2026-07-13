@@ -10,13 +10,13 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  formContext?: Registry['formContext']
+  registry: Registry
   required?: boolean
   id: string
   schema?: RJSFSchema
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required, id, schema }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, registry, required, id, schema }: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
@@ -45,24 +45,24 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     onChange(updatedArray)
   }
 
-  if (!formContext) {
+  if (!registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, formContext)
+  const mirroredState = getMirroredState(id, registry.formContext)
 
   return (
     <AdditionalInformation
-      editMode={formContext.editMode}
+      editMode={registry.formContext.editMode}
       mirroredState={mirroredState}
-      display={formContext.mirroredModel && value}
+      display={registry.formContext.mirroredModel && value}
       label={label}
       id={id}
       required={required}
-      mirroredModel={formContext.mirroredModel}
+      mirroredModel={registry.formContext.mirroredModel}
       description={schema ? schema.description : ''}
     >
-      {formContext && formContext.editMode && (
+      {registry.formContext && registry.formContext.editMode && (
         <Stack spacing={1}>
           <Stack
             direction={{ md: 'row', sm: 'column' }}
@@ -105,7 +105,9 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                       color: theme.palette.customTextInput.main,
                     }}
                   >
-                    {formContext && formContext.emptyPlaceholderText ? formContext.emptyPlaceholderText : 'No tags'}
+                    {registry.formContext && registry.formContext.emptyPlaceholderText
+                      ? registry.formContext.emptyPlaceholderText
+                      : 'Unanswered'}
                   </Typography>
                 ) : (
                   <Box sx={{ whitespace: 'pre-wrap' }}>
@@ -126,6 +128,30 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {errorText}
           </Typography>
         </Stack>
+      )}
+      {!registry.formContext.editMode && (
+        <Box sx={{ overflow: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {value.length === 0 ? (
+              <Typography
+                sx={{
+                  fontStyle: 'italic',
+                  color: theme.palette.customTextInput.main,
+                }}
+              >
+                {registry.formContext && registry.formContext.emptyPlaceholderText
+                  ? registry.formContext.emptyPlaceholderText
+                  : 'Unanswered'}
+              </Typography>
+            ) : (
+              <Box sx={{ whitespace: 'pre-wrap' }}>
+                {value.map((tag) => (
+                  <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} />
+                ))}
+              </Box>
+            )}
+          </Stack>
+        </Box>
       )}
     </AdditionalInformation>
   )
