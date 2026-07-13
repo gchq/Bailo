@@ -1,10 +1,10 @@
-import { Model, PipelineStage } from 'mongoose'
+import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { SystemRoles } from '../../models/Model.js'
+import ModelModel, { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -695,7 +695,7 @@ export class BaseMetricsConnector {
   ): Promise<GetModelBreakdownResponse> {
     await checkUserIsAuthorised(user)
 
-    const mongoQuery: any = {}
+    const mongoQuery: QueryFilter<ModelInterface> = {}
 
     // Filter by organisation only if provided and not 'all' - if 'none' then query any with empty string
     if (query.organisation !== undefined && query.organisation.toLowerCase() !== 'all') {

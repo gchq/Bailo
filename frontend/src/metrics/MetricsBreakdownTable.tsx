@@ -56,7 +56,7 @@ export default function MetricsBreakdownTable({ title, data, isLoading = false }
         </Typography>
       )}
       <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-        <Table sx={{ minWidth: 650 }} size='small'>
+        <Table sx={{ minWidth: 300 }} size='small'>
           <TableHead>
             <TableRow>
               <TableCell>Model ID</TableCell>
