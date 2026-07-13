@@ -13,6 +13,21 @@ const fileUtilsMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/utils/fileUtils.js', () => fileUtilsMocks)
 
+const logMocks = vi.hoisted(() => ({
+  default: { info: vi.fn() },
+}))
+vi.mock('../../../src/services/log.js', () => logMocks)
+
+const modelMocks = vi.hoisted(() => ({
+  isModelCardRevisionDoc: vi.fn(() => true),
+}))
+vi.mock('../../../src/services/model.js', () => modelMocks)
+
+const releaseMocks = vi.hoisted(() => ({
+  isReleaseDoc: vi.fn(() => true),
+}))
+vi.mock('../../../src/services/release.js', () => releaseMocks)
+
 const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('services > parsers > modelParser', () => {
@@ -36,6 +51,7 @@ describe('services > parsers > modelParser', () => {
   })
 
   test('parseModelCard > data not a model card', () => {
+    modelMocks.isModelCardRevisionDoc.mockReturnValueOnce(false)
     expect(() => parseModelCard({}, '', '', mockLogData)).toThrow('Data cannot be converted into a model card.')
   })
 
@@ -84,6 +100,7 @@ describe('services > parsers > modelParser', () => {
   })
 
   test('parseRelease > data not a release', () => {
+    releaseMocks.isReleaseDoc.mockReturnValueOnce(false)
     expect(() => parseRelease({}, '', '', mockLogData)).toThrow('Data cannot be converted into a release.')
   })
 

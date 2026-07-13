@@ -49,7 +49,7 @@ registerPath(
     schema: getRoleComplianceMetricsSchema,
     responses: {
       200: {
-        description: 'Current snapshot of models with missing releases.',
+        description: 'Current snapshot of entries missing required review roles.',
         content: {
           'application/json': {
             schema: GetRoleComplianceMetricsResponseSchema,
