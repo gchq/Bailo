@@ -7,6 +7,7 @@ import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsBreakdownTable from 'src/metrics/MetricsBreakdownTable'
+import MetricsHeader from 'src/metrics/MetricsHeader'
 import { SystemRole } from 'types/types'
 import { buildEntriesHref, EntriesFilterQuery } from 'utils/metricsUtils'
 
@@ -48,11 +49,6 @@ export default function EntryMetrics() {
 
     router.push(buildEntriesHref(next), undefined, { shallow: true })
   }
-
-  const organisationOptions = useMemo(
-    () => [ALL_VALUE, ...(overviewMetrics?.byOrganisation.map((org) => org.organisation) ?? [])],
-    [overviewMetrics],
-  )
 
   const stateOptions = useMemo(
     () => [ALL_VALUE, ...(overviewMetrics?.global.entryState?.map((s) => s.state) ?? [])],
@@ -104,48 +100,47 @@ export default function EntryMetrics() {
 
   return (
     <Container maxWidth='lg' sx={{ mb: 4 }}>
-      <Stack spacing={2} sx={{ mt: 2, mb: 4 }}>
-        <Stack spacing={0.5}>
-          <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold' }}>
-            Entries
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            Browse and filter individual entries by organisation, lifecycle state, and schema.
-          </Typography>
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
-          <Stack direction='row' spacing={1}>
-            <FilterMenuButton
-              label='Organisation'
-              options={organisationOptions.map((org) => ({ value: org, label: org }))}
-              selectedValue={organisation}
-              onSelect={(value) => updateFilter('organisation', value)}
-            />
-            <FilterMenuButton
-              label='State'
-              options={stateOptions.map((s) => ({ value: s, label: s }))}
-              selectedValue={state}
-              onSelect={(value) => updateFilter('state', value)}
-            />
-            <FilterMenuButton
-              label='Schema'
-              options={schemaOptions}
-              selectedValue={schemaId}
-              onSelect={(value) => updateFilter('schemaId', value)}
-            />
-          </Stack>
-          {resultCountLabel && (
-            <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
-              {resultCountLabel}
-            </Typography>
-          )}
-        </Stack>
+      <Stack spacing={0.5} sx={{ mt: 2, mb: 4 }}>
+        {overviewMetrics && (
+          <MetricsHeader
+            organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={overviewMetrics.lastUpdated}
+            onOrganisationChange={(value) => updateFilter('organisation', value)}
+            selectedOrganisation={organisation}
+            exportDocumentTitle='Bailo entry metrics'
+            titleObjectType='entries'
+          >
+            <>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
+                <Stack direction='row' spacing={1}>
+                  <FilterMenuButton
+                    label='State'
+                    options={stateOptions.map((s) => ({ value: s, label: s }))}
+                    selectedValue={state}
+                    onSelect={(value) => updateFilter('state', value)}
+                  />
+                  <FilterMenuButton
+                    label='Schema'
+                    options={schemaOptions}
+                    selectedValue={schemaId}
+                    onSelect={(value) => updateFilter('schemaId', value)}
+                  />
+                </Stack>
+                {resultCountLabel && (
+                  <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
+                    {resultCountLabel}
+                  </Typography>
+                )}
+              </Stack>
+              {isEntriesError ? (
+                <MessageAlert message={isEntriesError.info.message} />
+              ) : (
+                <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+              )}
+            </>
+          </MetricsHeader>
+        )}
       </Stack>
-      {isEntriesError ? (
-        <MessageAlert message={isEntriesError.info.message} />
-      ) : (
-        <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
-      )}
     </Container>
   )
 }

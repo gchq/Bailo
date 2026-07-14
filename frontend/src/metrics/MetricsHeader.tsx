@@ -13,6 +13,7 @@ interface MetricsHeaderProps {
   selectedMetric?: SelectedMetricKindKeys
   onMetricChange?: (newMetric: SelectedMetricKindKeys) => void
   exportDocumentTitle: string
+  titleObjectType?: string
 }
 
 export default function MetricsHeader({
@@ -24,6 +25,7 @@ export default function MetricsHeader({
   selectedMetric,
   onMetricChange,
   exportDocumentTitle,
+  titleObjectType = 'metrics',
 }: MetricsHeaderProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -50,7 +52,7 @@ export default function MetricsHeader({
           <Stack spacing={1}>
             <Box>
               <Stack direction={{ sm: 'column', md: 'row' }} spacing={1} sx={{ alignItems: 'center' }}>
-                <em>Showing metrics for</em>
+                <em>Showing {titleObjectType} for</em>
                 {selectedMetric && (
                   <>
                     <Select
