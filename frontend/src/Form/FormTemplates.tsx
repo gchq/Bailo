@@ -1,11 +1,14 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
+import Done from '@mui/icons-material/Done'
+import Error from '@mui/icons-material/ErrorOutlineOutlined'
 import Share from '@mui/icons-material/Share'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
+  FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
   TitleFieldProps,
@@ -13,6 +16,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
+import { isQuestionAnswered } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -57,6 +61,57 @@ export function ArrayFieldItemTemplate({ children, registry, buttonsProps }: Arr
 
 export function DescriptionFieldTemplate() {
   return <></>
+}
+
+export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+  const theme = useTheme()
+  const answered = isQuestionAnswered(id, schema, registry.formContext)
+  const requiredByState =
+    registry.formContext.requiredByModelState &&
+    schema.requiredByModelStates &&
+    schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
+
+  if (requiredByState) {
+    return (
+      <Stack
+        spacing={0.5}
+        sx={{
+          backgroundColor: alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1),
+          p: 1,
+        }}
+      >
+        <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+          {answered ? (
+            <Done
+              color='success'
+              fontSize='small'
+              aria-label={`Answered field required for ${registry.formContext.requiredByModelState}`}
+            />
+          ) : (
+            <Error
+              color='error'
+              fontSize='small'
+              aria-label={`Unanswered field required for ${registry.formContext.requiredByModelState}`}
+            />
+          )}
+          <Typography variant='caption' color={answered ? 'success' : 'error'}>
+            {`Required for ${registry.formContext.requiredByModelState}`}
+          </Typography>
+        </Stack>
+        {children}
+      </Stack>
+    )
+  }
+
+  return <>{children}</>
+}
+
+export function ErrorListTemplate() {
+  return (
+    <Typography color='error' sx={{ mb: 2 }}>
+      Please make sure that all errors listed below have been resolved.
+    </Typography>
+  )
 }
 
 export function ObjectFieldTemplate({

@@ -46,6 +46,7 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   if (cachedSchema) {
     return cachedSchema
   }
+
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -54,12 +55,11 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
     throw NotFound(`The requested schema was not found.`, { schemaId })
   }
 
+  schema.jsonSchema = enforceModelStateFields(schema.jsonSchema, modelState)
+
   const schemaObject = schema.toObject()
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
 
-  if (modelState) {
-    schemaObject.jsonSchema = enforceModelStateFields(schemaObject.jsonSchema, modelState)
-  }
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject
 }
@@ -84,9 +84,14 @@ function addToParentRequired(
   }
 }
 
-function enforceModelStateFields(schema: object, targetState: string) {
+function addUniqueStates(root: traverse.SchemaObject, states: string[]) {
+  const validStates = new Set(config.ui.modelDetails.states)
+  root.stateList = Array.from(new Set([...(root.stateList ?? []), ...states.filter((state) => validStates.has(state))]))
+}
+
+function enforceModelStateFields(schema: object, targetState?: string) {
   const validStates = config.ui.modelDetails.states
-  if (!validStates.includes(targetState)) {
+  if (targetState && !validStates.includes(targetState)) {
     throw BadReq('The value for modelState is not a valid model state', { validStates, modelState: targetState })
   }
   const jsonSchema = structuredClone(schema)
@@ -96,13 +101,16 @@ function enforceModelStateFields(schema: object, targetState: string) {
   traverse(jsonSchema, {
     allKeys: true,
     cb: {
-      post: (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
+      post: (subschema, pointer, root, _parentPointer, parentKeyword, parentSchema) => {
         if (!subschema || typeof subschema !== 'object') {
           return
         }
 
-        if (Array.isArray(subschema.requiredByModelStates) && subschema.requiredByModelStates.includes(targetState)) {
-          addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
+        if (Array.isArray(subschema.requiredByModelStates)) {
+          if (subschema.requiredByModelStates.includes(targetState)) {
+            addToParentRequired(pointer, modifiedSchemas, parentKeyword, parentSchema)
+          }
+          addUniqueStates(root, subschema.requiredByModelStates)
         }
 
         if (modifiedSchemas.has(subschema)) {
