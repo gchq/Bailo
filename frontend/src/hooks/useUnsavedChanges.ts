@@ -27,6 +27,7 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
       // Ignore the 'page' query param when determining if the URL has meaningfully changed
       params.delete('page')
       params.delete('requiredByModelState')
+      params.delete('isEdit')
       params.sort()
       const remaining = params.toString()
       return remaining ? `${pathname}?${remaining}` : pathname
