@@ -1,11 +1,14 @@
 import { Box, Stack, Typography } from '@mui/material'
+import { Theme, useTheme } from '@mui/material/styles'
+import { ResponsiveStyleValue } from '@mui/system'
 import { ReactNode } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 
 type InlineDiffProps = {
-  from?: string
-  to?: string
+  from?: string | ReactNode
+  to?: string | ReactNode
   markdown?: boolean
+  direction?: ResponsiveStyleValue<'row' | 'row-reverse' | 'column' | 'column-reverse'> | undefined
 }
 
 const removedStyle = {
@@ -16,7 +19,6 @@ const removedStyle = {
   display: 'block',
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
-  width: '100%',
 } as const
 
 const addedStyle = {
@@ -27,32 +29,39 @@ const addedStyle = {
   display: 'block',
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
-  width: '100%',
 } as const
 
-function renderContent(markdown: boolean, value?: string): ReactNode {
+export function isDiffEmpty(from?: string, to?: string): boolean {
+  return (from === undefined || from === '') && (to === undefined || to === '')
+}
+
+function renderContent(theme: Theme, markdown: boolean, value?: string | ReactNode): ReactNode {
   if (value === undefined || value === '') {
     return (
-      <Typography component='span' sx={{ fontStyle: 'italic' }}>
+      <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
         Unanswered
       </Typography>
     )
   }
+  if (typeof value !== 'string') {
+    return value
+  }
   return markdown ? <MarkdownDisplay>{value}</MarkdownDisplay> : <Typography component='span'>{value}</Typography>
 }
 
-export default function InlineDiff({ from, to, markdown = false }: InlineDiffProps) {
+export default function InlineDiff({ from, to, markdown = false, direction = undefined }: InlineDiffProps) {
+  const theme = useTheme()
   if (from === to) {
-    return <Box sx={{ wordBreak: 'break-word' }}>{renderContent(markdown, to)}</Box>
+    return <Box sx={{ wordBreak: 'break-word' }}>{renderContent(theme, markdown, to)}</Box>
   }
 
   return (
-    <Stack spacing={0.5}>
+    <Stack direction={direction} spacing={0.5}>
       <Box component='mark' sx={removedStyle}>
-        {renderContent(markdown, from)}
+        {renderContent(theme, markdown, from)}
       </Box>
       <Box component='mark' sx={addedStyle}>
-        {renderContent(markdown, to)}
+        {renderContent(theme, markdown, to)}
       </Box>
     </Stack>
   )

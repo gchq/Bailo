@@ -39,13 +39,13 @@ export default function RichTextInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const mirroredState = getMirroredState(id, registry.formContext) as string | undefined
   const compareFromState = getCompareFromState(id, registry.formContext) as string | undefined
   const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string | undefined
   const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
 
   if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState !== undefined ? compareFromState : (mirroredState as string | undefined)
+    const from = compareFromState !== undefined ? compareFromState : mirroredState
     return (
       <Stack spacing={1}>
         <Typography
@@ -63,64 +63,44 @@ export default function RichTextInput({
     )
   }
 
-  if (!registry.formContext.editMode) {
-    const mirroredContent =
-      inCompareMode && registry.formContext.mirroredModel ? (
-        <InlineDiff markdown from={compareFromMirroredState} to={mirroredState as string | undefined} />
-      ) : mirroredState ? (
-        <MarkdownDisplay>{mirroredState}</MarkdownDisplay>
-      ) : undefined
-    const displayPanel =
-      inCompareMode && registry.formContext.mirroredModel
-        ? true
-        : (registry.formContext.mirroredModel && value) || false
-    return (
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredContent}
-        display={displayPanel}
-        label={label}
-        required={required}
-        id={id}
-        mirroredModel={registry.formContext.mirroredModel}
-        description={schema.description}
-      >
-        {inCompareMode && registry.formContext.mirroredModel ? (
-          <InlineDiff markdown from={compareFromState} to={value} />
-        ) : value ? (
-          <MarkdownDisplay>{value}</MarkdownDisplay>
-        ) : (
-          <Typography
-            sx={{
-              fontStyle: 'italic',
-              color: theme.palette.customTextInput.main,
-            }}
-          >
-            Unanswered
-          </Typography>
-        )}
-      </AdditionalInformation>
+  const mirroredContent =
+    inCompareMode && registry.formContext.mirroredModel && value ? (
+      <InlineDiff markdown from={compareFromMirroredState} to={mirroredState} />
+    ) : mirroredState ? (
+      <MarkdownDisplay>{mirroredState}</MarkdownDisplay>
+    ) : (
+      <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+        Unanswered
+      </Typography>
     )
-  }
-
   return (
     <AdditionalInformation
       editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value}
+      mirroredState={mirroredContent}
+      display={inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value}
       required={required}
       label={label}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
     >
-      <RichTextEditor
-        value={value}
-        onChange={onChange}
-        textareaProps={{ disabled, id }}
-        errors={rawErrors}
-        key={label}
-      />
+      {registry.formContext.editMode ? (
+        <RichTextEditor
+          value={value}
+          onChange={onChange}
+          textareaProps={{ disabled, id }}
+          errors={rawErrors}
+          key={label}
+        />
+      ) : inCompareMode && registry.formContext.mirroredModel ? (
+        <InlineDiff markdown from={compareFromState} to={value} />
+      ) : value ? (
+        <MarkdownDisplay>{value}</MarkdownDisplay>
+      ) : (
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
+      )}
     </AdditionalInformation>
   )
 }

@@ -16,6 +16,22 @@ export const entryKindForRedirect = (entryKind: EntryKindKeys) => {
   }
 }
 
+export function buildModelCardHref(entryId: string, entryKind: EntryKindKeys, version: number): string {
+  const comparePath = entryKind === EntryKind.DATA_CARD ? '/data-card/compare' : '/model-card/compare'
+
+  const query = new URLSearchParams()
+
+  query.set('fromModel', entryId)
+
+  if (entryKind === EntryKind.MIRRORED_MODEL) {
+    query.set('fromMirroredVersion', String(version))
+  } else {
+    query.set('fromVersion', String(version))
+  }
+
+  return `${comparePath}?${query.toString()}`
+}
+
 /** Updates `router.query` based on record. If a key is undefined it will be removed from the query.*/
 export const updateQuery = (router: NextRouter, updates: Record<string, string | undefined>) => {
   const query = { ...router.query }

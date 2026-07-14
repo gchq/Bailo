@@ -5,10 +5,11 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import InlineDiff from 'src/common/InlineDiff'
 import UserDisplay from 'src/common/UserDisplay'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import { EntityObject } from 'types/types'
-import { getMirroredState } from 'utils/formUtils'
+import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 import { useGetCurrentUser, useListEntities } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -23,6 +24,18 @@ interface EntitySelectorProps {
   rawErrors?: string[]
   id: string
   schema: RJSFSchema
+}
+
+function formatEntityValue(entities: string[] | undefined): string {
+  if (!entities || entities.length === 0) {
+    return ''
+  }
+  return entities
+    .map((entity) => {
+      const [, entityId] = entity.split(':')
+      return entityId ?? entity
+    })
+    .join('\n')
 }
 
 export default function EntitySelector({
@@ -92,16 +105,54 @@ export default function EntitySelector({
   }
 
   const mirroredState = getMirroredState(id, registry.formContext)
+  const compareFromState = getCompareFromState(id, registry.formContext) as string[] | undefined
+  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string[] | undefined
+  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+
+  const currentValueString = formatEntityValue(currentValue)
+  const compareFromString = formatEntityValue(compareFromState)
+  const mirroredStateString = formatEntityValue(mirroredState as string[] | undefined)
+  const compareFromMirroredString = formatEntityValue(compareFromMirroredState)
+
+  if (inCompareMode && !registry.formContext.mirroredModel) {
+    const from = compareFromState ? compareFromString : mirroredStateString
+    return (
+      <Stack spacing={1}>
+        <Typography
+          id={`${id}-label`}
+          aria-label={`Label for ${label}`}
+          component='label'
+          htmlFor={id}
+          sx={{ fontWeight: 'bold' }}
+        >
+          {label}
+          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+        </Typography>
+        <InlineDiff from={from} to={currentValueString} />
+      </Stack>
+    )
+  }
 
   if (isCurrentUserLoading) {
     return <Loading />
   }
 
+  const mirroredContent =
+    inCompareMode && registry.formContext.mirroredModel ? (
+      <InlineDiff from={compareFromMirroredString} to={mirroredStateString} />
+    ) : (
+      mirroredState
+    )
+
   return (
     <AdditionalInformation
       editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && currentValue.length > 0}
+      mirroredState={mirroredContent}
+      display={
+        inCompareMode && registry.formContext.mirroredModel
+          ? true
+          : (registry.formContext.mirroredModel && currentValue.length > 0) || false
+      }
       label={label}
       id={id}
       mirroredModel={registry.formContext.mirroredModel}
@@ -111,7 +162,7 @@ export default function EntitySelector({
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
-      {currentUser && registry.formContext && registry.formContext.editMode && (
+      {currentUser && registry.formContext.editMode ? (
         <>
           <Autocomplete<EntityObject, true, true>
             multiple
@@ -160,27 +211,25 @@ export default function EntitySelector({
             )}
           />
         </>
-      )}
-      {registry.formContext && !registry.formContext.editMode && (
-        <>
-          {currentValue.length === 0 && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((entity) => (
-                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-              ))}
-            </Stack>
-          </Box>
-        </>
+      ) : inCompareMode && registry.formContext.mirroredModel ? (
+        <InlineDiff from={compareFromString} to={currentValueString} />
+      ) : currentValue.length > 0 ? (
+        <Box sx={{ overflowX: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {currentValue.map((entity) => (
+              <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+            ))}
+          </Stack>
+        </Box>
+      ) : (
+        <Typography
+          sx={{
+            fontStyle: 'italic',
+            color: theme.palette.customTextInput.main,
+          }}
+        >
+          Unanswered
+        </Typography>
       )}
     </AdditionalInformation>
   )

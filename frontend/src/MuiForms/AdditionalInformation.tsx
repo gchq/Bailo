@@ -82,7 +82,6 @@ export default function AdditionalInformation({
         return mirroredState
     }
   }
-
   if (!display && !editMode) {
     return (
       <>
@@ -113,7 +112,6 @@ export default function AdditionalInformation({
       </>
     )
   }
-
   return (
     <Stack>
       {editMode && (
@@ -218,7 +216,9 @@ export default function AdditionalInformation({
               <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
             )}
           </Stack>
-          {children && (
+          {/* Some components are conditionally rendered this filters between children that have a ReactNode*/}
+          {((children && !Array.isArray(children)) ||
+            (Array.isArray(children) && children.some((child) => !!child))) && (
             <Box>
               <Box
                 sx={{

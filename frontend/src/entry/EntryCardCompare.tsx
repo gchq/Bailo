@@ -1,24 +1,11 @@
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
-import ExpandMore from '@mui/icons-material/ExpandMore'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Alert,
-  Autocomplete,
-  Button,
-  Container,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Alert, Autocomplete, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -31,7 +18,7 @@ import {
   SplitSchemaNoRender,
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
-import { formatDateString } from 'utils/dateUtils'
+import { formatDateTimeString } from 'utils/dateUtils'
 import { getStepsFromSchema } from 'utils/formUtils'
 import { entryKindForRedirect, updateQuery } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
@@ -150,11 +137,19 @@ export default function EntryCardCompare({
   const hasLocalPair = !!fromLocalCard && !!toLocalCard
   const hasMirroredPair = !!fromMirroredCard && !!toMirroredCard
 
+  const hasFromCard = !!fromLocalCard || !!fromMirroredCard
+  const hasToCard = !!toLocalCard || !!toMirroredCard
+  const fromOnly = hasFromCard && !hasToCard
+
+  const previewCard = fromLocalCard ?? fromMirroredCard
+
   const localSchemaId =
     hasLocalPair && fromLocalCard.schemaId === toLocalCard.schemaId ? toLocalCard.schemaId : undefined
   const mirroredSchemaId =
     hasMirroredPair && fromMirroredCard.schemaId === toMirroredCard.schemaId ? toMirroredCard.schemaId : undefined
-  const chosenSchemaId = localSchemaId ?? mirroredSchemaId
+
+  const singleSideSchemaId = fromOnly ? previewCard?.schemaId : undefined
+  const chosenSchemaId = localSchemaId ?? mirroredSchemaId ?? singleSideSchemaId
 
   const {
     schema: chosenSchema,
@@ -206,10 +201,10 @@ export default function EntryCardCompare({
       chosenSchema,
       {},
       ['properties.contacts'],
+      fromState,
+      fromMirroredState,
       toState,
       toMirroredState,
-      hasLocalPair ? fromState : undefined,
-      hasMirroredPair ? fromMirroredState : undefined,
     )
     for (const step of steps) {
       step.steps = steps
@@ -219,8 +214,6 @@ export default function EntryCardCompare({
     chosenSchema,
     fromLocalCard?.metadata,
     fromMirroredCard?.metadata,
-    hasLocalPair,
-    hasMirroredPair,
     toLocalCard?.metadata,
     toMirroredCard?.metadata,
   ])
@@ -236,6 +229,7 @@ export default function EntryCardCompare({
         toEntryId,
         toLocalCard?.version,
         toMirroredCard?.version,
+        fromOnly ? 'single' : 'diff',
       ].join(':')
     : undefined
   if (currentKey && currentKey !== lastKey) {
@@ -255,6 +249,10 @@ export default function EntryCardCompare({
     const key = `${side}${cardType}`
     updateQuery(router, { [key]: version === undefined ? undefined : String(version) })
   }
+
+  useEffect(() => {
+    setSplitSchema(initialSplit)
+  }, [initialSplit])
 
   const error = MultipleErrorWrapper(`Unable to load compare page`, {
     isFromRevisionsError,
@@ -281,7 +279,7 @@ export default function EntryCardCompare({
     (!!chosenSchemaId && isSchemaLoading)
 
   const renderVersionLabel = (revision: EntryCardRevisionInterface) =>
-    `Updated by ${revision.createdBy} on ${formatDateString(revision.createdAt)}`
+    `Updated by ${revision.createdBy} on ${formatDateTimeString(revision.createdAt)}`
 
   const renderEntryLabel = (entry: EntrySearchResult) => `${entry.name} (${entry.id})`
 
@@ -294,8 +292,19 @@ export default function EntryCardCompare({
   const fromHasMirroredRevisions = sortedFromMirroredRevisions.length > 0
   const toHasMirroredRevisions = sortedToMirroredRevisions.length > 0
 
+  const sameEntrySelected = !!fromEntryId && fromEntryId === toEntryId
+
+  const isToLocalOptionDisabled = (revision: EntryCardRevisionInterface) =>
+    sameEntrySelected && fromVersion !== undefined && revision.version === fromVersion
+
+  const isFromLocalOptionDisabled = (revision: EntryCardRevisionInterface) =>
+    sameEntrySelected && toVersion !== undefined && revision.version === toVersion
+
+  const isToMirroredOptionDisabled = (revision: EntryCardRevisionInterface) =>
+    sameEntrySelected && fromMirroredVersion !== undefined && revision.version === fromMirroredVersion
+
   const kindLabel = EntryKindLabel[entryKind]
-  const backHref = `/${entryKindForRedirect(entryKind)}/${fromEntryId}`
+  const link = `/${entryKindForRedirect(entryKind)}/${fromEntryId}`
 
   const hasAnyVersionFrom = !!fromEntryId && (fromVersion !== undefined || fromMirroredVersion !== undefined)
   const hasAnyVersionTo = !!toEntryId && (toVersion !== undefined || toMirroredVersion !== undefined)
@@ -306,147 +315,152 @@ export default function EntryCardCompare({
 
   const canRenderForm = !loading && !!chosenSchema && splitSchema.steps.length > 0 && !schemasDiverge
 
-  const isSameRevision =
-    !!fromEntryId && fromEntryId === toEntryId && fromVersion === toVersion && fromMirroredVersion === toMirroredVersion
+  const showSelectPrompt = !loading && !fromOnly && (!hasAnyVersionFrom || !hasAnyVersionTo)
 
   return (
     <Container>
       <Paper sx={{ p: 4, my: 4 }}>
-        <Stack direction='row' spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
-          <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(backHref)}>
-            {`Back to ${kindLabel}`}
-          </Button>
-        </Stack>
-        <Accordion defaultExpanded={!isSameRevision} sx={{ mb: 3 }}>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography variant='h6' component='h1' color='primary'>
-              {`Compare ${toTitleCase(kindLabel)} Cards`}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'stretch' }}>
-              <Stack spacing={2} sx={{ flex: 1 }}>
-                <Typography sx={{ fontWeight: 'bold' }}>From</Typography>
+        <Stack spacing={4}>
+          <Link href={link}>
+            <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+              {`Back to ${kindLabel}`}
+            </Button>
+          </Link>
+          <Typography variant='h6' component='h1' color='primary'>
+            {`Compare ${toTitleCase(kindLabel)} Cards`}
+          </Typography>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'stretch' }}>
+            <Stack spacing={2} sx={{ flex: 1 }}>
+              <Typography sx={{ fontWeight: 'bold' }}>From</Typography>
+              <Autocomplete
+                disablePortal
+                options={fromEntries}
+                loading={isFromEntriesLoading}
+                fullWidth
+                size='small'
+                value={fromEntry ?? null}
+                getOptionLabel={renderEntryLabel}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onInputChange={(_event, value, reason) => {
+                  if (reason === 'input') {
+                    setFromSearch(value)
+                  }
+                }}
+                onChange={(_event, value) => setModel(QueryDiffSide.From, value)}
+                renderInput={(params) => <TextField {...params} label={`${kindLabel}`} />}
+              />
+              <Autocomplete
+                disablePortal
+                options={sortedFromLocalRevisions.filter((revision) => revision.version !== 1)}
+                disabled={!fromEntryId}
+                loading={isFromRevisionsLoading}
+                fullWidth
+                size='small'
+                value={fromLocalOption}
+                getOptionLabel={renderVersionLabel}
+                getOptionDisabled={isFromLocalOptionDisabled}
+                isOptionEqualToValue={(option, value) => option.version === value.version}
+                onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Standard, value?.version)}
+                renderInput={(params) => <TextField {...params} label='Version' />}
+              />
+              {fromHasMirroredRevisions && (
                 <Autocomplete
                   disablePortal
-                  options={fromEntries}
-                  loading={isFromEntriesLoading}
-                  fullWidth
-                  size='small'
-                  value={fromEntry ?? null}
-                  getOptionLabel={renderEntryLabel}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  onInputChange={(_event, value, reason) => {
-                    if (reason === 'input') {
-                      setFromSearch(value)
-                    }
-                  }}
-                  onChange={(_event, value) => setModel(QueryDiffSide.From, value)}
-                  renderInput={(params) => <TextField {...params} label={`${kindLabel}`} />}
-                />
-                <Autocomplete
-                  disablePortal
-                  options={sortedFromLocalRevisions.filter((revision) => revision.version !== 1)}
+                  options={sortedFromMirroredRevisions}
                   disabled={!fromEntryId}
                   loading={isFromRevisionsLoading}
                   fullWidth
                   size='small'
-                  value={fromLocalOption}
+                  value={fromMirroredOption}
                   getOptionLabel={renderVersionLabel}
+                  getOptionDisabled={isFromLocalOptionDisabled}
                   isOptionEqualToValue={(option, value) => option.version === value.version}
-                  onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Standard, value?.version)}
-                  renderInput={(params) => <TextField {...params} label='Version' />}
+                  onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Mirror, value?.version)}
+                  renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
                 />
-                {fromHasMirroredRevisions && (
-                  <Autocomplete
-                    disablePortal
-                    options={sortedFromMirroredRevisions}
-                    disabled={!fromEntryId}
-                    loading={isFromRevisionsLoading}
-                    fullWidth
-                    size='small'
-                    value={fromMirroredOption}
-                    getOptionLabel={renderVersionLabel}
-                    isOptionEqualToValue={(option, value) => option.version === value.version}
-                    onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Mirror, value?.version)}
-                    renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
-                  />
-                )}
-              </Stack>
-              <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
-                <CompareArrowsIcon color='primary' fontSize='large' />
-              </Stack>
-              <Stack spacing={2} sx={{ flex: 1 }}>
-                <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
+              )}
+            </Stack>
+            <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
+              <Typography>&nbsp;</Typography>
+              <CompareArrowsIcon color='primary' fontSize='large' />
+            </Stack>
+            <Stack spacing={2} sx={{ flex: 1 }}>
+              <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
+              <Autocomplete
+                disablePortal
+                options={toEntries}
+                loading={isToEntriesLoading}
+                fullWidth
+                size='small'
+                value={toEntry ?? null}
+                getOptionLabel={renderEntryLabel}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onInputChange={(_event, value, reason) => {
+                  if (reason === 'input') {
+                    setToSearch(value)
+                  }
+                }}
+                onChange={(_event, value) => setModel(QueryDiffSide.To, value)}
+                renderInput={(params) => <TextField {...params} label={`${kindLabel}`} />}
+              />
+              <Autocomplete
+                disablePortal
+                options={sortedToLocalRevisions}
+                disabled={!toEntryId}
+                loading={isToRevisionsLoading}
+                fullWidth
+                size='small'
+                value={toLocalOption}
+                getOptionLabel={renderVersionLabel}
+                getOptionDisabled={isToLocalOptionDisabled}
+                isOptionEqualToValue={(option, value) => option.version === value.version}
+                onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Standard, value?.version)}
+                renderInput={(params) => <TextField {...params} label='Version' />}
+              />
+              {toHasMirroredRevisions && (
                 <Autocomplete
                   disablePortal
-                  options={toEntries}
-                  loading={isToEntriesLoading}
-                  fullWidth
-                  size='small'
-                  value={toEntry ?? null}
-                  getOptionLabel={renderEntryLabel}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  onInputChange={(_event, value, reason) => {
-                    if (reason === 'input') {
-                      setToSearch(value)
-                    }
-                  }}
-                  onChange={(_event, value) => setModel(QueryDiffSide.To, value)}
-                  renderInput={(params) => <TextField {...params} label={`${kindLabel}`} />}
-                />
-                <Autocomplete
-                  disablePortal
-                  options={sortedToLocalRevisions}
+                  options={sortedToMirroredRevisions}
                   disabled={!toEntryId}
                   loading={isToRevisionsLoading}
                   fullWidth
                   size='small'
-                  value={toLocalOption}
+                  value={toMirroredOption}
                   getOptionLabel={renderVersionLabel}
+                  getOptionDisabled={isToMirroredOptionDisabled}
                   isOptionEqualToValue={(option, value) => option.version === value.version}
-                  onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Standard, value?.version)}
-                  renderInput={(params) => <TextField {...params} label='Version' />}
+                  onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Mirror, value?.version)}
+                  renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
                 />
-                {toHasMirroredRevisions && (
-                  <Autocomplete
-                    disablePortal
-                    options={sortedToMirroredRevisions}
-                    disabled={!toEntryId}
-                    loading={isToRevisionsLoading}
-                    fullWidth
-                    size='small'
-                    value={toMirroredOption}
-                    getOptionLabel={renderVersionLabel}
-                    isOptionEqualToValue={(option, value) => option.version === value.version}
-                    onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Mirror, value?.version)}
-                    renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
-                  />
-                )}
-              </Stack>
+              )}
             </Stack>
-          </AccordionDetails>
-        </Accordion>
-        {loading && <Loading />}
-        {!loading && (!hasAnyVersionFrom || !hasAnyVersionTo) && (
-          <Alert severity='info'>
-            Select a {kindLabel.toLowerCase()} and at least one version on both sides to view a diff.
-          </Alert>
-        )}
-        {!loading && schemasDiverge && (
-          <Alert severity='warning' sx={{ mb: 2 }}>
-            The selected revisions use different schemas and cannot be compared.
-          </Alert>
-        )}
-        {canRenderForm && (
-          <JsonSchemaForm
-            splitSchema={splitSchema}
-            setSplitSchema={setSplitSchema}
-            canEdit={false}
-            compareMode
-            mirroredModel={useMirroredLayout}
-          />
-        )}
+          </Stack>
+          {loading && <Loading />}
+          {showSelectPrompt && (
+            <Alert severity='info'>
+              Select a {kindLabel.toLowerCase()} and at least one version on both sides to view a diff.
+            </Alert>
+          )}
+          {!loading && fromOnly && canRenderForm && (
+            <Alert severity='info' sx={{ mb: 2 }}>
+              Showing a single {kindLabel.toLowerCase()} card. Select a version on the “To” side to compare.
+            </Alert>
+          )}
+          {!loading && schemasDiverge && (
+            <Alert severity='warning' sx={{ mb: 2 }}>
+              The selected revisions use different schemas and cannot be compared.
+            </Alert>
+          )}
+          {canRenderForm && (
+            <JsonSchemaForm
+              splitSchema={splitSchema}
+              setSplitSchema={setSplitSchema}
+              canEdit={false}
+              compareMode={!fromOnly}
+              mirroredModel={fromOnly ? !!fromMirroredCard : useMirroredLayout}
+            />
+          )}
+        </Stack>
       </Paper>
     </Container>
   )

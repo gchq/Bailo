@@ -2,9 +2,10 @@ import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/m
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
+import InlineDiff from 'src/common/InlineDiff'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState } from 'utils/formUtils'
+import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -14,6 +15,13 @@ interface TagSelectorProps {
   required?: boolean
   id: string
   schema?: RJSFSchema
+}
+
+function formatTagValue(tags: string[] | undefined): string {
+  if (!tags || tags.length === 0) {
+    return ''
+  }
+  return tags.join(', ')
 }
 
 export default function TagSelector({ onChange, value, label, formContext, required, id, schema }: TagSelectorProps) {
@@ -50,19 +58,53 @@ export default function TagSelector({ onChange, value, label, formContext, requi
   }
 
   const mirroredState = getMirroredState(id, formContext)
+  const compareFromState = getCompareFromState(id, formContext) as string[] | undefined
+  const compareFromMirroredState = getCompareFromMirroredState(id, formContext) as string[] | undefined
+  const inCompareMode = !!formContext.compareMode && !formContext.editMode
+
+  const currentValueString = formatTagValue(value)
+  const compareFromString = formatTagValue(compareFromState)
+  const mirroredStateString = formatTagValue(mirroredState as string[] | undefined)
+  const compareFromMirroredString = formatTagValue(compareFromMirroredState)
+
+  if (inCompareMode && !formContext.mirroredModel) {
+    const from = compareFromState ? compareFromString : mirroredStateString
+    return (
+      <Stack spacing={1}>
+        <Typography
+          id={`${id}-label`}
+          aria-label={`Label for ${label}`}
+          component='label'
+          htmlFor={id}
+          sx={{ fontWeight: 'bold' }}
+        >
+          {label}
+          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+        </Typography>
+        <InlineDiff from={from} to={currentValueString} />
+      </Stack>
+    )
+  }
+
+  const mirroredContent =
+    inCompareMode && formContext.mirroredModel ? (
+      <InlineDiff from={compareFromMirroredString} to={mirroredStateString} />
+    ) : (
+      mirroredState
+    )
 
   return (
     <AdditionalInformation
       editMode={formContext.editMode}
-      mirroredState={mirroredState}
-      display={formContext.mirroredModel && value}
+      mirroredState={mirroredContent}
+      display={value.length > 0}
       label={label}
       id={id}
       required={required}
       mirroredModel={formContext.mirroredModel}
       description={schema ? schema.description : ''}
     >
-      {formContext && formContext.editMode && (
+      {formContext.editMode ? (
         <Stack spacing={1}>
           <Stack
             direction={{ md: 'row', sm: 'column' }}
@@ -126,6 +168,27 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {errorText}
           </Typography>
         </Stack>
+      ) : inCompareMode && formContext.mirroredModel ? (
+        <InlineDiff from={compareFromString} to={currentValueString} />
+      ) : value.length === 0 ? (
+        <Typography
+          sx={{
+            fontStyle: 'italic',
+            color: theme.palette.customTextInput.main,
+          }}
+        >
+          Unanswered
+        </Typography>
+      ) : value.length ? (
+        <Box sx={{ overflow: 'auto', p: 1 }}>
+          <Box sx={{ whiteSpace: 'pre-wrap' }}>
+            {value.map((tag) => (
+              <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} />
+            ))}
+          </Box>
+        </Box>
+      ) : (
+        <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
       )}
     </AdditionalInformation>
   )

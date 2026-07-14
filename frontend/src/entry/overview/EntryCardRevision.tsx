@@ -2,7 +2,7 @@ import { Checkbox, Stack, TableBody, TableCell, TableRow, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import UserDisplay from 'src/common/UserDisplay'
 import { EntryKindKeys } from 'types/types'
-import { formatDateString } from 'utils/dateUtils'
+import { formatDateTimeString } from 'utils/dateUtils'
 
 export type EntryCardSnapshot = {
   key: string
@@ -36,32 +36,43 @@ export default function EntryCardRevision({
   const primaryColor = theme.palette.secondary.main
   const mutedColor = theme.palette.text.secondary
 
+  const versionStyle = (isChanged: boolean) => ({
+    color: isChanged ? primaryColor : mutedColor,
+    fontWeight: isChanged ? 'bold' : undefined,
+    fontStyle: isChanged ? undefined : 'italic',
+  })
+
   return (
     <TableBody>
-      <TableRow hover selected={isChecked} onClick={onRowClick} sx={{ '&:hover': { cursor: 'pointer' } }}>
+      <TableRow
+        hover={snapshot.local !== 1}
+        selected={isChecked}
+        onClick={snapshot.local !== 1 ? onRowClick : () => {}}
+        sx={{ '&:hover': { cursor: snapshot.local !== 1 ? 'pointer' : 'default' } }}
+      >
         <TableCell>
           <Stack direction='column' spacing={0}>
             {snapshot.local !== undefined && (
-              <Typography sx={{ color: changedIsLocal ? primaryColor : mutedColor }}>{`v${snapshot.local}`}</Typography>
+              <Typography sx={versionStyle(changedIsLocal)}>{`v${snapshot.local}`}</Typography>
             )}
             {snapshot.mirrored !== undefined && (
-              <Typography sx={{ color: !changedIsLocal ? primaryColor : mutedColor }}>
-                {`Mirrored v${snapshot.mirrored}`}
-              </Typography>
+              <Typography sx={versionStyle(!changedIsLocal)}>{`Mirrored v${snapshot.mirrored}`}</Typography>
             )}
           </Stack>
         </TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>
           <UserDisplay dn={snapshot.createdBy} />
         </TableCell>
-        <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateString(snapshot.createdAt)}</TableCell>
+        <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateTimeString(snapshot.createdAt)}</TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>
-          <Checkbox
-            checked={isChecked}
-            onClick={(event) => event.stopPropagation()}
-            onChange={onCheckToggle}
-            disabled={hideCheckbox}
-          />
+          {snapshot.local !== 1 && (
+            <Checkbox
+              checked={isChecked}
+              onClick={(event) => event.stopPropagation()}
+              onChange={onCheckToggle}
+              disabled={hideCheckbox}
+            />
+          )}
         </TableCell>
       </TableRow>
     </TableBody>

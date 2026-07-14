@@ -71,10 +71,12 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
   // Newest-first for display in the table.
   const snapshotsNewestFirst = useMemo(() => [...snapshotsOldestFirst].reverse(), [snapshotsOldestFirst])
 
-  const buildHref = (from: EntryCardSnapshot, to: EntryCardSnapshot): string => {
+  const buildHref = (from: EntryCardSnapshot, to?: EntryCardSnapshot): string => {
     const query = new URLSearchParams()
     query.set('fromModel', entry.id)
-    query.set('toModel', entry.id)
+    if (to) {
+      query.set('toModel', entry.id)
+    }
 
     if (from.local !== undefined) {
       query.set('fromVersion', String(from.local))
@@ -82,10 +84,10 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
     if (from.mirrored !== undefined) {
       query.set('fromMirroredVersion', String(from.mirrored))
     }
-    if (to.local !== undefined) {
+    if (to?.local !== undefined) {
       query.set('toVersion', String(to.local))
     }
-    if (to.mirrored !== undefined) {
+    if (to?.mirrored !== undefined) {
       query.set('toMirroredVersion', String(to.mirrored))
     }
 
@@ -101,7 +103,6 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
         return current.filter((s) => s.key !== snapshot.key)
       }
       if (current.length >= MAX_SELECTED) {
-        // Defensive — unchecked checkboxes are hidden once MAX_SELECTED is reached.
         return current
       }
       return [...current, snapshot]
@@ -131,7 +132,7 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
             isChecked={checked}
             hideCheckbox={hideCheckbox}
             onRowClick={() => {
-              router.push(buildHref(snapshot, snapshot))
+              router.push(buildHref(snapshot))
             }}
             onCheckToggle={() => toggleSelection(snapshot)}
           />
@@ -168,7 +169,7 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
         </TableContainer>
         <DialogActions>
           <Button color='primary' variant='contained' disabled={!compareEnabled} onClick={onCompareSelected}>
-            Compare selected
+            Compare revisions
           </Button>
           <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>
             Close

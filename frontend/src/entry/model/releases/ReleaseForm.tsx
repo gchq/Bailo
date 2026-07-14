@@ -49,6 +49,7 @@ import {
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
+import { buildModelCardHref } from 'utils/routerUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -281,9 +282,7 @@ export default function ReleaseForm({
           {isReadOnly ? (
             <Typography>
               {formData.modelCardVersion} -{' '}
-              <Link
-                href={`/model/${model.id}/history/${formData.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`}
-              >
+              <Link href={buildModelCardHref(model.id, model.kind, formData.modelCardVersion)}>
                 <Button size='small'>View Model card</Button>
               </Link>
             </Typography>

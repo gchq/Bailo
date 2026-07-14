@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
@@ -57,7 +57,7 @@ export default function CustomTextInput({
   const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
 
   if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState !== undefined ? compareFromState : (mirroredState as string | undefined)
+    const from = compareFromState ?? mirroredState
     return (
       <Stack spacing={1}>
         <Typography
@@ -75,11 +75,10 @@ export default function CustomTextInput({
     )
   }
 
-  const mirroredCompareContent = inCompareMode && registry.formContext.mirroredModel && (
-    <InlineDiff from={compareFromMirroredState} to={mirroredState as string | undefined} />
+  const mirroredCompareContent = inCompareMode && registry.formContext.mirroredModel && value && (
+    <InlineDiff from={compareFromMirroredState} to={mirroredState} />
   )
-  const displayPanel =
-    inCompareMode && registry.formContext.mirroredModel ? true : (registry.formContext.mirroredModel && value) || false
+  const displayPanel = Boolean(registry.formContext.mirroredModel && (value || mirroredState))
 
   return (
     <AdditionalInformation
@@ -92,8 +91,10 @@ export default function CustomTextInput({
       mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
     >
-      {inCompareMode && registry.formContext.mirroredModel && <InlineDiff from={compareFromState} to={value} />}
-      {!inCompareMode && registry.formContext.editMode && (
+      {inCompareMode && registry.formContext.mirroredModel && value && (
+        <InlineDiff from={compareFromState} to={value} />
+      )}
+      {!inCompareMode && (
         <TextField
           size='small'
           error={rawErrors && rawErrors.length > 0}
@@ -139,20 +140,6 @@ export default function CustomTextInput({
             },
           }}
         />
-      )}
-      {!inCompareMode && !registry.formContext.editMode && (
-        <Box sx={{ wordBreak: 'break-word' }}>
-          {value || (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
-        </Box>
       )}
     </AdditionalInformation>
   )
