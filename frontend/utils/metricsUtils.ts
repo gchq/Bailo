@@ -4,7 +4,7 @@ import { SchemaInterface } from 'types/types'
 export const breakdownQueryTypes = ['byState', 'bySchema', 'totalEntries', 'withReleases', 'withAccessRequest'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
 
-const filterIncludeTypes = {
+export const filterIncludeTypes = {
   WITH: 'with',
   WITHOUT: 'without',
 }

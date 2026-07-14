@@ -8,7 +8,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsBreakdownTable from 'src/metrics/components/MetricsBreakdownTable'
 import { SystemRole } from 'types/types'
-import { buildEntriesHref, EntriesFilterQuery } from 'utils/metricsUtils'
+import { buildEntriesHref, EntriesFilterQuery, filterIncludeTypes } from 'utils/metricsUtils'
 
 const ALL_VALUE = 'All'
 const NONE_SCHEMA_VALUE = 'none'
@@ -76,14 +76,14 @@ export default function EntryMetrics() {
 
   const releaseOptions = [
     { value: ALL_VALUE, label: ALL_VALUE },
-    { value: 'with', label: 'With releases' },
-    { value: 'without', label: 'Without releases' },
+    { value: filterIncludeTypes.WITH, label: 'With releases' },
+    { value: filterIncludeTypes.WITHOUT, label: 'Without releases' },
   ]
 
   const accessRequestOptions = [
     { value: ALL_VALUE, label: ALL_VALUE },
-    { value: 'with', label: 'With access request' },
-    { value: 'without', label: 'Without access request' },
+    { value: filterIncludeTypes.WITH, label: 'With access request' },
+    { value: filterIncludeTypes.WITHOUT, label: 'Without access request' },
   ]
 
   const tableData = useMemo(
