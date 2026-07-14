@@ -26,11 +26,13 @@ import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
-import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useState } from 'react'
+import { useRouter } from 'next/router'
+import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import ImportModelCardTextDialog from 'src/entry/overview/ImportModelCardTextDialog'
@@ -50,8 +52,22 @@ type FormEditPageProps = {
   entry: EntryInterface
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
+
+export type RouterQueryParams = {
+  page?: number
+  requiredByModelState?: string
+  isEdit?: boolean
+}
+
 export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
-  const [isEdit, setIsEdit] = useState(false)
+  const router = useRouter()
+  const { userPermissions } = useContext(UserPermissionsContext)
+
+  const isEdit = useMemo(
+    () => router.query.isEdit === 'true' && userPermissions.editEntryCard.hasPermission,
+    [router.query.isEdit, userPermissions.editEntryCard.hasPermission],
+  )
+
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const [migrationErrorMessage, setMigrationErrorMessage] = useState('')
@@ -117,11 +133,11 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       const data = getStepsData(splitSchema, true)
 
       if (getChangedFields(oldData, data).length === 0) {
-        setIsEdit(false)
+        handleChangeEditMode(false)
       } else {
         const res = await putEntryCard(entry.id, data)
         if (res.status && res.status < 400) {
-          setIsEdit(false)
+          handleChangeEditMode(false)
           mutateEntryCardRevisions()
         } else {
           setErrorMessage(res.data)
@@ -146,7 +162,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         step.steps = steps
       }
       setSplitSchema({ reference: schema.id, steps })
-      setIsEdit(false)
+      handleChangeEditMode(false)
     }
   }
 
@@ -232,6 +248,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     saveDisplayFormStats(event.target.checked)
   }
 
+  function handleChangeEditMode(isEdit: boolean) {
+    router.replace({
+      query: { ...router.query, isEdit },
+    })
+  }
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -310,7 +332,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     sx={{ width: 'fit-content', height: 'fit-content' }}
                     onClick={() => {
                       handleActionButtonClose()
-                      setIsEdit(!isEdit)
+                      handleChangeEditMode(!isEdit)
                       setOldSchema(_.cloneDeep(splitSchema))
                     }}
                     data-test='editEntryCardButton'
@@ -406,6 +428,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           calculateStats={calculateStats}
           canEdit={isEdit}
           displayStats={displayFormStats}
+          stateList={(schema?.jsonSchema as { stateList?: string[] } | undefined)?.stateList || []}
         />
         {isEdit && (
           <SaveAndCancelButtons

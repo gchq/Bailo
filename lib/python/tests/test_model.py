@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
 
@@ -22,10 +24,28 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "organisation", "state", "tags", "visibility", "collaborators"),
+    ("name", "description", "organisation", "state", "tags", "visibility", "collaborators", "metadata"),
     [
-        ("test-model", "test", None, None, None, ModelVisibility.PUBLIC, None),
-        ("test-model", "test", None, None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        (
+            "test-model",
+            "test",
+            None,
+            None,
+            None,
+            ModelVisibility.PUBLIC,
+            None,
+            None,
+        ),
+        (
+            "test-model",
+            "test",
+            None,
+            None,
+            None,
+            None,
+            [CollaboratorEntry("user:user", ["owner", "contributor"])],
+            None,
+        ),
         (
             "test-model",
             "test",
@@ -34,6 +54,19 @@ def test_create_experiment_from_model(local_model):
             ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
+            None,
+        ),
+        (
+            "test-model",
+            "test-description",
+            "Example Organisation",
+            "Development",
+            ["taga", "tagb"],
+            None,
+            [CollaboratorEntry("user:user", [Role.OWNER])],
+            {
+                "overview": {"modelSummary": "I am filled."},
+            },
         ),
     ],
 )
@@ -46,6 +79,7 @@ def test_create_get_from_id_update_and_delete_model(
     tags: list[str] | None,
     collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
+    metadata: dict[str, Any],
 ):
     # Create model
     model = Model.create(
@@ -61,15 +95,20 @@ def test_create_get_from_id_update_and_delete_model(
     model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)
 
+    if metadata is not None:
+        model.update_model_card(model_card=metadata)
+
     # Check that a model can be changed
     model.description = "testing-1234"
-    model.update()
 
-    get_model = Model.from_id(integration_client, model.model_id)
-
-    assert get_model.description == "testing-1234"
-
-    assert model.model_id == get_model.model_id
+    if state is not None and metadata is None:
+        with pytest.raises(BailoException):
+            model.update()
+    else:
+        model.update()
+        get_model = Model.from_id(integration_client, model.model_id)
+        assert get_model.description == "testing-1234"
+        assert model.model_id == get_model.model_id
 
     # Check that the model is deleted
     assert model.delete()
