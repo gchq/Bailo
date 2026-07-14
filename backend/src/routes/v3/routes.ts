@@ -5,6 +5,7 @@ import { getImageByDigest } from '../v3/model/images/getImage.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getComplianceMetrics } from './metrics/getComplianceMetrics.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
+import { getModelBreakdown } from './metrics/getModelBreakdown.js'
 import { getUsageMetrics } from './metrics/getUsageMetrics.js'
 import { getLatestResponse } from './response/getLatestResponseForReview.js'
 import { postNotifyReviewer } from './review/postNotifyReviewer.js'
@@ -20,6 +21,7 @@ router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance', ...getComplianceMetrics)
 router.get('/metrics/entryVolume', ...getEntryVolume)
+router.get('/metrics/breakdown', ...getModelBreakdown)
 
 router.post('/review/:reviewId/response', ...postReviewResponse)
 router.post('/review/:modelId', ...postReview)

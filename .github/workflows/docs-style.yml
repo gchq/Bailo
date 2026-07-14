@@ -5,14 +5,30 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-    # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
-    paths:
-      - 'frontend/pages/docs/**/*.mdx'
-      - 'frontend/scripts/check-docs-style.sh'
-      - '.github/workflows/docs-style.yml'
+
+permissions:
+  contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7
+      # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'frontend/pages/docs/**/*.mdx'
+              - 'frontend/scripts/check-docs-style.sh'
+              - '.github/workflows/docs-style.yml'
+
   docs_style_check:
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
