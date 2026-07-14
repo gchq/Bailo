@@ -5,7 +5,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "nodemon",
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/services/smtp/templates && cp src/services/smtp/templates/*.hbs dist/services/smtp/templates/",
     "test": "vitest",
     "lint": "eslint . -c eslint.config.mjs '**/*.ts' --max-warnings=0",
     "style": "prettier --write .",

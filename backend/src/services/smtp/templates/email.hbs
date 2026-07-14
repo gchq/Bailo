@@ -53,7 +53,7 @@
           padding-bottom='28px'
           padding-top='28px'
         >
-          <span style='font-size: 20px; font-weight: bold'>{{{title}}}</span>
+          <span style='font-size: 20px; font-weight: bold'>{{title}}</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -70,7 +70,7 @@
             padding-left='25px'
             padding-right='25px'
             padding-bottom='0px'
-          ><strong>{{{this.title}}}</strong></mj-text>
+          ><strong>{{this.title}}</strong></mj-text>
           <mj-text
             align='center'
             color='#FFF'
@@ -80,7 +80,7 @@
             padding-right='25px'
             padding-bottom='20px'
             padding-top='10px'
-          >{{{this.data}}}</mj-text>
+          >{{this.data}}</mj-text>
         </mj-column>
       {{/each}}
     </mj-section>
@@ -97,12 +97,12 @@
             border='none'
             padding='15px 30px'
             border-radius='10px'
-            href='{{{this.url}}}'
+            href='{{this.url}}'
             font-family='Helvetica'
             padding-left='25px'
             padding-right='25px'
             padding-bottom='10px'
-          >{{{this.name}}}</mj-button>
+          >{{this.name}}</mj-button>
         </mj-column>
       {{/each}}
     </mj-section>
