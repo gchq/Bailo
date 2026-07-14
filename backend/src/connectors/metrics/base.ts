@@ -425,7 +425,6 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
       $project: {
         _id: 0,
         entryId: '$id',
-        organisation: { $ifNull: ['$organisation', 'unset'] },
         modelOwners: {
           $map: {
             input: {
