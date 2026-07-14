@@ -1,19 +1,18 @@
 import dayjs, { Dayjs } from '@dayjs'
 import { Stack, Typography } from '@mui/material'
-import { cheerfulFiestaPaletteDark, mangoFusionPaletteDark } from '@mui/x-charts'
+import { cheerfulFiestaPaletteDark } from '@mui/x-charts'
 import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
-import { DefaultizedPieValueType, PieItemIdentifier } from '@mui/x-charts/models'
-import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetVolumeForModel } from 'actions/metrics'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
+import { noneColour, OverviewPieChart, PieChartData } from 'src/metrics/components/MetricsPieChart'
+import OverviewStatPanel from 'src/metrics/components/OverviewStatPanel'
 import { ModelVolume, ModelVolumeData, OverviewBaseMetrics } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
-import { BreakdownQueryType, NONE_COLOR, PieChartData, withConsistentColours } from 'utils/metricsUtils'
+import { BreakdownQueryType } from 'utils/metricsUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
@@ -45,19 +44,6 @@ export default function OverviewMetricsCharts({
     borderRadius: 2,
   })
 
-  const pieChartSettings = {
-    margin: { right: 5 },
-    width: 200,
-    height: 200,
-    sx: {
-      [`& .${pieClasses.arcLabel}`]: {
-        fontWeight: 'bold',
-        color: 'white',
-      },
-    },
-    colors: mangoFusionPaletteDark,
-  }
-
   const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
     'month',
     `${startDate ? setAsFirstDayOfMonth(startDate) : setAsFirstDayOfMonth(dayjs(new Date()))}`,
@@ -69,7 +55,7 @@ export default function OverviewMetricsCharts({
       data.entryState?.map((state) => ({
         label: state.state,
         value: state.count,
-        color: state.state.toLowerCase() === 'none' ? NONE_COLOR : undefined,
+        color: state.state.toLowerCase() === 'none' ? noneColour : undefined,
       })) ?? []
     )
   }, [data.entryState])
@@ -97,7 +83,7 @@ export default function OverviewMetricsCharts({
           return {
             label: schemaItem.schemaName,
             value: schemaItem.count,
-            color: schemaItem.schemaName.toLowerCase() === 'none' ? NONE_COLOR : undefined,
+            color: schemaItem.schemaName.toLowerCase() === 'none' ? noneColour : undefined,
           }
         }),
       )
@@ -142,28 +128,6 @@ export default function OverviewMetricsCharts({
 
   if (isModelVolumeLoading) {
     return <Loading />
-  }
-
-  const handleStateItemClick = (
-    _event: React.MouseEvent<SVGPathElement, MouseEvent>,
-    _identifier: PieItemIdentifier,
-    item: DefaultizedPieValueType,
-  ) => {
-    const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
-    if (label) {
-      onSelect('byState', label)
-    }
-  }
-
-  const handleSchemaItemClick = (
-    _event: React.MouseEvent<SVGPathElement, MouseEvent>,
-    _identifier: PieItemIdentifier,
-    item: DefaultizedPieValueType,
-  ) => {
-    const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
-    if (label) {
-      onSelect('bySchema', label)
-    }
   }
 
   return (
@@ -212,6 +176,9 @@ export default function OverviewMetricsCharts({
         />
       </Stack>
       <Stack spacing={4}>
+        {/** TODO - Currently only the cards and pie charts are clickable.
+         *          Once all charts in this page are clickable, move this text to above the top chart and update the text */}
+        <Typography sx={{ mb: 2 }}>Click on any of the charts below to view the model breakdown</Typography>
         <Stack
           spacing={6}
           sx={{ alignItems: { lg: 'flex-start', md: 'center' } }}
@@ -238,83 +205,23 @@ export default function OverviewMetricsCharts({
             />
           </Stack>
           <Stack>
-            {/** TODO - Currently only the pie charts are clickable.
-             *          Once all charts in this page are clickable, move this text to above the top chart and update the text */}
-            <Typography sx={{ mb: 2 }}>Click on either of the pie charts below to view the model breakdown</Typography>
             <Stack
               spacing={2}
               direction={{ lg: 'row', md: 'column' }}
               sx={{ width: '100%', justifyContent: 'space-around' }}
             >
-              <Stack spacing={2} sx={{ alignItems: 'center' }}>
-                <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-                  Life cycle status
-                </Typography>
-                <PieChart
-                  series={[
-                    {
-                      id: 'life-cycle-status',
-                      innerRadius: 50,
-                      outerRadius: 100,
-                      data: withConsistentColours(stateData),
-                      arcLabel: 'value',
-                      paddingAngle: 1,
-                      cornerRadius: 4,
-                      highlightScope: { fade: 'global', highlight: 'item' },
-                    },
-                  ]}
-                  onItemClick={handleStateItemClick}
-                  slotProps={{
-                    legend: {
-                      direction: 'horizontal',
-                      position: { vertical: 'bottom', horizontal: 'center' },
-                    },
-                  }}
-                  sx={{
-                    ...pieChartSettings.sx,
-                    '& path': { cursor: 'pointer' },
-                  }}
-                  margin={pieChartSettings.margin}
-                  width={pieChartSettings.width}
-                  height={pieChartSettings.height}
-                  colors={pieChartSettings.colors}
-                />
-              </Stack>
-              <Stack spacing={2} sx={{ alignItems: 'center' }}>
-                <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-                  Schema usage
-                </Typography>
-                <PieChart
-                  series={[
-                    {
-                      id: 'schema-usage',
-                      innerRadius: 50,
-                      outerRadius: 100,
-                      data: withConsistentColours(schemaData),
-                      arcLabel: 'value',
-                      paddingAngle: 1,
-                      cornerRadius: 4,
-                      color: 'red',
-                      highlightScope: { fade: 'global', highlight: 'item' },
-                    },
-                  ]}
-                  onItemClick={handleSchemaItemClick}
-                  slotProps={{
-                    legend: {
-                      direction: 'horizontal',
-                      position: { vertical: 'bottom', horizontal: 'center' },
-                    },
-                  }}
-                  sx={{
-                    ...pieChartSettings.sx,
-                    '& path': { cursor: 'pointer' },
-                  }}
-                  margin={pieChartSettings.margin}
-                  width={pieChartSettings.width}
-                  height={pieChartSettings.height}
-                  colors={pieChartSettings.colors}
-                />
-              </Stack>
+              <OverviewPieChart
+                id='life-cycle-status'
+                title='Life cycle status'
+                data={stateData}
+                onSelectItem={(label) => onSelect('byState', label)}
+              />
+              <OverviewPieChart
+                id='schema-usage'
+                title='Schema usage'
+                data={schemaData}
+                onSelectItem={(label) => onSelect('bySchema', label)}
+              />
             </Stack>
           </Stack>
         </Stack>

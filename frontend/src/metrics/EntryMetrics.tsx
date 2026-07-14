@@ -1,4 +1,4 @@
-import { Container, Stack, Typography } from '@mui/material'
+import { Box, Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import MetricsBreakdownTable from 'src/metrics/MetricsBreakdownTable'
+import MetricsBreakdownTable from 'src/metrics/components/MetricsBreakdownTable'
 import { SystemRole } from 'types/types'
 import { buildEntriesHref, EntriesFilterQuery } from 'utils/metricsUtils'
 
@@ -76,14 +76,14 @@ export default function EntryMetrics() {
 
   const releaseOptions = [
     { value: ALL_VALUE, label: ALL_VALUE },
-    { value: 'WITH', label: 'With releases' },
-    { value: 'WITHOUT', label: 'Without releases' },
+    { value: 'with', label: 'With releases' },
+    { value: 'without', label: 'Without releases' },
   ]
 
   const accessRequestOptions = [
     { value: ALL_VALUE, label: ALL_VALUE },
-    { value: 'WITH', label: 'With access request' },
-    { value: 'WITHOUT', label: 'Without access request' },
+    { value: 'with', label: 'With access request' },
+    { value: 'without', label: 'Without access request' },
   ]
 
   const tableData = useMemo(
@@ -121,8 +121,8 @@ export default function EntryMetrics() {
   }
 
   return (
-    <Container maxWidth='lg' sx={{ mb: 4 }}>
-      <Stack spacing={2} sx={{ mt: 2, mb: 4 }}>
+    <Container maxWidth='lg' sx={{ mb: 2 }}>
+      <Stack spacing={2} sx={{ mt: 2, mb: 2 }}>
         <Stack spacing={0.5}>
           <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold' }}>
             Entries
@@ -166,17 +166,21 @@ export default function EntryMetrics() {
               onSelect={(value) => updateFilter('accessRequest', value)}
             />
           </Stack>
-          {resultCountLabel && (
-            <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
-              {resultCountLabel}
-            </Typography>
-          )}
         </Stack>
       </Stack>
       {isEntriesError ? (
         <MessageAlert message={isEntriesError.info.message} />
       ) : (
-        <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+        <Stack>
+          <Box sx={{ pb: 2 }}>
+            {resultCountLabel && (
+              <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
+                {resultCountLabel}
+              </Typography>
+            )}
+          </Box>
+          <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+        </Stack>
       )}
     </Container>
   )

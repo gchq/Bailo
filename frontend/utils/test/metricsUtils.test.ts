@@ -1,5 +1,5 @@
 import { SchemaInterface } from 'types/types'
-import { buildEntriesTabHref } from 'utils/metricsUtils'
+import { buildEntriesTabHref, sortPieData } from 'utils/metricsUtils'
 import { expect } from 'vitest'
 
 const mockSchemas = [
@@ -48,59 +48,43 @@ describe('buildEntriesTabHref', () => {
   })
 })
 
-// test('getFormStats should calculate stats for a fully completed mixed form', () => {
-//   const step = {
-//     ...stepExample,
-//     schema: {
-//       definitions: {
-//         infoRequirement: {
-//           type: 'string',
-//           enum: ['DOG', 'CAT'],
-//         },
-//         entity: {
-//           type: 'string',
-//           description:
-//             "An entity can be a user, group or more. Entities follow the form type:identifier, e.g. 'user:test'.",
-//         },
-//       },
-//       title: 'Business Case',
-//       description: 'The business case section is designed for a non-technical customer of a mcdonaldsel to understand.',
-//       type: 'object',
-//       properties: {
-//         need: {
-//           title: 'Need for creating the mcdonaldsel',
-//           description: 'Detailed description.',
-//           type: 'string',
-//           maxLength: 10000,
-//         },
-//         function: {
-//           title: 'Applicable statutory function',
-//           type: 'array',
-//           widget: 'multiSelector',
-//           items: {
-//             type: 'string',
-//             enum: ['SHOE', 'HAT', 'SOCK', 'Not applicable'],
-//           },
-//           uniqueItems: true,
-//         },
-//         extraInfo: {
-//           title: 'Extra Information',
-//           description: 'List extra information',
-//           type: 'string',
-//           maxLength: 10000,
-//         },
-//       },
-//       additionalProperties: false,
-//     },
-//     state: {
-//       need: 'It is needed',
-//       function: ['SHOE'],
-//       extraInfo: 'Because we need it now',
-//     },
-//   }
-//   const stats = getFormStats(step)
-//   expect(stats.totalQuestions).toBe(2)
-//   expect(stats.totalAnswers).toBe(3)
-//   expect(stats.percentageQuestionsComplete).toBe(100)
-//   expect(stats.formCompleted).toBe(true)
-// })
+describe('sortPieData', () => {
+  it('moves "None" entries to the end of the array', () => {
+    const data = [
+      { label: 'None', value: 4 },
+      { label: 'Development', value: 3 },
+      { label: 'Review', value: 1 },
+    ]
+
+    const result = sortPieData(data)
+
+    expect(result).toEqual([
+      { label: 'Development', value: 3 },
+      { label: 'Review', value: 1 },
+      { label: 'None', value: 4 },
+    ])
+  })
+
+  it('treats "None" case-insensitively and does not mutate the input array', () => {
+    const data = [
+      { label: 'Development', value: 3 },
+      { label: 'nOnE', value: 4 },
+      { label: 'Review', value: 1 },
+    ]
+
+    const result = sortPieData(data)
+
+    expect(result).toEqual([
+      { label: 'Development', value: 3 },
+      { label: 'Review', value: 1 },
+      { label: 'nOnE', value: 4 },
+    ])
+
+    // Verify the original array was not modified
+    expect(data).toEqual([
+      { label: 'Development', value: 3 },
+      { label: 'nOnE', value: 4 },
+      { label: 'Review', value: 1 },
+    ])
+  })
+})

@@ -695,7 +695,6 @@ export class BaseMetricsConnector {
   ): Promise<GetModelBreakdownResponse> {
     await checkUserIsAuthorised(user)
 
-    // const mongoQuery: any = {}
     const mongoQuery: QueryFilter<ModelInterface> = {}
 
     const idFilter: {
@@ -723,17 +722,10 @@ export class BaseMetricsConnector {
     }
 
     // Filter by models with releases if provided
-    // if (query.release !== undefined) {
-    //   const releaseModelIds = await ReleaseModel.distinct('modelId')
-    //   mongoQuery.id = {
-    //     ...mongoQuery.id,
-    //     ...(query.release === EntryFilter.WITH ? { $in: releaseModelIds } : { $nin: releaseModelIds }),
-    //   }
-    // }
     if (query.release !== undefined) {
       const releaseModelIds = await ReleaseModel.distinct('modelId')
 
-      if (query.release === EntryFilter.WITH) {
+      if (query.release.toLowerCase() === EntryFilter.WITH) {
         idFilter.$in = releaseModelIds
       } else {
         idFilter.$nin = releaseModelIds
@@ -741,26 +733,10 @@ export class BaseMetricsConnector {
     }
 
     // Filter by models with access requests if provided
-    // if (query.accessRequest !== undefined) {
-    //   const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
-    //   if (query.accessRequest === EntryFilter.WITH) {
-    //     mongoQuery.id = {
-    //       ...mongoQuery.id,
-    //       $in: mongoQuery.id?.$in
-    //         ? mongoQuery.id.$in.filter((id: string) => accessRequestModelIds.includes(id))
-    //         : accessRequestModelIds,
-    //     }
-    //   } else {
-    //     mongoQuery.id = {
-    //       ...mongoQuery.id,
-    //       $nin: [...(mongoQuery.id?.$nin ?? []), ...accessRequestModelIds],
-    //     }
-    //   }
-    // }
     if (query.accessRequest !== undefined) {
       const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
 
-      if (query.accessRequest === EntryFilter.WITH) {
+      if (query.accessRequest.toLowerCase() === EntryFilter.WITH) {
         idFilter.$in = idFilter.$in
           ? idFilter.$in.filter((id) => accessRequestModelIds.includes(id))
           : accessRequestModelIds
