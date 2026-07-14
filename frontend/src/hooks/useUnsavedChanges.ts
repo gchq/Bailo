@@ -20,6 +20,7 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
       e.preventDefault()
       return (e.returnValue = warningText)
     }
+
     const handleBrowseAway = () => {
       if (!unsavedChanges) {
         return
