@@ -1,7 +1,13 @@
 import { PieChartData } from 'src/metrics/components/MetricsPieChart'
 import { SchemaInterface } from 'types/types'
+
 export const breakdownQueryTypes = ['byState', 'bySchema', 'totalEntries', 'withReleases', 'withAccessRequest'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
+
+const filterIncludeTypes = {
+  WITH: 'with',
+  WITHOUT: 'without',
+}
 
 type ModelBreakdownRequest = {
   organisation: string
@@ -51,12 +57,12 @@ function buildBreakdownQuery(
     case 'withReleases':
       return {
         organisation: context.organisation,
-        release: 'with',
+        release: filterIncludeTypes.WITH,
       }
     case 'withAccessRequest':
       return {
         organisation: context.organisation,
-        accessRequest: 'with',
+        accessRequest: filterIncludeTypes.WITH,
       }
     default: {
       const exhaustiveCheck: never = type
@@ -65,6 +71,9 @@ function buildBreakdownQuery(
   }
 }
 
+/**
+ * Constructs the URL with any optional query parameters provided.
+ */
 export function buildEntriesHref(filters: EntriesFilterQuery): string {
   const params = new URLSearchParams()
   if (filters.organisation && filters.organisation !== 'All') {
