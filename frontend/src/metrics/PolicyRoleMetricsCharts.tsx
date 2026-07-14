@@ -1,3 +1,4 @@
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import Check from '@mui/icons-material/Check'
 import {
   Box,
@@ -73,6 +74,7 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
           sx={{ width: 'fit-content' }}
           variant='outlined'
           size='small'
+          endIcon={<ArrowDropDown />}
         >
           Filter by missing role {missingRoleFilters.length > 0 ? `(${missingRoleFilters.length})` : ''}
         </Button>

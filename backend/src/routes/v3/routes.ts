@@ -4,6 +4,7 @@ import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
+import { getModelBreakdown } from './metrics/getModelBreakdown.js'
 import { getNoReleasesComplianceMetrics } from './metrics/getNoReleasesComplianceMetrics.js'
 import { getRoleComplianceMetrics } from './metrics/getRoleComplianceMetrics.js'
 import { getUsageMetrics } from './metrics/getUsageMetrics.js'
@@ -22,6 +23,7 @@ router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
 router.get('/metrics/compliance/roles', ...getRoleComplianceMetrics)
 router.get('/metrics/entryVolume', ...getEntryVolume)
+router.get('/metrics/breakdown', ...getModelBreakdown)
 
 router.post('/review/:reviewId/response', ...postReviewResponse)
 router.post('/review/:modelId', ...postReview)

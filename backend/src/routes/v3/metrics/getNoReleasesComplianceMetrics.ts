@@ -15,7 +15,6 @@ export const NoReleasesSummaryMetricsSchema = z.object({
 
 export const ModelsNoReleasesSchema = z.object({
   entryId: z.string().openapi({ example: 'my-model-213gj' }),
-  organisation: z.string().openapi({ example: 'Example Organisation' }),
   modelOwners: z.array(z.string()).openapi({ example: ['user:user'] }),
 })
 

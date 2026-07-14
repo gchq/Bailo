@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useMemo, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useMemo } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import ExpandableTypography from 'src/common/ExpandableTypography'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -50,11 +50,15 @@ export default function PageWithTabs({
   const router = useRouter()
   const { tab } = router.query
 
-  const [currentTab, setCurrentTab] = useState(
-    tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path || '',
-  )
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
   const theme = useTheme()
+
+  const currentTab = useMemo(() => {
+    if (!router.isReady) {
+      return tabs.find((pageTab) => pageTab.path === tab)?.path ?? ''
+    }
+    return tabs.find((pageTab) => pageTab.path === tab)?.path ?? tabs[0]?.path ?? ''
+  }, [tab, router.isReady, tabs])
 
   const tabsList = useMemo(
     () =>
@@ -110,7 +114,6 @@ export default function PageWithTabs({
   }
 
   function continueNavigation(newTab: string) {
-    setCurrentTab(newTab)
     setUnsavedChanges(false)
     router.replace({
       query: { ...requiredUrlParams, tab: newTab },
