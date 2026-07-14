@@ -145,7 +145,7 @@ export default function Marketplace() {
     EntryKind.DATA_CARD,
     selectedRoles,
     '',
-    [],
+    selectedTags,
     selectedOrganisations,
     selectedStates,
     selectedPeers,

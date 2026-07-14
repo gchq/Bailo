@@ -1,3 +1,4 @@
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import Close from '@mui/icons-material/Close'
 import Code from '@mui/icons-material/Code'
 import Save from '@mui/icons-material/Save'
@@ -7,6 +8,8 @@ interface SaveAndCancelButtonsProps {
   onCancel: () => void
   onSubmit: () => void
   openTextInputDialog: () => void
+  openImportTextDialog?: () => void
+  showImportFromText?: boolean
   loading: boolean
   cancelDataTestId?: string
   saveDataTestId?: string
@@ -15,6 +18,8 @@ export default function SaveAndCancelButtons({
   onCancel,
   onSubmit,
   openTextInputDialog,
+  openImportTextDialog,
+  showImportFromText = false,
   loading,
   cancelDataTestId = '',
   saveDataTestId = '',
@@ -29,6 +34,17 @@ export default function SaveAndCancelButtons({
         mb: { xs: 2 },
       }}
     >
+      {showImportFromText && openImportTextDialog && (
+        <Button
+          variant='contained'
+          startIcon={<AutoAwesomeIcon />}
+          color='secondary'
+          onClick={openImportTextDialog}
+          data-test='importModelCardTextButton'
+        >
+          Import from Text
+        </Button>
+      )}
       <Button
         variant='contained'
         startIcon={<Code />}

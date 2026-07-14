@@ -6,8 +6,28 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7
+      # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'lib/artefactscan_api/**'
+              - '.github/workflows/artefactscan.yml'
+
   artefactscan_build:
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:

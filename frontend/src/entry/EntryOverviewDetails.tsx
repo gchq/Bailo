@@ -3,7 +3,7 @@ import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import { patchEntry, useGetEntry } from 'actions/entry'
+import { patchEntry } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import EntrySelect from 'src/common/EntrySelect'
@@ -18,16 +18,17 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, EntryInterface, ReviewKind } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
+  mutateEntry: () => void
 }
 
-export default function EntryOverviewDetails({ entry }: OrganisationAndStateDetailsProps) {
+export default function EntryOverviewDetails({ entry, mutateEntry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
@@ -36,7 +37,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const sendNotification = useNotification()
 
-  const { mutateEntry } = useGetEntry(entry.id)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: entry.id,
     kind: ReviewKind.LIFECYCLE,
@@ -143,9 +143,9 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
             />
           )}
         </Stack>
-        {entry.card && (
+        {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
-            <Typography sx={{ fontWeight: 'bold' }} color='primary'>
+            <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (
