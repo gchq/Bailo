@@ -18,6 +18,11 @@ const registryServiceMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/registry.js', () => registryServiceMocks)
 
+const modelTransferMock = vi.hoisted(() => ({
+  updateArtefactTransferStatus: vi.fn(),
+}))
+vi.mock('../../../../src/services/modelTransfer.js', () => modelTransferMock)
+
 const registryClientMocks = vi.hoisted(() => ({
   doesLayerExist: vi.fn(),
   initialiseUpload: vi.fn(() => ({ location: 'upload-location' })),

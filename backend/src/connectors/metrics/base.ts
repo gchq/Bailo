@@ -1,10 +1,10 @@
-import { Model, PipelineStage } from 'mongoose'
+import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { SystemRoles } from '../../models/Model.js'
+import ModelModel, { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -15,8 +15,10 @@ import {
   EntryVolumeInterval,
   GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
+import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { SchemaKind } from '../../types/enums.js'
+import { MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import {
@@ -140,7 +142,7 @@ async function calculateEntriesByState(filter: ModelFilter): Promise<StateInfo[]
   const entriesByState = await ModelModel.aggregate(pipeline)
 
   return entriesByState.map((row) => ({
-    state: row._id && row._id.trim() !== '' ? row._id : 'none',
+    state: row._id && row._id.trim() !== '' ? row._id : 'None',
     count: row.count,
   }))
 }
@@ -218,14 +220,14 @@ async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): 
   const schemaTotal = schemaMetrics.reduce((sum, s) => sum + s.count, 0)
 
   // Entries with no schema
-  const unsetCount = Math.max(totalEntries - schemaTotal, 0)
+  const noneCount = Math.max(totalEntries - schemaTotal, 0)
 
   const schemaBreakdown: SchemaInfo[] = [
     ...schemaMetrics,
     {
-      schemaId: 'unset',
-      schemaName: 'unset',
-      count: unsetCount,
+      schemaId: 'none',
+      schemaName: 'None',
+      count: noneCount,
     },
   ]
 
@@ -682,5 +684,56 @@ export class BaseMetricsConnector {
 
       throw err
     }
+  }
+
+  /**
+   * Calculates the model breakdown for a given query.
+   */
+  async calculateModelBreakdown(
+    user: UserInterface,
+    query: MetricsEntrySearchOptionsParams,
+  ): Promise<GetModelBreakdownResponse> {
+    await checkUserIsAuthorised(user)
+
+    const mongoQuery: QueryFilter<ModelInterface> = {}
+
+    // Filter by organisation only if provided and not 'all' - if 'none' then query any with empty string
+    if (query.organisation !== undefined && query.organisation.toLowerCase() !== 'all') {
+      mongoQuery.organisation = query.organisation.toLowerCase() === 'unset' ? '' : query.organisation
+    }
+
+    if (query.state !== undefined) {
+      mongoQuery.state = query.state.toLowerCase() === 'none' ? '' : query.state
+    }
+
+    if (query.schemaId !== undefined) {
+      if (query.schemaId.toLowerCase() === 'none') {
+        mongoQuery['card.schemaId'] = { $exists: false }
+      } else {
+        mongoQuery['card.schemaId'] = query.schemaId
+      }
+    }
+
+    const models = await ModelModel.find(mongoQuery)
+      .select({
+        id: true,
+        name: true,
+        collaborators: true,
+        _id: false,
+      })
+      .sort({
+        updatedAt: -1,
+      })
+      .lean()
+
+    return models.map((model) => ({
+      entryId: model.id,
+      entryName: model.name,
+      collaborators:
+        model.collaborators?.map((collaborator) => ({
+          entity: collaborator.entity,
+          roles: collaborator.roles ?? [],
+        })) ?? [],
+    }))
   }
 }

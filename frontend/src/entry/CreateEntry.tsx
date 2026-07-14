@@ -361,7 +361,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       value={tags}
                       label=''
                       id='entry-tag-selector'
-                      formContext={{ editMode: true }}
+                      editable
                     />
                   </Stack>
                   {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (

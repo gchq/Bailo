@@ -83,6 +83,10 @@ export interface UiConfig {
     untrustedModelDescription: string
     fileUploadGuidance: string
   }
+
+  llmImport: {
+    enabled: boolean
+  }
 }
 
 export interface FileInterface {
@@ -1032,6 +1036,12 @@ export interface PolicyMetrics {
   global: PolicyBaseMetrics
   byOrganisation: OrganisationPolicyMetrics[]
   lastUpdated: string
+}
+
+export interface ModelBreakdown {
+  entryId: string
+  entryName: string
+  modelOwners: string[]
 }
 
 export const Roles = {

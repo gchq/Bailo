@@ -3,7 +3,7 @@ import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import { patchEntry, useGetModel } from 'actions/entry'
+import { patchEntry } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useContext, useMemo, useState } from 'react'
@@ -25,9 +25,10 @@ import { toSentenceCase } from 'utils/stringUtils'
 
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
+  mutateEntry: () => void
 }
 
-export default function EntryOverviewDetails({ entry }: OrganisationAndStateDetailsProps) {
+export default function EntryOverviewDetails({ entry, mutateEntry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
@@ -36,7 +37,6 @@ export default function EntryOverviewDetails({ entry }: OrganisationAndStateDeta
 
   const sendNotification = useNotification()
 
-  const { mutateEntry } = useGetModel(entry.id)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: entry.id,
     kind: ReviewKind.LIFECYCLE,
