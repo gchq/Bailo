@@ -39,9 +39,6 @@ export default function PolicyMetrics() {
     if (!selectedMetric) {
       setSelectedData(rolePolicyMetrics)
     } else {
-      if (!filteredDataset) {
-        return
-      }
       switch (selectedMetric) {
         case SelectedMetricKind.MISSING_ROLES:
           setSelectedData(rolePolicyMetrics)
