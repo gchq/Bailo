@@ -17,7 +17,6 @@ import { useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
-import { SettingsCategory } from 'src/entry/settings/Settings'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { PolicyBaseMetrics } from 'types/types'
@@ -75,9 +74,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
         <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
           <TableCell component='th' scope='row'>
             <Typography sx={{ maxWidth: '500px' }}>
-              <Link href={`/model/${row.entryId}?tab=settings&category=${SettingsCategory.PERMISSIONS}`}>
-                {row.entryId}
-              </Link>
+              <Link href={`/model/${row.entryId}`}>{row.entryId}</Link>
             </Typography>
           </TableCell>
           <TableCell>

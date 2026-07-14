@@ -149,7 +149,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
         </Stack>
         {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
-            <Typography sx={{ fontWeight: 'bold' }} color='primary'>
+            <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (

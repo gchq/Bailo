@@ -35,3 +35,9 @@ export const HttpHeader = {
   CONTENT_RANGE: 'Content-Range',
   IF_NONE_MATCH: 'If-None-Match',
 }
+
+export const MetricsCacheKeys = {
+  USAGE: 'usageMetrics',
+  ROLE_COMPLIANCE: 'roleComplianceMetrics',
+  NO_RELEASES_COMPLIANCE: 'noReleasesComplianceMetrics',
+}

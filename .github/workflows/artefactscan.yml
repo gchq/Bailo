@@ -66,3 +66,14 @@ jobs:
           python -m pytest -m integration
         env:
           PYTEST_RUN_PATH: "lib/artefactscan_api"
+
+  # Gate job for branch protection: always runs so the required check is never left pending when the matrix is skipped
+  artefactscan_build_result:
+    if: always()
+    needs: [changes, artefactscan_build]
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        if: >-
+          needs.artefactscan_build.result == 'failure'
+          || (needs.changes.outputs.relevant == 'true' && needs.artefactscan_build.result != 'success')
