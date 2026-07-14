@@ -1,6 +1,6 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { ModelVolume, OverviewMetrics, PolicyMetrics } from 'types/types'
+import { CollaboratorEntry, ModelVolume, OverviewMetrics, PolicyMetrics } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
@@ -44,5 +44,37 @@ export function useGetRolePolicyMetrics() {
     rolePolicyMetrics: data,
     isRolePolicyMetricsLoading: isLoading,
     isRolePolicyMetricsError: error,
+  }
+}
+
+export interface ModelBreakdownResponse {
+  entryId: string
+  entryName: string
+  collaborators: CollaboratorEntry[]
+}
+
+interface UseGetModelBreakdownParams {
+  organisation?: string
+  state?: string
+  schemaId?: string
+}
+
+export function useGetModelBreakdown({ organisation, state, schemaId }: UseGetModelBreakdownParams) {
+  const queryParams = {
+    ...(organisation && { organisation }),
+    ...(state && { state }),
+    ...(schemaId && { schemaId }),
+  }
+
+  const { data, isLoading, error, mutate } = useSWR<ModelBreakdownResponse[], ErrorInfo>(
+    `/api/v3/metrics/breakdown?${qs.stringify(queryParams)}`,
+    fetcher,
+  )
+
+  return {
+    mutateEntries: mutate,
+    entries: data,
+    isEntriesLoading: isLoading,
+    isEntriesError: error,
   }
 }

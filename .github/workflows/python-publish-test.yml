@@ -6,6 +6,9 @@ on:
       tags:
         description: 'Publish to TestPyPI.'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build distribution

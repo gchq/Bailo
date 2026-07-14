@@ -21,7 +21,26 @@ permissions:
   id-token: write
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7
+      # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'backend/**'
+              - 'frontend/pages/docs/**'
+              - 'lib/landing/**'
+              - '.github/workflows/web.yml'
+
   sphinx:
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -54,7 +73,8 @@ jobs:
 
   # Build job
   build:
-    needs: sphinx
+    needs: [changes, sphinx]
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -131,8 +151,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    needs: [changes, build]
+    if: needs.changes.outputs.relevant == 'true' && github.ref == 'refs/heads/main'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
