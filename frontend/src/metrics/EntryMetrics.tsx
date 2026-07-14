@@ -155,14 +155,12 @@ export default function EntryMetrics() {
               label='Release'
               options={releaseOptions}
               selectedValue={release}
-              // this onSelect needs updating, not sure how best to do this
               onSelect={(value) => updateFilter('release', value)}
             />
             <FilterMenuButton
               label='Access request'
               options={accessRequestOptions}
               selectedValue={accessRequest}
-              // this onSelect needs updating, not sure how best to do this
               onSelect={(value) => updateFilter('accessRequest', value)}
             />
           </Stack>

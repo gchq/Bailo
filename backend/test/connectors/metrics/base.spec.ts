@@ -20,8 +20,14 @@ const modelMocks = vi.hoisted(() => ({
   distinct: vi.fn(),
   find: vi.fn(),
 }))
+
 vi.mock('../../../src/models/Model.js', () => ({
   default: modelMocks,
+  EntryKind: {
+    Model: 'model',
+    UntrustedModel: 'untrusted-model',
+    MirroredModel: 'mirrored-model',
+  },
   SystemRoles: {
     Owner: 'owner',
     Contributor: 'contributor',
@@ -34,6 +40,7 @@ const releaseMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
   distinct: vi.fn(),
 }))
+
 vi.mock('../../../src/models/Release.js', () => ({
   default: releaseMocks,
 }))
@@ -69,6 +76,7 @@ vi.mock('../../../src/models/Schema.js', () => ({
 const reviewRoleMocks = vi.hoisted(() => ({
   find: vi.fn(),
 }))
+
 vi.mock('../../../src/models/ReviewRole.js', () => ({
   default: reviewRoleMocks,
 }))
@@ -112,6 +120,20 @@ const mockCursorQuery = (result: any[]) => {
     cursor: vi.fn().mockReturnValue(asyncIterable),
   }
 }
+
+const mockFindWithIdFilter = (allModels: any[]) =>
+  vi.fn().mockImplementation((filter: any = {}) => {
+    let filtered = allModels
+
+    if (filter.id?.$in) {
+      filtered = filtered.filter((model) => filter.id.$in.includes(model.id))
+    }
+    if (filter.id?.$nin) {
+      filtered = filtered.filter((model) => !filter.id.$nin.includes(model.id))
+    }
+
+    return mockFindQuery(filtered)
+  })
 
 await describe('connectors > metrics > simple > getUsageMetrics', async () => {
   let connector
@@ -658,38 +680,24 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
       'You do not have the required role.',
     )
   })
-  await describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
-    let connector
+})
 
-    await beforeEach(async () => {
-      vi.clearAllMocks()
+await describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
+  let connector
 
-      const { BaseMetricsConnector } = await loadConnector()
-      connector = new BaseMetricsConnector(['b corp'])
-    })
+  await beforeEach(async () => {
+    vi.clearAllMocks()
 
-    test('returns mapped model breakdown results', async () => {
-      modelMocks.find.mockReturnValue(
-        mockFindQuery([
-          {
-            id: 'model-1',
-            name: 'Model One',
-            collaborators: [
-              {
-                entity: 'user:test',
-                roles: ['owner'],
-              },
-            ],
-          },
-        ]),
-      )
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['b corp'])
+  })
 
-      const result = await connector.calculateModelBreakdown(mockUser, {} as any)
-
-      expect(result).toEqual([
+  test('returns mapped model breakdown results', async () => {
+    modelMocks.find.mockReturnValue(
+      mockFindQuery([
         {
-          entryId: 'model-1',
-          entryName: 'Model One',
+          id: 'model-1',
+          name: 'Model One',
           collaborators: [
             {
               entity: 'user:test',
@@ -697,73 +705,144 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
             },
           ],
         },
-      ])
+      ]),
+    )
 
-      expect(modelMocks.find).toHaveBeenCalledWith({})
+    const result = await connector.calculateModelBreakdown(mockUser, {} as any)
+
+    expect(result).toEqual([
+      {
+        entryId: 'model-1',
+        entryName: 'Model One',
+        collaborators: [
+          {
+            entity: 'user:test',
+            roles: ['owner'],
+          },
+        ],
+      },
+    ])
+
+    expect(modelMocks.find).toHaveBeenCalledWith({})
+  })
+
+  test('queries empty organisation when organisation is none', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      organisation: 'unset',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      organisation: '',
     })
+  })
 
-    test('queries empty organisation when organisation is none', async () => {
-      modelMocks.find.mockReturnValue(mockFindQuery([]))
+  test('queries empty state when state is none', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
 
-      await connector.calculateModelBreakdown(mockUser, {
-        organisation: 'unset',
-      } as any)
+    await connector.calculateModelBreakdown(mockUser, {
+      state: 'none',
+    } as any)
 
-      expect(modelMocks.find).toHaveBeenCalledWith({
-        organisation: '',
-      })
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      state: '',
     })
+  })
 
-    test('queries empty state when state is none', async () => {
-      modelMocks.find.mockReturnValue(mockFindQuery([]))
+  test('queries models without schema when schemaId is none', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
 
-      await connector.calculateModelBreakdown(mockUser, {
-        state: 'none',
-      } as any)
+    await connector.calculateModelBreakdown(mockUser, {
+      schemaId: 'none',
+    } as any)
 
-      expect(modelMocks.find).toHaveBeenCalledWith({
-        state: '',
-      })
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      'card.schemaId': { $exists: false },
     })
+  })
 
-    test('queries models without schema when schemaId is none', async () => {
-      modelMocks.find.mockReturnValue(mockFindQuery([]))
+  test('queries specific schema when schemaId is provided', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
 
-      await connector.calculateModelBreakdown(mockUser, {
-        schemaId: 'none',
-      } as any)
+    await connector.calculateModelBreakdown(mockUser, {
+      schemaId: 'minimal-general-v10',
+    } as any)
 
-      expect(modelMocks.find).toHaveBeenCalledWith({
-        'card.schemaId': { $exists: false },
-      })
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      'card.schemaId': 'minimal-general-v10',
     })
+  })
 
-    test('queries specific schema when schemaId is provided', async () => {
-      modelMocks.find.mockReturnValue(mockFindQuery([]))
+  test('combines organisation, state and schema filters', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
 
-      await connector.calculateModelBreakdown(mockUser, {
-        schemaId: 'minimal-general-v10',
-      } as any)
+    await connector.calculateModelBreakdown(mockUser, {
+      organisation: 'Example Organisation',
+      state: 'active',
+      schemaId: 'minimal-general-v10',
+    } as any)
 
-      expect(modelMocks.find).toHaveBeenCalledWith({
-        'card.schemaId': 'minimal-general-v10',
-      })
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      organisation: 'Example Organisation',
+      state: 'active',
+      'card.schemaId': 'minimal-general-v10',
     })
+  })
 
-    test('combines organisation, state and schema filters', async () => {
-      modelMocks.find.mockReturnValue(mockFindQuery([]))
+  test('returns only entries that have a release when release filter is "with"', async () => {
+    const allModels = [
+      { id: 'model-1', name: 'Model One', collaborators: [] },
+      { id: 'model-2', name: 'Model Two', collaborators: [] },
+    ]
 
-      await connector.calculateModelBreakdown(mockUser, {
-        organisation: 'Example Organisation',
-        state: 'active',
-        schemaId: 'minimal-general-v10',
-      } as any)
+    modelMocks.find.mockImplementation(mockFindWithIdFilter(allModels))
+    releaseMocks.distinct.mockResolvedValue(['model-1'])
 
-      expect(modelMocks.find).toHaveBeenCalledWith({
-        organisation: 'Example Organisation',
-        state: 'active',
-        'card.schemaId': 'minimal-general-v10',
-      })
-    })
+    const result = await connector.calculateModelBreakdown(mockUser, { release: 'with' } as any)
+
+    expect(result.map((entry) => entry.entryId)).toEqual(['model-1'])
+  })
+
+  test('returns only entries that do not have a release when release filter is "without"', async () => {
+    const allModels = [
+      { id: 'model-1', name: 'Model One', collaborators: [] },
+      { id: 'model-2', name: 'Model Two', collaborators: [] },
+    ]
+
+    modelMocks.find.mockImplementation(mockFindWithIdFilter(allModels))
+    releaseMocks.distinct.mockResolvedValue(['model-1'])
+
+    const result = await connector.calculateModelBreakdown(mockUser, { release: 'without' } as any)
+
+    expect(result.map((entry) => entry.entryId)).toEqual(['model-2'])
+  })
+
+  test('returns only entries that have an access request when accessRequest filter is "with"', async () => {
+    const allModels = [
+      { id: 'model-1', name: 'Model One', collaborators: [] },
+      { id: 'model-2', name: 'Model Two', collaborators: [] },
+    ]
+
+    modelMocks.find.mockImplementation(mockFindWithIdFilter(allModels))
+    accessRequestMocks.distinct.mockResolvedValue(['model-2'])
+
+    const result = await connector.calculateModelBreakdown(mockUser, { accessRequest: 'with' } as any)
+
+    expect(result.map((entry) => entry.entryId)).toEqual(['model-2'])
+  })
+
+  test('returns only entries that do not have an access request when accessRequest filter is "without"', async () => {
+    const allModels = [
+      { id: 'model-1', name: 'Model One', collaborators: [] },
+      { id: 'model-2', name: 'Model Two', collaborators: [] },
+    ]
+
+    modelMocks.find.mockImplementation(mockFindWithIdFilter(allModels))
+    accessRequestMocks.distinct.mockResolvedValue(['model-2'])
+
+    const result = await connector.calculateModelBreakdown(mockUser, { accessRequest: 'without' } as any)
+
+    expect(result.map((entry) => entry.entryId)).toEqual(['model-1'])
   })
 })
