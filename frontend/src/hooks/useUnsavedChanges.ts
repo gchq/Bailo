@@ -24,7 +24,7 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
     const getComparableUrl = (url: string) => {
       const [pathname, queryString = ''] = url.split('?')
       const params = new URLSearchParams(queryString)
-      // Ignore the 'page' query param when determining if the URL has meaningfully changed
+      // Ignore various query params when determining if the URL has meaningfully changed
       params.delete('page')
       params.delete('requiredByModelState')
       params.delete('isEdit')
