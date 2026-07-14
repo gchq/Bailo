@@ -35,29 +35,27 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0 }}>
-        {
-          <Stack
-            spacing={2}
-            direction={{ xs: 'column', sm: 'row' }}
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            <TextField
-              size='small'
-              fullWidth
-              label='User'
-              value={manualEntityName}
-              onChange={(e) => setManualEntityName(e.target.value)}
-            />
-            {uiConfig.helpPopoverText.manualEntryAccess && (
-              <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>
-            )}
-            <Button variant='contained' disabled={manualEntityName === ''} onClick={handleAddEntityManuallyOnClick}>
-              Add
-            </Button>
-          </Stack>
-        }
+        <Stack
+          spacing={2}
+          direction={{ xs: 'column', sm: 'row' }}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <TextField
+            size='small'
+            fullWidth
+            label='User'
+            value={manualEntityName}
+            onChange={(e) => setManualEntityName(e.target.value)}
+          />
+          {uiConfig.helpPopoverText.manualEntryAccess && (
+            <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>
+          )}
+          <Button variant='contained' disabled={manualEntityName === ''} onClick={handleAddEntityManuallyOnClick}>
+            Add
+          </Button>
+        </Stack>
         <MessageAlert message={errorMessage} severity='error' />
       </AccordionDetails>
     </Accordion>

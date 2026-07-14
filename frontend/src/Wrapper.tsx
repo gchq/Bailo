@@ -62,7 +62,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
 
   return (
     <>
-      <Banner />
+      {uiConfig.banner.enabled && <Banner />}
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (

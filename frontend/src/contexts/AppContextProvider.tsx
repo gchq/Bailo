@@ -62,17 +62,17 @@ export default function AppContextProvider({ children }: AppContextProviderProps
     }
 
     return (
-      <UiConfigContext.Provider value={uiConfig}>
-        <ArtefactScanningInfoContext.Provider value={scanners}>
-          <ThemeModeContext.Provider value={themeModeValue}>
-            <UnsavedChangesContext.Provider value={unsavedChangesValue}>
-              <UserPermissionsContext.Provider value={userPermissionsValue}>
-                <CurrentUserContext.Provider value={currentUserV3}>{children}</CurrentUserContext.Provider>
-              </UserPermissionsContext.Provider>
-            </UnsavedChangesContext.Provider>
-          </ThemeModeContext.Provider>
-        </ArtefactScanningInfoContext.Provider>
-      </UiConfigContext.Provider>
+      <UiConfigContext value={uiConfig}>
+        <ArtefactScanningInfoContext value={scanners}>
+          <ThemeModeContext value={themeModeValue}>
+            <UnsavedChangesContext value={unsavedChangesValue}>
+              <UserPermissionsContext value={userPermissionsValue}>
+                <CurrentUserContext value={currentUserV3}>{children}</CurrentUserContext>
+              </UserPermissionsContext>
+            </UnsavedChangesContext>
+          </ThemeModeContext>
+        </ArtefactScanningInfoContext>
+      </UiConfigContext>
     )
   }
 

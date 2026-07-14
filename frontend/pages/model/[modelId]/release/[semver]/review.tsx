@@ -129,7 +129,7 @@ export default function ReleaseReview() {
             alignItems: 'center',
           }}
         >
-          {<CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
+          <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
         </Stack>
       ))
     }

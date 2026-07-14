@@ -108,7 +108,7 @@ export default function ReleaseAssetsAccordion({
               <Stack spacing={1}>
                 {release.images.map((image) => (
                   <Box key={`${image.repository}-${image.name}-${image.tag}`}>
-                    {<CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
+                    <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
                   </Box>
                 ))}
               </Stack>

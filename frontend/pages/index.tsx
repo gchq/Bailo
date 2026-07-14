@@ -242,11 +242,11 @@ export default function Marketplace() {
   }, [peers])
 
   const organisationList = useMemo(() => {
-    return uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem)
+    return uiConfig.modelDetails.organisations
   }, [uiConfig])
 
   const stateList = useMemo(() => {
-    return uiConfig.modelDetails.states.map((stateItem) => stateItem)
+    return uiConfig.modelDetails.states
   }, [uiConfig])
 
   const modelKindOptions = useMemo((): string[] => {
