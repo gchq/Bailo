@@ -77,6 +77,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
   { title: 'Soft Deletion', slug: 'users/deletion/soft-deletion' },
 
+  { title: 'Bailo Metrics', slug: 'users/metrics', header: true },
+  { title: 'Viewing Bailo Metrics', slug: 'users/metrics/viewing-metrics' },
+
   { title: 'Programmatic Access', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
   { title: 'Personal Access Tokens', slug: 'users/programmatically-using-bailo/personal-access-tokens' },
