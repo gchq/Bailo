@@ -46,7 +46,11 @@ export default function AppContextProvider({ children }: AppContextProviderProps
     }
 
     if (isUiConfigError) {
-      return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+      if (isUiConfigError.status === 403) {
+        return <MessageAlert message='Error authenticating user.' severity='error' />
+      }
+
+      return <MessageAlert message={`Error loading UI Config: ${isUiConfigError.info.message}`} severity='error' />
     }
 
     if (isScannersError) {
@@ -58,17 +62,17 @@ export default function AppContextProvider({ children }: AppContextProviderProps
     }
 
     return (
-      <UiConfigContext.Provider value={uiConfig}>
-        <ArtefactScanningInfoContext.Provider value={scanners}>
-          <ThemeModeContext.Provider value={themeModeValue}>
-            <UnsavedChangesContext.Provider value={unsavedChangesValue}>
-              <UserPermissionsContext.Provider value={userPermissionsValue}>
-                <CurrentUserContext.Provider value={currentUserV3}>{children}</CurrentUserContext.Provider>
-              </UserPermissionsContext.Provider>
-            </UnsavedChangesContext.Provider>
-          </ThemeModeContext.Provider>
-        </ArtefactScanningInfoContext.Provider>
-      </UiConfigContext.Provider>
+      <UiConfigContext value={uiConfig}>
+        <ArtefactScanningInfoContext value={scanners}>
+          <ThemeModeContext value={themeModeValue}>
+            <UnsavedChangesContext value={unsavedChangesValue}>
+              <UserPermissionsContext value={userPermissionsValue}>
+                <CurrentUserContext value={currentUserV3}>{children}</CurrentUserContext>
+              </UserPermissionsContext>
+            </UnsavedChangesContext>
+          </ThemeModeContext>
+        </ArtefactScanningInfoContext>
+      </UiConfigContext>
     )
   }
 

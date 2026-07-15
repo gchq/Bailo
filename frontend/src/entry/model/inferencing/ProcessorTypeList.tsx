@@ -1,8 +1,6 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { SyntheticEvent, useMemo } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import { SyntheticEvent, useContext, useMemo } from 'react'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 
 type ProcessorTypeListProps = {
   value: string
@@ -11,26 +9,16 @@ type ProcessorTypeListProps = {
 }
 
 export default function ProcessorTypeList({ value, onChange, readOnly = false }: ProcessorTypeListProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
-  const processorTypesList = useMemo(
-    () => (uiConfig ? ['cpu', ...Object.values(uiConfig.inference.gpus)] : []),
-    [uiConfig],
+  const processorTypesList = useMemo(() => ['cpu', ...Object.values(uiConfig.inference.gpus)], [uiConfig])
+  const readOnlyProcessorTypeList = useMemo(
+    () => processorTypesList.map((processorType) => <Typography key={processorType}>{processorType}</Typography>),
+    [processorTypesList],
   )
-  const readOnlyProcessorTypeList = useMemo(() => {
-    return isUiConfigLoading ? (
-      <Loading />
-    ) : (
-      processorTypesList.map((processorType) => <Typography key={processorType}>{processorType}</Typography>)
-    )
-  }, [processorTypesList, isUiConfigLoading])
 
   const handleChange = (_event: SyntheticEvent, newValue: string | null) => {
     onChange(newValue || '')
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
   return (
@@ -39,7 +27,6 @@ export default function ProcessorTypeList({ value, onChange, readOnly = false }:
         readOnlyProcessorTypeList
       ) : (
         <Autocomplete
-          loading={isUiConfigLoading}
           data-test='processorTypesAutocomplete'
           options={processorTypesList}
           value={value}

@@ -6,17 +6,15 @@ import { Box, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stac
 import { rerunImageArtefactScan } from 'actions/artefactScanning'
 import { deleteEntryImage } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useContext, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import Loading from 'src/common/Loading'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
-import MessageAlert from 'src/MessageAlert'
 import { ArtefactKind, ImageTagResult, ModelImagesWithOptionalScanResults, SeverityLevel } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -61,7 +59,7 @@ interface ModelImageTagDisplayProps {
 export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelImageTagDisplayProps) {
   const sendNotification = useNotification()
   const scanners = useContext(ArtefactScanningInfoContext)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
@@ -162,14 +160,6 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
     }
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading) {
-    return <Loading />
-  }
-
   return (
     <Box
       key={`${modelImage.repository}-${modelImage.name}-${tag}`}
@@ -199,7 +189,7 @@ export default function ModelImageTagDisplay({ modelImage, tag, mutate }: ModelI
             }}
           >
             <CodeLine
-              line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelImage.repository}/${modelImage.name}:${tag}`}
+              line={`docker pull ${uiConfig.registry.host}/${modelImage.repository}/${modelImage.name}:${tag}`}
             />
           </Box>
           {checkIfMultiPlatform(modelImage, tag) && (
