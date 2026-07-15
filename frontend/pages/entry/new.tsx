@@ -1,18 +1,16 @@
 import { Card, Container, Divider, Paper, Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useMemo, useState } from 'react'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CreateEntry from 'src/entry/CreateEntry'
 import EntryCard from 'src/entry/EntryCard'
-import MessageAlert from 'src/MessageAlert'
 import { EntryKind, EntryKindKeys } from 'types/types'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 export default function NewEntry() {
   const [createEntryKind, setCreateEntryKind] = useState<EntryKindKeys | undefined>()
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const modelProps = useMemo(
     () =>
@@ -30,19 +28,19 @@ export default function NewEntry() {
           description:
             'Mirrored models allow models to be copied from other deployments using an external model ID. These are imported as read only models and should be updated via the source.',
           handleClick: () => setCreateEntryKind(EntryKind.MIRRORED_MODEL),
-          disabled: uiConfig?.modelMirror.import.enabled === false,
+          disabled: uiConfig.modelMirror.import.enabled === false,
         },
         {
           title: 'Untrusted Model',
-          description: uiConfig?.untrustedModel.untrustedModelDescription || '',
+          description: uiConfig.untrustedModel.untrustedModelDescription,
           handleClick: () => setCreateEntryKind(EntryKind.UNTRUSTED_MODEL),
-          disabled: uiConfig?.untrustedModel.enabled === false,
+          disabled: uiConfig.untrustedModel.enabled === false,
         },
       ].filter((entryCardProp) => !entryCardProp.disabled),
     [
-      uiConfig?.modelMirror.import.enabled,
-      uiConfig?.untrustedModel.enabled,
-      uiConfig?.untrustedModel.untrustedModelDescription,
+      uiConfig.modelMirror.import.enabled,
+      uiConfig.untrustedModel.enabled,
+      uiConfig.untrustedModel.untrustedModelDescription,
     ],
   )
 
@@ -55,14 +53,6 @@ export default function NewEntry() {
       dataTest: 'createMirroredModel',
     },
   ]
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (!uiConfig || isUiConfigLoading) {
-    return <Loading />
-  }
 
   return (
     <>

@@ -1,9 +1,10 @@
 import { Box, Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { postEntryExportToS3 } from 'actions/entry'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useContext, useState } from 'react'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Restricted from 'src/common/Restricted'
-import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import ReleaseSelector from 'src/entry/model/mirroredModels/ReleaseSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -15,6 +16,7 @@ type ExportModelAgreementProps = {
 }
 
 export default function ExportModelAgreement({ model }: ExportModelAgreementProps) {
+  const uiConfig = useContext(UiConfigContext)
   const [checked, setChecked] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -69,7 +71,7 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
             spacing={2}
             sx={{ borderStyle: 'solid', borderWidth: 1, borderColor: theme.palette.divider, p: 2, maxWidth: '730px' }}
           >
-            <ModelExportAgreementText />
+            <MarkdownDisplay>{uiConfig.modelMirror.export.disclaimer}</MarkdownDisplay>
             <FormControlLabel
               control={<Checkbox checked={checked} onChange={handleChecked} />}
               label='I agree to the terms and conditions of this model export agreement'
