@@ -20,13 +20,13 @@ export const ModelsNoReleasesSchema = z.object({
 
 export const GlobalNoReleasesMetricsSchema = z.object({
   summary: NoReleasesSummaryMetricsSchema,
-  models: z.array(ModelsNoReleasesSchema),
+  entries: z.array(ModelsNoReleasesSchema),
 })
 
 export const NoReleaseMetricsByOrgSchema = z.object({
   organisation: z.string().openapi({ example: 'Example Organisation' }),
   summary: NoReleasesSummaryMetricsSchema,
-  models: z.array(ModelsNoReleasesSchema),
+  entries: z.array(ModelsNoReleasesSchema),
 })
 
 export const BaseNoReleaseMetricsSchema = z.object({

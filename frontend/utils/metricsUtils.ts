@@ -1,6 +1,8 @@
 import { PieChartData } from 'src/metrics/components/MetricsPieChart'
 import { SchemaInterface } from 'types/types'
 
+export const dateFormat = 'YYYY-MM'
+
 export const breakdownQueryTypes = ['byState', 'bySchema', 'totalEntries', 'withReleases', 'withAccessRequest'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
 

@@ -64,7 +64,8 @@ export default function OverviewMetrics() {
       <Stack spacing={4} sx={{ mt: 2, mb: 4 }}>
         {filteredDataset && overviewMetrics && (
           <MetricsHeader
-            data={overviewMetrics}
+            organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={overviewMetrics.lastUpdated}
             onOrganisationChange={handleOrganisationChange}
             selectedOrganisation={selectedOrganisation}
             exportDocumentTitle='Bailo overview metrics'

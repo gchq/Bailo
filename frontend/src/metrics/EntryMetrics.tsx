@@ -1,16 +1,17 @@
 import dayjs from '@dayjs'
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTable'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
-import { buildEntriesHref, EntriesFilterQuery, filterIncludeTypes } from 'utils/metricsUtils'
+import { buildEntriesHref, dateFormat, EntriesFilterQuery, filterIncludeTypes } from 'utils/metricsUtils'
 
 const ALL_VALUE = 'All'
 const NONE_SCHEMA_VALUE = 'none'
@@ -32,7 +33,6 @@ export default function EntryMetrics() {
   const release = getQueryString(router.query.release)
   const accessRequest = getQueryString(router.query.accessRequest)
   const startMonth = typeof router.query.startMonth === 'string' ? router.query.startMonth : undefined
-
   const endMonth = typeof router.query.endMonth === 'string' ? router.query.endMonth : undefined
 
   const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown({
@@ -81,11 +81,6 @@ export default function EntryMetrics() {
       shallow: true,
     })
   }
-
-  const organisationOptions = useMemo(
-    () => [ALL_VALUE, ...(overviewMetrics?.byOrganisation.map((org) => org.organisation) ?? [])],
-    [overviewMetrics],
-  )
 
   const stateOptions = useMemo(
     () => [ALL_VALUE, ...(overviewMetrics?.global.entryState?.map((s) => s.state) ?? [])],
@@ -137,83 +132,113 @@ export default function EntryMetrics() {
     return `${count} ${count === 1 ? 'entry' : 'entries'}`
   }, [isEntriesLoading, isEntriesError, tableData.length])
 
+  const handleClearFiltersOnClick = useCallback(() => {
+    const current: EntriesFilterQuery = {
+      organisation: organisation,
+      state: undefined,
+      schemaId: undefined,
+      release: undefined,
+      accessRequest: undefined,
+      startMonth: undefined,
+      endMonth: undefined,
+    }
+    router.push(buildEntriesHref(current), undefined, { shallow: true })
+  }, [organisation, router])
+
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
+
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} />
   }
+
   if (isOverviewMetricsLoading || isSchemasLoading) {
     return <Loading />
   }
 
+  const isClearDisabled =
+    state === ALL_VALUE &&
+    schemaId === ALL_VALUE &&
+    release === ALL_VALUE &&
+    accessRequest === ALL_VALUE &&
+    startMonth === undefined &&
+    endMonth === undefined
+
   return (
-    <Container maxWidth='lg' sx={{ mb: 2 }}>
-      <Stack spacing={2} sx={{ mt: 2, mb: 2 }}>
-        <Stack spacing={0.5}>
-          <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold' }}>
-            Entries
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            Browse and filter individual entries by organisation, lifecycle state, schema and more.
-          </Typography>
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
-          <Stack direction='row' spacing={1}>
-            <FilterMenuButton
-              label='Organisation'
-              options={organisationOptions.map((org) => ({ value: org, label: org }))}
-              selectedValue={organisation}
-              onSelect={(value) => updateFilter('organisation', value)}
-            />
-            <FilterMenuButton
-              label='State'
-              options={stateOptions.map((s) => ({ value: s, label: s }))}
-              selectedValue={state}
-              onSelect={(value) => updateFilter('state', value)}
-            />
-            <FilterMenuButton
-              label='Schema'
-              options={schemaOptions}
-              selectedValue={schemaId}
-              onSelect={(value) => updateFilter('schemaId', value)}
-            />
-            <FilterMenuButton
-              label='Release'
-              options={releaseOptions}
-              selectedValue={release}
-              onSelect={(value) => updateFilter('release', value)}
-            />
-            <FilterMenuButton
-              label='Access request'
-              options={accessRequestOptions}
-              selectedValue={accessRequest}
-              onSelect={(value) => updateFilter('accessRequest', value)}
-            />
-          </Stack>
-        </Stack>
-        <MonthlyUploadsSelector
-          startDate={startMonth ? dayjs(startMonth) : null}
-          endDate={endMonth ? dayjs(endMonth) : null}
-          showTitle={false}
-          onStartDateChange={(date) => updateMonthRange(date ? date.format('YYYY-MM') : undefined, endMonth)}
-          onEndDateChange={(date) => updateMonthRange(startMonth, date ? date.format('YYYY-MM') : undefined)}
-        />
+    <Container maxWidth='lg' sx={{ mb: 4 }}>
+      <Stack spacing={0.5} sx={{ mt: 2, mb: 4 }}>
+        {overviewMetrics && (
+          <MetricsHeader
+            organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={overviewMetrics.lastUpdated}
+            onOrganisationChange={(value) => updateFilter('organisation', value)}
+            selectedOrganisation={organisation}
+            exportDocumentTitle='Bailo entry metrics'
+            titleObjectType='entries'
+          >
+            <Stack spacing={2}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
+                <Stack direction='row' spacing={1}>
+                  <FilterMenuButton
+                    label='State'
+                    options={stateOptions.map((s) => ({ value: s, label: s }))}
+                    selectedValue={state}
+                    onSelect={(value) => updateFilter('state', value)}
+                  />
+                  <FilterMenuButton
+                    label='Schema'
+                    options={schemaOptions}
+                    selectedValue={schemaId}
+                    onSelect={(value) => updateFilter('schemaId', value)}
+                  />
+                  <FilterMenuButton
+                    label='Release'
+                    options={releaseOptions}
+                    selectedValue={release}
+                    onSelect={(value) => updateFilter('release', value)}
+                  />
+                  <FilterMenuButton
+                    label='Access request'
+                    options={accessRequestOptions}
+                    selectedValue={accessRequest}
+                    onSelect={(value) => updateFilter('accessRequest', value)}
+                  />
+                  <Button disabled={isClearDisabled} onClick={handleClearFiltersOnClick}>
+                    Clear filters
+                  </Button>
+                </Stack>
+              </Stack>
+              <MonthlyUploadsSelector
+                startDate={startMonth ? dayjs(startMonth) : null}
+                endDate={endMonth ? dayjs(endMonth) : null}
+                showTitle={false}
+                onStartDateChange={(date) => updateMonthRange(date ? date.format(dateFormat) : undefined, endMonth)}
+                onEndDateChange={(date) => updateMonthRange(startMonth, date ? date.format(dateFormat) : undefined)}
+              />
+              {isEntriesError ? (
+                <MessageAlert message={isEntriesError.info.message} />
+              ) : (
+                <Stack>
+                  <Box sx={{ pb: 2 }}>
+                    {resultCountLabel && (
+                      <Typography
+                        variant='body2'
+                        color='text.secondary'
+                        aria-live='polite'
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        {resultCountLabel}
+                      </Typography>
+                    )}
+                  </Box>
+                  <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+                </Stack>
+              )}
+            </Stack>
+          </MetricsHeader>
+        )}
       </Stack>
-      {isEntriesError ? (
-        <MessageAlert message={isEntriesError.info.message} />
-      ) : (
-        <Stack>
-          <Box sx={{ pb: 2 }}>
-            {resultCountLabel && (
-              <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
-                {resultCountLabel}
-              </Typography>
-            )}
-          </Box>
-          <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
-        </Stack>
-      )}
     </Container>
   )
 }

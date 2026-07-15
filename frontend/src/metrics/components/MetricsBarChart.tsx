@@ -7,6 +7,7 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { ModelVolume, ModelVolumeData } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
+import { dateFormat } from 'utils/metricsUtils'
 
 type BarChartRow = {
   label: string
@@ -60,7 +61,7 @@ export function MetricsBarChart({ organisationList, selectedOrganisation, onSele
 
         const incrementObject = {
           label: formattedDate,
-          month: dayjs(volumeData.startDate).format('YYYY-MM'),
+          month: dayjs(volumeData.startDate).format(dateFormat),
         }
 
         Object.entries(volumeData.organisations)

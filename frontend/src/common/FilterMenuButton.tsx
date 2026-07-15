@@ -43,7 +43,6 @@ export function FilterMenuButton({ label, allValue = 'All', options, selectedVal
     <>
       <Button
         variant='outlined'
-        color='inherit'
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}
         aria-haspopup='true'
