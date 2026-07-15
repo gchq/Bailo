@@ -218,6 +218,33 @@ describe('services > file', () => {
     expect(FileModelMock.save).not.toHaveBeenCalled()
   })
 
+  test('uploadFile > success with path-like name', async () => {
+    ScanModelMock.findOne.mockResolvedValueOnce(null)
+    const result = await uploadFile(
+      { dn: 'testUser' } as any,
+      'testModelId',
+      'weights/subdir/model.bin',
+      'application/octet-stream',
+      new Readable() as any,
+    )
+
+    expect(s3Mocks.putObjectStream).toHaveBeenCalled()
+    expect(FileModelMock.save).toHaveBeenCalled()
+    expect(result.name).toBe('weights/subdir/model.bin')
+  })
+
+  test('uploadFile > rejects path traversal', async () => {
+    await expect(() =>
+      uploadFile({} as any, 'modelId', '../etc/passwd', 'mime', new Readable() as any),
+    ).rejects.toThrow(/path traversal/)
+  })
+
+  test('uploadFile > rejects empty path segments', async () => {
+    await expect(() =>
+      uploadFile({} as any, 'modelId', 'weights//model.bin', 'mime', new Readable() as any),
+    ).rejects.toThrow(/empty path segments/)
+  })
+
   test('uploadFile > fileSize 0', async () => {
     vi.mocked(s3Mocks.putObjectStream).mockResolvedValueOnce({
       fileSize: 0,
@@ -733,6 +760,20 @@ describe('services > file', () => {
     const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
     await expect(promise).rejects.toThrow(/^You do not have permission to upload a file to this model./)
+    expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+  })
+
+  test('updateFile > rejects invalid path in name', async () => {
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+
+    FileModelMock.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
+
+    const promise = updateFile(user, modelId, testFileId, { name: '../traversal.txt' })
+
+    await expect(promise).rejects.toThrow(/path traversal/)
     expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 

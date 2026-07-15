@@ -120,9 +120,9 @@ router.post('/model/:modelId/import-model-card-text', ...postImportModelCardText
 router.post('/model/:modelId/releases', ...postRelease)
 router.get('/model/:modelId/releases', ...getReleases)
 router.get('/model/:modelId/release/:semver', ...getRelease)
-router.get('/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+router.get('/model/:modelId/release/:semver/file/*fileName/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.
-router.get('/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+router.get('/token/model/:modelId/release/:semver/file/*fileName/download', ...getDownloadFile)
 router.put('/model/:modelId/release/:semver', ...putRelease)
 router.post('/model/:modelId/release/:semver/comment', ...postReleaseComment)
 router.delete('/model/:modelId/release/:semver', ...deleteRelease)

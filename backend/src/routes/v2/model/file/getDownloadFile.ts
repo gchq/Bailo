@@ -14,6 +14,7 @@ import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { PathConfig, registerPath } from '../../../../services/specification.js'
 import { HttpHeader } from '../../../../types/enums.js'
 import { BailoError } from '../../../../types/error.js'
+import { getFileBaseName } from '../../../../utils/fileUtils.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -66,7 +67,10 @@ const binaryContent = {
 const modelIdParam = z.object({ modelId: z.string() })
 const fileIdParam = z.object({ fileId: z.string() })
 const semverParam = z.object({ semver: z.string() })
-const fileNameParam = z.object({ fileName: z.string() })
+// Wildcard route (*fileName) returns path segments as an array, join them back into a slash-delimited filename
+const fileNameParam = z.object({
+  fileName: z.union([z.string(), z.array(z.string())]).transform((v) => (Array.isArray(v) ? v.join('/') : v)),
+})
 
 const modelIdWithSemverAndFileName = modelIdParam.merge(semverParam).merge(fileNameParam)
 const modelIdWithFileId = modelIdParam.merge(fileIdParam)
@@ -177,7 +181,8 @@ export const getDownloadFile = [
       headersCommitted = true
 
       // Required to support utf-8 file names
-      res.set(HttpHeader.CONTENT_DISPOSITION, create(file.name, { type: 'attachment' }))
+      // Use basename so browsers suggest "model.bin" not "weights/model.bin"
+      res.set(HttpHeader.CONTENT_DISPOSITION, create(getFileBaseName(file.name), { type: 'attachment' }))
       res.set(HttpHeader.CONTENT_TYPE, file.mime)
       res.status(fetchRange ? 206 : 200)
     })

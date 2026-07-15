@@ -129,5 +129,18 @@ describe('routes > files > getDownloadFile', () => {
       expect(res.statusCode).toBe(200)
       expect(fileMock.downloadFile).toHaveBeenCalledWith(expect.anything(), 'fileId', undefined)
     })
+
+    test('200 > content-disposition uses basename for path-like filenames', async () => {
+      const pathLikeFile = { ...mockFileObject, name: 'weights/subdir/model.bin' }
+      fileMock.getFileById.mockReturnValueOnce(pathLikeFile)
+      releaseMock.getFileByReleaseFileName.mockReturnValueOnce(pathLikeFile)
+
+      const fixture = createFixture(getDownloadFileSchema)
+      const res = await testGet(buildUrl(fixture))
+
+      expect(res.statusCode).toBe(200)
+      expect(res.headers['content-disposition']).toContain('model.bin')
+      expect(res.headers['content-disposition']).not.toContain('weights/subdir')
+    })
   })
 })
