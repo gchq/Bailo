@@ -1,7 +1,15 @@
 import { FileInterface } from 'types/types'
 import { describe, expect, test } from 'vitest'
 
-import { buildFileTree, getBreadcrumbParts, getFileBaseName, getNodeAtPath, hasAnyNestedFiles } from '../fileTreeUtils'
+import {
+  buildFileTree,
+  collectAllFileNames,
+  countMatchingFiles,
+  getBreadcrumbParts,
+  getFileBaseName,
+  getNodeAtPath,
+  hasAnyNestedFiles,
+} from '../fileTreeUtils'
 
 function makeFile(name: string): FileInterface {
   return {
@@ -138,6 +146,34 @@ describe('utils > fileTreeUtils', () => {
 
     test('returns false for empty array', () => {
       expect(hasAnyNestedFiles([])).toBe(false)
+    })
+  })
+
+  describe('collectAllFileNames', () => {
+    test('collects all file names recursively', () => {
+      const tree = buildFileTree([makeFile('a/b.txt'), makeFile('a/c/d.txt'), makeFile('e.txt')])
+      const aNode = tree.children.find((c) => c.name === 'a')!
+      expect(collectAllFileNames(aNode).sort()).toEqual(['a/b.txt', 'a/c/d.txt'])
+    })
+  })
+
+  describe('countMatchingFiles', () => {
+    test('returns total count when no query', () => {
+      const tree = buildFileTree([makeFile('a/b.txt'), makeFile('a/c.json')])
+      const aNode = tree.children.find((c) => c.name === 'a')!
+      expect(countMatchingFiles(aNode, '')).toBe(2)
+    })
+
+    test('counts only matching files', () => {
+      const tree = buildFileTree([makeFile('a/b.txt'), makeFile('a/c.json'), makeFile('a/d.txt')])
+      const aNode = tree.children.find((c) => c.name === 'a')!
+      expect(countMatchingFiles(aNode, '.txt')).toBe(2)
+    })
+
+    test('search is case-insensitive', () => {
+      const tree = buildFileTree([makeFile('a/Model.BIN'), makeFile('a/readme.md')])
+      const aNode = tree.children.find((c) => c.name === 'a')!
+      expect(countMatchingFiles(aNode, 'model')).toBe(1)
     })
   })
 })

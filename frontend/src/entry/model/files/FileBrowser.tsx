@@ -14,6 +14,7 @@ import {
   Menu,
   MenuItem,
   Stack,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
@@ -30,6 +31,8 @@ import { EntryKind, FileInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import {
   buildFileTree,
+  collectAllFileNames,
+  countMatchingFiles,
   type FileTreeNode,
   getBreadcrumbParts,
   getNodeAtPath,
@@ -42,6 +45,7 @@ type ViewMode = 'flat' | 'folder'
 type BrowseListItem = {
   key: string
   name: string
+  searchableText: string
   size: number
   createdAt: Date
   updatedAt: Date
@@ -67,12 +71,15 @@ export default function FileBrowser({
   const hasNested = useMemo(() => hasAnyNestedFiles(files), [files])
   const [viewMode, setViewMode] = useState<ViewMode>(hasNested ? 'folder' : 'flat')
   const [currentPath, setCurrentPath] = useState('')
+  const [folderSearchQuery, setFolderSearchQuery] = useState('')
 
   const tree = useMemo(() => buildFileTree(files), [files])
   const currentNode = useMemo(() => getNodeAtPath(tree, currentPath), [tree, currentPath])
   const breadcrumbs = useMemo(() => getBreadcrumbParts(currentPath), [currentPath])
 
-  // Build a unified list of folder and file items at the current level for Paginate
+  // Build a unified list of folder and file items at the current level for Paginate.
+  // Folder searchableText includes the folder name plus all nested file names so
+  // Paginate's text filter matches folders containing matching files deeper in the tree.
   const browseItems: BrowseListItem[] = useMemo(() => {
     if (!currentNode) {
       return []
@@ -80,12 +87,13 @@ export default function FileBrowser({
     const items: BrowseListItem[] = []
     for (const child of currentNode.children) {
       if (child.isDirectory) {
+        const nestedNames = collectAllFileNames(child)
         items.push({
           key: `folder-${child.fullPath}`,
           kind: 'folder',
           node: child,
           name: child.name,
-          // Use earliest file date so folders sort meaningfully
+          searchableText: [child.name, ...nestedNames].join(' '),
           size: child.totalFileCount,
           createdAt: new Date(0),
           updatedAt: new Date(0),
@@ -96,6 +104,7 @@ export default function FileBrowser({
           kind: 'file',
           file: child.file,
           name: child.file.name,
+          searchableText: child.file.name,
           size: child.file.size,
           createdAt: child.file.createdAt,
           updatedAt: child.file.updatedAt,
@@ -104,6 +113,15 @@ export default function FileBrowser({
     }
     return items
   }, [currentNode])
+
+  // Filter browse items by the managed search query so folders with matching nested files are shown
+  const filteredBrowseItems = useMemo(() => {
+    if (!folderSearchQuery) {
+      return browseItems
+    }
+    const lowerQuery = folderSearchQuery.toLowerCase()
+    return browseItems.filter((item) => item.searchableText.toLowerCase().includes(lowerQuery))
+  }, [browseItems, folderSearchQuery])
 
   const handleViewModeChange = (_: unknown, newMode: ViewMode | null) => {
     if (newMode) {
@@ -144,6 +162,7 @@ export default function FileBrowser({
               releases={releases}
               readOnly={readOnly}
               onNavigate={setCurrentPath}
+              searchQuery={folderSearchQuery}
             />
           </Stack>
         </Box>
@@ -233,10 +252,19 @@ export default function FileBrowser({
               )
             })}
           </Breadcrumbs>
+          <TextField
+            size='small'
+            placeholder='Search files and folders...'
+            value={folderSearchQuery}
+            onChange={(e) => setFolderSearchQuery(e.target.value)}
+            sx={{ px: 2, pb: 1 }}
+            fullWidth
+          />
           <Paginate
-            list={browseItems}
-            emptyListText='No files in this folder'
-            searchFilterProperty='name'
+            list={filteredBrowseItems}
+            emptyListText={folderSearchQuery ? 'No matching files or folders' : 'No files in this folder'}
+            searchFilterProperty='searchableText'
+            hideSearchInput
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
               { value: 'size', title: 'Size', iconKind: 'size' },
@@ -262,6 +290,7 @@ function FolderRow({
   releases,
   readOnly,
   onNavigate,
+  searchQuery = '',
 }: {
   node: FileTreeNode
   modelId: string
@@ -269,6 +298,7 @@ function FolderRow({
   releases: ReleaseInterface[]
   readOnly: boolean
   onNavigate: (path: string) => void
+  searchQuery?: string
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -330,6 +360,10 @@ function FolderRow({
 
   const canDelete = !readOnly && modelKind === EntryKind.MODEL
 
+  // When a search is active, show the count of matching files instead of the total
+  const displayCount = useMemo(() => countMatchingFiles(node, searchQuery), [node, searchQuery])
+  const totalCount = node.totalFileCount
+
   return (
     <>
       <Stack
@@ -346,7 +380,9 @@ function FolderRow({
           <Folder color='action' />
           <Typography variant='h6'>{node.name}</Typography>
           <Typography variant='caption' sx={{ width: 'max-content' }}>
-            {node.totalFileCount} file{node.totalFileCount !== 1 ? 's' : ''}
+            {searchQuery && displayCount !== totalCount
+              ? `${displayCount} of ${totalCount} file${totalCount !== 1 ? 's' : ''} match`
+              : `${totalCount} file${totalCount !== 1 ? 's' : ''}`}
           </Typography>
         </Stack>
         {canDelete && (
@@ -379,7 +415,7 @@ function FolderRow({
         title={`Delete folder "${node.name}"?`}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteOpen(false)}
-        loading={isDeleting}
+        confirmLoading={isDeleting}
         errorMessage={deleteError}
       >
         <Stack spacing={1}>

@@ -116,3 +116,37 @@ export function getBreadcrumbParts(path: string): { name: string; fullPath: stri
 export function hasAnyNestedFiles(files: FileInterface[]): boolean {
   return files.some((file) => file.name.includes('/'))
 }
+
+/** Collects all file names recursively under a tree node, for use as searchable text. */
+export function collectAllFileNames(node: FileTreeNode): string[] {
+  const names: string[] = []
+  const collect = (n: FileTreeNode) => {
+    if (!n.isDirectory && n.file) {
+      names.push(n.file.name)
+    }
+    for (const child of n.children) {
+      collect(child)
+    }
+  }
+  collect(node)
+  return names
+}
+
+/** Counts how many files under a tree node match a search query (case-insensitive). */
+export function countMatchingFiles(node: FileTreeNode, query: string): number {
+  if (!query) {
+    return node.totalFileCount
+  }
+  const lowerQuery = query.toLowerCase()
+  let count = 0
+  const walk = (n: FileTreeNode) => {
+    if (!n.isDirectory && n.file && n.file.name.toLowerCase().includes(lowerQuery)) {
+      count++
+    }
+    for (const child of n.children) {
+      walk(child)
+    }
+  }
+  walk(node)
+  return count
+}
