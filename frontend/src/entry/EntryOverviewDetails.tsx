@@ -5,12 +5,12 @@ import { DatePicker } from '@mui/x-date-pickers'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { patchEntry } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
@@ -52,7 +52,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
     kind: ReviewKind.LIFECYCLE,
     open: false,
   })
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const { userPermissions } = useContext(UserPermissionsContext)
   const theme = useTheme()
@@ -97,12 +97,8 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
     }
   }, [entry.id, mutateArchivedReviews, mutateReviews, reviewDate, sendNotification])
 
-  if (isUiConfigLoading || isReviewsLoading || isArchivedReviewsLoading) {
+  if (isReviewsLoading || isArchivedReviewsLoading) {
     return <Loading />
-  }
-
-  if (isUiConfigError) {
-    return <ErrorWrapper message={isUiConfigError.info.message} />
   }
 
   if (isReviewsError) {
@@ -124,7 +120,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
           {toSentenceCase(entry.kind)} details
         </Typography>
         <Stack>
-          {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
+          {uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
               editable={updateEntryPermission.hasPermission}
@@ -135,7 +131,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
               options={uiConfig.modelDetails.organisations}
             />
           )}
-          {uiConfig && uiConfig.modelDetails.states.length > 0 && entry.card && (
+          {uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
               editable={updateEntryPermission.hasPermission}
@@ -149,7 +145,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
         </Stack>
         {entry.kind !== EntryKind.DATA_CARD && entry.card && (
           <Stack spacing={1}>
-            <Typography sx={{ fontWeight: 'bold' }} color='primary'>
+            <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
             {updateEntryPermission.hasPermission && reviews.length === 0 && (

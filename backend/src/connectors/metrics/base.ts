@@ -9,15 +9,16 @@ import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
-import { GetComplianceMetricsResponse } from '../../routes/v3/metrics/getComplianceMetrics.js'
 import {
   EntryVolumeDataPoint,
   EntryVolumeInterval,
   GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
 import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
+import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
+import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
-import { SchemaKind } from '../../types/enums.js'
+import { MetricsCacheKeys, SchemaKind } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
@@ -31,8 +32,6 @@ import {
 } from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
-const USAGE_METRICS_CACHE_KEY = 'usageMetrics'
-const COMPLIANCE_METRICS_CACHE_KEY = 'complianceMetrics'
 
 const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
@@ -277,7 +276,7 @@ export async function buildSchemaRoleMap(): Promise<SchemaRoleMap> {
   }
 }
 
-type ComplianceMetricsResult = {
+type RoleComplianceMetricsResult = {
   summary: {
     roleId: string
     roleName: string
@@ -293,6 +292,28 @@ type ComplianceMetricsResult = {
   }[]
 }
 
+type ModelWithNoReleases = {
+  entryId: string
+  organisation: string
+  modelOwners: string[]
+}
+
+type NoReleasesComplianceMetricsResultSubset = {
+  summary: {
+    modelsWithNoReleases: number
+  }
+  models: ModelWithNoReleases[]
+}
+
+type NoReleasesComplianceMetricsResultByOrgSubset = {
+  organisation: string
+} & NoReleasesComplianceMetricsResultSubset
+
+type NoReleasesComplianceMetricsResult = {
+  global: NoReleasesComplianceMetricsResultSubset
+  byOrganisation: NoReleasesComplianceMetricsResultByOrgSubset[]
+}
+
 /**
  * Calculates which entries are missing required review roles, either globally
  * or scoped to a specific organisation.
@@ -301,7 +322,7 @@ async function calculateMissingEntryRoles(
   schemaRoleMap: Record<string, string[]>,
   roleMeta: Record<string, { roleId: string; roleName: string }>,
   org?: string,
-): Promise<ComplianceMetricsResult> {
+): Promise<RoleComplianceMetricsResult> {
   const filter: ModelFilter = {}
 
   // Only undefined means global
@@ -312,7 +333,7 @@ async function calculateMissingEntryRoles(
   // Gets models by the specified organisation | no organisation
   const models = ModelModel.find(filter).select('id organisation card collaborators').lean().cursor()
 
-  const entriesResult: ComplianceMetricsResult['entries'] = []
+  const entriesResult: RoleComplianceMetricsResult['entries'] = []
 
   // Build set of all known roles
   const allKnownRoles = new Set<string>([])
@@ -369,6 +390,71 @@ async function calculateMissingEntryRoles(
   }
 }
 
+async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesComplianceMetricsResultSubset> {
+  const filter: ModelFilter = {}
+
+  // Only undefined means global
+  if (org !== undefined) {
+    filter.organisation = org
+  }
+
+  const pipeline: PipelineStage[] = [
+    { $match: filter },
+    {
+      $lookup: {
+        from: 'v2_releases',
+        let: { modelId: '$id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$modelId', '$$modelId'],
+              },
+            },
+          },
+          { $limit: 1 },
+          { $project: { _id: 1 } },
+        ],
+        as: 'releaseMatch',
+      },
+    },
+    {
+      $match: {
+        'releaseMatch.0': { $exists: false },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        entryId: '$id',
+        modelOwners: {
+          $map: {
+            input: {
+              $filter: {
+                input: '$collaborators',
+                as: 'item',
+                cond: { $in: ['owner', { $ifNull: ['$$item.roles', []] }] },
+              },
+            },
+            as: 'owner',
+            in: '$$owner.entity',
+          },
+        },
+      },
+    },
+  ]
+
+  // Gets models by the specified organisation | no organisation
+  const models = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
+
+  return {
+    summary: {
+      modelsWithNoReleases: models.length,
+    },
+    models,
+  }
+}
+
 /**
  * Builds a cache key for entry metrics based on
  * interval, date range, and timezone to ensure parameter-safe caching.
@@ -396,7 +482,7 @@ export class BaseMetricsConnector {
    * Gets metrics around general model usage within Bailo.
    */
   async getUsageMetrics(user: UserInterface): Promise<GetUsageMetricsResponse> {
-    const cacheKey = `${USAGE_METRICS_CACHE_KEY}:${user.dn}`
+    const cacheKey = `${MetricsCacheKeys.USAGE}:${user.dn}`
 
     const cached = getCached<CachedMetrics<GetUsageMetricsResponse>>(cacheKey)
     if (cached !== undefined) {
@@ -481,10 +567,10 @@ export class BaseMetricsConnector {
   /**
    * Gets metrics around system compliance and roles.
    */
-  async getComplianceMetrics(user: UserInterface): Promise<GetComplianceMetricsResponse> {
+  async getRoleComplianceMetrics(user: UserInterface): Promise<GetRoleComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
-    const cached = getCached<CachedMetrics<GetComplianceMetricsResponse>>(COMPLIANCE_METRICS_CACHE_KEY)
+    const cached = getCached<CachedMetrics<GetRoleComplianceMetricsResponse>>(MetricsCacheKeys.ROLE_COMPLIANCE)
     if (cached !== undefined) {
       return {
         ...cached.data,
@@ -509,7 +595,7 @@ export class BaseMetricsConnector {
 
     const lastUpdated = new Date().toISOString()
 
-    setCached(COMPLIANCE_METRICS_CACHE_KEY, {
+    setCached(MetricsCacheKeys.ROLE_COMPLIANCE, {
       data: result,
       lastUpdated,
     })
@@ -683,6 +769,48 @@ export class BaseMetricsConnector {
       }
 
       throw err
+    }
+  }
+
+  /**
+   * Gets compliance metrics for models without releases.
+   */
+  async getNoReleasesMetrics(user: UserInterface): Promise<GetNoReleasesComplianceMetricsResponse> {
+    await checkUserIsAuthorised(user)
+
+    const cached = getCached<CachedMetrics<GetNoReleasesComplianceMetricsResponse>>(
+      MetricsCacheKeys.NO_RELEASES_COMPLIANCE,
+    )
+    if (cached !== undefined) {
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
+    }
+
+    const global = await calculateModelsMissingReleases()
+
+    const organisationIds = await this.getOrganisationIds()
+
+    const byOrganisation = await Promise.all(
+      organisationIds.map(async (org) => ({
+        organisation: org || 'unset',
+        ...(await calculateModelsMissingReleases(org)),
+      })),
+    )
+
+    const result: NoReleasesComplianceMetricsResult = { global, byOrganisation }
+
+    const lastUpdated = new Date().toISOString()
+
+    setCached(MetricsCacheKeys.NO_RELEASES_COMPLIANCE, {
+      data: result,
+      lastUpdated,
+    })
+
+    return {
+      ...result,
+      lastUpdated,
     }
   }
 

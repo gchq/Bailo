@@ -22,7 +22,6 @@ interface DataCardSelectorProps {
   onChange: (newValue: string[]) => void
   registry?: Registry
   rawErrors?: string[]
-  InputProps?: any
   schema: RJSFSchema
 }
 
@@ -34,7 +33,6 @@ export default function DataCardSelector({
   id,
   registry,
   rawErrors,
-  InputProps,
   schema,
 }: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
@@ -135,15 +133,6 @@ export default function DataCardSelector({
                   if (event.key === 'Backspace') {
                     event.stopPropagation()
                   }
-                }}
-                slotProps={{
-                  input: {
-                    ...InputProps,
-                    ...(!registry.formContext.editMode && { disableUnderline: true }),
-                    'data-test': id,
-                    'aria-label': `input field for ${label}`,
-                    id: id,
-                  },
                 }}
               />
             )}

@@ -31,15 +31,15 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { rerunImageArtefactScan, useGetImageScanResults } from 'actions/artefactScanning'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import useNotification from 'src/hooks/useNotification'
@@ -67,7 +67,7 @@ export default function ImageTagInformation() {
     mutateImage,
   } = useGetImageScanResults(modelId as string, name as string, tag as string, digest as string, router.isReady)
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const sendNotification = useNotification()
 
   const [page, setPage] = useState(0)
@@ -235,11 +235,7 @@ export default function ImageTagInformation() {
     return <MessageAlert message={isImageError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isImageLoading || isUiConfigLoading || !modelImage) {
+  if (isImageLoading || !modelImage) {
     return <Loading />
   }
 
@@ -298,9 +294,7 @@ export default function ImageTagInformation() {
                     width: 'fit-content',
                   }}
                 >
-                  <CodeLine
-                    line={`docker pull ${uiConfig ? uiConfig.registry.host : 'unknownhost'}/${modelId}/${name}:${modelImage.tag}`}
-                  />
+                  <CodeLine line={`docker pull ${uiConfig.registry.host}/${modelId}/${name}:${modelImage.tag}`} />
                 </Box>
               </Stack>
               {modelImage.platform && (

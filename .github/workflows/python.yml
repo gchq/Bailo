@@ -107,3 +107,14 @@ jobs:
           python -m pytest
         env:
           PYTEST_RUN_PATH: "lib/python"
+
+  # Gate job for branch protection: always runs so the required check is never left pending when the matrix is skipped
+  python_test_result:
+    if: always()
+    needs: [changes, python_test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        if: >-
+          needs.python_test.result == 'failure'
+          || (needs.changes.outputs.relevant == 'true' && needs.python_test.result != 'success')
