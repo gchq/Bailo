@@ -50,80 +50,82 @@ export default function SchemaListItem({
 
   return (
     <ListItem divider={index < schemasLength - 1} key={schema.id}>
-      <ListItemText
-        primary={
-          <EditableText
-            value={schema.name}
-            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { name: newValue })}
-            tooltipText='Edit schema name'
-          />
-        }
-        secondary={
-          <EditableText
-            value={schema.description}
-            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { description: newValue })}
-            tooltipText='Edit schema description'
-            richText
-          />
-        }
-      />
-      <Stack
-        spacing={1}
-        direction={{ xs: 'column', md: 'row' }}
-        sx={{
-          alignItems: 'center',
-          ml: 2,
-        }}
-      >
-        <Chip
-          label={schema.active ? 'Active' : 'Inactive'}
-          size='small'
-          color={schema.active ? 'success' : 'warning'}
+      <Stack direction={{ xs: 'column', sm: 'row' }}>
+        <ListItemText
+          primary={
+            <EditableText
+              value={schema.name}
+              onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { name: newValue })}
+              tooltipText='Edit schema name'
+            />
+          }
+          secondary={
+            <EditableText
+              value={schema.description}
+              onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { description: newValue })}
+              tooltipText='Edit schema description'
+              richText
+            />
+          }
         />
-        {schema.hidden && <Chip label='Hidden' size='small' color='error' />}
-        <Button
-          id={`schema-actions-button-${schema.id}`}
-          size='small'
-          variant='contained'
-          aria-controls={open ? `schema-actions-menu-${schema.id}` : undefined}
-          aria-haspopup='true'
-          aria-expanded={open ? 'true' : undefined}
-          endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          onClick={(event) => onOpenMenuClick(event, schema.id)}
-          startIcon={<MenuIcon />}
+        <Stack
+          spacing={1}
+          direction={{ xs: 'column', md: 'row' }}
+          sx={{
+            alignItems: 'center',
+            ml: 2,
+          }}
         >
-          Actions
-        </Button>
-        <Menu
-          id={`schema-actions-menu-${schema.id}`}
-          open={open}
-          anchorEl={anchorEl}
-          slotProps={{
-            list: {
-              'aria-label': `schema-actions-button-${schema.id}`,
-            },
-          }}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-          onClose={onMenuClose}
-          onClick={(_event) => setOpenMenuSchemaId(null)}
-        >
-          <MenuItem onClick={() => onEditSchemaClick(schema.id, { active: !schema.active })}>
-            {schema.active ? 'Mark as inactive' : 'Mark as active'}
-          </MenuItem>
-          <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
-            {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
-          </MenuItem>
-          <MenuItem onClick={() => setEntriesListOpen(true)}>View schema usage</MenuItem>
-          <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
-          <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
-        </Menu>
+          <Chip
+            label={schema.active ? 'Active' : 'Inactive'}
+            size='small'
+            color={schema.active ? 'success' : 'warning'}
+          />
+          {schema.hidden && <Chip label='Hidden' size='small' color='error' />}
+          <Button
+            id={`schema-actions-button-${schema.id}`}
+            size='small'
+            variant='contained'
+            aria-controls={open ? `schema-actions-menu-${schema.id}` : undefined}
+            aria-haspopup='true'
+            aria-expanded={open ? 'true' : undefined}
+            endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            onClick={(event) => onOpenMenuClick(event, schema.id)}
+            startIcon={<MenuIcon />}
+          >
+            Actions
+          </Button>
+          <Menu
+            id={`schema-actions-menu-${schema.id}`}
+            open={open}
+            anchorEl={anchorEl}
+            slotProps={{
+              list: {
+                'aria-label': `schema-actions-button-${schema.id}`,
+              },
+            }}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+            onClose={onMenuClose}
+            onClick={(_event) => setOpenMenuSchemaId(null)}
+          >
+            <MenuItem onClick={() => onEditSchemaClick(schema.id, { active: !schema.active })}>
+              {schema.active ? 'Mark as inactive' : 'Mark as active'}
+            </MenuItem>
+            <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
+              {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
+            </MenuItem>
+            <MenuItem onClick={() => setEntriesListOpen(true)}>View schema usage</MenuItem>
+            <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
+            <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
+          </Menu>
+        </Stack>
       </Stack>
       <UpdateReviewRolesForSchemaDialog
         open={reviewRoleSelectorIsOpen}
