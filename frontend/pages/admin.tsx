@@ -36,8 +36,8 @@ export default function Admin() {
             Admin panel
           </Typography>
           <Divider />
-          <Grid container spacing={{ sm: 2 }}>
-            <Grid size='auto'>
+          <Grid container direction='row'>
+            <Grid size={{ md: 12, lg: 3 }}>
               <List sx={{ width: '280px' }}>
                 <Typography variant='caption'>Schemas</Typography>
                 <SimpleListItemButton
@@ -76,7 +76,7 @@ export default function Admin() {
                 </SimpleListItemButton>
               </List>
             </Grid>
-            <Grid size={{ md: 12, lg: 9 }}>
+            <Grid size='grow'>
               <Container sx={{ my: 2, width: '100%' }}>
                 {selectedSection === AdminSection.SCHEMA_LIST && <SchemaTab />}
                 {selectedSection === AdminSection.COMPARE && <SchemaCompare />}
