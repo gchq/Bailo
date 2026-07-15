@@ -3,7 +3,8 @@ import PublishedWithChanges from '@mui/icons-material/PublishedWithChanges'
 import Schema from '@mui/icons-material/Schema'
 import SupervisorAccount from '@mui/icons-material/SupervisorAccount'
 import { Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import ReviewRoleList from 'src/reviewRoles/ReviewRoleList'
@@ -20,11 +21,37 @@ export const AdminSection = {
 
 export type AdminSectionKeys = (typeof AdminSection)[keyof typeof AdminSection]
 
-export default function Admin() {
-  const [selectedSection, setSelectedSection] = useState<AdminSectionKeys>(AdminSection.SCHEMA_LIST)
+function isAdminSection(value: string | string[] | undefined): value is AdminSectionKeys {
+  return (
+    value === AdminSection.SCHEMA_LIST ||
+    value === AdminSection.COMPARE ||
+    value === AdminSection.MIGRATION ||
+    value === AdminSection.ROLES
+  )
+}
 
-  const handleListItemClick = (section: AdminSectionKeys) => {
-    setSelectedSection(section)
+export default function Admin() {
+  const router = useRouter()
+
+  const { section } = router.query
+
+  const [selectedSection, setSelectedSection] = useState<AdminSectionKeys>(
+    isAdminSection(section) ? section : AdminSection.SCHEMA_LIST,
+  )
+
+  useEffect(() => {
+    if (!selectedSection) {
+      router.replace({
+        query: { ...router.query, section: AdminSection.SCHEMA_LIST },
+      })
+    }
+  }, [section, router, selectedSection])
+
+  const handleListItemClick = (newSection: AdminSectionKeys) => {
+    setSelectedSection(newSection)
+    router.replace({
+      query: { ...router.query, section: newSection },
+    })
   }
 
   return (
