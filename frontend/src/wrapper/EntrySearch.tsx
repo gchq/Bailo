@@ -63,7 +63,7 @@ export default function EntrySearch() {
     () =>
       entries.map((entry) => (
         <Box key={entry.id} sx={{ maxWidth: '400px' }}>
-          <Link href={`/${entry.kind}/${entry.id}`} noLinkStyle>
+          <Link href={`/model/${entry.id}`} noLinkStyle>
             <ListItem
               disablePadding
               secondaryAction={<Chip label={toTitleCase(EntryKindLabel[entry.kind])} size='small' />}
