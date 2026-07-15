@@ -79,6 +79,7 @@ type FileDisplayProps = {
   style?: CSSProperties
   key?: string
   releases: ReleaseInterface[]
+  displayName?: string
 } & ClickableFileDownloadProps
 
 export default function FileDisplay({
@@ -93,6 +94,7 @@ export default function FileDisplay({
   style = {},
   key = '',
   releases,
+  displayName,
 }: FileDisplayProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -318,7 +320,7 @@ export default function FileDisplay({
                       overflow: 'hidden',
                     }}
                   >
-                    {file.name}
+                    {displayName ?? file.name}
                   </Typography>
                 </Link>
               </Tooltip>
