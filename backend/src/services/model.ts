@@ -753,14 +753,9 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  if (modelCardRevision.version === 1) {
-    // Special case for the first when a schema is set but `metadata` is still `undefined`
-    if (modelCardRevision.metadata !== undefined) {
-      throw BadReq('Model card metadata must not be set for the first version.', {
-        metadata: modelCardRevision.metadata,
-      })
-    }
-  } else {
+  // Special case for the first model card revision when a schema is set but `metadata` is still `undefined`
+  // This only happens when created from a schema, but when created from a template the first revision will not be undefined
+  if (modelCardRevision.version !== 1 || modelCardRevision.metadata !== undefined) {
     const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
     if (!valid) {
       throw BadReq('Model metadata could not be validated against the schema.', {
@@ -775,9 +770,9 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     mirrored: true,
   })
 
-  if (!foundModelCardRevision && modelCardRevision.version !== 1) {
+  if (!foundModelCardRevision && !(modelCardRevision.version === 1 && modelCardRevision.metadata === undefined)) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
-    // Ignore model cards with a version number of 1 as these will always be blank.
+    // Conditionally ignore model cards with a version number of 1 as these will be blank if created from schema.
     const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
     await newModelCardRevision.save()
     return modelCardRevision
