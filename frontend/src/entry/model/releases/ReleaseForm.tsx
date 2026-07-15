@@ -20,7 +20,6 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
-import { memoize } from 'lodash-es'
 import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
@@ -28,26 +27,16 @@ import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
-import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
-import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import UiConfigContext from 'src/contexts/uiConfigContext'
-import FileDisplay from 'src/entry/model/files/FileDisplay'
+import FileBrowser from 'src/entry/model/files/FileBrowser'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import {
-  ArtefactKind,
-  EntryInterface,
-  EntryKind,
-  FileInterface,
-  FileWithMetadataAndTags,
-  FlattenedModelImage,
-  isFileInterface,
-} from 'types/types'
+import { EntryInterface, EntryKind, FileInterface, FileWithMetadataAndTags, FlattenedModelImage } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
 import { isValidSemver } from 'utils/stringUtils'
@@ -115,7 +104,6 @@ export default function ReleaseForm({
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
-  const scanners = useContext(ArtefactScanningInfoContext)
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -183,23 +171,6 @@ export default function ReleaseForm({
       onFilesMetadataChange(tempFilesWithMetadata)
     },
     [filesMetadata, onFilesMetadataChange],
-  )
-
-  // We can assume that all the displayed files will be interfaces when the form is in read only
-  const FileRowItem = memoize(({ data }) =>
-    isFileInterface(data) ? (
-      <FileDisplay
-        key={data.name}
-        file={data}
-        modelId={model.id}
-        showMenuItems={{ rescanFile: scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) }}
-        mutator={mutateReleases}
-        style={{ padding: 1 }}
-        releases={releases}
-      />
-    ) : (
-      <></>
-    ),
   )
 
   if (isReleasesError) {
@@ -427,23 +398,16 @@ export default function ReleaseForm({
                   )}
                 </Stack>
               )}
-              <Stack spacing={1} divider={<Divider />}>
-                {isReadOnly && (
-                  <Paginate
-                    list={formData.files as FileInterface[]}
-                    defaultSortProperty='name'
-                    searchFilterProperty='name'
-                    searchPlaceholderText='Search by filename'
-                    sortingProperties={[
-                      { value: 'name', title: 'Name', iconKind: 'text' },
-                      { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-                      { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-                    ]}
-                  >
-                    {FileRowItem}
-                  </Paginate>
-                )}
-              </Stack>
+              {isReadOnly && (
+                <FileBrowser
+                  files={formData.files as FileInterface[]}
+                  modelId={model.id}
+                  modelKind={model.kind}
+                  releases={releases}
+                  mutator={mutateReleases}
+                  readOnly
+                />
+              )}
             </>
           </AccordionDetails>
         </Accordion>
