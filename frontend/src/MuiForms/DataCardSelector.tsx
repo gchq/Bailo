@@ -125,7 +125,7 @@ export default function DataCardSelector({
   const displayPanel =
     inCompareMode && registry.formContext.mirroredModel
       ? true
-      : registry.formContext.mirroredModel && currentValue.length > 0 && currentValue[0] !== null
+      : registry.formContext.mirroredModel && currentValue.length > 0
 
   return (
     <AdditionalInformation
@@ -179,26 +179,26 @@ export default function DataCardSelector({
             />
           )}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel ? (
+      ) : inCompareMode && registry.formContext.mirroredModel && currentValue.length > 0 ? (
         <InlineDiff from={idsToDiffString(compareFromState)} to={idsToDiffString(currentValue)} />
-      ) : currentValue.length > 0 ? (
-        <Box sx={{ overflowX: 'auto', p: 1 }}>
-          <Stack spacing={1} direction='row'>
-            {currentValue.map((currentDataCardId) => (
-              <Chip
-                label={
-                  dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                  'Unable to find data card name'
-                }
-                key={currentDataCardId}
-                onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                sx={{ width: 'fit-content' }}
-              />
-            ))}
-          </Stack>
-        </Box>
       ) : (
-        <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
+        currentValue.length > 0 && (
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((currentDataCardId) => (
+                <Chip
+                  label={
+                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                    'Unable to find data card name'
+                  }
+                  key={currentDataCardId}
+                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                  sx={{ width: 'fit-content' }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )
       )}
     </AdditionalInformation>
   )

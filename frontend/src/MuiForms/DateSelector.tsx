@@ -82,7 +82,7 @@ export default function DateSelector({ onChange, value, label, registry, require
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={mirroredContent}
-      display={Boolean(registry.formContext.mirroredModel && (value || mirroredState))}
+      display={inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value}
       label={label}
       id={id}
       required={required}
@@ -101,14 +101,16 @@ export default function DateSelector({ onChange, value, label, registry, require
       ) : inCompareMode && registry.formContext.mirroredModel && value ? (
         <InlineDiff from={formatDate(compareFromState)} to={formatDate(value)} />
       ) : (
-        <Typography
-          sx={{
-            fontStyle: value ? 'unset' : 'italic',
-            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-          }}
-        >
-          {value ? formatDate(value) : 'Unanswered'}
-        </Typography>
+        value && (
+          <Typography
+            sx={{
+              fontStyle: value ? 'unset' : 'italic',
+              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+            }}
+          >
+            {formatDate(value)}
+          </Typography>
+        )
       )}
     </AdditionalInformation>
   )

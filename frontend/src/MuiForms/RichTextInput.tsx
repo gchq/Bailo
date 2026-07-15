@@ -92,14 +92,10 @@ export default function RichTextInput({
           errors={rawErrors}
           key={label}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel ? (
+      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
         <InlineDiff markdown from={compareFromState} to={value} />
-      ) : value ? (
-        <MarkdownDisplay>{value}</MarkdownDisplay>
       ) : (
-        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
-          Unanswered
-        </Typography>
+        value && <MarkdownDisplay>{value}</MarkdownDisplay>
       )}
     </AdditionalInformation>
   )

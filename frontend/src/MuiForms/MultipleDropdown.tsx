@@ -104,7 +104,7 @@ export default function MultipleDropdown({
       display={
         inCompareMode && registry.formContext.mirroredModel
           ? true
-          : registry.formContext.mirroredModel && value.length > 0 && value[0] !== null
+          : registry.formContext.mirroredModel && value.length > 0
       }
       label={label}
       id={id}
@@ -150,9 +150,10 @@ export default function MultipleDropdown({
             />
           )}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel ? (
+      ) : inCompareMode && registry.formContext.mirroredModel && value.length > 0 ? (
         <InlineDiff from={formatValues(compareFromState)} to={formatValues(value)} />
-      ) : value.length > 0 ? (
+      ) : (
+        value.length > 0 &&
         value.map((selectedValue) => (
           <Typography
             key={selectedValue}
@@ -164,8 +165,6 @@ export default function MultipleDropdown({
             {selectedValue}
           </Typography>
         ))
-      ) : (
-        <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
       )}
     </AdditionalInformation>
   )

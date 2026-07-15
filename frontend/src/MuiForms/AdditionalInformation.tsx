@@ -35,10 +35,6 @@ export default function AdditionalInformation({
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const theme = useTheme()
 
-  if (children === undefined || (Array.isArray(children) && children.length === 0)) {
-    return <></>
-  }
-
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }

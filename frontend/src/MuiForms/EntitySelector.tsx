@@ -211,25 +211,18 @@ export default function EntitySelector({
             )}
           />
         </>
-      ) : inCompareMode && registry.formContext.mirroredModel ? (
+      ) : inCompareMode && registry.formContext.mirroredModel && currentValue.length ? (
         <InlineDiff from={compareFromString} to={currentValueString} />
-      ) : currentValue.length > 0 ? (
-        <Box sx={{ overflowX: 'auto', p: 1 }}>
-          <Stack spacing={1} direction='row'>
-            {currentValue.map((entity) => (
-              <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-            ))}
-          </Stack>
-        </Box>
       ) : (
-        <Typography
-          sx={{
-            fontStyle: 'italic',
-            color: theme.palette.customTextInput.main,
-          }}
-        >
-          Unanswered
-        </Typography>
+        currentValue.length > 0 && (
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((entity) => (
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+              ))}
+            </Stack>
+          </Box>
+        )
       )}
     </AdditionalInformation>
   )

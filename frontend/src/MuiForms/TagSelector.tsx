@@ -11,11 +11,10 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  formContext?: Registry
+  formContext?: Registry['formContext']
   required?: boolean
   id: string
   schema?: RJSFSchema
-  editable?: boolean
 }
 
 function formatTagValue(tags: string[] | undefined): string {
@@ -54,7 +53,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     onChange(updatedArray)
   }
 
-  if (!editable && registry && !registry.formContext) {
+  if (!formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
@@ -98,11 +97,11 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     <AdditionalInformation
       editMode={formContext.editMode}
       mirroredState={mirroredContent}
-      display={value.length > 0}
+      display={inCompareMode && formContext.mirroredModel ? true : formContext.mirroredModel && value.length > 0}
       label={label}
       id={id}
       required={required}
-      mirroredModel={registry && registry.formContext.mirroredModel}
+      mirroredModel={formContext.mirroredModel}
       description={schema ? schema.description : ''}
     >
       {formContext.editMode ? (
@@ -148,9 +147,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                       color: theme.palette.customTextInput.main,
                     }}
                   >
-                    {registry && registry.formContext && registry.formContext.emptyPlaceholderText
-                      ? registry.formContext.emptyPlaceholderText
-                      : 'Unanswered'}
+                    {formContext && formContext.emptyPlaceholderText ? formContext.emptyPlaceholderText : 'No tags'}
                   </Typography>
                 ) : (
                   <Box sx={{ whitespace: 'pre-wrap' }}>
@@ -171,52 +168,18 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {errorText}
           </Typography>
         </Stack>
-      ) : inCompareMode && formContext.mirroredModel ? (
+      ) : inCompareMode && formContext.mirroredModel && value.length > 0 ? (
         <InlineDiff from={compareFromString} to={currentValueString} />
-      ) : value.length === 0 ? (
-        <Typography
-          sx={{
-            fontStyle: 'italic',
-            color: theme.palette.customTextInput.main,
-          }}
-        >
-          Unanswered
-        </Typography>
-      ) : value.length ? (
-        <Box sx={{ overflow: 'auto', p: 1 }}>
-          <Box sx={{ whiteSpace: 'pre-wrap' }}>
-            {value.map((tag) => (
-              <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} />
-            ))}
-          </Box>
-        </Box>
       ) : (
-        <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
-      )}
-      {!(registry && registry.formContext.editMode) && !editable && (
-        <Box sx={{ overflow: 'auto', p: 1 }}>
-          here
-          <Stack spacing={1} direction='row'>
-            {value.length === 0 ? (
-              <Typography
-                sx={{
-                  fontStyle: 'italic',
-                  color: theme.palette.customTextInput.main,
-                }}
-              >
-                {registry && registry.formContext && registry.formContext.emptyPlaceholderText
-                  ? registry.formContext.emptyPlaceholderText
-                  : 'Unanswered'}
-              </Typography>
-            ) : (
-              <Box sx={{ whitespace: 'pre-wrap' }}>
-                {value.map((tag) => (
-                  <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} />
-                ))}
-              </Box>
-            )}
-          </Stack>
-        </Box>
+        value.length > 0 && (
+          <Box sx={{ overflow: 'auto', p: 1 }}>
+            <Box sx={{ whiteSpace: 'pre-wrap' }}>
+              {value.map((tag) => (
+                <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} />
+              ))}
+            </Box>
+          </Box>
+        )
       )}
     </AdditionalInformation>
   )

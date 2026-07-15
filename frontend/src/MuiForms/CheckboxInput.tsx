@@ -123,10 +123,10 @@ export default function CheckboxInput({
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>
-      ) : inCompareMode && registry.formContext.mirroredModel ? (
+      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
         <InlineDiff from={formatBoolean(compareFromState)} to={formatBoolean(value)} />
       ) : (
-        <Typography>{formatBoolean(value)}</Typography>
+        value && <Typography>{formatBoolean(value)}</Typography>
       )}
     </AdditionalInformation>
   )

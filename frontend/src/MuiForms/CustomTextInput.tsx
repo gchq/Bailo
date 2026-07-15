@@ -78,13 +78,12 @@ export default function CustomTextInput({
   const mirroredCompareContent = inCompareMode && registry.formContext.mirroredModel && value && (
     <InlineDiff from={compareFromMirroredState} to={mirroredState} />
   )
-  const displayPanel = Boolean(registry.formContext.mirroredModel && (value || mirroredState))
 
   return (
     <AdditionalInformation
       editMode={registry.formContext.editMode}
       mirroredState={mirroredCompareContent || mirroredState}
-      display={displayPanel}
+      display={inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value}
       label={label}
       id={id}
       required={required}

@@ -197,15 +197,17 @@ export default function EntryCardCompare({
     const fromState = fromLocalCard?.metadata ?? {}
     const toMirroredState = toMirroredCard?.metadata ?? {}
     const fromMirroredState = fromMirroredCard?.metadata ?? {}
-    const steps = getStepsFromSchema(
-      chosenSchema,
-      {},
-      ['properties.contacts'],
-      fromState,
-      fromMirroredState,
-      toState,
-      toMirroredState,
-    )
+    const steps = fromOnly
+      ? getStepsFromSchema(chosenSchema, {}, ['properties.contacts'], fromState, fromMirroredState)
+      : getStepsFromSchema(
+          chosenSchema,
+          {},
+          ['properties.contacts'],
+          toState,
+          toMirroredState,
+          fromState,
+          fromMirroredState,
+        )
     for (const step of steps) {
       step.steps = steps
     }
@@ -214,6 +216,7 @@ export default function EntryCardCompare({
     chosenSchema,
     fromLocalCard?.metadata,
     fromMirroredCard?.metadata,
+    fromOnly,
     toLocalCard?.metadata,
     toMirroredCard?.metadata,
   ])

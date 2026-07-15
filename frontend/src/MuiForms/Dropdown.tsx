@@ -135,12 +135,10 @@ export default function Dropdown({
             />
           )}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel ? (
+      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
         <InlineDiff from={compareFromState} to={value} />
-      ) : value ? (
-        <Typography>{value}</Typography>
       ) : (
-        <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
+        value && <Typography>{value}</Typography>
       )}
     </AdditionalInformation>
   )
