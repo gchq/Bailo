@@ -239,8 +239,9 @@ data:
 
         untrustedModel: {
           enabled: {{ .Values.config.ui.untrustedModel.enabled }},
-          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}'
-        }
+          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}',
+          fileUploadGuidance: '{{ .Values.config.ui.untrustedModel.fileUploadGuidance }}',
+        },
       },
 
       connectors: {
@@ -315,6 +316,15 @@ data:
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
       },
+
+      llm: {
+        endpoint: '{{ .Values.llm.endpoint }}',
+        model: '{{ .Values.llm.model }}',
+        maxTokens: {{ .Values.llm.maxTokens }},
+        timeoutMs: {{ .Values.llm.timeoutMs }},
+        temperature: {{ .Values.llm.temperature }},
+        systemPrompt: {{ .Values.llm.systemPrompt | quote }},
+      }
     }
 
   custom-environment-variables.cjs: |
@@ -345,5 +355,8 @@ data:
             },
           },
         },
+      },
+      llm: {
+        apiKey: 'LLM_API_KEY',
       },
     }

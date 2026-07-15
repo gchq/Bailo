@@ -81,6 +81,12 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: authenticationMocks,
 }))
 
+const mockFindQuery = (result: any) => ({
+  select: vi.fn().mockReturnThis(),
+  sort: vi.fn().mockReturnThis(),
+  lean: vi.fn().mockResolvedValue(result),
+})
+
 const mockUser = {
   dn: 'test-user',
 } as any
@@ -215,7 +221,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
     expect(result.global.schemaBreakdown).toEqual([
       { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
       { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
-      { schemaId: 'unset', schemaName: 'unset', count: 0 },
+      { schemaId: 'none', schemaName: 'None', count: 0 },
     ])
   })
   test('global model count equals sum of organisation + unset counts', async () => {
@@ -275,7 +281,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
   })
 })
 
-await describe('connectors > metrics > simple > getComplianceMetrics', async () => {
+await describe('connectors > metrics > simple > getRoleComplianceMetrics', async () => {
   let connector
   await beforeEach(async () => {
     vi.resetModules()
@@ -326,7 +332,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
       ]),
     )
 
-    const result = await connector.getComplianceMetrics(mockUser)
+    const result = await connector.getRoleComplianceMetrics(mockUser)
 
     expect(result.global.entries).toHaveLength(2)
 
@@ -378,7 +384,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
       return mockCursorQuery(filtered)
     })
 
-    const result = await connector.getComplianceMetrics(mockUser)
+    const result = await connector.getRoleComplianceMetrics(mockUser)
 
     expect(result.byOrganisation).toHaveLength(2)
 
@@ -419,7 +425,7 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
       return mockCursorQuery(filtered)
     })
 
-    const result = await connector.getComplianceMetrics(mockUser)
+    const result = await connector.getRoleComplianceMetrics(mockUser)
 
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
 
@@ -431,7 +437,43 @@ await describe('connectors > metrics > simple > getComplianceMetrics', async () 
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
-    await expect(connector.getComplianceMetrics(mockUser)).rejects.toThrow()
+    await expect(connector.getRoleComplianceMetrics(mockUser)).rejects.toThrow()
+  })
+})
+
+await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', async () => {
+  let connector
+  await beforeEach(async () => {
+    vi.resetModules()
+    vi.clearAllMocks()
+
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['a corp', 'b corp'])
+  })
+
+  test('groups results by organisation correctly', async () => {
+    modelMocks.distinct.mockResolvedValue(['a corp', 'b corp'])
+
+    modelMocks.aggregate.mockImplementation(() => {
+      const allModels = [
+        {
+          id: 'orgB-model',
+          organisation: 'b corp',
+          owners: ['user:user'],
+        },
+      ]
+      return allModels
+    })
+
+    const result = await connector.getNoReleasesMetrics(mockUser)
+
+    expect(result.byOrganisation).toHaveLength(3)
+  })
+
+  test('throws Forbidden if user is not admin', async () => {
+    authenticationMocks.hasRole.mockResolvedValue(false)
+
+    await expect(connector.getNoReleasesMetrics(mockUser)).rejects.toThrow()
   })
 })
 
@@ -651,5 +693,113 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
     await expect(connector.calculateEntryVolume(mockUser, 'month', '2026-05-01', '2026-05-31')).rejects.toThrow(
       'You do not have the required role.',
     )
+  })
+  await describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
+    let connector
+
+    await beforeEach(async () => {
+      vi.clearAllMocks()
+
+      const { BaseMetricsConnector } = await loadConnector()
+      connector = new BaseMetricsConnector(['b corp'])
+    })
+
+    test('returns mapped model breakdown results', async () => {
+      modelMocks.find.mockReturnValue(
+        mockFindQuery([
+          {
+            id: 'model-1',
+            name: 'Model One',
+            collaborators: [
+              {
+                entity: 'user:test',
+                roles: ['owner'],
+              },
+            ],
+          },
+        ]),
+      )
+
+      const result = await connector.calculateModelBreakdown(mockUser, {} as any)
+
+      expect(result).toEqual([
+        {
+          entryId: 'model-1',
+          entryName: 'Model One',
+          collaborators: [
+            {
+              entity: 'user:test',
+              roles: ['owner'],
+            },
+          ],
+        },
+      ])
+
+      expect(modelMocks.find).toHaveBeenCalledWith({})
+    })
+
+    test('queries empty organisation when organisation is none', async () => {
+      modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+      await connector.calculateModelBreakdown(mockUser, {
+        organisation: 'unset',
+      } as any)
+
+      expect(modelMocks.find).toHaveBeenCalledWith({
+        organisation: '',
+      })
+    })
+
+    test('queries empty state when state is none', async () => {
+      modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+      await connector.calculateModelBreakdown(mockUser, {
+        state: 'none',
+      } as any)
+
+      expect(modelMocks.find).toHaveBeenCalledWith({
+        state: '',
+      })
+    })
+
+    test('queries models without schema when schemaId is none', async () => {
+      modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+      await connector.calculateModelBreakdown(mockUser, {
+        schemaId: 'none',
+      } as any)
+
+      expect(modelMocks.find).toHaveBeenCalledWith({
+        'card.schemaId': { $exists: false },
+      })
+    })
+
+    test('queries specific schema when schemaId is provided', async () => {
+      modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+      await connector.calculateModelBreakdown(mockUser, {
+        schemaId: 'minimal-general-v10',
+      } as any)
+
+      expect(modelMocks.find).toHaveBeenCalledWith({
+        'card.schemaId': 'minimal-general-v10',
+      })
+    })
+
+    test('combines organisation, state and schema filters', async () => {
+      modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+      await connector.calculateModelBreakdown(mockUser, {
+        organisation: 'Example Organisation',
+        state: 'active',
+        schemaId: 'minimal-general-v10',
+      } as any)
+
+      expect(modelMocks.find).toHaveBeenCalledWith({
+        organisation: 'Example Organisation',
+        state: 'active',
+        'card.schemaId': 'minimal-general-v10',
+      })
+    })
   })
 })

@@ -2,10 +2,11 @@ import Add from '@mui/icons-material/Add'
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import MessageAlert from 'src/MessageAlert'
@@ -16,6 +17,7 @@ type FilesProps = {
 }
 
 export default function Files({ model }: FilesProps) {
+  const scanners = useContext(ArtefactScanningInfoContext)
   const { modelFiles, isModelFilesLoading, isModelFilesError, mutateModelFiles } = useGetModelFiles(model.id)
   const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false)
   const [activeFileTag, setActiveFileTag] = useState('')
@@ -64,7 +66,8 @@ export default function Files({ model }: FilesProps) {
         >
           <Typography>
             Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
-            that are no longer needed, and also manually retrigger file scanning (if file scanning is enabled).
+            that are no longer needed
+            {scanners.length > 0 && ', and also manually retrigger file scanning (if file scanning is enabled)'}.
           </Typography>
           <Stack
             direction={{ sm: 'column', md: 'row' }}

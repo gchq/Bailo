@@ -133,10 +133,12 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
  * @remarks
  * _Only_ use this function when an auth check would break expected functionality, otherwise use `getModelById`.
  */
-export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+export async function getModelByIdNoAuth(modelId: string, kinds?: EntryKindKeys[] | EntryKindKeys): Promise<ModelDoc> {
+  const kindArray = kinds ? (Array.isArray(kinds) ? kinds : [kinds]) : undefined
+
   const model = await ModelModel.findOne({
     id: modelId,
-    ...(kind && { kind }),
+    ...(kindArray && { kind: { $in: kindArray } }),
   })
 
   if (!model) {
@@ -146,7 +148,11 @@ export async function getModelByIdNoAuth(modelId: string, kind?: EntryKindKeys):
   return model
 }
 
-export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys): Promise<ModelDoc> {
+export async function getModelById(
+  user: UserInterface,
+  modelId: string,
+  kind?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc> {
   const model = await getModelByIdNoAuth(modelId, kind)
 
   const auth = await authorisation.model(user, model, ModelAction.View)

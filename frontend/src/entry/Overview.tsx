@@ -43,7 +43,7 @@ export default function Overview({ entry, mutateEntry }: OverviewProps) {
     >
       <Grid size={{ md: 3, sm: 12 }}>
         <Box sx={{ m: 2 }}>
-          <EntryOverviewDetails entry={entry} />
+          <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} />
         </Box>
       </Grid>
       <Grid size={{ md: 9, sm: 12 }}>

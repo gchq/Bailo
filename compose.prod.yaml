@@ -34,7 +34,7 @@ services:
     ports:
       - 1080:1080
       - 1025:1025
-    image: marlonb/mailcrab:v1.7.0
+    image: marlonb/mailcrab:v1.8.0
 
   webhook-tester:
     networks:

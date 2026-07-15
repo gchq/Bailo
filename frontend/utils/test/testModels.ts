@@ -259,6 +259,11 @@ export const testUiConfig: UiConfig = {
   untrustedModel: {
     untrustedModelDescription: '',
     enabled: true,
+    fileUploadGuidance: '',
+  },
+
+  llmImport: {
+    enabled: false,
   },
 
   announcement: {

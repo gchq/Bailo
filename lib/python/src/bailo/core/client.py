@@ -290,6 +290,29 @@ class Client:
             )
         )
 
+    def import_model_card_text(
+        self,
+        model_id: str,
+        text: str,
+    ):
+        """Extract model card metadata from free text using an LLM.
+
+        Sends the provided text to a configured LLM endpoint which extracts
+        structured metadata matching the model's schema. The model must already
+        have a schema selected.
+
+        :param model_id: Unique model ID
+        :param text: Model card text to extract metadata from (e.g. HuggingFace model card)
+        :return: JSON response object containing extracted metadata
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/import-model-card-text",
+            json={
+                "text": text,
+            },
+            timeout=180,
+        ).json()
+
     def model_card_from_schema(
         self,
         model_id: str,

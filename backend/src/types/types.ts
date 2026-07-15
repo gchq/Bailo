@@ -176,6 +176,11 @@ export interface UiConfig {
   untrustedModel: {
     enabled: boolean
     untrustedModelDescription: string
+    fileUploadGuidance: string
+  }
+
+  llmImport: {
+    enabled: boolean
   }
 }
 
@@ -232,6 +237,21 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   peers: coerceArray(z.array(z.string()).optional()),
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
+
+export interface MetricsEntrySearchOptions {
+  organisation: string
+  state: string
+  schemaId: string
+}
+
+export type MetricsEntrySearchOptionsParams = Optional<MetricsEntrySearchOptions>
+
+export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOptionsParams, ZodTypeDef, unknown> =
+  z.object({
+    organisation: z.string().optional(),
+    state: z.string().optional(),
+    schemaId: z.string().optional(),
+  })
 
 export type ModelImages = ModelImageTags[]
 export type LayerScanSummary = Pick<

@@ -25,6 +25,11 @@ vi.mock('../../../../src/services/log.js', () => ({
   default: logMocks,
 }))
 
+const modelTransferMock = vi.hoisted(() => ({
+  updateArtefactTransferStatus: vi.fn(),
+}))
+vi.mock('../../../../src/services/modelTransfer.js', () => modelTransferMock)
+
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(),
 }))

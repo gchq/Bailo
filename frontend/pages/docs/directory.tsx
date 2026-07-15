@@ -28,7 +28,12 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   { title: 'Models', slug: 'users/models', header: true },
   { title: 'Creating a Model', slug: 'users/models/creating-a-model' },
-  { title: 'Model Card', slug: 'users/models/model-card' },
+  { title: 'Model Card', slug: 'users/models/model-card', header: true },
+  { title: 'Model Card', slug: 'users/models/model-card/model-card' },
+  {
+    title: 'Importing Model Card Text',
+    slug: 'users/models/model-card/importing-model-card-text',
+  },
   { title: 'Creating a Release', slug: 'users/models/creating-a-release' },
   { title: 'Uploading Files', slug: 'users/models/uploading-files' },
   { title: 'Uploading Images', slug: 'users/models/uploading-images' },
@@ -72,6 +77,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Deleting a Model', slug: 'users/deletion/model-deletion' },
   { title: 'Soft Deletion', slug: 'users/deletion/soft-deletion' },
 
+  { title: 'Bailo Metrics', slug: 'users/metrics', header: true },
+  { title: 'Viewing Bailo Metrics', slug: 'users/metrics/viewing-metrics' },
+
   { title: 'Programmatic Access', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
   { title: 'Personal Access Tokens', slug: 'users/programmatically-using-bailo/personal-access-tokens' },
@@ -87,6 +95,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Deployment Architecture', slug: 'administration/getting-started/deployment-architecture' },
   { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
   { title: 'Model Lifecycle Configuration', slug: 'administration/getting-started/model-lifecycle-configuration' },
+
+  /// LLM
+  { title: 'LLM', slug: 'administration/llm', header: true },
+  { title: 'LLM Import', slug: 'administration/llm/llm-import' },
 
   /// Schema Management
   { title: 'Schemas', slug: 'administration/schemas', header: true },

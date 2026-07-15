@@ -18,11 +18,10 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
-import { ChangeEvent, useCallback, useMemo } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
@@ -31,6 +30,8 @@ import MultiFileInput from 'src/common/MultiFileInput'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
+import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
@@ -106,6 +107,7 @@ export default function ReleaseForm({
   uploadedFiles,
   filesToUploadCount,
 }: ReleaseFormProps) {
+  const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
@@ -114,7 +116,7 @@ export default function ReleaseForm({
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
-  const { scanners, isScannersLoading, isScannersError } = useGetArtefactScannerInfo()
+  const scanners = useContext(ArtefactScanningInfoContext)
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -186,7 +188,7 @@ export default function ReleaseForm({
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
   const FileRowItem = memoize(({ data }) =>
-    isFileInterface(data) && !isScannersLoading && !isScannersError ? (
+    isFileInterface(data) ? (
       <FileDisplay
         key={data.name}
         file={data}
@@ -358,6 +360,15 @@ export default function ReleaseForm({
             >{`Files (${formData.files.length})`}</Typography>
           </AccordionSummary>
           <AccordionDetails>
+            {!isReadOnly && model.kind === EntryKind.UNTRUSTED_MODEL && (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <MessageAlert
+                  message={uiConfig.untrustedModel.fileUploadGuidance}
+                  severity='warning'
+                  style={{ width: 'fit-content' }}
+                />
+              </Box>
+            )}
             <>
               {!isReadOnly && (
                 <Stack spacing={2}>

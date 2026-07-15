@@ -235,6 +235,16 @@ export interface Config {
   inference: {
     authorisationToken: string
   }
+
+  llm: {
+    endpoint: string
+    apiKey: string
+    model: string
+    maxTokens: number
+    timeoutMs: number
+    temperature: number
+    systemPrompt: string
+  }
 }
 
 const config = _config.util.toObject(_config)

@@ -11,10 +11,11 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  formContext?: Registry['formContext']
+  formContext?: Registry
   required?: boolean
   id: string
   schema?: RJSFSchema
+  editable?: boolean
 }
 
 function formatTagValue(tags: string[] | undefined): string {
@@ -53,7 +54,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     onChange(updatedArray)
   }
 
-  if (!formContext) {
+  if (!editable && registry && !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
@@ -101,7 +102,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       label={label}
       id={id}
       required={required}
-      mirroredModel={formContext.mirroredModel}
+      mirroredModel={registry && registry.formContext.mirroredModel}
       description={schema ? schema.description : ''}
     >
       {formContext.editMode ? (
@@ -147,7 +148,9 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                       color: theme.palette.customTextInput.main,
                     }}
                   >
-                    {formContext && formContext.emptyPlaceholderText ? formContext.emptyPlaceholderText : 'No tags'}
+                    {registry && registry.formContext && registry.formContext.emptyPlaceholderText
+                      ? registry.formContext.emptyPlaceholderText
+                      : 'Unanswered'}
                   </Typography>
                 ) : (
                   <Box sx={{ whitespace: 'pre-wrap' }}>
@@ -189,6 +192,31 @@ export default function TagSelector({ onChange, value, label, formContext, requi
         </Box>
       ) : (
         <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
+      )}
+      {!(registry && registry.formContext.editMode) && !editable && (
+        <Box sx={{ overflow: 'auto', p: 1 }}>
+          here
+          <Stack spacing={1} direction='row'>
+            {value.length === 0 ? (
+              <Typography
+                sx={{
+                  fontStyle: 'italic',
+                  color: theme.palette.customTextInput.main,
+                }}
+              >
+                {registry && registry.formContext && registry.formContext.emptyPlaceholderText
+                  ? registry.formContext.emptyPlaceholderText
+                  : 'Unanswered'}
+              </Typography>
+            ) : (
+              <Box sx={{ whitespace: 'pre-wrap' }}>
+                {value.map((tag) => (
+                  <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} />
+                ))}
+              </Box>
+            )}
+          </Stack>
+        </Box>
       )}
     </AdditionalInformation>
   )
