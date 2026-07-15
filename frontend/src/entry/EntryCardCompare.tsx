@@ -1,6 +1,18 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
-import { Alert, Autocomplete, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Autocomplete,
+  Button,
+  Container,
+  IconButton,
+  Link,
+  Paper,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -320,6 +332,18 @@ export default function EntryCardCompare({
 
   const showSelectPrompt = !loading && !fromOnly && (!hasAnyVersionFrom || !hasAnyVersionTo)
 
+  const flipComparison = () => {
+    updateQuery(router, {
+      fromModel: toEntryId,
+      fromVersion: toVersion === undefined ? undefined : String(toVersion),
+      fromMirroredVersion: toMirroredVersion === undefined ? undefined : String(toMirroredVersion),
+
+      toModel: fromEntryId,
+      toVersion: fromVersion === undefined ? undefined : String(fromVersion),
+      toMirroredVersion: fromMirroredVersion === undefined ? undefined : String(fromMirroredVersion),
+    })
+  }
+
   return (
     <Container>
       <Paper sx={{ p: 4, my: 4 }}>
@@ -385,7 +409,23 @@ export default function EntryCardCompare({
             </Stack>
             <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
               <Typography>&nbsp;</Typography>
-              <CompareArrowsIcon color='primary' fontSize='large' />
+              <Tooltip title='Swap comparison sides'>
+                <span>
+                  <IconButton
+                    aria-label='Swap From and To comparison sides'
+                    onClick={flipComparison}
+                    disabled={!fromEntryId && !toEntryId}
+                    sx={{
+                      transition: 'transform 150ms ease-in-out',
+                      '&:hover': {
+                        transform: 'rotate(180deg)',
+                      },
+                    }}
+                  >
+                    <CompareArrowsIcon color='primary' fontSize='large' />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </Stack>
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
