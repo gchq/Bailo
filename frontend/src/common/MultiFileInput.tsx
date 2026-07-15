@@ -1,9 +1,8 @@
-import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import FolderOpen from '@mui/icons-material/FolderOpen'
-import { Box, ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
-import { ChangeEvent, useCallback, useMemo, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useMemo, useRef } from 'react'
 import { FileInterface, FileWithMetadataAndTags } from 'types/types'
 const Input = styled('input')({
   display: 'none',
@@ -33,7 +32,6 @@ export default function MultiFileInput({
   readOnly = false,
 }: MultiFileInputProps) {
   const htmlId = useMemo(() => `${label.replace(/ /g, '-').toLowerCase()}-file`, [label])
-  const [splitMenuAnchor, setSplitMenuAnchor] = useState<HTMLElement | null>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
 
   const handleAddFile = useCallback(
@@ -72,48 +70,21 @@ export default function MultiFileInput({
     <Box sx={{ ...(fullWidth && { width: '100%' }) }}>
       {!readOnly && (
         <>
-          <ButtonGroup variant='outlined' fullWidth={fullWidth} disabled={disabled}>
+          <Stack direction='row' spacing={1} sx={{ width: '100%' }}>
             <label htmlFor={htmlId} style={{ flex: 1 }}>
-              <Button fullWidth component='span' disabled={disabled}>
+              <Button fullWidth component='span' variant='outlined' disabled={disabled}>
                 {label}
               </Button>
             </label>
             <Button
-              size='small'
-              onClick={(e) => setSplitMenuAnchor(splitMenuAnchor ? null : e.currentTarget)}
+              variant='outlined'
               disabled={disabled}
-              aria-label='Select upload type'
+              endIcon={<FolderOpen />}
+              onClick={() => folderInputRef.current?.click()}
             >
-              <ArrowDropDown />
+              Select folder
             </Button>
-          </ButtonGroup>
-          <Popper
-            open={Boolean(splitMenuAnchor)}
-            anchorEl={splitMenuAnchor}
-            transition
-            disablePortal
-            sx={{ zIndex: 1 }}
-          >
-            {({ TransitionProps }) => (
-              <Grow {...TransitionProps}>
-                <Paper>
-                  <ClickAwayListener onClickAway={() => setSplitMenuAnchor(null)}>
-                    <MenuList>
-                      <MenuItem
-                        onClick={() => {
-                          setSplitMenuAnchor(null)
-                          folderInputRef.current?.click()
-                        }}
-                      >
-                        <FolderOpen sx={{ mr: 1 }} fontSize='small' />
-                        Select folder
-                      </MenuItem>
-                    </MenuList>
-                  </ClickAwayListener>
-                </Paper>
-              </Grow>
-            )}
-          </Popper>
+          </Stack>
           <Input
             multiple
             id={htmlId}
@@ -123,16 +94,18 @@ export default function MultiFileInput({
             disabled={disabled}
             data-test='uploadFileButton'
           />
-          {/* @ts-expect-error webkitdirectory is a non-standard attribute for folder selection */}
           <input
-            ref={folderInputRef}
+            ref={(el) => {
+              folderInputRef.current = el
+              if (el) {
+                el.setAttribute('webkitdirectory', '')
+              }
+            }}
             type='file'
             style={{ display: 'none' }}
             onChange={handleAddFile}
             disabled={disabled}
             data-test='uploadFolderButton'
-            webkitdirectory=''
-            directory=''
           />
         </>
       )}

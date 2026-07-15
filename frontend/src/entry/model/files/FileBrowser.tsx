@@ -1,26 +1,33 @@
 import AccountTree from '@mui/icons-material/AccountTree'
+import Delete from '@mui/icons-material/Delete'
 import Folder from '@mui/icons-material/Folder'
 import Home from '@mui/icons-material/Home'
+import MoreVert from '@mui/icons-material/MoreVert'
 import ViewList from '@mui/icons-material/ViewList'
 import {
-  Badge,
   Box,
   Breadcrumbs,
+  IconButton,
   Link,
-  List,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useMemo, useState } from 'react'
+import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
+import { useRouter } from 'next/router'
+import { useCallback, useMemo, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Paginate from 'src/common/Paginate'
 import FileDisplay, { MutateFiles, MutateReleases } from 'src/entry/model/files/FileDisplay'
+import useNotification from 'src/hooks/useNotification'
 import { EntryKind, FileInterface, ReleaseInterface } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import {
   buildFileTree,
   type FileTreeNode,
@@ -30,6 +37,15 @@ import {
 } from 'utils/fileTreeUtils'
 
 type ViewMode = 'flat' | 'folder'
+
+/** Union type for rendering both folders and files in the same Paginate list */
+type BrowseListItem = {
+  key: string
+  name: string
+  size: number
+  createdAt: Date
+  updatedAt: Date
+} & ({ kind: 'folder'; node: FileTreeNode } | { kind: 'file'; file: FileInterface })
 
 interface FileBrowserProps {
   files: FileInterface[]
@@ -53,30 +69,42 @@ export default function FileBrowser({
   const [currentPath, setCurrentPath] = useState('')
 
   const tree = useMemo(() => buildFileTree(files), [files])
-
-  // Get the directory node at the current browsing path
   const currentNode = useMemo(() => getNodeAtPath(tree, currentPath), [tree, currentPath])
   const breadcrumbs = useMemo(() => getBreadcrumbParts(currentPath), [currentPath])
 
-  // Separate directories and files at the current level, directories first
-  const { directories, filesAtLevel } = useMemo(() => {
+  // Build a unified list of folder and file items at the current level for Paginate
+  const browseItems: BrowseListItem[] = useMemo(() => {
     if (!currentNode) {
-      return { directories: [], filesAtLevel: [] }
+      return []
     }
-    const dirs: FileTreeNode[] = []
-    const fileNodes: FileInterface[] = []
+    const items: BrowseListItem[] = []
     for (const child of currentNode.children) {
       if (child.isDirectory) {
-        dirs.push(child)
+        items.push({
+          key: `folder-${child.fullPath}`,
+          kind: 'folder',
+          node: child,
+          name: child.name,
+          // Use earliest file date so folders sort meaningfully
+          size: child.totalFileCount,
+          createdAt: new Date(0),
+          updatedAt: new Date(0),
+        })
       } else if (child.file) {
-        fileNodes.push(child.file)
+        items.push({
+          key: child.file._id,
+          kind: 'file',
+          file: child.file,
+          name: child.file.name,
+          size: child.file.size,
+          createdAt: child.file.createdAt,
+          updatedAt: child.file.updatedAt,
+        })
       }
     }
-    dirs.sort((a, b) => a.name.localeCompare(b.name))
-    return { directories: dirs, filesAtLevel: fileNodes }
+    return items
   }, [currentNode])
 
-  // Reset path when switching to flat view
   const handleViewModeChange = (_: unknown, newMode: ViewMode | null) => {
     if (newMode) {
       setViewMode(newMode)
@@ -104,29 +132,45 @@ export default function FileBrowser({
     </Box>
   )
 
-  // Folder view: show breadcrumbs, directories, then files at current level
-  const FolderFileListItem = ({ data }: { data: FileInterface & { key: string } }) => (
-    <Box key={data._id} sx={{ width: '100%' }}>
-      <Stack spacing={1} sx={{ p: 2 }}>
-        <FileDisplay
-          showMenuItems={{
-            associatedReleases: !readOnly,
-            deleteFile: !readOnly && modelKind === EntryKind.MODEL,
-            rescanFile: !readOnly,
-          }}
-          file={data}
-          modelId={modelId}
-          mutator={mutator}
-          releases={releases}
-          displayName={data.name.includes('/') ? data.name.split('/').pop() : undefined}
-        />
-      </Stack>
-    </Box>
-  )
+  const BrowseListRow = ({ data }: { data: BrowseListItem }) => {
+    if (data.kind === 'folder') {
+      return (
+        <Box sx={{ width: '100%' }}>
+          <Stack spacing={1} sx={{ p: 2 }}>
+            <FolderRow
+              node={data.node}
+              modelId={modelId}
+              modelKind={modelKind}
+              releases={releases}
+              readOnly={readOnly}
+              onNavigate={setCurrentPath}
+            />
+          </Stack>
+        </Box>
+      )
+    }
+    return (
+      <Box key={data.file._id} sx={{ width: '100%' }}>
+        <Stack spacing={1} sx={{ p: 2 }}>
+          <FileDisplay
+            showMenuItems={{
+              associatedReleases: !readOnly,
+              deleteFile: !readOnly && modelKind === EntryKind.MODEL,
+              rescanFile: !readOnly,
+            }}
+            file={data.file}
+            modelId={modelId}
+            mutator={mutator}
+            releases={releases}
+            displayName={data.file.name.includes('/') ? data.file.name.split('/').pop() : undefined}
+          />
+        </Stack>
+      </Box>
+    )
+  }
 
   return (
     <Stack spacing={1} sx={{ width: '100%' }}>
-      {/* Only show the view toggle if there are nested files */}
       {hasNested && (
         <Stack direction='row' sx={{ justifyContent: 'flex-end' }}>
           <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small'>
@@ -161,7 +205,6 @@ export default function FileBrowser({
         </Paginate>
       ) : (
         <>
-          {/* Breadcrumb navigation */}
           <Breadcrumbs sx={{ px: 2, py: 1 }}>
             <Link
               component='button'
@@ -190,51 +233,176 @@ export default function FileBrowser({
               )
             })}
           </Breadcrumbs>
-          {/* Directory entries */}
-          {directories.length > 0 && (
-            <List disablePadding>
-              {directories.map((dir) => (
-                <ListItemButton
-                  key={dir.fullPath}
-                  onClick={() => setCurrentPath(dir.fullPath)}
-                  data-test={`folder-${dir.name}`}
-                >
-                  <ListItemIcon>
-                    <Badge badgeContent={dir.totalFileCount} color='primary' max={999}>
-                      <Folder color='action' />
-                    </Badge>
-                  </ListItemIcon>
-                  <ListItemText primary={dir.name} />
-                </ListItemButton>
-              ))}
-            </List>
-          )}
-          {/* Files at current directory level */}
-          {filesAtLevel.length > 0 ? (
-            <Paginate
-              list={filesAtLevel.map((f) => ({ key: f._id, ...f }))}
-              emptyListText='No files in this folder'
-              searchFilterProperty='name'
-              sortingProperties={[
-                { value: 'name', title: 'Name', iconKind: 'text' },
-                { value: 'size', title: 'Size', iconKind: 'size' },
-                { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-                { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-              ]}
-              searchPlaceholderText='Search files in this folder'
-              defaultSortProperty='name'
-            >
-              {FolderFileListItem}
-            </Paginate>
-          ) : (
-            directories.length === 0 && (
-              <Typography sx={{ px: 2, py: 4, textAlign: 'center' }} color='text.secondary'>
-                No files in this folder
-              </Typography>
-            )
-          )}
+          <Paginate
+            list={browseItems}
+            emptyListText='No files in this folder'
+            searchFilterProperty='name'
+            sortingProperties={[
+              { value: 'name', title: 'Name', iconKind: 'text' },
+              { value: 'size', title: 'Size', iconKind: 'size' },
+              { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+              { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+            ]}
+            searchPlaceholderText='Search by name'
+            defaultSortProperty='name'
+          >
+            {BrowseListRow}
+          </Paginate>
         </>
       )}
     </Stack>
+  )
+}
+
+/** Renders a folder row with the same visual weight as FileDisplay, including a delete action menu. */
+function FolderRow({
+  node,
+  modelId,
+  modelKind,
+  releases,
+  readOnly,
+  onNavigate,
+}: {
+  node: FileTreeNode
+  modelId: string
+  modelKind?: string
+  releases: ReleaseInterface[]
+  readOnly: boolean
+  onNavigate: (path: string) => void
+}) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const sendNotification = useNotification()
+  const { mutateModelFiles } = useGetModelFiles(modelId)
+  const router = useRouter()
+
+  // Collect all files recursively under this folder
+  const allFilesInFolder = useMemo(() => {
+    const result: FileInterface[] = []
+    const collect = (n: FileTreeNode) => {
+      if (!n.isDirectory && n.file) {
+        result.push(n.file)
+      }
+      for (const child of n.children) {
+        collect(child)
+      }
+    }
+    collect(node)
+    return result
+  }, [node])
+
+  // Find releases that reference any file in this folder
+  const associatedReleases = useMemo(
+    () => releases.filter((release) => allFilesInFolder.some((file) => release.fileIds.includes(file._id))),
+    [releases, allFilesInFolder],
+  )
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (isDeleting) {
+      return
+    }
+    try {
+      setIsDeleting(true)
+      setDeleteError('')
+      for (const file of allFilesInFolder) {
+        const res = await deleteEntryFile(modelId, file._id)
+        if (!res.ok) {
+          setDeleteError(await getErrorMessage(res))
+          return
+        }
+      }
+      sendNotification({
+        variant: 'success',
+        msg: `Folder "${node.name}" and ${allFilesInFolder.length} file(s) deleted`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+      mutateModelFiles()
+      setDeleteOpen(false)
+      router.push(`/model/${modelId}?tab=files`)
+    } catch (err) {
+      setDeleteError(`Failed to delete folder.\n${err}`)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [isDeleting, allFilesInFolder, modelId, node.name, sendNotification, mutateModelFiles, router])
+
+  const canDelete = !readOnly && modelKind === EntryKind.MODEL
+
+  return (
+    <>
+      <Stack
+        direction={{ sm: 'column', md: 'row' }}
+        spacing={2}
+        sx={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+      >
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{ alignItems: 'center', cursor: 'pointer', flex: 1 }}
+          onClick={() => onNavigate(node.fullPath)}
+        >
+          <Folder color='action' />
+          <Typography variant='h6'>{node.name}</Typography>
+          <Typography variant='caption' sx={{ width: 'max-content' }}>
+            {node.totalFileCount} file{node.totalFileCount !== 1 ? 's' : ''}
+          </Typography>
+        </Stack>
+        {canDelete && (
+          <>
+            <IconButton
+              size='small'
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+              data-test={`folder-menu-${node.name}`}
+            >
+              <MoreVert />
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null)
+                  setDeleteOpen(true)
+                }}
+              >
+                <ListItemIcon>
+                  <Delete color='error' fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Delete folder</ListItemText>
+              </MenuItem>
+            </Menu>
+          </>
+        )}
+      </Stack>
+      <ConfirmationDialogue
+        open={deleteOpen}
+        title={`Delete folder "${node.name}"?`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteOpen(false)}
+        loading={isDeleting}
+        errorMessage={deleteError}
+      >
+        <Stack spacing={1}>
+          <Typography>
+            This will delete <strong>{allFilesInFolder.length}</strong> file{allFilesInFolder.length !== 1 ? 's' : ''}{' '}
+            in this folder and all sub-folders.
+          </Typography>
+          {associatedReleases.length > 0 && (
+            <Typography color='error'>
+              Warning: {associatedReleases.length} release{associatedReleases.length !== 1 ? 's' : ''} reference files
+              in this folder: {associatedReleases.map((r) => r.semver).join(', ')}
+            </Typography>
+          )}
+          <Typography variant='caption'>Files to be deleted:</Typography>
+          <Box sx={{ maxHeight: 200, overflow: 'auto', pl: 2 }}>
+            {allFilesInFolder.map((file) => (
+              <Typography key={file._id} variant='body2'>
+                {file.name}
+              </Typography>
+            ))}
+          </Box>
+        </Stack>
+      </ConfirmationDialogue>
+    </>
   )
 }
