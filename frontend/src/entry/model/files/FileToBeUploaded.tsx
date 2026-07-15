@@ -61,10 +61,10 @@ export default function FileToBeUploaded({
           textOverflow: 'ellipsis',
         }}
       >
-        <Tooltip title={fileWithMetadata.file.name}>
+        <Tooltip title={fileWithMetadata.uploadPath || fileWithMetadata.file.name}>
           <Chip
             color='primary'
-            label={fileWithMetadata.file.name}
+            label={fileWithMetadata.uploadPath || fileWithMetadata.file.name}
             onDelete={() => onDelete(fileWithMetadata.file.name)}
           />
         </Tooltip>

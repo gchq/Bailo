@@ -28,7 +28,9 @@ export async function postFileForModelId(
   file: File,
   onUploadProgress: (progress: AxiosProgressEvent) => void,
   metadata?: FileUploadMetadata,
+  uploadName?: string,
 ) {
+  const name = uploadName || file.name
   const mime = file.type || 'application/octet-stream'
 
   const queryParams = {
@@ -37,7 +39,7 @@ export async function postFileForModelId(
   }
   try {
     const fileResponse = await axios.post(
-      `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify(queryParams)}`,
+      `/api/v2/model/${modelId}/files/upload/simple?name=${encodeURIComponent(name)}&mime=${mime}&${qs.stringify(queryParams)}`,
       file,
       { onUploadProgress },
     )

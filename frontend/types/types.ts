@@ -697,6 +697,7 @@ export type RestrictedActionKeys = keyof UserPermissions
 export type FileUploadWithMetadata = {
   file: File
   metadata?: FileUploadMetadata
+  uploadPath?: string
 }
 
 export type FileUploadMetadata = {

@@ -1,9 +1,28 @@
 import styled from '@emotion/styled'
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import FileUpload from '@mui/icons-material/FileUpload'
-import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
+import FolderOpen from '@mui/icons-material/FolderOpen'
+import {
+  Alert,
+  Box,
+  Button,
+  ButtonGroup,
+  ClickAwayListener,
+  Dialog,
+  DialogContent,
+  Divider,
+  Grow,
+  LinearProgress,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -30,20 +49,29 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
   const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
+  const [splitMenuAnchor, setSplitMenuAnchor] = useState<HTMLElement | null>(null)
+  const folderInputRef = useRef<HTMLInputElement>(null)
 
   const handleAddNewFiles = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const newFiles = event.target.files
         ? Array.from(event.target.files).map((newFile) => {
-            return { file: newFile }
+            // For folder uploads, webkitRelativePath contains the path relative to the selected folder
+            const uploadPath = newFile.webkitRelativePath || undefined
+            const dedupeKey = uploadPath || newFile.name
+            return { file: newFile, uploadPath, _dedupeKey: dedupeKey }
           })
         : []
       const filteredNewFiles = newFiles.filter(
         (newFile) =>
-          filesToBeUploaded.find((existingFile) => existingFile.file.name === newFile.file.name) === undefined,
+          filesToBeUploaded.find(
+            (existingFile) => (existingFile.uploadPath || existingFile.file.name) === newFile._dedupeKey,
+          ) === undefined,
       )
 
-      setFilesToBeUpload([...filteredNewFiles, ...filesToBeUploaded])
+      setFilesToBeUpload([...filteredNewFiles.map(({ _dedupeKey: _, ...rest }) => rest), ...filesToBeUploaded])
+      // Reset input value so re-selecting the same folder works
+      event.target.value = ''
     },
     [filesToBeUploaded],
   )
@@ -85,6 +113,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
           fileItem.file,
           handleUploadProgress,
           fileItem.metadata,
+          fileItem.uploadPath,
         )
         setCurrentFileUploadProgress(undefined)
         if (fileUploadResponse) {
@@ -154,17 +183,49 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
-          <label htmlFor='add-files-button' style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Button
-              loading={isFilesUploading}
-              endIcon={<FileUpload />}
-              component='span'
-              variant='outlined'
-              sx={{ width: '40%' }}
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <ButtonGroup variant='outlined'>
+              <label htmlFor='add-files-button'>
+                <Button loading={isFilesUploading} endIcon={<FileUpload />} component='span'>
+                  Select files
+                </Button>
+              </label>
+              <Button
+                size='small'
+                onClick={(e) => setSplitMenuAnchor(splitMenuAnchor ? null : e.currentTarget)}
+                aria-label='Select upload type'
+              >
+                <ArrowDropDown />
+              </Button>
+            </ButtonGroup>
+            <Popper
+              open={Boolean(splitMenuAnchor)}
+              anchorEl={splitMenuAnchor}
+              transition
+              disablePortal
+              sx={{ zIndex: 1 }}
             >
-              Select files
-            </Button>
-          </label>
+              {({ TransitionProps }) => (
+                <Grow {...TransitionProps}>
+                  <Paper>
+                    <ClickAwayListener onClickAway={() => setSplitMenuAnchor(null)}>
+                      <MenuList>
+                        <MenuItem
+                          onClick={() => {
+                            setSplitMenuAnchor(null)
+                            folderInputRef.current?.click()
+                          }}
+                        >
+                          <FolderOpen sx={{ mr: 1 }} fontSize='small' />
+                          Select folder
+                        </MenuItem>
+                      </MenuList>
+                    </ClickAwayListener>
+                  </Paper>
+                </Grow>
+              )}
+            </Popper>
+          </Box>
           {model.kind === EntryKind.UNTRUSTED_MODEL && (
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <MessageAlert
@@ -175,6 +236,16 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
             </Box>
           )}
           <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
+          {/* @ts-expect-error webkitdirectory is a non-standard attribute for folder selection */}
+          <input
+            ref={folderInputRef}
+            type='file'
+            style={{ display: 'none' }}
+            onChange={handleAddNewFiles}
+            data-test='uploadFolderButton'
+            webkitdirectory=''
+            directory=''
+          />
           {filesToBeUploaded.length === 0 && <EmptyBlob text='No files selected.' />}
           {filesToBeUploaded.length > 0 && (
             <Typography
