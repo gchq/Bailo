@@ -44,12 +44,7 @@ export default function EntryCardRevision({
 
   return (
     <TableBody>
-      <TableRow
-        hover={snapshot.local !== 1}
-        selected={isChecked}
-        onClick={snapshot.local !== 1 ? onRowClick : () => {}}
-        sx={{ '&:hover': { cursor: snapshot.local !== 1 ? 'pointer' : 'default' } }}
-      >
+      <TableRow hover selected={isChecked} onClick={onRowClick} sx={{ '&:hover': { cursor: 'pointer' } }}>
         <TableCell>
           <Stack direction='column' spacing={0}>
             {snapshot.local !== undefined && (
@@ -65,14 +60,12 @@ export default function EntryCardRevision({
         </TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateTimeString(snapshot.createdAt)}</TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>
-          {snapshot.local !== 1 && (
-            <Checkbox
-              checked={isChecked}
-              onClick={(event) => event.stopPropagation()}
-              onChange={onCheckToggle}
-              disabled={hideCheckbox}
-            />
-          )}
+          <Checkbox
+            checked={isChecked}
+            onClick={(event) => event.stopPropagation()}
+            onChange={onCheckToggle}
+            disabled={hideCheckbox}
+          />
         </TableCell>
       </TableRow>
     </TableBody>

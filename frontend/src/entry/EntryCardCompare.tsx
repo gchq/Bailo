@@ -169,33 +169,20 @@ export default function EntryCardCompare({
     isSchemaError: isSchemaError,
   } = useGetSchema(chosenSchemaId ?? '')
 
-  // First versions are non comparable since they have no content
   const sortedFromLocalRevisions = useMemo(
-    () =>
-      [...fromRevisions]
-        .filter((revision) => revision.version !== 1 && !revision.mirrored)
-        .sort(sortByCreatedAtDescending),
+    () => [...fromRevisions].filter((revision) => !revision.mirrored).sort(sortByCreatedAtDescending),
     [fromRevisions],
   )
   const sortedFromMirroredRevisions = useMemo(
-    () =>
-      [...fromRevisions]
-        .filter((revision) => revision.version !== 1 && revision.mirrored)
-        .sort(sortByCreatedAtDescending),
+    () => [...fromRevisions].filter((revision) => revision.mirrored).sort(sortByCreatedAtDescending),
     [fromRevisions],
   )
   const sortedToLocalRevisions = useMemo(
-    () =>
-      [...toRevisions]
-        .filter((revision) => revision.version !== 1 && !revision.mirrored)
-        .sort(sortByCreatedAtDescending),
+    () => [...toRevisions].filter((revision) => !revision.mirrored).sort(sortByCreatedAtDescending),
     [toRevisions],
   )
   const sortedToMirroredRevisions = useMemo(
-    () =>
-      [...toRevisions]
-        .filter((revision) => revision.version !== 1 && revision.mirrored)
-        .sort(sortByCreatedAtDescending),
+    () => [...toRevisions].filter((revision) => revision.mirrored).sort(sortByCreatedAtDescending),
     [toRevisions],
   )
 
@@ -378,7 +365,7 @@ export default function EntryCardCompare({
               />
               <Autocomplete
                 disablePortal
-                options={sortedFromLocalRevisions.filter((revision) => revision.version !== 1)}
+                options={sortedFromLocalRevisions}
                 disabled={!fromEntryId}
                 loading={isFromRevisionsLoading}
                 fullWidth
