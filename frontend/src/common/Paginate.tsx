@@ -36,6 +36,7 @@ interface PaginateProps<T> {
   defaultSortDirection?: SortingDirectionKeys
   hideBorders?: boolean
   hideDividers?: boolean
+  onSearchChange?: (query: string) => void
   children: ({ data }: { data: T }) => ReactElement
 }
 
@@ -64,6 +65,7 @@ export default function Paginate<T>({
   defaultSortDirection = SortingDirection.DESC,
   hideBorders = false,
   hideDividers = false,
+  onSearchChange,
   children,
 }: PaginateProps<T>) {
   const [page, setPage] = useState(1)
@@ -73,6 +75,14 @@ export default function Paginate<T>({
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(defaultSortDirection)
   const [searchFilter, setSearchFilter] = useState('')
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchFilter(value)
+      onSearchChange?.(value)
+    },
+    [onSearchChange],
+  )
 
   const filteredList = list.filter((item: T) => {
     if (!searchFilterProperty) {
@@ -267,7 +277,7 @@ export default function Paginate<T>({
             size='small'
             value={searchFilter}
             label={searchPlaceholderText}
-            onChange={(e) => setSearchFilter(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             sx={{ maxWidth: '200px' }}
           />
         )}

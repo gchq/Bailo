@@ -14,7 +14,6 @@ import {
   Menu,
   MenuItem,
   Stack,
-  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
@@ -114,15 +113,6 @@ export default function FileBrowser({
     return items
   }, [currentNode])
 
-  // Filter browse items by the managed search query so folders with matching nested files are shown
-  const filteredBrowseItems = useMemo(() => {
-    if (!folderSearchQuery) {
-      return browseItems
-    }
-    const lowerQuery = folderSearchQuery.toLowerCase()
-    return browseItems.filter((item) => item.searchableText.toLowerCase().includes(lowerQuery))
-  }, [browseItems, folderSearchQuery])
-
   const handleViewModeChange = (_: unknown, newMode: ViewMode | null) => {
     if (newMode) {
       setViewMode(newMode)
@@ -188,90 +178,95 @@ export default function FileBrowser({
     )
   }
 
+  const viewToggle = hasNested ? (
+    <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small'>
+      <ToggleButton value='folder' data-test='folderViewToggle'>
+        <Tooltip title='Folder view'>
+          <AccountTree fontSize='small' />
+        </Tooltip>
+      </ToggleButton>
+      <ToggleButton value='flat' data-test='flatViewToggle'>
+        <Tooltip title='Flat list view'>
+          <ViewList fontSize='small' />
+        </Tooltip>
+      </ToggleButton>
+    </ToggleButtonGroup>
+  ) : null
+
   return (
-    <Stack spacing={1} sx={{ width: '100%' }}>
-      {hasNested && (
-        <Stack direction='row' sx={{ justifyContent: 'flex-end' }}>
-          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small'>
-            <ToggleButton value='folder' data-test='folderViewToggle'>
-              <Tooltip title='Folder view'>
-                <AccountTree fontSize='small' />
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value='flat' data-test='flatViewToggle'>
-              <Tooltip title='Flat list view'>
-                <ViewList fontSize='small' />
-              </Tooltip>
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Stack>
-      )}
+    <Stack spacing={0} sx={{ width: '100%' }}>
       {viewMode === 'flat' ? (
-        <Paginate
-          list={files.map((f) => ({ key: f._id, ...f }))}
-          emptyListText='No files found'
-          searchFilterProperty='name'
-          sortingProperties={[
-            { value: 'name', title: 'Name', iconKind: 'text' },
-            { value: 'size', title: 'Size', iconKind: 'size' },
-            { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-            { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-          ]}
-          searchPlaceholderText='Search by file name'
-          defaultSortProperty='createdAt'
-        >
-          {FlatFileListItem}
-        </Paginate>
-      ) : (
         <>
-          <Breadcrumbs sx={{ px: 2, py: 1 }}>
-            <Link
-              component='button'
-              underline='hover'
-              onClick={() => setCurrentPath('')}
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <Home fontSize='small' />
-              Root
-            </Link>
-            {breadcrumbs.map((crumb, i) => {
-              const isLast = i === breadcrumbs.length - 1
-              return isLast ? (
-                <Typography key={crumb.fullPath} fontWeight='bold'>
-                  {crumb.name}
-                </Typography>
-              ) : (
-                <Link
-                  key={crumb.fullPath}
-                  component='button'
-                  underline='hover'
-                  onClick={() => setCurrentPath(crumb.fullPath)}
-                >
-                  {crumb.name}
-                </Link>
-              )
-            })}
-          </Breadcrumbs>
-          <TextField
-            size='small'
-            placeholder='Search files and folders...'
-            value={folderSearchQuery}
-            onChange={(e) => setFolderSearchQuery(e.target.value)}
-            sx={{ px: 2, pb: 1 }}
-            fullWidth
-          />
+          {viewToggle && (
+            <Stack direction='row' sx={{ justifyContent: 'flex-end', px: 2, pt: 1 }}>
+              {viewToggle}
+            </Stack>
+          )}
           <Paginate
-            list={filteredBrowseItems}
-            emptyListText={folderSearchQuery ? 'No matching files or folders' : 'No files in this folder'}
-            searchFilterProperty='searchableText'
-            hideSearchInput
+            list={files.map((f) => ({ key: f._id, ...f }))}
+            emptyListText='No files found'
+            searchFilterProperty='name'
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
               { value: 'size', title: 'Size', iconKind: 'size' },
               { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
               { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
             ]}
-            searchPlaceholderText='Search by name'
+            searchPlaceholderText='Search by file name'
+            defaultSortProperty='createdAt'
+          >
+            {FlatFileListItem}
+          </Paginate>
+        </>
+      ) : (
+        <>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{ alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1 }}
+          >
+            <Breadcrumbs sx={{ flex: 1 }}>
+              <Link
+                component='button'
+                underline='hover'
+                onClick={() => setCurrentPath('')}
+                sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+              >
+                <Home fontSize='small' />
+                Root
+              </Link>
+              {breadcrumbs.map((crumb, i) => {
+                const isLast = i === breadcrumbs.length - 1
+                return isLast ? (
+                  <Typography key={crumb.fullPath} fontWeight='bold'>
+                    {crumb.name}
+                  </Typography>
+                ) : (
+                  <Link
+                    key={crumb.fullPath}
+                    component='button'
+                    underline='hover'
+                    onClick={() => setCurrentPath(crumb.fullPath)}
+                  >
+                    {crumb.name}
+                  </Link>
+                )
+              })}
+            </Breadcrumbs>
+            {viewToggle}
+          </Stack>
+          <Paginate
+            list={browseItems}
+            emptyListText='No files in this folder'
+            searchFilterProperty='searchableText'
+            onSearchChange={setFolderSearchQuery}
+            sortingProperties={[
+              { value: 'name', title: 'Name', iconKind: 'text' },
+              { value: 'size', title: 'Size', iconKind: 'size' },
+              { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+              { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+            ]}
+            searchPlaceholderText='Search files and folders'
             defaultSortProperty='name'
           >
             {BrowseListRow}
@@ -359,9 +354,7 @@ function FolderRow({
   }, [isDeleting, allFilesInFolder, modelId, node.name, sendNotification, mutateModelFiles, router])
 
   const canDelete = !readOnly && modelKind === EntryKind.MODEL
-
-  // When a search is active, show the count of matching files instead of the total
-  const displayCount = useMemo(() => countMatchingFiles(node, searchQuery), [node, searchQuery])
+  const matchingCount = useMemo(() => countMatchingFiles(node, searchQuery), [node, searchQuery])
   const totalCount = node.totalFileCount
 
   return (
@@ -380,8 +373,8 @@ function FolderRow({
           <Folder color='action' />
           <Typography variant='h6'>{node.name}</Typography>
           <Typography variant='caption' sx={{ width: 'max-content' }}>
-            {searchQuery && displayCount !== totalCount
-              ? `${displayCount} of ${totalCount} file${totalCount !== 1 ? 's' : ''} match`
+            {searchQuery && matchingCount !== totalCount
+              ? `${matchingCount} of ${totalCount} file${totalCount !== 1 ? 's' : ''} match`
               : `${totalCount} file${totalCount !== 1 ? 's' : ''}`}
           </Typography>
         </Stack>

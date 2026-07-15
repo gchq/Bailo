@@ -82,7 +82,7 @@ export default function MultiFileInput({
               endIcon={<FolderOpen />}
               onClick={() => folderInputRef.current?.click()}
             >
-              Select folder
+              Select new folder
             </Button>
           </Stack>
           <Input
