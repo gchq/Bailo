@@ -249,6 +249,8 @@ export interface MetricsEntrySearchOptions {
   schemaId: string
   release: string
   accessRequest: string
+  startMonth: string
+  endMonth: string
 }
 
 export type MetricsEntrySearchOptionsParams = Optional<MetricsEntrySearchOptions>
@@ -260,6 +262,8 @@ export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOption
     schemaId: z.string().optional(),
     release: z.string().optional(),
     accessRequest: z.string().optional(),
+    startMonth: z.string().optional(),
+    endMonth: z.string().optional(),
   })
 
 export type ModelImages = ModelImageTags[]

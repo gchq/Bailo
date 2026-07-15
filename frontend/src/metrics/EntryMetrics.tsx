@@ -1,3 +1,4 @@
+import dayjs from '@dayjs'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
@@ -6,7 +7,8 @@ import { useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import MetricsBreakdownTable from 'src/metrics/components/MetricsBreakdownTable'
+import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTable'
+import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
 import { buildEntriesHref, EntriesFilterQuery, filterIncludeTypes } from 'utils/metricsUtils'
 
@@ -29,6 +31,9 @@ export default function EntryMetrics() {
   const schemaId = getQueryString(router.query.schemaId)
   const release = getQueryString(router.query.release)
   const accessRequest = getQueryString(router.query.accessRequest)
+  const startMonth = typeof router.query.startMonth === 'string' ? router.query.startMonth : undefined
+
+  const endMonth = typeof router.query.endMonth === 'string' ? router.query.endMonth : undefined
 
   const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown({
     organisation: organisation !== ALL_VALUE ? organisation : undefined,
@@ -36,16 +41,24 @@ export default function EntryMetrics() {
     schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
     release: release !== ALL_VALUE ? release : undefined,
     accessRequest: accessRequest !== ALL_VALUE ? accessRequest : undefined,
+    startMonth,
+    endMonth,
   })
 
-  function updateFilter(key: keyof EntriesFilterQuery, value: string) {
-    const current: EntriesFilterQuery = {
+  function getCurrentFilterQuery(): EntriesFilterQuery {
+    return {
       organisation: organisation !== ALL_VALUE ? organisation : undefined,
       state: state !== ALL_VALUE ? state : undefined,
       schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
       release: release !== ALL_VALUE ? release : undefined,
       accessRequest: accessRequest !== ALL_VALUE ? accessRequest : undefined,
+      startMonth,
+      endMonth,
     }
+  }
+
+  function updateFilter(key: keyof EntriesFilterQuery, value: string) {
+    const current = getCurrentFilterQuery()
 
     const next = {
       ...current,
@@ -53,6 +66,20 @@ export default function EntryMetrics() {
     }
 
     router.push(buildEntriesHref(next), undefined, { shallow: true })
+  }
+
+  function updateMonthRange(start?: string, end?: string) {
+    const current = getCurrentFilterQuery()
+
+    const next: EntriesFilterQuery = {
+      ...current,
+      startMonth: start,
+      endMonth: end,
+    }
+
+    router.push(buildEntriesHref(next), undefined, {
+      shallow: true,
+    })
   }
 
   const organisationOptions = useMemo(
@@ -165,6 +192,13 @@ export default function EntryMetrics() {
             />
           </Stack>
         </Stack>
+        <MonthlyUploadsSelector
+          startDate={startMonth ? dayjs(startMonth) : null}
+          endDate={endMonth ? dayjs(endMonth) : null}
+          showTitle={false}
+          onStartDateChange={(date) => updateMonthRange(date ? date.format('YYYY-MM') : undefined, endMonth)}
+          onEndDateChange={(date) => updateMonthRange(startMonth, date ? date.format('YYYY-MM') : undefined)}
+        />
       </Stack>
       {isEntriesError ? (
         <MessageAlert message={isEntriesError.info.message} />

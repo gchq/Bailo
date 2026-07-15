@@ -3,7 +3,7 @@ import { useGetPolicyMetrics } from 'actions/metrics'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import MetricsHeader from 'src/metrics/MetricsHeader'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
 
 export default function PolicyMetrics() {

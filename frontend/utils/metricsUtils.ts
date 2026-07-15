@@ -23,6 +23,8 @@ export type EntriesFilterQuery = {
   schemaId?: string
   release?: string
   accessRequest?: string
+  startMonth?: string
+  endMonth?: string
 }
 
 type BreakdownContext = {
@@ -90,6 +92,12 @@ export function buildEntriesHref(filters: EntriesFilterQuery): string {
   }
   if (filters.accessRequest) {
     params.set('accessRequest', filters.accessRequest)
+  }
+  if (filters.startMonth) {
+    params.set('startMonth', filters.startMonth)
+  }
+  if (filters.endMonth) {
+    params.set('endMonth', filters.endMonth)
   }
   const queryString = params.toString()
   return `/metrics?tab=entries${queryString ? `&${queryString}` : ''}`

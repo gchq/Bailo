@@ -745,6 +745,30 @@ export class BaseMetricsConnector {
       }
     }
 
+    // Filter by createdAt month range if provided. startMonth and endMonth are
+    // each independently optional, so only add the bound that was supplied.
+    if (query.startMonth !== undefined || query.endMonth !== undefined) {
+      const createdAtFilter: { $gte?: Date; $lt?: Date } = {}
+
+      if (query.startMonth !== undefined) {
+        const start = new Date(query.startMonth)
+        if (isNaN(start.getTime())) {
+          throw BadReq('Invalid startMonth. Must be in the format YYYY-MM.', { startMonth: query.startMonth })
+        }
+        createdAtFilter.$gte = start
+      }
+
+      if (query.endMonth !== undefined) {
+        const end = new Date(query.endMonth)
+        if (isNaN(end.getTime())) {
+          throw BadReq('Invalid endMonth. Must be in the format YYYY-MM.', { endMonth: query.endMonth })
+        }
+        createdAtFilter.$lt = addInterval(end, 'month')
+      }
+
+      mongoQuery.createdAt = createdAtFilter
+    }
+
     if (Object.keys(idFilter).length > 0) {
       mongoQuery.id = idFilter
     }
