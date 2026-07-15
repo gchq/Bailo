@@ -108,7 +108,7 @@ export default function SchemaMigrationEditor() {
       {sourceSchemaCombined && targetSchemaCombined && (
         <Container maxWidth='xl'>
           <Paper sx={{ my: 4, p: 4 }}>
-            <Link href={`/schemas/list?tab=migrations`}>
+            <Link href='/admin?section=migration'>
               <Button
                 size='small'
                 sx={{ width: 'fit-content', pb: 2 }}
