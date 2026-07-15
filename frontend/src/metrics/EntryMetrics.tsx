@@ -1,8 +1,8 @@
-import { Container, Stack, Typography } from '@mui/material'
+import { Button, Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -35,20 +35,23 @@ export default function EntryMetrics() {
     schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
   })
 
-  function updateFilter(key: keyof EntriesFilterQuery, value: string) {
-    const current: EntriesFilterQuery = {
-      organisation: organisation !== ALL_VALUE ? organisation : undefined,
-      state: state !== ALL_VALUE ? state : undefined,
-      schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
-    }
+  const updateFilter = useCallback(
+    (key: keyof EntriesFilterQuery, value: string) => {
+      const current: EntriesFilterQuery = {
+        organisation: organisation !== ALL_VALUE ? organisation : undefined,
+        state: state !== ALL_VALUE ? state : undefined,
+        schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
+      }
 
-    const next = {
-      ...current,
-      [key]: value === ALL_VALUE ? undefined : value,
-    }
+      const next = {
+        ...current,
+        [key]: value === ALL_VALUE ? undefined : value,
+      }
 
-    router.push(buildEntriesHref(next), undefined, { shallow: true })
-  }
+      router.push(buildEntriesHref(next), undefined, { shallow: true })
+    },
+    [organisation, router, schemaId, state],
+  )
 
   const stateOptions = useMemo(
     () => [ALL_VALUE, ...(overviewMetrics?.global.entryState?.map((s) => s.state) ?? [])],
@@ -88,6 +91,15 @@ export default function EntryMetrics() {
     return `${count} ${count === 1 ? 'entry' : 'entries'}`
   }, [isEntriesLoading, isEntriesError, tableData.length])
 
+  const handleClearFiltersOnClick = useCallback(() => {
+    const current: EntriesFilterQuery = {
+      organisation: organisation,
+      state: undefined,
+      schemaId: undefined,
+    }
+    router.push(buildEntriesHref(current), undefined, { shallow: true })
+  }, [organisation, router])
+
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
@@ -125,6 +137,9 @@ export default function EntryMetrics() {
                     selectedValue={schemaId}
                     onSelect={(value) => updateFilter('schemaId', value)}
                   />
+                  <Button disabled={state === ALL_VALUE && schemaId === ALL_VALUE} onClick={handleClearFiltersOnClick}>
+                    Clear filters
+                  </Button>
                 </Stack>
                 {resultCountLabel && (
                   <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
