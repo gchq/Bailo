@@ -60,7 +60,7 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
     <Stack spacing={4}>
       <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-          Entries with no releases
+          Models with no releases
         </Typography>
         <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
           <Table size='small'>
