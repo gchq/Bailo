@@ -1006,7 +1006,7 @@ export interface OverviewMetrics {
   lastUpdated: string
 }
 
-export interface PolicySummaryMetrics {
+export interface PolicyRoleSummaryMetrics {
   roleId: string
   roleName: string
   count: number
@@ -1017,23 +1017,23 @@ export interface PolicyRoleMetric {
   roleName: string
 }
 
-export interface PolicyModelMetrics {
+export interface PolicyModelRoleMetrics {
   entryId: string
   missingRoles: PolicyRoleMetric[]
   modelOwners: string[]
 }
 
-export interface PolicyBaseMetrics {
-  summary: PolicySummaryMetrics[]
-  entries: PolicyModelMetrics[]
+export interface PolicyRoleBaseMetrics {
+  summary: PolicyRoleSummaryMetrics[]
+  entries: PolicyModelRoleMetrics[]
 }
 
-export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
+export interface OrganisationPolicyMetrics extends PolicyRoleBaseMetrics {
   organisation: string
 }
 
-export interface PolicyMetrics {
-  global: PolicyBaseMetrics
+export interface PolicyRoleMetrics {
+  global: PolicyRoleBaseMetrics
   byOrganisation: OrganisationPolicyMetrics[]
   lastUpdated: string
 }
@@ -1049,3 +1049,30 @@ export const Roles = {
   Compliance: 'compliance',
 } as const
 export type RoleKeys = (typeof Roles)[keyof typeof Roles]
+
+export interface NoReleasesSummaryMetrics {
+  modelsWithNoReleases: number
+}
+
+export interface ModelsNoReleases {
+  entryId: string
+  organisation: string
+  modelOwners: string[]
+}
+
+export interface GlobalNoReleasesMetrics {
+  summary: NoReleasesSummaryMetrics
+  entries: ModelsNoReleases[]
+}
+
+export interface NoReleaseMetricsByOrg {
+  organisation: string
+  summary: NoReleasesSummaryMetrics
+  entries: ModelsNoReleases[]
+}
+
+export interface BaseNoReleaseMetrics {
+  global: GlobalNoReleasesMetrics
+  byOrganisation: NoReleaseMetricsByOrg[]
+  lastUpdated: string
+}
