@@ -3,6 +3,7 @@ from __future__ import annotations
 from io import BytesIO
 from json import JSONDecodeError
 from typing import Any
+from urllib.parse import quote
 
 import requests
 
@@ -519,18 +520,20 @@ class Client:
 
         :param model_id: Unique model ID
         :param semver: Semver of the release
-        :param filename: The filename trying to download from
+        :param filename: The filename trying to download from (may contain slashes for path-like names)
         :return: Response object
         """
+        # URL-encode each path segment so slashes in path-like filenames are preserved in the URL
+        encoded_filename = "/".join(quote(segment, safe="") for segment in filename.split("/"))
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download",
+                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{encoded_filename}/download",
                 stream=True,
                 timeout=10_000,
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download",
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{encoded_filename}/download",
                 stream=True,
                 timeout=10_000,
             )
