@@ -44,21 +44,20 @@ export default function EntrySelect({
     if (!response.ok) {
       if (field === 'state') {
         router.replace({
-          query: { ...router.query, requiredByModelState: event.target.value },
+          query: { ...router.query, requiredByModelState: event.target.value, isEdit: 'true' },
         })
       }
       setErrorMessage(await getErrorMessage(response))
     } else {
-      if (field === 'state') {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { requiredByModelState, ...queryWithoutFiltered } = router.query
-        router.replace({
-          query: queryWithoutFiltered,
-        })
-      }
+      const { ...queries } = router.query
+      delete queries.requiredByModelState
+      router.replace({
+        query: queries,
+      })
+
       mutate()
+      setIsEdit(false)
     }
-    setIsEdit(false)
   }
 
   return (
@@ -76,7 +75,7 @@ export default function EntrySelect({
               value={value ?? ''}
               onChange={handleSelectOption}
               displayEmpty
-              renderValue={(value: any) => (value ? value : <em>Unset</em>)}
+              renderValue={(value: string) => (value ? value : <em>Unset</em>)}
             >
               {options.map((option: string) => (
                 <MenuItem key={option} value={option}>

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "nodemon",
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/src/services/smtp/templates && cp src/services/smtp/templates/*.hbs dist/src/services/smtp/templates/",
     "test": "vitest",
     "lint": "eslint . -c eslint.config.mjs '**/*.ts' --max-warnings=0",
     "style": "prettier --write .",
@@ -49,6 +49,7 @@
     "express-session": "^1.19.0",
     "form-data": "^4.0.6",
     "grant": "^5.4.23",
+    "handlebars": "^4.7.9",
     "helmet": "^8.2.0",
     "json-schema-traverse": "^1.0.0",
     "jsonschema": "^1.5.0",

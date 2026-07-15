@@ -111,7 +111,7 @@ export async function requestReviewForRelease(entities: string[], review: Review
     ],
     [
       { name: 'Open Release', url: getReleaseUrl(release) },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=release` },
     ],
     true,
   )
@@ -150,7 +150,7 @@ export async function requestReviewForAccessRequest(
         name: 'Open Access Request',
         url: getAccessRequestUrl(accessRequest),
       },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
     ],
     true,
   )
@@ -190,7 +190,7 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
     ],
     [
       { name: 'Open Release', url: getReleaseUrl(release) },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=release` },
     ],
   )
 
@@ -258,7 +258,7 @@ export async function notifyReviewResponseForAccess(
     ],
     [
       { name: 'Open Access Request', url: getAccessRequestUrl(accessRequest) },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
     ],
   )
   const model = await getModelByIdNoAuth(accessRequest.modelId)
@@ -275,7 +275,7 @@ export async function dispatchEmailToModelRole(modelId: string, role: string, em
 async function notifyRole(review: ReviewInterface, title: string, fields: Info[], actionUrl: string) {
   const emailContent = await buildEmail(title, fields, [
     { name: 'Open item', url: actionUrl },
-    { name: 'See Reviews', url: `${appBaseUrl}/review` },
+    { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
   ])
 
   await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
