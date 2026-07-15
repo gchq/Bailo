@@ -5,18 +5,16 @@ import ImportExport from '@mui/icons-material/ImportExport'
 import Key from '@mui/icons-material/Key'
 import ManageAccounts from '@mui/icons-material/ManageAccounts'
 import { Container, Divider, List, Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDeletion from 'src/entry/settings/EntryDeletion'
 import EntryDetails from 'src/entry/settings/EntryDetails'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind } from 'types/types'
 
 export const SettingsCategory = {
@@ -76,7 +74,7 @@ export default function Settings({ entry }: SettingsProps) {
 
   const { category } = router.query
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(
     isSettingsCategory(category, entry) ? category : SettingsCategory.DETAILS,
@@ -95,14 +93,6 @@ export default function Settings({ entry }: SettingsProps) {
     router.replace({
       query: { ...router.query, category },
     })
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
   }
 
   return (

@@ -1,9 +1,9 @@
 import Done from '@mui/icons-material/Done'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import { ChangesRequestedDisplay } from 'src/entry/model/reviews/ChangesRequestedDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, ResponseInterface } from 'types/types'
@@ -25,7 +25,7 @@ export default function ReviewDisplay({
   currentUserDn,
 }: ReviewDisplayProps) {
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const dynamicRoles = useMemo(() => {
     const staticRoles = ['owner', 'contributor', 'consumer']
     return entryRoles.filter((role) => !staticRoles.includes(role.shortName))
@@ -45,21 +45,17 @@ export default function ReviewDisplay({
 
   const roleNameDisplay = (response: ResponseInterface) => {
     if (response.role === 'owner') {
-      return uiConfig ? uiConfig.roleDisplayNames.owner : 'Owner'
+      return uiConfig.roleDisplayNames.owner
     }
     return dynamicRoles.find((role) => role.shortName === response.role)?.name
   }
 
-  if (isEntryRolesLoading || isUiConfigLoading) {
+  if (isEntryRolesLoading) {
     return <Loading />
   }
 
   if (isEntryRolesError) {
     return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
   return (

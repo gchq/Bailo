@@ -1,12 +1,12 @@
 import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { sendTokenToService, useGetInferencesForModelId } from 'actions/inferencing'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { deleteUserToken, postUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
@@ -23,13 +23,13 @@ export default function InferenceServices({ model }: InferenceProps) {
   const [healthCheck, setHealthCheck] = useState(false)
 
   const { tokens, isTokensLoading, isTokensError, mutateTokens } = useGetUserTokens()
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   useEffect(() => {
     async function checkAuthentication() {
       try {
         setErrorMessage('')
-        const response = await fetch(`${uiConfig?.inference.connection.host}/api/health`, { credentials: 'include' })
+        const response = await fetch(`${uiConfig.inference.connection.host}/api/health`, { credentials: 'include' })
         setHealthCheck(response.ok)
         if (!response.ok) {
           return setErrorMessage(await getErrorMessage(response))
@@ -57,7 +57,7 @@ export default function InferenceServices({ model }: InferenceProps) {
   const handleCreateToken = async () => {
     setErrorMessage('')
 
-    const authorizationTokenName = uiConfig?.inference.authorizationTokenName
+    const authorizationTokenName = uiConfig.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
     if (authorizationTokenName) {
       for (const token of authorizationAccessKeys) {
@@ -102,11 +102,7 @@ export default function InferenceServices({ model }: InferenceProps) {
     return <MessageAlert message={isTokensError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isTokensLoading || isUiConfigLoading) {
+  if (isTokensLoading) {
     return <Loading />
   }
 

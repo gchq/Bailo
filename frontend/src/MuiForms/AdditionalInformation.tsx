@@ -1,11 +1,9 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { SxProps, useTheme } from '@mui/material/styles'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { ReactNode } from 'react'
+import { ReactNode, useContext } from 'react'
 import ExpandableTypography from 'src/common/ExpandableTypography'
-import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 
 interface AdditionalInformationProps {
   children: ReactNode
@@ -32,19 +30,11 @@ export default function AdditionalInformation({
   mirroredState,
   description = undefined,
 }: AdditionalInformationProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
 
   if (children === undefined || (Array.isArray(children) && children.length === 0)) {
     return <></>
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading) {
-    return <Loading />
   }
 
   if (!mirroredModel) {
@@ -160,7 +150,7 @@ export default function AdditionalInformation({
                   fontWeight: 'bold',
                 }}
               >
-                {uiConfig ? uiConfig.modelMirror.import.originalAnswerHeading : 'Original answer'}
+                {uiConfig.modelMirror.import.originalAnswerHeading}
               </Typography>
               <Box>
                 {mirroredState !== undefined ? (
@@ -183,7 +173,7 @@ export default function AdditionalInformation({
                   pl: 4,
                 }}
               >
-                {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
+                {uiConfig.modelMirror.import.additionalInfoHeading}
               </Typography>
               {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
             </Stack>
@@ -240,7 +230,7 @@ export default function AdditionalInformation({
                       fontWeight: 'bold',
                     }}
                   >
-                    {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
+                    {uiConfig.modelMirror.import.additionalInfoHeading}
                   </Typography>
                   {children}
                 </Stack>

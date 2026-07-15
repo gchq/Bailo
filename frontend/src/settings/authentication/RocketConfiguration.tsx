@@ -1,9 +1,7 @@
 import { Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useMemo, useState } from 'react'
 import SplitButton from 'src/common/SplitButton'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import { getRktCredentialsConfig } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
@@ -17,19 +15,11 @@ type RocketConfigurationProps = {
 }
 
 export default function RocketConfiguration({ token }: RocketConfigurationProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const [showFilePreview, setShowFilePreview] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-auth.json`, [token.description])
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
-  }
 
   return (
     <Stack spacing={4}>

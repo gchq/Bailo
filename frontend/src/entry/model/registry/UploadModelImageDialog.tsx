@@ -9,10 +9,11 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
+import { useContext } from 'react'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -25,12 +26,8 @@ interface UploadModelImageDialogProps {
 }
 
 export default function UploadModelImageDialog({ open, handleClose, model }: UploadModelImageDialogProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
@@ -38,8 +35,8 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
 
   return (
     <>
-      {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
-      {uiConfig && currentUser && (
+      {isCurrentUserLoading && <Loading />}
+      {currentUser && (
         <Dialog open={open} onClose={handleClose} slots={{ transition: Transition }}>
           <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
           <DialogContent>
