@@ -550,6 +550,16 @@ describe('services > model', () => {
     )
   })
 
+  test('updateModelCard > should throw bad request when metadata fails schema validation for a state', async () => {
+    const mockModel = { state: 'Production', settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
+    ModelModelMock.findOne.mockResolvedValueOnce(mockModel)
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+
+    await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
+      'Model metadata could not be validated against the schema, for Production state.',
+    )
+  })
+
   test('updateModelCard > should successfully update model card', async () => {
     const mockModel = { settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
     ModelModelMock.findOne.mockResolvedValueOnce(mockModel).mockResolvedValueOnce(mockModel)
@@ -633,7 +643,7 @@ describe('services > model', () => {
     schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
-      /^Please fill in all required fields in the model card, to update the state to Production/,
+      'Model metadata could not be validated against the schema, for Production state.',
     )
   })
 
