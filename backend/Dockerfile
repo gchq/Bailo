@@ -23,7 +23,7 @@ COPY --from=python src /app/python/src
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
 
-RUN make dirhtml
+RUN make html
 
 FROM node:26.5.0-alpine AS node-base
 
