@@ -571,9 +571,12 @@ export async function updateModelCard(
 
   const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
   if (!valid) {
-    throw BadReq('Model metadata could not be validated against the schema.', {
-      validationErrors: errors,
-    })
+    throw BadReq(
+      `Model metadata could not be validated against the schema${model.state && `, for ${model.state} state`}.`,
+      {
+        validationErrors: errors,
+      },
+    )
   }
 
   const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, metadata)
@@ -617,7 +620,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (modelDiff.state && model.card) {
     const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
     if (!valid) {
-      throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
+      throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
     }
   }
 
