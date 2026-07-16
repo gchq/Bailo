@@ -23,11 +23,6 @@ const modelMocks = vi.hoisted(() => ({
 
 vi.mock('../../../src/models/Model.js', () => ({
   default: modelMocks,
-  EntryKind: {
-    Model: 'model',
-    UntrustedModel: 'untrusted-model',
-    MirroredModel: 'mirrored-model',
-  },
   SystemRoles: {
     Owner: 'owner',
     Contributor: 'contributor',
