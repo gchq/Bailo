@@ -41,7 +41,7 @@ interface OverviewPieChartProps {
   height?: number
 }
 
-export function OverviewPieChart({ id, title, data, onSelectItem, width = 200, height = 200 }: OverviewPieChartProps) {
+export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, height = 220 }: OverviewPieChartProps) {
   const handleItemClick = (item: DefaultizedPieValueType) => {
     const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
     if (label) {
