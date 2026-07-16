@@ -1,12 +1,8 @@
 import Add from '@mui/icons-material/Add'
-import ExpandMore from '@mui/icons-material/ExpandMore'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Button,
   Container,
@@ -79,6 +75,7 @@ export default function Marketplace() {
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [titleOnly, setTitleOnly] = useState(false)
+  const [isFiltersHidden, setIsFiltersHidden] = useState(false)
 
   useEffect(() => {
     if (!router.isReady) {
@@ -399,17 +396,20 @@ export default function Marketplace() {
               <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
                 Create
               </Button>
-              <Box>
-                <Accordion defaultExpanded sx={{ backgroundColor: grey[200], borderRadius: '8px' }}>
-                  <AccordionSummary expandIcon={<ExpandMore />} sx={{ pl: 1, m: 0 }}>
-                    <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center' }}>
-                      <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold', px: 2 }}>
-                        Filters
-                      </Typography>
-                      <HelpDialog title='Search Information' content={<SearchInfo />} />
-                    </Stack>
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ backgroundColor: grey[200], borderRadius: '8px' }}>
+              <Box sx={{ backgroundColor: grey[200], borderRadius: '8px', p: 2 }}>
+                <Stack direction='row' sx={{ justifyContent: 'space-between', width: '100%', mb: 2 }}>
+                  <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center' }}>
+                    <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
+                      Filters
+                    </Typography>
+                    <HelpDialog title='Search Information' content={<SearchInfo />} />
+                  </Stack>
+                  <Button onClick={() => setIsFiltersHidden(!isFiltersHidden)}>
+                    {isFiltersHidden ? 'Hide filters' : 'Show filters'}
+                  </Button>
+                </Stack>
+                {isFiltersHidden && (
+                  <>
                     <FormControl
                       sx={{
                         display: 'flex',
@@ -556,8 +556,8 @@ export default function Marketplace() {
                         Reset filters
                       </Button>
                     </Box>
-                  </AccordionDetails>
-                </Accordion>
+                  </>
+                )}
               </Box>
             </Stack>
           </Box>
