@@ -7,7 +7,7 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { ModelVolume, ModelVolumeData } from 'types/types'
 import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
-import { dateFormat } from 'utils/metricsUtils'
+import { dateFormat, filterSelectTypes } from 'utils/metricsUtils'
 
 type BarChartRow = {
   label: string
@@ -53,7 +53,7 @@ export function MetricsBarChart({ organisationList, selectedOrganisation, onSele
   const updateModelVolume = useEffectEvent((modelVolume: ModelVolume, changedOrganisation: string) => {
     setBarChartConfig((prev) => ({
       ...prev,
-      hideLegend: changedOrganisation !== 'All',
+      hideLegend: changedOrganisation !== filterSelectTypes.ALL,
     }))
     if (modelVolume.data) {
       const updatedStructure = modelVolume.data.map((volumeData: ModelVolumeData) => {
@@ -65,7 +65,7 @@ export function MetricsBarChart({ organisationList, selectedOrganisation, onSele
         }
 
         Object.entries(volumeData.organisations)
-          .filter(([org]) => changedOrganisation === 'All' || org === changedOrganisation)
+          .filter(([org]) => changedOrganisation === filterSelectTypes.ALL || org === changedOrganisation)
           .forEach(([org, count]) => {
             incrementObject[org] = count
           })

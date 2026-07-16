@@ -3,6 +3,12 @@ import { SchemaInterface } from 'types/types'
 
 export const dateFormat = 'YYYY-MM'
 
+export const filterSelectTypes = {
+  ALL: 'All',
+  NONE: 'none',
+  UNSET: 'unset',
+}
+
 export const breakdownQueryTypes = ['byState', 'bySchema', 'totalEntries', 'withReleases', 'withAccessRequest'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
 
@@ -130,4 +136,16 @@ export function sortPieData<T extends PieChartData>(items: T[]): T[] {
 
     return Number(aIsNone) - Number(bIsNone)
   })
+}
+
+/**
+ * Convert data into the format expected by the pie chart
+ * utilising a specific colour for 'none' values.
+ */
+export function toPieData(items: { label: string; value: number }[], noneColour: string): PieChartData[] {
+  return items.map(({ label, value }) => ({
+    label,
+    value,
+    color: label.toLowerCase() === filterSelectTypes.NONE ? noneColour : undefined,
+  }))
 }

@@ -1,6 +1,6 @@
 import { Container, Stack } from '@mui/material'
 import { useGetNoReleasesPolicyMetrics, useGetRolePolicyMetrics } from 'actions/metrics'
-import { ReactElement, useCallback, useEffect, useState } from 'react'
+import { ReactElement, useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -21,9 +21,6 @@ export default function PolicyMetrics() {
     useGetNoReleasesPolicyMetrics()
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
-  const [selectedMetric, setSelectedMetric] = useState<SelectedMetricKindKeys>(SelectedMetricKind.MISSING_ROLES)
-  const [selectedData, setSelectedData] = useState<undefined | PolicyRoleMetrics | BaseNoReleaseMetrics>(undefined)
-  const [selectedChart, setSelectedChart] = useState<ReactElement>(<></>)
 
   const filteredDataset = useCallback(
     (metricData) => {
@@ -34,39 +31,34 @@ export default function PolicyMetrics() {
     },
     [selectedOrganisation],
   )
-
-  useEffect(() => {
-    if (!selectedMetric) {
-      setSelectedData(rolePolicyMetrics)
-    } else {
-      switch (selectedMetric) {
-        case SelectedMetricKind.MISSING_ROLES:
-          setSelectedData(rolePolicyMetrics)
-          if (rolePolicyMetrics) {
-            setSelectedChart(
-              filteredDataset(rolePolicyMetrics).entries.length > 0 ? (
-                <PolicyRoleMetricsCharts data={filteredDataset(rolePolicyMetrics)} />
-              ) : (
-                <EmptyBlob text='No items to display.' />
-              ),
-            )
-          }
-          break
-        case SelectedMetricKind.NO_RELEASES:
-          setSelectedData(noReleasesPolicyMetrics)
-          if (noReleasesPolicyMetrics) {
-            setSelectedChart(
-              filteredDataset(noReleasesPolicyMetrics).entries.length > 0 ? (
-                <PolicyNoReleasesMetricsCharts data={filteredDataset(noReleasesPolicyMetrics)} />
-              ) : (
-                <EmptyBlob text='No items to display.' />
-              ),
-            )
-          }
-          break
-      }
+  const [selectedMetric, setSelectedMetric] = useState<SelectedMetricKindKeys>(SelectedMetricKind.MISSING_ROLES)
+  const selectedData: undefined | PolicyRoleMetrics | BaseNoReleaseMetrics = (() => {
+    switch (selectedMetric) {
+      case SelectedMetricKind.MISSING_ROLES:
+        return rolePolicyMetrics
+      case SelectedMetricKind.NO_RELEASES:
+        return noReleasesPolicyMetrics
+      default:
+        return rolePolicyMetrics
     }
-  }, [selectedMetric, rolePolicyMetrics, noReleasesPolicyMetrics, filteredDataset])
+  })()
+  const selectedChart: ReactElement = useMemo(() => {
+    if (!selectedData) {
+      return <></>
+    }
+    const filtered = filteredDataset(selectedData)
+    if (!filtered || filtered.entries.length === 0) {
+      return <EmptyBlob text='No items to display.' />
+    }
+    switch (selectedMetric) {
+      case SelectedMetricKind.MISSING_ROLES:
+        return <PolicyRoleMetricsCharts data={filteredDataset(rolePolicyMetrics)} />
+      case SelectedMetricKind.NO_RELEASES:
+        return <PolicyNoReleasesMetricsCharts data={filteredDataset(noReleasesPolicyMetrics)} />
+      default:
+        return <></>
+    }
+  }, [filteredDataset, noReleasesPolicyMetrics, rolePolicyMetrics, selectedData, selectedMetric])
 
   if (isRolePolicyMetricsError) {
     return <MessageAlert message={isRolePolicyMetricsError.info.message} />

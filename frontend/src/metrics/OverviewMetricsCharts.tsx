@@ -1,11 +1,11 @@
 import { Stack, Typography } from '@mui/material'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import { MetricsBarChart } from 'src/metrics/components/MetricsBarChart'
-import { noneColour, OverviewPieChart, PieChartData } from 'src/metrics/components/MetricsPieChart'
+import { noneColour, OverviewPieChart } from 'src/metrics/components/MetricsPieChart'
 import OverviewStatPanel from 'src/metrics/components/OverviewStatPanel'
 import { OverviewBaseMetrics } from 'types/types'
-import { BreakdownQueryType } from 'utils/metricsUtils'
+import { BreakdownQueryType, toPieData } from 'utils/metricsUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
@@ -22,35 +22,29 @@ export default function OverviewMetricsCharts({
   onSelect,
   onSelectMonth,
 }: OverviewMetricsChartsProps) {
-  const [schemaData, setSchemaData] = useState<PieChartData[]>([])
+  const stateData = useMemo(
+    () =>
+      toPieData(
+        (data.entryState ?? []).map((state) => ({
+          label: state.state,
+          value: state.count,
+        })),
+        noneColour,
+      ),
+    [data.entryState],
+  )
 
-  const stateData = useMemo(() => {
-    return (
-      data.entryState?.map((state) => ({
-        label: state.state,
-        value: state.count,
-        color: state.state.toLowerCase() === 'none' ? noneColour : undefined,
-      })) ?? []
-    )
-  }, [data.entryState])
-
-  const updateSchemaData = useEffectEvent((newSchemaData) => {
-    setSchemaData(newSchemaData)
-  })
-
-  useEffect(() => {
-    if (data.schemaBreakdown) {
-      updateSchemaData(
-        data.schemaBreakdown.map((schemaItem) => {
-          return {
-            label: schemaItem.schemaName,
-            value: schemaItem.count,
-            color: schemaItem.schemaName.toLowerCase() === 'none' ? noneColour : undefined,
-          }
-        }),
-      )
-    }
-  }, [data.schemaBreakdown])
+  const schemaData = useMemo(
+    () =>
+      toPieData(
+        (data.schemaBreakdown ?? []).map((schema) => ({
+          label: schema.schemaName,
+          value: schema.count,
+        })),
+        noneColour,
+      ),
+    [data.schemaBreakdown],
+  )
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />

@@ -90,12 +90,10 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
         >
           {data.summary.map((roleSummary) => (
             <MenuItem key={roleSummary.roleId} onClick={() => handleChipFilterOnClick(roleSummary.roleId)}>
-              {missingRoleFilters.includes(roleSummary.roleId) ? (
+              {missingRoleFilters.includes(roleSummary.roleId) && (
                 <ListItemIcon>
                   <Check />
                 </ListItemIcon>
-              ) : (
-                <></>
               )}
               <ListItemText
                 inset={!missingRoleFilters.includes(roleSummary.roleId)}

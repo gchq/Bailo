@@ -7,20 +7,20 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref } from 'utils/metricsUtils'
+import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
   const { schemas } = useGetSchemas()
 
-  const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const [selectedOrganisation, setSelectedOrganisation] = useState(filterSelectTypes.ALL)
 
   const filteredDataset = useMemo(() => {
     if (!overviewMetrics) {
       return undefined
     }
-    if (selectedOrganisation === 'All') {
+    if (selectedOrganisation === filterSelectTypes.ALL) {
       return overviewMetrics.global
     }
     return overviewMetrics.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
@@ -38,7 +38,7 @@ export default function OverviewMetrics() {
     (month: string) => {
       router.push(
         buildEntriesHref({
-          organisation: selectedOrganisation !== 'All' ? selectedOrganisation : undefined,
+          organisation: selectedOrganisation !== filterSelectTypes.ALL ? selectedOrganisation : undefined,
           startMonth: month,
           endMonth: month,
         }),

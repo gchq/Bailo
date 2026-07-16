@@ -1,5 +1,5 @@
 import { SchemaInterface } from 'types/types'
-import { buildEntriesTabHref, sortPieData } from 'utils/metricsUtils'
+import { buildEntriesTabHref, sortPieData, toPieData } from 'utils/metricsUtils'
 import { expect } from 'vitest'
 
 const mockSchemas = [
@@ -85,6 +85,31 @@ describe('sortPieData', () => {
       { label: 'Development', value: 3 },
       { label: 'nOnE', value: 4 },
       { label: 'Review', value: 1 },
+    ])
+  })
+})
+
+describe('toPieData', () => {
+  it('maps items to pie chart data and applies the none colour to "none" entries', () => {
+    const result = toPieData(
+      [
+        { label: 'Development', value: 3 },
+        { label: 'None', value: 4 },
+      ],
+      '#999999',
+    )
+
+    expect(result).toEqual([
+      {
+        label: 'Development',
+        value: 3,
+        color: undefined,
+      },
+      {
+        label: 'None',
+        value: 4,
+        color: '#999999',
+      },
     ])
   })
 })
