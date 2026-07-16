@@ -198,7 +198,6 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     await expect(exporter._init()).rejects.toEqual(expectedErr)
   })
 
-  // new tests to cover _checkAuths functionality
   test('_checkAuths runs successfully when auth passes', async () => {
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
 
