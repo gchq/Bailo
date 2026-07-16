@@ -131,7 +131,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-
       if (getChangedFields(oldData, data).length === 0) {
         handleChangeEditMode(false)
       } else {
@@ -139,6 +138,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         if (res.status && res.status < 400) {
           handleChangeEditMode(false)
           mutateEntryCardRevisions()
+          mutateEntry()
         } else {
           setErrorMessage(res.data)
         }
