@@ -1,12 +1,12 @@
 import { CSSProperties } from '@mui/material'
 import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
-import { useGetUiConfig } from 'actions/uiConfig'
 import cookies from 'js-cookie'
 import { useRouter } from 'next/router'
-import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react'
+import { ReactElement, ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Announcement from 'src/Announcement'
 import Loading from 'src/common/Loading'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 import { DISMISSED_COOKIE_NAME } from 'utils/constants'
 
@@ -23,7 +23,7 @@ export type WrapperProps = {
 export default function Wrapper({ children }: WrapperProps): ReactElement {
   const [open, setOpen] = useState(false)
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const router = useRouter()
   const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
 
@@ -35,15 +35,13 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
 
   const dismissedTimestamp = cookies.get(DISMISSED_COOKIE_NAME)
   const [announcementBannerOpen, setAnnouncementBannerOpen] = useState(
-    (uiConfig &&
-      uiConfig.announcement.enabled &&
+    (uiConfig.announcement.enabled &&
       (!dismissedTimestamp || new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp))) ||
       false,
   )
 
-  const pageTopStyling: CSSProperties = uiConfig && uiConfig.banner.enabled ? { mt: 4 } : { mt: 'unset' }
-  const contentTopStyling: CSSProperties =
-    uiConfig && uiConfig.banner.enabled ? { mt: isDocsPage ? 2 : 4 } : { mt: 'unset' }
+  const pageTopStyling: CSSProperties = uiConfig.banner.enabled ? { mt: 4 } : { mt: 'unset' }
+  const contentTopStyling: CSSProperties = uiConfig.banner.enabled ? { mt: isDocsPage ? 2 : 4 } : { mt: 'unset' }
 
   const handleSideNavigationError = useCallback((message: string) => setErrorMessage(message), [])
 
@@ -58,24 +56,16 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
     cookies.set(DISMISSED_COOKIE_NAME, new Date().toISOString())
   }
 
-  if (isUiConfigError) {
-    if (isUiConfigError.status === 403) {
-      return <MessageAlert message='Error authenticating user.' severity='error' />
-    }
-
-    return <MessageAlert message={`Error loading UI Config: ${isUiConfigError.info.message}`} severity='error' />
-  }
-
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
   return (
     <>
-      <Banner />
+      {uiConfig.banner.enabled && <Banner />}
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && uiConfig && (
+        {uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
+        {currentUser && (
           <>
             <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
@@ -107,7 +97,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             ) : (
               <>
                 {isCurrentUserLoading && <Loading />}
-                {uiConfig && announcementBannerOpen && (
+                {announcementBannerOpen && (
                   <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
                 )}
                 <Box

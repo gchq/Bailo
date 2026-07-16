@@ -150,9 +150,9 @@ export default function NewSchema() {
   return (
     <>
       <Title text='Upload a new Schema' />
-      <Container maxWidth='sm' sx={{ my: 4 }}>
+      <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 4, m: 'auto' }}>
-          <Link href={`/schemas/list`}>
+          <Link href={`/admin?section=schema-list`}>
             <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
               Back to schema list
             </Button>
@@ -166,7 +166,7 @@ export default function NewSchema() {
             }}
           >
             <Typography variant='h6' component='h1' color='primary'>
-              Upload a new Schema
+              Upload a new schema
             </Typography>
             <Schema color='primary' fontSize='large' />
             <Typography>Schemas are used to construct both model and access request forms.</Typography>
@@ -195,7 +195,7 @@ export default function NewSchema() {
                   />
                   <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
                 </Stack>
-                <Stack>
+                <Stack sx={{ width: '100%' }}>
                   <Typography
                     sx={{
                       fontWeight: 'bold',

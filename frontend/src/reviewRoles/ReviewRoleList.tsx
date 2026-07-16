@@ -11,10 +11,10 @@ import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
-import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import Link from 'src/Link'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
 import { ReviewRoleInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -37,7 +37,7 @@ const editReviewRoleHeading = (
   </Stack>
 )
 
-export default function ReviewRoles() {
+export default function ReviewRoleList() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
@@ -298,26 +298,16 @@ export default function ReviewRoles() {
   }
 
   return (
-    <>
-      <Title text='View Review Roles' />
-      <Stack
-        direction='row'
-        divider={<Divider flexItem orientation='vertical' />}
-        spacing={2}
-        sx={{
-          mx: 2,
-          mb: 1,
-        }}
-      >
-        <Typography component='h1' color='primary' variant='h6' noWrap data-test='ReviewRolesTitle'>
-          Review Roles
-        </Typography>
-        <Button variant='contained' href='/reviewRoles/new' color='primary' startIcon={<Add />}>
-          Create new review role
-        </Button>
-      </Stack>
+    <Stack sx={{ m: 2 }} spacing={2}>
+      <Box sx={{ textAlign: 'right' }}>
+        <Link href={`/reviewRoles/new`}>
+          <Button variant='contained' startIcon={<Add />}>
+            Create new review role
+          </Button>
+        </Link>
+      </Box>
       {reviewRoles ? (
-        <Paper sx={{ p: 4, my: 4 }}>
+        <Paper sx={{ p: 4, my: 2 }}>
           {reviewRoles.length > 0 ? (
             <Stack direction={{ xs: 'column', sm: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
               <List sx={{ width: '280px' }}>{listRoles}</List>
@@ -330,6 +320,6 @@ export default function ReviewRoles() {
       ) : (
         <Loading />
       )}
-    </>
+    </Stack>
   )
 }

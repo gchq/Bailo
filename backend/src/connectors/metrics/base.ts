@@ -4,7 +4,7 @@ import NodeCache from 'node-cache'
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { ModelInterface, SystemRoles } from '../../models/Model.js'
+import ModelModel, { EntryKind, ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -302,7 +302,7 @@ type NoReleasesComplianceMetricsResultSubset = {
   summary: {
     modelsWithNoReleases: number
   }
-  models: ModelWithNoReleases[]
+  entries: ModelWithNoReleases[]
 }
 
 type NoReleasesComplianceMetricsResultByOrgSubset = {
@@ -399,7 +399,7 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   }
 
   const pipeline: PipelineStage[] = [
-    { $match: filter },
+    { $match: { ...filter, kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] } } },
     {
       $lookup: {
         from: 'v2_releases',
@@ -445,13 +445,13 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   ]
 
   // Gets models by the specified organisation | no organisation
-  const models = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
+  const entries = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
 
   return {
     summary: {
-      modelsWithNoReleases: models.length,
+      modelsWithNoReleases: entries.length,
     },
-    models,
+    entries,
   }
 }
 

@@ -1,12 +1,13 @@
-import { Container, Stack, Typography } from '@mui/material'
+import { Button, Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsBreakdownTable from 'src/metrics/MetricsBreakdownTable'
+import MetricsHeader from 'src/metrics/MetricsHeader'
 import { SystemRole } from 'types/types'
 import { buildEntriesHref, EntriesFilterQuery } from 'utils/metricsUtils'
 
@@ -34,24 +35,22 @@ export default function EntryMetrics() {
     schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
   })
 
-  function updateFilter(key: keyof EntriesFilterQuery, value: string) {
-    const current: EntriesFilterQuery = {
-      organisation: organisation !== ALL_VALUE ? organisation : undefined,
-      state: state !== ALL_VALUE ? state : undefined,
-      schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
-    }
+  const updateFilter = useCallback(
+    (key: keyof EntriesFilterQuery, value: string) => {
+      const current: EntriesFilterQuery = {
+        organisation: organisation !== ALL_VALUE ? organisation : undefined,
+        state: state !== ALL_VALUE ? state : undefined,
+        schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
+      }
 
-    const next = {
-      ...current,
-      [key]: value === ALL_VALUE ? undefined : value,
-    }
+      const next = {
+        ...current,
+        [key]: value === ALL_VALUE ? undefined : value,
+      }
 
-    router.push(buildEntriesHref(next), undefined, { shallow: true })
-  }
-
-  const organisationOptions = useMemo(
-    () => [ALL_VALUE, ...(overviewMetrics?.byOrganisation.map((org) => org.organisation) ?? [])],
-    [overviewMetrics],
+      router.push(buildEntriesHref(next), undefined, { shallow: true })
+    },
+    [organisation, router, schemaId, state],
   )
 
   const stateOptions = useMemo(
@@ -92,6 +91,15 @@ export default function EntryMetrics() {
     return `${count} ${count === 1 ? 'entry' : 'entries'}`
   }, [isEntriesLoading, isEntriesError, tableData.length])
 
+  const handleClearFiltersOnClick = useCallback(() => {
+    const current: EntriesFilterQuery = {
+      organisation: organisation,
+      state: undefined,
+      schemaId: undefined,
+    }
+    router.push(buildEntriesHref(current), undefined, { shallow: true })
+  }, [organisation, router])
+
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
@@ -104,48 +112,50 @@ export default function EntryMetrics() {
 
   return (
     <Container maxWidth='lg' sx={{ mb: 4 }}>
-      <Stack spacing={2} sx={{ mt: 2, mb: 4 }}>
-        <Stack spacing={0.5}>
-          <Typography variant='h6' color='primary' sx={{ fontWeight: 'bold' }}>
-            Entries
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            Browse and filter individual entries by organisation, lifecycle state, and schema.
-          </Typography>
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
-          <Stack direction='row' spacing={1}>
-            <FilterMenuButton
-              label='Organisation'
-              options={organisationOptions.map((org) => ({ value: org, label: org }))}
-              selectedValue={organisation}
-              onSelect={(value) => updateFilter('organisation', value)}
-            />
-            <FilterMenuButton
-              label='State'
-              options={stateOptions.map((s) => ({ value: s, label: s }))}
-              selectedValue={state}
-              onSelect={(value) => updateFilter('state', value)}
-            />
-            <FilterMenuButton
-              label='Schema'
-              options={schemaOptions}
-              selectedValue={schemaId}
-              onSelect={(value) => updateFilter('schemaId', value)}
-            />
-          </Stack>
-          {resultCountLabel && (
-            <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
-              {resultCountLabel}
-            </Typography>
-          )}
-        </Stack>
+      <Stack spacing={0.5} sx={{ mt: 2, mb: 4 }}>
+        {overviewMetrics && (
+          <MetricsHeader
+            organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={overviewMetrics.lastUpdated}
+            onOrganisationChange={(value) => updateFilter('organisation', value)}
+            selectedOrganisation={organisation}
+            exportDocumentTitle='Bailo entry metrics'
+            titleObjectType='entries'
+          >
+            <>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
+                <Stack direction='row' spacing={1}>
+                  <FilterMenuButton
+                    label='State'
+                    options={stateOptions.map((s) => ({ value: s, label: s }))}
+                    selectedValue={state}
+                    onSelect={(value) => updateFilter('state', value)}
+                  />
+                  <FilterMenuButton
+                    label='Schema'
+                    options={schemaOptions}
+                    selectedValue={schemaId}
+                    onSelect={(value) => updateFilter('schemaId', value)}
+                  />
+                  <Button disabled={state === ALL_VALUE && schemaId === ALL_VALUE} onClick={handleClearFiltersOnClick}>
+                    Clear filters
+                  </Button>
+                </Stack>
+                {resultCountLabel && (
+                  <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
+                    {resultCountLabel}
+                  </Typography>
+                )}
+              </Stack>
+              {isEntriesError ? (
+                <MessageAlert message={isEntriesError.info.message} />
+              ) : (
+                <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+              )}
+            </>
+          </MetricsHeader>
+        )}
       </Stack>
-      {isEntriesError ? (
-        <MessageAlert message={isEntriesError.info.message} />
-      ) : (
-        <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
-      )}
     </Container>
   )
 }

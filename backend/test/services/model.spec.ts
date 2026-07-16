@@ -18,6 +18,7 @@ import {
   isModelCardRevisionDoc,
   popularTagsForEntries,
   removeModel,
+  saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
   updateModel,
@@ -69,7 +70,7 @@ vi.mock('../../src/services/review.js', async () => reviewMock)
 
 const schemaMock = vi.hoisted(() => ({
   getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
-  validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] })),
+  validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] as string[] })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
@@ -567,6 +568,16 @@ describe('services > model', () => {
     )
   })
 
+  test('updateModelCard > should throw bad request when metadata fails schema validation for a state', async () => {
+    const mockModel = { state: 'Production', settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
+    ModelModelMock.findOne.mockResolvedValueOnce(mockModel)
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+
+    await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrow(
+      'Model metadata could not be validated against the schema, for Production state.',
+    )
+  })
+
   test('updateModelCard > should successfully update model card', async () => {
     const mockModel = { settings: { mirror: {} }, card: { schemaId: 'test-schema', version: 1 } }
     ModelModelMock.findOne.mockResolvedValueOnce(mockModel).mockResolvedValueOnce(mockModel)
@@ -650,7 +661,7 @@ describe('services > model', () => {
     schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
     await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
-      /^Please fill in all required fields in the model card, to update the state to Production/,
+      'Model metadata could not be validated against the schema, for Production state.',
     )
   })
 
@@ -665,6 +676,79 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(ModelModelMock.save).not.toHaveBeenCalled()
+  })
+
+  describe('saveImportedModelCard', () => {
+    const modelCardRevision = {
+      modelId: 'test-model',
+      schemaId: 'test-schema',
+      version: 2,
+      metadata: { key: 'value' },
+      createdBy: 'user',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    test('validate metadata against schema and save a new model card revision', async () => {
+      ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      const result = await saveImportedModelCard(modelCardRevision as any)
+
+      expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith('test-schema', { key: 'value' })
+      expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
+      expect(result).toEqual(modelCardRevision)
+    })
+
+    test('throw BadReq when metadata fails schema validation', async () => {
+      schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: ['invalid field'] })
+
+      await expect(() => saveImportedModelCard(modelCardRevision as any)).rejects.toThrow(
+        /^Model metadata could not be validated against the schema./,
+      )
+      expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
+    })
+
+    test('skip validation for version 1 with undefined metadata', async () => {
+      // create from schema has v1 be undefined
+      const revisionV1 = { ...modelCardRevision, version: 1, metadata: undefined }
+      ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      await saveImportedModelCard(revisionV1 as any)
+
+      expect(schemaMock.validateContentAgainstSchema).not.toHaveBeenCalled()
+    })
+
+    test('not save when a mirrored revision already exists', async () => {
+      ModelCardRevisionModelMock.findOne.mockResolvedValueOnce({ modelId: 'test-model', version: 2 })
+
+      const result = await saveImportedModelCard(modelCardRevision as any)
+
+      expect(result).toBeUndefined()
+      expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
+    })
+
+    test('not save version 1 with undefined metadata even when no existing revision', async () => {
+      // create from schema has v1 be undefined
+      const revisionV1 = { ...modelCardRevision, version: 1, metadata: undefined }
+      ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      const result = await saveImportedModelCard(revisionV1 as any)
+
+      expect(result).toBeUndefined()
+      expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
+    })
+
+    test('should validate version 1 with defined metadata', async () => {
+      // create from template has v1 be populated
+      const revisionV1WithMeta = { ...modelCardRevision, version: 1 }
+      ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      const result = await saveImportedModelCard(revisionV1WithMeta as any)
+
+      expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith('test-schema', { key: 'value' })
+      expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
+      expect(result).toEqual(revisionV1WithMeta)
+    })
   })
 
   test('setLatestImportedModelCard > success', async () => {

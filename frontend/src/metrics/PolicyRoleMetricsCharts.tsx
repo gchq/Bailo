@@ -1,8 +1,14 @@
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
+import Check from '@mui/icons-material/Check'
 import {
   Box,
-  Chip,
+  Button,
   List,
   ListItem,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -19,16 +25,24 @@ import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { PolicyBaseMetrics } from 'types/types'
+import { PolicyRoleBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
-  data: PolicyBaseMetrics
+  data: PolicyRoleBaseMetrics
 }
 
-export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) {
+export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
   const [missingRoleFilters, setMissingRolesFilters] = useState<string[]>([])
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
 
@@ -51,18 +65,48 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
   )
 
   const displayMissingRoleCountChips = useMemo(() => {
-    return data.summary.map((roleSummary) => {
-      return (
-        <Chip
-          key={roleSummary.roleId}
-          label={`${roleSummary.count} entries missing ${roleSummary.roleName}`}
-          variant={missingRoleFilters.includes(roleSummary.roleId) ? 'filled' : 'outlined'}
-          onClick={() => handleChipFilterOnClick(roleSummary.roleId)}
-          color='primary'
-        />
-      )
-    })
-  }, [data.summary, handleChipFilterOnClick, missingRoleFilters])
+    return (
+      <Stack direction='row' spacing={1}>
+        <Button
+          id='menu-button'
+          aria-label='filter-menu-button'
+          onClick={handleClick}
+          sx={{ width: 'fit-content' }}
+          variant='outlined'
+          size='small'
+          endIcon={<ArrowDropDown />}
+        >
+          Filter by missing role {missingRoleFilters.length > 0 ? `(${missingRoleFilters.length})` : ''}
+        </Button>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          slotProps={{
+            list: {
+              'aria-labelledby': 'menu-button',
+            },
+          }}
+        >
+          {data.summary.map((roleSummary) => (
+            <MenuItem key={roleSummary.roleId} onClick={() => handleChipFilterOnClick(roleSummary.roleId)}>
+              {missingRoleFilters.includes(roleSummary.roleId) && (
+                <ListItemIcon>
+                  <Check />
+                </ListItemIcon>
+              )}
+              <ListItemText
+                inset={!missingRoleFilters.includes(roleSummary.roleId)}
+              >{`${roleSummary.roleName} (${roleSummary.count})`}</ListItemText>
+            </MenuItem>
+          ))}
+        </Menu>
+        <Button disabled={missingRoleFilters.length === 0} onClick={() => setMissingRolesFilters([])}>
+          Clear filters
+        </Button>
+      </Stack>
+    )
+  }, [anchorEl, data.summary, handleChipFilterOnClick, missingRoleFilters, open])
 
   const tableRows = useMemo(() => {
     return data.entries
@@ -78,9 +122,11 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
             </Typography>
           </TableCell>
           <TableCell>
-            {row.modelOwners.map((owner) => (
-              <UserDisplay key={owner} dn={owner} />
-            ))}
+            {row.modelOwners.length > 0 ? (
+              row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
+            ) : (
+              <em>{`No ${ownerRoleDisplayName}s set`}</em>
+            )}
           </TableCell>
           <TableCell>
             <List dense>
@@ -93,7 +139,7 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
           </TableCell>
         </TableRow>
       ))
-  }, [data.entries, missingRoleFilters])
+  }, [data.entries, missingRoleFilters, ownerRoleDisplayName])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
@@ -108,16 +154,14 @@ export default function PolicyMetricsCharts({ data }: PolicyMetricsChartsProps) 
   }
 
   return (
-    <Stack spacing={4}>
-      <Stack direction={{ md: 'row', sm: 'column' }} spacing={2}>
-        {displayMissingRoleCountChips}
-      </Stack>
+    <Stack spacing={2}>
+      {displayMissingRoleCountChips}
       <Stack spacing={2} sx={{ width: '100%' }}>
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
           Entries missing review roles
         </Typography>
-        <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-          <Table sx={{ minWidth: 650 }} size='small'>
+        <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1, overflow: 'auto' }}>
+          <Table size='small'>
             <TableHead>
               <TableRow>
                 <TableCell>Model ID</TableCell>
