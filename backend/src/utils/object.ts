@@ -23,25 +23,3 @@ export function getPropValue<T = unknown>(source: unknown, path: string): T | un
     return acc != null ? acc[key] : undefined
   }, source)
 }
-
-export function removeEmptyValues(value) {
-  if (value === '') {
-    return undefined
-  }
-
-  if (Array.isArray(value)) {
-    return value.map(removeEmptyValues).filter((item) => item !== undefined)
-  }
-
-  if (value !== null && typeof value === 'object') {
-    const cleaned = Object.fromEntries(
-      Object.entries(value)
-        .map(([key, item]) => [key, removeEmptyValues(item)])
-        .filter(([, item]) => item !== undefined),
-    )
-
-    return Object.keys(cleaned).length > 0 ? cleaned : undefined
-  }
-
-  return value
-}

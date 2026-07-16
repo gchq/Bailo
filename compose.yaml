@@ -36,17 +36,8 @@ services:
     ports:
       - 27017:27017
 
-  mailcrab:
-    networks:
-      default:
-      internal:
-    ports:
-      - 1080:1080
-      - 1025:1025
-    image: marlonb/mailcrab:v1.8.0
-
   minio:
-    image: bitnamilegacy/minio:2024.4.6
+    image: bitnamilegacy/minio:2025.7.23
     networks:
       internal:
     environment:

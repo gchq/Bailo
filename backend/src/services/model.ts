@@ -31,7 +31,6 @@ import {
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { removeEmptyValues } from '../utils/object.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
@@ -570,10 +569,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  let updatedModelCard: any = _.cloneDeep(metadata)
-  updatedModelCard = removeEmptyValues(updatedModelCard)
-
-  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, updatedModelCard || {}, model.state)
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
   if (!valid) {
     throw BadReq(
       `Model metadata could not be validated against the schema${model.state && `, for ${model.state} state`}.`,
@@ -583,7 +579,7 @@ export async function updateModelCard(
     )
   }
 
-  const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, updatedModelCard)
+  const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, metadata)
   return revision
 }
 
