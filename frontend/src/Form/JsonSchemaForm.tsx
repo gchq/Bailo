@@ -303,7 +303,6 @@ export default function JsonSchemaForm({
             validator={validator}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
-            omitExtraData
             disabled={!canEdit}
             liveOmit
             formContext={{
