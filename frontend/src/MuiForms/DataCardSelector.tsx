@@ -1,16 +1,15 @@
-import { Box, Chip, Stack, Typography } from '@mui/material'
+import { Box, Chip, Stack } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
-import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntryKind } from 'types/types'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 import MessageAlert from '../MessageAlert'
 
@@ -54,7 +53,6 @@ export default function DataCardSelector({
     setSelectedDataCards(dataCards.filter((card) => currentValue.includes(card.id)))
   }, [dataCards, currentValue])
 
-  const theme = useTheme()
   const router = useRouter()
 
   const handleSelectedDataCardsChange = useCallback(
@@ -81,12 +79,10 @@ export default function DataCardSelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext) as string[] | undefined
-  const compareFromState = getCompareFromState(id, registry.formContext) as string[] | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string[] | undefined
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
 
-  const idsToDiffString = (ids?: string[]) => {
+  const idsToDiffString = (val?: unknown): string | undefined => {
+    const ids = val as string[] | undefined
     if (!ids || ids.length === 0) {
       return ''
     }
@@ -96,49 +92,19 @@ export default function DataCardSelector({
       .join('\n')
   }
 
-  if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState ?? mirroredState
-    return (
-      <Stack spacing={1}>
-        <Typography
-          id={`${id}-label`}
-          aria-label={`Label for ${label}`}
-          component='label'
-          htmlFor={id}
-          sx={{ fontWeight: 'bold' }}
-        >
-          {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
-        <InlineDiff from={idsToDiffString(from)} to={idsToDiffString(currentValue)} />
-      </Stack>
-    )
-  }
-
-  const mirroredContent =
-    inCompareMode && registry.formContext.mirroredModel ? (
-      <InlineDiff from={idsToDiffString(compareFromMirroredState)} to={idsToDiffString(mirroredState)} />
-    ) : (
-      idsToDiffString(mirroredState)
-    )
-
-  const displayPanel =
-    inCompareMode && registry.formContext.mirroredModel
-      ? true
-      : registry.formContext.mirroredModel && currentValue.length > 0
-
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={displayPanel}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={currentValue}
+      formatter={idsToDiffString}
+      hasValue={currentValue.length > 0}
+      fallbackMirroredContent={idsToDiffString(compare.mirroredState)}
     >
-      {registry.formContext.editMode ? (
+      {compare.editMode ? (
         <Autocomplete<EntrySearchResult, true, true>
           multiple
           data-test='dataCardSelector'
@@ -179,8 +145,8 @@ export default function DataCardSelector({
             />
           )}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel && currentValue.length > 0 ? (
-        <InlineDiff from={idsToDiffString(compareFromState)} to={idsToDiffString(currentValue)} />
+      ) : compare.inMirroredCompare && currentValue.length > 0 ? (
+        <InlineDiff from={idsToDiffString(compare.compareFromState)} to={idsToDiffString(currentValue)} />
       ) : (
         currentValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>
@@ -200,6 +166,6 @@ export default function DataCardSelector({
           </Box>
         )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

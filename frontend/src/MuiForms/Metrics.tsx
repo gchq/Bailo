@@ -15,10 +15,10 @@ import { Registry, RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import MetricItem from 'src/MuiForms/MetricItem'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -37,7 +37,6 @@ interface MetricsProps {
   onChange: (newValue: MetricValue[]) => void
   value: MetricValue[]
   label: string
-  formContext?: Registry['formContext']
   id: string
   registry?: Registry
   required?: boolean
@@ -111,10 +110,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
-  const compareFromState = getCompareFromState(id, registry.formContext) as MetricValue[] | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as MetricValue[] | undefined
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+  const compare = getCompareFieldState<MetricValue[]>(id, registry.formContext)
 
   const metricsTableRows = (metrics: MetricValue[], compareWith?: MetricValue[]) => {
     if (!metrics) {
@@ -130,10 +126,14 @@ export default function Metrics({ onChange, value, label, id, registry, required
             maxWidth: '500px',
           }}
         >
-          {inCompareMode ? <InlineDiff from={compareWith?.name} to={metric?.name} direction={'row'} /> : metric?.name}
+          {compare.inCompareMode ? (
+            <InlineDiff from={compareWith?.name} to={metric?.name} direction={'row'} />
+          ) : (
+            metric?.name
+          )}
         </TableCell>
         <TableCell align='right'>
-          {inCompareMode ? (
+          {compare.inCompareMode ? (
             <InlineDiff from={compareWith?.value?.toString()} to={metric?.value?.toString()} direction={'row'} />
           ) : (
             metric?.value
@@ -145,16 +145,16 @@ export default function Metrics({ onChange, value, label, id, registry, required
 
   return (
     <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={metricsTableRows(mirroredState, compareFromMirroredState)}
-      display={registry.formContext.mirroredModel && value !== undefined && value.length > 0}
+      editMode={compare.editMode}
+      mirroredState={metricsTableRows(compare.mirroredState as MetricValue[], compare.compareFromMirroredState)}
+      display={compare.isMirroredModel && value !== undefined && value.length > 0}
       label={label}
       required={required}
       id={id}
-      mirroredModel={registry.formContext.mirroredModel}
+      mirroredModel={compare.isMirroredModel}
       description={schema.description}
     >
-      {registry.formContext && registry.formContext.editMode && (
+      {compare.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
           <Stack spacing={2}>{metricItems}</Stack>
           <Button onClick={handleAddItem} aria-label='add metric button'>
@@ -162,9 +162,9 @@ export default function Metrics({ onChange, value, label, id, registry, required
           </Button>
         </Stack>
       )}
-      {registry.formContext && !registry.formContext.editMode && (
+      {!compare.editMode && (
         <>
-          {!registry.formContext.mirroredModel && value.length === 0 && (
+          {!compare.isMirroredModel && value.length === 0 && (
             <Typography
               sx={{
                 fontStyle: 'italic',
@@ -183,7 +183,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
                     <TableCell align='right'>Value</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>{metricsTableRows(value, compareFromState)}</TableBody>
+                <TableBody>{metricsTableRows(value, compare.compareFromState)}</TableBody>
               </Table>
             </TableContainer>
           )}

@@ -2,10 +2,10 @@ import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface DropdownProps {
   label?: string
@@ -55,51 +55,18 @@ export default function Dropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext) as string | undefined
-  const compareFromState = getCompareFromState(id, registry.formContext) as string | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string | undefined
-
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
-  const isMirroredModel = !!registry.formContext.mirroredModel
-  const inMirroredCompare = inCompareMode && isMirroredModel
-
-  if (inCompareMode && !isMirroredModel) {
-    const from = compareFromState ?? mirroredState
-    return (
-      <AdditionalInformation
-        editMode={false}
-        label={label}
-        id={id}
-        required={required}
-        mirroredModel={false}
-        description={schema.description}
-      >
-        <InlineDiff from={from} to={value} />
-      </AdditionalInformation>
-    )
-  }
-
-  const mirroredContent = inMirroredCompare ? (
-    <InlineDiff from={compareFromMirroredState} to={mirroredState} />
-  ) : (
-    mirroredState
-  )
-
-  const displayPanel =
-    inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value
+  const compare = getCompareFieldState<string>(id, registry.formContext)
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={displayPanel}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={isMirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
     >
-      {registry.formContext.editMode ? (
+      {compare.editMode ? (
         <Autocomplete
           size='small'
           options={dropdownOptions}
@@ -123,7 +90,7 @@ export default function Dropdown({
           })}
           onChange={handleChange}
           value={value || ''}
-          disabled={!registry.formContext.editMode}
+          disabled={!compare.editMode}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -135,11 +102,11 @@ export default function Dropdown({
             />
           )}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
-        <InlineDiff from={compareFromState} to={value} />
+      ) : compare.inMirroredCompare && value ? (
+        <InlineDiff from={compare.compareFromState} to={value} />
       ) : (
         value && <Typography>{value}</Typography>
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

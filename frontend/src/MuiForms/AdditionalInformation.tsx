@@ -212,9 +212,7 @@ export default function AdditionalInformation({
               <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
             )}
           </Stack>
-          {/* Some components are conditionally rendered this filters between children that have a ReactNode*/}
-          {((children && !Array.isArray(children)) ||
-            (Array.isArray(children) && children.some((child) => !!child))) && (
+          {children && (
             <Box>
               <Box
                 sx={{

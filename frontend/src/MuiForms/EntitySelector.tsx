@@ -5,11 +5,11 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
 import UserDisplay from 'src/common/UserDisplay'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntityObject } from 'types/types'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 import { useGetCurrentUser, useListEntities } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -104,65 +104,31 @@ export default function EntitySelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
-  const compareFromState = getCompareFromState(id, registry.formContext) as string[] | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string[] | undefined
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
 
-  const currentValueString = formatEntityValue(currentValue)
-  const compareFromString = formatEntityValue(compareFromState)
-  const mirroredStateString = formatEntityValue(mirroredState as string[] | undefined)
-  const compareFromMirroredString = formatEntityValue(compareFromMirroredState)
-
-  if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState ? compareFromString : mirroredStateString
-    return (
-      <Stack spacing={1}>
-        <Typography
-          id={`${id}-label`}
-          aria-label={`Label for ${label}`}
-          component='label'
-          htmlFor={id}
-          sx={{ fontWeight: 'bold' }}
-        >
-          {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
-        <InlineDiff from={from} to={currentValueString} />
-      </Stack>
-    )
-  }
+  const formatEntity = (val?: unknown): string | undefined => formatEntityValue(val as string[] | undefined)
 
   if (isCurrentUserLoading) {
     return <Loading />
   }
 
-  const mirroredContent =
-    inCompareMode && registry.formContext.mirroredModel ? (
-      <InlineDiff from={compareFromMirroredString} to={mirroredStateString} />
-    ) : (
-      mirroredState
-    )
+  const currentValueString = formatEntityValue(currentValue)
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={
-        inCompareMode && registry.formContext.mirroredModel
-          ? true
-          : (registry.formContext.mirroredModel && currentValue.length > 0) || false
-      }
-      label={label}
+    <CompareField
       id={id}
-      mirroredModel={registry.formContext.mirroredModel}
+      label={label}
       required={required}
       description={schema.description}
+      compare={compare}
+      value={currentValue}
+      formatter={formatEntity}
+      hasValue={currentValue.length > 0}
     >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
-      {currentUser && registry.formContext.editMode ? (
+      {currentUser && compare.editMode ? (
         <>
           <Autocomplete<EntityObject, true, true>
             multiple
@@ -211,8 +177,8 @@ export default function EntitySelector({
             )}
           />
         </>
-      ) : inCompareMode && registry.formContext.mirroredModel && currentValue.length ? (
-        <InlineDiff from={compareFromString} to={currentValueString} />
+      ) : compare.inMirroredCompare && currentValue.length ? (
+        <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
       ) : (
         currentValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>
@@ -224,6 +190,6 @@ export default function EntitySelector({
           </Box>
         )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

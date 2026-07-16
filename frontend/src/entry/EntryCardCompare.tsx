@@ -1,12 +1,10 @@
-import ArrowBack from '@mui/icons-material/ArrowBack'
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
 import {
   Alert,
   Autocomplete,
   Button,
   Container,
-  IconButton,
-  Link,
+  Fab,
   Paper,
   Stack,
   TextField,
@@ -234,9 +232,9 @@ export default function EntryCardCompare({
         fromOnly ? 'single' : 'diff',
       ].join(':')
     : undefined
+
   if (currentKey && currentKey !== lastKey) {
     setLastKey(currentKey)
-    setSplitSchema(initialSplit)
   }
 
   const setModel = (side: QueryDiffSide, model: EntrySearchResult | null) => {
@@ -306,7 +304,16 @@ export default function EntryCardCompare({
     sameEntrySelected && fromMirroredVersion !== undefined && revision.version === fromMirroredVersion
 
   const kindLabel = EntryKindLabel[entryKind]
-  const link = `/${entryKindForRedirect(entryKind)}/${fromEntryId}`
+
+  const renderGotoEntryButton = (entryId?: string) => {
+    const href = entryId ? `/${entryKindForRedirect(entryKind)}/${entryId}` : undefined
+
+    return (
+      <Button size='small' variant='outlined' disabled={!entryId} href={href}>
+        Go to {kindLabel}
+      </Button>
+    )
+  }
 
   const hasAnyVersionFrom = !!fromEntryId && (fromVersion !== undefined || fromMirroredVersion !== undefined)
   const hasAnyVersionTo = !!toEntryId && (toVersion !== undefined || toMirroredVersion !== undefined)
@@ -335,17 +342,13 @@ export default function EntryCardCompare({
     <Container>
       <Paper sx={{ p: 4, my: 4 }}>
         <Stack spacing={4}>
-          <Link href={link}>
-            <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-              {`Back to ${kindLabel}`}
-            </Button>
-          </Link>
           <Typography variant='h6' component='h1' color='primary'>
             {`Compare ${toTitleCase(kindLabel)} Cards`}
           </Typography>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'stretch' }}>
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Typography sx={{ fontWeight: 'bold' }}>From</Typography>
+              {renderGotoEntryButton(fromEntryId)}
               <Autocomplete
                 disablePortal
                 options={fromEntries}
@@ -398,24 +401,31 @@ export default function EntryCardCompare({
               <Typography>&nbsp;</Typography>
               <Tooltip title='Swap comparison sides'>
                 <span>
-                  <IconButton
+                  <Fab
+                    color='primary'
                     aria-label='Swap From and To comparison sides'
                     onClick={flipComparison}
                     disabled={!fromEntryId && !toEntryId}
-                    sx={{
-                      transition: 'transform 150ms ease-in-out',
-                      '&:hover': {
-                        transform: 'rotate(180deg)',
-                      },
-                    }}
                   >
-                    <CompareArrowsIcon color='primary' fontSize='large' />
-                  </IconButton>
+                    <CompareArrowsIcon
+                      sx={{
+                        transition: 'transform 150ms ease-in-out',
+                        ':focus': {
+                          transform: 'rotate(180deg)',
+                        },
+                        ':hover': {
+                          transform: 'rotate(180deg)',
+                        },
+                      }}
+                      fontSize='large'
+                    />
+                  </Fab>
                 </span>
               </Tooltip>
             </Stack>
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
+              {renderGotoEntryButton(toEntryId)}
               <Autocomplete
                 disablePortal
                 options={toEntries}

@@ -345,6 +345,24 @@ describe('services > model', () => {
     await searchModels(user, searchParams)
   })
 
+  test('searchModels > multiple kinds', async () => {
+    const user: any = { dn: 'test' }
+
+    ModelModelMock.sort.mockResolvedValueOnce([])
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model', 'data-card'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+    }
+
+    await searchModels(user, searchParams)
+  })
+
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     ModelModelMock.sort.mockResolvedValue([])

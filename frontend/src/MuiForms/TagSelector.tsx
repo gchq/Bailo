@@ -2,9 +2,9 @@ import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/m
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
+import getCompareFieldState from 'src/hooks/useCompareField'
 
 interface TagEditorProps {
   editable: boolean
@@ -110,8 +110,8 @@ interface TagSelectorProps {
   value: string[]
   label: string
   editable?: boolean
-  formContext?: Registry['formContext']
   required?: boolean
+  registry?: Registry
   id: string
   schema?: RJSFSchema
 }
@@ -121,8 +121,8 @@ export default function TagSelector({
   value,
   label,
   editable = true,
-  formContext,
   required,
+  registry,
   id,
   schema,
 }: TagSelectorProps) {
@@ -154,7 +154,7 @@ export default function TagSelector({
     onChange(value.filter((e) => e !== tag))
   }
 
-  if (!formContext) {
+  if (!registry?.formContext) {
     return (
       <Stack spacing={1}>
         <Typography
@@ -188,54 +188,22 @@ export default function TagSelector({
     )
   }
 
-  const mirroredState = getMirroredState(id, formContext)
-  const compareFromState = getCompareFromState(id, formContext) as string[] | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, formContext) as string[] | undefined
-  const inCompareMode = !!formContext.compareMode && !formContext.editMode
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
 
-  const currentValueString = formatTagValue(value)
-  const compareFromString = formatTagValue(compareFromState)
-  const mirroredStateString = formatTagValue(mirroredState as string[] | undefined)
-  const compareFromMirroredString = formatTagValue(compareFromMirroredState)
-
-  if (inCompareMode && !formContext.mirroredModel) {
-    const from = compareFromState ? compareFromString : mirroredStateString
-    return (
-      <Stack spacing={1}>
-        <Typography
-          id={`${id}-label`}
-          aria-label={`Label for ${label}`}
-          component='label'
-          htmlFor={id}
-          sx={{ fontWeight: 'bold' }}
-        >
-          {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
-        <InlineDiff from={from} to={currentValueString} />
-      </Stack>
-    )
-  }
-
-  const mirroredContent =
-    inCompareMode && formContext.mirroredModel ? (
-      <InlineDiff from={compareFromMirroredString} to={mirroredStateString} />
-    ) : (
-      mirroredState
-    )
+  const formatTag = (val?: unknown): string | undefined => formatTagValue(val as string[] | undefined)
 
   return (
-    <AdditionalInformation
-      editMode={formContext.editMode}
-      mirroredState={mirroredContent}
-      display={inCompareMode && formContext.mirroredModel ? true : formContext.mirroredModel && value.length > 0}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={formContext.mirroredModel}
       description={schema ? schema.description : ''}
+      compare={compare}
+      value={value}
+      formatter={formatTag}
+      hasValue={value.length > 0}
     >
-      {formContext.editMode ? (
+      {compare.editMode ? (
         <TagEditor
           editable
           value={value}
@@ -246,10 +214,10 @@ export default function TagSelector({
           id={id}
           onSubmit={handleNewTagSubmit}
           onDelete={handleChipOnDelete}
-          emptyPlaceholderText={formContext.emptyPlaceholderText ?? 'No tags'}
+          emptyPlaceholderText={registry.formContext.emptyPlaceholderText ?? 'No tags'}
         />
-      ) : inCompareMode && formContext.mirroredModel && value.length > 0 ? (
-        <InlineDiff from={compareFromString} to={currentValueString} />
+      ) : compare.inMirroredCompare && value.length > 0 ? (
+        <InlineDiff from={formatTagValue(compare.compareFromState)} to={formatTagValue(value)} />
       ) : (
         value.length > 0 && (
           <Box sx={{ overflow: 'auto', p: 1 }}>
@@ -261,6 +229,6 @@ export default function TagSelector({
           </Box>
         )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

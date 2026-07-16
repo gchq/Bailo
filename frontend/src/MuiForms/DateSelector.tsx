@@ -3,10 +3,10 @@ import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Registry, RJSFSchema } from '@rjsf/utils'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface DateSelectorProps {
   label?: string
@@ -36,70 +36,36 @@ export default function DateSelector({ onChange, value, label, registry, require
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext) as string | undefined
+  const compare = getCompareFieldState<string>(id, registry.formContext)
 
-  const compareFromState = getCompareFromState(id, registry.formContext) as string | undefined
-
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string | undefined
-
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
-
-  const formatDate = (val?: string) => {
-    if (!val) {
-      return
+  const formatDate = (val?: unknown): string | undefined => {
+    if (!val || typeof val !== 'string') {
+      return undefined
     }
-
     return dayjs(val).format('DD-MM-YYYY')
   }
 
-  if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState ?? mirroredState
-
-    return (
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={false}
-        label={label}
-        id={id}
-        required={required}
-        mirroredModel={registry.formContext.mirroredModel}
-        description={schema.description}
-      >
-        <InlineDiff from={formatDate(from)} to={formatDate(value)} />
-      </AdditionalInformation>
-    )
-  }
-
-  const mirroredContent =
-    inCompareMode && registry.formContext.mirroredModel && value ? (
-      <InlineDiff from={formatDate(compareFromMirroredState)} to={formatDate(mirroredState)} />
-    ) : (
-      formatDate(mirroredState)
-    )
-
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
+      formatter={formatDate}
+      fallbackMirroredContent={formatDate(compare.mirroredState)}
     >
-      {registry.formContext.editMode ? (
+      {compare.editMode ? (
         <DatePicker
-          // MUI DatePicker requires null (not undefined) for empty state to correctly re-render when the value changes externally
           value={value ? dayjs(value) : null}
           aria-label={`date input field for ${label}`}
           onChange={handleChange}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
-        <InlineDiff from={formatDate(compareFromState)} to={formatDate(value)} />
+      ) : compare.inMirroredCompare && value ? (
+        <InlineDiff from={formatDate(compare.compareFromState)} to={formatDate(value)} />
       ) : (
         value && (
           <Typography
@@ -112,6 +78,6 @@ export default function DateSelector({ onChange, value, label, registry, require
           </Typography>
         )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

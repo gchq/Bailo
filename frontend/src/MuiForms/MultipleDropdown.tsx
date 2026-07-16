@@ -2,10 +2,10 @@ import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface MultipleDropdownProps {
   label?: string
@@ -63,56 +63,32 @@ export default function MultipleDropdown({
     onChange([])
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext) as string[] | undefined
-  const compareFromState = getCompareFromState(id, registry.formContext) as string[] | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string[] | undefined
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
 
-  const formatValues = (val: string[] | undefined): string => (val && val.length ? [...val].join('\n') : '')
-
-  if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState ?? mirroredState
-    return (
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={false}
-        label={label}
-        id={id}
-        required={required}
-        mirroredModel={registry.formContext.mirroredModel}
-        description={schema.description}
-      >
-        <InlineDiff from={formatValues(from)} to={formatValues(value)} />
-      </AdditionalInformation>
-    )
+  const formatValues = (val?: unknown): string | undefined => {
+    const arr = val as string[] | undefined
+    return arr && arr.length ? [...arr].join('\n') : ''
   }
 
-  const mirroredContent =
-    inCompareMode && registry.formContext.mirroredModel && value ? (
-      <InlineDiff from={compareFromMirroredState} to={mirroredState} />
-    ) : mirroredState ? (
-      <Typography>{mirroredState}</Typography>
-    ) : (
-      <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
-    )
+  const fallbackMirrored = compare.mirroredState ? (
+    <Typography>{compare.mirroredState}</Typography>
+  ) : (
+    <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
+  )
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={
-        inCompareMode && registry.formContext.mirroredModel
-          ? true
-          : registry.formContext.mirroredModel && value.length > 0
-      }
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
+      formatter={formatValues}
+      hasValue={value.length > 0}
+      fallbackMirroredContent={fallbackMirrored}
     >
-      {registry.formContext.editMode ? (
+      {compare.editMode ? (
         <Autocomplete
           multiple
           size='small'
@@ -137,7 +113,7 @@ export default function MultipleDropdown({
           })}
           onChange={handleChange}
           value={value || []}
-          disabled={!registry.formContext.editMode}
+          disabled={!compare.editMode}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -150,8 +126,8 @@ export default function MultipleDropdown({
             />
           )}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel && value.length > 0 ? (
-        <InlineDiff from={formatValues(compareFromState)} to={formatValues(value)} />
+      ) : compare.inMirroredCompare && value.length > 0 ? (
+        <InlineDiff from={formatValues(compare.compareFromState)} to={formatValues(value)} />
       ) : (
         value.length > 0 &&
         value.map((selectedValue) => (
@@ -166,6 +142,6 @@ export default function MultipleDropdown({
           </Typography>
         ))
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

@@ -1,12 +1,12 @@
-import { Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FieldPathId, Registry, RJSFSchema } from '@rjsf/utils'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface RichTextInputProps {
   value: string
@@ -39,52 +39,28 @@ export default function RichTextInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext) as string | undefined
-  const compareFromState = getCompareFromState(id, registry.formContext) as string | undefined
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as string | undefined
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
+  const compare = getCompareFieldState<string>(id, registry.formContext)
 
-  if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState !== undefined ? compareFromState : mirroredState
-    return (
-      <Stack spacing={1}>
-        <Typography
-          id={`${id}-label`}
-          aria-label={`Label for ${label}`}
-          component='label'
-          htmlFor={id}
-          sx={{ fontWeight: 'bold' }}
-        >
-          {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
-        <InlineDiff markdown from={from} to={value} />
-      </Stack>
-    )
-  }
+  const fallbackMirrored = compare.mirroredState ? (
+    <MarkdownDisplay>{compare.mirroredState}</MarkdownDisplay>
+  ) : (
+    <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+      Unanswered
+    </Typography>
+  )
 
-  const mirroredContent =
-    inCompareMode && registry.formContext.mirroredModel && value ? (
-      <InlineDiff markdown from={compareFromMirroredState} to={mirroredState} />
-    ) : mirroredState ? (
-      <MarkdownDisplay>{mirroredState}</MarkdownDisplay>
-    ) : (
-      <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
-        Unanswered
-      </Typography>
-    )
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value}
-      required={required}
-      label={label}
+    <CompareField
       id={id}
-      mirroredModel={registry.formContext.mirroredModel}
+      label={label}
+      required={required}
       description={schema.description}
+      compare={compare}
+      value={value}
+      markdown
+      fallbackMirroredContent={fallbackMirrored}
     >
-      {registry.formContext.editMode ? (
+      {compare.editMode ? (
         <RichTextEditor
           value={value}
           onChange={onChange}
@@ -92,11 +68,11 @@ export default function RichTextInput({
           errors={rawErrors}
           key={label}
         />
-      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
-        <InlineDiff markdown from={compareFromState} to={value} />
+      ) : compare.inMirroredCompare && value ? (
+        <InlineDiff markdown from={compare.compareFromState} to={value} />
       ) : (
         value && <MarkdownDisplay>{value}</MarkdownDisplay>
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

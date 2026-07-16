@@ -2,10 +2,11 @@ import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { ChangeEvent } from 'react'
+import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 interface CustomTextInputProps {
   label?: string
@@ -40,51 +41,25 @@ export default function CheckboxInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext) as boolean | undefined
+  const compare = getCompareFieldState<boolean>(id, registry.formContext)
 
-  const compareFromState = getCompareFromState(id, registry.formContext) as boolean | undefined
-
-  const compareFromMirroredState = getCompareFromMirroredState(id, registry.formContext) as boolean | undefined
-
-  const inCompareMode = !!registry.formContext.compareMode && !registry.formContext.editMode
-
-  const formatBoolean = (val?: boolean) => {
+  const formatBoolean = (val?: unknown): string | undefined => {
     if (val === undefined) {
-      return
+      return undefined
     }
-
     return val ? 'Yes' : 'No'
   }
 
-  if (inCompareMode && !registry.formContext.mirroredModel) {
-    const from = compareFromState ?? mirroredState
-
+  if (!compare.editMode && !compare.inCompareMode && value === undefined) {
     return (
       <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={false}
+        editMode={false}
+        mirroredState={compare.mirroredState}
+        display={compare.isMirroredModel && value !== undefined}
         label={label}
         id={id}
         required={required}
-        mirroredModel={registry.formContext.mirroredModel}
-        description={schema.description}
-      >
-        <InlineDiff from={formatBoolean(from)} to={formatBoolean(value)} />
-      </AdditionalInformation>
-    )
-  }
-
-  if (!registry.formContext.editMode && value === undefined) {
-    return (
-      <AdditionalInformation
-        editMode={registry.formContext.editMode}
-        mirroredState={mirroredState}
-        display={registry.formContext.mirroredModel && value !== undefined}
-        label={label}
-        id={id}
-        required={required}
-        mirroredModel={registry.formContext.mirroredModel}
+        mirroredModel={compare.isMirroredModel}
         description={schema.description}
       >
         <Typography
@@ -100,34 +75,31 @@ export default function CheckboxInput({
     )
   }
 
-  const mirroredContent =
-    inCompareMode && registry.formContext.mirroredModel && value ? (
-      <InlineDiff from={formatBoolean(compareFromMirroredState)} to={formatBoolean(mirroredState)} />
-    ) : mirroredState !== undefined ? (
-      <Typography>{formatBoolean(mirroredState)}</Typography>
-    ) : undefined
+  const fallbackMirrored =
+    compare.mirroredState !== undefined ? <Typography>{formatBoolean(compare.mirroredState)}</Typography> : undefined
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredContent}
-      display={inCompareMode && registry.formContext.mirroredModel ? true : registry.formContext.mirroredModel && value}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
+      formatter={formatBoolean}
+      hasValue={value !== undefined}
+      fallbackMirroredContent={fallbackMirrored}
     >
-      {registry.formContext.editMode ? (
+      {compare.editMode ? (
         <RadioGroup onChange={handleChange} value={value} aria-label={`radio input field for ${label}`} id={id}>
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>
-      ) : inCompareMode && registry.formContext.mirroredModel && value ? (
-        <InlineDiff from={formatBoolean(compareFromState)} to={formatBoolean(value)} />
+      ) : compare.inMirroredCompare && value ? (
+        <InlineDiff from={formatBoolean(compare.compareFromState)} to={formatBoolean(value)} />
       ) : (
         value && <Typography>{formatBoolean(value)}</Typography>
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }
