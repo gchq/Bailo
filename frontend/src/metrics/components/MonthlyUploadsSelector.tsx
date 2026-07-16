@@ -3,6 +3,8 @@ import { Stack, Typography } from '@mui/material'
 import { alpha, SxProps, Theme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 
+const minimumDate = '1970/01/01'
+
 interface MonthlyUploadsSelectorProps {
   startDate: Dayjs | null
   endDate: Dayjs | null
@@ -61,7 +63,7 @@ export function MonthlyUploadsSelector({
           views={['year', 'month']}
           value={startDate}
           onChange={onStartDateChange}
-          minDate={dayjs('1970/01/01')}
+          minDate={dayjs(minimumDate)}
           maxDate={endDate || dayjs()}
           slotProps={{ textField: { size: 'small' } }}
           sx={datePickerSx}
@@ -74,7 +76,7 @@ export function MonthlyUploadsSelector({
           views={['year', 'month']}
           value={endDate}
           onChange={onEndDateChange}
-          minDate={startDate || dayjs('1970/01/01')}
+          minDate={startDate || dayjs(minimumDate)}
           maxDate={dayjs()}
           sx={datePickerSx}
         />

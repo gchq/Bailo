@@ -881,4 +881,66 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
 
     expect(result.map((entry) => entry.entryId)).toEqual(['model-1'])
   })
+
+  test('filters by startMonth only', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      startMonth: '2026-01',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      createdAt: { $gte: new Date('2026-01-01T00:00:00.000Z') },
+    })
+  })
+
+  test('filters by endMonth only', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      endMonth: '2026-01',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      createdAt: { $lt: new Date('2026-02-01T00:00:00.000Z') },
+    })
+  })
+
+  test('filters by both startMonth and endMonth', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      startMonth: '2026-01',
+      endMonth: '2026-03',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      createdAt: {
+        $gte: new Date('2026-01-01T00:00:00.000Z'),
+        $lt: new Date('2026-04-01T00:00:00.000Z'),
+      },
+    })
+  })
+
+  test('combines startMonth/endMonth with organisation, state and schema filters', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      organisation: 'Example Organisation',
+      state: 'active',
+      schemaId: 'minimal-general-v10',
+      startMonth: '2026-01',
+      endMonth: '2026-02',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      organisation: 'Example Organisation',
+      state: 'active',
+      'card.schemaId': 'minimal-general-v10',
+      createdAt: {
+        $gte: new Date('2026-01-01T00:00:00.000Z'),
+        $lt: new Date('2026-03-01T00:00:00.000Z'),
+      },
+    })
+  })
 })
