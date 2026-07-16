@@ -1,20 +1,21 @@
 import { render, screen } from '@testing-library/react'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { describe, expect, it, vi } from 'vitest'
+import UiConfigContext from 'src/contexts/uiConfigContext'
+import { describe, expect, it } from 'vitest'
 
 import CompareField from '../../src/common/CompareField'
 import { CompareFieldState } from '../../src/hooks/useCompareField'
 
-vi.mock('../../actions/uiConfig', () => ({
-  useGetUiConfig: vi.fn(),
-}))
-
 const mockUiConfig: any = {
-  uiConfig: {
-    modelMirror: { import: { originalAnswerHeading: 'Original answer', additionalInfoHeading: 'Additional info' } },
+  modelMirror: {
+    import: {
+      originalAnswerHeading: 'Original answer',
+      additionalInfoHeading: 'Additional info',
+    },
   },
-  isUiConfigLoading: false,
-  isUiConfigError: false,
+}
+
+function renderWithUiConfig(ui: React.ReactNode) {
+  return render(<UiConfigContext.Provider value={mockUiConfig}>{ui}</UiConfigContext.Provider>)
 }
 
 function makeCompare(overrides: Partial<CompareFieldState<unknown>> = {}): CompareFieldState<unknown> {
@@ -32,9 +33,7 @@ function makeCompare(overrides: Partial<CompareFieldState<unknown>> = {}): Compa
 
 describe('CompareField', () => {
   it('renders children in normal mode', () => {
-    vi.mocked(useGetUiConfig).mockReturnValue(mockUiConfig)
-
-    render(
+    renderWithUiConfig(
       <CompareField id='root_field' label='Test Label' compare={makeCompare()} value='hello'>
         <span data-test='child'>Child Content</span>
       </CompareField>,
@@ -45,9 +44,7 @@ describe('CompareField', () => {
   })
 
   it('renders InlineDiff in non-mirrored compare mode and hides children', () => {
-    vi.mocked(useGetUiConfig).mockReturnValue(mockUiConfig)
-
-    render(
+    renderWithUiConfig(
       <CompareField
         id='root_field'
         label='Test Label'
@@ -58,7 +55,7 @@ describe('CompareField', () => {
         })}
         value='new value'
       >
-        <span data-test='child'>Should not appear</span>
+        <span data-testid='child'>Should not appear</span>
       </CompareField>,
     )
 
@@ -68,11 +65,9 @@ describe('CompareField', () => {
   })
 
   it('applies formatter to values in non-mirrored compare mode', () => {
-    vi.mocked(useGetUiConfig).mockReturnValue(mockUiConfig)
-
     const formatter = (val: unknown) => (val ? 'YES' : 'NO')
 
-    render(
+    renderWithUiConfig(
       <CompareField
         id='root_field'
         label='Test Label'
@@ -93,9 +88,7 @@ describe('CompareField', () => {
   })
 
   it('falls back to mirroredState when compareFromState is undefined in non-mirrored compare', () => {
-    vi.mocked(useGetUiConfig).mockReturnValue(mockUiConfig)
-
-    render(
+    renderWithUiConfig(
       <CompareField
         id='root_field'
         label='Test Label'
@@ -116,9 +109,7 @@ describe('CompareField', () => {
   })
 
   it('renders children in mirrored compare mode', () => {
-    vi.mocked(useGetUiConfig).mockReturnValue(mockUiConfig)
-
-    render(
+    renderWithUiConfig(
       <CompareField
         id='root_field'
         label='Test Label'

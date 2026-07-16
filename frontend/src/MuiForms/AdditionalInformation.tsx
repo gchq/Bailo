@@ -33,10 +33,6 @@ export default function AdditionalInformation({
   const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
 
-  if (children === undefined || (Array.isArray(children) && children.length === 0)) {
-    return <></>
-  }
-
   if (!mirroredModel) {
     return (
       <Stack spacing={1}>
