@@ -125,9 +125,10 @@ export default function PageWithTabs({
       <Stack
         divider={<Divider flexItem orientation='vertical' />}
         spacing={{ xs: 1, sm: 2 }}
-        direction={{ xs: 'column', sm: 'row' }}
+        direction={{ sm: 'column', md: 'row' }}
         sx={{
           alignItems: 'center',
+          justifyContent: 'flex-start',
           pb: 2,
           px: 2,
         }}
@@ -136,6 +137,7 @@ export default function PageWithTabs({
           sx={{
             overflow: 'auto',
             maxWidth: 'md',
+            p: 2,
           }}
         >
           <Stack
@@ -208,18 +210,20 @@ export default function PageWithTabs({
           </ExpandableTypography>
         )}
       </Box>
-      <Tabs
-        value={currentTab || false}
-        onChange={handleChange}
-        aria-label='Tabbed view'
-        indicatorColor='secondary'
-        scrollButtons='auto'
-        variant='scrollable'
-        allowScrollButtonsMobile
-        sx={{ height: '20px' }}
-      >
-        {tabsList}
-      </Tabs>
+      <Box sx={{ width: '100vh' }}>
+        <Tabs
+          value={currentTab || false}
+          onChange={handleChange}
+          aria-label='Tabbed view'
+          indicatorColor='secondary'
+          scrollButtons='auto'
+          variant='scrollable'
+          allowScrollButtonsMobile
+          sx={{ height: '20px', width: '100%' }}
+        >
+          {tabsList}
+        </Tabs>
+      </Box>
       {tabPanels}
     </>
   )
