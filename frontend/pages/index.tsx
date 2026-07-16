@@ -1,8 +1,12 @@
 import Add from '@mui/icons-material/Add'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   Container,
@@ -390,162 +394,173 @@ export default function Marketplace() {
       <Title text='Marketplace' />
       <Container maxWidth='xl'>
         <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
-          <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '300px' } }}>
-            <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
-              Create
-            </Button>
-            <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
-                <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
-                  Filters
-                </Typography>
-                <HelpDialog title='Search Information' content={<SearchInfo />} />
-              </Stack>
-              <FormControl
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  maxWidth: { sm: 'unset', md: '400px' },
-                  mb: 3,
-                  my: 2,
-                }}
-                variant='filled'
-                onSubmit={onFilterSubmit}
-              >
-                <InputLabel htmlFor='entry-filter-input'>
-                  {titleOnly ? 'Search by name' : 'Search by full text'}
-                </InputLabel>
-                <FilledInput
-                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
-                  id='entry-filter-input'
-                  value={filter}
-                  disableUnderline
-                  inputProps={{ spellCheck: 'false' }}
-                  onChange={handleFilterChange}
-                  endAdornment={
-                    <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>
-                      <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
-                        {titleOnly ? <TitleIcon /> : <SubjectIcon />}
-                      </IconButton>
-                    </Tooltip>
-                  }
-                />
-                {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
-                  <Typography variant='caption' color='error'>
-                    Please enter at least three characters
-                  </Typography>
-                )}
-              </FormControl>
-              <Stack divider={<Divider flexItem />} spacing={0}>
-                {uiConfig.modelDetails.organisations.length > 0 && (
-                  <Box>
-                    <ChipSelector
-                      label='Organisations'
-                      chipTooltipTitle={'Filter by organisation'}
-                      options={organisationList}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={selectedOrganisations}
-                      onChange={handleOrganisationsOnChange}
-                      size='small'
-                      ariaLabel='add organisation to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                {uiConfig.modelDetails.states.length > 0 && (
-                  <Box>
-                    <ChipSelector
-                      label='States'
-                      chipTooltipTitle={'Filter by state'}
-                      options={stateList}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={selectedStates}
-                      onChange={handleStatesOnChange}
-                      size='small'
-                      ariaLabel='add state to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
-                  <Box>
-                    <ChipSelector
-                      label='External repositories'
-                      chipTooltipTitle={'Include external repostories'}
-                      options={Array.from(peers.keys())}
-                      unreachableOptions={unreachablePeerList}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={selectedPeers}
-                      onChange={handlePeersOnChange}
-                      size='small'
-                      ariaLabel='add external repository to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                <Box>
-                  <ChipSelector
-                    label='Popular tags'
-                    subheading='(top 10)'
-                    chipTooltipTitle={'Filter by frequently used tags'}
-                    options={tags}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedTags}
-                    onChange={handlePopularTagsOnChange}
-                    size='small'
-                    ariaLabel='add tag to search filter'
-                    accordion
-                  />
-                </Box>
-                {selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
-                  <Box>
-                    <ChipSelector
-                      label='Model kinds'
-                      chipTooltipTitle={'Filter by model kinds'}
-                      options={modelKindOptions}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={
-                        selectedKinds.length === availableModelKinds.length
-                          ? [ALL_KINDS, ...selectedKinds.map(toTitleCase)]
-                          : selectedKinds.map(toTitleCase)
-                      }
-                      onChange={handleModelKindsOnChange}
-                      size='small'
-                      ariaLabel='add model kind to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                <Box>
-                  <ChipSelector
-                    label='My roles'
-                    multiple
-                    options={roleOptions.map((role) => role.label)}
-                    onChange={handleSelectedRolesOnChange}
-                    selectedChips={roleOptions
-                      .filter((label) => selectedRoles.includes(label.key))
-                      .map((type) => type.label)}
-                    size='small'
-                  />
-                </Box>
-              </Stack>
-              <Box
-                sx={{
-                  justifySelf: 'center',
-                  marginTop: 1,
-                }}
-              >
-                <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
-                  Reset filters
-                </Button>
+          <Box sx={{ mb: 2 }}>
+            <Stack spacing={2} sx={{ maxWidth: { sm: '100%', mb: '300px' } }}>
+              <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
+                Create
+              </Button>
+              <Box>
+                <Accordion defaultExpanded sx={{ backgroundColor: grey[200], borderRadius: '8px' }}>
+                  <AccordionSummary expandIcon={<ExpandMore />} sx={{ pl: 1, m: 0 }}>
+                    <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center' }}>
+                      <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold', px: 2 }}>
+                        Filters
+                      </Typography>
+                      <HelpDialog title='Search Information' content={<SearchInfo />} />
+                    </Stack>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ backgroundColor: grey[200], borderRadius: '8px' }}>
+                    <FormControl
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        maxWidth: { sm: 'unset', md: '400px' },
+                      }}
+                      variant='filled'
+                      onSubmit={onFilterSubmit}
+                    >
+                      <InputLabel htmlFor='entry-filter-input'>
+                        {titleOnly ? 'Search by name' : 'Search by full text'}
+                      </InputLabel>
+                      <FilledInput
+                        sx={{
+                          flex: 1,
+                          backgroundColor: theme.palette.background.paper,
+                          borderRadius: 2,
+                          width: '100%',
+                        }}
+                        id='entry-filter-input'
+                        value={filter}
+                        disableUnderline
+                        inputProps={{ spellCheck: 'false' }}
+                        onChange={handleFilterChange}
+                        endAdornment={
+                          <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>
+                            <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
+                              {titleOnly ? <TitleIcon /> : <SubjectIcon />}
+                            </IconButton>
+                          </Tooltip>
+                        }
+                      />
+                      {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
+                        <Typography variant='caption' color='error'>
+                          Please enter at least three characters
+                        </Typography>
+                      )}
+                    </FormControl>
+                    <Stack divider={<Divider flexItem />} spacing={0}>
+                      {uiConfig.modelDetails.organisations.length > 0 && (
+                        <Box>
+                          <ChipSelector
+                            label='Organisations'
+                            chipTooltipTitle={'Filter by organisation'}
+                            options={organisationList}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={selectedOrganisations}
+                            onChange={handleOrganisationsOnChange}
+                            size='small'
+                            ariaLabel='add organisation to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      {uiConfig.modelDetails.states.length > 0 && (
+                        <Box>
+                          <ChipSelector
+                            label='States'
+                            chipTooltipTitle={'Filter by state'}
+                            options={stateList}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={selectedStates}
+                            onChange={handleStatesOnChange}
+                            size='small'
+                            ariaLabel='add state to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
+                        <Box>
+                          <ChipSelector
+                            label='External repositories'
+                            chipTooltipTitle={'Include external repostories'}
+                            options={Array.from(peers.keys())}
+                            unreachableOptions={unreachablePeerList}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={selectedPeers}
+                            onChange={handlePeersOnChange}
+                            size='small'
+                            ariaLabel='add external repository to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      <Box>
+                        <ChipSelector
+                          label='Popular tags'
+                          subheading='(top 10)'
+                          chipTooltipTitle={'Filter by frequently used tags'}
+                          options={tags}
+                          expandThreshold={10}
+                          multiple
+                          selectedChips={selectedTags}
+                          onChange={handlePopularTagsOnChange}
+                          size='small'
+                          ariaLabel='add tag to search filter'
+                          accordion
+                        />
+                      </Box>
+                      {selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
+                        <Box>
+                          <ChipSelector
+                            label='Model kinds'
+                            chipTooltipTitle={'Filter by model kinds'}
+                            options={modelKindOptions}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={
+                              selectedKinds.length === availableModelKinds.length
+                                ? [ALL_KINDS, ...selectedKinds.map(toTitleCase)]
+                                : selectedKinds.map(toTitleCase)
+                            }
+                            onChange={handleModelKindsOnChange}
+                            size='small'
+                            ariaLabel='add model kind to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      <Box>
+                        <ChipSelector
+                          label='My roles'
+                          multiple
+                          options={roleOptions.map((role) => role.label)}
+                          onChange={handleSelectedRolesOnChange}
+                          selectedChips={roleOptions
+                            .filter((label) => selectedRoles.includes(label.key))
+                            .map((type) => type.label)}
+                          size='small'
+                        />
+                      </Box>
+                    </Stack>
+                    <Box
+                      sx={{
+                        justifySelf: 'center',
+                        marginTop: 1,
+                      }}
+                    >
+                      <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
+                        Reset filters
+                      </Button>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
               </Box>
-            </Container>
-          </Stack>
+            </Stack>
+          </Box>
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>

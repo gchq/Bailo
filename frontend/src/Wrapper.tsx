@@ -1,5 +1,6 @@
-import { CSSProperties } from '@mui/material'
+import { CSSProperties, useMediaQuery } from '@mui/material'
 import Box from '@mui/material/Box'
+import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import cookies from 'js-cookie'
 import { useRouter } from 'next/router'
@@ -26,6 +27,8 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const uiConfig = useContext(UiConfigContext)
   const router = useRouter()
   const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
+  const theme = useTheme()
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -67,7 +70,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
         {uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (
           <>
-            <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
+            <TopNavigation toggleDrawer={toggleDrawer} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
               page={page}
               bannerVisible={uiConfig.banner.enabled}
@@ -91,7 +94,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           })}
         >
           <Toolbar />
-          <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
+          <Box sx={{ ...contentTopStyling, paddingLeft: isSmOrLarger ? 7.5 : 0 }}>
             {isDocsPage ? (
               children
             ) : (
