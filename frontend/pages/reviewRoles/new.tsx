@@ -64,9 +64,6 @@ export default function ReviewRolesForm() {
         loading={loading}
         errorMessage={errorMessage}
         handleSubmit={handleSubmit}
-        handleCancel={() => {
-          router.push('/reviewRoles/view')
-        }}
       />
     </>
   )

@@ -34,6 +34,12 @@ vi.mock('../../../src/models/Model.js', () => ({
     Consumer: 'consumer',
     None: '',
   },
+  EntryKind: {
+    Model: 'model',
+    DataCard: 'data-card',
+    MirroredModel: 'mirrored-model',
+    UntrustedModel: 'untrusted-model',
+  },
 }))
 
 const releaseMocks = vi.hoisted(() => ({
