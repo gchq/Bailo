@@ -97,7 +97,7 @@ export default function SchemaMigrationSelector() {
     if (!res.ok) {
       setSubmitErrorText(await getErrorMessage(res))
     } else {
-      router.push('/schemas/list?tab=migrations')
+      router.push('/admin?section=migration')
     }
   }
 

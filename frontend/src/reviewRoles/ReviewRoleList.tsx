@@ -141,7 +141,6 @@ export default function ReviewRoleList() {
       ? formData.defaultEntities.map((defaultEntity) => (
           <Stack
             key={defaultEntity}
-            direction='row'
             spacing={1}
             sx={{
               alignItems: 'center',
@@ -298,28 +297,30 @@ export default function ReviewRoleList() {
   }
 
   return (
-    <Stack sx={{ m: 2 }} spacing={2}>
-      <Box sx={{ textAlign: 'right' }}>
-        <Link href={`/reviewRoles/new`}>
-          <Button variant='contained' startIcon={<Add />}>
-            Create new review role
-          </Button>
-        </Link>
-      </Box>
-      {reviewRoles ? (
-        <Paper sx={{ p: 4, my: 2 }}>
-          {reviewRoles.length > 0 ? (
-            <Stack direction={{ xs: 'column', sm: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
-              <List sx={{ width: '280px' }}>{listRoles}</List>
-              <Container sx={{ m: 2 }}>{listRoleDescriptions}</Container>
-            </Stack>
-          ) : (
-            <EmptyBlob text='No review roles found. Press button in top-right to create new review role.' />
-          )}
-        </Paper>
-      ) : (
-        <Loading />
-      )}
-    </Stack>
+    <Container sx={{ my: 2 }}>
+      <Stack sx={{ m: 2 }} spacing={2}>
+        <Box sx={{ textAlign: 'right' }}>
+          <Link href={`/reviewRoles/new`}>
+            <Button variant='contained' startIcon={<Add />}>
+              Create new review role
+            </Button>
+          </Link>
+        </Box>
+        {reviewRoles ? (
+          <Paper>
+            {reviewRoles.length > 0 ? (
+              <Stack direction={{ md: 'column', lg: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
+                <List sx={{ width: '280px' }}>{listRoles}</List>
+                <Container sx={{ m: 2 }}>{listRoleDescriptions}</Container>
+              </Stack>
+            ) : (
+              <EmptyBlob text='No review roles found. Press button in top-right to create new review role.' />
+            )}
+          </Paper>
+        ) : (
+          <Loading />
+        )}
+      </Stack>
+    </Container>
   )
 }

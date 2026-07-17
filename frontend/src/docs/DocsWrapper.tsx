@@ -143,7 +143,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   return (
     <>
       <Title text='Documentation' />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
         <Box
           sx={[
             {

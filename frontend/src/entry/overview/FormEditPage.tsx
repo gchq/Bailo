@@ -292,7 +292,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           {!isEdit && (
             <Stack direction={{ md: 'row', sm: 'column' }} sx={{ justifyContent: 'space-between' }} spacing={1}>
               <Stack
-                direction={{ md: 'row', sm: 'column' }}
+                direction={{ sm: 'row', xs: 'column' }}
                 sx={{ alignItems: 'center' }}
                 spacing={2}
                 divider={<Divider flexItem orientation='vertical' />}

@@ -404,11 +404,11 @@ export default function Marketplace() {
                     </Typography>
                     <HelpDialog title='Search Information' content={<SearchInfo />} />
                   </Stack>
-                  <Button onClick={() => setIsFiltersHidden(!isFiltersHidden)}>
-                    {isFiltersHidden ? 'Hide filters' : 'Show filters'}
+                  <Button size='small' onClick={() => setIsFiltersHidden(!isFiltersHidden)}>
+                    {isFiltersHidden ? 'Show filters' : 'Hide filters'}
                   </Button>
                 </Stack>
-                {isFiltersHidden && (
+                {!isFiltersHidden && (
                   <>
                     <FormControl
                       sx={{
