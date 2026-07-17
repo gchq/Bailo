@@ -318,8 +318,7 @@ export const darkTheme = createTheme({
     MuiChip: {
       styleOverrides: {
         filled: {
-          backgroundColor: 'white',
-          color: '#2d2d2d',
+          color: 'black',
         },
         deleteIcon: {
           color: '#3f3f3f',

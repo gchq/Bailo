@@ -273,7 +273,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           <Box>
             {schemaMigrations.length > 0 && canBeMigrated() && (
               <Restricted action='editEntryCard' fallback={<></>}>
-                <Box sx={{ width: 'fit-content' }}>
+                <Box sx={{ width: 'fit-content', mt: 2 }}>
                   <MessageAlert
                     severity='info'
                     style={{ my: 0 }}
