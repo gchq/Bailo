@@ -577,7 +577,7 @@ describe('services > model', () => {
       collaborators: [],
     }
     ModelModelMock.findOne.mockResolvedValueOnce(testModel)
-    vi.mocked(authorisation.model).mockResolvedValue({ info: '', success: true, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
 
     await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: 'some-source' } } }),
@@ -592,7 +592,7 @@ describe('services > model', () => {
       collaborators: [],
     }
     ModelModelMock.findOne.mockResolvedValueOnce(testModel)
-    vi.mocked(authorisation.model).mockResolvedValue({ info: '', success: true, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
 
     await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: 'new-source' } } }),
@@ -609,7 +609,7 @@ describe('services > model', () => {
       save: saveMock,
     }
     ModelModelMock.findOne.mockResolvedValueOnce(testModel)
-    vi.mocked(authorisation.model).mockResolvedValue({ info: '', success: true, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
 
     const result = await updateModel({} as any, '123', { settings: { mirror: { sourceModelId: 'new-source' } } })
 
@@ -624,7 +624,7 @@ describe('services > model', () => {
       collaborators: [],
     }
     ModelModelMock.findOne.mockResolvedValueOnce(testModel)
-    vi.mocked(authorisation.model).mockResolvedValue({ info: '', success: true, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
 
     await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { destinationModelId: '123' } } }),
@@ -638,7 +638,7 @@ describe('services > model', () => {
       collaborators: [],
     }
     ModelModelMock.findOne.mockResolvedValueOnce(testModel)
-    vi.mocked(authorisation.model).mockResolvedValue({ info: '', success: true, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
 
     await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '123', destinationModelId: '234' } } }),
