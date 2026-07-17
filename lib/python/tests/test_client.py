@@ -246,6 +246,19 @@ def test_patch_model(requests_mock):
     assert result == {"success": True}
 
 
+def test_patch_model_with_settings(requests_mock):
+    requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.patch_model(
+        model_id="test_id",
+        settings={"mirror": {"sourceModelId": "new-source-123"}},
+    )
+
+    assert result == {"success": True}
+    assert requests_mock.last_request.json()["settings"]["mirror"]["sourceModelId"] == "new-source-123"
+
+
 def test_delete_model(requests_mock):
     requests_mock.delete("https://example.com/api/v2/model/test_id", json={"success": True})
 

@@ -57,6 +57,44 @@ def test_get_card_latest_with_card_and_mirrored_card(local_mirrored_model, reque
     }
 
 
+def test_update_sends_source_model_id_when_changed(local_mirrored_model, requests_mock):
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "name": "test",
+                "description": "test",
+                "visibility": "public",
+            }
+        },
+    )
+    local_mirrored_model.sourceModelId = "new-source-456"
+    local_mirrored_model.update()
+
+    request_body = requests_mock.last_request.json()
+    assert request_body["settings"]["mirror"]["sourceModelId"] == "new-source-456"
+
+
+def test_update_omits_settings_when_source_model_id_unchanged(local_mirrored_model, requests_mock):
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "name": "test",
+                "description": "updated description",
+                "visibility": "public",
+            }
+        },
+    )
+    local_mirrored_model.description = "updated description"
+    local_mirrored_model.update()
+
+    request_body = requests_mock.last_request.json()
+    assert "settings" not in request_body
+
+
 def test_mirrored_model(local_mirrored_model):
     assert isinstance(local_mirrored_model, MirroredModel)
 

@@ -2,7 +2,14 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.8.0 - dd/mm/2026
+## 3.9.0 - dd/mm/2026
+
+### Changes
+
+- Add `settings` kwarg to `Client.patch_model`
+- Track changes to `MirroredModel.sourceModelId` to allow updating `sourceModelId` using `MirroredModel.update`
+
+## 3.8.0 - 26/06/2026
 
 ### Changes
 

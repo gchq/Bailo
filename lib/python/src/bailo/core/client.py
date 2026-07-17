@@ -207,6 +207,7 @@ class Client:
         state: str | None = None,
         tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
+        settings: dict | None = None,
     ):
         """Update a specific model using its unique ID.
 
@@ -219,6 +220,7 @@ class Client:
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param settings: Model settings dictionary (e.g. {"mirror": {"sourceModelId": "..."}}), defaults to None
         :return: JSON response object
         """
         filtered_params = filter_none(
@@ -231,6 +233,7 @@ class Client:
                 "visibility": visibility,
                 "collaborators": collaborators,
                 "tags": tags,
+                "settings": settings,
             }
         )
         normalised_params = normalise_query_params(filtered_params)
