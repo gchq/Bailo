@@ -591,14 +591,19 @@ export type UpdateModelParams = Pick<
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
+  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
+  }
   if (modelDiff.settings?.mirror?.sourceModelId) {
-    throw BadReq('Cannot change standard model to be a mirrored model.')
+    if (model.kind !== EntryKind.MirroredModel) {
+      throw BadReq('Cannot set a source model ID on a non-mirrored model.')
+    }
+    if (model.mirroredCard?.metadata !== undefined) {
+      throw BadReq('Cannot change the source model ID after the model has been imported.')
+    }
   }
   if (EntryKind.MirroredModel === model.kind && modelDiff.settings?.mirror?.destinationModelId) {
     throw BadReq('Cannot set a destination model ID for a mirrored model.')
-  }
-  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
-    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
     await validateCollaborators(modelDiff.collaborators, model.collaborators)

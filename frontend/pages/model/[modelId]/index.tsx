@@ -89,7 +89,7 @@ export default function Model() {
               datatest: 'settingsTab',
               disabled: !settingsPermission.hasPermission,
               disabledText: settingsPermission.info,
-              view: <Settings entry={entry} />,
+              view: <Settings entry={entry} mutateEntry={mutateEntry} />,
             },
           ]
         : [],
