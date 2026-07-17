@@ -1,7 +1,7 @@
 import CloudQueue from '@mui/icons-material/CloudQueue'
 import CorporateFare from '@mui/icons-material/CorporateFare'
 import LaunchOutlined from '@mui/icons-material/LaunchOutlined'
-import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/entry'
 import { CSSProperties, useMemo, useState } from 'react'
@@ -85,118 +85,103 @@ export default function EntryListRow({
         ...style,
       }}
     >
-      <Stack spacing={1}>
-        <Link
-          sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-          href={href}
-          target={isExternal ? '_blank' : '_self'}
-        >
-          <Stack
-            spacing={1}
-            direction='row'
+      <Link
+        sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+        href={href}
+        target={isExternal ? '_blank' : '_self'}
+      >
+        <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography
+            variant='h5'
+            component='h2'
             sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              fontWeight: '500',
+              textDecoration: 'none',
+              color: theme.palette.primary.main,
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
             }}
           >
-            <Typography
-              variant='h5'
-              component='h2'
-              sx={{
-                fontWeight: '500',
-                textDecoration: 'none',
-                color: theme.palette.primary.main,
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-              }}
-            >
-              {entry.name}
-            </Typography>
-            <Stack spacing={2} direction='row'>
-              {label}
-              {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
-              {isExternal && <LaunchOutlined />}
-            </Stack>
+            {entry.name}
+          </Typography>
+          <Stack spacing={2} direction='row'>
+            {label}
+            {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
+            {isExternal && <LaunchOutlined />}
           </Stack>
-          {displayPeers && isExternal && (
+        </Stack>
+        {displayPeers && isExternal && (
+          <ChipSelector
+            chipTooltipTitle={'Filter by external repository'}
+            options={peers && entry?.peerId && peers.has(entry.peerId) ? [entry.peerId] : []}
+            expandThreshold={10}
+            variant='outlined'
+            multiple
+            selectedChips={selectedPeers}
+            onChange={onSelectedPeersChange}
+            size='small'
+            ariaLabel='add external repository to search filter'
+            style={{ padding: 1, marginLeft: 'auto' }}
+            icon={<CloudQueue />}
+          />
+        )}
+      </Link>
+      <>
+        {!expanded &&
+          `${entry.description.slice(0, descriptionTextLimit)}${entry.description.length > descriptionTextLimit ? '...' : ''}`}
+        {expanded && entry.description}
+        {entry.description.length > descriptionTextLimit && (
+          <Button sx={{ width: 'max-content' }} onClick={() => setExpanded(!expanded)}>
+            {expanded ? 'Show less' : 'Show more...'}
+          </Button>
+        )}
+      </>
+      <Box>
+        <Stack direction={{ sm: 'column', md: 'row' }}>
+          {displayOrganisation && entry.organisation && (
             <ChipSelector
-              chipTooltipTitle={'Filter by external repository'}
-              options={peers && entry?.peerId && peers.has(entry.peerId) ? [entry.peerId] : []}
+              chipTooltipTitle={'Filter by organisation'}
+              options={[entry.organisation]}
               expandThreshold={10}
               variant='outlined'
               multiple
-              selectedChips={selectedPeers}
-              onChange={onSelectedPeersChange}
-              size='small'
-              ariaLabel='add external repository to search filter'
-              style={{ padding: 1, marginLeft: 'auto' }}
-              icon={<CloudQueue />}
-            />
-          )}
-        </Link>
-        <>
-          {!expanded &&
-            `${entry.description.slice(0, descriptionTextLimit)}${entry.description.length > descriptionTextLimit ? '...' : ''}`}
-          {expanded && entry.description}
-          {entry.description.length > descriptionTextLimit && (
-            <Button sx={{ width: 'max-content' }} onClick={() => setExpanded(!expanded)}>
-              {expanded ? 'Show less' : 'Show more...'}
-            </Button>
-          )}
-        </>
-        <Stack
-          direction='row'
-          spacing={1}
-          sx={{ flexWrap: 'wrap', rowGap: 1 }}
-          divider={<Divider flexItem orientation='vertical' />}
-        >
-          <Box>
-            <Stack direction='row' spacing={1}>
-              {displayOrganisation && entry.organisation && (
-                <ChipSelector
-                  chipTooltipTitle={'Filter by organisation'}
-                  options={[entry.organisation]}
-                  expandThreshold={10}
-                  variant='outlined'
-                  multiple
-                  selectedChips={selectedOrganisations}
-                  onChange={onSelectedOrganisationsChange}
-                  size='small'
-                  ariaLabel='add tag to search filter'
-                  icon={<CorporateFare />}
-                  style={{ padding: 1 }}
-                />
-              )}
-              {displayState && entry.state && (
-                <ChipSelector
-                  chipTooltipTitle={'Filter by state'}
-                  options={[entry.state]}
-                  expandThreshold={10}
-                  variant='outlined'
-                  multiple
-                  selectedChips={selectedStates}
-                  onChange={onSelectedStatesChange}
-                  size='small'
-                  ariaLabel='add tag to search filter'
-                  style={{ padding: 1 }}
-                />
-              )}
-            </Stack>
-          </Box>
-          {entry.tags.length > 0 && (
-            <ChipSelector
-              chipTooltipTitle={'Filter by tag'}
-              options={entry.tags.slice(0, 10)}
-              expandThreshold={10}
-              multiple
-              selectedChips={selectedChips}
-              onChange={onSelectedChipsChange}
+              selectedChips={selectedOrganisations}
+              onChange={onSelectedOrganisationsChange}
               size='small'
               ariaLabel='add tag to search filter'
+              icon={<CorporateFare />}
+              style={{ padding: 1 }}
+            />
+          )}
+          {displayState && entry.state && (
+            <ChipSelector
+              chipTooltipTitle={'Filter by state'}
+              options={[entry.state]}
+              expandThreshold={10}
+              variant='outlined'
+              multiple
+              selectedChips={selectedStates}
+              onChange={onSelectedStatesChange}
+              size='small'
+              ariaLabel='add tag to search filter'
+              style={{ padding: 1 }}
             />
           )}
         </Stack>
-      </Stack>
+      </Box>
+      {entry.tags.length > 0 && (
+        <ChipSelector
+          chipTooltipTitle={'Filter by tag'}
+          options={entry.tags.slice(0, 10)}
+          expandThreshold={10}
+          multiple
+          selectedChips={selectedChips}
+          onChange={onSelectedChipsChange}
+          size='small'
+          ariaLabel='add tag to search filter'
+          style={{ maxWidth: '400px' }}
+        />
+      )}
     </Box>
   )
 }
