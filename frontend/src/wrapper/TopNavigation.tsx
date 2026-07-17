@@ -17,6 +17,7 @@ import {
   MenuItem,
   Stack,
   Toolbar,
+  Tooltip,
   Typography,
   useMediaQuery,
 } from '@mui/material'
@@ -145,52 +146,58 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 </Link>
               </Stack>
               <Stack direction='row' sx={{ alignItems: 'center' }} spacing={1}>
-                <IconButton
-                  onClick={() => setIsTopNavSearchOpen(true)}
-                  sx={{
-                    color: 'white',
-                    backgroundColor: alpha(theme.palette.common.white, 0.15),
-                    '&:hover, &:focus': {
-                      backgroundColor: alpha(theme.palette.common.white, 0.25),
-                    },
-                    textTransform: 'capitalize',
-                    height: 'max-content',
-                  }}
-                >
-                  <Search />
-                </IconButton>
-                <IconButton
-                  onClick={handleCreateEntryClick}
-                  sx={{
-                    color: 'white',
-                    backgroundColor: alpha(theme.palette.common.white, 0.15),
-                    '&:hover, &:focus': {
-                      backgroundColor: alpha(theme.palette.common.white, 0.25),
-                    },
-                    textTransform: 'capitalize',
-                    height: 'max-content',
-                  }}
-                >
-                  <Add />
-                </IconButton>
+                <Tooltip title='Search'>
+                  <IconButton
+                    onClick={() => setIsTopNavSearchOpen(true)}
+                    sx={{
+                      color: 'white',
+                      backgroundColor: alpha(theme.palette.common.white, 0.15),
+                      '&:hover, &:focus': {
+                        backgroundColor: alpha(theme.palette.common.white, 0.25),
+                      },
+                      textTransform: 'capitalize',
+                      height: 'max-content',
+                    }}
+                  >
+                    <Search />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title='Create a new model or data card'>
+                  <IconButton
+                    onClick={handleCreateEntryClick}
+                    sx={{
+                      color: 'white',
+                      backgroundColor: alpha(theme.palette.common.white, 0.15),
+                      '&:hover, &:focus': {
+                        backgroundColor: alpha(theme.palette.common.white, 0.25),
+                      },
+                      textTransform: 'capitalize',
+                      height: 'max-content',
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                </Tooltip>
                 {currentUser ? (
                   <>
-                    <IconButton
-                      sx={{
-                        color: 'white',
-                        backgroundColor: alpha(theme.palette.common.white, 0.15),
-                        '&:hover, &:focus': {
-                          backgroundColor: alpha(theme.palette.common.white, 0.25),
-                        },
-                        textTransform: 'capitalize',
-                        height: 'max-content',
-                      }}
-                      onClick={handleUserMenuClicked}
-                      data-test='userMenuButton'
-                      aria-label='User menu dropdown button'
-                    >
-                      <Person />
-                    </IconButton>
+                    <Tooltip title='User settings'>
+                      <IconButton
+                        sx={{
+                          color: 'white',
+                          backgroundColor: alpha(theme.palette.common.white, 0.15),
+                          '&:hover, &:focus': {
+                            backgroundColor: alpha(theme.palette.common.white, 0.25),
+                          },
+                          textTransform: 'capitalize',
+                          height: 'max-content',
+                        }}
+                        onClick={handleUserMenuClicked}
+                        data-test='userMenuButton'
+                        aria-label='User menu dropdown button'
+                      >
+                        <Person />
+                      </IconButton>
+                    </Tooltip>
                     <Menu
                       disableScrollLock
                       anchorEl={userMenuAnchorEl}
