@@ -125,7 +125,7 @@ export default function TagSelector({
                       <Chip
                         label={tag}
                         key={tag}
-                        sx={{ width: 'fit-content', m: 0.5 }}
+                        sx={{ maxWidth: '300px', m: 0.5 }}
                         onDelete={() => handleChipOnDelete(tag)}
                       />
                     ))}
