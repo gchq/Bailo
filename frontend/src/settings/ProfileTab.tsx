@@ -41,7 +41,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
               slotProps={{ input: { 'aria-label': 'Toggle dark mode' } }}
             />
           }
-          label='Dark mode'
+          label='Dark mode (beta)'
         />
       </Box>
     </Box>
