@@ -124,28 +124,24 @@ class MirroredModel(Entry):
     def update(self) -> None:
         """Upload and retrieve any changes to the mirrored model summary on Bailo.
 
-        Extends the base update to include the sourceModelId in settings when it has changed.
+        Merges the sourceModelId into settings when it has changed, then delegates to the base update.
         """
-        settings = None
         if self.sourceModelId != self._original_source_model_id:
-            settings = {"mirror": {"sourceModelId": self.sourceModelId}}
-
-        res = self.client.patch_model(
-            model_id=self.id,
-            name=self.name,
-            kind=self.kind,
-            description=self.description,
-            visibility=self.visibility,
-            organisation=self.organisation,
-            state=self.state,
-            tags=self.tags,
-            collaborators=self.collaborators,
-            settings=settings,
-        )
-        self._unpack(res["model"])
+            if self.settings is None:
+                self.settings = {}
+            self.settings.setdefault("mirror", {})["sourceModelId"] = self.sourceModelId
+        super().update()
         self._original_source_model_id = self.sourceModelId
 
-        logger.info("ID %s updated locally and on server.", self.id)
+    def _unpack(self, res):
+        """Update mirrored model attributes from API response.
+
+        :param res: Response dictionary containing model information.
+        """
+        super()._unpack(res)
+        source_id = res.get("settings", {}).get("mirror", {}).get("sourceModelId", self.sourceModelId)
+        self.sourceModelId = source_id
+        self._original_source_model_id = source_id
 
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> MirroredModel:

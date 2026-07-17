@@ -6,8 +6,13 @@ All dates are formatted dd/mm/yyyy.
 
 ### Changes
 
-- Add `settings` kwarg to `Client.patch_model`
-- Track changes to `MirroredModel.sourceModelId` to allow updating `sourceModelId` using `MirroredModel.update`
+- Align Python client with full backend `patchModel`, `postModel`, and `getModel` API specs
+- Add `settings` kwarg to `Client.post_model` and `Client.patch_model`; add `kind` kwarg to `Client.get_model`
+- Add `UNTRUSTED_MODEL` to `EntryKind` enum; improve `Client.patch_model` type hints to accept enum types
+- `Entry._unpack` now hydrates all fields (`organisation`, `state`, `tags`, `collaborators`, `kind`, `settings`) from API responses; `Entry.update` sends `settings` to the server
+- `MirroredModel.update` tracks `sourceModelId` changes and only sends them when modified
+- Fix boolean settings (`ungovernedAccess`, `allowTemplating`) being stringified in JSON request bodies
+- Extend unit and integration test coverage
 
 ## 3.8.0 - 26/06/2026
 

@@ -95,6 +95,21 @@ def test_update_omits_settings_when_source_model_id_unchanged(local_mirrored_mod
     assert "settings" not in request_body
 
 
+def test_unpack_syncs_source_model_id(local_mirrored_model):
+    res = {
+        "id": "test-id",
+        "name": "test",
+        "description": "test",
+        "visibility": "public",
+        "kind": "mirrored-model",
+        "settings": {"mirror": {"sourceModelId": "updated-source-789"}},
+    }
+    local_mirrored_model._unpack(res)
+
+    assert local_mirrored_model.sourceModelId == "updated-source-789"
+    assert local_mirrored_model._original_source_model_id == "updated-source-789"
+
+
 def test_mirrored_model(local_mirrored_model):
     assert isinstance(local_mirrored_model, MirroredModel)
 
@@ -160,6 +175,74 @@ def test_create_get_from_id_update_and_delete_mirrored_model(
 
     # Check that the mirroredModel is deleted
     assert mirroredModel.delete()
+
+
+@pytest.mark.integration
+def test_update_source_model_id_before_import(integration_client):
+    model = MirroredModel.create(
+        client=integration_client,
+        name="test-source-id-update",
+        description="test",
+        sourceModelId="original-source",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    assert model.sourceModelId == "original-source"
+
+    model.sourceModelId = "corrected-source"
+    model.update()
+
+    with pytest.warns(UserWarning):
+        fetched = MirroredModel.from_id(integration_client, model.model_id)
+
+    assert fetched.sourceModelId == "corrected-source"
+
+    assert model.delete()
+
+
+@pytest.mark.integration
+def test_update_preserves_settings_on_non_source_id_change(integration_client):
+    model = MirroredModel.create(
+        client=integration_client,
+        name="test-settings-preserve",
+        description="original",
+        sourceModelId="source-123",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model.description = "updated"
+    model.update()
+
+    with pytest.warns(UserWarning):
+        fetched = MirroredModel.from_id(integration_client, model.model_id)
+
+    assert fetched.description == "updated"
+    assert fetched.sourceModelId == "source-123"
+
+    assert model.delete()
+
+
+@pytest.mark.integration
+def test_from_id_hydrates_all_fields(integration_client):
+    model = MirroredModel.create(
+        client=integration_client,
+        name="test-hydrate",
+        description="hydrate test",
+        sourceModelId="hydrate-source",
+        visibility=ModelVisibility.PUBLIC,
+        organisation="Example Organisation",
+        tags=["mirror-tag"],
+    )
+
+    with pytest.warns(UserWarning):
+        fetched = MirroredModel.from_id(integration_client, model.model_id)
+
+    assert fetched.organisation == "Example Organisation"
+    assert fetched.tags == ["mirror-tag"]
+    assert fetched.settings is not None
+    assert fetched.settings["mirror"]["sourceModelId"] == "hydrate-source"
+
+    assert model.delete()
 
 
 @pytest.mark.integration

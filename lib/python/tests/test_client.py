@@ -259,6 +259,53 @@ def test_patch_model_with_settings(requests_mock):
     assert requests_mock.last_request.json()["settings"]["mirror"]["sourceModelId"] == "new-source-123"
 
 
+def test_patch_model_with_enum_types(requests_mock):
+    requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.patch_model(
+        model_id="test_id",
+        kind=EntryKind.MODEL,
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    assert result == {"success": True}
+    body = requests_mock.last_request.json()
+    assert body["kind"] == "model"
+    assert body["visibility"] == "public"
+
+
+def test_post_model_with_settings(requests_mock):
+    requests_mock.post("https://example.com/api/v2/models", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.post_model(
+        name="test",
+        kind=EntryKind.MIRRORED_MODEL,
+        description="test",
+        sourceModelId="source-123",
+        settings={"ungovernedAccess": True, "allowTemplating": True},
+    )
+
+    assert result == {"success": True}
+    body = requests_mock.last_request.json()
+    assert body["settings"]["ungovernedAccess"] is True
+    assert body["settings"]["allowTemplating"] is True
+    assert body["settings"]["mirror"]["sourceModelId"] == "source-123"
+
+
+def test_get_model_with_kind(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id?kind=model&kind=mirrored-model",
+        json={"success": True},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_model(model_id="test_id", kind=["model", "mirrored-model"])
+
+    assert result == {"success": True}
+
+
 def test_delete_model(requests_mock):
     requests_mock.delete("https://example.com/api/v2/model/test_id", json={"success": True})
 
@@ -763,3 +810,76 @@ def test_integration_put_model_card_validation_error(integration_client: Client)
 
     error_str = str(exc)
     assert "Validation errors:" in error_str
+
+
+@pytest.mark.integration
+def test_integration_post_model_with_settings(integration_client: Client):
+    result = integration_client.post_model(
+        name="integration-settings-model",
+        kind=EntryKind.MODEL,
+        description="test settings on create",
+        visibility=ModelVisibility.PUBLIC,
+        settings={"allowTemplating": True},
+    )
+
+    model_id = result["model"]["id"]
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["settings"]["allowTemplating"] is True
+
+
+@pytest.mark.integration
+def test_integration_patch_model_with_settings(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-patch-settings",
+        kind=EntryKind.MODEL,
+        description="test patching settings",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    integration_client.patch_model(
+        model_id=model_id,
+        settings={"allowTemplating": True},
+    )
+
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["settings"]["allowTemplating"] is True
+
+
+@pytest.mark.integration
+def test_integration_patch_model_with_enum_types(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-enum-patch",
+        kind=EntryKind.MODEL,
+        description="test enum types in patch",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    integration_client.patch_model(
+        model_id=model_id,
+        visibility=ModelVisibility.PRIVATE,
+    )
+
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["visibility"] == "private"
+
+
+@pytest.mark.integration
+def test_integration_get_model_with_kind(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-kind-filter",
+        kind=EntryKind.MODEL,
+        description="test kind filter",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    fetched = integration_client.get_model(model_id=model_id, kind=["model"])
+    assert fetched["model"]["id"] == model_id
+
+    with pytest.raises(BailoException):
+        integration_client.get_model(model_id=model_id, kind=["data-card"])
