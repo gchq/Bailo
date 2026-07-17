@@ -52,16 +52,6 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
       },
     },
   },
-  MuiTab: {
-    styleOverrides: {
-      root: {
-        textTransform: 'none',
-        '&:hover': {
-          backgroundColor: '#ececec',
-        },
-      },
-    },
-  },
   MuiMenu: {
     defaultProps: {
       anchorOrigin: {
@@ -137,6 +127,16 @@ export const lightTheme = createTheme({
         },
       },
     },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          '&:hover': {
+            backgroundColor: '#ececec',
+          },
+        },
+      },
+    },
   },
   palette: {
     mode: 'light',
@@ -192,11 +192,11 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#f37f58',
+      main: '#f7f7f7',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#ecc3b1',
+      main: '#914581',
     },
     error: {
       main: red.A200,
@@ -211,7 +211,8 @@ export const darkTheme = createTheme({
       main: green.A700,
     },
     background: {
-      paper: '#242424',
+      paper: '#2d2d2d',
+      default: '#2d2d2d',
     },
     action: {
       active: '#fff',
@@ -282,12 +283,19 @@ export const darkTheme = createTheme({
       },
     },
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
         outlined: {
           color: '#fff',
         },
         contained: {
           color: '#fff',
+          backgroundColor: '#914581',
         },
         text: {
           color: '#fff',
@@ -310,12 +318,44 @@ export const darkTheme = createTheme({
     MuiChip: {
       styleOverrides: {
         filled: {
-          color: 'black',
+          backgroundColor: 'white',
+          color: '#2d2d2d',
         },
         deleteIcon: {
           color: '#3f3f3f',
         },
       },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: '#e3e3e3',
+        },
+      },
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        root: {
+          color: '#e3e3e3',
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          '&:hover': {
+            backgroundColor: '#363636',
+          },
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: (theme) => ({
+        div: {
+          color: theme.palette.text.primary,
+        },
+      }),
     },
   },
 })

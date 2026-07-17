@@ -325,6 +325,7 @@ export default function Paginate<T>({
       >
         <Pagination
           count={pageCount}
+          color='secondary'
           page={page}
           onChange={handlePageOnChange}
           aria-label='bottom page pagination navigation'

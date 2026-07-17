@@ -243,8 +243,7 @@ export default function JsonSchemaForm({
                       <Typography
                         sx={{
                           wordBreak: 'break-word',
-                          color:
-                            !step.isComplete(step) && displayLabelValidation ? 'error' : theme.palette.common.black,
+                          color: !step.isComplete(step) && displayLabelValidation ? 'error' : 'unset',
                         }}
                       >
                         {step.schema.title}
