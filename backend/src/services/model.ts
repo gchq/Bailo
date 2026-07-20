@@ -759,7 +759,10 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
   // Special case for the first model card revision when a schema is set but `metadata` is still `undefined`
   // This only happens when created from a schema, but when created from a template the first revision will not be undefined
   if (modelCardRevision.version !== 1 || modelCardRevision.metadata !== undefined) {
-    const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+    const { valid, errors } = await validateContentAgainstSchema(
+      modelCardRevision.schemaId,
+      modelCardRevision.metadata || {},
+    )
     if (!valid) {
       throw BadReq('Model metadata could not be validated against the schema.', {
         validationErrors: errors,
