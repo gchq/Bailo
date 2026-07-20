@@ -1,214 +1,63 @@
-import dayjs, { Dayjs } from '@dayjs'
 import { Stack, Typography } from '@mui/material'
-import { cheerfulFiestaPaletteDark, mangoFusionPaletteDark } from '@mui/x-charts'
-import { BarChart, BarChartProps } from '@mui/x-charts/BarChart'
-import { DefaultizedPieValueType, PieItemIdentifier } from '@mui/x-charts/models'
-import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
-import { DatePicker } from '@mui/x-date-pickers'
-import { useGetVolumeForModel } from 'actions/metrics'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
-import OverviewStatPanel from 'src/metrics/OverviewStatPanel'
-import { ModelVolume, ModelVolumeData, OverviewBaseMetrics } from 'types/types'
-import { formatDateStringAsMonthAndYear, setAsFirstDayOfMonth, setAsLastDayOfMonth } from 'utils/dateUtils'
-import { BreakdownQueryType, NONE_COLOR, PieChartData, withConsistentColours } from 'utils/metricsUtils'
+import { MetricsBarChart } from 'src/metrics/components/MetricsBarChart'
+import { noneColour, OverviewPieChart } from 'src/metrics/components/MetricsPieChart'
+import OverviewStatPanel from 'src/metrics/components/OverviewStatPanel'
+import { OverviewBaseMetrics } from 'types/types'
+import { BreakdownQueryType, toPieData } from 'utils/metricsUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics
   organisationList: string[]
   selectedOrganisation: string
   onSelect: (type: BreakdownQueryType, value: string) => void
+  onSelectMonth: (month: string) => void
 }
-
-type BarChartRow = {
-  label: string
-} & Record<string, number | string>
 
 export default function OverviewMetricsCharts({
   data,
   organisationList,
   selectedOrganisation,
   onSelect,
+  onSelectMonth,
 }: OverviewMetricsChartsProps) {
-  const [schemaData, setSchemaData] = useState<PieChartData[]>([])
-  const [structuredModelVolume, setStructuredModelVolume] = useState<BarChartRow[]>([])
-  const [startDate, setStartDate] = useState<Dayjs | null>(null)
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(new Date()))
-  const [errorMessage, setErrorMessage] = useState('')
-  const [barChartConfig, setBarChartConfig] = useState<Partial<BarChartProps>>({
-    height: 250,
-    margin: { left: 0 },
-    yAxis: [{ width: 50 }],
-    colors: cheerfulFiestaPaletteDark,
-    borderRadius: 2,
-  })
-
-  const pieChartSettings = {
-    margin: { right: 5 },
-    width: 200,
-    height: 200,
-    sx: {
-      [`& .${pieClasses.arcLabel}`]: {
-        fontWeight: 'bold',
-        color: 'white',
-      },
-    },
-    colors: mangoFusionPaletteDark,
-  }
-
-  const { modelVolume, isModelVolumeLoading, isModelVolumeError } = useGetVolumeForModel(
-    'month',
-    `${startDate ? setAsFirstDayOfMonth(startDate) : setAsFirstDayOfMonth(dayjs(new Date()))}`,
-    `${endDate ? setAsLastDayOfMonth(endDate) : setAsLastDayOfMonth(dayjs(new Date()))}`,
+  const stateData = useMemo(
+    () =>
+      toPieData(
+        (data.entryState ?? []).map((state) => ({
+          label: state.state,
+          value: state.count,
+        })),
+        noneColour,
+      ),
+    [data.entryState],
   )
 
-  const stateData = useMemo(() => {
-    return (
-      data.entryState?.map((state) => ({
-        label: state.state,
-        value: state.count,
-        color: state.state.toLowerCase() === 'none' ? NONE_COLOR : undefined,
-      })) ?? []
-    )
-  }, [data.entryState])
-
-  const updateStartDate = useEffectEvent((newDate: Date) => {
-    setStartDate(dayjs(newDate))
-  })
-
-  useEffect(() => {
-    if (!startDate) {
-      const updatedStartDate = new Date()
-      updatedStartDate.setFullYear(updatedStartDate.getFullYear() - 1)
-      updateStartDate(updatedStartDate)
-    }
-  }, [startDate])
-
-  const updateSchemaData = useEffectEvent((newSchemaData) => {
-    setSchemaData(newSchemaData)
-  })
-
-  useEffect(() => {
-    if (data.schemaBreakdown) {
-      updateSchemaData(
-        data.schemaBreakdown.map((schemaItem) => {
-          return {
-            label: schemaItem.schemaName,
-            value: schemaItem.count,
-            color: schemaItem.schemaName.toLowerCase() === 'none' ? NONE_COLOR : undefined,
-          }
-        }),
-      )
-    }
-  }, [data.schemaBreakdown])
-
-  const updateModelVolume = useEffectEvent((modelVolume: ModelVolume, changedOrganisation: string) => {
-    setBarChartConfig((prev) => ({
-      ...prev,
-      hideLegend: changedOrganisation !== 'All',
-    }))
-    if (modelVolume.data) {
-      const updatedStructure = modelVolume.data.map((volumeData: ModelVolumeData) => {
-        const formattedDate = formatDateStringAsMonthAndYear(volumeData.startDate)
-        const incrementObject = {
-          label: formattedDate,
-        }
-        Object.entries(volumeData.organisations)
-          .filter(([org]) => changedOrganisation === 'All' || org === changedOrganisation)
-          .forEach(([org, count]) => {
-            incrementObject[org] = count
-          })
-        return incrementObject
-      })
-      setStructuredModelVolume(updatedStructure)
-    }
-  })
-
-  useEffect(() => {
-    if (modelVolume) {
-      updateModelVolume(modelVolume, selectedOrganisation)
-    }
-  }, [modelVolume, selectedOrganisation])
+  const schemaData = useMemo(
+    () =>
+      toPieData(
+        (data.schemaBreakdown ?? []).map((schema) => ({
+          label: schema.schemaName,
+          value: schema.count,
+        })),
+        noneColour,
+      ),
+    [data.schemaBreakdown],
+  )
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
   }
 
-  if (isModelVolumeError) {
-    return <MessageAlert message={isModelVolumeError.info.message} severity='error' />
-  }
-
-  if (isModelVolumeLoading) {
-    return <Loading />
-  }
-
-  const handleStateItemClick = (
-    _event: React.MouseEvent<SVGPathElement, MouseEvent>,
-    _identifier: PieItemIdentifier,
-    item: DefaultizedPieValueType,
-  ) => {
-    const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
-    if (label) {
-      onSelect('byState', label)
-    }
-  }
-
-  const handleSchemaItemClick = (
-    _event: React.MouseEvent<SVGPathElement, MouseEvent>,
-    _identifier: PieItemIdentifier,
-    item: DefaultizedPieValueType,
-  ) => {
-    const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
-    if (label) {
-      onSelect('bySchema', label)
-    }
-  }
-
   return (
     <Stack spacing={4}>
+      <Typography sx={{ mb: 2 }}>Click on any of the charts below to view the model breakdown</Typography>
       <Stack spacing={2}>
-        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'center' }}>
-          <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-            Monthly uploads between
-          </Typography>
-          <DatePicker
-            openTo='month'
-            views={['year', 'month']}
-            value={startDate}
-            onChange={(newValue) => {
-              setStartDate(newValue)
-              setErrorMessage('')
-            }}
-            minDate={dayjs('1970/01/01')}
-            maxDate={endDate || dayjs(new Date())}
-          />
-          <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-            -
-          </Typography>
-          <DatePicker
-            openTo='month'
-            views={['year', 'month']}
-            value={endDate}
-            onChange={(newValue) => {
-              setEndDate(newValue)
-              setErrorMessage('')
-            }}
-            minDate={startDate || dayjs('1970/01/01')}
-            maxDate={dayjs(new Date())}
-          />
-        </Stack>
-        <Typography color='error'>{errorMessage}</Typography>
-        <BarChart
-          dataset={structuredModelVolume}
-          series={[
-            ...organisationList.map((organisation) => {
-              return { dataKey: organisation, label: organisation }
-            }),
-          ]}
-          xAxis={[{ dataKey: 'label' }]}
-          {...barChartConfig}
+        <MetricsBarChart
+          organisationList={organisationList}
+          selectedOrganisation={selectedOrganisation}
+          onSelectMonth={onSelectMonth}
         />
       </Stack>
       <Stack spacing={4}>
@@ -218,88 +67,43 @@ export default function OverviewMetricsCharts({
           direction={{ lg: 'row', md: 'column' }}
         >
           <Stack spacing={2}>
-            <OverviewStatPanel label='total entries' value={data.entries} minWidth='300px' />
-            <OverviewStatPanel label='entries with releases' value={data.withReleases} minWidth='300px' />
-            <OverviewStatPanel label='entries with access requests' value={data.withAccessRequest} minWidth='320px' />
+            <OverviewStatPanel
+              label='total entries'
+              value={data.entries}
+              onClick={() => onSelect('totalEntries', '')}
+              minWidth='300px'
+            />
+            <OverviewStatPanel
+              label='entries with releases'
+              value={data.withReleases}
+              onClick={() => onSelect('withReleases', '')}
+              minWidth='300px'
+            />
+            <OverviewStatPanel
+              label='entries with access requests'
+              value={data.withAccessRequest}
+              onClick={() => onSelect('withAccessRequest', '')}
+              minWidth='320px'
+            />
           </Stack>
           <Stack>
-            {/** TODO - Currently only the pie charts are clickable.
-             *          Once all charts in this page are clickable, move this text to above the top chart and update the text */}
-            <Typography sx={{ mb: 2 }}>Click on either of the pie charts below to view the model breakdown</Typography>
             <Stack
               spacing={2}
               direction={{ lg: 'row', md: 'column' }}
               sx={{ width: '100%', justifyContent: 'space-around' }}
             >
-              <Stack spacing={2} sx={{ alignItems: 'center' }}>
-                <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-                  Life cycle status
-                </Typography>
-                <PieChart
-                  series={[
-                    {
-                      id: 'life-cycle-status',
-                      innerRadius: 50,
-                      outerRadius: 100,
-                      data: withConsistentColours(stateData),
-                      arcLabel: 'value',
-                      paddingAngle: 1,
-                      cornerRadius: 4,
-                      highlightScope: { fade: 'global', highlight: 'item' },
-                    },
-                  ]}
-                  onItemClick={handleStateItemClick}
-                  slotProps={{
-                    legend: {
-                      direction: 'horizontal',
-                      position: { vertical: 'bottom', horizontal: 'center' },
-                    },
-                  }}
-                  sx={{
-                    ...pieChartSettings.sx,
-                    '& path': { cursor: 'pointer' },
-                  }}
-                  margin={pieChartSettings.margin}
-                  width={pieChartSettings.width}
-                  height={pieChartSettings.height}
-                  colors={pieChartSettings.colors}
-                />
-              </Stack>
-              <Stack spacing={2} sx={{ alignItems: 'center' }}>
-                <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-                  Schema usage
-                </Typography>
-                <PieChart
-                  series={[
-                    {
-                      id: 'schema-usage',
-                      innerRadius: 50,
-                      outerRadius: 100,
-                      data: withConsistentColours(schemaData),
-                      arcLabel: 'value',
-                      paddingAngle: 1,
-                      cornerRadius: 4,
-                      color: 'red',
-                      highlightScope: { fade: 'global', highlight: 'item' },
-                    },
-                  ]}
-                  onItemClick={handleSchemaItemClick}
-                  slotProps={{
-                    legend: {
-                      direction: 'horizontal',
-                      position: { vertical: 'bottom', horizontal: 'center' },
-                    },
-                  }}
-                  sx={{
-                    ...pieChartSettings.sx,
-                    '& path': { cursor: 'pointer' },
-                  }}
-                  margin={pieChartSettings.margin}
-                  width={pieChartSettings.width}
-                  height={pieChartSettings.height}
-                  colors={pieChartSettings.colors}
-                />
-              </Stack>
+              <OverviewPieChart
+                id='life-cycle-status'
+                title='Life cycle status'
+                data={stateData}
+                onSelectItem={(label) => onSelect('byState', label)}
+              />
+              <OverviewPieChart
+                id='schema-usage'
+                title='Schema usage'
+                data={schemaData}
+                onSelectItem={(label) => onSelect('bySchema', label)}
+              />
             </Stack>
           </Stack>
         </Stack>

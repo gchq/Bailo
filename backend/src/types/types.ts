@@ -13,6 +13,7 @@ import {
 } from '../services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation, FileMirrorMetadata } from '../services/mirroredModel/importers/file.js'
 import { ImageMirrorInformation, ImageMirrorMetadata } from '../services/mirroredModel/importers/image.js'
+import { getEnumValues } from '../utils/enum.js'
 import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
 import { BailoError } from './error.js'
 
@@ -238,10 +239,19 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
 
+export const EntryFilter = {
+  WITH: 'with',
+  WITHOUT: 'without',
+} as const
+
 export interface MetricsEntrySearchOptions {
   organisation: string
   state: string
   schemaId: string
+  release: string
+  accessRequest: string
+  startMonth: string
+  endMonth: string
 }
 
 export type MetricsEntrySearchOptionsParams = Optional<MetricsEntrySearchOptions>
@@ -251,6 +261,16 @@ export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOption
     organisation: z.string().optional(),
     state: z.string().optional(),
     schemaId: z.string().optional(),
+    release: z.enum(getEnumValues(EntryFilter)).optional(),
+    accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
+    startMonth: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .optional(),
+    endMonth: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .optional(),
   })
 
 export type ModelImages = ModelImageTags[]
