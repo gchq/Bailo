@@ -127,7 +127,7 @@ export function buildEntriesTabHref(type: BreakdownQueryType, value: string, con
 }
 
 /**
- * Sort the pie chart data to ensure the 'None' count is always first.
+ * Sort the pie chart data to ensure the 'None' count is always last.
  */
 export function sortPieData<T extends PieChartData>(items: T[]): T[] {
   return [...items].sort((a, b) => {
