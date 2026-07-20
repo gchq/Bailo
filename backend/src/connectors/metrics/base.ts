@@ -894,6 +894,10 @@ export class BaseMetricsConnector {
         createdAtFilter.$lt = addInterval(end, 'month')
       }
 
+      if (query.startMonth && query.endMonth && query.startMonth > query.endMonth) {
+        throw BadReq('startMonth must be before or equal to endMonth')
+      }
+
       mongoQuery.createdAt = createdAtFilter
     }
 

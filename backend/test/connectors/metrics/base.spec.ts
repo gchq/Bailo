@@ -723,8 +723,6 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
   let connector
 
   await beforeEach(async () => {
-    vi.clearAllMocks()
-
     const { BaseMetricsConnector } = await loadConnector()
     connector = new BaseMetricsConnector(['b corp'])
   })
@@ -943,5 +941,14 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
         $lt: new Date('2026-03-01T00:00:00.000Z'),
       },
     })
+  })
+
+  test('throws when startMonth is after endMonth', async () => {
+    await expect(
+      connector.calculateModelBreakdown(mockUser, {
+        startMonth: '2026-03',
+        endMonth: '2026-01',
+      } as any),
+    ).rejects.toThrow(BadReq('startMonth must be before or equal to endMonth'))
   })
 })
