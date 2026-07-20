@@ -717,6 +717,116 @@ class Client:
         """
         return self._parse_json(self.agent.get(f"{self.url}/v2/model/{model_id}/images"))
 
+    def post_webhook(
+        self,
+        model_id: str,
+        name: str,
+        uri: str,
+        token: str | None = None,
+        insecure_ssl: bool | None = None,
+        events: list[str] | None = None,
+        active: bool | None = None,
+    ):
+        """Create a webhook for a model.
+
+        :param model_id: Unique model ID
+        :param name: Name of the webhook
+        :param uri: URI the webhook will call
+        :param token: Optional authentication token, defaults to None
+        :param insecure_ssl: Allow insecure SSL connections, defaults to None
+        :param events: List of event types to trigger on (e.g. createRelease, updateRelease), defaults to None
+        :param active: Whether the webhook is active, defaults to None
+        :return: JSON response object
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "uri": uri,
+                "token": token,
+                "insecureSSL": insecure_ssl,
+                "events": events,
+                "active": active,
+            }
+        )
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/webhooks",
+                json=filtered_params,
+            )
+        )
+
+    def get_webhooks(
+        self,
+        model_id: str,
+    ):
+        """Get all webhooks for a model.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/webhooks",
+            )
+        )
+
+    def put_webhook(
+        self,
+        model_id: str,
+        webhook_id: str,
+        name: str,
+        uri: str,
+        token: str | None = None,
+        insecure_ssl: bool | None = None,
+        events: list[str] | None = None,
+        active: bool | None = None,
+    ):
+        """Update a webhook for a model.
+
+        :param model_id: Unique model ID
+        :param webhook_id: Unique webhook ID
+        :param name: Name of the webhook
+        :param uri: URI the webhook will call
+        :param token: Optional authentication token, defaults to None
+        :param insecure_ssl: Allow insecure SSL connections, defaults to None
+        :param events: List of event types to trigger on, defaults to None
+        :param active: Whether the webhook is active, defaults to None
+        :return: JSON response object
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "uri": uri,
+                "token": token,
+                "insecureSSL": insecure_ssl,
+                "events": events,
+                "active": active,
+            }
+        )
+        return self._parse_json(
+            self.agent.put(
+                f"{self.url}/v2/model/{model_id}/webhook/{webhook_id}",
+                json=filtered_params,
+            )
+        )
+
+    def delete_webhook(
+        self,
+        model_id: str,
+        webhook_id: str,
+    ):
+        """Delete a webhook for a model.
+
+        :param model_id: Unique model ID
+        :param webhook_id: Unique webhook ID
+        :return: JSON response object
+        """
+        return self._parse_json(
+            self.agent.delete(
+                f"{self.url}/v2/model/{model_id}/webhook/{webhook_id}",
+            )
+        )
+
     def get_all_schemas(
         self,
         kind: SchemaKind | None = None,

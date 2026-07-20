@@ -648,6 +648,214 @@ def test_put_image_scan(requests_mock):
     assert result == {"status": "Scan started"}
 
 
+def test_patch_file(requests_mock):
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test_model_id/file/test_file_id",
+        json={"file": {"name": "renamed.bin"}},
+    )
+
+    client = Client("https://example.com")
+    result = client.patch_file(
+        model_id="test_model_id",
+        file_id="test_file_id",
+        name="renamed.bin",
+        tags=["v2"],
+    )
+
+    assert result == {"file": {"name": "renamed.bin"}}
+    body = requests_mock.last_request.json()
+    assert body["name"] == "renamed.bin"
+    assert body["tags"] == ["v2"]
+
+
+def test_get_filescanning_info(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/filescanning/info",
+        json={"scanners": [{"toolName": "ClamAV"}]},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_filescanning_info()
+
+    assert result == {"scanners": [{"toolName": "ClamAV"}]}
+
+
+def test_get_model_tags(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/models/tags",
+        json={"tags": ["nlp", "vision"]},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_model_tags()
+
+    assert result == {"tags": ["nlp", "vision"]}
+
+
+def test_start_multipart_upload(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_model_id/files/upload/multipart/start",
+        json={"fileId": "f1", "uploadId": "u1", "chunks": [{"startByte": 0, "endByte": 1024}]},
+    )
+
+    client = Client("https://example.com")
+    result = client.start_multipart_upload(
+        model_id="test_model_id",
+        name="large.bin",
+        size=1024,
+    )
+
+    assert result["fileId"] == "f1"
+    body = requests_mock.last_request.json()
+    assert body["name"] == "large.bin"
+    assert body["size"] == 1024
+
+
+def test_upload_multipart_part(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_model_id/files/upload/multipart/part",
+        json={"ETag": "abc123"},
+    )
+
+    client = Client("https://example.com")
+    result = client.upload_multipart_part(
+        model_id="test_model_id",
+        file_id="f1",
+        upload_id="u1",
+        part_number=1,
+        data=b"chunk-data",
+    )
+
+    assert result == {"ETag": "abc123"}
+    assert "fileId" in requests_mock.last_request.url
+    assert "uploadId" in requests_mock.last_request.url
+    assert "partNumber" in requests_mock.last_request.url
+
+
+def test_finish_multipart_upload(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_model_id/files/upload/multipart/finish",
+        json={"file": {"name": "large.bin", "complete": True}},
+    )
+
+    client = Client("https://example.com")
+    result = client.finish_multipart_upload(
+        model_id="test_model_id",
+        file_id="f1",
+        upload_id="u1",
+        parts=[{"ETag": "abc123", "PartNumber": 1}],
+    )
+
+    assert result["file"]["complete"] is True
+    body = requests_mock.last_request.json()
+    assert body["fileId"] == "f1"
+    assert body["parts"] == [{"ETag": "abc123", "PartNumber": 1}]
+
+
+def test_post_webhook(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/webhooks",
+        json={"webhook": {"id": "wh1", "name": "my-hook"}},
+    )
+
+    client = Client("https://example.com")
+    result = client.post_webhook(
+        model_id="test_id",
+        name="my-hook",
+        uri="https://hook.example.com",
+        events=["createRelease"],
+    )
+
+    assert result["webhook"]["name"] == "my-hook"
+    body = requests_mock.last_request.json()
+    assert body["name"] == "my-hook"
+    assert body["uri"] == "https://hook.example.com"
+    assert body["events"] == ["createRelease"]
+
+
+def test_get_webhooks(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id/webhooks",
+        json={"webhooks": [{"id": "wh1"}]},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_webhooks(model_id="test_id")
+
+    assert len(result["webhooks"]) == 1
+
+
+def test_put_webhook(requests_mock):
+    requests_mock.put(
+        "https://example.com/api/v2/model/test_id/webhook/wh1",
+        json={"webhook": {"id": "wh1", "name": "updated-hook"}},
+    )
+
+    client = Client("https://example.com")
+    result = client.put_webhook(
+        model_id="test_id",
+        webhook_id="wh1",
+        name="updated-hook",
+        uri="https://hook.example.com/v2",
+        active=False,
+    )
+
+    assert result["webhook"]["name"] == "updated-hook"
+    body = requests_mock.last_request.json()
+    assert body["name"] == "updated-hook"
+    assert body["active"] is False
+
+
+def test_delete_webhook(requests_mock):
+    requests_mock.delete(
+        "https://example.com/api/v2/model/test_id/webhook/wh1",
+        json={"message": "Successfully removed webhook"},
+    )
+
+    client = Client("https://example.com")
+    result = client.delete_webhook(model_id="test_id", webhook_id="wh1")
+
+    assert result == {"message": "Successfully removed webhook"}
+
+
+@pytest.mark.integration
+def test_integration_webhook_lifecycle(integration_client: Client):
+    model = integration_client.post_model(
+        name="webhook-test-model",
+        kind=EntryKind.MODEL,
+        description="webhook integration test",
+        visibility=ModelVisibility.PUBLIC,
+    )
+    model_id = model["model"]["id"]
+
+    created = integration_client.post_webhook(
+        model_id=model_id,
+        name="test-hook",
+        uri="https://example.com/webhook",
+        events=["createRelease"],
+    )
+    assert "webhook" in created
+    webhook_id = created["webhook"]["id"]
+
+    listed = integration_client.get_webhooks(model_id=model_id)
+    assert any(w["id"] == webhook_id for w in listed["webhooks"])
+
+    updated = integration_client.put_webhook(
+        model_id=model_id,
+        webhook_id=webhook_id,
+        name="updated-hook",
+        uri="https://example.com/webhook/v2",
+        active=False,
+    )
+    assert updated["webhook"]["name"] == "updated-hook"
+
+    deleted = integration_client.delete_webhook(model_id=model_id, webhook_id=webhook_id)
+    assert "message" in deleted
+
+    after_delete = integration_client.get_webhooks(model_id=model_id)
+    assert not any(w["id"] == webhook_id for w in after_delete["webhooks"])
+
+
 @pytest.mark.integration
 def test_integration_create_and_fetch_model(integration_client: Client):
     result = integration_client.post_model(
