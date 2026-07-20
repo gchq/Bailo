@@ -1,4 +1,4 @@
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoNewRelease from 'public/docs/bailo_new_release.png'
 import bailoNewReleaseForm from 'public/docs/bailo_new_release_form.png'
@@ -34,7 +34,11 @@ attaching files or images:
 2. Click **Draft new Release**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='empty model releases tab with new release button' src={bailoNewRelease} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='empty model releases tab with new release button'
+    src={bailoNewRelease}
+  />
 </Box>
 
 The screenshot above shows the Releases tab with no releases yet and a 'Draft new Release' button.
@@ -46,7 +50,7 @@ The screenshot above shows the Releases tab with no releases yet and a 'Draft ne
    - **Images** - attach container (Docker) images to this release
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='draft new release form' src={bailoNewReleaseForm} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='draft new release form' src={bailoNewReleaseForm} />
 </Box>
 
 The screenshot above shows the release creation form with fields for version number, release notes, file attachments,
