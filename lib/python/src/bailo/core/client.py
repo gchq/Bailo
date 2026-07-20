@@ -708,17 +708,19 @@ class Client:
 
     def get_model_roles(
         self,
-        model_id: str,
+        model_id: str | None = None,
     ):
         """
-        Get roles for a model.
+        Get roles available for entries. Includes both system and dynamic roles.
 
-        :param model_id: Unique model ID
+        :param model_id: Optional unique model ID to scope roles to a specific model, defaults to None
         :return: JSON response object
         """
+        filtered_params = filter_none({"modelId": model_id})
         return self._parse_json(
             self.agent.get(
-                f"{self.url}/v2/model/{model_id}/roles",
+                f"{self.url}/v2/roles",
+                params=filtered_params,
             )
         )
 

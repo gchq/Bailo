@@ -534,7 +534,7 @@ def test_post_access_request_review(comment, requests_mock):
 
 
 def test_get_model_roles(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/roles", json={"success": True})
+    requests_mock.get("https://example.com/api/v2/roles", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_model_roles(
@@ -542,6 +542,17 @@ def test_get_model_roles(requests_mock):
     )
 
     assert result == {"success": True}
+    assert "modelId" in requests_mock.last_request.url
+
+
+def test_get_model_roles_without_model_id(requests_mock):
+    requests_mock.get("https://example.com/api/v2/roles", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.get_model_roles()
+
+    assert result == {"success": True}
+    assert requests_mock.last_request.qs == {}
 
 
 def test_get_access_request(requests_mock):
