@@ -558,9 +558,102 @@ class Client:
             timeout=10_000,
         )
 
-    # def start_multi_upload(): TBC
+    def start_multipart_upload(
+        self,
+        model_id: str,
+        name: str,
+        size: int,
+        mime: str | None = None,
+        tags: list[str] | None = None,
+    ):
+        """Start a multipart file upload.
 
-    # def finish_multi_upload(): TBC
+        :param model_id: Unique model ID
+        :param name: Name of the file to upload
+        :param size: Total size of the file in bytes
+        :param mime: MIME type of the file, defaults to application/octet-stream
+        :param tags: Optional tags to associate with the file
+        :return: JSON response object containing fileId, uploadId, and chunks
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "size": size,
+                "mime": mime,
+                "tags": tags,
+            }
+        )
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/multipart/start",
+                json=filtered_params,
+            )
+        )
+
+    def upload_multipart_part(
+        self,
+        model_id: str,
+        file_id: str,
+        upload_id: str,
+        part_number: int,
+        data: BytesIO | bytes,
+    ):
+        """Upload a single part of a multipart file upload.
+
+        :param model_id: Unique model ID
+        :param file_id: File ID returned by start_multipart_upload
+        :param upload_id: Upload ID returned by start_multipart_upload
+        :param part_number: 1-based part number
+        :param data: File chunk as BytesIO or bytes
+        :return: JSON response object containing the ETag for this part
+        """
+        if isinstance(data, BytesIO):
+            content_length = data.getbuffer().nbytes
+        else:
+            content_length = len(data)
+
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/multipart/part",
+                params={"fileId": file_id, "uploadId": upload_id, "partNumber": part_number},
+                data=data,
+                headers={"Content-Length": str(content_length)},
+                stream=True,
+                timeout=10_000,
+            )
+        )
+
+    def finish_multipart_upload(
+        self,
+        model_id: str,
+        file_id: str,
+        upload_id: str,
+        parts: list[dict[str, Any]],
+        tags: list[str] | None = None,
+    ):
+        """Complete a multipart file upload.
+
+        :param model_id: Unique model ID
+        :param file_id: File ID returned by start_multipart_upload
+        :param upload_id: Upload ID returned by start_multipart_upload
+        :param parts: List of dicts with ETag and PartNumber for each uploaded part
+        :param tags: Optional tags to associate with the file
+        :return: JSON response object containing the completed file
+        """
+        filtered_params = filter_none(
+            {
+                "fileId": file_id,
+                "uploadId": upload_id,
+                "parts": parts,
+                "tags": tags,
+            }
+        )
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/multipart/finish",
+                json=filtered_params,
+            )
+        )
 
     def delete_file(
         self,
@@ -576,6 +669,40 @@ class Client:
         return self._parse_json(
             self.agent.delete(
                 f"{self.url}/v2/model/{model_id}/file/{file_id}",
+            )
+        )
+
+    def patch_file(
+        self,
+        model_id: str,
+        file_id: str,
+        name: str | None = None,
+        mime: str | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ):
+        """Update metadata for a specific file.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :param name: New file name, defaults to None
+        :param mime: New MIME type, defaults to None
+        :param tags: Tags to associate with the file, defaults to None
+        :param metadata: Arbitrary metadata dict, defaults to None
+        :return: JSON response object
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "mime": mime,
+                "tags": tags,
+                "metadata": metadata,
+            }
+        )
+        return self._parse_json(
+            self.agent.patch(
+                f"{self.url}/v2/model/{model_id}/file/{file_id}",
+                json=filtered_params,
             )
         )
 
@@ -837,6 +964,28 @@ class Client:
         """
         return self._parse_json(
             self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/image/{image_name}/{image_tag}/scan", json={})
+        )
+
+    def get_filescanning_info(self):
+        """Get information about available file scanning tools.
+
+        :return: JSON response object containing scanner info
+        """
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/filescanning/info",
+            )
+        )
+
+    def get_model_tags(self):
+        """Get popular tags used across all models.
+
+        :return: JSON response object containing a list of tags
+        """
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/models/tags",
+            )
         )
 
     def post_access_request_review(
