@@ -104,6 +104,18 @@ describe('Create new model', () => {
     cy.contains('This is a test summary')
   })
 
+  it('can view the model card history of an existing model', () => {
+    cy.log('Navigating to an existing model')
+    cy.visit(`/model/${modelUuid}`)
+    cy.log('Test that we can edit the model card')
+    cy.get('[data-test=openEntryOverviewActions]').click()
+    cy.contains('View History')
+    cy.get('[data-test=viewHistoryButton]').click()
+    cy.contains('Model Card History')
+    cy.visit(`/model-card/${modelUuid}/compare?fromEntry=${modelUuid}fromVersion=1`)
+    cy.contains('Compare Model Cards')
+  })
+
   it('can soft delete the model', () => {
     cy.intercept('DELETE', `/api/v2/model/${modelUuid}`).as('deleteModel')
     cy.request('POST', `/api/v2/model/${modelUuid}/releases`, {

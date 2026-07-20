@@ -1,22 +1,12 @@
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
-import {
-  Alert,
-  Autocomplete,
-  Button,
-  Container,
-  Fab,
-  Paper,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Alert, Autocomplete, Container, Fab, Link, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import {
@@ -55,6 +45,27 @@ type EntryCardCompareProps = {
   toEntryId?: string
   toVersion?: number
   toMirroredVersion?: number
+}
+
+const RevisionDetails = ({ revision }: { revision?: EntryCardRevisionInterface | null }) => {
+  if (!revision) {
+    return null
+  }
+
+  return (
+    <Stack direction='row' spacing={0.5} sx={{ minHeight: 20, alignItems: 'center' }}>
+      <Typography component='span' variant='caption'>
+        Updated by
+      </Typography>
+      <UserDisplay dn={revision.createdBy} />
+      <Typography component='span' variant='caption'>
+        on
+      </Typography>
+      <Typography component='span' variant='caption' sx={{ fontWeight: 'bold' }}>
+        {formatDateTimeString(revision.createdAt)}
+      </Typography>
+    </Stack>
+  )
 }
 
 export default function EntryCardCompare({
@@ -239,9 +250,9 @@ export default function EntryCardCompare({
 
   const setModel = (side: QueryDiffSide, model: EntrySearchResult | null) => {
     if (side === QueryDiffSide.From) {
-      updateQuery(router, { fromModel: model?.id, fromVersion: undefined, fromMirroredVersion: undefined })
+      updateQuery(router, { fromEntry: model?.id, fromVersion: undefined, fromMirroredVersion: undefined })
     } else {
-      updateQuery(router, { toModel: model?.id, toVersion: undefined, toMirroredVersion: undefined })
+      updateQuery(router, { toEntry: model?.id, toVersion: undefined, toMirroredVersion: undefined })
     }
   }
 
@@ -278,8 +289,7 @@ export default function EntryCardCompare({
         (toMirroredVersion !== undefined && isToMirroredLoading))) ||
     (!!chosenSchemaId && isSchemaLoading)
 
-  const renderVersionLabel = (revision: EntryCardRevisionInterface) =>
-    `Updated by ${revision.createdBy} on ${formatDateTimeString(revision.createdAt)}`
+  const renderVersionLabel = (revision: EntryCardRevisionInterface) => `Version ${revision.version}`
 
   const renderEntryLabel = (entry: EntrySearchResult) => `${entry.name} (${entry.id})`
 
@@ -305,13 +315,13 @@ export default function EntryCardCompare({
 
   const kindLabel = EntryKindLabel[entryKind]
 
-  const renderGotoEntryButton = (entryId?: string) => {
-    const href = entryId ? `/${entryKindForRedirect(entryKind)}/${entryId}` : undefined
+  const renderGotoEntryButton = (entry?: EntrySearchResult) => {
+    const href = entry ? `/${entryKindForRedirect(entry.kind)}/${entry.id}` : undefined
 
     return (
-      <Button size='small' variant='outlined' disabled={!entryId} href={href}>
-        Go to {kindLabel}
-      </Button>
+      <Link sx={{ fontWeight: 'bold' }} href={href}>
+        {entry && entry.name}
+      </Link>
     )
   }
 
@@ -328,11 +338,11 @@ export default function EntryCardCompare({
 
   const flipComparison = () => {
     updateQuery(router, {
-      fromModel: toEntryId,
+      fromEntry: toEntryId,
       fromVersion: toVersion === undefined ? undefined : String(toVersion),
       fromMirroredVersion: toMirroredVersion === undefined ? undefined : String(toMirroredVersion),
 
-      toModel: fromEntryId,
+      toEntry: fromEntryId,
       toVersion: fromVersion === undefined ? undefined : String(fromVersion),
       toMirroredVersion: fromMirroredVersion === undefined ? undefined : String(fromMirroredVersion),
     })
@@ -347,8 +357,10 @@ export default function EntryCardCompare({
           </Typography>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'stretch' }}>
             <Stack spacing={2} sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 'bold' }}>From</Typography>
-              {renderGotoEntryButton(fromEntryId)}
+              <Stack spacing={1} direction='row' sx={{ alignItems: 'center' }}>
+                <Typography sx={{ fontWeight: 'bold' }}>From</Typography>
+                {renderGotoEntryButton(fromEntry)}
+              </Stack>
               <Autocomplete
                 disablePortal
                 options={fromEntries}
@@ -364,7 +376,7 @@ export default function EntryCardCompare({
                   }
                 }}
                 onChange={(_event, value) => setModel(QueryDiffSide.From, value)}
-                renderInput={(params) => <TextField {...params} label={`${kindLabel}`} />}
+                renderInput={(params) => <TextField {...params} label={kindLabel} />}
               />
               <Autocomplete
                 disablePortal
@@ -380,21 +392,25 @@ export default function EntryCardCompare({
                 onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Standard, value?.version)}
                 renderInput={(params) => <TextField {...params} label='Version' />}
               />
+              <RevisionDetails revision={fromLocalOption} />
               {fromHasMirroredRevisions && (
-                <Autocomplete
-                  disablePortal
-                  options={sortedFromMirroredRevisions}
-                  disabled={!fromEntryId}
-                  loading={isFromRevisionsLoading}
-                  fullWidth
-                  size='small'
-                  value={fromMirroredOption}
-                  getOptionLabel={renderVersionLabel}
-                  getOptionDisabled={isFromLocalOptionDisabled}
-                  isOptionEqualToValue={(option, value) => option.version === value.version}
-                  onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Mirror, value?.version)}
-                  renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
-                />
+                <>
+                  <Autocomplete
+                    disablePortal
+                    options={sortedFromMirroredRevisions}
+                    disabled={!fromEntryId}
+                    loading={isFromRevisionsLoading}
+                    fullWidth
+                    size='small'
+                    value={fromMirroredOption}
+                    getOptionLabel={renderVersionLabel}
+                    getOptionDisabled={isFromLocalOptionDisabled}
+                    isOptionEqualToValue={(option, value) => option.version === value.version}
+                    onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Mirror, value?.version)}
+                    renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
+                  />
+                  <RevisionDetails revision={fromMirroredOption} />
+                </>
               )}
             </Stack>
             <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -410,10 +426,10 @@ export default function EntryCardCompare({
                     <CompareArrowsIcon
                       sx={{
                         transition: 'transform 150ms ease-in-out',
-                        ':focus': {
+                        '&:focus': {
                           transform: 'rotate(180deg)',
                         },
-                        ':hover': {
+                        '&:hover': {
                           transform: 'rotate(180deg)',
                         },
                       }}
@@ -424,8 +440,10 @@ export default function EntryCardCompare({
               </Tooltip>
             </Stack>
             <Stack spacing={2} sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
-              {renderGotoEntryButton(toEntryId)}
+              <Stack spacing={1} direction='row' sx={{ alignItems: 'center' }}>
+                <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
+                {renderGotoEntryButton(toEntry)}
+              </Stack>
               <Autocomplete
                 disablePortal
                 options={toEntries}
@@ -441,7 +459,7 @@ export default function EntryCardCompare({
                   }
                 }}
                 onChange={(_event, value) => setModel(QueryDiffSide.To, value)}
-                renderInput={(params) => <TextField {...params} label={`${kindLabel}`} />}
+                renderInput={(params) => <TextField {...params} label={kindLabel} />}
               />
               <Autocomplete
                 disablePortal
@@ -457,21 +475,25 @@ export default function EntryCardCompare({
                 onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Standard, value?.version)}
                 renderInput={(params) => <TextField {...params} label='Version' />}
               />
+              <RevisionDetails revision={toLocalOption} />
               {toHasMirroredRevisions && (
-                <Autocomplete
-                  disablePortal
-                  options={sortedToMirroredRevisions}
-                  disabled={!toEntryId}
-                  loading={isToRevisionsLoading}
-                  fullWidth
-                  size='small'
-                  value={toMirroredOption}
-                  getOptionLabel={renderVersionLabel}
-                  getOptionDisabled={isToMirroredOptionDisabled}
-                  isOptionEqualToValue={(option, value) => option.version === value.version}
-                  onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Mirror, value?.version)}
-                  renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
-                />
+                <>
+                  <Autocomplete
+                    disablePortal
+                    options={sortedToMirroredRevisions}
+                    disabled={!toEntryId}
+                    loading={isToRevisionsLoading}
+                    fullWidth
+                    size='small'
+                    value={toMirroredOption}
+                    getOptionLabel={renderVersionLabel}
+                    getOptionDisabled={isToMirroredOptionDisabled}
+                    isOptionEqualToValue={(option, value) => option.version === value.version}
+                    onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Mirror, value?.version)}
+                    renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
+                  />
+                  <RevisionDetails revision={toMirroredOption} />
+                </>
               )}
             </Stack>
           </Stack>

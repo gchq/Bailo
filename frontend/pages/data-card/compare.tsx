@@ -7,17 +7,17 @@ import { parseVersion } from 'utils/stringUtils'
 export default function DataCardComparePage() {
   const router = useRouter()
   const {
-    fromModel,
+    fromEntry,
     fromVersion,
     fromMirroredVersion,
-    toModel,
+    toEntry,
     toVersion,
     toMirroredVersion,
   }: {
-    fromModel?: string
+    fromEntry?: string
     fromVersion?: string
     fromMirroredVersion?: string
-    toModel?: string
+    toEntry?: string
     toVersion?: string
     toMirroredVersion?: string
   } = router.query
@@ -27,10 +27,10 @@ export default function DataCardComparePage() {
       <Title text='Compare Data Cards' />
       <EntryCardCompare
         entryKind={EntryKind.DATA_CARD}
-        fromEntryId={fromModel}
+        fromEntryId={fromEntry}
         fromVersion={parseVersion(fromVersion)}
         fromMirroredVersion={parseVersion(fromMirroredVersion)}
-        toEntryId={toModel}
+        toEntryId={toEntry}
         toVersion={parseVersion(toVersion)}
         toMirroredVersion={parseVersion(toMirroredVersion)}
       />

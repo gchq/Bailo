@@ -179,7 +179,7 @@ export default function JsonSchemaForm({
   }
 
   function onShareSectionOnClick(sectionId: string) {
-    const link = `${window.location.origin}${window.location.pathname}?page=${activeStep}#${sectionId}`
+    const link = `${window.location.origin}${window.location.pathname}${window.location.search}#${sectionId}`
 
     copyToClipboard(link, 'Link saved to clipboard', 'Failed to save link to clipboard', {
       horizontal: 'center',

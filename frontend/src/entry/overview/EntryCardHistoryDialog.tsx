@@ -73,9 +73,9 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
 
   const buildHref = (from: EntryCardSnapshot, to?: EntryCardSnapshot): string => {
     const query = new URLSearchParams()
-    query.set('fromModel', entry.id)
+    query.set('fromEntry', entry.id)
     if (to) {
-      query.set('toModel', entry.id)
+      query.set('toEntry', entry.id)
     }
 
     if (from.local !== undefined) {
