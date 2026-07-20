@@ -863,10 +863,11 @@ export class BaseMetricsConnector {
     // Filter by models with access requests if provided
     if (query.accessRequest !== undefined) {
       const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
+      const accessRequestModelIdSet = new Set(accessRequestModelIds)
 
       if (query.accessRequest.toLowerCase() === EntryFilter.WITH) {
         idFilter.$in = idFilter.$in
-          ? idFilter.$in.filter((id) => accessRequestModelIds.includes(id))
+          ? idFilter.$in.filter((id) => accessRequestModelIdSet.has(id))
           : accessRequestModelIds
       } else {
         idFilter.$nin = [...(idFilter.$nin ?? []), ...accessRequestModelIds]
