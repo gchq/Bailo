@@ -6,7 +6,6 @@ import { patchEntry, useGetEntry } from 'actions/entry'
 import { SyntheticEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
-import SourceModelInput from 'src/entry/SourceModelInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, EntryKindLabel, UpdateEntryForm } from 'types/types'
@@ -22,20 +21,13 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
-  const [sourceModelId, setSourceModelId] = useState(entry.settings.mirror?.sourceModelId || '')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-
-  const isMirroredModel = entry.kind === EntryKind.MIRRORED_MODEL
-  const isImported = entry.mirroredCard?.metadata !== undefined
 
   const sendNotification = useNotification()
   const { mutateEntry: mutateEntry } = useGetEntry(entry.id, entry.kind)
 
-  const isFormValid = useMemo(
-    () => name && description && (!isMirroredModel || isImported || sourceModelId),
-    [name, description, isMirroredModel, isImported, sourceModelId],
-  )
+  const isFormValid = useMemo(() => name && description, [name, description])
 
   const saveButtonTooltip = useMemo(() => {
     if (!isFormValid) {
@@ -54,8 +46,7 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
       description,
       visibility,
     }
-    const delta = isMirroredModel && !isImported ? { ...formData, settings: { mirror: { sourceModelId } } } : formData
-    const response = await patchEntry(entry.id, delta)
+    const response = await patchEntry(entry.id, formData)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
@@ -136,23 +127,6 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
         </>
-        {isMirroredModel && (
-          <>
-            <Divider />
-            <Typography variant='h6' component='h2'>
-              Source model
-            </Typography>
-            {isImported ? (
-              <MessageAlert
-                message={`Source Model ID: ${entry.settings.mirror?.sourceModelId}`}
-                subHeading='The source model ID cannot be changed after import.'
-                severity='info'
-              />
-            ) : (
-              <SourceModelInput value={sourceModelId} onChange={(value) => setSourceModelId(value)} />
-            )}
-          </>
-        )}
         <Divider />
         <>
           <Typography variant='h6' component='h2'>
