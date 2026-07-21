@@ -67,9 +67,10 @@ function isSettingsCategory(
 
 type SettingsProps = {
   entry: EntryInterface
+  mutateEntry?: () => void
 }
 
-export default function Settings({ entry }: SettingsProps) {
+export default function Settings({ entry, mutateEntry }: SettingsProps) {
   const router = useRouter()
 
   const { category } = router.query
@@ -165,7 +166,7 @@ export default function Settings({ entry }: SettingsProps) {
           </SimpleListItemButton>
         </List>
         <Container sx={{ my: 2 }}>
-          {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
+          {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} onSave={mutateEntry} />}
           {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessTab entry={entry} />}
           {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
           {selectedCategory === SettingsCategory.TEMPLATING && <TemplateSettings model={entry} />}
