@@ -13,7 +13,7 @@ interface MetricsBreakdownTableProps {
   isLoading?: boolean
 }
 
-export default function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
+export function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
