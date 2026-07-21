@@ -15,6 +15,8 @@ interface MetricsHeaderProps {
   onMetricChange?: (newMetric: SelectedMetricKindKeys) => void
   exportDocumentTitle: string
   titleObjectType?: string
+  csvExportEnabled?: boolean
+  onCsvExport?: () => void
 }
 
 export default function MetricsHeader({
@@ -27,6 +29,8 @@ export default function MetricsHeader({
   onMetricChange,
   exportDocumentTitle,
   titleObjectType = 'metrics',
+  csvExportEnabled = false,
+  onCsvExport,
 }: MetricsHeaderProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -93,10 +97,15 @@ export default function MetricsHeader({
               <em>Last updated {formatDateStringWithMinutes(lastUpdated)}</em>
             </Typography>
           </Stack>
-          <Stack>
+          <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
             <Button variant='contained' onClick={() => setDialogOpen(true)}>
               Export as PDF
             </Button>
+            {csvExportEnabled && (
+              <Button variant='contained' onClick={onCsvExport}>
+                Export as CSV
+              </Button>
+            )}
           </Stack>
         </Stack>
         {children}

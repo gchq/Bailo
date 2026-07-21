@@ -11,6 +11,7 @@ import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTa
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
+import { downloadCsv } from 'utils/csvUtilts'
 import { dateFormat, filterIncludeTypes, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function EntryMetrics() {
@@ -61,6 +62,18 @@ export default function EntryMetrics() {
       })),
     [entries],
   )
+
+  const exportDocumentTitle = 'Bailo entry metrics'
+
+  const handleCsvExport = useCallback(() => {
+    const headers = ['Model ID', 'Model Name', 'Owner']
+    const rows = tableData.map((row) => [
+      row.entryId,
+      row.entryName,
+      row.modelOwners.length > 0 ? row.modelOwners.join('; ') : '',
+    ])
+    downloadCsv(exportDocumentTitle, headers, rows)
+  }, [tableData])
 
   const resultCountLabel = useMemo(() => {
     if (isEntriesLoading) {
@@ -117,6 +130,8 @@ export default function EntryMetrics() {
             selectedOrganisation={selectedValue('organisation')}
             exportDocumentTitle='Bailo entry metrics'
             titleObjectType='entries'
+            csvExportEnabled
+            onCsvExport={handleCsvExport}
           >
             <Stack spacing={2}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
