@@ -202,7 +202,8 @@ export default function AdditionalInformation({
               <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
             )}
           </Stack>
-          {children && (
+          {((children && !Array.isArray(children)) ||
+            (Array.isArray(children) && children.some((child) => !!child))) && (
             <Box>
               <Box
                 sx={{

@@ -1,5 +1,16 @@
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
-import { Alert, Autocomplete, Container, Fab, Link, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import {
+  Alert,
+  Autocomplete,
+  Container,
+  IconButton,
+  Link,
+  Paper,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -417,11 +428,18 @@ export default function EntryCardCompare({
               <Typography>&nbsp;</Typography>
               <Tooltip title='Swap comparison sides'>
                 <span>
-                  <Fab
+                  <IconButton
                     color='primary'
                     aria-label='Swap From and To comparison sides'
                     onClick={flipComparison}
                     disabled={!fromEntryId && !toEntryId}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'primary.main',
+                      '&.Mui-disabled': {
+                        borderColor: 'action.disabled',
+                      },
+                    }}
                   >
                     <CompareArrowsIcon
                       sx={{
@@ -435,7 +453,7 @@ export default function EntryCardCompare({
                       }}
                       fontSize='large'
                     />
-                  </Fab>
+                  </IconButton>
                 </span>
               </Tooltip>
             </Stack>
