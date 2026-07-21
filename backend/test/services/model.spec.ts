@@ -588,34 +588,76 @@ describe('services > model', () => {
     expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
   })
 
-  test('updateModel > should throw bad request when attempting to change a standard model to be a mirrored model', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({
-      info: 'Cannot change standard model to be a mirrored model.',
-      success: false,
-      id: '',
-    })
+  test('updateModel > should throw bad request when setting sourceModelId on a non-mirrored model', async () => {
+    const testModel = {
+      kind: EntryKind.Model,
+      settings: { mirror: {}, ungovernedAccess: false, allowTemplating: false },
+      collaborators: [],
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+
     await expect(() =>
-      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '', destinationModelId: '123' } } }),
-    ).rejects.toThrow(/^Cannot change standard model to be a mirrored model./)
+      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: 'some-source' } } }),
+    ).rejects.toThrow(/^Cannot set a source model ID on a non-mirrored model./)
   })
 
-  test('updateModel > should throw bad request when attempting to change a destinationModel ID to a mirrored model', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({
-      info: 'Cannot set a destination model ID for a mirrored model.',
-      success: false,
-      id: '',
-    })
+  test('updateModel > should throw bad request when changing sourceModelId on an already-imported mirrored model', async () => {
+    const testModel = {
+      kind: EntryKind.MirroredModel,
+      mirroredCard: { schemaId: 'test-schema', version: 1, metadata: {} },
+      settings: { mirror: { sourceModelId: 'old-source' }, ungovernedAccess: false, allowTemplating: false },
+      collaborators: [],
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+
     await expect(() =>
-      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '', destinationModelId: '123' } } }),
+      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: 'new-source' } } }),
+    ).rejects.toThrow(/^Cannot change the source model ID after the model has been imported./)
+  })
+
+  test('updateModel > should allow changing sourceModelId on a mirrored model that has not been imported', async () => {
+    const saveMock = vi.fn()
+    const testModel = {
+      kind: EntryKind.MirroredModel,
+      mirroredCard: undefined,
+      settings: { mirror: { sourceModelId: 'old-source' }, ungovernedAccess: false, allowTemplating: false },
+      collaborators: [],
+      save: saveMock,
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+
+    const result = await updateModel({} as any, '123', { settings: { mirror: { sourceModelId: 'new-source' } } })
+
+    expect(saveMock).toHaveBeenCalled()
+    expect(result.settings.mirror.sourceModelId).toBe('new-source')
+  })
+
+  test('updateModel > should throw bad request when attempting to change a destinationModel ID on a mirrored model', async () => {
+    const testModel = {
+      kind: EntryKind.MirroredModel,
+      settings: { mirror: { sourceModelId: 'abc' }, ungovernedAccess: false, allowTemplating: false },
+      collaborators: [],
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+
+    await expect(() =>
+      updateModel({} as any, '123', { settings: { mirror: { destinationModelId: '123' } } }),
     ).rejects.toThrow(/^Cannot set a destination model ID for a mirrored model./)
   })
 
-  test('updateModel > should throw a bad request when attempting to select both standard and mirror model', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({
-      info: 'You cannot select both mirror settings simultaneously.',
-      success: false,
-      id: '',
-    })
+  test('updateModel > should throw a bad request when attempting to select both mirror settings simultaneously', async () => {
+    const testModel = {
+      kind: EntryKind.MirroredModel,
+      settings: { mirror: {}, ungovernedAccess: false, allowTemplating: false },
+      collaborators: [],
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+
     await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '123', destinationModelId: '234' } } }),
     ).rejects.toThrow(/^You cannot select both mirror settings simultaneously./)

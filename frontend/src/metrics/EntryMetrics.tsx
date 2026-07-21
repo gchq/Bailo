@@ -1,71 +1,53 @@
-import { Button, Container, Stack, Typography } from '@mui/material'
+import dayjs from '@dayjs'
+import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
-import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
 import Loading from 'src/common/Loading'
+import { useEntriesFilters } from 'src/hooks/useEntriesFilters'
 import MessageAlert from 'src/MessageAlert'
-import MetricsBreakdownTable from 'src/metrics/MetricsBreakdownTable'
-import MetricsHeader from 'src/metrics/MetricsHeader'
+import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTable'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
+import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
-import { buildEntriesHref, EntriesFilterQuery } from 'utils/metricsUtils'
-
-const ALL_VALUE = 'All'
-const NONE_SCHEMA_VALUE = 'none'
-
-function getQueryString(value: string | string[] | undefined): string {
-  return typeof value === 'string' ? value : ALL_VALUE
-}
+import { dateFormat, filterIncludeTypes, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function EntryMetrics() {
-  const router = useRouter()
-
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
   // Filters are sourced directly from the URL so this view can be deep linked.
-  const organisation = getQueryString(router.query.organisation)
-  const state = getQueryString(router.query.state)
-  const schemaId = getQueryString(router.query.schemaId)
+  const { filters, setFilters } = useEntriesFilters()
+  const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown(filters)
 
-  const { entries, isEntriesLoading, isEntriesError } = useGetModelBreakdown({
-    organisation: organisation !== ALL_VALUE ? organisation : undefined,
-    state: state !== ALL_VALUE ? state : undefined,
-    schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
-  })
-
-  const updateFilter = useCallback(
-    (key: keyof EntriesFilterQuery, value: string) => {
-      const current: EntriesFilterQuery = {
-        organisation: organisation !== ALL_VALUE ? organisation : undefined,
-        state: state !== ALL_VALUE ? state : undefined,
-        schemaId: schemaId !== ALL_VALUE ? schemaId : undefined,
-      }
-
-      const next = {
-        ...current,
-        [key]: value === ALL_VALUE ? undefined : value,
-      }
-
-      router.push(buildEntriesHref(next), undefined, { shallow: true })
-    },
-    [organisation, router, schemaId, state],
-  )
+  const selectedValue = useCallback((key: keyof typeof filters) => filters[key] ?? filterSelectTypes.ALL, [filters])
 
   const stateOptions = useMemo(
-    () => [ALL_VALUE, ...(overviewMetrics?.global.entryState?.map((s) => s.state) ?? [])],
+    () => [filterSelectTypes.ALL, ...(overviewMetrics?.global.entryState?.map((s) => s.state) ?? [])],
     [overviewMetrics],
   )
 
   const schemaOptions = useMemo(
     () => [
-      { value: ALL_VALUE, label: 'All' },
-      { value: NONE_SCHEMA_VALUE, label: 'None' },
+      { value: filterSelectTypes.ALL, label: filterSelectTypes.ALL },
+      { value: filterSelectTypes.NONE, label: 'None' },
       ...(schemas ?? []).map((schema) => ({ value: schema.id, label: schema.name })),
     ],
     [schemas],
   )
+
+  const releaseOptions = [
+    { value: filterSelectTypes.ALL, label: filterSelectTypes.ALL },
+    { value: filterIncludeTypes.WITH, label: 'With releases' },
+    { value: filterIncludeTypes.WITHOUT, label: 'Without releases' },
+  ]
+
+  const accessRequestOptions = [
+    { value: filterSelectTypes.ALL, label: filterSelectTypes.ALL },
+    { value: filterIncludeTypes.WITH, label: 'With access request' },
+    { value: filterIncludeTypes.WITHOUT, label: 'Without access request' },
+  ]
 
   const tableData = useMemo(
     () =>
@@ -92,23 +74,35 @@ export default function EntryMetrics() {
   }, [isEntriesLoading, isEntriesError, tableData.length])
 
   const handleClearFiltersOnClick = useCallback(() => {
-    const current: EntriesFilterQuery = {
-      organisation: organisation,
+    setFilters({
       state: undefined,
       schemaId: undefined,
-    }
-    router.push(buildEntriesHref(current), undefined, { shallow: true })
-  }, [organisation, router])
+      release: undefined,
+      accessRequest: undefined,
+      startMonth: undefined,
+      endMonth: undefined,
+    })
+  }, [setFilters])
 
   if (isOverviewMetricsError) {
     return <MessageAlert message={isOverviewMetricsError.info.message} />
   }
+
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} />
   }
+
   if (isOverviewMetricsLoading || isSchemasLoading) {
     return <Loading />
   }
+
+  const isClearDisabled =
+    !filters.state &&
+    !filters.schemaId &&
+    !filters.release &&
+    !filters.accessRequest &&
+    !filters.startMonth &&
+    !filters.endMonth
 
   return (
     <Container maxWidth='lg' sx={{ mb: 4 }}>
@@ -117,42 +111,74 @@ export default function EntryMetrics() {
           <MetricsHeader
             organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
             lastUpdated={overviewMetrics.lastUpdated}
-            onOrganisationChange={(value) => updateFilter('organisation', value)}
-            selectedOrganisation={organisation}
+            onOrganisationChange={(value) =>
+              setFilters({ organisation: value === filterSelectTypes.ALL ? undefined : value })
+            }
+            selectedOrganisation={selectedValue('organisation')}
             exportDocumentTitle='Bailo entry metrics'
             titleObjectType='entries'
           >
-            <>
+            <Stack spacing={2}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
                 <Stack direction='row' spacing={1}>
                   <FilterMenuButton
                     label='State'
                     options={stateOptions.map((s) => ({ value: s, label: s }))}
-                    selectedValue={state}
-                    onSelect={(value) => updateFilter('state', value)}
+                    selectedValue={selectedValue('state')}
+                    onSelect={(value) => setFilters({ state: value === filterSelectTypes.ALL ? undefined : value })}
                   />
                   <FilterMenuButton
                     label='Schema'
                     options={schemaOptions}
-                    selectedValue={schemaId}
-                    onSelect={(value) => updateFilter('schemaId', value)}
+                    selectedValue={selectedValue('schemaId')}
+                    onSelect={(value) => setFilters({ schemaId: value === filterSelectTypes.ALL ? undefined : value })}
                   />
-                  <Button disabled={state === ALL_VALUE && schemaId === ALL_VALUE} onClick={handleClearFiltersOnClick}>
+                  <FilterMenuButton
+                    label='Release'
+                    options={releaseOptions}
+                    selectedValue={selectedValue('release')}
+                    onSelect={(value) => setFilters({ release: value === filterSelectTypes.ALL ? undefined : value })}
+                  />
+                  <FilterMenuButton
+                    label='Access request'
+                    options={accessRequestOptions}
+                    selectedValue={selectedValue('accessRequest')}
+                    onSelect={(value) =>
+                      setFilters({ accessRequest: value === filterSelectTypes.ALL ? undefined : value })
+                    }
+                  />
+                  <Button disabled={isClearDisabled} onClick={handleClearFiltersOnClick}>
                     Clear filters
                   </Button>
                 </Stack>
-                {resultCountLabel && (
-                  <Typography variant='body2' color='text.secondary' aria-live='polite' sx={{ whiteSpace: 'nowrap' }}>
-                    {resultCountLabel}
-                  </Typography>
-                )}
               </Stack>
+              <MonthlyUploadsSelector
+                startDate={filters.startMonth ? dayjs(filters.startMonth) : null}
+                endDate={filters.endMonth ? dayjs(filters.endMonth) : null}
+                showTitle={false}
+                onStartDateChange={(date) => setFilters({ startMonth: date ? date.format(dateFormat) : undefined })}
+                onEndDateChange={(date) => setFilters({ endMonth: date ? date.format(dateFormat) : undefined })}
+              />
               {isEntriesError ? (
                 <MessageAlert message={isEntriesError.info.message} />
               ) : (
-                <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+                <Stack>
+                  <Box sx={{ pb: 2 }}>
+                    {resultCountLabel && (
+                      <Typography
+                        variant='body2'
+                        color='text.secondary'
+                        aria-live='polite'
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        {resultCountLabel}
+                      </Typography>
+                    )}
+                  </Box>
+                  <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+                </Stack>
               )}
-            </>
+            </Stack>
           </MetricsHeader>
         )}
       </Stack>

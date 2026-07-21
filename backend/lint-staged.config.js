@@ -1,3 +1,3 @@
 export default {
-  '*.ts': ["eslint . -c eslint.config.mjs '**/*.ts' --max-warnings=0", 'prettier --check'],
+  '*.ts': ['eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0', 'prettier --check'],
 }

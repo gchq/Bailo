@@ -14,9 +14,10 @@ import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryDetailsProps = {
   entry: EntryInterface
+  onSave?: () => void
 }
 
-export default function EntryDetails({ entry }: EntryDetailsProps) {
+export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
@@ -56,6 +57,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()
+      onSave?.()
     }
     setIsLoading(false)
   }

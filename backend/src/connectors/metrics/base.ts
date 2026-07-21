@@ -19,7 +19,7 @@ import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { MetricsCacheKeys, SchemaKind } from '../../types/enums.js'
-import { MetricsEntrySearchOptionsParams } from '../../types/types.js'
+import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import {
@@ -825,21 +825,85 @@ export class BaseMetricsConnector {
 
     const mongoQuery: QueryFilter<ModelInterface> = {}
 
+    const idFilter: {
+      $in?: string[]
+      $nin?: string[]
+    } = {}
+
     // Filter by organisation only if provided and not 'all' - if 'none' then query any with empty string
     if (query.organisation !== undefined && query.organisation.toLowerCase() !== 'all') {
       mongoQuery.organisation = query.organisation.toLowerCase() === 'unset' ? '' : query.organisation
     }
 
+    // Filter by model state if provided
     if (query.state !== undefined) {
       mongoQuery.state = query.state.toLowerCase() === 'none' ? '' : query.state
     }
 
+    // Filter by schemaId if provided
     if (query.schemaId !== undefined) {
       if (query.schemaId.toLowerCase() === 'none') {
         mongoQuery['card.schemaId'] = { $exists: false }
       } else {
         mongoQuery['card.schemaId'] = query.schemaId
       }
+    }
+
+    // Filter by models with releases if provided
+    if (query.release !== undefined) {
+      const releaseModelIds = await ReleaseModel.distinct('modelId')
+
+      if (query.release.toLowerCase() === EntryFilter.WITH) {
+        idFilter.$in = releaseModelIds
+      } else {
+        idFilter.$nin = releaseModelIds
+      }
+    }
+
+    // Filter by models with access requests if provided
+    if (query.accessRequest !== undefined) {
+      const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
+      const accessRequestModelIdSet = new Set(accessRequestModelIds)
+
+      if (query.accessRequest.toLowerCase() === EntryFilter.WITH) {
+        idFilter.$in = idFilter.$in
+          ? idFilter.$in.filter((id) => accessRequestModelIdSet.has(id))
+          : accessRequestModelIds
+      } else {
+        idFilter.$nin = [...(idFilter.$nin ?? []), ...accessRequestModelIds]
+      }
+    }
+
+    // Filter by createdAt month range if provided. startMonth and endMonth are
+    // each independently optional, so only add the bound that was supplied.
+    if (query.startMonth !== undefined || query.endMonth !== undefined) {
+      const createdAtFilter: { $gte?: Date; $lt?: Date } = {}
+
+      if (query.startMonth !== undefined) {
+        const start = new Date(query.startMonth)
+        if (isNaN(start.getTime())) {
+          throw BadReq('Invalid startMonth. Must be in the format YYYY-MM.', { startMonth: query.startMonth })
+        }
+        createdAtFilter.$gte = start
+      }
+
+      if (query.endMonth !== undefined) {
+        const end = new Date(query.endMonth)
+        if (isNaN(end.getTime())) {
+          throw BadReq('Invalid endMonth. Must be in the format YYYY-MM.', { endMonth: query.endMonth })
+        }
+        createdAtFilter.$lt = addInterval(end, 'month')
+      }
+
+      if (query.startMonth && query.endMonth && query.startMonth > query.endMonth) {
+        throw BadReq('startMonth must be before or equal to endMonth')
+      }
+
+      mongoQuery.createdAt = createdAtFilter
+    }
+
+    if (Object.keys(idFilter).length > 0) {
+      mongoQuery.id = idFilter
     }
 
     const models = await ModelModel.find(mongoQuery)

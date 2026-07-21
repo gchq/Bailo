@@ -3,6 +3,7 @@ import { ReactElement, useCallback, useState } from 'react'
 import MetricsExportPreview from 'src/metrics/MetricsExportPreview'
 import { SelectedMetricKind, SelectedMetricKindKeys } from 'src/metrics/PolicyMetrics'
 import { formatDateStringWithMinutes } from 'utils/dateUtils'
+import { filterSelectTypes } from 'utils/metricsUtils'
 
 interface MetricsHeaderProps {
   organisations: string[]
@@ -77,12 +78,12 @@ export default function MetricsHeader({
                   onChange={handleOrganisationSelectOnChange}
                   variant='standard'
                 >
-                  <MenuItem key='all' value='All'>
+                  <MenuItem key='all' value={filterSelectTypes.ALL}>
                     all organisations
                   </MenuItem>
                   {organisations.map((organisation) => (
                     <MenuItem key={organisation} value={organisation}>
-                      {organisation === 'unset' ? <em>no organisation</em> : organisation}
+                      {organisation === filterSelectTypes.UNSET ? <em>no organisation</em> : organisation}
                     </MenuItem>
                   ))}
                 </Select>
