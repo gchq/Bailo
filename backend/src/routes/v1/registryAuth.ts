@@ -7,6 +7,7 @@ import type { StringValue } from 'ms'
 import NodeCache from 'node-cache'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
+import { AuditInfo } from '../../connectors/audit/Base.js'
 import audit from '../../connectors/audit/index.js'
 import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
@@ -313,6 +314,9 @@ export const getDockerRegistryAuth = [
     }
 
     if (isOfflineToken) {
+      req.audit = AuditInfo.RegistryIssueRefreshToken
+      await audit.onRegistryIssueRefreshToken(req, user)
+
       const refreshToken = await issueRefreshToken(user)
       rlog.trace('Successfully generated offline token')
       res.json({ token: refreshToken })
@@ -323,6 +327,14 @@ export const getDockerRegistryAuth = [
       // User requesting no scope, they're just trying to login
       // Because this token has no permissions, it is safe to
       // provide.
+
+      req.audit = AuditInfo.RegistryLogin
+      await audit.onRegistryLogin(req, user)
+
+      // necessary?
+      req.audit = AuditInfo.RegistryIssueAccessToken
+      await audit.onRegistryIssueAccessToken(req, user)
+
       res.json({ token: await issueAccessToken(user, []) })
       return
     }
@@ -347,7 +359,7 @@ export const getDockerRegistryAuth = [
     const authResults = await Promise.all(requestedAccesses.map((a) => checkAccess(a, user, admin)))
     const grantedAccesses: Access[] = []
 
-    authResults.forEach((result, idx) => {
+    authResults.forEach(async (result, idx) => {
       const access = requestedAccesses[idx]
 
       if (!result.success) {
@@ -358,6 +370,19 @@ export const getDockerRegistryAuth = [
         }
 
         throw Forbidden({ access }, result.info, rlog)
+      }
+
+      if (access.actions.includes('push')) {
+        req.audit = AuditInfo.RegistryImagePush
+        await audit.onRegistryImagePush(req, user)
+      }
+      if (access.actions.includes('pull')) {
+        req.audit = AuditInfo.RegistryImagePull
+        await audit.onRegistryImagePull(req, user)
+      }
+      if (access.actions.includes('delete')) {
+        req.audit = AuditInfo.RegistryImageDelete
+        await audit.onRegistryImageDelete(req, user)
       }
 
       grantedAccesses.push(access)
@@ -375,6 +400,9 @@ export const getDockerRegistryAuth = [
     if (grantedAccesses.length === 0) {
       throw Forbidden({ requestedAccesses }, 'Requested image is not accessible - no authorised scopes.', rlog)
     }
+
+    req.audit = AuditInfo.RegistryIssueAccessToken
+    await audit.onRegistryIssueAccessToken(req, user)
 
     const accessToken = await issueAccessToken(user, grantedAccesses)
     rlog.trace('Successfully generated access token.')
