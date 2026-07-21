@@ -8,13 +8,14 @@
     "script": "npm --prefix ./backend/ run script",
     "build": "npm --prefix ./backend/ run build && npm --prefix ./frontend/ run build",
     "test": "npm --prefix ./backend/ run test && npm --prefix ./frontend/ run test",
-    "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
+    "lint": "concurrently -n backend,frontend 'npm --prefix ./backend/ run lint' 'npm --prefix ./frontend/ run lint'",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
     "prepare": "husky"
   },
   "devDependencies": {
+    "concurrently": "^10.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
     "prettier": "^3.9.4"

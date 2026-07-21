@@ -7,7 +7,7 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
     "start": "next start",
-    "lint": "eslint --max-warnings 0 actions cypress pages src types utils",
+    "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings 0 actions cypress pages src types utils",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "test": "vitest"
@@ -78,7 +78,6 @@
     "eslint": "10.6.0",
     "eslint-config-next": "16.2.9",
     "eslint-plugin-cypress": "^6.4.2",
-    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "jsdom": "^29.1.1",
