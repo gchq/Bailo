@@ -33,10 +33,6 @@ export default function AdditionalInformation({
   const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
 
-  if (children === undefined || (Array.isArray(children) && children.length === 0)) {
-    return <></>
-  }
-
   if (!mirroredModel) {
     return (
       <Stack spacing={1}>
@@ -72,7 +68,6 @@ export default function AdditionalInformation({
         return mirroredState
     }
   }
-
   if (!display && !editMode) {
     return (
       <>
@@ -103,7 +98,6 @@ export default function AdditionalInformation({
       </>
     )
   }
-
   return (
     <Stack>
       {editMode && (
@@ -208,7 +202,8 @@ export default function AdditionalInformation({
               <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
             )}
           </Stack>
-          {children && (
+          {((children && !Array.isArray(children)) ||
+            (Array.isArray(children) && children.some((child) => !!child))) && (
             <Box>
               <Box
                 sx={{
