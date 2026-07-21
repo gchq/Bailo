@@ -1,7 +1,7 @@
-import { relative } from 'path'
+const eslintBin = `${process.cwd()}/frontend/node_modules/.bin/eslint`
 
 const buildEslintCommand = (filenames) =>
-  `eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings 0 ${filenames.map((fileName) => relative(`${process.cwd()}/frontend`, fileName)).join(' ')}`
+  `${eslintBin} --cache --cache-location frontend/node_modules/.cache/eslint/ --max-warnings 0 ${filenames.join(' ')}`
 
 const config = {
   '**/*.{ts,tsx,md}': [buildEslintCommand],
