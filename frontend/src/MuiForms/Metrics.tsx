@@ -134,7 +134,12 @@ export default function Metrics({ onChange, value, label, id, registry, required
         </TableCell>
         <TableCell align='right'>
           {compare.inCompareMode ? (
-            <InlineDiff from={compareWith?.value?.toString()} to={metric?.value?.toString()} direction={'row'} />
+            <InlineDiff
+              from={compareWith?.value?.toString()}
+              to={metric?.value?.toString()}
+              direction={'row'}
+              align='right'
+            />
           ) : (
             metric?.value
           )}

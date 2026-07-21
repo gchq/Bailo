@@ -9,6 +9,7 @@ type InlineDiffProps = {
   to?: string | ReactNode
   markdown?: boolean
   direction?: ResponsiveStyleValue<'row' | 'row-reverse' | 'column' | 'column-reverse'> | undefined
+  align?: 'left' | 'right'
 }
 
 const removedStyle = {
@@ -49,14 +50,25 @@ function renderContent(theme: Theme, markdown: boolean, value?: string | ReactNo
   return markdown ? <MarkdownDisplay>{value}</MarkdownDisplay> : <Typography component='span'>{value}</Typography>
 }
 
-export default function InlineDiff({ from, to, markdown = false, direction = undefined }: InlineDiffProps) {
+export default function InlineDiff({
+  from,
+  to,
+  markdown = false,
+  direction = undefined,
+  align = 'left',
+}: InlineDiffProps) {
   const theme = useTheme()
+
   if (from === to) {
     return <Box sx={{ wordBreak: 'break-word' }}>{renderContent(theme, markdown, to)}</Box>
   }
 
   return (
-    <Stack direction={direction} spacing={0.5}>
+    <Stack
+      direction={direction}
+      spacing={0.5}
+      sx={{ justifyContent: align === 'right' ? 'flex-end' : 'flex-start', width: '100%' }}
+    >
       <Box component='mark' sx={removedStyle}>
         {renderContent(theme, markdown, from)}
       </Box>
