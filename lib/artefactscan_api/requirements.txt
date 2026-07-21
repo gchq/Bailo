@@ -1,6 +1,6 @@
 content-size-limit-asgi==0.1.5
 fastapi[standard-no-fastapi-cloud-cli]==0.139.2
-filelock==3.29.7
+filelock==3.31.2
 modelscan[tensorflow,h5py]==0.8.8
 oras==0.2.42
 pydantic_settings==2.14.2
