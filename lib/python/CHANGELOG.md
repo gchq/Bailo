@@ -19,7 +19,7 @@ All dates are formatted dd/mm/yyyy.
 - Add `Client.get_model_tags` method for retrieving popular tags across all models
 - Add API coverage regression test (`test_api_coverage.py`) that dynamically discovers client routes and compares against the live backend Swagger spec
 
-## 3.9.0 - dd/mm/2026
+## 3.9.0 - 21/07/2026
 
 ### Changes
 
