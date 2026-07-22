@@ -40,6 +40,7 @@ const log = pino({
 export default log
 
 export const httpLog = pinoHttp({
+  wrapSerializers: false,
   logger: log,
   serializers: {
     req: function customReqSerializer(req) {
@@ -47,7 +48,7 @@ export const httpLog = pinoHttp({
         id: req.id,
         method: req.method,
         url: req.url,
-        user: req.raw.user,
+        user: req.user,
         clientIp: req.headers['x-forwarded-for'] || req.remoteAddress,
         ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
         // trim each value in body to 128 characters maximum
