@@ -27,7 +27,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import EntrySearch from 'src/wrapper/EntrySearch'
+import DocsSearch from 'src/docs/DocsSearch'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
@@ -139,9 +139,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   </ListItemIcon>
                   <ListItemText>Create</ListItemText>
                 </MenuItem>
-                <span style={{ marginLeft: 2 }}>
-                  <EntrySearch />
-                </span>
                 <Divider />
                 <MenuItem component='a' href='/settings' data-test='settingsLink' role='menuitem'>
                   <ListItemIcon>
@@ -190,7 +187,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
-                <EntrySearch />
+                <DocsSearch />
                 {currentUser ? (
                   <>
                     <Button

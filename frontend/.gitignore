@@ -41,3 +41,5 @@ next-env.d.ts
 
 .swc
 .turbo
+
+/src/docs/searchIndex.generated.json
