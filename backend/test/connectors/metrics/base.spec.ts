@@ -825,6 +825,36 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
     })
   })
 
+  test('queries specific entry kind when kind is provided', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      kind: 'model',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      kind: 'model',
+    })
+  })
+
+  test('combines kind with organisation, state and schema filters', async () => {
+    modelMocks.find.mockReturnValue(mockFindQuery([]))
+
+    await connector.calculateModelBreakdown(mockUser, {
+      organisation: 'Example Organisation',
+      state: 'active',
+      schemaId: 'minimal-general-v10',
+      kind: 'data-card',
+    } as any)
+
+    expect(modelMocks.find).toHaveBeenCalledWith({
+      organisation: 'Example Organisation',
+      state: 'active',
+      'card.schemaId': 'minimal-general-v10',
+      kind: 'data-card',
+    })
+  })
+
   test('returns only entries that have a release when release filter is "with"', async () => {
     const allModels = [
       { id: 'model-1', name: 'Model One', collaborators: [] },

@@ -64,6 +64,7 @@ export function useGetNoReleasesPolicyMetrics() {
 export interface ModelBreakdownResponse {
   entryId: string
   entryName: string
+  entryKind: string
   collaborators: CollaboratorEntry[]
 }
 

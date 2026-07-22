@@ -4,7 +4,7 @@ import NodeCache from 'node-cache'
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { EntryKind, ModelInterface, SystemRoles } from '../../models/Model.js'
+import ModelModel, { EntryKind, EntryKindKeys, ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -18,7 +18,7 @@ import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreak
 import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
-import { MetricsCacheKeys, SchemaKind } from '../../types/enums.js'
+import { MetricsCacheKeys } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
@@ -32,6 +32,7 @@ import {
 } from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
+const MODELS_KIND_FILTER = { kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] } }
 
 const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
@@ -153,7 +154,6 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
   const pipeline: PipelineStage[] = [
     {
       $match: {
-        kind: SchemaKind.Model,
         hidden: false,
       },
     },
@@ -399,7 +399,7 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   }
 
   const pipeline: PipelineStage[] = [
-    { $match: { ...filter, kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] } } },
+    { $match: { ...filter, ...MODELS_KIND_FILTER } },
     {
       $lookup: {
         from: 'v2_releases',
@@ -849,6 +849,19 @@ export class BaseMetricsConnector {
       }
     }
 
+    // Filter by entry kind if provided (model, data-card, mirrored-model, untrusted-model)
+    if (query.kind !== undefined) {
+      const validKinds = Object.values(EntryKind)
+
+      if (!validKinds.includes(query.kind as EntryKindKeys)) {
+        throw BadReq(`Invalid entryKind. Must be one of: ${validKinds.join(', ')}.`, {
+          entryKind: query.kind,
+        })
+      }
+
+      mongoQuery.kind = query.kind as EntryKindKeys
+    }
+
     // Filter by models with releases if provided
     if (query.release !== undefined) {
       const releaseModelIds = await ReleaseModel.distinct('modelId')
@@ -910,6 +923,7 @@ export class BaseMetricsConnector {
       .select({
         id: true,
         name: true,
+        kind: true,
         collaborators: true,
         _id: false,
       })
@@ -921,6 +935,7 @@ export class BaseMetricsConnector {
     return models.map((model) => ({
       entryId: model.id,
       entryName: model.name,
+      entryKind: model.kind,
       collaborators:
         model.collaborators?.map((collaborator) => ({
           entity: collaborator.entity,

@@ -5,12 +5,21 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { ModelBreakdown } from 'types/types'
+import { EntryKind, ModelBreakdown } from 'types/types'
 
 interface MetricsBreakdownTableProps {
   title?: string
   data: ModelBreakdown[]
   isLoading?: boolean
+}
+
+function toFirstLetterUppercase(text?: string | null): string {
+  return text ? `${text.charAt(0).toUpperCase()}${text.slice(1)}` : ''
+}
+
+function getLinkRoute(entryKind?: string | null): string {
+  // Return the model route for all entries other than data cards
+  return entryKind ? (entryKind === EntryKind.DATA_CARD ? EntryKind.DATA_CARD : EntryKind.MODEL) : ''
 }
 
 export function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
@@ -31,12 +40,13 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
       >
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/model/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
+            <Link href={`/${getLinkRoute(row.entryKind)}/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
               {row.entryId}
             </Link>
           </Typography>
         </TableCell>
         <TableCell>{row.entryName}</TableCell>
+        <TableCell>{toFirstLetterUppercase(row.entryKind)}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
@@ -59,14 +69,15 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
         <Table sx={{ minWidth: 300 }} size='small'>
           <TableHead>
             <TableRow>
-              <TableCell>Model ID</TableCell>
-              <TableCell>Model Name</TableCell>
+              <TableCell>Entry ID</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Kind</TableCell>
               <TableCell>Owner</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {isLoading && <LoadingRows columnCount={3} />}
-            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No models found.' />}
+            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No entries found.' />}
             {!isLoading && tableRows}
           </TableBody>
         </Table>

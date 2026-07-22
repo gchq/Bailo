@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { mangoFusionPaletteDark } from '@mui/x-charts'
 import { DefaultizedPieValueType } from '@mui/x-charts/models'
 import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
@@ -41,13 +41,17 @@ interface OverviewPieChartProps {
   height?: number
 }
 
-export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, height = 220 }: OverviewPieChartProps) {
+export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, height = 250 }: OverviewPieChartProps) {
   const handleItemClick = (item: DefaultizedPieValueType) => {
     const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
     if (label) {
       onSelectItem(label)
     }
   }
+
+  // Filter out items with zero count
+  const filteredData = data.filter((item) => item.value >= 1)
+  const chartData = withConsistentColours(sortPieData(filteredData))
 
   return (
     <Stack spacing={2} sx={{ alignItems: 'center' }}>
@@ -57,14 +61,9 @@ export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, h
       <PieChart
         width={width}
         height={height}
+        hideLegend
         margin={{ right: 5 }}
         colors={mangoFusionPaletteDark}
-        slotProps={{
-          legend: {
-            direction: 'horizontal',
-            position: { vertical: 'bottom', horizontal: 'center' },
-          },
-        }}
         sx={{
           [`& .${pieClasses.arcLabel}`]: {
             fontWeight: 'bold',
@@ -77,7 +76,7 @@ export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, h
             id,
             innerRadius: 50,
             outerRadius: 100,
-            data: withConsistentColours(sortPieData(data)),
+            data: chartData,
             arcLabel: 'value',
             paddingAngle: 1,
             cornerRadius: 4,
@@ -86,6 +85,37 @@ export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, h
         ]}
         onItemClick={(_event, _identifier, item) => handleItemClick(item)}
       />
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: 2,
+          minHeight: 48,
+          maxWidth: width,
+        }}
+      >
+        {chartData.map((item) => (
+          <Box
+            key={item.label}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+            }}
+          >
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: item.color,
+              }}
+            />
+            <Typography variant='body2'>{item.label}</Typography>
+          </Box>
+        ))}
+      </Box>
     </Stack>
   )
 }
