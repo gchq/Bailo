@@ -204,7 +204,7 @@ describe('services > accessRequest', () => {
   test('removeAccessRequest > success', async () => {
     ReviewModelMock.find.mockResolvedValue([])
     ResponseModelMock.find.mockResolvedValue([])
-    expect(await removeAccessRequest({} as any, 'test')).toStrictEqual({ accessRequestId: 'test' })
+    expect(await removeAccessRequest({} as any, 'test')).toMatchSnapshot()
   })
 
   test('removeAccessRequest > no permission', async () => {
@@ -229,9 +229,7 @@ describe('services > accessRequest', () => {
     ReviewModelMock.find.mockResolvedValue([])
     ResponseModelMock.find.mockResolvedValue([])
 
-    expect(await removeAccessRequests({} as any, ['test', 'test2'])).toStrictEqual({
-      accessRequestIds: ['test', 'test2'],
-    })
+    expect(await removeAccessRequests({} as any, ['test', 'test2'])).toMatchSnapshot()
     expect(ReviewModelMock.find).toHaveBeenCalledTimes(2)
     // Once in removeAccessRequests and twice in getAccessRequestById
     expect(modelMocks.getModelById).toHaveBeenCalledTimes(3)

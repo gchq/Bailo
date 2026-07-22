@@ -379,6 +379,8 @@ export async function removeReviewRole(user: UserInterface, reviewRoleShortName:
   }
 
   await reviewRole.delete()
+
+  return reviewRole
 }
 
 export async function addReviewsForNewRole(user: UserInterface, newReviewRole: ReviewRoleInterface, model: ModelDoc) {

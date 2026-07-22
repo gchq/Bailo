@@ -10,8 +10,8 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleInterface } from '../../models/ReviewRole.js'
-import { SchemaInterface } from '../../models/Schema.js'
+import { ReviewRoleDoc, ReviewRoleInterface } from '../../models/ReviewRole.js'
+import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { StroomEventObject } from '../../models/StroomEvent.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -111,19 +111,20 @@ type SearchEventDetail = {
   TypeId: string
 } & SearchEventVariant
 
+type SearchEventVariantPartial = {
+  Description: string
+  Query: { Advanced: { And: { Term: Array<SearchTerm> } } } | { Raw: string }
+}
+
 type SearchEventVariant =
   | {
-      Search: {
-        Description: string
-        Query: { Advanced: { And: { Term: Array<SearchTerm> } } } | { Raw: string }
+      Search: SearchEventVariantPartial & {
         TotalResults: number
         Results?: SearchResult
       }
     }
   | {
-      Search: {
-        Description: string
-        Query: { Advanced: { And: { Term: Array<SearchTerm> } } } | { Raw: string }
+      Search: SearchEventVariantPartial & {
         Outcome: {
           Success: false
           Description: string
@@ -194,38 +195,38 @@ export class StroomAuditConnector extends BaseAuditConnector {
     return `${file.name} (${file._id.toString()})`
   }
 
-  async onCreateModel(req: Request, model: ModelDoc) {
+  async onCreateModel(req: Request, model: ModelDoc): Promise<void> {
     this.auditGenericEvent(req, model.id)
   }
 
-  async onViewModel(req: Request, model: ModelDoc) {
+  async onViewModel(req: Request, model: ModelDoc): Promise<void> {
     this.auditGenericEvent(req, model.id)
   }
 
-  async onSearchModel(req: Request, models: EntrySearchResult[]) {
+  async onSearchModel(req: Request, models: EntrySearchResult[]): Promise<void> {
     this.auditSearchEvent(
       req,
       models.map((model) => ({ Id: model.id })),
     )
   }
 
-  async onUpdateModel(req: Request, model: ModelDoc) {
+  async onUpdateModel(req: Request, model: ModelDoc): Promise<void> {
     this.auditGenericEvent(req, model.id)
   }
 
-  async onDeleteModel(req: Request, modelId: string) {
-    this.auditGenericEvent(req, modelId)
+  async onDeleteModel(req: Request, model: ModelDoc): Promise<void> {
+    this.auditGenericEvent(req, model.id)
   }
 
-  async onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
+  async onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface): Promise<void> {
     this.auditGenericEvent(req, `${model.id}:${modelCard.version}`)
   }
 
-  async onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+  async onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface): Promise<void> {
     this.auditGenericEvent(req, `${modelId}:${modelCard.version}`)
   }
 
-  async onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[]) {
+  async onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       modelCards.map((modelCard) => ({ Id: `${modelId}:${modelCard.version}` })),
@@ -233,39 +234,39 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+  async onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface): Promise<void> {
     this.auditGenericEvent(req, `${modelId}:${modelCard.version}`)
   }
 
-  async onCreateFile(req: Request, file: FileInterfaceDoc) {
+  async onCreateFile(req: Request, file: FileInterfaceDoc): Promise<void> {
     this.auditFileEvent(req, [file])
   }
 
-  async onViewFile(req: Request, file: FileInterfaceDoc) {
+  async onViewFile(req: Request, file: FileInterfaceDoc): Promise<void> {
     this.auditFileEvent(req, [file])
   }
 
-  async onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
+  async onViewFiles(req: Request, modelId: string, files: FileInterface[]): Promise<void> {
     this.auditFileEvent(req, files)
   }
 
-  async onUpdateFile(req: Request, modelId: string, fileId: string) {
+  async onUpdateFile(req: Request, modelId: string, fileId: string): Promise<void> {
     this.auditGenericEvent(req, `${modelId} - ${fileId}`)
   }
 
-  async onDeleteFile(req: Request, file: FileWithScanResultsAggregate) {
+  async onDeleteFile(req: Request, file: FileWithScanResultsAggregate): Promise<void> {
     this.auditFileEvent(req, [file])
   }
 
-  async onCreateRelease(req: Request, release: ReleaseDoc) {
+  async onCreateRelease(req: Request, release: ReleaseDoc): Promise<void> {
     this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
   }
 
-  async onViewRelease(req: Request, release: ReleaseDoc) {
+  async onViewRelease(req: Request, release: ReleaseDoc): Promise<void> {
     this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
   }
 
-  async onViewReleases(req: Request, releases: ReleaseDoc[]) {
+  async onViewReleases(req: Request, releases: ReleaseDoc[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       releases.map((release) => ({ Id: `${release.modelId}:${release.semver}` })),
@@ -273,23 +274,23 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onUpdateRelease(req: Request, release: ReleaseDoc) {
+  async onUpdateRelease(req: Request, release: ReleaseDoc): Promise<void> {
     this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
   }
 
-  async onDeleteRelease(req: Request, modelId: string, semver: string) {
-    this.auditGenericEvent(req, `${modelId}:${semver}`)
+  async onDeleteRelease(req: Request, release: ReleaseDoc): Promise<void> {
+    this.auditGenericEvent(req, `${release.modelId}:${release.semver}`)
   }
 
-  async onCreateReviewResponse(req: Request, response: ResponseInterface) {
+  async onCreateReviewResponse(req: Request, response: ResponseInterface): Promise<void> {
     this.auditGenericEvent(req, `${response._id}`)
   }
 
-  async onCreateCommentResponse(req: Request, response: ResponseInterface) {
+  async onCreateCommentResponse(req: Request, response: ResponseInterface): Promise<void> {
     this.auditGenericEvent(req, `${response._id}`)
   }
 
-  async onViewResponses(req: Request, responses: ResponseInterface[]) {
+  async onViewResponses(req: Request, responses: ResponseInterface[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       responses.map((response) => ({ Id: `${response._id}` })),
@@ -297,15 +298,15 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onUpdateResponse(req: Request, responseId: string) {
+  async onUpdateResponse(req: Request, responseId: string): Promise<void> {
     this.auditGenericEvent(req, responseId)
   }
 
-  async onCreateUserToken(req: Request, token: TokenDoc) {
+  async onCreateUserToken(req: Request, token: TokenDoc): Promise<void> {
     this.auditGenericEvent(req, token.accessKey)
   }
 
-  async onViewUserTokens(req: Request, tokens: TokenDoc[]) {
+  async onViewUserTokens(req: Request, tokens: TokenDoc[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       tokens.map((token) => ({ Id: token.accessKey })),
@@ -313,19 +314,19 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onDeleteUserToken(req: Request, accessKey: string) {
-    this.auditGenericEvent(req, accessKey)
+  async onDeleteUserToken(req: Request, token: TokenDoc): Promise<void> {
+    this.auditGenericEvent(req, token.accessKey)
   }
 
-  async onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
+  async onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void> {
     this.auditGenericEvent(req, accessRequest.id)
   }
 
-  async onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
+  async onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void> {
     this.auditGenericEvent(req, accessRequest.id)
   }
 
-  async onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
+  async onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       accessRequests.map((accessRequest) => ({
@@ -335,53 +336,53 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
+  async onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void> {
     this.auditGenericEvent(req, accessRequest.id)
   }
 
-  async onDeleteAccessRequest(req: Request, accessRequestId: string) {
-    this.auditGenericEvent(req, accessRequestId)
+  async onDeleteAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void> {
+    this.auditGenericEvent(req, accessRequest.id)
   }
 
-  async onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]) {
+  async onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]): Promise<void> {
     this.auditSearchEvent(
       req,
       reviews.map((review) => ({ Id: `${review.modelId}:${review.semver ? review.semver : review.accessRequestId}` })),
     )
   }
 
-  async onCreateSchema(req: Request, schema: SchemaInterface) {
+  async onCreateSchema(req: Request, schema: SchemaInterface): Promise<void> {
     this.auditGenericEvent(req, schema.id)
   }
 
-  async onViewSchema(req: Request, schema: SchemaInterface) {
+  async onViewSchema(req: Request, schema: SchemaInterface): Promise<void> {
     this.auditGenericEvent(req, schema.id)
   }
 
-  async onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
+  async onSearchSchemas(req: Request, schemas: SchemaInterface[]): Promise<void> {
     this.auditSearchEvent(
       req,
       schemas.map((schema) => ({ Id: `${schema.id}` })),
     )
   }
 
-  async onUpdateSchema(req: Request, schema: SchemaInterface) {
+  async onUpdateSchema(req: Request, schema: SchemaDoc): Promise<void> {
     this.auditGenericEvent(req, schema.id)
   }
 
-  async onDeleteSchema(req: Request, schemaId: string) {
-    this.auditGenericEvent(req, schemaId)
+  async onDeleteSchema(req: Request, schema: SchemaDoc): Promise<void> {
+    this.auditGenericEvent(req, schema.id)
   }
 
-  async onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+  async onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void> {
     this.auditGenericEvent(req, schemaMigration.id)
   }
 
-  async onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+  async onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void> {
     this.auditGenericEvent(req, schemaMigration.id)
   }
 
-  async onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
+  async onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       schemaMigrations.map((schemaMigration) => ({ Id: schemaMigration.id })),
@@ -389,19 +390,19 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+  async onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void> {
     this.auditGenericEvent(req, schemaMigration.id)
   }
 
-  async onCreateInference(req: Request, inference: InferenceDoc) {
+  async onCreateInference(req: Request, inference: InferenceDoc): Promise<void> {
     this.auditGenericEvent(req, `${inference.modelId}/${inference.image}:${inference.tag}`)
   }
 
-  async onViewInference(req: Request, inference: InferenceDoc) {
+  async onViewInference(req: Request, inference: InferenceDoc): Promise<void> {
     this.auditGenericEvent(req, `${inference.modelId}/${inference.image}:${inference.tag}`)
   }
 
-  async onViewInferences(req: Request, inferences: InferenceDoc[]) {
+  async onViewInferences(req: Request, inferences: InferenceDoc[]): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       inferences.map((inference) => ({ Id: `${inference.modelId}/${inference.image}:${inference.tag}` })),
@@ -409,15 +410,15 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onUpdateInference(req: Request, inference: InferenceDoc) {
+  async onUpdateInference(req: Request, inference: InferenceDoc): Promise<void> {
     this.auditGenericEvent(req, `${inference.modelId}/${inference.image}:${inference.tag}`)
   }
 
-  async onDeleteInference(req: Request, inference: InferenceDoc) {
+  async onDeleteInference(req: Request, inference: InferenceDoc): Promise<void> {
     this.auditGenericEvent(req, `${inference.modelId}/${inference.image}:${inference.tag}`)
   }
 
-  async onViewScanners(req: Request) {
+  async onViewScanners(req: Request): Promise<void> {
     this.auditGenericEvent(req, 'Viewing scanners')
   }
 
@@ -425,7 +426,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     req: Request,
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
-  ) {
+  ): Promise<void> {
     this.auditMultipleViewEvent(
       req,
       images.map((image) => ({ Id: `${image.repository}/${image.name}:${image.tags}` })),
@@ -433,15 +434,19 @@ export class StroomAuditConnector extends BaseAuditConnector {
     )
   }
 
-  async onViewModelImage(req: Request, modelId: string, name: string, tag: string) {
+  async onViewModelImage(req: Request, modelId: string, name: string, tag: string): Promise<void> {
     this.auditGenericEvent(req, `${modelId}/${name}:${tag}`)
   }
 
-  async onUpdateImage(req: Request, modelId: string, image: { repository: string; name: string; tag: string }) {
+  async onUpdateImage(
+    req: Request,
+    modelId: string,
+    image: { repository: string; name: string; tag: string },
+  ): Promise<void> {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
 
-  async onDeleteImage(req: Request, modelId: string, image: ImageTagRef) {
+  async onDeleteImage(req: Request, modelId: string, image: ImageTagRef): Promise<void> {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
 
@@ -449,7 +454,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
     modelId: string,
     semvers?: string[] | undefined,
-  ) {
+  ): Promise<void> {
     this.auditGenericEvent(req, `${modelId} - ${semvers?.join(', ') ?? 'all'}`)
   }
 
@@ -459,31 +464,31 @@ export class StroomAuditConnector extends BaseAuditConnector {
     sourceModelId: string,
     exporter: string,
     importResult: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
-  ) {
+  ): Promise<void> {
     this.auditImportEvent(req, sourceModelId, exporter, mirroredModel.id, { ...importResult })
   }
 
-  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void> {
     this.auditGenericEvent(req, `Review role created for ${reviewRole.name}`)
   }
 
-  async onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]) {
+  async onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void> {
     this.auditGenericEvent(req, `${reviewRole.length} review roles found.`)
   }
 
-  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void> {
     this.auditGenericEvent(req, reviewRole.name)
   }
 
-  async onDeleteReviewRole(req: Request, reviewRoleId: string) {
-    this.auditGenericEvent(req, reviewRoleId)
+  async onDeleteReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void> {
+    this.auditGenericEvent(req, reviewRole.id)
   }
 
   async onViewMetric(req: Request): Promise<void> {
     this.auditGenericEvent(req, 'Viewing metric')
   }
 
-  async onCreateReview(req: Request, modelId: string) {
+  async onCreateReview(req: Request, modelId: string): Promise<void> {
     this.auditGenericEvent(req, `Review created for ${modelId}`)
   }
 
@@ -491,11 +496,11 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, userInformation.user.dn)
   }
 
-  async onNotifyReviewers(req: Request, reviewId: string) {
+  async onNotifyReviewers(req: Request, reviewId: string): Promise<void> {
     this.auditGenericEvent(req, reviewId)
   }
 
-  async onError(req: Request, error: BailoError) {
+  async onError(req: Request, error: BailoError): Promise<void> {
     if (!req.audit) {
       log.warn({ url: req.url }, 'Unable to audit')
       return
@@ -566,7 +571,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.generateEvent(req, eventDetail)
   }
 
-  async generateEvent(req: Request, eventDetail: EventDetail) {
+  async generateEvent(req: Request, eventDetail: EventDetail): Promise<void> {
     const event: StroomEventObject = {
       EventTime: { TimeCreated: new Date().toISOString() },
       EventSource: {
@@ -587,7 +592,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     }
   }
 
-  auditGenericEvent(req: Request, Id: string) {
+  auditGenericEvent(req: Request, Id: string): void {
     const eventInfo: EventObject = {
       Object: {
         Id,
@@ -644,7 +649,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.generateEvent(req, eventDetail)
   }
 
-  auditFileEvent(req: Request, files: FileInterfaceDoc[] | FileInterface[]) {
+  auditFileEvent(req: Request, files: FileInterfaceDoc[] | FileInterface[]): void {
     let eventDetail: EventDetail
     switch (req.audit.auditKind) {
       case AuditKind.Create: {
@@ -763,7 +768,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.generateEvent(req, eventDetail)
   }
 
-  auditMultipleViewEvent(req: Request, ids: Array<{ Id: string }>, name: string) {
+  auditMultipleViewEvent(req: Request, ids: Array<{ Id: string }>, name: string): void {
     if (req.audit.auditKind !== AuditKind.View) {
       log.error(
         {
@@ -775,11 +780,12 @@ export class StroomAuditConnector extends BaseAuditConnector {
       return
     }
     if (ids.length === 0) {
-      return this.generateEvent(req, {
+      this.generateEvent(req, {
         TypeId: req.audit.typeId,
         Description: 'No items viewed',
         View: { Object: { Id: null } },
       })
+      return
     }
     const infos = ids.map((info) => ({
       Id: info.Id,
@@ -789,7 +795,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.generateEvent(req, { TypeId: req.audit.typeId, View: { Object: infos } })
   }
 
-  auditSearchEvent(req: Request, ids: Array<{ Id: string }>) {
+  auditSearchEvent(req: Request, ids: Array<{ Id: string }>): void {
     const eventDetail: SearchEventDetail = {
       TypeId: req.audit.typeId,
       Search: {
@@ -803,7 +809,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.generateEvent(req, eventDetail)
   }
 
-  getSearchDescriptionAndQuery(req: Request) {
+  getSearchDescriptionAndQuery(req: Request): SearchEventVariantPartial {
     if (req.audit.auditKind !== AuditKind.Search) {
       log.error(
         {
@@ -859,7 +865,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     exporter: string,
     mirroredModelId: string,
     importResult: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation,
-  ) {
+  ): void {
     const eventDetail: ImportEventDetail = {
       TypeId: req.audit.typeId,
       Import: {
@@ -907,7 +913,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.generateEvent(req, eventDetail)
   }
 
-  getHostDeviceIP() {
+  getHostDeviceIP(): string[] {
     const addresses: string[] = []
     const interfaces = os.networkInterfaces()
     for (const k in interfaces) {

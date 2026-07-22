@@ -526,6 +526,7 @@ export async function deleteReleases(
   if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot delete a release on a mirrored model.')
   }
+  const releases: ReleaseDoc[] = []
   for (const semver of semvers) {
     const release = await getReleaseBySemver(user, model, semver)
 
@@ -539,9 +540,10 @@ export async function deleteReleases(
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
     await removeResponsesByParentIds([...reviewsForRelease.map((review) => review.id), release.id], session)
+    releases.push(release)
   }
 
-  return { modelId, semvers }
+  return releases
 }
 
 export async function deleteRelease(
@@ -551,8 +553,7 @@ export async function deleteRelease(
   deleteMirroredModel: boolean = false,
   session?: ClientSession,
 ) {
-  await deleteReleases(user, modelId, [semver], deleteMirroredModel, session)
-  return { modelId, semver }
+  return (await deleteReleases(user, modelId, [semver], deleteMirroredModel, session))[0]
 }
 
 export function getReleaseName(release: ReleaseDoc): string {

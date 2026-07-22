@@ -93,7 +93,7 @@ export async function removeToken(user: UserInterface, accessKey: string) {
 
   await token.delete()
 
-  return { success: true }
+  return token
 }
 
 interface GetTokenOptions {

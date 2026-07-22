@@ -7,7 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleInterface } from '../../models/ReviewRole.js'
+import { ReviewRoleDoc, ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -451,7 +451,7 @@ export abstract class BaseAuditConnector {
   abstract onViewModel(req: Request, model: ModelDoc): Promise<void>
   abstract onSearchModel(req: Request, models: EntrySearchResult[]): Promise<void>
   abstract onUpdateModel(req: Request, model: ModelDoc): Promise<void>
-  abstract onDeleteModel(req: Request, modelId: string): Promise<void>
+  abstract onDeleteModel(req: Request, model: ModelDoc): Promise<void>
 
   abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface): Promise<void>
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface): Promise<void>
@@ -468,7 +468,7 @@ export abstract class BaseAuditConnector {
   abstract onViewRelease(req: Request, release: ReleaseDoc): Promise<void>
   abstract onViewReleases(req: Request, releases: ReleaseDoc[]): Promise<void>
   abstract onUpdateRelease(req: Request, release: ReleaseDoc): Promise<void>
-  abstract onDeleteRelease(req: Request, modelId: string, semver: string): Promise<void>
+  abstract onDeleteRelease(req: Request, release: ReleaseDoc): Promise<void>
 
   abstract onCreateCommentResponse(req: Request, response: ResponseInterface): Promise<void>
   abstract onCreateReviewResponse(req: Request, response: ResponseInterface): Promise<void>
@@ -477,13 +477,13 @@ export abstract class BaseAuditConnector {
 
   abstract onCreateUserToken(req: Request, token: TokenDoc): Promise<void>
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[]): Promise<void>
-  abstract onDeleteUserToken(req: Request, accessKey: string): Promise<void>
+  abstract onDeleteUserToken(req: Request, token: TokenDoc): Promise<void>
 
   abstract onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
   abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
   abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]): Promise<void>
   abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
-  abstract onDeleteAccessRequest(req: Request, accessRequestId: string): Promise<void>
+  abstract onDeleteAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]): Promise<void>
 
@@ -491,7 +491,7 @@ export abstract class BaseAuditConnector {
   abstract onViewSchema(req: Request, schema: SchemaInterface): Promise<void>
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[]): Promise<void>
   abstract onUpdateSchema(req: Request, schema: SchemaDoc): Promise<void>
-  abstract onDeleteSchema(req: Request, schemaId: string): Promise<void>
+  abstract onDeleteSchema(req: Request, schema: SchemaDoc): Promise<void>
 
   abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
   abstract onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
@@ -523,14 +523,14 @@ export abstract class BaseAuditConnector {
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
   abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
-  abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
+  abstract onDeleteReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
 
   abstract onViewMetric(req: Request): Promise<void>
 
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
-  abstract onNotifyReviewers(req: Request, reviewId: string)
+  abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
