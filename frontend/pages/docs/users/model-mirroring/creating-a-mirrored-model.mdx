@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import mirrorCreateImage from 'public/docs/mirror-create.png'
 import mirrorCreateFormImage from 'public/docs/mirror-create-form.png'
@@ -32,7 +32,11 @@ optionally add additional local context to a mirrored model without modifying th
 Create a mirrored model from the model creation page if mirroring is enabled for your Bailo instance:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='model creation page with mirrored model option' src={mirrorCreateImage} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='model creation page with mirrored model option'
+    src={mirrorCreateImage}
+  />
 </Box>
 
 The screenshot above shows the model creation page with the Mirrored Model option available.
@@ -42,7 +46,11 @@ The screenshot above shows the model creation page with the Mirrored Model optio
 3. Enter the **Source Model ID** of the model you want to mirror
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='mirrored model creation form with source model ID field' src={mirrorCreateFormImage} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='mirrored model creation form with source model ID field'
+    src={mirrorCreateFormImage}
+  />
 </Box>
 
 The screenshot above shows the mirrored model creation form with fields for basic details and the Source Model ID.
@@ -51,17 +59,16 @@ The Source Model ID must exactly match the ID of the source model. This is used 
 
 ## Changing the source model ID
 
-If you entered an incorrect Source Model ID during creation, you can update it from the model settings page before the
+If you entered an incorrect Source Model ID during creation, you can update it directly from the model page before the
 first import has been performed.
 
 1. Navigate to your mirrored model
-2. Open **Settings** and select **Details**
-3. In the **Source model** section, edit the Source Model ID
-4. Click **Save**
+2. In the info banner at the top of the page, click the edit icon next to the Source Model ID
+3. Enter the corrected Source Model ID and confirm
 
 Once the source model has been exported and the mirrored model has received its first import, the Source Model ID is
-locked and can no longer be changed. The settings page displays the current Source Model ID with an informational
-message when editing is no longer available.
+locked and can no longer be changed. Hovering over the Source Model ID displays a message explaining that editing is no
+longer available.
 
 ## Exporting the source model
 
@@ -73,7 +80,7 @@ source model:
 3. Export the model
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='source model export settings' src={mirrorSettingsFormImage} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='source model export settings' src={mirrorSettingsFormImage} />
 </Box>
 
 The screenshot above shows the source model's export settings used to synchronise the mirrored copy.

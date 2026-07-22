@@ -369,8 +369,8 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind) {
-    query['kind'] = { $all: opts.kind }
+  if (opts.kind?.length) {
+    query['kind'] = { $in: opts.kind }
   }
 
   if (opts.organisations?.length) {
@@ -764,7 +764,10 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
   // Special case for the first model card revision when a schema is set but `metadata` is still `undefined`
   // This only happens when created from a schema, but when created from a template the first revision will not be undefined
   if (modelCardRevision.version !== 1 || modelCardRevision.metadata !== undefined) {
-    const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+    const { valid, errors } = await validateContentAgainstSchema(
+      modelCardRevision.schemaId,
+      modelCardRevision.metadata || {},
+    )
     if (!valid) {
       throw BadReq('Model metadata could not be validated against the schema.', {
         validationErrors: errors,
