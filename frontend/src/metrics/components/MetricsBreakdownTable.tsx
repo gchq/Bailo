@@ -5,16 +5,13 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryKind, ModelBreakdown } from 'types/types'
+import { EntryKind, EntryKindLabel, ModelBreakdown } from 'types/types'
+import { toTitleCase } from 'utils/stringUtils'
 
 interface MetricsBreakdownTableProps {
   title?: string
   data: ModelBreakdown[]
   isLoading?: boolean
-}
-
-function toFirstLetterUppercase(text?: string | null): string {
-  return text ? `${text.charAt(0).toUpperCase()}${text.slice(1)}` : ''
 }
 
 function getLinkRoute(entryKind?: string | null): string {
@@ -46,7 +43,7 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
           </Typography>
         </TableCell>
         <TableCell>{row.entryName}</TableCell>
-        <TableCell>{toFirstLetterUppercase(row.entryKind)}</TableCell>
+        <TableCell>{toTitleCase(EntryKindLabel[row.entryKind])}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)

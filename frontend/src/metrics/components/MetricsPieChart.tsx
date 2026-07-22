@@ -1,4 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { mangoFusionPaletteDark } from '@mui/x-charts'
 import { DefaultizedPieValueType } from '@mui/x-charts/models'
 import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
@@ -42,6 +43,8 @@ interface OverviewPieChartProps {
 }
 
 export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, height = 250 }: OverviewPieChartProps) {
+  const theme = useTheme()
+
   const handleItemClick = (item: DefaultizedPieValueType) => {
     const label = typeof item.label === 'function' ? item.label('arc') : (item.label ?? null)
     if (label) {
@@ -67,7 +70,7 @@ export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, h
         sx={{
           [`& .${pieClasses.arcLabel}`]: {
             fontWeight: 'bold',
-            color: 'white',
+            color: theme.palette.common.white,
           },
           '& path': { cursor: 'pointer' },
         }}
@@ -108,8 +111,9 @@ export function OverviewPieChart({ id, title, data, onSelectItem, width = 340, h
               sx={{
                 width: 12,
                 height: 12,
-                borderRadius: '50%',
+                mb: '2px',
                 backgroundColor: item.color,
+                borderRadius: '50%',
               }}
             />
             <Typography variant='body2'>{item.label}</Typography>

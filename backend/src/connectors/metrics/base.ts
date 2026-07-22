@@ -4,7 +4,7 @@ import NodeCache from 'node-cache'
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { EntryKind, EntryKindKeys, ModelInterface, SystemRoles } from '../../models/Model.js'
+import ModelModel, { EntryKind, ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel from '../../models/Release.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
@@ -849,17 +849,18 @@ export class BaseMetricsConnector {
       }
     }
 
-    // Filter by entry kind if provided (model, data-card, mirrored-model, untrusted-model)
-    if (query.kind !== undefined) {
+    // Filter by entry kind(s) if provided (model, data-card, mirrored-model, untrusted-model)
+    if (query.kind !== undefined && query.kind.length > 0) {
       const validKinds = Object.values(EntryKind)
+      const invalidKinds = query.kind.filter((kind) => !validKinds.includes(kind))
 
-      if (!validKinds.includes(query.kind as EntryKindKeys)) {
+      if (invalidKinds.length > 0) {
         throw BadReq(`Invalid entryKind. Must be one of: ${validKinds.join(', ')}.`, {
-          entryKind: query.kind,
+          entryKind: invalidKinds,
         })
       }
 
-      mongoQuery.kind = query.kind as EntryKindKeys
+      mongoQuery.kind = { $in: query.kind }
     }
 
     // Filter by models with releases if provided
