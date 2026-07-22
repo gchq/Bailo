@@ -10,7 +10,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleDoc, ReviewRoleInterface } from '../../models/ReviewRole.js'
+import { ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { StroomEventObject } from '../../models/StroomEvent.js'
@@ -468,16 +468,20 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditImportEvent(req, sourceModelId, exporter, mirroredModel.id, { ...importResult })
   }
 
-  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void> {
-    this.auditGenericEvent(req, `Review role created for ${reviewRole.name}`)
+  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void> {
+    this.auditGenericEvent(req, reviewRole.id)
   }
 
-  async onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void> {
-    this.auditGenericEvent(req, `${reviewRole.length} review roles found.`)
+  async onViewReviewRoles(req: Request, reviewRoles: ReviewRoleDoc[]): Promise<void> {
+    this.auditMultipleViewEvent(
+      req,
+      reviewRoles.map((reviewRole) => ({ Id: reviewRole.id })),
+      'review role',
+    )
   }
 
-  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void> {
-    this.auditGenericEvent(req, reviewRole.name)
+  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void> {
+    this.auditGenericEvent(req, reviewRole.id)
   }
 
   async onDeleteReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void> {

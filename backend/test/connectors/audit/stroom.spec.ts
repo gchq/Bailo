@@ -9,7 +9,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/model
 import { ImageTagRef, ReleaseDoc } from '../../../src/models/Release.js'
 import { ResponseInterface } from '../../../src/models/Response.js'
 import { ReviewInterface } from '../../../src/models/Review.js'
-import { ReviewRoleDoc, ReviewRoleInterface } from '../../../src/models/ReviewRole.js'
+import { ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../../src/models/Schema.js'
 import { SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
 import { TokenDoc } from '../../../src/models/Token.js'
@@ -446,17 +446,17 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onCreateReviewRole > save expected event', async () => {
-    await connector.onCreateReviewRole(createEventRequest, { name: 'reviewRole' } as ReviewRoleInterface)
+    await connector.onCreateReviewRole(createEventRequest, { id: 'reviewRoleId' } as ReviewRoleDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewReviewRoles > save expected event', async () => {
-    await connector.onViewReviewRoles(viewEventRequest, [{ name: 'reviewRole' } as ReviewRoleInterface])
+    await connector.onViewReviewRoles(viewEventRequest, [{ id: 'reviewRoleId' } as ReviewRoleDoc])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateReviewRole > save expected event', async () => {
-    await connector.onUpdateReviewRole(updateEventRequest, { name: 'reviewRole' } as ReviewRoleInterface)
+    await connector.onUpdateReviewRole(updateEventRequest, { id: 'reviewRoleId' } as ReviewRoleDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

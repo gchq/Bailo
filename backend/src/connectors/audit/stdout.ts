@@ -7,7 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleDoc, ReviewRoleInterface } from '../../models/ReviewRole.js'
+import { ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -397,21 +397,26 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleDoc) {
     this.checkEventType(AuditInfo.CreateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
     req.log.info(event, req.audit.description)
   }
 
-  async onViewReviewRoles(req: Request) {
+  async onViewReviewRoles(req: Request, reviewRoles: ReviewRoleDoc[]) {
     this.checkEventType(AuditInfo.ViewReviewRoles, req)
-    const event = this.generateEvent(req, {})
+    const event = this.generateEvent(
+      req,
+      reviewRoles.map((reviewRole) => ({
+        reviewRoleId: reviewRole.id,
+      })),
+    )
     req.log.info(event, req.audit.description)
   }
 
-  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleDoc) {
     this.checkEventType(AuditInfo.UpdateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
     req.log.info(event, req.audit.description)
   }
 

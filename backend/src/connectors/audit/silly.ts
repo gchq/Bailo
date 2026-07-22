@@ -7,7 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleDoc, ReviewRoleInterface } from '../../models/ReviewRole.js'
+import { ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -80,9 +80,9 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _exporter: string,
     _importResult: MirrorInformation,
   ) {}
-  async onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
-  async onViewReviewRoles(_req: Request, _reviewRole: ReviewRoleInterface[]) {}
-  async onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
+  async onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleDoc) {}
+  async onViewReviewRoles(_req: Request, _reviewRole: ReviewRoleDoc[]) {}
+  async onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleDoc) {}
   async onDeleteReviewRole(_req: Request, _reviewRole: ReviewRoleDoc) {}
   async onViewMetric(_req: Request): Promise<void> {}
   async onCreateReview(_req: Request, _modelId: string) {}

@@ -1,4 +1,5 @@
-import { ClientSession, PipelineStage, Types } from 'mongoose'
+import { ClientSession, PipelineStage, QueryFilter, Types } from 'mongoose'
+import NodeCache from 'node-cache'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -17,7 +18,6 @@ import log from './log.js'
 import { getModelById, getRoleEntities } from './model.js'
 import { getSchemaById, searchSchemas } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
-
 export interface DefaultReviewRole {
   name: string
   shortName: string
@@ -25,6 +25,9 @@ export interface DefaultReviewRole {
   kind: string
   systemRole: string
 }
+
+const reviewRolesCache = new NodeCache({ stdTTL: 300 }) // 5 minutes
+const DEFAULT_REVIEW_ROLES_CACHE_KEY = 'default-review-roles'
 
 export async function findReviews(
   user: UserInterface,
@@ -318,30 +321,53 @@ export async function findReviewRole(user: UserInterface, shortName: string) {
   return reviewRole
 }
 
-export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleInterface[]> {
-  let reviewRoles: ReviewRoleDoc[]
+export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleDoc[]> {
+  const mongoQuery: QueryFilter<ReviewRoleInterface> = {}
+
   if (schemaIds) {
     const schemas = await searchSchemas(undefined, undefined, undefined, schemaIds)
     if (!schemas || schemas.length === 0) {
       throw BadReq('Unable to find schemas', { schemaIds })
     }
     const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
-    reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
-  } else {
-    reviewRoles = await ReviewRoleModel.find()
+    mongoQuery.shortName = { $in: uniqueRoles }
   }
-  return reviewRoles
+
+  return await ReviewRoleModel.find(mongoQuery)
 }
 
 export async function addDefaultReviewRoles() {
-  for (const reviewRole of config.defaultReviewRoles) {
-    log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
-    const defaultRole = await ReviewRoleModel.findOne({ shortName: reviewRole.shortName })
-    if (!defaultRole) {
-      const newRole = new ReviewRoleModel({ ...reviewRole })
-      newRole.save()
-    }
+  const shortNames = config.defaultReviewRoles.map((role) => role.shortName)
+
+  const existingRoles = await ReviewRoleModel.find({ shortName: { $in: shortNames } }).lean()
+
+  for (const reviewRole of existingRoles) {
+    log.info({ name: reviewRole.name }, `Review role already exists`)
   }
+  const existingShortNames = new Set(existingRoles.map((role) => role.shortName))
+  const rolesToCreate = config.defaultReviewRoles.filter((role) => !existingShortNames.has(role.shortName))
+
+  for (const reviewRole of rolesToCreate) {
+    log.info({ name: reviewRole.name }, 'Creating review role')
+  }
+  if (rolesToCreate.length > 0) {
+    await ReviewRoleModel.insertMany(rolesToCreate)
+  }
+}
+
+export async function getDefaultReviewRolesCached(): Promise<ReviewRoleDoc[]> {
+  const cached = reviewRolesCache.get<ReviewRoleDoc[]>(DEFAULT_REVIEW_ROLES_CACHE_KEY)
+  if (cached) {
+    return cached
+  }
+
+  const reviewRoles = await ReviewRoleModel.find({
+    shortName: { $in: config.defaultReviewRoles.map((r) => r.shortName) },
+  })
+
+  reviewRolesCache.set(DEFAULT_REVIEW_ROLES_CACHE_KEY, reviewRoles)
+
+  return reviewRoles
 }
 
 export async function removeReviewRole(user: UserInterface, reviewRoleShortName: string) {

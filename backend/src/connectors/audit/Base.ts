@@ -7,7 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleDoc, ReviewRoleInterface } from '../../models/ReviewRole.js'
+import { ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -520,9 +520,9 @@ export abstract class BaseAuditConnector {
     importResult: Omit<MirrorInformation, 'metadata'>,
   ): Promise<void>
 
-  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
-  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
-  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
+  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
+  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleDoc[]): Promise<void>
+  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
   abstract onDeleteReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
 
   abstract onViewMetric(req: Request): Promise<void>
