@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import pino from 'pino'
 import { pinoHttp } from 'pino-http'
 import { v4 } from 'uuid'
@@ -43,13 +44,19 @@ export default log
 export const httpLog = pinoHttp({
   wrapSerializers: false,
   logger: log,
+  // The serializers are bound by the middleware order whereas this function is not.
+  customSuccessObject(req: Request, res, originalLog) {
+    return {
+      ...originalLog,
+      user: req.user,
+    }
+  },
   serializers: {
     req: function customReqSerializer(req) {
       return {
         id: req.id,
         method: req.method,
         url: req.url,
-        user: req.user,
         clientIp: req.headers['x-forwarded-for'] || req.remoteAddress,
         ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
         // trim each value in body to 128 characters maximum

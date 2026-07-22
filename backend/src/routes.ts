@@ -21,12 +21,11 @@ const jsonParser = (req, res, next) => {
   const limit = needsLargeBody ? '500kb' : '100kb'
   bodyParser.json({ limit })(req, res, next)
 }
-server.use([jsonParser, helmet()])
+server.use([jsonParser, httpLog, helmet()])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
-server.use(httpLog)
 
 server.use('/api/v1', v1Router)
 server.use('/api/v2', v2Router)
