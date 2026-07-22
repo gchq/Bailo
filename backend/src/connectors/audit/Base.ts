@@ -11,6 +11,7 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserInterface } from '../../models/User.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
@@ -44,6 +45,7 @@ export const ResourceKind = {
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
   User: 'user',
+  Registry: 'reigstry',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -443,6 +445,44 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Review,
   },
+  // new registry stuff goes here
+  // TODO - descriptions
+  RegistryLogin: {
+    typeId: 'RegistryLogin',
+    description: 'TBD',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryIssueAccessToken: {
+    typeId: 'RegistryIssueAccessToken',
+    description: 'TBD',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryIssueRefreshToken: {
+    typeId: 'RegistryIssueRefreshToken',
+    description: 'TBD',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImagePull: {
+    typeId: 'RegistryImagePull',
+    description: 'TBD',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImagePush: {
+    typeId: 'RegistryImagePush',
+    description: 'TBD',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImageDelete: {
+    typeId: 'RegistryImageDelete',
+    description: 'TBD',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.Registry,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -530,7 +570,14 @@ export abstract class BaseAuditConnector {
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
-  abstract onNotifyReviewers(req: Request, reviewId: string)
+  abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
+
+  abstract onRegistryLogin(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryIssueAccessToken(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryIssueRefreshToken(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryImagePull(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryImagePush(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryImageDelete(req: Request, user: UserInterface): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

@@ -11,6 +11,7 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserInterface } from '../../models/User.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
@@ -442,6 +443,42 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onNotifyReviewers(req: Request, reviewId: string): Promise<void> {
     this.checkEventType(AuditInfo.NotifyReviewers, req)
     const event = this.generateEvent(req, { reviewId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryLogin(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryLogin, req)
+    const event = this.generateEvent(req, { userDn: user.dn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryIssueAccessToken(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryIssueAccessToken, req)
+    const event = this.generateEvent(req, { userDn: user.dn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryIssueRefreshToken(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryIssueRefreshToken, req)
+    const event = this.generateEvent(req, { userDn: user.dn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImagePull(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryImagePull, req)
+    const event = this.generateEvent(req, { userDn: user.dn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImagePush(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryImagePush, req)
+    const event = this.generateEvent(req, { userDn: user.dn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImageDelete(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryImageDelete, req)
+    const event = this.generateEvent(req, { userDn: user.dn })
     req.log.info(event, req.audit.description)
   }
 

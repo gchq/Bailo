@@ -11,6 +11,7 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserInterface } from '../../models/User.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
@@ -87,6 +88,13 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onViewMetric(_req: Request): Promise<void> {}
   async onCreateReview(_req: Request, _modelId: string) {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
-  async onNotifyReviewers(_req: Request, _reviewId: string) {}
+  async onNotifyReviewers(_req: Request, _reviewId: string): Promise<void> {}
+  async onRegistryLogin(_req: Request, _user: UserInterface): Promise<void> {}
+  async onRegistryIssueAccessToken(_req: Request, _user: UserInterface): Promise<void> {}
+  async onRegistryIssueRefreshToken(_req: Request, _user: UserInterface): Promise<void> {}
+  async onRegistryImagePull(_req: Request, _user: UserInterface): Promise<void> {}
+  async onRegistryImagePush(_req: Request, _user: UserInterface): Promise<void> {}
+  async onRegistryImageDelete(_req: Request, _user: UserInterface): Promise<void> {}
+
   async onError(_req: Request, _error: BailoError) {}
 }

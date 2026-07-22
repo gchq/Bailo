@@ -15,6 +15,7 @@ import { SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { StroomEventObject } from '../../models/StroomEvent.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserInterface } from '../../models/User.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import log from '../../services/log.js'
 import { MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
@@ -491,8 +492,32 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, userInformation.user.dn)
   }
 
-  async onNotifyReviewers(req: Request, reviewId: string) {
+  async onNotifyReviewers(req: Request, reviewId: string): Promise<void> {
     this.auditGenericEvent(req, reviewId)
+  }
+
+  async onRegistryLogin(req: Request, user: UserInterface): Promise<void> {
+    this.auditGenericEvent(req, user.dn)
+  }
+
+  async onRegistryIssueAccessToken(req: Request, user: UserInterface): Promise<void> {
+    this.auditGenericEvent(req, user.dn)
+  }
+
+  async onRegistryIssueRefreshToken(req: Request, user: UserInterface): Promise<void> {
+    this.auditGenericEvent(req, user.dn)
+  }
+
+  async onRegistryImagePull(req: Request, user: UserInterface): Promise<void> {
+    this.auditGenericEvent(req, user.dn)
+  }
+
+  async onRegistryImagePush(req: Request, user: UserInterface): Promise<void> {
+    this.auditGenericEvent(req, user.dn)
+  }
+
+  async onRegistryImageDelete(req: Request, user: UserInterface): Promise<void> {
+    this.auditGenericEvent(req, user.dn)
   }
 
   async onError(req: Request, error: BailoError) {
