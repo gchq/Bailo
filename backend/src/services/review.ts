@@ -1,5 +1,4 @@
 import { ClientSession, PipelineStage, QueryFilter, Types } from 'mongoose'
-import NodeCache from 'node-cache'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -25,9 +24,6 @@ export interface DefaultReviewRole {
   kind: string
   systemRole: string
 }
-
-const reviewRolesCache = new NodeCache({ stdTTL: 300 }) // 5 minutes
-const DEFAULT_REVIEW_ROLES_CACHE_KEY = 'default-review-roles'
 
 export async function findReviews(
   user: UserInterface,
@@ -353,21 +349,6 @@ export async function addDefaultReviewRoles() {
   if (rolesToCreate.length > 0) {
     await ReviewRoleModel.insertMany(rolesToCreate)
   }
-}
-
-export async function getDefaultReviewRolesCached(): Promise<ReviewRoleDoc[]> {
-  const cached = reviewRolesCache.get<ReviewRoleDoc[]>(DEFAULT_REVIEW_ROLES_CACHE_KEY)
-  if (cached) {
-    return cached
-  }
-
-  const reviewRoles = await ReviewRoleModel.find({
-    shortName: { $in: config.defaultReviewRoles.map((r) => r.shortName) },
-  })
-
-  reviewRolesCache.set(DEFAULT_REVIEW_ROLES_CACHE_KEY, reviewRoles)
-
-  return reviewRoles
 }
 
 export async function removeReviewRole(user: UserInterface, reviewRoleShortName: string) {

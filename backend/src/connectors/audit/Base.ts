@@ -520,6 +520,7 @@ export abstract class BaseAuditConnector {
     importResult: Omit<MirrorInformation, 'metadata'>,
   ): Promise<void>
 
+  // Only the non-system roles are audited as system roles are not stored in the DB so have no ID
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleDoc[]): Promise<void>
   abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
