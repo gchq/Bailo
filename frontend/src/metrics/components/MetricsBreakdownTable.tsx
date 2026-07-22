@@ -5,18 +5,14 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryKind, EntryKindLabel, ModelBreakdown } from 'types/types'
+import { EntryKindKeys, EntryKindLabel, ModelBreakdown } from 'types/types'
+import { entryKindForRedirect } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 interface MetricsBreakdownTableProps {
   title?: string
   data: ModelBreakdown[]
   isLoading?: boolean
-}
-
-function getLinkRoute(entryKind?: string | null): string {
-  // Return the model route for all entries other than data cards
-  return entryKind ? (entryKind === EntryKind.DATA_CARD ? EntryKind.DATA_CARD : EntryKind.MODEL) : ''
 }
 
 export function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
@@ -37,7 +33,11 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
       >
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/${getLinkRoute(row.entryKind)}/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
+            <Link
+              href={`/${entryKindForRedirect(row.entryKind as EntryKindKeys)}/${row.entryId}`}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
               {row.entryId}
             </Link>
           </Typography>

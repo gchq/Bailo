@@ -850,9 +850,9 @@ export class BaseMetricsConnector {
     }
 
     // Filter by entry kind(s) if provided (model, data-card, mirrored-model, untrusted-model)
-    if (query.kind !== undefined && query.kind.length > 0) {
+    if (query.kinds !== undefined && query.kinds.length > 0) {
       const validKinds = Object.values(EntryKind)
-      const invalidKinds = query.kind.filter((kind) => !validKinds.includes(kind))
+      const invalidKinds = query.kinds.filter((kind) => !validKinds.includes(kind))
 
       if (invalidKinds.length > 0) {
         throw BadReq(`Invalid entryKind. Must be one of: ${validKinds.join(', ')}.`, {
@@ -860,7 +860,7 @@ export class BaseMetricsConnector {
         })
       }
 
-      mongoQuery.kind = { $in: query.kind }
+      mongoQuery.kind = { $in: query.kinds }
     }
 
     // Filter by models with releases if provided

@@ -829,7 +829,7 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
     modelMocks.find.mockReturnValue(mockFindQuery([]))
 
     await connector.calculateModelBreakdown(mockUser, {
-      kind: ['model'],
+      kinds: ['model'],
     } as any)
 
     expect(modelMocks.find).toHaveBeenCalledWith({
@@ -844,7 +844,7 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
       organisation: 'Example Organisation',
       state: 'active',
       schemaId: 'minimal-general-v10',
-      kind: ['model', 'data-card'],
+      kinds: ['model', 'data-card'],
     } as any)
 
     expect(modelMocks.find).toHaveBeenCalledWith({
