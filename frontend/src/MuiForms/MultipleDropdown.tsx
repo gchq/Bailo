@@ -128,8 +128,7 @@ export default function MultipleDropdown({
         />
       ) : compare.inMirroredCompare && value.length > 0 ? (
         <InlineDiff from={formatValues(compare.compareFromState)} to={formatValues(value)} />
-      ) : (
-        value.length > 0 &&
+      ) : value.length > 0 ? (
         value.map((selectedValue) => (
           <Typography
             key={selectedValue}
@@ -141,6 +140,10 @@ export default function MultipleDropdown({
             {selectedValue}
           </Typography>
         ))
+      ) : (
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )
