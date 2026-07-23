@@ -100,7 +100,8 @@ pip install -r requirements-dev.txt
   both validation and OpenAPI generation via `@asteasolutions/zod-to-openapi`.
 - Use existing error helpers from `backend/src/utils/error.ts`: `BadReq`, `Forbidden`, `NotFound`, `Unauthorized`,
   `Conflict`, `ContentTooLarge`, `UnsatisfiableRange`.
-- Use **JSDoc-style** docstrings. Keep them concise (1-2 lines) unless genuinely needed.
+- Prefer self-documenting code. Only add a docstring when the function name, parameters, and types do not make the
+  intent obvious. When a docstring is needed, use **JSDoc-style** and keep it to 1-2 lines.
 
 ### Python
 
@@ -174,7 +175,8 @@ Path-filtered (only run when relevant files change):
 
 Licensed under Apache 2.0 (see `LICENSE.txt`). See `CONTRIBUTING.md` for full details. Key points:
 
-- Branch off `main` with naming pattern `gh-12345-my-contribution`.
+- Use [conventional branch names](https://conventionalbranch.org/): `<type>/<description>` (e.g. `feat/add-login-page`,
+  `fix/issue-123-broken-upload`, `chore/update-deps`).
 - Sign the GCHQ Contributor Licence Agreement (CLA).
 - Ensure Prettier, ESLint, and all tests pass before opening a PR.
 - Update relevant documentation for new features or UX changes.
