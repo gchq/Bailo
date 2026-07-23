@@ -8,12 +8,39 @@ from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
 # isort: split
 
 from bailo import Client, Datacard, Experiment, Model, ModelVisibility
+from bailo.core.enums import EntryKind
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
 
 def test_model(local_model):
     assert isinstance(local_model, Model)
+
+
+def test_unpack_hydrates_all_fields(local_model):
+    res = {
+        "id": "test-id",
+        "name": "updated-name",
+        "description": "updated-desc",
+        "visibility": "private",
+        "kind": "model",
+        "organisation": "New Org",
+        "state": "Production",
+        "tags": ["tag1", "tag2"],
+        "collaborators": [{"entity": "user:admin", "roles": ["owner"]}],
+        "settings": {"ungovernedAccess": True, "allowTemplating": False, "mirror": {}},
+    }
+    local_model._unpack(res)
+
+    assert local_model.name == "updated-name"
+    assert local_model.description == "updated-desc"
+    assert local_model.visibility == ModelVisibility.PRIVATE
+    assert local_model.kind == EntryKind.MODEL
+    assert local_model.organisation == "New Org"
+    assert local_model.state == "Production"
+    assert local_model.tags == ["tag1", "tag2"]
+    assert local_model.collaborators == [{"entity": "user:admin", "roles": ["owner"]}]
+    assert local_model.settings["ungovernedAccess"] is True
 
 
 def test_create_experiment_from_model(local_model):
@@ -111,6 +138,32 @@ def test_create_get_from_id_update_and_delete_model(
         assert model.model_id == get_model.model_id
 
     # Check that the model is deleted
+    assert model.delete()
+
+
+@pytest.mark.integration
+def test_update_round_trips_all_fields(integration_client):
+    model = Model.create(
+        client=integration_client,
+        name="test-round-trip",
+        description="original",
+        visibility=ModelVisibility.PUBLIC,
+        organisation="Example Organisation",
+        tags=["alpha"],
+    )
+    model.card_from_schema("minimal-general-v10")
+
+    model.description = "updated"
+    model.tags = ["alpha", "beta"]
+    model.update()
+
+    fetched = Model.from_id(integration_client, model.model_id)
+    assert fetched.description == "updated"
+    assert fetched.tags == ["alpha", "beta"]
+    assert fetched.organisation == "Example Organisation"
+    assert fetched.settings is not None
+    assert isinstance(fetched.settings, dict)
+
     assert model.delete()
 
 

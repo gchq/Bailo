@@ -1,4 +1,4 @@
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoReviewPage from 'public/docs/bailo_review_page.png'
 import bailoReview from 'public/docs/bailo_review.png'
@@ -27,7 +27,11 @@ Navigate to the **Reviews** page from the navigation bar. Releases awaiting your
 reviews** tab, under the **Releases** heading.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='open release reviews page with a list of unreviewed releases' src={bailoReviewPage} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='open release reviews page with a list of unreviewed releases'
+    src={bailoReviewPage}
+  />
 </Box>
 
 The screenshot above shows the Reviews page with a list of open release reviews waiting for action.
@@ -41,7 +45,11 @@ Open a release from the Reviews page or the model's Releases tab, examine the su
    - Navigate to the **Releases** page for the model. A **Review** button appears in the release banner
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='releases page showing release with review banner visually attached' src={bailoReview} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='releases page showing release with review banner visually attached'
+    src={bailoReview}
+  />
 </Box>
 
 The screenshot above shows a release on the model's Releases page with a review banner attached.
@@ -57,7 +65,7 @@ The screenshot above shows a release on the model's Releases page with a review 
    - **Request changes** - something needs to be addressed
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='release review approval popup' src={bailoReviewForm} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='release review approval popup' src={bailoReviewForm} />
 </Box>
 
 The screenshot above shows the release review form with options to approve or request changes, and a comment field.

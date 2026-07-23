@@ -38,7 +38,7 @@ export default function DataCard() {
               path: 'settings',
               disabled: !settingsPermission.hasPermission,
               disabledText: settingsPermission.info,
-              view: <Settings entry={dataCard} />,
+              view: <Settings entry={dataCard} mutateEntry={mutateEntry} />,
             },
           ]
         : [],

@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import bailoUploadFileRelease from 'public/docs/bailo_release_file_upload.png'
 import bailoUploadedFileRelease from 'public/docs/bailo_created_release_upload_file.png'
@@ -26,7 +26,7 @@ Upload files from the **File Management** tab on your model page:
 3. Optionally assign tags to each file
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of files being uploaded' src={bailoUploadFile} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view of files being uploaded' src={bailoUploadFile} />
 </Box>
 
 The screenshot above shows the file upload interface with file selection, tag assignment, and an Upload files button.
@@ -38,7 +38,11 @@ The screenshot above shows the file upload interface with file selection, tag as
 When creating a new release, you can attach both newly uploaded files and files that already exist on the model.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='new release form with file attached' src={bailoUploadFileRelease} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='new release form with file attached'
+    src={bailoUploadFileRelease}
+  />
 </Box>
 
 The screenshot above shows the new release form with a file already attached.
@@ -48,7 +52,11 @@ The screenshot above shows the new release form with a file already attached.
 You can edit existing releases to add or remove file attachments.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of existing release with edit release button' src={bailoUploadedFileRelease} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='view of existing release with edit release button'
+    src={bailoUploadedFileRelease}
+  />
 </Box>
 
 The screenshot above shows an existing release with an Edit release button for adding or removing files.

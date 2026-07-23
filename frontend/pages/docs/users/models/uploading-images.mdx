@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import bailoPushImage from 'public/docs/bailo_push_image_to_docker_container.png'
 import bailoImageRelease from 'public/docs/bailo_add_image_to_release.png'
@@ -24,7 +24,11 @@ Push container images to the Bailo registry from the **Registry** tab on your mo
 This tab provides step-by-step instructions tailored to your model and registry.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='instructions on how to push image to model' src={bailoPushImage} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='instructions on how to push image to model'
+    src={bailoPushImage}
+  />
 </Box>
 
 The screenshot above shows the Registry tab with step-by-step instructions for logging in, tagging, and pushing a
@@ -37,7 +41,11 @@ Once pushed, container images can be attached to new or existing releases.
 Edit an existing release or create a new one, then select the image from the available list.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='release being edited with new image attached' src={bailoImageRelease} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='release being edited with new image attached'
+    src={bailoImageRelease}
+  />
 </Box>
 
 The screenshot above shows a release being edited with a container image attached from the available list.

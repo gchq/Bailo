@@ -78,6 +78,11 @@ for file in "${MDX_FILES[@]}"; do
       has_docs_wrapper=true
     fi
 
+    # Check Image tags have responsive style
+    if [[ "$line" =~ \<Image[[:space:]] ]] && [[ ! "$line" =~ style= ]]; then
+      error "$file:$line_num: <Image> missing style={{ width: '100%', height: 'auto' }}"
+    fi
+
     # Check links (only outside code blocks)
     check_line="$line"
     link_re='\[([^]]+)\]\(([^)]+)\)'

@@ -41,7 +41,7 @@ export interface ModelExportRequest {
 }
 
 export function useListEntries(
-  kind?: EntryKindKeys,
+  kind?: EntryKindKeys[] | EntryKindKeys,
   roles: string[] = [],
   task = '',
   libraries: string[] = [],

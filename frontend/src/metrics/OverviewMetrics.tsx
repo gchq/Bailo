@@ -5,22 +5,22 @@ import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import MetricsHeader from 'src/metrics/MetricsHeader'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-import { BreakdownQueryType, buildEntriesTabHref } from 'utils/metricsUtils'
+import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
   const { schemas } = useGetSchemas()
 
-  const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const [selectedOrganisation, setSelectedOrganisation] = useState(filterSelectTypes.ALL)
 
   const filteredDataset = useMemo(() => {
     if (!overviewMetrics) {
       return undefined
     }
-    if (selectedOrganisation === 'All') {
+    if (selectedOrganisation === filterSelectTypes.ALL) {
       return overviewMetrics.global
     }
     return overviewMetrics.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
@@ -32,6 +32,19 @@ export default function OverviewMetrics() {
       router.push(href)
     },
     [router, selectedOrganisation, schemas],
+  )
+
+  const handleMonthSelection = useCallback(
+    (month: string) => {
+      router.push(
+        buildEntriesHref({
+          organisation: selectedOrganisation !== filterSelectTypes.ALL ? selectedOrganisation : undefined,
+          startMonth: month,
+          endMonth: month,
+        }),
+      )
+    },
+    [router, selectedOrganisation],
   )
 
   const handleOrganisationChange = useCallback((newOrganisation: string) => {
@@ -64,6 +77,7 @@ export default function OverviewMetrics() {
               )}
               selectedOrganisation={selectedOrganisation}
               onSelect={handleBreakdownSelection}
+              onSelectMonth={handleMonthSelection}
             />
           </MetricsHeader>
         )}

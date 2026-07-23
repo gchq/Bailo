@@ -11,7 +11,7 @@ import requests
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.exceptions import BailoException, ResponseException
-from bailo.core.utils import filter_none, normalise_query_params
+from bailo.core.utils import filter_none, normalise_json_params, normalise_query_params
 
 
 class Client:
@@ -65,6 +65,7 @@ class Client:
         state: str | None = None,
         tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
+        settings: dict | None = None,
     ):
         """Create a model.
 
@@ -77,6 +78,7 @@ class Client:
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param settings: Model settings dictionary (e.g. {"ungovernedAccess": True, "allowTemplating": True}), defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -89,16 +91,16 @@ class Client:
         if sourceModelId is None and kind == EntryKind.MIRRORED_MODEL:
             raise ValueError("Mirrored Models must specify a `sourceModelId` argument.")
 
+        merged_settings = dict(settings) if settings else {}
+        if sourceModelId is not None:
+            merged_settings.setdefault("mirror", {})["sourceModelId"] = sourceModelId
+
         filtered_params = filter_none(
             {
                 "name": name,
                 "kind": kind,
                 "description": description,
-                "settings": {
-                    "mirror": {
-                        "sourceModelId": sourceModelId,
-                    },
-                },
+                "settings": merged_settings,
                 "visibility": _visibility,
                 "organisation": organisation,
                 "state": state,
@@ -106,7 +108,7 @@ class Client:
                 "collaborators": collaborators,
             }
         )
-        normalised_params = normalise_query_params(filtered_params)
+        normalised_params = normalise_json_params(filtered_params)
 
         return self._parse_json(
             self.agent.post(
@@ -184,29 +186,32 @@ class Client:
     def get_model(
         self,
         model_id: str,
+        kind: list[EntryKind] | list[str] | None = None,
     ):
         """Retrieve a specific model using its unique ID.
 
         :param model_id: Unique model ID
+        :param kind: List of entry kinds to filter by (e.g. ["model", "mirrored-model"]), defaults to None
         :return: JSON response object
         """
-        return self._parse_json(
-            self.agent.get(
-                f"{self.url}/v2/model/{model_id}",
-            )
-        )
+        url = f"{self.url}/v2/model/{model_id}"
+        if kind:
+            query = "&".join(f"kind={k}" for k in kind)
+            url = f"{url}?{query}"
+        return self._parse_json(self.agent.get(url))
 
     def patch_model(
         self,
         model_id: str,
         name: str | None = None,
-        kind: str | None = None,
+        kind: EntryKind | str | None = None,
         description: str | None = None,
-        visibility: str | None = None,
+        visibility: ModelVisibility | str | None = None,
         organisation: str | None = None,
         state: str | None = None,
         tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
+        settings: dict | None = None,
     ):
         """Update a specific model using its unique ID.
 
@@ -219,6 +224,7 @@ class Client:
         :param state: Development readiness of the model, defaults to None
         :param tags: Tags to assign to the model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param settings: Model settings dictionary (e.g. {"mirror": {"sourceModelId": "..."}}), defaults to None
         :return: JSON response object
         """
         filtered_params = filter_none(
@@ -231,9 +237,10 @@ class Client:
                 "visibility": visibility,
                 "collaborators": collaborators,
                 "tags": tags,
+                "settings": settings,
             }
         )
-        normalised_params = normalise_query_params(filtered_params)
+        normalised_params = normalise_json_params(filtered_params)
 
         return self._parse_json(self.agent.patch(f"{self.url}/v2/model/{model_id}", json=normalised_params))
 

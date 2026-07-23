@@ -58,6 +58,7 @@ class MirroredModel(Entry):
             collaborators=collaborators,
         )
         self.sourceModelId = sourceModelId
+        self._original_source_model_id = sourceModelId
         self.model_id = model_id
 
         self._mirrored_card = None
@@ -119,6 +120,28 @@ class MirroredModel(Entry):
         model._unpack(res["model"])
 
         return model
+
+    def update(self) -> None:
+        """Upload and retrieve any changes to the mirrored model summary on Bailo.
+
+        Merges the sourceModelId into settings when it has changed, then delegates to the base update.
+        """
+        if self.sourceModelId != self._original_source_model_id:
+            if self.settings is None:
+                self.settings = {}
+            self.settings.setdefault("mirror", {})["sourceModelId"] = self.sourceModelId
+        super().update()
+        self._original_source_model_id = self.sourceModelId
+
+    def _unpack(self, res):
+        """Update mirrored model attributes from API response.
+
+        :param res: Response dictionary containing model information.
+        """
+        super()._unpack(res)
+        source_id = res.get("settings", {}).get("mirror", {}).get("sourceModelId", self.sourceModelId)
+        self.sourceModelId = source_id
+        self._original_source_model_id = source_id
 
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> MirroredModel:

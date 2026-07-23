@@ -125,20 +125,42 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   }
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
+  function removeEmptyValues(value) {
+    if (value === '') {
+      return undefined
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(removeEmptyValues).filter((item) => item !== undefined)
+    }
+
+    if (value !== null && typeof value === 'object') {
+      const cleaned = Object.fromEntries(
+        Object.entries(value)
+          .map(([key, item]) => [key, removeEmptyValues(item)])
+          .filter(([, item]) => item !== undefined),
+      )
+
+      return Object.keys(cleaned).length > 0 ? cleaned : undefined
+    }
+
+    return value
+  }
+
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-
       if (getChangedFields(oldData, data).length === 0) {
         handleChangeEditMode(false)
       } else {
-        const res = await putEntryCard(entry.id, data)
+        const res = await putEntryCard(entry.id, removeEmptyValues(data) || {})
         if (res.status && res.status < 400) {
           handleChangeEditMode(false)
           mutateEntryCardRevisions()
+          mutateEntry()
         } else {
           setErrorMessage(res.data)
         }

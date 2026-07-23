@@ -1,6 +1,13 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { BaseNoReleaseMetrics, CollaboratorEntry, ModelVolume, OverviewMetrics, PolicyRoleMetrics } from 'types/types'
+import {
+  BaseNoReleaseMetrics,
+  CollaboratorEntry,
+  EntryKindKeys,
+  ModelVolume,
+  OverviewMetrics,
+  PolicyRoleMetrics,
+} from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
@@ -64,6 +71,7 @@ export function useGetNoReleasesPolicyMetrics() {
 export interface ModelBreakdownResponse {
   entryId: string
   entryName: string
+  entryKind: EntryKindKeys
   collaborators: CollaboratorEntry[]
 }
 
@@ -71,13 +79,29 @@ interface UseGetModelBreakdownParams {
   organisation?: string
   state?: string
   schemaId?: string
+  release?: string
+  accessRequest?: string
+  startMonth?: string
+  endMonth?: string
 }
 
-export function useGetModelBreakdown({ organisation, state, schemaId }: UseGetModelBreakdownParams) {
+export function useGetModelBreakdown({
+  organisation,
+  state,
+  schemaId,
+  release,
+  accessRequest,
+  startMonth,
+  endMonth,
+}: UseGetModelBreakdownParams) {
   const queryParams = {
     ...(organisation && { organisation }),
     ...(state && { state }),
     ...(schemaId && { schemaId }),
+    ...(release && { release }),
+    ...(accessRequest && { accessRequest }),
+    ...(startMonth && { startMonth }),
+    ...(endMonth && { endMonth }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<ModelBreakdownResponse[], ErrorInfo>(

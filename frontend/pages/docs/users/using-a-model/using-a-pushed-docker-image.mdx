@@ -1,5 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 
 import pushingAnImage from '../../../../public/docs/Pushing-an-image.png'
@@ -21,7 +21,11 @@ Container (Docker) images can be pushed to the Bailo registry and associated wit
 later be used in model releases.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='model registry tab with push image button circled' src={registryTab} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='model registry tab with push image button circled'
+    src={registryTab}
+  />
 </Box>
 
 The screenshot above shows the model Registry tab with a push image button.
@@ -40,7 +44,11 @@ After pushing an image, it becomes selectable when drafting a release. Choose th
 creation form.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='image dropdown displaying model-assigned images for use in a release' src={selectingAnImage} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='image dropdown displaying model-assigned images for use in a release'
+    src={selectingAnImage}
+  />
 </Box>
 
 The screenshot above shows the image selection dropdown in the release creation form.
@@ -50,7 +58,11 @@ The screenshot above shows the image selection dropdown in the release creation 
 Images attached to a release are listed in the **Releases** tab.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='release in releases tab with attached docker images' src={ModelReleaseImageList} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='release in releases tab with attached docker images'
+    src={ModelReleaseImageList}
+  />
 </Box>
 
 The screenshot above shows a release in the Releases tab with attached container images listed.
