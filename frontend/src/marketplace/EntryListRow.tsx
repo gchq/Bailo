@@ -85,12 +85,8 @@ export default function EntryListRow({
         ...style,
       }}
     >
-      <Link
-        sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-        href={href}
-        target={isExternal ? '_blank' : '_self'}
-      >
-        <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+      <Link sx={{ textDecoration: 'none', overflow: 'hidden' }} href={href} target={isExternal ? '_blank' : '_self'}>
+        <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
           <Typography
             variant='h5'
             component='h2'
@@ -98,8 +94,10 @@ export default function EntryListRow({
               fontWeight: '500',
               textDecoration: 'none',
               color: theme.palette.primary.main,
-              textOverflow: 'ellipsis',
               overflow: 'hidden',
+              wordBreak: 'break-word',
+              minWidth: 0,
+              flex: 1,
             }}
           >
             {entry.name}

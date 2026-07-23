@@ -209,7 +209,7 @@ export default function PageWithTabs({
           </ExpandableTypography>
         )}
       </Box>
-      <Box sx={{ width: '170vh' }}>
+      <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
         <Tabs
           value={currentTab || false}
           onChange={handleChange}
@@ -218,7 +218,7 @@ export default function PageWithTabs({
           scrollButtons='auto'
           variant='scrollable'
           allowScrollButtonsMobile
-          sx={{ height: '20px', width: '100%' }}
+          sx={{ height: '20px', width: '100%', maxWidth: '100%', minWidth: 0 }}
         >
           {tabsList}
         </Tabs>

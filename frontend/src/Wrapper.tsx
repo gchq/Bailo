@@ -88,6 +88,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
+            minWidth: 0,
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),

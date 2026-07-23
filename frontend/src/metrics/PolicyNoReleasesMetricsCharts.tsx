@@ -28,7 +28,7 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
   const tableRows = useMemo(() => {
     return data.entries.map((row) => (
       <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-        <TableCell component='th' scope='row'>
+        <TableCell component='th' scope='row' sx={{ wordBreak: 'break-word' }}>
           <Typography sx={{ maxWidth: '500px' }}>
             <Link href={`/model/${row.entryId}`}>{row.entryId}</Link>
           </Typography>
