@@ -472,6 +472,7 @@ export const EntryKind = {
   DATA_CARD: 'data-card',
   MIRRORED_MODEL: 'mirrored-model',
   UNTRUSTED_MODEL: 'untrusted-model',
+  MIRRORED_DATA_CARD: 'mirrored-data-card',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
