@@ -91,6 +91,27 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       : createEntryKind
   }, [createEntryKind])
 
+  const createEntryKindDescription = useMemo(() => {
+    switch (createEntryKind) {
+      case EntryKind.MODEL:
+        return 'A model repository contains all files, history and information related to a model.'
+      case EntryKind.MIRRORED_MODEL:
+        return (
+          'A mirrored model is a read-only copy of a model from another deployment, imported using a source model ID.'
+        )
+      case EntryKind.UNTRUSTED_MODEL:
+        return (
+          'An untrusted model repository contains all files, history and information related to a private model.'
+        )
+      case EntryKind.DATA_CARD:
+        return (
+          'A data card tracks and references training data used to generate models, including storage location and accreditation information.'
+        )
+      default:
+        return `Create a new ${EntryKindLabel[createEntryKind]}.`
+    }
+  }, [createEntryKind])
+
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
@@ -258,11 +279,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               {`Create ${toTitleCase(createEntryKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
-            {createEntryKind === EntryKind.MODEL && (
-              <Typography>
-                A model repository contains all files, history and information related to a model.
-              </Typography>
-            )}
+            <Typography>{createEntryKindDescription}</Typography>
           </Stack>
         </Stack>
         <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>
