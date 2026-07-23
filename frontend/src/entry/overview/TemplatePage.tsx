@@ -15,6 +15,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
   const entryCardDescription = useMemo(() => {
     switch (entry.kind) {
       case EntryKind.MODEL:
+      case EntryKind.UNTRUSTED_MODEL:
         return 'Model cards are required to ensure that our models are ethical, secure and effective. A model card is a living document, it lives with your code and will evolve over time.'
       case EntryKind.DATA_CARD:
         return 'Data cards allow you to track and reference the training data used to generate your models. Adding data cards to Bailo allows you to link it to any model, keep track of its storage location and other accreditation requirements.'
