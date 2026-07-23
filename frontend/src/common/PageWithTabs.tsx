@@ -128,6 +128,7 @@ export default function PageWithTabs({
         direction={{ xs: 'column', sm: 'row' }}
         sx={{
           alignItems: 'center',
+          justifyContent: 'flex-start',
           pb: 2,
           px: 2,
         }}
@@ -208,18 +209,20 @@ export default function PageWithTabs({
           </ExpandableTypography>
         )}
       </Box>
-      <Tabs
-        value={currentTab || false}
-        onChange={handleChange}
-        aria-label='Tabbed view'
-        indicatorColor='secondary'
-        scrollButtons='auto'
-        variant='scrollable'
-        allowScrollButtonsMobile
-        sx={{ height: '20px' }}
-      >
-        {tabsList}
-      </Tabs>
+      <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+        <Tabs
+          value={currentTab || false}
+          onChange={handleChange}
+          aria-label='Tabbed view'
+          indicatorColor='secondary'
+          scrollButtons='auto'
+          variant='scrollable'
+          allowScrollButtonsMobile
+          sx={{ height: '20px', width: '100%', maxWidth: '100%', minWidth: 0 }}
+        >
+          {tabsList}
+        </Tabs>
+      </Box>
       {tabPanels}
     </>
   )
