@@ -27,10 +27,9 @@ from urllib.parse import urlparse
 
 import pytest
 import requests
-from conftest import BAILO_URL
-
 from bailo import Client
 from bailo.core.agent import Agent
+from conftest import BAILO_URL
 
 HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 VALID_HTTP_METHODS_SET = {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"}
@@ -256,7 +255,7 @@ def test_all_client_methods_discoverable():
         if not _find_captured_request(agent):
             failures.append(f"{method_name}: no HTTP call made")
 
-    assert not failures, f"Client methods that could not be auto-discovered:\n{'\n'.join(failures)}"
+    assert not failures, f"Client methods that could not be auto-discovered:\n" + "\n".join(failures)
 
 
 def test_discovered_routes_have_api_prefix():
@@ -270,7 +269,7 @@ def test_discovered_routes_have_api_prefix():
         if not path.startswith("/api/v2/")
     ]
 
-    assert not wrong_prefix, f"Client methods with unexpected URL prefix:\n{'\n'.join(wrong_prefix)}"
+    assert not wrong_prefix, f"Client methods with unexpected URL prefix:\n" + "\n".join(wrong_prefix)
 
 
 # ---------------------------------------------------------------------------
@@ -298,7 +297,7 @@ def test_client_routes_exist_in_swagger():
         elif (http_method, matched_spec_path) not in live_routes:
             mismatches.append(f"{method_name}: spec has path {matched_spec_path} but not for method {http_method}")
 
-    assert not mismatches, f"Client methods targeting non-existent backend routes:\n{'\n'.join(mismatches)}"
+    assert not mismatches, f"Client methods targeting non-existent backend routes:\n" + "\n".join(mismatches)
 
 
 @pytest.mark.integration
@@ -395,4 +394,4 @@ def test_swagger_spec_params_match_client():
         if missing_body:
             mismatches.append(f"{method_name}: missing required body fields {missing_body}")
 
-    assert not mismatches, f"Parameter mismatches:\n{'\n'.join(mismatches)}"
+    assert not mismatches, f"Parameter mismatches:\n" + "\n".join(mismatches)
