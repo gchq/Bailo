@@ -257,7 +257,8 @@ export const testUiConfig: UiConfig = {
   },
 
   untrustedModel: {
-    untrustedModelDescription: '',
+    untrustedModelLongDescription: '',
+    untrustedModelShortDescription: '',
     enabled: true,
     fileUploadGuidance: '',
   },

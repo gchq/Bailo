@@ -239,7 +239,8 @@ data:
 
         untrustedModel: {
           enabled: {{ .Values.config.ui.untrustedModel.enabled }},
-          untrustedModelDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelDescription }}',
+          untrustedModelLongDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelLongDescription }}',
+          untrustedModelShortDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelShortDescription }}',
           fileUploadGuidance: '{{ .Values.config.ui.untrustedModel.fileUploadGuidance }}',
         },
       },

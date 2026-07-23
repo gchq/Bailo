@@ -24,8 +24,9 @@ import {
 import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
@@ -55,6 +56,7 @@ type CreateEntryProps = {
 export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
 
+  const uiConfig = useContext(UiConfigContext)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [name, setName] = useState('')
@@ -91,26 +93,20 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       : createEntryKind
   }, [createEntryKind])
 
-  const createEntryKindDescription = useMemo(() => {
+  const createEntryKindShortDescription = useMemo(() => {
     switch (createEntryKind) {
       case EntryKind.MODEL:
         return 'A model repository contains all files, history and information related to a model.'
       case EntryKind.MIRRORED_MODEL:
-        return (
-          'A mirrored model is a read-only copy of a model from another deployment, imported using a source model ID.'
-        )
+        return 'A mirrored model contains a read-only copy of a model from another Bailo deployment with local details added alongside the imported model card.'
       case EntryKind.UNTRUSTED_MODEL:
-        return (
-          'An untrusted model repository contains all files, history and information related to a private model.'
-        )
+        return uiConfig.untrustedModel.untrustedModelShortDescription
       case EntryKind.DATA_CARD:
-        return (
-          'A data card tracks and references training data used to generate models, including storage location and accreditation information.'
-        )
+        return 'A data card tracks and references training data used to generate models, including storage location and accreditation information.'
       default:
         return `Create a new ${EntryKindLabel[createEntryKind]}.`
     }
-  }, [createEntryKind])
+  }, [createEntryKind, uiConfig.untrustedModel.untrustedModelShortDescription])
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -279,7 +275,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               {`Create ${toTitleCase(createEntryKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
-            <Typography>{createEntryKindDescription}</Typography>
+            <Typography>{createEntryKindShortDescription}</Typography>
           </Stack>
         </Stack>
         <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>

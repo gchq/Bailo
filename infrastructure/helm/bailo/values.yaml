@@ -276,7 +276,8 @@ config:
 
     untrustedModel:
       enabled: false
-      untrustedModelDescription: 'These are private only models.'
+      untrustedModelLongDescription: 'Untrusted models are are private only models with the registry tab disabled. They have ot yet been verified or validated to the same standard as a regular model.'
+      untrustedModelLongDescription: 'An untrusted model repository contains all files, history and information related to a private model.'
       fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.'
 
     llmImport:

@@ -80,7 +80,8 @@ export interface UiConfig {
 
   untrustedModel: {
     enabled: boolean
-    untrustedModelDescription: string
+    untrustedModelLongDescription: string
+    untrustedModelShortDescription: string
     fileUploadGuidance: string
   }
 
