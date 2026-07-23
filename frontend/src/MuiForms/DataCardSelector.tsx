@@ -1,17 +1,16 @@
-import { Box, Chip, Stack, Typography } from '@mui/material'
+import { Box, Chip, Stack } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
-import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import CompareField from 'src/common/CompareField'
+import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntryKind } from 'types/types'
-import { getMirroredState } from 'utils/formUtils'
 
-import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
 interface DataCardSelectorProps {
@@ -54,7 +53,6 @@ export default function DataCardSelector({
     setSelectedDataCards(dataCards.filter((card) => currentValue.includes(card.id)))
   }, [dataCards, currentValue])
 
-  const theme = useTheme()
   const router = useRouter()
 
   const handleSelectedDataCardsChange = useCallback(
@@ -81,95 +79,93 @@ export default function DataCardSelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
+
+  const idsToDiffString = (val?: unknown): string | undefined => {
+    const ids = val as string[] | undefined
+    if (!ids || ids.length === 0) {
+      return ''
+    }
+    return ids
+      .map((cardId) => dataCards?.find((dataCard) => dataCard.id === cardId)?.name ?? 'Unable to find data card name')
+      .sort((a, b) => a.localeCompare(b))
+      .join('\n')
+  }
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && currentValue.length > 0}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={currentValue}
+      formatter={idsToDiffString}
+      hasValue={currentValue.length > 0}
+      fallbackMirroredContent={idsToDiffString(compare.mirroredState)}
     >
-      {isDataCardsLoading && <Loading />}
-      {registry.formContext && registry.formContext.editMode && (
-        <>
-          <Autocomplete<EntrySearchResult, true, true>
-            multiple
-            data-test='dataCardSelector'
-            loading={dataCardListQuery.length > 3 && isDataCardsLoading}
-            open={open}
-            size='small'
-            onOpen={() => {
-              setOpen(true)
-            }}
-            onClose={() => {
-              setOpen(false)
-            }}
-            disableClearable
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            getOptionLabel={(option) => option.name}
-            value={selectedDataCards || []}
-            onChange={handleSelectedDataCardsChange}
-            noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
-            onInputChange={debounceOnInputChange}
-            options={dataCards || []}
-            renderValue={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Box key={option.name} sx={{ maxWidth: '200px' }}>
-                  <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
-                </Box>
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder='Data card name'
-                error={rawErrors && rawErrors.length > 0}
-                onKeyDown={(event: KeyboardEvent) => {
-                  if (event.key === 'Backspace') {
-                    event.stopPropagation()
-                  }
-                }}
-              />
-            )}
-          />
-        </>
-      )}
-      {registry.formContext && !registry.formContext.editMode && (
-        <>
-          {currentValue.length === 0 && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
+      {compare.editMode ? (
+        <Autocomplete<EntrySearchResult, true, true>
+          multiple
+          data-test='dataCardSelector'
+          loading={dataCardListQuery.length > 3 && isDataCardsLoading}
+          open={open}
+          size='small'
+          onOpen={() => {
+            setOpen(true)
+          }}
+          onClose={() => {
+            setOpen(false)
+          }}
+          disableClearable
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          getOptionLabel={(option) => option.name}
+          value={selectedDataCards || []}
+          onChange={handleSelectedDataCardsChange}
+          noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+          onInputChange={debounceOnInputChange}
+          options={dataCards || []}
+          renderValue={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Box key={option.name} sx={{ maxWidth: '200px' }}>
+                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
+              </Box>
+            ))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder='Data card name'
+              error={rawErrors && rawErrors.length > 0}
+              onKeyDown={(event: KeyboardEvent) => {
+                if (event.key === 'Backspace') {
+                  event.stopPropagation()
+                }
               }}
-            >
-              Unanswered
-            </Typography>
+            />
           )}
-          {currentValue.length > 0 && (
-            <Box sx={{ overflowX: 'auto', p: 1 }}>
-              <Stack spacing={1} direction='row'>
-                {currentValue.map((currentDataCardId) => (
-                  <Chip
-                    label={
-                      dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                      'Unable to find data card name'
-                    }
-                    key={currentDataCardId}
-                    onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                    sx={{ width: 'fit-content' }}
-                  />
-                ))}
-              </Stack>
-            </Box>
-          )}
-        </>
+        />
+      ) : compare.inMirroredCompare && currentValue.length > 0 ? (
+        <InlineDiff from={idsToDiffString(compare.compareFromState)} to={idsToDiffString(currentValue)} />
+      ) : (
+        currentValue.length > 0 && (
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((currentDataCardId) => (
+                <Chip
+                  label={
+                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                    'Unable to find data card name'
+                  }
+                  key={currentDataCardId}
+                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                  sx={{ width: 'fit-content' }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }
