@@ -49,6 +49,7 @@ class Entry:
         self.state = state
         self.tags = tags
         self.collaborators = collaborators
+        self.settings: dict | None = None
 
         self._card = None
         self._card_version = None
@@ -66,6 +67,7 @@ class Entry:
             state=self.state,
             tags=self.tags,
             collaborators=self.collaborators,
+            settings=self.settings,
         )
         self._unpack(res["model"])
 
@@ -162,6 +164,15 @@ class Entry:
             self.visibility = ModelVisibility.PRIVATE
         else:
             self.visibility = ModelVisibility.PUBLIC
+
+        if "kind" in res:
+            self.kind = EntryKind(res["kind"])
+
+        self.organisation = res.get("organisation", self.organisation)
+        self.state = res.get("state", self.state)
+        self.tags = res.get("tags", self.tags)
+        self.collaborators = res.get("collaborators", self.collaborators)
+        self.settings = res.get("settings", self.settings)
 
         logger.info("Attributes for ID %s successfully unpacked.", self.id)
 

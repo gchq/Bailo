@@ -408,6 +408,8 @@ export interface StepNoRender {
 
   state: any
   mirroredState?: any
+  compareFromState?: any
+  compareFromMirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>
@@ -447,6 +449,7 @@ export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  createdAt: string
   mirrored: boolean
   metadata: unknown
 }

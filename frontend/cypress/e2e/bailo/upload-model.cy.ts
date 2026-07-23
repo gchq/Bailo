@@ -112,8 +112,8 @@ describe('Create new model', () => {
     cy.contains('View History')
     cy.get('[data-test=viewHistoryButton]').click({ force: true })
     cy.contains('Model Card History')
-    cy.visit(`/model/${modelUuid}/history/1`)
-    cy.contains('Back to model')
+    cy.visit(`/model-card/compare?fromEntry=${modelUuid}fromVersion=1`)
+    cy.contains('Compare Model Cards')
   })
 
   it('can soft delete the model', () => {

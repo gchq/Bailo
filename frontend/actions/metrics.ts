@@ -71,13 +71,29 @@ interface UseGetModelBreakdownParams {
   organisation?: string
   state?: string
   schemaId?: string
+  release?: string
+  accessRequest?: string
+  startMonth?: string
+  endMonth?: string
 }
 
-export function useGetModelBreakdown({ organisation, state, schemaId }: UseGetModelBreakdownParams) {
+export function useGetModelBreakdown({
+  organisation,
+  state,
+  schemaId,
+  release,
+  accessRequest,
+  startMonth,
+  endMonth,
+}: UseGetModelBreakdownParams) {
   const queryParams = {
     ...(organisation && { organisation }),
     ...(state && { state }),
     ...(schemaId && { schemaId }),
+    ...(release && { release }),
+    ...(accessRequest && { accessRequest }),
+    ...(startMonth && { startMonth }),
+    ...(endMonth && { endMonth }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<ModelBreakdownResponse[], ErrorInfo>(
