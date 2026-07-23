@@ -127,9 +127,12 @@ export default function EntryListRow({
         )}
       </Link>
       <>
-        {!expanded &&
-          `${entry.description.slice(0, descriptionTextLimit)}${entry.description.length > descriptionTextLimit ? '...' : ''}`}
-        {expanded && entry.description}
+        {!expanded && (
+          <Typography
+            sx={{ wordBreak: 'break-word' }}
+          >{`${entry.description.slice(0, descriptionTextLimit)}${entry.description.length > descriptionTextLimit ? '...' : ''}`}</Typography>
+        )}
+        {expanded && <Typography sx={{ wordBreak: 'break-word' }}>{entry.description}</Typography>}
         {entry.description.length > descriptionTextLimit && (
           <Button sx={{ width: 'max-content' }} onClick={() => setExpanded(!expanded)}>
             {expanded ? 'Show less' : 'Show more...'}
