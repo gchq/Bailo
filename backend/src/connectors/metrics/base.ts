@@ -32,7 +32,6 @@ import {
 } from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
-const MODELS_KIND_FILTER = { kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] } }
 
 const metricsCache = new NodeCache({
   stdTTL: METRICS_CACHE_TTL,
@@ -399,7 +398,7 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   }
 
   const pipeline: PipelineStage[] = [
-    { $match: { ...filter, ...MODELS_KIND_FILTER } },
+    { $match: { ...filter, kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] } } },
     {
       $lookup: {
         from: 'v2_releases',

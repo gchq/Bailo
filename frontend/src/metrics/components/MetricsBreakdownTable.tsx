@@ -5,7 +5,7 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryKindKeys, EntryKindLabel, ModelBreakdown } from 'types/types'
+import { EntryKindLabel, ModelBreakdown } from 'types/types'
 import { entryKindForRedirect } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -34,7 +34,7 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
             <Link
-              href={`/${entryKindForRedirect(row.entryKind as EntryKindKeys)}/${row.entryId}`}
+              href={`/${entryKindForRedirect(row.entryKind)}/${row.entryId}`}
               target='_blank'
               rel='noopener noreferrer'
             >
