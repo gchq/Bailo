@@ -369,8 +369,8 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind) {
-    query['kind'] = { $all: opts.kind }
+  if (opts.kind?.length) {
+    query['kind'] = { $in: opts.kind }
   }
 
   if (opts.organisations?.length) {
@@ -591,14 +591,19 @@ export type UpdateModelParams = Pick<
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
+  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
+  }
   if (modelDiff.settings?.mirror?.sourceModelId) {
-    throw BadReq('Cannot change standard model to be a mirrored model.')
+    if (model.kind !== EntryKind.MirroredModel) {
+      throw BadReq('Cannot set a source model ID on a non-mirrored model.')
+    }
+    if (model.mirroredCard?.metadata !== undefined) {
+      throw BadReq('Cannot change the source model ID after the model has been imported.')
+    }
   }
   if (EntryKind.MirroredModel === model.kind && modelDiff.settings?.mirror?.destinationModelId) {
     throw BadReq('Cannot set a destination model ID for a mirrored model.')
-  }
-  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
-    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
     await validateCollaborators(modelDiff.collaborators, model.collaborators)
@@ -759,7 +764,10 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
   // Special case for the first model card revision when a schema is set but `metadata` is still `undefined`
   // This only happens when created from a schema, but when created from a template the first revision will not be undefined
   if (modelCardRevision.version !== 1 || modelCardRevision.metadata !== undefined) {
-    const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+    const { valid, errors } = await validateContentAgainstSchema(
+      modelCardRevision.schemaId,
+      modelCardRevision.metadata || {},
+    )
     if (!valid) {
       throw BadReq('Model metadata could not be validated against the schema.', {
         validationErrors: errors,

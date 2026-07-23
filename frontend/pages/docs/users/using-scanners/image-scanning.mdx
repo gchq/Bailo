@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Alert from '@mui/material/Alert'
 
 import chipView from 'public/docs/bailo_image_vuln_report_chip.png'
@@ -33,7 +33,7 @@ For scan results:
 - View scan results. Vulnerabilities are classified by severity, listing the amount of each as so:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view image scanning chip' src={chipView} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view image scanning chip' src={chipView} />
 </Box>
 
 The screenshot above shows the scan status chip on a container image in the Registry tab, with vulnerability counts
@@ -52,7 +52,7 @@ includes the following information:
 You can filter these results by Severity, using the tags at the top of the page.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view image scan results' src={detailedView} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view image scan results' src={detailedView} />
 </Box>
 
 The screenshot above shows the detailed vulnerability report page with CVE information and severity filters.
@@ -65,7 +65,7 @@ Trigger a rescan of a container image from the scan results menu.
 2. Click **Rerun image scan**
 
 <Box sx={{ maxWidth: '50%', margin: 'auto' }}>
-  <Image alt='view rescan button' src={rescanView} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view rescan button' src={rescanView} />
 </Box>
 
 The screenshot above shows the image actions menu with a Rescan option.
@@ -82,7 +82,7 @@ Bailo also allows you to scan multiplatform images, which are images that point 
 your host architecture. Click the **See detailed results** button to view the platform-specific, detailed results page.
 
 <Box sx={{ maxWidth: '50%', margin: 'auto' }}>
-  <Image alt='view multiplatform image summary' src={multiPlatView} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view multiplatform image summary' src={multiPlatView} />
 </Box>
 
 The screenshot above shows a multiplatform image summary with platform-specific vulnerability breakdowns.

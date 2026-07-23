@@ -2,9 +2,10 @@ import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
+import CompareField from 'src/common/CompareField'
+import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState } from 'utils/formUtils'
 
 interface DropdownProps {
   label?: string
@@ -54,20 +55,18 @@ export default function Dropdown({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const compare = getCompareFieldState<string>(id, registry.formContext)
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
     >
-      {registry.formContext.editMode && (
+      {compare.editMode ? (
         <Autocomplete
           size='small'
           options={dropdownOptions}
@@ -91,7 +90,7 @@ export default function Dropdown({
           })}
           onChange={handleChange}
           value={value || ''}
-          disabled={!registry.formContext.editMode}
+          disabled={!compare.editMode}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -103,17 +102,11 @@ export default function Dropdown({
             />
           )}
         />
+      ) : compare.inMirroredCompare && value ? (
+        <InlineDiff from={compare.compareFromState} to={value} />
+      ) : (
+        value && <Typography>{value}</Typography>
       )}
-      {!registry.formContext.editMode && (
-        <Typography
-          sx={{
-            fontStyle: value ? 'unset' : 'italic',
-            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-          }}
-        >
-          {value ? value : 'Unanswered'}
-        </Typography>
-      )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }
