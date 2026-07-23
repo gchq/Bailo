@@ -208,7 +208,7 @@ export interface EntrySearchResultWithErrors {
 }
 
 export interface EntrySearchOptions {
-  kind: EntryKindKeys
+  kind: Array<EntryKindKeys>
   libraries: Array<string>
   organisations: Array<string>
   states: Array<string>
@@ -225,7 +225,7 @@ export interface EntrySearchOptions {
 export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
 
 export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
-  kind: z.nativeEnum(EntryKind).optional(),
+  kind: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
   task: z.string().toLowerCase().optional(),
   libraries: coerceArray(z.array(z.string().toLowerCase()).optional()),
   organisations: coerceArray(z.array(z.string()).optional()),

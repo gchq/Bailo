@@ -5,10 +5,11 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import CompareField from 'src/common/CompareField'
+import InlineDiff from 'src/common/InlineDiff'
 import UserDisplay from 'src/common/UserDisplay'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntityObject } from 'types/types'
-import { getMirroredState } from 'utils/formUtils'
 
 import { useGetCurrentUser, useListEntities } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -23,6 +24,18 @@ interface EntitySelectorProps {
   rawErrors?: string[]
   id: string
   schema: RJSFSchema
+}
+
+function formatEntityValue(entities: string[] | undefined): string {
+  if (!entities || entities.length === 0) {
+    return ''
+  }
+  return entities
+    .map((entity) => {
+      const [, entityId] = entity.split(':')
+      return entityId ?? entity
+    })
+    .join('\n')
 }
 
 export default function EntitySelector({
@@ -91,27 +104,31 @@ export default function EntitySelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
+
+  const formatEntity = (val?: unknown): string | undefined => formatEntityValue(val as string[] | undefined)
 
   if (isCurrentUserLoading) {
     return <Loading />
   }
 
+  const currentValueString = formatEntityValue(currentValue)
+
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && currentValue.length > 0}
-      label={label}
+    <CompareField
       id={id}
-      mirroredModel={registry.formContext.mirroredModel}
+      label={label}
       required={required}
       description={schema.description}
+      compare={compare}
+      value={currentValue}
+      formatter={formatEntity}
+      hasValue={currentValue.length > 0}
     >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
-      {currentUser && registry.formContext && registry.formContext.editMode && (
+      {currentUser && compare.editMode ? (
         <>
           <Autocomplete<EntityObject, true, true>
             multiple
@@ -160,19 +177,10 @@ export default function EntitySelector({
             )}
           />
         </>
-      )}
-      {registry.formContext && !registry.formContext.editMode && (
-        <>
-          {currentValue.length === 0 && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
+      ) : compare.inMirroredCompare && currentValue.length ? (
+        <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
+      ) : (
+        currentValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((entity) => (
@@ -180,8 +188,8 @@ export default function EntitySelector({
               ))}
             </Stack>
           </Box>
-        </>
+        )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }
