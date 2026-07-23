@@ -323,7 +323,7 @@ def test_report_uncovered_routes():
         sorted_routes = sorted(uncovered_routes, key=lambda r: (r[1], r[0]))
         route_lines = [f"  {method:6s} {path}" for method, path in sorted_routes]
         warnings.warn(
-            f"\n{len(uncovered_routes)} backend routes not covered by Python client:\n{'\n'.join(route_lines)}",
+            f"\n{len(uncovered_routes)} backend routes not covered by Python client:\n" + "\n".join(route_lines),
             stacklevel=1,
         )
 
