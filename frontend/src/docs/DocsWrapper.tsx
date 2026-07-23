@@ -1,5 +1,7 @@
+import { MDXProvider } from '@mdx-js/react'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import ArrowForward from '@mui/icons-material/ArrowForward'
+import LinkIcon from '@mui/icons-material/Link'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { grey } from '@mui/material/colors'
@@ -15,9 +17,54 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { Fragment, ReactElement, ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Title from '../common/Title'
 import Copyright from '../Copyright'
+import { directory, DirectoryTree, flatDirectory } from './directory'
+
+function makeHeadingComponent(tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') {
+  return function HeadingComponent({ children, id }: { children?: React.ReactNode; id?: string }) {
+    return (
+      <Box
+        id={id}
+        component={tag}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          scrollMarginTop: 100,
+          '&:hover .heading-anchor': { opacity: 1 },
+        }}
+      >
+        {children}
+        {id && (
+          <Box
+            component='a'
+            href={`#${id}`}
+            className='heading-anchor'
+            aria-label='Link to this section'
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.15s',
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              flexShrink: 0,
+              textDecoration: 'none',
+              '&:hover': { color: 'primary.main' },
+            }}
+          >
+            <LinkIcon fontSize='small' />
+          </Box>
+        )}
+      </Box>
+    )
+  }
+}
+
+const mdxComponents = {
+  h2: makeHeadingComponent('h2'),
+  h3: makeHeadingComponent('h3'),
+}
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -41,7 +88,8 @@ const StyledList = styled(List)(({ theme }) => ({
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
-  const { pathname, push } = useRouter()
+  const router = useRouter()
+  const { pathname, push } = router
   const ref = useRef(null)
 
   useEffect(() => {
@@ -192,7 +240,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 },
               }}
             >
-              {children}
+              <MDXProvider components={mdxComponents}>{children}</MDXProvider>
             </Container>
             <Box sx={{ width: '100%', pl: 4, pr: 4, mt: 'auto' }}>
               <Divider flexItem />
