@@ -9,11 +9,12 @@ import { ModelBreakdown } from 'types/types'
 
 interface MetricsBreakdownTableProps {
   title?: string
+  headers: string[]
   data: ModelBreakdown[]
   isLoading?: boolean
 }
 
-export function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
+export function MetricsBreakdownTable({ title, headers, data, isLoading = false }: MetricsBreakdownTableProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
@@ -59,9 +60,9 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
         <Table sx={{ minWidth: 300 }} size='small'>
           <TableHead>
             <TableRow>
-              <TableCell>Model ID</TableCell>
-              <TableCell>Model Name</TableCell>
-              <TableCell>Owner</TableCell>
+              {headers.map((header) => (
+                <TableCell key={header}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>

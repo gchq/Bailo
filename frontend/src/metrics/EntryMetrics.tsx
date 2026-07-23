@@ -11,8 +11,13 @@ import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTa
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
-import { downloadCsv } from 'utils/csvUtilts'
+import { downloadCsv } from 'utils/csvUtils'
+import { currentTimestampSimple } from 'utils/dateUtils'
 import { dateFormat, filterIncludeTypes, filterSelectTypes } from 'utils/metricsUtils'
+import { toKebabCase } from 'utils/stringUtils'
+
+const exportDocumentTitle = 'Bailo entry metrics'
+const headers = ['Entry ID', 'Name', 'Owner']
 
 export default function EntryMetrics() {
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
@@ -63,16 +68,11 @@ export default function EntryMetrics() {
     [entries],
   )
 
-  const exportDocumentTitle = 'Bailo entry metrics'
+  const handleCsvExport = useCallback(async () => {
+    const rows = tableData.map((row) => [row.entryId, row.entryName, row.modelOwners.join('; ')])
+    const csvFileName = `${toKebabCase(exportDocumentTitle)}-${currentTimestampSimple()}`
 
-  const handleCsvExport = useCallback(() => {
-    const headers = ['Model ID', 'Model Name', 'Owner']
-    const rows = tableData.map((row) => [
-      row.entryId,
-      row.entryName,
-      row.modelOwners.length > 0 ? row.modelOwners.join('; ') : '',
-    ])
-    downloadCsv(exportDocumentTitle, headers, rows)
+    await downloadCsv(csvFileName, headers, rows)
   }, [tableData])
 
   const resultCountLabel = useMemo(() => {
@@ -128,10 +128,10 @@ export default function EntryMetrics() {
               setFilters({ organisation: value === filterSelectTypes.ALL ? undefined : value })
             }
             selectedOrganisation={selectedValue('organisation')}
-            exportDocumentTitle='Bailo entry metrics'
+            exportDocumentTitle={exportDocumentTitle}
             titleObjectType='entries'
-            csvExportEnabled
-            onCsvExport={handleCsvExport}
+            showCsvExport
+            onCsvExport={tableData.length > 0 ? handleCsvExport : undefined}
           >
             <Stack spacing={2}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
@@ -190,7 +190,7 @@ export default function EntryMetrics() {
                       </Typography>
                     )}
                   </Box>
-                  <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+                  <MetricsBreakdownTable headers={headers} data={tableData} isLoading={isEntriesLoading} />
                 </Stack>
               )}
             </Stack>

@@ -1,12 +1,20 @@
+/** Leading characters that spreadsheet apps may interpret as formula triggers. */
+const dangerousPrefixes = /^[=+\-@\t\r]/
+
+/** Characters that require RFC 4180 quoting within a CSV field. */
+const csvSpecialCharacters = /[",\r\n]/
+
 /**
  * Escapes a single CSV field. Wraps the value in quotes (and doubles any
  * embedded quotes) if it contains a comma, quote, or newline.
  */
 function escapeCsvField(value: string): string {
-  if (/[",\n]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`
+  const safeValue = dangerousPrefixes.test(value) ? `'${value}` : value
+
+  if (csvSpecialCharacters.test(safeValue)) {
+    return `"${safeValue.replace(/"/g, '""')}"`
   }
-  return value
+  return safeValue
 }
 
 /**
@@ -20,7 +28,7 @@ export function toCsvString(headers: string[], rows: string[][]): string {
 /**
  * Builds a CSV file from headers + rows and triggers a browser download.
  */
-export function downloadCsv(filename: string, headers: string[], rows: string[][]): void {
+export function downloadCsv(filename: string, headers: string[], rows: string[][]) {
   const csvContent = toCsvString(headers, rows)
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
