@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { flatDirectory } from '../../pages/docs/directory'
+import { flatDirectory } from './directory'
 import rawIndex from './searchIndex.generated.json'
 
 /**

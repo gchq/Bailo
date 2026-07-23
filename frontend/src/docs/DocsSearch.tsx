@@ -268,7 +268,7 @@ export default function DocsSearch(): ReactElement {
 
   return (
     <Box>
-      <Search onClick={() => setOpen(true)} aria-haspopup='dialog' aria-expanded={open}>
+      <Search onClick={() => setOpen(true)} aria-haspopup='true' aria-expanded={open ? 'true' : undefined}>
         <StyledInputBase
           placeholder='Search documentation...'
           slotProps={{
