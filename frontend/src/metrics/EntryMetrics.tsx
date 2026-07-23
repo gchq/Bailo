@@ -11,7 +11,7 @@ import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTa
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
-import { downloadCsv } from 'utils/csvUtils'
+import { downloadCsv, toSemiColonSeparatedString } from 'utils/csvUtils'
 import { currentTimestampSimple } from 'utils/dateUtils'
 import { dateFormat, filterIncludeTypes, filterSelectTypes } from 'utils/metricsUtils'
 import { toKebabCase } from 'utils/stringUtils'
@@ -69,7 +69,7 @@ export default function EntryMetrics() {
   )
 
   const handleCsvExport = useCallback(async () => {
-    const rows = tableData.map((row) => [row.entryId, row.entryName, row.modelOwners.join('; ')])
+    const rows = tableData.map((row) => [row.entryId, row.entryName, toSemiColonSeparatedString(row.modelOwners)])
     const csvFileName = `${toKebabCase(exportDocumentTitle)}-${currentTimestampSimple()}`
 
     await downloadCsv(csvFileName, headers, rows)

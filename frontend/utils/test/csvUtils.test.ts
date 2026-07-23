@@ -1,4 +1,4 @@
-import { toCsvString } from 'utils/csvUtils'
+import { toCsvString, toSemiColonSeparatedString } from 'utils/csvUtils'
 import { expect } from 'vitest'
 
 describe('toCsvString', () => {
@@ -52,5 +52,31 @@ describe('toCsvString', () => {
     const result = toCsvString(['text'], [['He said, "hello"']])
 
     expect(result).toBe('text\r\n"He said, ""hello"""')
+  })
+})
+
+describe('toSemiColonSeparatedString', () => {
+  it('joins values with semicolons', () => {
+    expect(toSemiColonSeparatedString(['bob', 'cameron', 'dave'])).toBe('bob;cameron;dave')
+  })
+
+  it('returns an empty string for an empty array', () => {
+    expect(toSemiColonSeparatedString([])).toBe('')
+  })
+
+  it('quotes values containing semicolons', () => {
+    expect(toSemiColonSeparatedString(['bob', 'camer;on', 'dave'])).toBe('bob;"camer;on";dave')
+  })
+
+  it('quotes values containing double quotes', () => {
+    expect(toSemiColonSeparatedString(['bob', 'cam"eron', 'dave'])).toBe('bob;"cam""eron";dave')
+  })
+
+  it('quotes values containing both semicolons and double quotes', () => {
+    expect(toSemiColonSeparatedString(['bob', 'cam";er;on', 'dave'])).toBe('bob;"cam"";er;on";dave')
+  })
+
+  it('quotes multiple values when required', () => {
+    expect(toSemiColonSeparatedString(['a;b', 'c"d', 'e'])).toBe('"a;b";"c""d";e')
   })
 })

@@ -18,6 +18,21 @@ function escapeCsvField(value: string): string {
 }
 
 /**
+ * Converts a list of values into a semicolon-separated string, quoting any
+ * value that contains a semicolon or double quote.
+ */
+export const toSemiColonSeparatedString = (values: string[]): string => {
+  return values
+    .map((value) => {
+      if (/[;"]/.test(value)) {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      return value
+    })
+    .join(';')
+}
+
+/**
  * Converts headers + rows of string values into a CSV formatted string.
  */
 export function toCsvString(headers: string[], rows: string[][]): string {
