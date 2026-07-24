@@ -90,7 +90,11 @@ export default function OverviewMetricsCharts({
             <Stack
               spacing={2}
               direction={{ lg: 'row', md: 'column' }}
-              sx={{ width: '100%', justifyContent: 'space-around' }}
+              sx={{
+                width: '100%',
+                justifyContent: 'space-around',
+                alignItems: 'flex-start',
+              }}
             >
               <OverviewPieChart
                 id='life-cycle-status'

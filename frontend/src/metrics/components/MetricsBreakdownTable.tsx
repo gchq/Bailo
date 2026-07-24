@@ -5,7 +5,9 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { ModelBreakdown } from 'types/types'
+import { EntryKindLabel, ModelBreakdown } from 'types/types'
+import { entryKindForRedirect } from 'utils/routerUtils'
+import { toTitleCase } from 'utils/stringUtils'
 
 interface MetricsBreakdownTableProps {
   title?: string
@@ -32,12 +34,17 @@ export function MetricsBreakdownTable({ title, headers, data, isLoading = false 
       >
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/model/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
+            <Link
+              href={`/${entryKindForRedirect(row.entryKind)}/${row.entryId}`}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
               {row.entryId}
             </Link>
           </Typography>
         </TableCell>
         <TableCell>{row.entryName}</TableCell>
+        <TableCell>{toTitleCase(EntryKindLabel[row.entryKind])}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
@@ -67,7 +74,7 @@ export function MetricsBreakdownTable({ title, headers, data, isLoading = false 
           </TableHead>
           <TableBody>
             {isLoading && <LoadingRows columnCount={3} />}
-            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No models found.' />}
+            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No entries found.' />}
             {!isLoading && tableRows}
           </TableBody>
         </Table>

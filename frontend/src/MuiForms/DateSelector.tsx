@@ -66,17 +66,19 @@ export default function DateSelector({ onChange, value, label, registry, require
         />
       ) : compare.inMirroredCompare && value ? (
         <InlineDiff from={formatDate(compare.compareFromState)} to={formatDate(value)} />
+      ) : value ? (
+        <Typography
+          sx={{
+            fontStyle: value ? 'unset' : 'italic',
+            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+          }}
+        >
+          {formatDate(value)}
+        </Typography>
       ) : (
-        value && (
-          <Typography
-            sx={{
-              fontStyle: value ? 'unset' : 'italic',
-              color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-            }}
-          >
-            {formatDate(value)}
-          </Typography>
-        )
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )

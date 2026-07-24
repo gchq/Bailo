@@ -17,7 +17,7 @@ import { dateFormat, filterIncludeTypes, filterSelectTypes } from 'utils/metrics
 import { toKebabCase } from 'utils/stringUtils'
 
 const exportDocumentTitle = 'Bailo entry metrics'
-const headers = ['Entry ID', 'Name', 'Owner']
+const headers = ['Entry ID', 'Name', 'Kind', 'Owner']
 
 export default function EntryMetrics() {
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
@@ -60,6 +60,7 @@ export default function EntryMetrics() {
       (entries ?? []).map((entry) => ({
         entryId: entry.entryId,
         entryName: entry.entryName,
+        entryKind: entry.entryKind,
         modelOwners:
           entry.collaborators
             ?.filter((person) => person.roles.includes(SystemRole.Owner))
@@ -69,7 +70,12 @@ export default function EntryMetrics() {
   )
 
   const handleCsvExport = useCallback(async () => {
-    const rows = tableData.map((row) => [row.entryId, row.entryName, toSemiColonSeparatedString(row.modelOwners)])
+    const rows = tableData.map((row) => [
+      row.entryId,
+      row.entryName,
+      row.entryKind,
+      toSemiColonSeparatedString(row.modelOwners),
+    ])
     const csvFileName = `${toKebabCase(exportDocumentTitle)}-${currentTimestampSimple()}`
 
     await downloadCsv(csvFileName, headers, rows)
