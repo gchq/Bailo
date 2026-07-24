@@ -8,6 +8,7 @@ import pytest
 
 # isort: split
 
+from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.helper.model import Model
 
@@ -116,3 +117,69 @@ def test_file_delete(example_model: Model):
 
     # assert the specific file is no longer accessible
     assert len(diff_files) == 1 and diff_files[0]["id"] == original_file_id
+
+
+@pytest.mark.integration
+def test_patch_file(example_model: Model):
+    byte_obj = b"Test Binary"
+    file = BytesIO(byte_obj)
+
+    example_release = example_model.create_release("0.1.0", "test")
+    example_release.upload("original.bin", file)
+
+    files = example_model.client.get_files(example_model.model_id)
+    file_id = files["files"][0]["id"]
+
+    result = example_model.client.patch_file(
+        model_id=example_model.model_id,
+        file_id=file_id,
+        name="renamed.bin",
+        tags=["integration-test"],
+    )
+
+    assert result["file"]["name"] == "renamed.bin"
+    assert "integration-test" in result["file"].get("tags", [])
+
+
+@pytest.mark.integration
+def test_multipart_upload(example_model: Model):
+    file_data = b"A" * 2048
+    file_size = len(file_data)
+
+    start = example_model.client.start_multipart_upload(
+        model_id=example_model.model_id,
+        name="multipart_test.bin",
+        size=file_size,
+    )
+
+    assert "fileId" in start
+    assert "uploadId" in start
+    assert "chunks" in start
+    assert len(start["chunks"]) >= 1
+
+    file_id = start["fileId"]
+    upload_id = start["uploadId"]
+    chunks = start["chunks"]
+
+    parts = []
+    for i, chunk in enumerate(chunks):
+        chunk_data = file_data[chunk["startByte"] : chunk["endByte"]]
+        part_resp = example_model.client.upload_multipart_part(
+            model_id=example_model.model_id,
+            file_id=file_id,
+            upload_id=upload_id,
+            part_number=i + 1,
+            data=chunk_data,
+        )
+        assert "ETag" in part_resp
+        parts.append({"ETag": part_resp["ETag"], "PartNumber": i + 1})
+
+    finish = example_model.client.finish_multipart_upload(
+        model_id=example_model.model_id,
+        file_id=file_id,
+        upload_id=upload_id,
+        parts=parts,
+    )
+
+    assert finish["file"]["name"] == "multipart_test.bin"
+    assert finish["file"]["complete"] is True

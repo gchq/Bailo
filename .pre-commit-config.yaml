@@ -69,3 +69,12 @@ repos:
     hooks:
       - id: black
         args: ['--config', 'lib/python/pyproject.toml']
+
+  - repo: local
+    hooks:
+      - id: normalize-notebooks
+        name: normalize notebook formatting
+        entry: jupyter nbconvert --to notebook --inplace
+        language: python
+        files: ^backend/docs/notebooks/.*\.ipynb$
+        additional_dependencies: ['nbconvert']

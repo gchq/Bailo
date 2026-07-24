@@ -558,9 +558,102 @@ class Client:
             timeout=10_000,
         )
 
-    # def start_multi_upload(): TBC
+    def start_multipart_upload(
+        self,
+        model_id: str,
+        name: str,
+        size: int,
+        mime: str | None = None,
+        tags: list[str] | None = None,
+    ):
+        """Start a multipart file upload.
 
-    # def finish_multi_upload(): TBC
+        :param model_id: Unique model ID
+        :param name: Name of the file to upload
+        :param size: Total size of the file in bytes
+        :param mime: MIME type of the file, defaults to application/octet-stream
+        :param tags: Optional tags to associate with the file
+        :return: JSON response object containing fileId, uploadId, and chunks
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "size": size,
+                "mime": mime,
+                "tags": tags,
+            }
+        )
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/multipart/start",
+                json=filtered_params,
+            )
+        )
+
+    def upload_multipart_part(
+        self,
+        model_id: str,
+        file_id: str,
+        upload_id: str,
+        part_number: int,
+        data: BytesIO | bytes,
+    ):
+        """Upload a single part of a multipart file upload.
+
+        :param model_id: Unique model ID
+        :param file_id: File ID returned by start_multipart_upload
+        :param upload_id: Upload ID returned by start_multipart_upload
+        :param part_number: 1-based part number
+        :param data: File chunk as BytesIO or bytes
+        :return: JSON response object containing the ETag for this part
+        """
+        if isinstance(data, BytesIO):
+            content_length = data.getbuffer().nbytes
+        else:
+            content_length = len(data)
+
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/multipart/part",
+                params={"fileId": file_id, "uploadId": upload_id, "partNumber": part_number},
+                data=data,
+                headers={"Content-Length": str(content_length)},
+                stream=True,
+                timeout=10_000,
+            )
+        )
+
+    def finish_multipart_upload(
+        self,
+        model_id: str,
+        file_id: str,
+        upload_id: str,
+        parts: list[dict[str, Any]],
+        tags: list[str] | None = None,
+    ):
+        """Complete a multipart file upload.
+
+        :param model_id: Unique model ID
+        :param file_id: File ID returned by start_multipart_upload
+        :param upload_id: Upload ID returned by start_multipart_upload
+        :param parts: List of dicts with ETag and PartNumber for each uploaded part
+        :param tags: Optional tags to associate with the file
+        :return: JSON response object containing the completed file
+        """
+        filtered_params = filter_none(
+            {
+                "fileId": file_id,
+                "uploadId": upload_id,
+                "parts": parts,
+                "tags": tags,
+            }
+        )
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/multipart/finish",
+                json=filtered_params,
+            )
+        )
 
     def delete_file(
         self,
@@ -579,6 +672,40 @@ class Client:
             )
         )
 
+    def patch_file(
+        self,
+        model_id: str,
+        file_id: str,
+        name: str | None = None,
+        mime: str | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ):
+        """Update metadata for a specific file.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :param name: New file name, defaults to None
+        :param mime: New MIME type, defaults to None
+        :param tags: Tags to associate with the file, defaults to None
+        :param metadata: Arbitrary metadata dict, defaults to None
+        :return: JSON response object
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "mime": mime,
+                "tags": tags,
+                "metadata": metadata,
+            }
+        )
+        return self._parse_json(
+            self.agent.patch(
+                f"{self.url}/v2/model/{model_id}/file/{file_id}",
+                json=filtered_params,
+            )
+        )
+
     def get_all_images(
         self,
         model_id: str,
@@ -589,6 +716,116 @@ class Client:
         :return: JSON response object
         """
         return self._parse_json(self.agent.get(f"{self.url}/v2/model/{model_id}/images"))
+
+    def post_webhook(
+        self,
+        model_id: str,
+        name: str,
+        uri: str,
+        token: str | None = None,
+        insecure_ssl: bool | None = None,
+        events: list[str] | None = None,
+        active: bool | None = None,
+    ):
+        """Create a webhook for a model.
+
+        :param model_id: Unique model ID
+        :param name: Name of the webhook
+        :param uri: URI the webhook will call
+        :param token: Optional authentication token, defaults to None
+        :param insecure_ssl: Allow insecure SSL connections, defaults to None
+        :param events: List of event types to trigger on (e.g. createRelease, updateRelease), defaults to None
+        :param active: Whether the webhook is active, defaults to None
+        :return: JSON response object
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "uri": uri,
+                "token": token,
+                "insecureSSL": insecure_ssl,
+                "events": events,
+                "active": active,
+            }
+        )
+        return self._parse_json(
+            self.agent.post(
+                f"{self.url}/v2/model/{model_id}/webhooks",
+                json=filtered_params,
+            )
+        )
+
+    def get_webhooks(
+        self,
+        model_id: str,
+    ):
+        """Get all webhooks for a model.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/model/{model_id}/webhooks",
+            )
+        )
+
+    def put_webhook(
+        self,
+        model_id: str,
+        webhook_id: str,
+        name: str,
+        uri: str,
+        token: str | None = None,
+        insecure_ssl: bool | None = None,
+        events: list[str] | None = None,
+        active: bool | None = None,
+    ):
+        """Update a webhook for a model.
+
+        :param model_id: Unique model ID
+        :param webhook_id: Unique webhook ID
+        :param name: Name of the webhook
+        :param uri: URI the webhook will call
+        :param token: Optional authentication token, defaults to None
+        :param insecure_ssl: Allow insecure SSL connections, defaults to None
+        :param events: List of event types to trigger on, defaults to None
+        :param active: Whether the webhook is active, defaults to None
+        :return: JSON response object
+        """
+        filtered_params = filter_none(
+            {
+                "name": name,
+                "uri": uri,
+                "token": token,
+                "insecureSSL": insecure_ssl,
+                "events": events,
+                "active": active,
+            }
+        )
+        return self._parse_json(
+            self.agent.put(
+                f"{self.url}/v2/model/{model_id}/webhook/{webhook_id}",
+                json=filtered_params,
+            )
+        )
+
+    def delete_webhook(
+        self,
+        model_id: str,
+        webhook_id: str,
+    ):
+        """Delete a webhook for a model.
+
+        :param model_id: Unique model ID
+        :param webhook_id: Unique webhook ID
+        :return: JSON response object
+        """
+        return self._parse_json(
+            self.agent.delete(
+                f"{self.url}/v2/model/{model_id}/webhook/{webhook_id}",
+            )
+        )
 
     def get_all_schemas(
         self,
@@ -708,17 +945,19 @@ class Client:
 
     def get_model_roles(
         self,
-        model_id: str,
+        model_id: str | None = None,
     ):
         """
-        Get roles for a model.
+        Get roles available for entries. Includes both system and dynamic roles.
 
-        :param model_id: Unique model ID
+        :param model_id: Optional unique model ID to scope roles to a specific model, defaults to None
         :return: JSON response object
         """
+        filtered_params = filter_none({"modelId": model_id})
         return self._parse_json(
             self.agent.get(
-                f"{self.url}/v2/model/{model_id}/roles",
+                f"{self.url}/v2/roles",
+                params=filtered_params,
             )
         )
 
@@ -835,6 +1074,28 @@ class Client:
         """
         return self._parse_json(
             self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/image/{image_name}/{image_tag}/scan", json={})
+        )
+
+    def get_filescanning_info(self):
+        """Get information about available file scanning tools.
+
+        :return: JSON response object containing scanner info
+        """
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/filescanning/info",
+            )
+        )
+
+    def get_model_tags(self):
+        """Get popular tags used across all models.
+
+        :return: JSON response object containing a list of tags
+        """
+        return self._parse_json(
+            self.agent.get(
+                f"{self.url}/v2/models/tags",
+            )
         )
 
     def post_access_request_review(

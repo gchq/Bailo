@@ -46,9 +46,19 @@ From within the `backend/docs` directory:
 ```bash
 python3 -m venv backenddocsvenv
 source backenddocsvenv/bin/activate
-pip install bailo -r requirements.txt
+pip install bailo -r requirements-dev.txt
 ```
 
 #### Building
 
 Run either `make html` (Linux & Mac) or `make.bat` (Windows). This will build the docs in the backend directory by default.
+
+#### Notebook Formatting
+
+Notebook files are automatically normalized on commit via a pre-commit hook (`jupyter nbconvert --to notebook --inplace`). This ensures `source` fields use the canonical array-of-lines format.
+
+To manually normalize notebooks:
+
+```bash
+jupyter nbconvert --to notebook --inplace backend/docs/notebooks/*.ipynb
+```
