@@ -18,7 +18,7 @@ export default function NewEntry() {
         {
           title: 'Model',
           description:
-            'Creating a model allows you to create artefacts and images, write a model card and control who has access over your model. Use it when you have used training data to create a model, or are using a model from another source.',
+            'Creating a model allows you to upload artefacts and images, write a model card and control who has access over your model. Use it when you have used training data to create a model, or are using a model from a non-Bailo source.',
           handleClick: () => setCreateEntryKind(EntryKind.MODEL),
           dataTest: 'createModelButton',
           mostPopular: true,
@@ -26,13 +26,13 @@ export default function NewEntry() {
         {
           title: 'Mirrored Model',
           description:
-            'Mirrored models allow models to be copied from other deployments using an external model ID. These are imported as read only models and should be updated via the source.',
+            'Mirrored models allow models to be copied from other Bailo deployments using an external source model ID. These are imported as read-only models, with the original model card maintained from the source. Additional local details can be added alongside the imported model card.',
           handleClick: () => setCreateEntryKind(EntryKind.MIRRORED_MODEL),
           disabled: uiConfig.modelMirror.import.enabled === false,
         },
         {
           title: 'Untrusted Model',
-          description: uiConfig.untrustedModel.untrustedModelDescription,
+          description: uiConfig.untrustedModel.untrustedModelLongDescription,
           handleClick: () => setCreateEntryKind(EntryKind.UNTRUSTED_MODEL),
           disabled: uiConfig.untrustedModel.enabled === false,
         },
@@ -40,7 +40,7 @@ export default function NewEntry() {
     [
       uiConfig.modelMirror.import.enabled,
       uiConfig.untrustedModel.enabled,
-      uiConfig.untrustedModel.untrustedModelDescription,
+      uiConfig.untrustedModel.untrustedModelLongDescription,
     ],
   )
 

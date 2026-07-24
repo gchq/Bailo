@@ -139,7 +139,8 @@ const config: PartialDeep<Config> = {
     },
     untrustedModel: {
       enabled: false,
-      untrustedModelDescription: 'tbd',
+      untrustedModelLongDescription: 'tbd',
+      untrustedModelShortDescription: 'tbd',
     },
   },
   modelMirror: {
