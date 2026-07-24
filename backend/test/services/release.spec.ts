@@ -471,17 +471,14 @@ describe('services > release', () => {
 
   test('deleteRelease > success', async () => {
     ReviewModelMock.find.mockResolvedValue([])
-    expect(await deleteRelease({} as any, 'test', 'test')).toStrictEqual({ modelId: 'test', semver: 'test' })
+    expect(await deleteRelease({} as any, 'test', 'test')).toMatchSnapshot()
   })
 
   describe('deleteReleases', () => {
     test('success', async () => {
       ReviewModelMock.find.mockResolvedValue([])
 
-      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'])).toStrictEqual({
-        modelId: 'test',
-        semvers: ['test1', 'test2'],
-      })
+      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'])).toMatchSnapshot()
       expect(ReleaseModelMock.delete).toHaveBeenCalledTimes(2)
     })
 
@@ -515,10 +512,7 @@ describe('services > release', () => {
       })
       ReviewModelMock.find.mockResolvedValue([])
 
-      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'], true)).toStrictEqual({
-        modelId: 'test',
-        semvers: ['test1', 'test2'],
-      })
+      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'], true)).toMatchSnapshot()
       expect(ReleaseModelMock.delete).toHaveBeenCalledTimes(2)
     })
 
