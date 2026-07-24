@@ -1045,6 +1045,7 @@ export interface PolicyRoleMetrics {
 export interface ModelBreakdown {
   entryId: string
   entryName: string
+  entryKind: EntryKindKeys
   modelOwners: string[]
 }
 
