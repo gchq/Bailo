@@ -7,18 +7,27 @@ import { resolve } from 'path'
 
 import log from '../services/log.js'
 import { generateSwaggerSpec, generateV3SwaggerSpec } from '../services/specification.js'
+import { defineScript } from './scriptHelper.js'
 
-async function main() {
-  const outDir = process.argv[2] || resolve(import.meta.dirname, '../../openapi-specs')
+defineScript({
+  name: 'generateOpenApiSpecs',
+  description: 'Generate OpenAPI specification files for v2 and v3 APIs',
+  connectToMongo: false,
+  args: (yargs) =>
+    yargs.option('outDir', {
+      type: 'string',
+      default: resolve(import.meta.dirname, '../../openapi-specs'),
+      describe: 'Output directory for the generated spec files',
+    }),
+  run: async (args) => {
+    mkdirSync(args.outDir, { recursive: true })
 
-  mkdirSync(outDir, { recursive: true })
+    const v2Spec = generateSwaggerSpec()
+    const v3Spec = generateV3SwaggerSpec()
 
-  const v2Spec = generateSwaggerSpec()
-  const v3Spec = generateV3SwaggerSpec()
+    writeFileSync(resolve(args.outDir, 'swagger-v2.json'), JSON.stringify(v2Spec, null, 2))
+    writeFileSync(resolve(args.outDir, 'swagger-v3.json'), JSON.stringify(v3Spec, null, 2))
 
-  writeFileSync(resolve(outDir, 'swagger-v2.json'), JSON.stringify(v2Spec, null, 2))
-  writeFileSync(resolve(outDir, 'swagger-v3.json'), JSON.stringify(v3Spec, null, 2))
-
-  log.info(`OpenAPI specs written to ${outDir}`)
-}
-main()
+    log.info(`OpenAPI specs written to ${args.outDir}`)
+  },
+})
