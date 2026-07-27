@@ -176,7 +176,8 @@ export interface UiConfig {
 
   untrustedModel: {
     enabled: boolean
-    untrustedModelDescription: string
+    untrustedModelLongDescription: string
+    untrustedModelShortDescription: string
     fileUploadGuidance: string
   }
 
@@ -248,6 +249,7 @@ export interface MetricsEntrySearchOptions {
   organisation: string
   state: string
   schemaId: string
+  kinds: Array<EntryKindKeys>
   release: string
   accessRequest: string
   startMonth: string
@@ -261,6 +263,7 @@ export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOption
     organisation: z.string().optional(),
     state: z.string().optional(),
     schemaId: z.string().optional(),
+    kinds: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
     release: z.enum(getEnumValues(EntryFilter)).optional(),
     accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
     startMonth: z

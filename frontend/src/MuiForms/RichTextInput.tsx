@@ -70,8 +70,12 @@ export default function RichTextInput({
         />
       ) : compare.inMirroredCompare && value ? (
         <InlineDiff markdown from={compare.compareFromState} to={value} />
+      ) : value ? (
+        <MarkdownDisplay>{value}</MarkdownDisplay>
       ) : (
-        value && <MarkdownDisplay>{value}</MarkdownDisplay>
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )
