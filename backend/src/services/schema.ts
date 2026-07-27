@@ -123,7 +123,7 @@ function enforceModelStateFields(schema: object, targetState?: string) {
   return jsonSchema
 }
 
-export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<string> {
+export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<SchemaDoc> {
   const schema = await SchemaModel.findOne({
     id: schemaId,
   })
@@ -142,7 +142,7 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
 
   await schema.deleteOne()
 
-  return schema.id
+  return schema
 }
 
 export async function createSchema(user: UserInterface, schema: Partial<SchemaInterface>, overwrite = false) {

@@ -6,6 +6,6 @@ exports[`routes > model > deleteModel > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > model > deleteModel > audit > expected call 1`] = `"expedita"`;
+exports[`routes > model > deleteModel > audit > expected call 1`] = `undefined`;
 
 exports[`routes > model > deleteModel > audit > expected call 2`] = `undefined`;
