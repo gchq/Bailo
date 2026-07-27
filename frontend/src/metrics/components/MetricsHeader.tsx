@@ -1,4 +1,14 @@
-import { Box, Button, Container, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { ReactElement, useCallback, useState } from 'react'
 import MetricsExportPreview from 'src/metrics/MetricsExportPreview'
 import { SelectedMetricKind, SelectedMetricKindKeys } from 'src/metrics/PolicyMetrics'
@@ -15,6 +25,8 @@ interface MetricsHeaderProps {
   onMetricChange?: (newMetric: SelectedMetricKindKeys) => void
   exportDocumentTitle: string
   titleObjectType?: string
+  showCsvExport?: boolean
+  onCsvExport?: () => Promise<void> | void
 }
 
 export default function MetricsHeader({
@@ -27,8 +39,11 @@ export default function MetricsHeader({
   onMetricChange,
   exportDocumentTitle,
   titleObjectType = 'metrics',
+  showCsvExport = false,
+  onCsvExport,
 }: MetricsHeaderProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [isCsvExporting, setIsCsvExporting] = useState(false)
 
   const handleOrganisationSelectOnChange = useCallback(
     (event: SelectChangeEvent) => {
@@ -45,6 +60,18 @@ export default function MetricsHeader({
     },
     [onMetricChange],
   )
+
+  const handleCsvExportOnClick = useCallback(async () => {
+    if (!onCsvExport) {
+      return
+    }
+    setIsCsvExporting(true)
+    try {
+      await onCsvExport()
+    } finally {
+      setIsCsvExporting(false)
+    }
+  }, [onCsvExport])
 
   return (
     <Container maxWidth='lg'>
@@ -93,10 +120,20 @@ export default function MetricsHeader({
               <em>Last updated {formatDateStringWithMinutes(lastUpdated)}</em>
             </Typography>
           </Stack>
-          <Stack>
+          <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
             <Button variant='contained' onClick={() => setDialogOpen(true)}>
               Export as PDF
             </Button>
+            {showCsvExport && (
+              <Button
+                variant='contained'
+                disabled={!onCsvExport || isCsvExporting}
+                onClick={handleCsvExportOnClick}
+                sx={{ minWidth: 140 }}
+              >
+                {isCsvExporting ? <CircularProgress size={24} color='inherit' /> : 'Export as CSV'}
+              </Button>
+            )}
           </Stack>
         </Stack>
         {children}
