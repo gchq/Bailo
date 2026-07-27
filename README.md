@@ -43,12 +43,18 @@ sharing.
 
 #### Requirements
 
-- Node v26
-- Docker / Docker Compose
+Follow the instructions below to get a local development environment running. You will need:
+
+- Node v26 - [https://nodejs.org/en/download](https://nodejs.org/en/download)
+- Docker / Docker Compose - [https://www.docker.com/get-started/](https://www.docker.com/get-started/)
+
 
 #### Development Build
 
 To run in development mode (modified files on your host machine will be reloaded into the running application):
+
+> [!NOTE]
+> You will need to install and start docker desktop before running these commands.
 
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
