@@ -393,7 +393,13 @@ export default function Marketplace() {
             <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
               Create
             </Button>
-            <Container sx={{ backgroundColor: theme.palette.background.paper, py: 2, borderRadius: '8px' }}>
+            <Container
+              sx={{
+                backgroundColor: theme.palette.mode === 'light' ? theme.palette.background.paper : 'unset',
+                py: 2,
+                borderRadius: '8px',
+              }}
+            >
               <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
                 <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
                   Filters

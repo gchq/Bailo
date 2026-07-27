@@ -1,5 +1,6 @@
 import Forward from '@mui/icons-material/Forward'
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
@@ -9,6 +10,7 @@ import { SchemaInterface } from 'types/types'
 
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
+  const theme = useTheme()
 
   const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>(null)
   const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>(null)
@@ -29,6 +31,7 @@ export default function SchemaCompare() {
           newValue={JSON.stringify(afterSchema, null, 2)}
           splitView={true}
           compareMethod={DiffMethod.WORDS}
+          useDarkTheme={theme.palette.mode === 'dark'}
           styles={{
             gutter: {
               pre: {
@@ -41,7 +44,7 @@ export default function SchemaCompare() {
     } else {
       return <Typography sx={{ textAlign: 'center' }}>Please select two schemas to compare</Typography>
     }
-  }, [beforeSchema, afterSchema])
+  }, [beforeSchema, afterSchema, theme])
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />

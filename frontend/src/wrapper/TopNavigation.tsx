@@ -105,6 +105,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         ...theme.applyStyles('light', {
           background: `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`,
         }),
+        ...theme.applyStyles('dark', {
+          background: theme.palette.container.dark,
+        }),
       })}
     >
       <Toolbar
