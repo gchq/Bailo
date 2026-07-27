@@ -396,7 +396,9 @@ export default function Marketplace() {
               <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
                 Create
               </Button>
-              <Box sx={{ backgroundColor: grey[200], borderRadius: '8px', p: 2, maxWidth: '350px' }}>
+              <Box
+                sx={{ backgroundColor: grey[200], borderRadius: '8px', p: 2, maxWidth: { sm: '100%', md: '350px' } }}
+              >
                 <Stack direction='row' sx={{ justifyContent: 'space-between', width: '100%', mb: 2 }}>
                   <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center' }}>
                     <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
