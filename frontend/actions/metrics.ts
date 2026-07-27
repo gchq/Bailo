@@ -1,6 +1,13 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { BaseNoReleaseMetrics, CollaboratorEntry, ModelVolume, OverviewMetrics, PolicyRoleMetrics } from 'types/types'
+import {
+  BaseNoReleaseMetrics,
+  CollaboratorEntry,
+  EntryKindKeys,
+  ModelVolume,
+  OverviewMetrics,
+  PolicyRoleMetrics,
+} from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
@@ -64,6 +71,7 @@ export function useGetNoReleasesPolicyMetrics() {
 export interface ModelBreakdownResponse {
   entryId: string
   entryName: string
+  entryKind: EntryKindKeys
   collaborators: CollaboratorEntry[]
 }
 

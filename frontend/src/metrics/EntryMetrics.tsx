@@ -54,6 +54,7 @@ export default function EntryMetrics() {
       (entries ?? []).map((entry) => ({
         entryId: entry.entryId,
         entryName: entry.entryName,
+        entryKind: entry.entryKind,
         modelOwners:
           entry.collaborators
             ?.filter((person) => person.roles.includes(SystemRole.Owner))

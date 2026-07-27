@@ -18,11 +18,7 @@ EXPOSE 3000
 
 FROM base AS dev
 
-RUN --mount=type=cache,target=/cache/npm npm ci --omit=dev --cache=/cache/npm
-
-# Pickup dev packages too
-RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm && \
-    npm install sharp@0.33.5 --cache=/cache/npm
+RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 
 COPY . .
 

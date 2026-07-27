@@ -34,6 +34,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
     title: 'Importing Model Card Text',
     slug: 'users/models/model-card/importing-model-card-text',
   },
+  { title: 'Comparing Model Cards', slug: 'users/models/model-card/comparing-model-cards' },
   { title: 'Creating a Release', slug: 'users/models/creating-a-release' },
   { title: 'Uploading Files', slug: 'users/models/uploading-files' },
   { title: 'Uploading Images', slug: 'users/models/uploading-images' },

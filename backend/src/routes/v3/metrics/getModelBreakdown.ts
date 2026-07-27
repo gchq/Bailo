@@ -16,6 +16,7 @@ export const GetModelBreakdownResponseSchema = z.array(
   z.object({
     entryId: z.string(),
     entryName: z.string(),
+    entryKind: z.string(),
     collaborators: z.array(
       z.object({
         entity: z.string().openapi({ example: 'user:user' }),
