@@ -11,7 +11,13 @@ import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTa
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import { MonthlyUploadsSelector } from 'src/metrics/components/MonthlyUploadsSelector'
 import { SystemRole } from 'types/types'
+import { downloadCsv, toSemiColonSeparatedString } from 'utils/csvUtils'
+import { currentTimestampSimple } from 'utils/dateUtils'
 import { dateFormat, filterIncludeTypes, filterSelectTypes } from 'utils/metricsUtils'
+import { toKebabCase } from 'utils/stringUtils'
+
+const exportDocumentTitle = 'Bailo entry metrics'
+const headers = ['Entry ID', 'Name', 'Kind', 'Owner']
 
 export default function EntryMetrics() {
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
@@ -62,6 +68,18 @@ export default function EntryMetrics() {
       })),
     [entries],
   )
+
+  const handleCsvExport = useCallback(async () => {
+    const rows = tableData.map((row) => [
+      row.entryId,
+      row.entryName,
+      row.entryKind,
+      toSemiColonSeparatedString(row.modelOwners),
+    ])
+    const csvFileName = `${toKebabCase(exportDocumentTitle)}-${currentTimestampSimple()}`
+
+    await downloadCsv(csvFileName, headers, rows)
+  }, [tableData])
 
   const resultCountLabel = useMemo(() => {
     if (isEntriesLoading) {
@@ -116,8 +134,10 @@ export default function EntryMetrics() {
               setFilters({ organisation: value === filterSelectTypes.ALL ? undefined : value })
             }
             selectedOrganisation={selectedValue('organisation')}
-            exportDocumentTitle='Bailo entry metrics'
+            exportDocumentTitle={exportDocumentTitle}
             titleObjectType='entries'
+            showCsvExport
+            onCsvExport={tableData.length > 0 ? handleCsvExport : undefined}
           >
             <Stack spacing={2}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
@@ -176,7 +196,7 @@ export default function EntryMetrics() {
                       </Typography>
                     )}
                   </Box>
-                  <MetricsBreakdownTable data={tableData} isLoading={isEntriesLoading} />
+                  <MetricsBreakdownTable headers={headers} data={tableData} isLoading={isEntriesLoading} />
                 </Stack>
               )}
             </Stack>
