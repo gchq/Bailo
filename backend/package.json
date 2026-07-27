@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "nodemon",
-    "build": "tsc && mkdir -p dist/src/services/smtp/templates && cp src/services/smtp/templates/*.hbs dist/src/services/smtp/templates/",
+    "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
+    "build": "tsc && npm run copy-templates",
     "test": "vitest",
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0",
     "style": "prettier --write .",
