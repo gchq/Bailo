@@ -17,6 +17,7 @@
                     <ul>
                         <li><a href="#python setup">Python Setup</a></li>
                         <li><a href="#building">Building</a></li>
+                        <li><a href="#building">Notebook Formatting</a></li>
                     </ul>
                 </li>
             </ul>
@@ -55,10 +56,4 @@ Run either `make html` (Linux & Mac) or `make.bat` (Windows). This will build th
 
 #### Notebook Formatting
 
-Notebook files are automatically normalized on commit via a pre-commit hook (`jupyter nbconvert --to notebook --inplace`). This ensures `source` fields use the canonical array-of-lines format.
-
-To manually normalize notebooks:
-
-```bash
-jupyter nbconvert --to notebook --inplace backend/docs/notebooks/*.ipynb
-```
+Notebook files are automatically normalized on commit via a pre-commit hook using black. This ensures `source` fields use the canonical array-of-lines format, as well as maintaining consistent styling with `lib/python`.
