@@ -354,6 +354,12 @@ export const darkTheme = createTheme({
         div: {
           color: theme.palette.text.primary,
         },
+        a: {
+          color: theme.palette.primary.main,
+          '&:visited': {
+            color: theme.palette.primary.main,
+          },
+        },
       }),
     },
   },
