@@ -31,12 +31,17 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
       >
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/model/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
+            <Link
+              href={`/model/${row.entryId}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              sx={{ wordBreak: 'break-word' }}
+            >
               {row.entryId}
             </Link>
           </Typography>
         </TableCell>
-        <TableCell>{row.entryName}</TableCell>
+        <TableCell sx={{ wordBreak: 'break-word' }}>{row.entryName}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
@@ -56,7 +61,7 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
         </Typography>
       )}
       <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-        <Table sx={{ minWidth: 300 }} size='small'>
+        <Table size='small'>
           <TableHead>
             <TableRow>
               <TableCell>Model ID</TableCell>

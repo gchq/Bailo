@@ -1,6 +1,5 @@
 import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
-import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
 import { ReactElement, SyntheticEvent, useContext, useMemo } from 'react'
@@ -51,7 +50,6 @@ export default function PageWithTabs({
   const { tab } = router.query
 
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
-  const theme = useTheme()
 
   const currentTab = useMemo(() => {
     if (!router.isReady) {
@@ -135,14 +133,15 @@ export default function PageWithTabs({
       >
         <Stack
           sx={{
-            overflow: 'auto',
-            maxWidth: 'md',
+            overflow: 'hidden',
+            minWidth: 0,
           }}
         >
           <Stack
             direction='row'
             sx={{
-              textOverflow: 'ellipsis',
+              alignItems: 'center',
+              minWidth: 0,
               overflow: 'hidden',
             }}
           >
@@ -159,28 +158,30 @@ export default function PageWithTabs({
               />
             )}
           </Stack>
-          {subheading && (
-            <Stack
-              direction='row'
-              sx={{
-                alignItems: 'center',
-              }}
-            >
-              <Typography
-                variant='caption'
-                sx={{ color: theme.palette.primary.main, textOverflow: 'ellipsis', overflow: 'hidden' }}
+          <>
+            {subheading && (
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  wordBreak: 'break-word',
+                }}
               >
-                {subheading}
-              </Typography>
-              {subheadingToCopy.length > 0 && (
-                <CopyToClipboardButton
-                  textToCopy={subheadingToCopy ? subheadingToCopy : subheading}
-                  notificationText='Copied to clipboard'
-                  ariaLabel='copy to clipboard'
-                />
-              )}
-            </Stack>
-          )}
+                <Typography variant='caption' noWrap color='primary'>
+                  {subheading}
+                </Typography>
+                {subheadingToCopy.length > 0 && (
+                  <CopyToClipboardButton
+                    textToCopy={subheadingToCopy ? subheadingToCopy : subheading}
+                    notificationText='Copied to clipboard'
+                    ariaLabel='copy to clipboard'
+                  />
+                )}
+              </Stack>
+            )}
+          </>
         </Stack>
         {displayActionButton && (
           <Button
@@ -192,7 +193,7 @@ export default function PageWithTabs({
             {actionButtonTitle}
           </Button>
         )}
-        {additionalHeaderDisplay}
+        {additionalHeaderDisplay && <div>{additionalHeaderDisplay}</div>}
       </Stack>
       <Box
         sx={{
