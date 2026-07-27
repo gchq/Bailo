@@ -96,9 +96,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const createEntryKindShortDescription = useMemo(() => {
     switch (createEntryKind) {
       case EntryKind.MODEL:
-        return 'A model repository contains all files, history and information related to a model.'
+        return 'A model repository contains all files, history, and information associated with a model.'
       case EntryKind.MIRRORED_MODEL:
-        return 'A mirrored model contains a read-only copy of a model from another Bailo deployment with local details added alongside the imported model card.'
+        return 'A mirrored model contains a read-only copy of a model imported from another Bailo deployment, with local details recorded alongside the imported model card.'
       case EntryKind.UNTRUSTED_MODEL:
         return uiConfig.untrustedModel.untrustedModelShortDescription
       case EntryKind.DATA_CARD:

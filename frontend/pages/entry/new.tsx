@@ -18,7 +18,7 @@ export default function NewEntry() {
         {
           title: 'Model',
           description:
-            'Creating a model allows you to upload artefacts and images, write a model card and control who has access over your model. Use it when you have used training data to create a model, or are using a model from a non-Bailo source.',
+            'A model enables the upload of artefacts and images, the creation and maintenance of a model card, and the management of access permissions. Models are used when training data has been used to create a model or when a model originates from a non-Bailo source.',
           handleClick: () => setCreateEntryKind(EntryKind.MODEL),
           dataTest: 'createModelButton',
           mostPopular: true,
@@ -26,7 +26,7 @@ export default function NewEntry() {
         {
           title: 'Mirrored Model',
           description:
-            'Mirrored models allow models to be copied from other Bailo deployments using an external source model ID. These are imported as read-only models, with the original model card maintained from the source. Additional local details can be added alongside the imported model card.',
+            'Mirrored models are read-only copies of models imported from other Bailo deployments using an external source model ID. The original model card is retained from the source deployment, with additional local details able to be recorded alongside it.',
           handleClick: () => setCreateEntryKind(EntryKind.MIRRORED_MODEL),
           disabled: uiConfig.modelMirror.import.enabled === false,
         },
@@ -48,7 +48,7 @@ export default function NewEntry() {
     {
       title: 'Data Card',
       description:
-        'Data cards allow you to track and reference the training data used to generate your models. Adding data cards to Bailo allows you to link it to any model, keep track of its storage location and other accreditation requirements.',
+        'Data cards track and reference the training data used to generate models. They can be linked to models and used to record storage locations and accreditation-related information.',
       handleClick: () => setCreateEntryKind(EntryKind.DATA_CARD),
       dataTest: 'createMirroredModel',
     },
