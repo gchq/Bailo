@@ -4,27 +4,28 @@ Administrative helper scripts for Bailo.
 
 ## Running Scripts
 
+All scripts must be run inside the `backend` container/pod.
+
 Scripts using `defineScript()` should be run directly with `npx tsx`, not via `npm run script` (the legacy runner strips
 named flags).
 
-When running from the host, `defineScript()` automatically detects it is outside Docker and reads the MongoDB connection
-details from the Docker Compose config file (`backend/config/dev_docker_compose.cjs`), replacing the container hostname
-with `localhost`.
-
 ```bash
-npx tsx src/scripts/exampleScript.ts --modelId abc-123 --dryRun
+# Docker Compose
+docker compose exec backend npx tsx src/scripts/exampleScript.ts --modelId abc-123 --dryRun
+
+# Kubernetes
+kubectl exec -it deploy/backend npx tsx src/scripts/exampleScript.ts --modelId abc-123 --dryRun
 ```
 
 Every script supports `--help`:
 
 ```bash
-npx tsx src/scripts/exampleScript.ts --help
+docker compose exec backend npx tsx src/scripts/exampleScript.ts --help
 ```
 
 ### Legacy Scripts
 
-Older scripts that do not use `defineScript()` rely on `npm run script` and must be run inside the `backend` container
-or pod, where the correct `NODE_CONFIG_ENV` and MongoDB hostname are already set.
+Older scripts that do not use `defineScript()` rely on `npm run script`.
 
 ```bash
 # Docker Compose
