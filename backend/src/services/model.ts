@@ -31,6 +31,7 @@ import {
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { deepMergePreferFirst } from '../utils/object.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
@@ -625,7 +626,13 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   if (modelDiff.state && model.card) {
-    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    let valid: boolean
+    if (model.kind === EntryKind.MirroredModel) {
+      const mergedCard = deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata || {})
+      valid = (await validateContentAgainstSchema(model.card.schemaId, mergedCard, modelDiff.state)).valid
+    } else {
+      valid = (await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)).valid
+    }
     if (!valid) {
       throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
     }
