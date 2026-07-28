@@ -136,6 +136,7 @@ export default function ChipSelector({
           sx={{
             alignContent: 'center',
             height: '56px',
+            px: 1,
           }}
         >{`${label}`}</Typography>
       )}
