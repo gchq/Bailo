@@ -200,7 +200,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     getAccessRequestsByModel(user, modelId),
   ])
 
-  return await useTransaction([
+  await useTransaction([
     // Initial concurrency has no overlapping Documents.
     (session) =>
       Promise.all([
@@ -273,6 +273,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     // Finally, delete the Model
     (session) => model.delete(session),
   ])
+
+  return model
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -369,8 +371,8 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind) {
-    query['kind'] = { $all: opts.kind }
+  if (opts.kind?.length) {
+    query['kind'] = { $in: opts.kind }
   }
 
   if (opts.organisations?.length) {

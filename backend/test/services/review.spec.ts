@@ -215,9 +215,9 @@ describe('services > review', () => {
   })
 
   test('addDefaultReviewRoles > successfully added default review roles', async () => {
-    ReviewRoleModelMock.findOne.mockResolvedValue(undefined)
+    ReviewRoleModelMock.lean.mockResolvedValue([])
     await addDefaultReviewRoles()
-    expect(ReviewRoleModelMock.save).toHaveBeenCalled()
+    expect(ReviewRoleModelMock.insertMany).toHaveBeenCalledWith(configMock.defaultReviewRoles)
   })
 
   test('removeReviewRole > successful', async () => {

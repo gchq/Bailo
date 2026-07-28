@@ -76,6 +76,7 @@ export const testModelCard: EntryCardInterface = {
   metadata: {},
   version: 1,
   createdBy: testEntity,
+  createdAt: new Date().toISOString(),
 }
 
 export const testV2Model: EntryInterface = {
@@ -256,7 +257,8 @@ export const testUiConfig: UiConfig = {
   },
 
   untrustedModel: {
-    untrustedModelDescription: '',
+    untrustedModelLongDescription: '',
+    untrustedModelShortDescription: '',
     enabled: true,
     fileUploadGuidance: '',
   },

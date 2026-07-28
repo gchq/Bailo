@@ -125,7 +125,7 @@ jobs:
 
       - name: Generate OpenAPI specs
         working-directory: backend
-        run: npm run script generateOpenApiSpecs
+        run: npx tsx src/scripts/generateOpenApiSpecs.ts
 
       - name: Install dependencies
         run: npm i

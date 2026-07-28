@@ -1,0 +1,110 @@
+import Image from 'next/image'
+import Box from '@mui/material/Box'
+import bailoHistory from 'public/docs/model-card-history-compare.png'
+import bailoHistoryCompare from 'public/docs/model-compare-page.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Comparing Model Cards
+
+Model card comparison allows you to review the differences between two versions of a model card. You can compare
+versions from the same model or select model cards from different models.
+
+This is useful when reviewing changes to model documentation, checking how models differ, or verifying that updates have
+been recorded correctly.
+
+> **Common questions this page answers:**
+>
+> - How do I compare two model cards?
+> - Can I compare model cards from different models?
+> - Can I compare different versions of a model card?
+> - How do I view the differences between model cards?
+
+## Selecting model cards to compare
+
+To compare two model cards:
+
+1. Open the model history or model card comparison page
+2. Select two card versions you wish to compare
+3. Select **Compare revisions**
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='selecting two model card versions to compare'
+    src={bailoHistory}
+  />
+</Box>
+
+The screenshot above shows two model card versions selected for comparison.
+
+## Comparing model cards
+
+After selecting two model cards, the comparison page displays their content side by side. This allows you to identify
+differences between the selected cards.
+
+The comparison can be used to review changes to:
+
+- Model summaries
+- Intended use
+- Training methodology
+- Performance metrics
+- Known limitations
+- Lifecycle and status information
+- Other fields defined by the model card schema
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='model card comparison page showing differences between two model cards'
+    src={bailoHistoryCompare}
+  />
+</Box>
+
+The screenshot above shows the model card comparison page, where the selected model cards are displayed.
+
+## Comparing versions of the same model
+
+When comparing versions of the same model, you can review how the model card has changed over time.
+
+For example, you might compare:
+
+- The current version with an earlier version
+- A version before and after a model lifecycle status update
+- Two versions created during a review
+- A released model card with its latest draft
+
+Each edit to a model card creates a new version. Comparing versions helps you understand what information was added,
+updated, or removed between those versions.
+
+## Comparing cards from different models
+
+Model card comparison also allows you to select cards from different models. This can help you review the documentation
+for related or alternative models.
+
+When comparing different models, consider whether:
+
+- The models use the same model card schema
+- The fields contain equivalent information
+- The models have different intended uses or limitations
+- Differences are caused by the models themselves or by the information recorded in their cards
+
+The comparison shows the information recorded in each selected model card. It does not indicate that one model is better
+or more suitable than the other.
+
+## Mirrored Models
+
+Mirrored model cards can also be included in model card comparisons.
+
+When comparing a mirrored model card with a non-mirrored model card, the comparison displays the additional local
+information recorded on the mirrored model alongside the corresponding static information on the non-mirrored model.
+
+Source content in the mirrored model remains read-only and is not overwritten or changed by the comparison.
+
+## Related pages
+
+- [Model Card](model-card) - Filling in the model card and configuring access
+- [Model Card Lifecycle](../../reviews/reviewing/model-lifecycle) - Completing and updating model card lifecycle reviews
+- [Editing Mirrored Model Cards](../../model-mirroring/editing-a-mirrored-model-card) - Editing additional information
+  on mirrored model cards
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

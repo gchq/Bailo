@@ -102,6 +102,24 @@ export default function Model() {
     router.push(`/model/${entryId}/access-request/schema`)
   }
 
+  function additionalHeaderDisplay() {
+    if (!entry) {
+      return undefined
+    }
+    if (entry.kind === EntryKind.MIRRORED_MODEL) {
+      return (
+        <Alert severity='info' sx={{ my: 2 }}>
+          <Typography>This is a mirrored model, some sections will be read-only.</Typography>
+          <SourceModelIdField entry={entry} mutateEntry={mutateEntry} />
+        </Alert>
+      )
+    } else if (entry.kind === EntryKind.UNTRUSTED_MODEL) {
+      return <MessageAlert message={'This is an untrusted model.'} severity='warning' />
+    } else {
+      return undefined
+    }
+  }
+
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isEntryError,
     isCurrentUserError,
@@ -127,19 +145,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: entry.id }}
           titleToCopy={entry.name}
           subheadingToCopy={entry.id}
-          additionalHeaderDisplay={
-            <>
-              {entry.kind === EntryKind.MIRRORED_MODEL && (
-                <Alert severity='info' sx={{ my: 2 }}>
-                  <Typography>This is a mirrored model, some sections will be read-only.</Typography>
-                  <SourceModelIdField entry={entry} mutateEntry={mutateEntry} />
-                </Alert>
-              )}
-              {entry.kind === EntryKind.UNTRUSTED_MODEL && (
-                <MessageAlert message={'This is an untrusted model.'} severity='warning' />
-              )}
-            </>
-          }
+          additionalHeaderDisplay={additionalHeaderDisplay()}
         />
       )}
     </>
