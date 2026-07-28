@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "nodemon",
-    "build": "tsc && mkdir -p dist/src/services/smtp/templates && cp src/services/smtp/templates/*.hbs dist/src/services/smtp/templates/",
+    "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
+    "build": "tsc && npm run copy-templates",
     "test": "vitest",
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0",
     "style": "prettier --write .",
@@ -104,6 +105,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@types/semver": "^7.7.1",
     "@types/shelljs": "^0.10.0",
+    "@types/showdown": "^2.0.6",
     "@types/supertest": "^7.2.0",
     "@types/tar-stream": "^3.1.4",
     "@typescript-eslint/eslint-plugin": "^8.60.1",

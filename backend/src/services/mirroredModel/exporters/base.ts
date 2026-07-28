@@ -316,6 +316,7 @@ export abstract class BaseExporter {
   async finalise() {
     log.trace(this.logData, `Finalising ${this.constructor.name}.`)
 
+    // Non-null assertion operator used due to `withStreams` performing assertion
     await finaliseTarGzUpload(this.tarStream!, this.uploadPromise!)
 
     log.trace(this.logData, `Finished finalising ${this.constructor.name}.`)

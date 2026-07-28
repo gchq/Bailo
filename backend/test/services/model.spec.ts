@@ -769,15 +769,16 @@ describe('services > model', () => {
       expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
     })
 
-    test('not save version 1 with undefined metadata even when no existing revision', async () => {
+    test('save version 1 with undefined metadata', async () => {
       // create from schema has v1 be undefined
       const revisionV1 = { ...modelCardRevision, version: 1, metadata: undefined }
       ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
 
       const result = await saveImportedModelCard(revisionV1 as any)
 
-      expect(result).toBeUndefined()
-      expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
+      expect(schemaMock.validateContentAgainstSchema).not.toHaveBeenCalled()
+      expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
+      expect(result).toEqual(revisionV1)
     })
 
     test('should validate version 1 with defined metadata', async () => {
