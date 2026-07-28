@@ -459,8 +459,8 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
 }
 
 type EntryWithUnapprovedReleases = {
-  id: string
-  owners: string[]
+  entryId: string
+  modelOwners: string[]
   unapprovedReleases: string[]
 }
 
@@ -494,8 +494,8 @@ function buildUnapprovedReleaseEntries(
     totalUnapprovedReleases += sortedReleases.length
 
     entries.push({
-      id: model.id,
-      owners: getModelOwners(model.collaborators),
+      entryId: model.id,
+      modelOwners: getModelOwners(model.collaborators),
       unapprovedReleases: sortedReleases,
     })
   }
