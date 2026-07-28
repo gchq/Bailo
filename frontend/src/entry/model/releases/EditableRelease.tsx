@@ -40,7 +40,6 @@ type EditableReleaseProps = {
 export default function EditableRelease({ release, isEdit, onIsEditChange, readOnly = false }: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
-  const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
   const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
@@ -100,11 +99,10 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const resetForm = useCallback(() => {
     setSemver(release.semver)
     setReleaseNotes(release.notes)
-    setIsMinorRelease(!!release.minor)
     setFiles(release.files)
     setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: { tags: [], text: '' } })))
     setImageList(release.images)
-  }, [release.semver, release.notes, release.minor, release.files, release.images])
+  }, [release.semver, release.notes, release.files, release.images])
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -217,7 +215,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
       semver,
       modelCardVersion: modelCardVersion,
       notes: releaseNotes,
-      minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
     }
@@ -295,7 +292,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         formData={{
           semver,
           releaseNotes,
-          isMinorRelease,
           files,
           imageList,
           modelCardVersion,
@@ -303,7 +299,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         filesMetadata={filesMetadata}
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
-        onMinorReleaseChange={(value) => setIsMinorRelease(value)}
         onFilesChange={(value) => handleFileOnChange(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onModelCardVersionChange={(value) => setModelCardVersion(value)}

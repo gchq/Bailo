@@ -205,7 +205,6 @@ export type ReleaseInterface = {
   modelCardVersion: number
   semver: string
   notes: string
-  minor?: boolean
   draft?: boolean
   fileIds: Array<string>
   files: Array<FileInterface>

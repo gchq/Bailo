@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
-import { useGetRelease } from 'actions/release'
+import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
@@ -17,6 +18,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
 import { ReviewKind } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function Release() {
@@ -24,6 +26,8 @@ export default function Release() {
   const { modelId, semver }: { modelId?: string; semver?: string } = router.query
 
   const [isEdit, setIsEdit] = useState(false)
+  const [putErrorMessage, setPutErrorMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError, mutateRelease } = useGetRelease(modelId, semver)
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
@@ -54,8 +58,9 @@ export default function Release() {
           (userReview) =>
             userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
         ),
-      ).length > 0,
-    [currentUserRoles, reviews, userReviews, reviewRoles],
+      ).length > 0 &&
+      !release?.draft,
+    [currentUserRoles, reviewRoles, reviews, release?.draft, userReviews],
   )
 
   const error = MultipleErrorWrapper('Unable to load release', {
@@ -84,6 +89,33 @@ export default function Release() {
     return <Loading />
   }
 
+  //hmmm... recreate this or change
+  async function handleDraftRelease() {
+    if (!model || !release || !semver) {
+      return
+    }
+    const updatedRelease: UpdateReleaseParams = {
+      modelId: model.id,
+      semver,
+      modelCardVersion: release.modelCardVersion,
+      notes: release.notes,
+      fileIds: [],
+      images: [],
+    }
+
+    setIsLoading(true)
+
+    const response = await putRelease(updatedRelease)
+
+    if (!response.ok) {
+      setPutErrorMessage(await getErrorMessage(response))
+    } else {
+      mutateRelease()
+    }
+
+    setIsLoading(false)
+  }
+
   return (
     <>
       <Title text={release ? release.semver : 'Loading...'} />
@@ -91,6 +123,16 @@ export default function Release() {
         <Paper>
           <>
             {userCanReview && <ReviewBanner release={release} />}
+            {release.draft && (
+              <DraftBanner
+                text='This is a draft release'
+                handlePublish={handleDraftRelease}
+                showButton={true}
+                disableButton={isEdit}
+                isLoading={isLoading}
+                errorMessage={putErrorMessage}
+              />
+            )}
             <Stack spacing={2} sx={{ px: 4, py: 2 }}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
