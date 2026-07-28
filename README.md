@@ -45,8 +45,8 @@ sharing.
 
 Follow the instructions below to get a local development environment running. You will need:
 
-- Node v26 - [https://nodejs.org/en/download](https://nodejs.org/en/download)
-- Docker / Docker Compose - [https://www.docker.com/get-started/](https://www.docker.com/get-started/)
+- [Node v26](https://nodejs.org/en/download/current)
+- [Docker / Docker Compose](https://www.docker.com/get-started/)
 
 
 #### Development Build
