@@ -86,13 +86,22 @@ export function getActiveRoleSet(collaborators: CollaboratorEntry[]): Set<string
   return activeRoleSet
 }
 
+/**
+ * Returns the entities assigned the Owner role for a model.
+ */
 export function getModelOwners(collaborators?: { entity: string; roles?: string[] }[]): string[] {
   return (collaborators ?? [])
     .filter((collaborator) => (collaborator.roles ?? []).includes(SystemRoles.Owner))
     .map((collaborator) => collaborator.entity)
 }
 
+/**
+ * Creates a unique key for a release from its model ID and version.
+ */
 export const buildReleaseKey = (modelId: string, semver: string) => `${modelId}::${semver}`
 
+/**
+ * Normalises a semver value into its string representation.
+ */
 export const semverToString = (semver: string | SemverObject): string =>
   typeof semver === 'string' ? semver : semverObjectToString(semver)

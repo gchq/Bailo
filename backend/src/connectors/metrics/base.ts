@@ -319,27 +319,6 @@ type NoReleasesComplianceMetricsResult = {
   byOrganisation: NoReleasesComplianceMetricsResultByOrgSubset[]
 }
 
-type EntryWithUnapprovedReleases = {
-  id: string
-  owners: string[]
-  unapprovedReleases: string[]
-}
-
-type UnapprovedComplianceMetricsResultSubset = {
-  summary: {
-    totalModelsWithUnapprovedReleases: number
-    totalUnapprovedReleases: number
-  }
-  entries: EntryWithUnapprovedReleases[]
-}
-
-type ReleaseRoleInfo = {
-  requiredRoles: Set<string>
-  approvedRoles: Set<string>
-}
-
-type ReleaseRoleMap = Map<string, ReleaseRoleInfo>
-
 /**
  * Calculates which entries are missing required review roles, either globally
  * or scoped to a specific organisation.
@@ -479,6 +458,23 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   }
 }
 
+type EntryWithUnapprovedReleases = {
+  id: string
+  owners: string[]
+  unapprovedReleases: string[]
+}
+
+type UnapprovedComplianceMetricsResultSubset = {
+  summary: {
+    totalModelsWithUnapprovedReleases: number
+    totalUnapprovedReleases: number
+  }
+  entries: EntryWithUnapprovedReleases[]
+}
+
+/**
+ * Builds compliance results for models with unapproved releases.
+ */
 function buildUnapprovedReleaseEntries(
   models: Pick<ModelInterface, 'id' | 'collaborators'>[],
   unapprovedByModel: Map<string, Set<string>>,
@@ -513,19 +509,28 @@ function buildUnapprovedReleaseEntries(
   }
 }
 
+/**
+ * Determines whether a release is still awaiting one or more required approvals.
+ */
 function releaseHasOutstandingReview(roles?: { requiredRoles: Set<string>; approvedRoles: Set<string> }): boolean {
   return roles === undefined || [...roles.requiredRoles].some((role) => !roles.approvedRoles.has(role))
 }
 
+type ReleaseWithSemver = {
+  modelId: string
+  semver: string | SemverObject
+}
+type RoleMap = {
+  requiredRoles: Set<string>
+  approvedRoles: Set<string>
+}
+
+/**
+ * Groups unapproved release versions by model identifier.
+ */
 function buildUnapprovedReleaseMap(
-  releases: { modelId: string; semver: string | SemverObject }[],
-  releaseRoleMap: Map<
-    string,
-    {
-      requiredRoles: Set<string>
-      approvedRoles: Set<string>
-    }
-  >,
+  releases: ReleaseWithSemver[],
+  releaseRoleMap: Map<string, RoleMap>,
 ): Map<string, Set<string>> {
   const unapprovedByModel = new Map<string, Set<string>>()
 
@@ -548,8 +553,18 @@ function buildUnapprovedReleaseMap(
   return unapprovedByModel
 }
 
+type ReleaseRoleInfo = {
+  requiredRoles: Set<string>
+  approvedRoles: Set<string>
+}
+
+type ReleaseRoleMap = Map<string, ReleaseRoleInfo>
+
 type ReleaseReview = Pick<ReviewInterface, '_id' | 'modelId' | 'semver' | 'role'>
 
+/**
+ * Builds a release-to-review-role mapping from review and approval data.
+ */
 function buildReleaseRoleMap(reviews: ReleaseReview[], approvedReviewIds: Set<string>): ReleaseRoleMap {
   const releaseRoleMap: ReleaseRoleMap = new Map()
 
@@ -646,7 +661,10 @@ async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComp
 
   const approvedReviewIds = new Set<string>(approvingResponses.map((response) => response.parentId.toString()))
 
+  // Build a map of releases to review roles
   const releaseRoleMap = buildReleaseRoleMap(reviews, approvedReviewIds)
+
+  // Groups those unapproved release versions by model id
   const unapprovedByModel = buildUnapprovedReleaseMap(releases, releaseRoleMap)
 
   return buildUnapprovedReleaseEntries(models, unapprovedByModel)
