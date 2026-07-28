@@ -294,7 +294,7 @@ export const darkTheme = createTheme({
           color: '#fff',
         },
         contained: {
-          color: 'black',
+          color: '#202020 !important',
           backgroundColor: '#B39CD0',
         },
         text: {

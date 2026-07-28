@@ -1,5 +1,6 @@
-import Forward from '@mui/icons-material/Forward'
-import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
+import SwapHoriz from '@mui/icons-material/SwapHoriz'
+import SwapVert from '@mui/icons-material/SwapVert'
+import { Autocomplete, Container, Stack, TextField, Typography, useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
@@ -11,6 +12,8 @@ import { SchemaInterface } from 'types/types'
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
   const theme = useTheme()
+
+  const isMdOrLarger = useMediaQuery(theme.breakpoints.up('lg'))
 
   const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>(null)
   const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>(null)
@@ -55,11 +58,11 @@ export default function SchemaCompare() {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Container sx={{ my: 4 }}>
       <Stack spacing={4}>
         <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={{ xs: 2, sm: 6 }}
+          direction={{ md: 'column', lg: 'row' }}
+          spacing={{ md: 2, lg: 4 }}
           sx={{
             justifyContent: 'center',
             alignItems: 'center',
@@ -76,7 +79,11 @@ export default function SchemaCompare() {
             renderInput={(params) => <TextField {...params} label='Source schema' />}
             onChange={handleBeforeSchemaChange}
           />
-          <Forward color='primary' fontSize='large' aria-label='Compare arrow' />
+          {isMdOrLarger ? (
+            <SwapHoriz color='primary' fontSize='large' aria-label='Compare arrow' />
+          ) : (
+            <SwapVert color='primary' fontSize='large' aria-label='Compare arrow' />
+          )}
           <Autocomplete
             disablePortal
             options={schemas}
@@ -91,6 +98,6 @@ export default function SchemaCompare() {
         </Stack>
         {schemaDiff}
       </Stack>
-    </Box>
+    </Container>
   )
 }

@@ -11,11 +11,12 @@ import { toTitleCase } from 'utils/stringUtils'
 
 interface MetricsBreakdownTableProps {
   title?: string
+  headers: string[]
   data: ModelBreakdown[]
   isLoading?: boolean
 }
 
-export function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
+export function MetricsBreakdownTable({ title, headers, data, isLoading = false }: MetricsBreakdownTableProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
@@ -37,12 +38,13 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
               href={`/${entryKindForRedirect(row.entryKind)}/${row.entryId}`}
               target='_blank'
               rel='noopener noreferrer'
+              sx={{ wordBreak: 'break-word' }}
             >
               {row.entryId}
             </Link>
           </Typography>
         </TableCell>
-        <TableCell>{row.entryName}</TableCell>
+        <TableCell sx={{ wordBreak: 'break-word' }}>{row.entryName}</TableCell>
         <TableCell>{toTitleCase(EntryKindLabel[row.entryKind])}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
@@ -63,13 +65,12 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
         </Typography>
       )}
       <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-        <Table sx={{ minWidth: 300 }} size='small'>
+        <Table size='small'>
           <TableHead>
             <TableRow>
-              <TableCell>Entry ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Kind</TableCell>
-              <TableCell>Owner</TableCell>
+              {headers.map((header) => (
+                <TableCell key={header}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
