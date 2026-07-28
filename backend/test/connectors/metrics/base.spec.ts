@@ -583,8 +583,8 @@ await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics',
     expect(result.global.summary.totalUnapprovedReleases).toBe(1)
     expect(result.global.entries).toEqual([
       {
-        id: 'model-1',
-        owners: ['user:owner'],
+        entryId: 'model-1',
+        modelOwners: ['user:owner'],
         unapprovedReleases: ['1.0.0'],
       },
     ])
@@ -610,8 +610,8 @@ await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics',
     expect(result.global.summary.totalUnapprovedReleases).toBe(1)
     expect(result.global.entries).toEqual([
       {
-        id: 'model-1',
-        owners: ['user:owner'],
+        entryId: 'model-1',
+        modelOwners: ['user:owner'],
         unapprovedReleases: ['1.0.0'],
       },
     ])
@@ -664,8 +664,8 @@ await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics',
     expect(result.global.summary.totalUnapprovedReleases).toBe(2)
     expect(result.global.entries).toEqual([
       {
-        id: 'model-1',
-        owners: [],
+        entryId: 'model-1',
+        modelOwners: [],
         unapprovedReleases: ['1.5.0', '2.0.0'],
       },
     ])
@@ -706,10 +706,10 @@ await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics',
     const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
 
     expect(aCorp?.modelsWithUnapprovedReleases).toBe(1)
-    expect(aCorp?.entries.map((entry) => entry.id)).toEqual(['model-a'])
+    expect(aCorp?.entries.map((entry) => entry.entryId)).toEqual(['model-a'])
 
     expect(unset?.modelsWithUnapprovedReleases).toBe(1)
-    expect(unset?.entries.map((entry) => entry.id)).toEqual(['model-unset'])
+    expect(unset?.entries.map((entry) => entry.entryId)).toEqual(['model-unset'])
 
     // Global aggregates both.
     expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(2)

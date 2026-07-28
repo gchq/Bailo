@@ -17,8 +17,8 @@ export const UnapprovedSummarySchema = z.object({
 })
 
 export const EntryUnapprovedMetricsSchema = z.object({
-  id: z.string(),
-  owners: z.array(z.string()),
+  entryId: z.string(),
+  modelOwners: z.array(z.string()),
   unapprovedReleases: z.array(z.string()),
 })
 
