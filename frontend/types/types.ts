@@ -1089,8 +1089,8 @@ export interface UnapprovedReleasesSummaryMetrics {
 }
 
 export interface ModelsUnapprovedReleases {
-  id: string
-  owners: string[]
+  entryId: string
+  modelOwners: string[]
   unapprovedReleases: string[]
 }
 

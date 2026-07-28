@@ -27,10 +27,10 @@ export default function PolicyUnapprovedReleasesCharts({ data }: PolicyUnapprove
 
   const tableRows = useMemo(() => {
     return data.entries.map((row) => (
-      <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+      <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row' sx={{ wordBreak: 'break-word' }}>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/model/${row.id}`}>{row.id}</Link>
+            <Link href={`/model/${row.entryId}`}>{row.entryId}</Link>
           </Typography>
         </TableCell>
         <TableCell>
@@ -41,8 +41,8 @@ export default function PolicyUnapprovedReleasesCharts({ data }: PolicyUnapprove
           </List>
         </TableCell>
         <TableCell>
-          {row.owners.length > 0 ? (
-            row.owners.map((owner) => <UserDisplay key={owner} dn={owner} />)
+          {row.modelOwners.length > 0 ? (
+            row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
           ) : (
             <em>{`No ${ownerRoleDisplayName}s set`}</em>
           )}
