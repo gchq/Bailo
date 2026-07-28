@@ -1,6 +1,6 @@
 import { Registry, RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
-import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
+import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
@@ -228,6 +228,32 @@ export const getState = (id: string, formContext: Registry['formContext']) => {
     .reduce((prev, cur) => prev && prev[cur], formContext.state)
 }
 
+// Mirrors backend `deepMergePreferFirst`
+export function deepMergePreferFirst<T extends object, U extends object>(first: T, second: U): T & U {
+  return mergeWith({}, second, first, (objValue, srcValue) => {
+    // Arrays: first object wins completely
+    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+      return srcValue ?? objValue
+    }
+
+    // Primitives: first object wins when present
+    if (srcValue !== undefined && (srcValue === null || typeof srcValue !== 'object')) {
+      return srcValue
+    }
+
+    // Return undefined to let lodash continue normal deep merge.
+    return undefined
+  }) as T & U
+}
+
+function getPreferFirstValue(firstValue: unknown, secondValue: unknown): unknown {
+  // Picks a value, preferring first when both exist
+  if (firstValue !== undefined && firstValue !== null && firstValue !== '') {
+    return firstValue
+  }
+  return secondValue
+}
+
 /**
  * Look up the compare-mode "from" local-card value for a field, mirroring `getState`. Returns
  * `undefined` when the current form isn't running in compare mode (i.e. no `compareFromState` was
@@ -282,7 +308,11 @@ export function isQuestionAnswered(id: string, schema: any, formContext: Registr
     return false
   }
 
-  const value = getState(id, formContext)
+  // For mirrored models, a field is answered if present in either local or source card (local value preferred)
+  const localValue = getState(id, formContext)
+  const value = formContext.mirroredModel
+    ? getPreferFirstValue(localValue, getMirroredState(id, formContext))
+    : localValue
 
   if (isPrimitiveSchema(schema)) {
     return isAnswered(value)
@@ -409,13 +439,13 @@ export function getFormStats(step?: StepNoRender, mirroredModel?: boolean, requi
   }
 
   const totalQuestions = countQuestionsFromSchema(step.schema, requiredByModelState)
-  const totalAnswers = countAnswersFromSchemaAndState(
-    step.schema,
-    mirroredModel ? step.mirroredState : step.state,
-    requiredByModelState,
-  )
+  // Mirrored models validate against the combined card with local values preferred to source values
+  const stateForValidation = mirroredModel
+    ? deepMergePreferFirst(step.state || {}, step.mirroredState || {})
+    : step.state
+  const totalAnswers = countAnswersFromSchemaAndState(step.schema, stateForValidation, requiredByModelState)
 
-  // If more answers given than required answers then return 100% otherwise calulate percentage
+  // If more answers given than required answers then return 100% otherwise calculate percentage
   const percentageQuestionsComplete =
     totalQuestions === 0 ? 100 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
 
