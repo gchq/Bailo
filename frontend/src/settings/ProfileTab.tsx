@@ -1,3 +1,6 @@
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
+import SettingsSystemDaydreamIcon from '@mui/icons-material/SettingsSystemDaydream'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Button, ButtonGroup, Stack } from 'node_modules/@mui/material/index.mjs'
@@ -43,9 +46,27 @@ export default function ProfileTab({ user }: ProfileTabProps) {
           own discretion.
         </Typography>
         <ButtonGroup variant='outlined'>
-          <Button onClick={() => toggleDarkMode(false)}>Light</Button>
-          <Button onClick={() => toggleDarkMode(true)}>Dark (beta)</Button>
-          <Button onClick={handleSystemThemeOnClick}>System</Button>
+          <Button
+            startIcon={<LightModeIcon />}
+            onClick={() => toggleDarkMode(false)}
+            aria-label='toggle light theme button'
+          >
+            Light
+          </Button>
+          <Button
+            startIcon={<DarkModeIcon />}
+            onClick={() => toggleDarkMode(true)}
+            aria-label='toggle dark theme button'
+          >
+            Dark (beta)
+          </Button>
+          <Button
+            startIcon={<SettingsSystemDaydreamIcon />}
+            onClick={handleSystemThemeOnClick}
+            aria-label='toggle system theme button'
+          >
+            System
+          </Button>
         </ButtonGroup>
       </Stack>
     </Box>
