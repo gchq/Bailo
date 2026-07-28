@@ -1,6 +1,10 @@
 import dayjs, { Dayjs } from '@dayjs'
 import { plural } from 'utils/stringUtils'
 
+export const currentTimestampSimple = (): string => {
+  return dayjs.utc().format('YYYY-MM-DDTHH-mm-ss')
+}
+
 export const utcDate = (value: string) => {
   return dayjs.utc(value)
 }

@@ -273,7 +273,10 @@ module.exports = {
 
     untrustedModel: {
       enabled: false,
-      untrustedModelDescription: 'These are private only models.',
+      untrustedModelLongDescription:
+        'Untrusted models are private-only models with the Registry tab disabled. They have not been verified or validated to the same standard as regular models.',
+      untrustedModelShortDescription:
+        'An untrusted model repository contains all files, history, and information associated with a private model.',
       fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.',
     },
 
