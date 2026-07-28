@@ -1,5 +1,6 @@
-import { Box, Chip, Stack } from '@mui/material'
+import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
@@ -36,6 +37,7 @@ export default function DataCardSelector({
 }: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
+  const theme = useTheme()
 
   const {
     entries: dataCards,
@@ -147,24 +149,26 @@ export default function DataCardSelector({
         />
       ) : compare.inMirroredCompare && currentValue.length > 0 ? (
         <InlineDiff from={idsToDiffString(compare.compareFromState)} to={idsToDiffString(currentValue)} />
+      ) : currentValue.length > 0 ? (
+        <Box sx={{ overflowX: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {currentValue.map((currentDataCardId) => (
+              <Chip
+                label={
+                  dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
+                  'Unable to find data card name'
+                }
+                key={currentDataCardId}
+                onClick={() => router.push(`/data-card/${currentDataCardId}`)}
+                sx={{ width: 'fit-content' }}
+              />
+            ))}
+          </Stack>
+        </Box>
       ) : (
-        currentValue.length > 0 && (
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((currentDataCardId) => (
-                <Chip
-                  label={
-                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
-                    'Unable to find data card name'
-                  }
-                  key={currentDataCardId}
-                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
-                  sx={{ width: 'fit-content' }}
-                />
-              ))}
-            </Stack>
-          </Box>
-        )
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )

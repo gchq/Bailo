@@ -42,7 +42,7 @@ export const GetUnapprovedComplianceMetricsResponseSchema = z.object({
 registerPath(
   {
     method: 'get',
-    path: '/api/v3/metrics/compliance/models/releases/unapproved',
+    path: '/api/v3/metrics/compliance/unapproved',
     tags: ['metrics'],
     description: 'Retrieve compliance metrics for entries with releases that are missing reviews.',
     schema: getUnapprovedComplianceMetricsSchema,

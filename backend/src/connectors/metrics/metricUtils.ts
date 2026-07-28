@@ -1,7 +1,9 @@
 import { PipelineStage } from 'mongoose'
 
-import { CollaboratorEntry } from '../../models/Model.js'
+import { CollaboratorEntry, SystemRoles } from '../../models/Model.js'
+import { SemverObject } from '../../models/Release.js'
 import { EntryVolumeInterval } from '../../routes/v3/metrics/getEntryVolume.js'
+import { semverObjectToString } from '../../services/release.js'
 
 /**
  * Returns a new Date incremented by one interval
@@ -83,3 +85,14 @@ export function getActiveRoleSet(collaborators: CollaboratorEntry[]): Set<string
   }
   return activeRoleSet
 }
+
+export function getModelOwners(collaborators?: { entity: string; roles?: string[] }[]): string[] {
+  return (collaborators ?? [])
+    .filter((collaborator) => (collaborator.roles ?? []).includes(SystemRoles.Owner))
+    .map((collaborator) => collaborator.entity)
+}
+
+export const buildReleaseKey = (modelId: string, semver: string) => `${modelId}::${semver}`
+
+export const semverToString = (semver: string | SemverObject): string =>
+  typeof semver === 'string' ? semver : semverObjectToString(semver)

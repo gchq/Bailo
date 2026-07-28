@@ -104,8 +104,12 @@ export default function Dropdown({
         />
       ) : compare.inMirroredCompare && value ? (
         <InlineDiff from={compare.compareFromState} to={value} />
+      ) : value ? (
+        <Typography>{value}</Typography>
       ) : (
-        value && <Typography>{value}</Typography>
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )

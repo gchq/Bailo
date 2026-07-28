@@ -4,10 +4,10 @@ import NodeCache from 'node-cache'
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { EntryKind, ModelInterface, SystemRoles } from '../../models/Model.js'
-import ReleaseModel from '../../models/Release.js'
+import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
+import ReleaseModel, { SemverObject } from '../../models/Release.js'
 import ResponseModel, { Decision } from '../../models/Response.js'
-import ReviewModel from '../../models/Review.js'
+import ReviewModel, { ReviewInterface } from '../../models/Review.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
@@ -21,17 +21,20 @@ import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/getUnapprovedComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
-import { MetricsCacheKeys, ReviewKind, SchemaKind } from '../../types/enums.js'
+import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import {
   addInterval,
   buildModelMatchStage,
+  buildReleaseKey,
   getActiveRoleSet,
   getApplicableRoleSet,
+  getModelOwners,
   ModelFilter,
   SchemaRoleMap,
+  semverToString,
 } from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
@@ -156,7 +159,6 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
   const pipeline: PipelineStage[] = [
     {
       $match: {
-        kind: SchemaKind.Model,
         hidden: false,
       },
     },
@@ -331,6 +333,13 @@ type UnapprovedComplianceMetricsResultSubset = {
   entries: EntryWithUnapprovedReleases[]
 }
 
+type ReleaseRoleInfo = {
+  requiredRoles: Set<string>
+  approvedRoles: Set<string>
+}
+
+type ReleaseRoleMap = Map<string, ReleaseRoleInfo>
+
 /**
  * Calculates which entries are missing required review roles, either globally
  * or scoped to a specific organisation.
@@ -386,9 +395,7 @@ async function calculateMissingEntryRoles(
       entriesResult.push({
         entryId: model.id,
         missingRoles,
-        modelOwners: model.collaborators
-          .filter((collaborator) => (collaborator.roles ?? []).includes(SystemRoles.Owner))
-          .map((collaborator) => collaborator.entity),
+        modelOwners: getModelOwners(model.collaborators),
       })
     }
   }
@@ -472,26 +479,126 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   }
 }
 
+function buildUnapprovedReleaseEntries(
+  models: Pick<ModelInterface, 'id' | 'collaborators'>[],
+  unapprovedByModel: Map<string, Set<string>>,
+): UnapprovedComplianceMetricsResultSubset {
+  const entries: EntryWithUnapprovedReleases[] = []
+  let totalUnapprovedReleases = 0
+
+  for (const model of models) {
+    const unapprovedReleases = unapprovedByModel.get(model.id)
+
+    if (unapprovedReleases === undefined || unapprovedReleases.size === 0) {
+      continue
+    }
+
+    const sortedReleases = [...unapprovedReleases].sort()
+
+    totalUnapprovedReleases += sortedReleases.length
+
+    entries.push({
+      id: model.id,
+      owners: getModelOwners(model.collaborators),
+      unapprovedReleases: sortedReleases,
+    })
+  }
+
+  return {
+    summary: {
+      totalModelsWithUnapprovedReleases: entries.length,
+      totalUnapprovedReleases,
+    },
+    entries,
+  }
+}
+
+function releaseHasOutstandingReview(roles?: { requiredRoles: Set<string>; approvedRoles: Set<string> }): boolean {
+  return roles === undefined || [...roles.requiredRoles].some((role) => !roles.approvedRoles.has(role))
+}
+
+function buildUnapprovedReleaseMap(
+  releases: { modelId: string; semver: string | SemverObject }[],
+  releaseRoleMap: Map<
+    string,
+    {
+      requiredRoles: Set<string>
+      approvedRoles: Set<string>
+    }
+  >,
+): Map<string, Set<string>> {
+  const unapprovedByModel = new Map<string, Set<string>>()
+
+  for (const release of releases) {
+    const semver = semverToString(release.semver)
+    const key = buildReleaseKey(release.modelId, semver)
+    const roles = releaseRoleMap.get(key)
+
+    if (!releaseHasOutstandingReview(roles)) {
+      continue
+    }
+
+    if (!unapprovedByModel.has(release.modelId)) {
+      unapprovedByModel.set(release.modelId, new Set<string>())
+    }
+
+    unapprovedByModel.get(release.modelId)!.add(semver)
+  }
+
+  return unapprovedByModel
+}
+
+type ReleaseReview = Pick<ReviewInterface, '_id' | 'modelId' | 'semver' | 'role'>
+
+function buildReleaseRoleMap(reviews: ReleaseReview[], approvedReviewIds: Set<string>): ReleaseRoleMap {
+  const releaseRoleMap: ReleaseRoleMap = new Map()
+
+  for (const review of reviews) {
+    if (review.semver === undefined) {
+      continue
+    }
+
+    const key = buildReleaseKey(review.modelId, semverToString(review.semver))
+
+    if (!releaseRoleMap.has(key)) {
+      releaseRoleMap.set(key, {
+        requiredRoles: new Set<string>(),
+        approvedRoles: new Set<string>(),
+      })
+    }
+
+    const entry = releaseRoleMap.get(key)!
+
+    entry.requiredRoles.add(review.role)
+
+    if (approvedReviewIds.has(review._id.toString())) {
+      entry.approvedRoles.add(review.role)
+    }
+  }
+
+  return releaseRoleMap
+}
+
 /**
- * Calculates which entries have releases that are missing reviews (i.e. at
- * least one required review role has not approved the release), either
+ * Calculates which entries have releases that are missing reviews either
  * globally or scoped to a specific organisation.
- *
- * When a release is created a `Review` document is generated for each role
- * required by the model's schema. A role is considered to have reviewed the
- * release only when there is an approving `Response` (decision `approve`)
- * linked to that review. A release is therefore "unapproved" if any of its
- * required review roles has no approving response.
  */
 async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComplianceMetricsResultSubset> {
   const filter: ModelFilter = {}
+  const emptyResult: UnapprovedComplianceMetricsResultSubset = {
+    summary: {
+      totalModelsWithUnapprovedReleases: 0,
+      totalUnapprovedReleases: 0,
+    },
+    entries: [],
+  }
 
   // Only undefined means global
   if (org !== undefined) {
     filter.organisation = org
   }
 
-  // Fetch candidate models (by organisation | all) that could have releases.
+  // Fetch candidate models (by organisation | all) that could have releases
   const models = await ModelModel.find({
     ...filter,
     kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] },
@@ -500,18 +607,12 @@ async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComp
     .lean()
 
   if (models.length === 0) {
-    return {
-      summary: {
-        totalModelsWithUnapprovedReleases: 0,
-        totalUnapprovedReleases: 0,
-      },
-      entries: [],
-    }
+    return emptyResult
   }
 
   const modelIds = models.map((model) => model.id)
 
-  // All non-draft releases belonging to the candidate models.
+  // All non-draft releases belonging to the candidate models
   const releases = await ReleaseModel.find({
     modelId: { $in: modelIds },
     draft: { $ne: true },
@@ -520,17 +621,10 @@ async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComp
     .lean()
 
   if (releases.length === 0) {
-    return {
-      summary: {
-        totalModelsWithUnapprovedReleases: 0,
-        totalUnapprovedReleases: 0,
-      },
-      entries: [],
-    }
+    return emptyResult
   }
 
-  // Release review documents describe which roles were requested to review
-  // each release (modelId + semver).
+  // Release review documents state which roles were requested to review each release (modelId + semver)
   const reviews = await ReviewModel.find({
     modelId: { $in: modelIds },
     kind: ReviewKind.Release,
@@ -538,7 +632,7 @@ async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComp
     .select('_id modelId semver role')
     .lean()
 
-  // Determine which reviews have an approving response.
+  // Determine which reviews have an approving response
   const reviewIds = reviews.map((review) => review._id)
   const approvingResponses =
     reviewIds.length > 0
@@ -552,77 +646,10 @@ async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComp
 
   const approvedReviewIds = new Set<string>(approvingResponses.map((response) => response.parentId.toString()))
 
-  // Map of `modelId::semver` -> { required roles, approved roles }.
-  const releaseRoleMap = new Map<string, { requiredRoles: Set<string>; approvedRoles: Set<string> }>()
+  const releaseRoleMap = buildReleaseRoleMap(reviews, approvedReviewIds)
+  const unapprovedByModel = buildUnapprovedReleaseMap(releases, releaseRoleMap)
 
-  const buildReleaseKey = (modelId: string, semver: string) => `${modelId}::${semver}`
-
-  for (const review of reviews) {
-    if (review.semver === undefined) {
-      continue
-    }
-
-    const key = buildReleaseKey(review.modelId, review.semver)
-    if (!releaseRoleMap.has(key)) {
-      releaseRoleMap.set(key, { requiredRoles: new Set<string>(), approvedRoles: new Set<string>() })
-    }
-
-    const entry = releaseRoleMap.get(key)!
-    entry.requiredRoles.add(review.role)
-
-    if (approvedReviewIds.has(review._id.toString())) {
-      entry.approvedRoles.add(review.role)
-    }
-  }
-
-  // Group unapproved release semvers by model.
-  const unapprovedByModel = new Map<string, Set<string>>()
-
-  for (const release of releases) {
-    const key = buildReleaseKey(release.modelId, release.semver)
-    const roles = releaseRoleMap.get(key)
-
-    // A release is unapproved if it has no reviews at all, or if any required
-    // review role is missing an approving response.
-    const hasOutstandingReview =
-      roles === undefined || [...roles.requiredRoles].some((role) => !roles.approvedRoles.has(role))
-
-    if (hasOutstandingReview) {
-      if (!unapprovedByModel.has(release.modelId)) {
-        unapprovedByModel.set(release.modelId, new Set<string>())
-      }
-      unapprovedByModel.get(release.modelId)!.add(release.semver)
-    }
-  }
-
-  const entries: EntryWithUnapprovedReleases[] = []
-  let totalUnapprovedReleases = 0
-
-  for (const model of models) {
-    const unapprovedReleases = unapprovedByModel.get(model.id)
-    if (unapprovedReleases === undefined || unapprovedReleases.size === 0) {
-      continue
-    }
-
-    const sortedReleases = [...unapprovedReleases].sort()
-    totalUnapprovedReleases += sortedReleases.length
-
-    entries.push({
-      id: model.id,
-      owners: (model.collaborators ?? [])
-        .filter((collaborator) => (collaborator.roles ?? []).includes(SystemRoles.Owner))
-        .map((collaborator) => collaborator.entity),
-      unapprovedReleases: sortedReleases,
-    })
-  }
-
-  return {
-    summary: {
-      totalModelsWithUnapprovedReleases: entries.length,
-      totalUnapprovedReleases,
-    },
-    entries,
-  }
+  return buildUnapprovedReleaseEntries(models, unapprovedByModel)
 }
 
 /**
@@ -1065,6 +1092,20 @@ export class BaseMetricsConnector {
       }
     }
 
+    // Filter by entry kind(s) if provided (model, data-card, mirrored-model, untrusted-model)
+    if (query.kinds !== undefined && query.kinds.length > 0) {
+      const validKinds = Object.values(EntryKind)
+      const invalidKinds = query.kinds.filter((kind) => !validKinds.includes(kind))
+
+      if (invalidKinds.length > 0) {
+        throw BadReq(`Invalid entryKind. Must be one of: ${validKinds.join(', ')}.`, {
+          entryKind: invalidKinds,
+        })
+      }
+
+      mongoQuery.kind = { $in: query.kinds }
+    }
+
     // Filter by models with releases if provided
     if (query.release !== undefined) {
       const releaseModelIds = await ReleaseModel.distinct('modelId')
@@ -1126,6 +1167,7 @@ export class BaseMetricsConnector {
       .select({
         id: true,
         name: true,
+        kind: true,
         collaborators: true,
         _id: false,
       })
@@ -1137,6 +1179,7 @@ export class BaseMetricsConnector {
     return models.map((model) => ({
       entryId: model.id,
       entryName: model.name,
+      entryKind: model.kind,
       collaborators:
         model.collaborators?.map((collaborator) => ({
           entity: collaborator.entity,

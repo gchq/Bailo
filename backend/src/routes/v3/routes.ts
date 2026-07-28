@@ -22,7 +22,7 @@ router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
-router.get('/metrics/compliance/models/releases/unapproved', ...getUnapprovedComplianceMetrics)
+router.get('/metrics/compliance/unapproved', ...getUnapprovedComplianceMetrics)
 router.get('/metrics/compliance/roles', ...getRoleComplianceMetrics)
 router.get('/metrics/entryVolume', ...getEntryVolume)
 router.get('/metrics/breakdown', ...getModelBreakdown)
