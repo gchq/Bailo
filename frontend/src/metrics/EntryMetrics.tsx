@@ -141,7 +141,7 @@ export default function EntryMetrics() {
           >
             <Stack spacing={2}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
-                <Stack direction='row' spacing={1}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                   <FilterMenuButton
                     label='State'
                     options={stateOptions.map((s) => ({ value: s, label: s }))}
