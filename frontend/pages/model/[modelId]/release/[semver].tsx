@@ -15,6 +15,7 @@ import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
 import { ReviewKind } from 'types/types'
@@ -24,6 +25,8 @@ import { getCurrentUserRoles, hasRole } from 'utils/roles'
 export default function Release() {
   const router = useRouter()
   const { modelId, semver }: { modelId?: string; semver?: string } = router.query
+
+  const sendNotification = useNotification()
 
   const [isEdit, setIsEdit] = useState(false)
   const [putErrorMessage, setPutErrorMessage] = useState('')
@@ -111,6 +114,7 @@ export default function Release() {
       setPutErrorMessage(await getErrorMessage(response))
     } else {
       mutateRelease()
+      sendNotification({ msg: 'Release successfully published.', variant: 'success' })
     }
 
     setIsLoading(false)

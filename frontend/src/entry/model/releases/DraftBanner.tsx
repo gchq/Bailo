@@ -4,7 +4,8 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import MessageAlert from 'src/MessageAlert'
+import { useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 
 type DraftBannerProps = {
   text: string
@@ -32,6 +33,7 @@ export function DraftBanner({
   disableButton,
 }: DraftBannerProps) {
   const theme = useTheme()
+  const [open, setOpen] = useState(false)
   return (
     <>
       <Paper
@@ -51,18 +53,30 @@ export function DraftBanner({
             <Typography>{text}</Typography>
           </Stack>
           {showButton && (
-            <Button
-              variant='outlined'
-              sx={{ borderColor: 'white', color: theme.palette.common.white }}
-              onClick={handlePublish}
-              disabled={disableButton}
-              loading={isLoading}
-            >
-              <Typography>Publish</Typography>
-            </Button>
+            <>
+              <Button
+                variant='outlined'
+                sx={{ borderColor: 'white', color: theme.palette.common.white }}
+                onClick={() => {
+                  setOpen(true)
+                }}
+                disabled={disableButton}
+                loading={isLoading}
+              >
+                <Typography>Publish</Typography>
+              </Button>
+              <ConfirmationDialogue
+                open={open}
+                title='Delete Release'
+                onConfirm={handlePublish}
+                onCancel={() => setOpen(false)}
+                errorMessage={errorMessage}
+                dialogMessage={'Are you sure you want to publish this release? This is irreversable.'}
+                confirmLoading={isLoading}
+              />
+            </>
           )}
         </Stack>
-        {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
       </Paper>
     </>
   )
