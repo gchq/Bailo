@@ -98,7 +98,7 @@ export default function ChipSelector({
               alignItems: 'center',
             }}
           >
-            <Typography component='h2' variant='h6'>
+            <Typography component='h2' variant='h6' sx={{ px: 1 }}>
               {`${label}`}
             </Typography>
             <Typography variant='caption'>{subheading ? subheading : ''}</Typography>

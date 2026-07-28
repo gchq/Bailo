@@ -192,11 +192,11 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#f7f7f7',
+      main: '#E4E4E4',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#914581',
+      main: '#B39CD0',
     },
     error: {
       main: red.A200,
@@ -263,12 +263,12 @@ export const darkTheme = createTheme({
             backgroundColor: '#5c5c5c',
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#f7a4c0',
+            borderColor: '#cbbfda',
           },
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#b5497d',
+            borderColor: '#b5a0ce',
           },
         },
       },
@@ -294,8 +294,8 @@ export const darkTheme = createTheme({
           color: '#fff',
         },
         contained: {
-          color: '#fff',
-          backgroundColor: '#914581',
+          color: 'black',
+          backgroundColor: '#B39CD0',
         },
         text: {
           color: '#fff',

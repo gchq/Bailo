@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
+import { Button, ButtonGroup, Stack } from 'node_modules/@mui/material/index.mjs'
 import { use } from 'react'
 import ThemeModeContext from 'src/contexts/themeModeContext'
 import { User } from 'types/types'
@@ -11,8 +10,14 @@ type ProfileTabProps = {
 }
 
 export default function ProfileTab({ user }: ProfileTabProps) {
-  const { theme, toggleDarkMode } = use(ThemeModeContext)
-  const isDark = theme.palette.mode === 'dark'
+  const { toggleDarkMode } = use(ThemeModeContext)
+  const systemIsDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')
+
+  const handleSystemThemeOnClick = () => {
+    if (systemIsDarkMode) {
+      toggleDarkMode(systemIsDarkMode.matches)
+    }
+  }
 
   return (
     <Box sx={{ px: 2, py: 4 }}>
@@ -24,26 +29,25 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         Name
       </Typography>
       <Typography>{user.dn}</Typography>
-      <Box sx={{ mt: 4 }}>
+      <Stack sx={{ mt: 4 }} spacing={1}>
         <Typography
           variant='body1'
           sx={{
             fontWeight: 'bold',
           }}
         >
-          Appearance
+          Theme
         </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={isDark}
-              onChange={toggleDarkMode}
-              slotProps={{ input: { 'aria-label': 'Toggle dark mode' } }}
-            />
-          }
-          label='Dark mode (beta)'
-        />
-      </Box>
+        <Typography variant='caption'>
+          Disclaimer: Dark mode is currently in development, and full accessibility cannot be guaranteed. Use at your
+          own discretion.
+        </Typography>
+        <ButtonGroup variant='outlined'>
+          <Button onClick={() => toggleDarkMode(false)}>Light</Button>
+          <Button onClick={() => toggleDarkMode(true)}>Dark (beta)</Button>
+          <Button onClick={handleSystemThemeOnClick}>System</Button>
+        </ButtonGroup>
+      </Stack>
     </Box>
   )
 }
