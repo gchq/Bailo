@@ -54,7 +54,7 @@ Follow the instructions below to get a local development environment running. Yo
 To run in development mode (modified files on your host machine will be reloaded into the running application):
 
 > [!NOTE]
-> You will need to install and start docker desktop before running these commands.
+> Ensure Docker and Docker Compose are installed before running these commands.
 
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
