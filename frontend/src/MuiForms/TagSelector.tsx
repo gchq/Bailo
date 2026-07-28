@@ -84,7 +84,12 @@ function TagEditor({
             ) : (
               <Box sx={{ whiteSpace: 'pre-wrap' }}>
                 {value.map((tag) => (
-                  <Chip label={tag} key={tag} sx={{ width: 'fit-content', m: 0.5 }} onDelete={() => onDelete(tag)} />
+                  <Chip
+                    label={tag}
+                    key={tag}
+                    sx={{ width: 'fit-content', m: 0.5, maxWidth: '280px' }}
+                    onDelete={() => onDelete(tag)}
+                  />
                 ))}
               </Box>
             )}

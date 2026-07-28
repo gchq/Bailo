@@ -99,7 +99,7 @@ export default function Admin() {
                 Roles
               </SimpleListItemButton>
             </List>
-            <Container sx={{ width: '100%' }}>
+            <Container>
               {selectedSection === AdminSection.SCHEMA_LIST && <SchemaTab />}
               {selectedSection === AdminSection.COMPARE && <SchemaCompare />}
               {selectedSection === AdminSection.MIGRATION && <SchemaMigrationList />}

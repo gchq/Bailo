@@ -32,10 +32,13 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
       >
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
+          spacing={1}
           sx={{
             justifyContent: 'center',
             alignItems: 'center',
+            py: 1,
+            width: '100%',
+            textAlign: 'center',
           }}
         >
           <CampaignIcon color='primary' />

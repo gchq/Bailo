@@ -38,12 +38,13 @@ export function MetricsBreakdownTable({ title, headers, data, isLoading = false 
               href={`/${entryKindForRedirect(row.entryKind)}/${row.entryId}`}
               target='_blank'
               rel='noopener noreferrer'
+              sx={{ wordBreak: 'break-word' }}
             >
               {row.entryId}
             </Link>
           </Typography>
         </TableCell>
-        <TableCell>{row.entryName}</TableCell>
+        <TableCell sx={{ wordBreak: 'break-word' }}>{row.entryName}</TableCell>
         <TableCell>{toTitleCase(EntryKindLabel[row.entryKind])}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
@@ -64,7 +65,7 @@ export function MetricsBreakdownTable({ title, headers, data, isLoading = false 
         </Typography>
       )}
       <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-        <Table sx={{ minWidth: 300 }} size='small'>
+        <Table size='small'>
           <TableHead>
             <TableRow>
               {headers.map((header) => (
