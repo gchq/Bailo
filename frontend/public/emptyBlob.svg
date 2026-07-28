@@ -5,6 +5,9 @@
     .blob-highlight { fill: #ef7067; }
     .blob-decoration { fill: #000; }
     @media (prefers-color-scheme: dark) {
+      .blob-main { fill: #8753c7; }
+      .blob-stripe { fill: #B39CD0; }
+      .blob-highlight { fill: #a78bc8; }
       .blob-decoration { fill: #e3e3e3; }
     }
   </style>
