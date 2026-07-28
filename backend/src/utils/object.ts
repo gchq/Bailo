@@ -1,6 +1,6 @@
 import { mergeWith } from 'lodash-es'
 
-export function deepFreeze(object: object) {
+export function deepFreeze(object) {
   // Retrieve the property names defined on object
   const propNames = Reflect.ownKeys(object)
 
