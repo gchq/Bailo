@@ -5,15 +5,18 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { ModelBreakdown } from 'types/types'
+import { EntryKindLabel, ModelBreakdown } from 'types/types'
+import { entryKindForRedirect } from 'utils/routerUtils'
+import { toTitleCase } from 'utils/stringUtils'
 
 interface MetricsBreakdownTableProps {
   title?: string
+  headers: string[]
   data: ModelBreakdown[]
   isLoading?: boolean
 }
 
-export function MetricsBreakdownTable({ title, data, isLoading = false }: MetricsBreakdownTableProps) {
+export function MetricsBreakdownTable({ title, headers, data, isLoading = false }: MetricsBreakdownTableProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
@@ -31,12 +34,18 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
       >
         <TableCell component='th' scope='row'>
           <Typography sx={{ maxWidth: '500px' }}>
-            <Link href={`/model/${row.entryId}`} target='_blank' rel='noopener noreferrer'>
+            <Link
+              href={`/${entryKindForRedirect(row.entryKind)}/${row.entryId}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              sx={{ wordBreak: 'break-word' }}
+            >
               {row.entryId}
             </Link>
           </Typography>
         </TableCell>
-        <TableCell>{row.entryName}</TableCell>
+        <TableCell sx={{ wordBreak: 'break-word' }}>{row.entryName}</TableCell>
+        <TableCell>{toTitleCase(EntryKindLabel[row.entryKind])}</TableCell>
         <TableCell>
           {row.modelOwners.length > 0 ? (
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
@@ -56,17 +65,17 @@ export function MetricsBreakdownTable({ title, data, isLoading = false }: Metric
         </Typography>
       )}
       <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}>
-        <Table sx={{ minWidth: 300 }} size='small'>
+        <Table size='small'>
           <TableHead>
             <TableRow>
-              <TableCell>Model ID</TableCell>
-              <TableCell>Model Name</TableCell>
-              <TableCell>Owner</TableCell>
+              {headers.map((header) => (
+                <TableCell key={header}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {isLoading && <LoadingRows columnCount={3} />}
-            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No models found.' />}
+            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No entries found.' />}
             {!isLoading && tableRows}
           </TableBody>
         </Table>

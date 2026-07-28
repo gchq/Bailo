@@ -50,3 +50,239 @@ exports[`services > accessRequest > getModelAccessRequestsForUser > query as exp
   ],
 ]
 `;
+
+exports[`services > accessRequest > removeAccessRequest > success 1`] = `
+{
+  "_id": {
+    "toString": [Function],
+  },
+  "aggregate": [MockFunction],
+  "append": [MockFunction],
+  "at": [MockFunction],
+  "bulkWrite": [MockFunction],
+  "delete": [MockFunction] {
+    "calls": [
+      [
+        undefined,
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "deleteMany": [MockFunction],
+  "deleteOne": [MockFunction],
+  "find": [MockFunction],
+  "findById": [MockFunction],
+  "findByIdAndDelete": [MockFunction],
+  "findOne": [MockFunction],
+  "findOneAndDelete": [MockFunction],
+  "findOneAndUpdate": [MockFunction],
+  "group": [MockFunction],
+  "id": "mock-id",
+  "insertMany": [MockFunction],
+  "lean": [MockFunction],
+  "limit": [MockFunction],
+  "lookup": [MockFunction],
+  "markModified": [MockFunction],
+  "match": [MockFunction],
+  "save": [MockFunction],
+  "sort": [MockFunction],
+  "toObject": [MockFunction],
+  "update": [MockFunction],
+  "updateMany": [MockFunction],
+  "updateOne": [MockFunction],
+}
+`;
+
+exports[`services > accessRequest > removeAccessRequests > success 1`] = `
+[
+  {
+    "_id": {
+      "toString": [Function],
+    },
+    "aggregate": [MockFunction],
+    "append": [MockFunction],
+    "at": [MockFunction],
+    "bulkWrite": [MockFunction],
+    "delete": [MockFunction] {
+      "calls": [
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": {
+            "_id": {
+              "toString": [Function],
+            },
+            "aggregate": [MockFunction],
+            "append": [MockFunction],
+            "at": [MockFunction],
+            "bulkWrite": [MockFunction],
+            "delete": [MockFunction] {
+              "calls": [
+                [
+                  undefined,
+                ],
+                [
+                  undefined,
+                ],
+              ],
+              "results": [Circular],
+            },
+            "deleteMany": [MockFunction],
+            "deleteOne": [MockFunction],
+            "find": [MockFunction],
+            "findById": [MockFunction],
+            "findByIdAndDelete": [MockFunction],
+            "findOne": [MockFunction],
+            "findOneAndDelete": [MockFunction],
+            "findOneAndUpdate": [MockFunction],
+            "group": [MockFunction],
+            "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
+            "lookup": [MockFunction],
+            "markModified": [MockFunction],
+            "match": [MockFunction],
+            "save": [MockFunction],
+            "sort": [MockFunction],
+            "toObject": [MockFunction],
+            "update": [MockFunction],
+            "updateMany": [MockFunction],
+            "updateOne": [MockFunction],
+          },
+        },
+      ],
+    },
+    "deleteMany": [MockFunction],
+    "deleteOne": [MockFunction],
+    "find": [MockFunction],
+    "findById": [MockFunction],
+    "findByIdAndDelete": [MockFunction],
+    "findOne": [MockFunction],
+    "findOneAndDelete": [MockFunction],
+    "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
+    "id": "mock-id",
+    "insertMany": [MockFunction],
+    "lean": [MockFunction],
+    "limit": [MockFunction],
+    "lookup": [MockFunction],
+    "markModified": [MockFunction],
+    "match": [MockFunction],
+    "save": [MockFunction],
+    "sort": [MockFunction],
+    "toObject": [MockFunction],
+    "update": [MockFunction],
+    "updateMany": [MockFunction],
+    "updateOne": [MockFunction],
+  },
+  {
+    "_id": {
+      "toString": [Function],
+    },
+    "aggregate": [MockFunction],
+    "append": [MockFunction],
+    "at": [MockFunction],
+    "bulkWrite": [MockFunction],
+    "delete": [MockFunction] {
+      "calls": [
+        [
+          undefined,
+        ],
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": {
+            "_id": {
+              "toString": [Function],
+            },
+            "aggregate": [MockFunction],
+            "append": [MockFunction],
+            "at": [MockFunction],
+            "bulkWrite": [MockFunction],
+            "delete": [MockFunction] {
+              "calls": [
+                [
+                  undefined,
+                ],
+                [
+                  undefined,
+                ],
+              ],
+              "results": [Circular],
+            },
+            "deleteMany": [MockFunction],
+            "deleteOne": [MockFunction],
+            "find": [MockFunction],
+            "findById": [MockFunction],
+            "findByIdAndDelete": [MockFunction],
+            "findOne": [MockFunction],
+            "findOneAndDelete": [MockFunction],
+            "findOneAndUpdate": [MockFunction],
+            "group": [MockFunction],
+            "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
+            "lookup": [MockFunction],
+            "markModified": [MockFunction],
+            "match": [MockFunction],
+            "save": [MockFunction],
+            "sort": [MockFunction],
+            "toObject": [MockFunction],
+            "update": [MockFunction],
+            "updateMany": [MockFunction],
+            "updateOne": [MockFunction],
+          },
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "deleteMany": [MockFunction],
+    "deleteOne": [MockFunction],
+    "find": [MockFunction],
+    "findById": [MockFunction],
+    "findByIdAndDelete": [MockFunction],
+    "findOne": [MockFunction],
+    "findOneAndDelete": [MockFunction],
+    "findOneAndUpdate": [MockFunction],
+    "group": [MockFunction],
+    "id": "mock-id",
+    "insertMany": [MockFunction],
+    "lean": [MockFunction],
+    "limit": [MockFunction],
+    "lookup": [MockFunction],
+    "markModified": [MockFunction],
+    "match": [MockFunction],
+    "save": [MockFunction],
+    "sort": [MockFunction],
+    "toObject": [MockFunction],
+    "update": [MockFunction],
+    "updateMany": [MockFunction],
+    "updateOne": [MockFunction],
+  },
+]
+`;

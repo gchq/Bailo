@@ -22,8 +22,8 @@ export class BailoPeerConnector extends BasePeerConnector {
     if (opts.search) {
       query.append('search', opts.search)
     }
-    if (opts.kind) {
-      query.append('kind', opts.kind)
+    if (opts.kind?.length) {
+      opts.kind.forEach((kind) => query.append('kind', kind))
     }
     if (opts.organisations?.length) {
       opts.organisations.forEach((organisation) => query.append('organisations', organisation))

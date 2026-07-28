@@ -1,9 +1,7 @@
 import eslint from '@eslint/js'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import { defineConfig } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import pluginCypress from 'eslint-plugin-cypress'
-import prettier from 'eslint-plugin-prettier'
-import reactHooks from 'eslint-plugin-react-hooks'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import tseslint from 'typescript-eslint'
 
@@ -13,11 +11,9 @@ export default defineConfig([
   },
   eslint.configs.recommended,
   tseslint.configs.recommended,
-  reactHooks.configs.flat.recommended,
   ...nextVitals,
   {
     plugins: {
-      prettier,
       'simple-import-sort': simpleImportSort,
     },
     settings: {
@@ -54,7 +50,7 @@ export default defineConfig([
     files: ['src/**/*.ts', 'src/**/*.tsx'],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.eslint.json'],
       },
     },
     rules: {
@@ -112,5 +108,4 @@ export default defineConfig([
       'func-names': 'off',
     },
   },
-  globalIgnores(['.node_modules/*', '.next/*']),
 ])

@@ -80,7 +80,8 @@ export interface UiConfig {
 
   untrustedModel: {
     enabled: boolean
-    untrustedModelDescription: string
+    untrustedModelLongDescription: string
+    untrustedModelShortDescription: string
     fileUploadGuidance: string
   }
 
@@ -408,6 +409,8 @@ export interface StepNoRender {
 
   state: any
   mirroredState?: any
+  compareFromState?: any
+  compareFromMirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>
@@ -447,6 +450,7 @@ export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  createdAt: string
   mirrored: boolean
   metadata: unknown
 }
@@ -469,6 +473,7 @@ export const EntryKind = {
   DATA_CARD: 'data-card',
   MIRRORED_MODEL: 'mirrored-model',
   UNTRUSTED_MODEL: 'untrusted-model',
+  MIRRORED_DATA_CARD: 'mirrored-data-card',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
@@ -1041,6 +1046,7 @@ export interface PolicyRoleMetrics {
 export interface ModelBreakdown {
   entryId: string
   entryName: string
+  entryKind: EntryKindKeys
   modelOwners: string[]
 }
 

@@ -18,7 +18,7 @@ import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreak
 import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
-import { MetricsCacheKeys, SchemaKind } from '../../types/enums.js'
+import { MetricsCacheKeys } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
@@ -153,7 +153,6 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
   const pipeline: PipelineStage[] = [
     {
       $match: {
-        kind: SchemaKind.Model,
         hidden: false,
       },
     },
@@ -849,6 +848,20 @@ export class BaseMetricsConnector {
       }
     }
 
+    // Filter by entry kind(s) if provided (model, data-card, mirrored-model, untrusted-model)
+    if (query.kinds !== undefined && query.kinds.length > 0) {
+      const validKinds = Object.values(EntryKind)
+      const invalidKinds = query.kinds.filter((kind) => !validKinds.includes(kind))
+
+      if (invalidKinds.length > 0) {
+        throw BadReq(`Invalid entryKind. Must be one of: ${validKinds.join(', ')}.`, {
+          entryKind: invalidKinds,
+        })
+      }
+
+      mongoQuery.kind = { $in: query.kinds }
+    }
+
     // Filter by models with releases if provided
     if (query.release !== undefined) {
       const releaseModelIds = await ReleaseModel.distinct('modelId')
@@ -910,6 +923,7 @@ export class BaseMetricsConnector {
       .select({
         id: true,
         name: true,
+        kind: true,
         collaborators: true,
         _id: false,
       })
@@ -921,6 +935,7 @@ export class BaseMetricsConnector {
     return models.map((model) => ({
       entryId: model.id,
       entryName: model.name,
+      entryKind: model.kind,
       collaborators:
         model.collaborators?.map((collaborator) => ({
           entity: collaborator.entity,

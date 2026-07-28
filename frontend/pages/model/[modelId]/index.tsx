@@ -1,3 +1,4 @@
+import { Alert, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -9,6 +10,7 @@ import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
+import SourceModelIdField from 'src/entry/model/mirroredModels/SourceModelIdField'
 import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
 import Releases from 'src/entry/model/Releases'
@@ -89,7 +91,7 @@ export default function Model() {
               datatest: 'settingsTab',
               disabled: !settingsPermission.hasPermission,
               disabledText: settingsPermission.info,
-              view: <Settings entry={entry} />,
+              view: <Settings entry={entry} mutateEntry={mutateEntry} />,
             },
           ]
         : [],
@@ -98,6 +100,24 @@ export default function Model() {
 
   function requestAccess() {
     router.push(`/model/${entryId}/access-request/schema`)
+  }
+
+  function additionalHeaderDisplay() {
+    if (!entry) {
+      return undefined
+    }
+    if (entry.kind === EntryKind.MIRRORED_MODEL) {
+      return (
+        <Alert severity='info' sx={{ my: 2 }}>
+          <Typography>This is a mirrored model, some sections will be read-only.</Typography>
+          <SourceModelIdField entry={entry} mutateEntry={mutateEntry} />
+        </Alert>
+      )
+    } else if (entry.kind === EntryKind.UNTRUSTED_MODEL) {
+      return <MessageAlert message={'This is an untrusted model.'} severity='warning' />
+    } else {
+      return undefined
+    }
   }
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
@@ -125,20 +145,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: entry.id }}
           titleToCopy={entry.name}
           subheadingToCopy={entry.id}
-          additionalHeaderDisplay={
-            <>
-              {entry.kind === EntryKind.MIRRORED_MODEL && (
-                <MessageAlert
-                  message={`This is a mirrored model, some sections will be read-only.`}
-                  subHeading={`Source model ID: ${entry.settings.mirror?.sourceModelId}`}
-                  severity='info'
-                />
-              )}
-              {entry.kind === EntryKind.UNTRUSTED_MODEL && (
-                <MessageAlert message={'This is an untrusted model.'} severity='warning' />
-              )}
-            </>
-          }
+          additionalHeaderDisplay={additionalHeaderDisplay()}
         />
       )}
     </>

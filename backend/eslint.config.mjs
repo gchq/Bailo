@@ -1,34 +1,22 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
-import prettier from 'eslint-plugin-prettier'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
+
 const eslintConfig = [
   {
     ignores: ['**/node_modules', '**/dist', '**/docs/_build', '**/docs/python-docs', '**/docs/backenddocsvenv'],
   },
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-  ),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     plugins: {
-      '@typescript-eslint': typescriptEslint,
-      prettier,
       'simple-import-sort': simpleImportSort,
     },
 
@@ -60,9 +48,8 @@ const eslintConfig = [
     files: ['**/*.ts', '**/*.tsx'],
     ignores: ['**/*.config.ts', 'vitest.config.ts'],
     languageOptions: {
-      parser: tsParser,
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.eslint.json'],
         tsconfigRootDir: __dirname,
       },
     },
@@ -73,7 +60,6 @@ const eslintConfig = [
   {
     files: ['**/*.config.ts', 'vitest.config.ts'],
     languageOptions: {
-      parser: tsParser,
       parserOptions: {
         project: null,
       },

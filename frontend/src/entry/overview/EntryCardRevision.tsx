@@ -1,46 +1,72 @@
-import { Stack, TableBody, TableCell, TableRow, Typography } from '@mui/material'
+import { Checkbox, Stack, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useRouter } from 'next/router'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntryCardRevisionInterface, EntryKind, EntryKindKeys } from 'types/types'
-import { formatDateString } from 'utils/dateUtils'
+import { EntryKindKeys } from 'types/types'
+import { formatDateTimeString } from 'utils/dateUtils'
 
-type EntryCardRevisionProps = {
-  entryCard: EntryCardRevisionInterface
-  entryKind: EntryKindKeys
+export type EntryCardSnapshot = {
+  key: string
+  local?: number
+  mirrored?: number
+  createdAt: string
+  createdBy: string
+  changedStream: 'local' | 'mirrored'
+  changedVersion: number
 }
 
-export default function EntryCardRevision({ entryCard, entryKind }: EntryCardRevisionProps) {
-  const router = useRouter()
+type EntryCardRevisionProps = {
+  snapshot: EntryCardSnapshot
+  entryKind: EntryKindKeys
+  onRowClick: () => void
+  onCheckToggle: () => void
+  isChecked: boolean
+  hideCheckbox: boolean
+}
+
+export default function EntryCardRevision({
+  snapshot,
+  onRowClick,
+  onCheckToggle,
+  isChecked,
+  hideCheckbox,
+}: EntryCardRevisionProps) {
   const theme = useTheme()
+
+  const changedIsLocal = snapshot.changedStream === 'local'
+  const primaryColor = theme.palette.secondary.main
+  const mutedColor = theme.palette.text.secondary
+
+  const versionStyle = (isChanged: boolean) => ({
+    color: isChanged ? primaryColor : mutedColor,
+    fontWeight: isChanged ? 'bold' : undefined,
+    fontStyle: isChanged ? undefined : 'italic',
+  })
 
   return (
     <TableBody>
-      <TableRow
-        hover
-        onClick={() =>
-          router.push(
-            `/${entryKind === EntryKind.MIRRORED_MODEL || entryKind === EntryKind.MODEL ? EntryKind.MODEL : entryKind}/${entryCard.modelId}/history/${entryCard.version}${entryCard.mirrored ? '?mirrored=true' : ''}`,
-          )
-        }
-        sx={{ '&:hover': { cursor: 'pointer' } }}
-      >
+      <TableRow hover selected={isChecked} onClick={onRowClick} sx={{ '&:hover': { cursor: 'pointer' } }}>
         <TableCell>
-          <Stack
-            direction='row'
-            spacing={1}
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            <Typography sx={{ color: theme.palette.secondary.main }}>{entryCard.version}</Typography>
-            <Typography variant='caption'>{entryCard.mirrored && `(Mirrored)`}</Typography>
+          <Stack direction='column' spacing={0}>
+            {snapshot.local !== undefined && (
+              <Typography sx={versionStyle(changedIsLocal)}>{`v${snapshot.local}`}</Typography>
+            )}
+            {snapshot.mirrored !== undefined && (
+              <Typography sx={versionStyle(!changedIsLocal)}>{`Mirrored v${snapshot.mirrored}`}</Typography>
+            )}
           </Stack>
         </TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>
-          <UserDisplay dn={entryCard.createdBy} />
+          <UserDisplay dn={snapshot.createdBy} />
         </TableCell>
-        <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateString(entryCard.createdAt)}</TableCell>
+        <TableCell sx={{ color: theme.palette.primary.main }}>{formatDateTimeString(snapshot.createdAt)}</TableCell>
+        <TableCell sx={{ color: theme.palette.primary.main }}>
+          <Checkbox
+            checked={isChecked}
+            onClick={(event) => event.stopPropagation()}
+            onChange={onCheckToggle}
+            disabled={hideCheckbox}
+          />
+        </TableCell>
       </TableRow>
     </TableBody>
   )
