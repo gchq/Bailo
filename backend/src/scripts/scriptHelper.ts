@@ -16,7 +16,14 @@ interface ScriptDefinition<T extends ScriptArgs> {
 
 export function defineScript<T extends ScriptArgs>(def: ScriptDefinition<T>) {
   const argv = def.args(
-    yargs(hideBin(process.argv)).scriptName(def.name).usage(`${def.description}\n\nUsage: $0 [options]`),
+    yargs(hideBin(process.argv))
+      .scriptName(def.name)
+      .usage(`${def.description}\n\nUsage: $0 [options]`)
+      .epilogue(
+        'Run inside the backend container/pod:\n' +
+          `  docker compose exec backend npx tsx src/scripts/${def.name}.ts [options]\n` +
+          `  kubectl exec -it deploy/backend -- npx tsx src/scripts/${def.name}.ts [options]`,
+      ),
   )
 
   async function execute() {

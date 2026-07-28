@@ -4,23 +4,24 @@ Administrative helper scripts for Bailo.
 
 ## Running Scripts
 
-All scripts must be run inside the `backend` container/pod.
+All scripts must be executed inside the `backend` container/pod using `npx tsx`. Each script supports `--help` which
+shows its options and example invocations for Docker Compose and Kubernetes.
 
-Scripts using `defineScript()` should be run directly with `npx tsx`, not via `npm run script` (the legacy runner strips
-named flags).
+```console
+$ npx tsx src/scripts/exampleScript.ts --help
+Example script demonstrating the defineScript pattern
 
-```bash
-# Docker Compose
-docker compose exec backend npx tsx src/scripts/exampleScript.ts --modelId abc-123 --dryRun
+Usage: exampleScript [options]
 
-# Kubernetes
-kubectl exec -it deploy/backend npx tsx src/scripts/exampleScript.ts --modelId abc-123 --dryRun
-```
+Options:
+  --version  Show version number                                       [boolean]
+  --modelId  The model ID to look up                         [string] [required]
+  --dryRun   Preview without making changes           [boolean] [default: false]
+  --help     Show help                                                 [boolean]
 
-Every script supports `--help`:
-
-```bash
-docker compose exec backend npx tsx src/scripts/exampleScript.ts --help
+Run inside the backend container/pod:
+  docker compose exec backend npx tsx src/scripts/exampleScript.ts [options]
+  kubectl exec -it deploy/backend -- npx tsx src/scripts/exampleScript.ts [options]
 ```
 
 ### Legacy Scripts
