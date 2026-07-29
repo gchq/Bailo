@@ -626,13 +626,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   if (modelDiff.state && model.card) {
-    let valid: boolean
-    if (model.kind === EntryKind.MirroredModel) {
-      const mergedCard = deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata || {})
-      valid = (await validateContentAgainstSchema(model.card.schemaId, mergedCard, modelDiff.state)).valid
-    } else {
-      valid = (await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)).valid
-    }
+    const card =
+      model.kind === EntryKind.MirroredModel && model.mirroredCard?.metadata
+        ? deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata)
+        : model.card.metadata
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, modelDiff.state)
+
     if (!valid) {
       throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
     }
