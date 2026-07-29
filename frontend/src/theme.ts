@@ -141,7 +141,7 @@ export const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#764591',
+      main: '#4d3075',
     },
     secondary: {
       main: '#b5497d',
@@ -211,7 +211,7 @@ export const darkTheme = createTheme({
       main: green.A700,
     },
     background: {
-      paper: '#2d2d2d',
+      paper: '#282828;',
       default: '#2d2d2d',
     },
     action: {
