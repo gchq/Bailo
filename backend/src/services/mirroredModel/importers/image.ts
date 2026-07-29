@@ -14,6 +14,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import {
   ImageManifestV2,
+  isManifestList,
   ManifestListV2,
   ManifestResponseBodySchema,
   OCIEmptyMediaType,
@@ -200,7 +201,7 @@ export class ImageImporter extends BaseImporter {
         },
       ])
 
-      if ('manifests' in this.manifestBody) {
+      if (isManifestList(this.manifestBody)) {
         // For fat manifests, upload platform-specific manifests first (by digest)
         log.debug(
           { ...this.logData, manifestCount: this.manifestBody.manifests.length },
@@ -258,7 +259,7 @@ export class ImageImporter extends BaseImporter {
       log.debug(
         {
           image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
-          isFatManifest: 'manifests' in this.manifestBody,
+          isFatManifest: isManifestList(this.manifestBody),
           ...this.logData,
         },
         'Completed registry upload',
