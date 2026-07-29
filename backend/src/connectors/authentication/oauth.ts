@@ -81,15 +81,23 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   async hasRole(user: UserInterface, role: RoleKeys) {
+    // If the user is an admin
     if (role === Roles.Admin) {
       const adminGroup = config.oauth.cognito.adminGroupName
       const admins = await this.getEntityMembers(toEntity(OauthEntityKind.Group, adminGroup))
       return admins.includes(user.dn)
     }
+    // If the user has the compliance role
     if (role === Roles.Compliance) {
       const complianceGroup = config.oauth.cognito.complianceGroupName
       const complianceUsers = await this.getEntityMembers(toEntity(OauthEntityKind.Group, complianceGroup))
       return complianceUsers.includes(user.dn)
+    }
+    // If the user has the untrusted model role or is an admin
+    if (role === Roles.UntrustedModel) {
+      const untrustedModelGroup = config.oauth.cognito.untrustedModelGroupName
+      const untrustedModelUsers = await this.getEntityMembers(toEntity(OauthEntityKind.Group, untrustedModelGroup))
+      return untrustedModelUsers.includes(user.dn) || this.hasRole(user, Roles.Admin)
     }
     return false
   }

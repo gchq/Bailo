@@ -35,6 +35,9 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     if (role === Roles.Compliance) {
       return true
     }
+    if (role === Roles.UntrustedModel) {
+      return true
+    }
     return false
   }
 

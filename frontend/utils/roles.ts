@@ -1,4 +1,4 @@
-import { EntryInterface, EntryRole, User } from 'types/types'
+import { EntryInterface, EntryRole, RoleKeys, User, UserV3 } from 'types/types'
 
 export function getRoleDisplayName(roleShortName: string, entryRoles: EntryRole[]) {
   const role = entryRoles.find((role) => role.shortName === roleShortName)
@@ -14,4 +14,8 @@ export const hasRole = (userRoles: string[], validRoles: string[]) => {
 
 export const getCurrentUserRoles = (entry: EntryInterface | undefined, currentUser: User | undefined) => {
   return entry?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles || []
+}
+
+export const isAuthorisedToCreateUntrustedModel = (currentUser: UserV3, requiredRole: RoleKeys): boolean => {
+  return requiredRole && currentUser.systemRoles.includes(requiredRole)
 }

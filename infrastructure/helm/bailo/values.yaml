@@ -75,6 +75,7 @@ oauth:
     subdomain: "cognito domain"
     adminGroupName: ''
     complianceGroupName: ''
+    untrustedModelGroupName: ''
   identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"
