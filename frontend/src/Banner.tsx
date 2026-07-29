@@ -11,7 +11,7 @@ export default function Banner() {
     pb: 0.5,
     textAlign: 'center',
     backgroundColor: uiConfig.banner?.colour || 'black',
-    color: uiConfig.banner?.textColor ? uiConfig.banner?.textColor : 'white',
+    color: uiConfig.banner?.textColor ? uiConfig.banner?.textColor : 'black',
     borderRadius: 0,
     position: 'fixed',
     width: 1,
@@ -20,7 +20,7 @@ export default function Banner() {
 
   return (
     <Card sx={style} aria-hidden='true'>
-      <Typography>{uiConfig.banner.text}</Typography>
+      <Typography sx={{ color: 'black' }}>{uiConfig.banner.text}</Typography>
     </Card>
   )
 }

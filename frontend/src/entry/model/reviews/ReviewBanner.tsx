@@ -37,7 +37,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     <Paper
       sx={{
         color: 'white',
-        backgroundColor: theme.palette.primary.main,
+        backgroundColor: theme.palette.mode === 'light' ? theme.palette.primary.main : 'unset',
         py: 1,
         display: 'flex',
         justifyContent: 'space-around',

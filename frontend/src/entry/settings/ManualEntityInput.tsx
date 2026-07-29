@@ -25,7 +25,7 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
   return (
     <Accordion sx={{ borderTop: 'none' }}>
       <AccordionSummary
-        sx={{ pl: 0, borderTop: 'none' }}
+        sx={{ pl: 2, borderTop: 'none' }}
         expandIcon={<ExpandMoreIcon />}
         aria-controls='manual-user-add-content'
         id='manual-user-add-header'
