@@ -331,7 +331,6 @@ export const getDockerRegistryAuth = [
       req.audit = AuditInfo.RegistryLogin
       await audit.onRegistryLogin(req, user)
 
-      // necessary?
       req.audit = AuditInfo.RegistryIssueAccessToken
       await audit.onRegistryIssueAccessToken(req, user)
 
@@ -359,7 +358,7 @@ export const getDockerRegistryAuth = [
     const authResults = await Promise.all(requestedAccesses.map((a) => checkAccess(a, user, admin)))
     const grantedAccesses: Access[] = []
 
-    authResults.forEach(async (result, idx) => {
+    for (const [idx, result] of authResults.entries()) {
       const access = requestedAccesses[idx]
 
       if (!result.success) {
@@ -373,20 +372,20 @@ export const getDockerRegistryAuth = [
       }
 
       if (access.actions.includes('push')) {
-        req.audit = AuditInfo.RegistryImagePush
-        await audit.onRegistryImagePush(req, user)
+        req.audit = AuditInfo.RegistryAuthorisePush
+        await audit.onRegistryAuthorisePush(req, user)
       }
       if (access.actions.includes('pull')) {
-        req.audit = AuditInfo.RegistryImagePull
-        await audit.onRegistryImagePull(req, user)
+        req.audit = AuditInfo.RegistryAuthorisePull
+        await audit.onRegistryAuthorisePull(req, user)
       }
       if (access.actions.includes('delete')) {
-        req.audit = AuditInfo.RegistryImageDelete
-        await audit.onRegistryImageDelete(req, user)
+        req.audit = AuditInfo.RegistryAuthoriseDelete
+        await audit.onRegistryAuthoriseDelete(req, user)
       }
 
       grantedAccesses.push(access)
-    })
+    }
 
     // Enforce non-empty write authorisation
     if (

@@ -469,20 +469,20 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onRegistryImagePull(req: Request, user: UserInterface): Promise<void> {
-    this.checkEventType(AuditInfo.RegistryImagePull, req)
+  async onRegistryAuthorisePull(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryAuthorisePull, req)
     const event = this.generateEvent(req, { userDn: user.dn })
     req.log.info(event, req.audit.description)
   }
 
-  async onRegistryImagePush(req: Request, user: UserInterface): Promise<void> {
-    this.checkEventType(AuditInfo.RegistryImagePush, req)
+  async onRegistryAuthorisePush(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryAuthorisePush, req)
     const event = this.generateEvent(req, { userDn: user.dn })
     req.log.info(event, req.audit.description)
   }
 
-  async onRegistryImageDelete(req: Request, user: UserInterface): Promise<void> {
-    this.checkEventType(AuditInfo.RegistryImageDelete, req)
+  async onRegistryAuthoriseDelete(req: Request, user: UserInterface): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryAuthoriseDelete, req)
     const event = this.generateEvent(req, { userDn: user.dn })
     req.log.info(event, req.audit.description)
   }

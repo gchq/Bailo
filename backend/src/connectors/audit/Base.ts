@@ -45,7 +45,7 @@ export const ResourceKind = {
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
   User: 'user',
-  Registry: 'reigstry',
+  Registry: 'registry',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -445,41 +445,39 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Review,
   },
-  // new registry stuff goes here
-  // TODO - descriptions
   RegistryLogin: {
     typeId: 'RegistryLogin',
-    description: 'TBD',
+    description: 'User has logged into the registry',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Registry,
   },
   RegistryIssueAccessToken: {
     typeId: 'RegistryIssueAccessToken',
-    description: 'TBD',
+    description: 'Registry has issued an access token for a user',
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Registry,
   },
   RegistryIssueRefreshToken: {
     typeId: 'RegistryIssueRefreshToken',
-    description: 'TBD',
+    description: 'Registry has refreshed an already issues access token for a user',
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Registry,
   },
-  RegistryImagePull: {
-    typeId: 'RegistryImagePull',
-    description: 'TBD',
+  RegistryAuthorisePull: {
+    typeId: 'RegistryAuthorisePull',
+    description: 'Registry has authorised a user to pull an image',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Registry,
   },
-  RegistryImagePush: {
-    typeId: 'RegistryImagePush',
-    description: 'TBD',
+  RegistryAuthorisePush: {
+    typeId: 'RegistryAuthorisePush',
+    description: 'Registry has authorised a user to push an image',
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Registry,
   },
-  RegistryImageDelete: {
-    typeId: 'RegistryImageDelete',
-    description: 'TBD',
+  RegistryAuthoriseDelete: {
+    typeId: 'RegistryAuthoriseDelete',
+    description: 'Registry has authorised a user to delete an image',
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Registry,
   },
@@ -576,9 +574,9 @@ export abstract class BaseAuditConnector {
   abstract onRegistryLogin(req: Request, user: UserInterface): Promise<void>
   abstract onRegistryIssueAccessToken(req: Request, user: UserInterface): Promise<void>
   abstract onRegistryIssueRefreshToken(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryImagePull(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryImagePush(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryImageDelete(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryAuthorisePull(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryAuthorisePush(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryAuthoriseDelete(req: Request, user: UserInterface): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
