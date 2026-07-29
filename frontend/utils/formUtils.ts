@@ -229,7 +229,10 @@ export const getState = (id: string, formContext: Registry['formContext']) => {
 }
 
 // Mirrors backend `deepMergePreferFirst`
-export function deepMergePreferFirst<T extends object, U extends object>(first: T, second: U): T & U {
+export function deepMergePreferFirst<TPreferred extends object, TFallback extends object>(
+  first: TPreferred,
+  second: TFallback,
+): TPreferred & TFallback {
   return mergeWith({}, second, first, (objValue, srcValue) => {
     // Arrays: first object wins completely
     if (Array.isArray(objValue) || Array.isArray(srcValue)) {
@@ -243,7 +246,7 @@ export function deepMergePreferFirst<T extends object, U extends object>(first: 
 
     // Return undefined to let lodash continue normal deep merge.
     return undefined
-  }) as T & U
+  }) as TPreferred & TFallback
 }
 
 function getPreferFirstValue(firstValue: unknown, secondValue: unknown): unknown {
