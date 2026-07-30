@@ -2,12 +2,11 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
 import { useGetModel } from 'actions/entry'
-import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -17,8 +16,7 @@ import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { ResponseInterface, ReviewKind } from 'types/types'
-import { latestReviewsForEachUser } from 'utils/reviewUtils'
+import { ReviewKind } from 'types/types'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function AccessRequest() {
@@ -36,11 +34,6 @@ export default function AccessRequest() {
     accessRequestId: accessRequestId || '',
   })
   const {
-    responses: reviewResponses,
-    isResponsesLoading: isReviewResponsesLoading,
-    isResponsesError: isReviewResponsesError,
-  } = useGetResponses(reviews.map((review) => review._id))
-  const {
     reviews: userReviews,
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
@@ -52,15 +45,6 @@ export default function AccessRequest() {
   )
 
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
-
-  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
-
-  useEffect(() => {
-    if (!isReviewsLoading && reviews) {
-      const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
-      setReviewsWithLatestResponses(latestReviews)
-    }
-  }, [reviews, isReviewsLoading, reviewResponses])
 
   const userCanReview = useMemo(
     () =>
@@ -84,7 +68,6 @@ export default function AccessRequest() {
     isModelError,
     isCurrentUserError,
     isReviewRolesError,
-    isReviewResponsesError,
   })
   if (error) {
     return error
@@ -100,7 +83,6 @@ export default function AccessRequest() {
             isUserReviewsLoading ||
             isModelLoading ||
             isCurrentUserLoading ||
-            isReviewResponsesLoading ||
             isReviewRolesLoading) && <Loading />}
           {accessRequest && (
             <>
@@ -132,7 +114,11 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
-                <ReviewDisplay reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
+                <Stack>
+                  {reviews.map((review) => (
+                    <ReviewDisplay key={review._id} modelId={accessRequest.modelId} review={review} />
+                  ))}
+                </Stack>
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}

@@ -12,7 +12,6 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { AccessRequestInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
-import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 type AccessRequestDisplayProps = {
   accessRequest: AccessRequestInterface
@@ -34,14 +33,6 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
     isResponsesLoading: isReviewResponsesLoading,
     isResponsesError: isReviewResponsesError,
   } = useGetResponses([...reviews.map((review) => review._id)])
-
-  function reviewsWithLatestResponses() {
-    if (!isReviewsLoading && reviews) {
-      return latestReviewsForEachUser(reviews, reviewResponses)
-    } else {
-      return []
-    }
-  }
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -178,7 +169,11 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                 pt: 2,
               }}
             >
-              <ReviewDisplay reviewResponses={reviewsWithLatestResponses()} modelId={accessRequest.modelId} />
+              <Stack>
+                {reviews.map((review) => (
+                  <ReviewDisplay key={review._id} modelId={accessRequest.modelId} review={review} />
+                ))}
+              </Stack>
               {(reviewResponses.length > 0 || commentResponses.length > 0) && (
                 <IconButton href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}#responses`}>
                   <Stack direction='row' spacing={2}>

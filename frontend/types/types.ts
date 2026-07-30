@@ -599,6 +599,7 @@ type PartialReviewInterface = {
   _id: string
   modelId: string
   role: string
+  status?: string
   createdAt: string
   updatedAt: string
 }
@@ -614,6 +615,7 @@ export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }

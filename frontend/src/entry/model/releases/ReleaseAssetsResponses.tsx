@@ -7,7 +7,6 @@ import Loading from 'src/common/Loading'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryInterface, ReleaseInterface } from 'types/types'
-import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 export interface ReleaseAssetsResponsesProps {
   model: EntryInterface
@@ -59,9 +58,10 @@ export default function ReleaseAssetsResponses({
           justifyContent: 'space-between',
         }}
       >
-        {!release.minor && (
-          <ReviewDisplay modelId={model.id} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
-        )}
+        <Stack>
+          {!release.minor &&
+            reviews.map((review) => <ReviewDisplay key={review._id} modelId={model.id} review={review} />)}
+        </Stack>
         {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
           <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
             <Stack direction='row' spacing={2}>
