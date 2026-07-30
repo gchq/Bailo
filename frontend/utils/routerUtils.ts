@@ -21,7 +21,7 @@ export function buildModelCardHref(entryId: string, entryKind: EntryKindKeys, ve
 
   const query = new URLSearchParams()
 
-  query.set('fromModel', entryId)
+  query.set('fromEntry', entryId)
 
   if (entryKind === EntryKind.MIRRORED_MODEL) {
     query.set('fromMirroredVersion', String(version))
