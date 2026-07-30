@@ -7,6 +7,7 @@ import {
   Chip,
   Dialog,
   DialogContent,
+  IconButton,
   InputAdornment,
   InputBase,
   List,
@@ -14,9 +15,11 @@ import {
   ListItemText,
   Stack,
   TextField,
+  Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
-import { alpha, styled } from '@mui/material/styles'
+import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Transition } from 'src/common/Transition'
@@ -201,6 +204,8 @@ const VisuallyHidden = styled('span')({
 export default function DocsSearch(): ReactElement {
   const router = useRouter()
   const isMac = useIsMac()
+  const theme = useTheme()
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -361,38 +366,57 @@ export default function DocsSearch(): ReactElement {
 
   return (
     <Box>
-      <Search
-        role='button'
-        tabIndex={0}
-        onClick={openDialog}
-        onKeyDown={handleTriggerKeyDown}
-        aria-haspopup='dialog'
-        aria-expanded={open}
-        aria-label='Open search'
-      >
-        <StyledInputBase
-          readOnly
-          placeholder='Search...'
-          sx={{ px: 1 }}
-          startAdornment={<SearchIcon sx={{ m: 0.5 }} />}
-          endAdornment={
-            <ShortcutButton
-              type='button'
-              aria-label={`Open search (${isMac ? 'Command K' : 'Control K'})`}
-              onClick={(event) => {
-                event.stopPropagation()
-                openDialog()
-              }}
-            >
-              {isMac ? '⌘K' : 'Ctrl + K'}
-            </ShortcutButton>
-          }
-          inputProps={{
-            'aria-label': 'Search documentation, datacards and models',
-            spellCheck: false,
-          }}
-        />
-      </Search>
+      {isSmOrLarger ? (
+        <Search
+          role='button'
+          tabIndex={0}
+          onClick={openDialog}
+          onKeyDown={handleTriggerKeyDown}
+          aria-haspopup='dialog'
+          aria-expanded={open}
+          aria-label='Open search'
+        >
+          <StyledInputBase
+            readOnly
+            placeholder='Search...'
+            sx={{ px: 1 }}
+            startAdornment={<SearchIcon sx={{ m: 0.5 }} />}
+            endAdornment={
+              <ShortcutButton
+                type='button'
+                aria-label={`Open search (${isMac ? 'Command K' : 'Control K'})`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  openDialog()
+                }}
+              >
+                {isMac ? '⌘K' : 'Ctrl + K'}
+              </ShortcutButton>
+            }
+            inputProps={{
+              'aria-label': 'Search documentation, datacards and models',
+              spellCheck: false,
+            }}
+          />
+        </Search>
+      ) : (
+        <Tooltip title='Search'>
+          <IconButton
+            onClick={openDialog}
+            sx={{
+              color: 'white',
+              backgroundColor: alpha(theme.palette.common.white, 0.15),
+              '&:hover, &:focus': {
+                backgroundColor: alpha(theme.palette.common.white, 0.25),
+              },
+              textTransform: 'capitalize',
+              height: 'max-content',
+            }}
+          >
+            <SearchIcon />
+          </IconButton>
+        </Tooltip>
+      )}
       <Dialog
         disableRestoreFocus
         open={open}
@@ -423,7 +447,7 @@ export default function DocsSearch(): ReactElement {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder='Search documentation, datacards and models'
+              placeholder='What are you looking for?'
               fullWidth
               autoComplete='off'
               autoFocus
@@ -437,11 +461,11 @@ export default function DocsSearch(): ReactElement {
                       <SearchIcon />
                     </InputAdornment>
                   ),
-                  endAdornment: (
+                  endAdornment: isSmOrLarger ? (
                     <ShortcutButton type='button' color='black' aria-label='Close search' onClick={closeDialog}>
                       Esc
                     </ShortcutButton>
-                  ),
+                  ) : undefined,
                 },
               }}
             />

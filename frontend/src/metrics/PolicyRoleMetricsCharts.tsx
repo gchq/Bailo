@@ -116,7 +116,7 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
       )
       .map((row) => (
         <TableRow key={row.entryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-          <TableCell component='th' scope='row'>
+          <TableCell component='th' scope='row' sx={{ wordBreak: 'break-word' }}>
             <Typography sx={{ maxWidth: '500px' }}>
               <Link href={`/model/${row.entryId}`}>{row.entryId}</Link>
             </Typography>
@@ -160,7 +160,14 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
           Entries missing review roles
         </Typography>
-        <Box sx={{ backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1, overflow: 'auto' }}>
+        <Box
+          style={{
+            backgroundColor: theme.palette.container.main,
+            padding: 2,
+            borderRadius: 1,
+            overflow: 'auto',
+          }}
+        >
           <Table size='small'>
             <TableHead>
               <TableRow>

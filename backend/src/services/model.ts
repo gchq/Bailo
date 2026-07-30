@@ -200,7 +200,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     getAccessRequestsByModel(user, modelId),
   ])
 
-  return await useTransaction([
+  await useTransaction([
     // Initial concurrency has no overlapping Documents.
     (session) =>
       Promise.all([
@@ -273,6 +273,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     // Finally, delete the Model
     (session) => model.delete(session),
   ])
+
+  return model
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -781,9 +783,8 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     mirrored: true,
   })
 
-  if (!foundModelCardRevision && !(modelCardRevision.version === 1 && modelCardRevision.metadata === undefined)) {
+  if (!foundModelCardRevision) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
-    // Conditionally ignore model cards with a version number of 1 as these will be blank if created from schema.
     const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
     await newModelCardRevision.save()
     return modelCardRevision
@@ -791,7 +792,8 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
 }
 
 /**
- * Note that we do not authorise that the user can access the model here.
+ * @remarks
+ * Note that we do _not_ authorise that the user can access the model here.
  * This function should only be used during the import model card process.
  * Do not expose this functionality to users.
  */

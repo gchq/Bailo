@@ -26,6 +26,8 @@ from bailo.helper.mirroredModel import MirroredModel
 from bailo.helper.model import Model
 from bailo.helper.schema import Schema
 
+BAILO_URL = "http://localhost:8080"
+
 
 def pytest_configure(config):
     config.mlflow_uri = "http://127.0.0.1:5050"
@@ -33,7 +35,7 @@ def pytest_configure(config):
 
 @pytest.fixture
 def integration_client():
-    return Client("http://localhost:8080")
+    return Client(BAILO_URL)
 
 
 @pytest.fixture

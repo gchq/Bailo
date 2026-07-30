@@ -191,7 +191,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   return (
     <>
       <Title text='Documentation' />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
         <Box
           sx={[
             {
@@ -233,7 +233,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 },
                 blockquote: {
                   fontStyle: 'italic',
-                  background: grey.A200,
+                  background: theme.palette.mode === 'light' ? grey.A200 : grey.A700,
                   borderLeft: `2px solid ${grey[900]}`,
                   px: 1,
                   py: 0.5,
