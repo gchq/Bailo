@@ -372,8 +372,8 @@ export default function DocsSearch(): ReactElement {
           tabIndex={0}
           onClick={openDialog}
           onKeyDown={handleTriggerKeyDown}
-          aria-haspopup='dialog'
-          aria-expanded={open}
+          aria-haspopup='true'
+          aria-expanded={open ? 'true' : undefined}
           aria-label='Open search'
         >
           <StyledInputBase
