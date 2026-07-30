@@ -82,7 +82,6 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
 
   private async hasGroupMembership(user: UserInterface, groupName: string): Promise<boolean> {
     const members = await this.getEntityMembers(toEntity(OauthEntityKind.Group, groupName))
-
     return members.includes(user.dn)
   }
 
