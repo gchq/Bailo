@@ -18,7 +18,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -397,7 +396,12 @@ export default function Marketplace() {
                 Create
               </Button>
               <Box
-                sx={{ backgroundColor: grey[200], borderRadius: '8px', p: 2, maxWidth: { sm: '100%', md: '350px' } }}
+                sx={{
+                  backgroundColor: theme.palette.mode === 'light' ? theme.palette.background.paper : 'unset',
+                  borderRadius: '8px',
+                  p: 2,
+                  maxWidth: { sm: '100%', md: '350px' },
+                }}
               >
                 <Stack direction='row' sx={{ justifyContent: 'space-between', width: '100%', mb: 2 }}>
                   <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center' }}>
