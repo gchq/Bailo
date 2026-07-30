@@ -249,13 +249,28 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.Export]: ModelAction.Export,
     }
 
+    //If release is draft, map view action to update instead
+    const draftActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+      [ReleaseAction.Create]: ModelAction.Write,
+      [ReleaseAction.Delete]: ModelAction.Write,
+      [ReleaseAction.Update]: ModelAction.Update,
+      [ReleaseAction.View]: ModelAction.Update,
+      [ReleaseAction.Import]: ModelAction.Import,
+      [ReleaseAction.Export]: ModelAction.Export,
+    }
+
     // Is this a constrained user token.
     const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
     if (!tokenAuth.success) {
       return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    return new Array(releases.length || 1).fill(await this.model(user, model, actionMap[action]))
+    const draftResponse = await this.model(user, model, draftActionMap[action])
+    const response = await this.model(user, model, actionMap[action])
+
+    return releases && releases.length > 0
+      ? releases.map((release) => (release.draft ? draftResponse : response))
+      : [response]
   }
 
   async accessRequests(

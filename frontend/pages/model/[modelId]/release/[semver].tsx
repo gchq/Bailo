@@ -92,7 +92,6 @@ export default function Release() {
     return <Loading />
   }
 
-  //hmmm... recreate this or change
   async function handleDraftRelease() {
     if (!model || !release || !semver) {
       return
@@ -174,14 +173,19 @@ export default function Release() {
                 </Stack>
               </Stack>
               <ReleaseAssetsResponses model={model} release={release} />
-              {release && (
-                <EditableRelease
-                  release={release}
-                  isEdit={isEdit}
-                  onIsEditChange={setIsEdit}
-                  readOnly={!!model?.settings.mirror?.sourceModelId}
-                />
-              )}
+              {release &&
+                (model?.settings.mirror?.sourceModelId ? (
+                  <EditableRelease release={release} readOnly />
+                ) : (
+                  <EditableRelease
+                    release={release}
+                    readOnly={false}
+                    isEdit={isEdit}
+                    onIsEditChange={setIsEdit}
+                    isLoading={isLoading}
+                    setIsLoading={setIsLoading}
+                  />
+                ))}
               <ReviewComments
                 identifier={release.semver}
                 parentId={release._id}

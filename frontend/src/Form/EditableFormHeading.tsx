@@ -101,7 +101,13 @@ export default function EditableFormHeading({
               mb: { xs: 2 },
             }}
           >
-            <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton' startIcon={<Close />}>
+            <Button
+              variant='outlined'
+              loading={isLoading}
+              onClick={onCancel}
+              data-test='cancelEditFormButton'
+              startIcon={<Close />}
+            >
               Cancel
             </Button>
             <Button

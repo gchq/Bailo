@@ -9,18 +9,20 @@ import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 
 type DraftBannerProps = {
   text: string
-  isLoading: boolean
-  errorMessage?: string
 } & (
   | {
       showButton: false
       disableButton?: never
       handlePublish?: never
+      isLoading?: never
+      errorMessage?: never
     }
   | {
       showButton: true
       disableButton: boolean
       handlePublish: () => void
+      isLoading: boolean
+      errorMessage?: string
     }
 )
 
