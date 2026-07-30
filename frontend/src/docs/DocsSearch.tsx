@@ -404,7 +404,7 @@ export default function DocsSearch(): ReactElement {
           <IconButton
             onClick={openDialog}
             sx={{
-              color: 'white',
+              color: theme.palette.common.white,
               backgroundColor: alpha(theme.palette.common.white, 0.15),
               '&:hover, &:focus': {
                 backgroundColor: alpha(theme.palette.common.white, 0.25),
