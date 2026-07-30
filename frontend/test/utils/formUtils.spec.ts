@@ -1,5 +1,10 @@
 import { StepNoRender } from 'types/types'
-import { deepMergePreferFirst, getFormStats, setFormDataPropertiesToUndefined } from 'utils/formUtils'
+import {
+  deepMergePreferFirst,
+  getFormStats,
+  isQuestionAnswered,
+  setFormDataPropertiesToUndefined,
+} from 'utils/formUtils'
 import { describe, expect, it } from 'vitest'
 
 describe('Form utils', () => {
@@ -84,6 +89,51 @@ describe('Form utils', () => {
     it('non-mirrored models only count local state', () => {
       const stats = getFormStats(baseStep, false)
       expect(stats.totalAnswers).toBe(1)
+    })
+  })
+
+  describe('isQuestionAnswered', () => {
+    const makeFormContext = (state: any, mirroredState?: any, mirroredModel = false) =>
+      ({ state, mirroredState, mirroredModel }) as any
+
+    it('returns true for answered string field', () => {
+      const context = makeFormContext({ overview: { name: 'Test' } })
+      expect(isQuestionAnswered('root_overview_name', { type: 'string' }, context)).toBe(true)
+    })
+
+    it('returns false for empty string field', () => {
+      const context = makeFormContext({ overview: { name: '' } })
+      expect(isQuestionAnswered('root_overview_name', { type: 'string' }, context)).toBe(false)
+    })
+
+    it('returns false for missing field', () => {
+      const context = makeFormContext({})
+      expect(isQuestionAnswered('root_overview_name', { type: 'string' }, context)).toBe(false)
+    })
+
+    it('falls back to mirrored value when local is empty for mirrored models', () => {
+      const context = makeFormContext({ overview: { name: '' } }, { overview: { name: 'Mirrored' } }, true)
+      expect(isQuestionAnswered('root_overview_name', { type: 'string' }, context)).toBe(true)
+    })
+
+    it('prefers local value over mirrored when both exist', () => {
+      const context = makeFormContext({ overview: { name: 'Local' } }, { overview: { name: 'Mirrored' } }, true)
+      expect(isQuestionAnswered('root_overview_name', { type: 'string' }, context)).toBe(true)
+    })
+
+    it('does not use mirrored value for non-mirrored models', () => {
+      const context = makeFormContext({ overview: { name: '' } }, { overview: { name: 'Mirrored' } }, false)
+      expect(isQuestionAnswered('root_overview_name', { type: 'string' }, context)).toBe(false)
+    })
+
+    it('falls back to mirrored array when local array is empty (DataCardSelector edge case)', () => {
+      const context = makeFormContext({ dataCards: [] }, { dataCards: ['card-1', 'card-2'] }, true)
+      expect(isQuestionAnswered('root_dataCards', { type: 'array', items: { type: 'string' } }, context)).toBe(true)
+    })
+
+    it('returns false when both local and mirrored arrays are empty', () => {
+      const context = makeFormContext({ dataCards: [] }, { dataCards: [] }, true)
+      expect(isQuestionAnswered('root_dataCards', { type: 'array', items: { type: 'string' } }, context)).toBe(false)
     })
   })
 })

@@ -250,11 +250,14 @@ export function deepMergePreferFirst<TPreferred extends object, TFallback extend
 }
 
 function getPreferFirstValue(firstValue: unknown, secondValue: unknown): unknown {
-  // Picks a value, preferring first when both exist
-  if (firstValue !== undefined && firstValue !== null && firstValue !== '') {
-    return firstValue
+  // Picks first value when it has meaningful content, otherwise falls back to second.
+  if (firstValue === undefined || firstValue === null || firstValue === '') {
+    return secondValue
   }
-  return secondValue
+  if (Array.isArray(firstValue) && firstValue.length === 0) {
+    return secondValue
+  }
+  return firstValue
 }
 
 /**
