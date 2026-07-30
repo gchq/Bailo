@@ -89,7 +89,7 @@ function extractContent(raw) {
   let inFence = false
 
   const finishHeading = () => {
-    if (!currentHeading) {
+    if (!currentHeading || currentHeading.depth === 1) {
       return
     }
 

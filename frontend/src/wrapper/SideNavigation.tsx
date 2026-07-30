@@ -153,7 +153,7 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            {!drawerOpen && <Divider aria-hidden='true' />}
+            <Divider aria-hidden='true' />
             <NavMenuItem
               href='/api/docs'
               selectedPage={page}
