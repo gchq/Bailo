@@ -368,7 +368,6 @@ export default function DocsSearch(): ReactElement {
     <Box>
       {isSmOrLarger ? (
         <Search
-          role='button'
           tabIndex={0}
           onClick={openDialog}
           onKeyDown={handleTriggerKeyDown}
@@ -505,7 +504,6 @@ export default function DocsSearch(): ReactElement {
         >
           {entriesUnavailable && (
             <Box
-              role='alert'
               sx={(theme) => ({
                 px: 2,
                 py: 1,
@@ -531,7 +529,7 @@ export default function DocsSearch(): ReactElement {
               </Typography>
             </Box>
           ) : (
-            <List dense disablePadding id='docs-search-results' role='listbox' aria-label='Search results'>
+            <List dense disablePadding id='docs-search-results' aria-label='Search results'>
               {sections.map((section) => (
                 <Box
                   component='li'
@@ -558,7 +556,7 @@ export default function DocsSearch(): ReactElement {
                   >
                     {section.title}
                   </Typography>
-                  <List disablePadding role='group' aria-label={section.title}>
+                  <List disablePadding aria-label={section.title}>
                     {section.rows.map((row) => {
                       const index = rowIndexes.get(row.key) ?? 0
                       const isHeading = row.kind === 'heading'
@@ -576,7 +574,6 @@ export default function DocsSearch(): ReactElement {
                           key={row.key}
                           id={`docs-search-result-${index}`}
                           selected={selected}
-                          role='option'
                           aria-selected={selected}
                           onMouseEnter={() => setHighlightedIndex(index)}
                           onClick={() => navigateToRow(row)}
