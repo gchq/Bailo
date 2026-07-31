@@ -21,7 +21,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   const theme = useTheme()
   const router = useRouter()
 
-  const [modelId, urlParam, semverOrAcessRequestId] = useMemo(
+  const [modelId, urlParam, semverOrAccessRequestId] = useMemo(
     () =>
       release
         ? [release.modelId, 'release', release.semver, { release }]
@@ -30,7 +30,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   )
 
   const handleReviewOnClick = () => {
-    router.push(`/model/${modelId}/${urlParam}/${semverOrAcessRequestId}/review`)
+    router.push(`/model/${modelId}/${urlParam}/${semverOrAccessRequestId}/review`)
   }
 
   return (

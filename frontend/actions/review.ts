@@ -92,7 +92,7 @@ export function useGetReviewRequestsForModel({
     ErrorInfo
   >(
     `/api/v2/reviews?${qs.stringify({
-      mine: false,
+      // TODO Check impact of this
       modelId,
       ...(semver && { semver }),
       ...(accessRequestId && { accessRequestId }),
