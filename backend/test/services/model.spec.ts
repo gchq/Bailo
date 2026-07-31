@@ -916,6 +916,7 @@ describe('services > model', () => {
       editEntry: { hasPermission: true },
       editEntryCard: { hasPermission: true },
       createRelease: { hasPermission: true },
+      viewRelease: { hasPermission: true },
       editRelease: { hasPermission: true },
       deleteRelease: { hasPermission: true },
       pushModelImage: { hasPermission: true },
@@ -949,6 +950,7 @@ describe('services > model', () => {
     const mockModelId = '123'
     const mockPermissions: EntryUserPermissions = {
       editEntry: { hasPermission: false, info: 'mocked' },
+      viewRelease: { hasPermission: false, info: 'mocked' },
       editEntryCard: { hasPermission: false, info: 'mocked' },
       createRelease: { hasPermission: false, info: 'mocked' },
       editRelease: { hasPermission: false, info: 'mocked' },
