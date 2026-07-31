@@ -27,7 +27,13 @@ import {
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponses.js'
+import {
+  Descriptors,
+  ImageManifestV2,
+  isManifestList,
+  ManifestListV2,
+  OCIEmptyMediaType,
+} from '../utils/registryResponses.js'
 import { platformToString } from '../utils/registryUtils.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getLayersForImage } from './images/getImageLayers.js'
@@ -198,7 +204,7 @@ export async function getModelImageWithScanResults(
   let platform: string | undefined
 
   let layerRef: ImageRef
-  if ('manifests' in body) {
+  if (isManifestList(body)) {
     if (!digest) {
       throw BadReq('Must provide digest for multiplatform image', { imageRef })
     }
@@ -243,7 +249,7 @@ export async function listModelImagesWithScanResults(
               return []
             }
 
-            if ('manifests' in manifestResponse.body) {
+            if (isManifestList(manifestResponse.body)) {
               return Promise.all(
                 manifestResponse.body.manifests.map(async (manifest) => {
                   const layers = await getLayersForImage(repositoryToken, { ...img, digest: manifest.digest })
@@ -324,7 +330,7 @@ async function getTagDigestReferenceMap(
       if (rootDigest) {
         refs.add(rootDigest)
       }
-      if (body && 'manifests' in body) {
+      if (body && isManifestList(body)) {
         for (const manifest of body.manifests) {
           if (manifest.digest) {
             refs.add(manifest.digest)
@@ -441,7 +447,7 @@ async function renameMultiManifest(
       }
 
       const { body: childManifest } = await getImageTagManifests(multiRepositoryToken, digestRef)
-      if (!childManifest || 'manifests' in childManifest) {
+      if (!childManifest || isManifestList(childManifest)) {
         throw InternalError('Platform manifest missing.', { digestRef })
       }
 
@@ -582,7 +588,7 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
     })
   }
 
-  if ('manifests' in manifest.body) {
+  if (isManifestList(manifest.body)) {
     await renameMultiManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)
   } else {
     await renameStandardManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)

@@ -10,6 +10,15 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Version tag for backend & frontend (e.g. 2.19.0)'
+        required: false
+        type: string
+      artefactscan_tag:
+        description: 'Version tag for artefactscan (e.g. 4.1.0)'
+        required: false
+        type: string
 
 # jobs define their own required permissions
 permissions: {}
@@ -101,42 +110,69 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      # Log in to GHCR if release made or artefactscan_api version changed
+      - name: Determine push targets
+        id: push_targets
+        # use env to safely prevent potential shell injection
+        env:
+          IS_RELEASE: ${{ github.event_name == 'release' }}
+          IS_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+          IS_ARTEFACTSCAN: ${{ matrix.component.name == 'artefactscan' }}
+          ARTEFACTSCAN_CHANGED: ${{ steps.artefactscan_version_changed.outputs.changed == 'true' }}
+          IS_MAIN: ${{ github.ref == 'refs/heads/main' }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          ARTEFACTSCAN_TAG: ${{ inputs.artefactscan_tag }}
+        run: |
+          PUSH_RELEASE="false"
+          if [[ "$IS_ARTEFACTSCAN" == "false" ]]; then
+            if [[ "$IS_RELEASE" == "true" || ("$IS_DISPATCH" == "true" && -n "$RELEASE_TAG") ]]; then
+              PUSH_RELEASE="true"
+            fi
+          fi
+
+          PUSH_ARTEFACTSCAN="false"
+          if [[ "$IS_ARTEFACTSCAN" == "true" ]]; then
+            # ARTEFACTSCAN_CHANGED is empty (not 'true') when the version check step is skipped for non-artefactscan matrix entries
+            if [[ ("$IS_MAIN" == "true" && "$ARTEFACTSCAN_CHANGED" == "true") || ("$IS_DISPATCH" == "true" && -n "$ARTEFACTSCAN_TAG") ]]; then
+              PUSH_ARTEFACTSCAN="true"
+            fi
+          fi
+
+          echo "push_release=$PUSH_RELEASE" >> $GITHUB_OUTPUT
+          echo "push_artefactscan=$PUSH_ARTEFACTSCAN" >> $GITHUB_OUTPUT
+
       - name: Log in to GHCR
-        if: (github.event_name == 'release' && matrix.component.name != 'artefactscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true')
+        if: steps.push_targets.outputs.push_release == 'true' || steps.push_targets.outputs.push_artefactscan == 'true'
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Push backend & frontend to GHCR if release made (ignoring artefactscan_api which is published separately)
-      - name: Tag & push backend & frontend images to GHCR
-        if: github.event_name == 'release' && matrix.component.name != 'artefactscan'
-        run: |
-          docker load -i ${{ matrix.component.tar }}
-          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name }}"
-          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
+      - name: Push backend & frontend images to GHCR
+        if: steps.push_targets.outputs.push_release == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.component.context }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name || inputs.release_tag }}
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
 
-          docker tag $IMAGE_ID $VERSION_TAG
-          docker tag $IMAGE_ID $LATEST_TAG
-          docker push $VERSION_TAG
-          docker push $LATEST_TAG
-
-      # Push artefactscan_api to GHCR if version bumped
-      - name: Tag & push artefactscan image to GHCR
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true'
-        run: |
-          docker load -i ${{ matrix.component.tar }}
-          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version }}"
-          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
-
-          docker tag $IMAGE_ID $VERSION_TAG
-          docker tag $IMAGE_ID $LATEST_TAG
-          docker push $VERSION_TAG
-          docker push $LATEST_TAG
+      - name: Push artefactscan image to GHCR
+        if: steps.push_targets.outputs.push_artefactscan == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.component.context }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version || inputs.artefactscan_tag }}
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7

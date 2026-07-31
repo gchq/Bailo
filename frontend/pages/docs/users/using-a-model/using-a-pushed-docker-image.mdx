@@ -12,6 +12,7 @@ import ModelReleaseImageList from '../../../../public/docs/Model-release-images.
 > **Common questions this page answers:**
 >
 > - How do I push a container (Docker) image to Bailo?
+> - How do I stream a container image from another registry to Bailo?
 > - How do I pull a container (Docker) image from Bailo?
 > - How do I add a container image to a release?
 
@@ -37,6 +38,33 @@ The process is:
   - When prompted for a password, use the `secretKey`
 - Tag the image: `docker tag <image> <registryAddress>/<modelId>/<imageName>:<tag>`
 - Push the image: `docker push <registryAddress>/<modelId>/<imageName>:<tag>`
+
+## Streaming an image from another registry
+
+If you want to copy a container image directly from another registry into Bailo without pulling it locally first, you
+can use `docker buildx imagetools create`. This is useful for transferring images - including multiplatform images -
+between registries.
+
+The process is:
+
+1. Log in to both the source and destination registries
+2. Run the following command to stream the image directly from the source registry to Bailo:
+
+```bash
+docker buildx imagetools create \
+  --prefer-index=false \
+  --tag <registryAddress>/<modelId>/<imageName>:<tag> \
+  <sourceRegistry>/<imageName>:<tag>
+```
+
+- `--prefer-index=false` ensures a single manifest is created rather than an index, which avoids compatibility issues
+  with some container runtimes
+- `--tag` specifies the destination in the Bailo registry
+- The final argument is the full source image reference
+
+This streams the image layers directly between registries without storing them on your local machine, which is faster
+and uses less disk space than a pull-tag-push workflow. Other tools such as `skopeo copy` can also stream images between
+registries without a local pull.
 
 ## Using a image in a release
 
