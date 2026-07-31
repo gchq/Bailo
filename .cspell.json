@@ -338,6 +338,10 @@
     "@cspell/dict-lorem-ipsum/cspell-ext.json",
     "@cspell/dict-html-symbol-entities/cspell-ext.json",
     "@cspell/dict-scientific-terms-gb/cspell-ext.json",
-    "@cspell/dict-python/cspell-ext.json"
+    "@cspell/dict-python/cspell-ext.json",
+    "@cspell/dict-docker/cspell-ext.json",
+    "@cspell/dict-k8s/cspell-ext.json",
+    "@cspell/dict-typescript/cspell-ext.json",
+    "@cspell/dict-markdown/cspell-ext.json"
   ]
 }
