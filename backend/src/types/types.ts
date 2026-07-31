@@ -58,7 +58,6 @@ export interface EntryUserPermissions {
   editEntryCard: PermissionDetail
 
   createRelease: PermissionDetail
-  viewRelease: PermissionDetail
   editRelease: PermissionDetail
   deleteRelease: PermissionDetail
 

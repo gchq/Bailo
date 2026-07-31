@@ -265,12 +265,15 @@ export class BasicAuthorisationConnector {
       return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
+    if (!releases || releases.length === 0) {
+      const response = await this.model(user, model, actionMap[action])
+      return [response]
+    }
+
     const draftResponse = await this.model(user, model, draftActionMap[action])
     const response = await this.model(user, model, actionMap[action])
 
-    return releases && releases.length > 0
-      ? releases.map((release) => (release.draft ? draftResponse : response))
-      : [response]
+    return releases.map((release) => (release.draft ? draftResponse : response))
   }
 
   async accessRequests(
