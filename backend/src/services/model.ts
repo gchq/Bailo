@@ -886,6 +886,7 @@ export async function getCurrentUserPermissionsByModel(
   const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
   const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
   const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
+  const viewReleaseAuth = await authorisation.release(user, model, ReleaseAction.View)
   const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
   const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
   const pushModelImageAuth = await authorisation.image(user, model, {
@@ -903,6 +904,7 @@ export async function getCurrentUserPermissionsByModel(
     editEntryCard: authResponseToUserPermission(editEntryCardAuth),
 
     createRelease: authResponseToUserPermission(createReleaseAuth),
+    viewRelease: authResponseToUserPermission(viewReleaseAuth),
     editRelease: authResponseToUserPermission(editReleaseAuth),
     deleteRelease: authResponseToUserPermission(deleteReleaseAuth),
 
