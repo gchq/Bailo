@@ -7,7 +7,7 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { AccessRequestInterface } from 'types/types'
@@ -177,7 +177,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 pt: 2,
               }}
             >
-              <ReviewDisplay reviewResponses={reviewsWithLatestResponses()} modelId={accessRequest.modelId} />
+              <ReviewStatus reviewResponses={reviewsWithLatestResponses()} modelId={accessRequest.modelId} />
               {(reviewResponses.length > 0 || commentResponses.length > 0) && (
                 <IconButton href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}#responses`}>
                   <Stack direction='row' spacing={2}>

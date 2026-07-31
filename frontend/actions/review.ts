@@ -124,7 +124,6 @@ export function useGetReviewRequestsForModel({
     ErrorInfo
   >(
     `/api/v2/reviews?${qs.stringify({
-      // TODO Check impact of this
       modelId,
       ...(semver && { semver }),
       ...(accessRequestId && { accessRequestId }),

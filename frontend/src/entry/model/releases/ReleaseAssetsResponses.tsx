@@ -4,7 +4,7 @@ import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import Loading from 'src/common/Loading'
-import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -59,8 +59,8 @@ export default function ReleaseAssetsResponses({
           justifyContent: 'space-between',
         }}
       >
-        {!release.minor && (
-          <ReviewDisplay modelId={model.id} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
+        {reviews.length > 0 && (
+          <ReviewStatus modelId={model.id} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
         )}
         {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
           <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>

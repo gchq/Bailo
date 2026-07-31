@@ -10,7 +10,7 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
@@ -91,7 +91,7 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
-                <ReviewDisplay reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
+                <ReviewStatus reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}
