@@ -61,16 +61,16 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 2
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       - name: Build ${{ matrix.component.name }} image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
@@ -142,7 +142,7 @@ jobs:
 
       - name: Log in to GHCR
         if: steps.push_targets.outputs.push_release == 'true' || steps.push_targets.outputs.push_artefactscan == 'true'
-        uses: docker/login-action@v4
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Push backend & frontend images to GHCR
         if: steps.push_targets.outputs.push_release == 'true'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
@@ -163,7 +163,7 @@ jobs:
 
       - name: Push artefactscan image to GHCR
         if: steps.push_targets.outputs.push_artefactscan == 'true'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
@@ -175,7 +175,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.component.artifact }}
           path: ${{ matrix.component.tar }}
@@ -188,16 +188,16 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 26
           cache: "npm"
 
       - name: Cache npm dependencies
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
@@ -227,11 +227,11 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       # jq is required so that `npm ci` is not needed to generate certs
       - name: Install jq
@@ -239,7 +239,7 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: bailo_*
           path: /tmp
@@ -248,7 +248,7 @@ jobs:
         run: ls -R /tmp/bailo_*
 
       - name: Start minikube
-        uses: medyagh/setup-minikube@latest
+        uses: medyagh/setup-minikube@e9e035a86bbc3caea26a450bd4dbf9d0c453682e # v0.0.21
         with:
           driver: docker
           kubernetes-version: v1.35.0
@@ -388,31 +388,31 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 26
           cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: bailo_artefactscan
           path: /tmp
@@ -475,7 +475,7 @@ jobs:
           --wait --wait-timeout 60
 
       # e2e with Cypress
-      - uses: cypress-io/github-action@v7
+      - uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7
         if: matrix.job_name == 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
@@ -486,13 +486,13 @@ jobs:
       # Python integration
       - name: Set up Python
         if: matrix.job_name == 'integration_python'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.14"
 
       - name: Cache python pip
         if: matrix.job_name == 'integration_python'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -532,7 +532,7 @@ jobs:
           PYTEST_RUN_PATH: "lib/python"
 
       # Upload all artifacts & logs
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: failure() && matrix.job_name == 'end_to_end'
         with:
           name: cypress-screenshots-e2e
@@ -546,7 +546,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always() && matrix.job_name == 'end_to_end'
         with:
           name: logs
