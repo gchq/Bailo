@@ -87,8 +87,10 @@ export default function ReviewFooter({ accessRequest, release, includeResponsesS
                 {commentResponses.length > 0 && (
                   <Tooltip title='Comments'>
                     <Stack direction='row' spacing={1}>
-                      <CommentIcon color='primary' />
-                      <Typography variant='caption'>{commentResponses.length}</Typography>
+                      <CommentIcon data-test='commentIcon' color='primary' />
+                      <Typography data-test='commentCount' variant='caption'>
+                        {commentResponses.length}
+                      </Typography>
                     </Stack>
                   </Tooltip>
                 )}
