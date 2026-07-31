@@ -1,6 +1,14 @@
 name: bailo-prod
 
 services:
+  mongo:
+    ports:
+      - 27017:27017
+
+  nginx:
+    ports:
+      - ${EXTERNAL_PORT}:8080
+
   clamd:
     image: clamav/clamav:1.4.3_base
     networks:

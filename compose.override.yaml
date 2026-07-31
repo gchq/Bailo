@@ -16,6 +16,14 @@ services:
     build:
       target: dev
 
+  mongo:
+    ports:
+      - 27017:27017
+
+  nginx:
+    ports:
+      - ${EXTERNAL_PORT}:8080
+
   minio:
     environment:
       MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/

@@ -33,8 +33,6 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       start_period: 30s
-    ports:
-      - 27017:27017
 
   minio:
     image: bitnamilegacy/minio:2025.7.23
@@ -53,8 +51,6 @@ services:
       internal:
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - ${EXTERNAL_PORT}:8080
     depends_on:
       - frontend
       - backend

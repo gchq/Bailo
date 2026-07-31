@@ -1,0 +1,43 @@
+services:
+  nginx:
+    ports:
+      - '8082:8080'
+
+  backend:
+    environment:
+      - NODE_CONFIG_ENV=prod_docker_compose
+    networks:
+      - default
+      - internal
+      # allow communicating with A's S3 store
+      - bailo-a_default
+
+  mongo:
+
+  minio:
+    ports:
+      - '9100:9000'
+      - '9101:9001'
+
+  registry:
+    ports:
+      - '5001:5000'
+
+  mailcrab:
+    networks:
+      default:
+      internal:
+    ports:
+      - 1080:1080
+      - 1025:1025
+    image: marlonb/mailcrab:v1.8.0
+
+networks:
+  default:
+    name: bailo-b_default
+
+  internal:
+    name: bailo-b_internal
+
+  bailo-a_default:
+    external: true

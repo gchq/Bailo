@@ -1,0 +1,36 @@
+services:
+  nginx:
+    ports:
+      - '8081:8080'
+
+  backend:
+    environment:
+      - NODE_CONFIG_ENV=prod_docker_compose
+    # TODO: remove this when finalised
+    volumes:
+      - ./backend/src:/app/src
+    build:
+      target: dev
+
+  mongo:
+
+  minio:
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      default:
+        aliases:
+          # prevent minio service name collision
+          - minio-a
+
+  registry:
+    ports:
+      - '5000:5000'
+
+networks:
+  default:
+    name: bailo-a_default
+
+  internal:
+    name: bailo-a_internal
