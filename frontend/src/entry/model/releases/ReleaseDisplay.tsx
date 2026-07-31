@@ -13,17 +13,10 @@ export interface ReleaseDisplayProps {
   model: EntryInterface
   release: ReleaseInterface
   latestRelease?: string
-  hideReviewBanner?: boolean
   hideFileDownloads?: boolean
 }
 
-export default function ReleaseDisplay({
-  model,
-  release,
-  latestRelease,
-  hideReviewBanner = false,
-  hideFileDownloads,
-}: ReleaseDisplayProps) {
+export default function ReleaseDisplay({ model, release, latestRelease, hideFileDownloads }: ReleaseDisplayProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: model.id,
     semver: release.semver,
@@ -54,7 +47,7 @@ export default function ReleaseDisplay({
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
+          {reviews.length > 0 && <ReviewBanner release={release} />}
           <Stack
             spacing={1}
             sx={{

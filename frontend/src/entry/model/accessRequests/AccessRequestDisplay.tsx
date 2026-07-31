@@ -16,10 +16,9 @@ import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 type AccessRequestDisplayProps = {
   accessRequest: AccessRequestInterface
-  hideReviewBanner?: boolean
 }
 
-export default function AccessRequestDisplay({ accessRequest, hideReviewBanner = false }: AccessRequestDisplayProps) {
+export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
@@ -66,7 +65,7 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner accessRequest={accessRequest} />}
+          {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack
             sx={{
               p: 2,

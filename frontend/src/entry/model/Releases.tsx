@@ -30,13 +30,7 @@ export default function Releases({ model, readOnly = false }: ReleasesProps) {
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
   const ReleaseListItem = memoize(({ data }) => (
-    <ReleaseDisplay
-      key={data.semver}
-      model={model}
-      release={data}
-      latestRelease={getLatestRelease()}
-      hideReviewBanner={readOnly}
-    />
+    <ReleaseDisplay key={data.semver} model={model} release={data} latestRelease={getLatestRelease()} />
   ))
 
   function handleDraftNewRelease() {
