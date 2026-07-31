@@ -1,10 +1,10 @@
 {
   "version": "0.2",
-  "language": "en-GB",
+  "language": "en",
+  "caseSensitive": false,
   "words": [
     "GCHQ",
     "Bailo",
-    "bailo",
     "Stroom",
     "Stroom's",
     "maxspace",
@@ -95,7 +95,6 @@
     "SPHINXOPTS",
     "Secdb",
     "Seldon",
-    "Semvers",
     "Sklearn",
     "Snackbars",
     "Somiax",
