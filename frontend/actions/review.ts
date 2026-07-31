@@ -86,7 +86,6 @@ export function useHeadReviewRequestsForModel({
   open,
 }: GetReviewRequestsForModelQuery) {
   const queryParams = {
-    // TODO Check impact of this
     modelId,
     ...(semver && { semver }),
     ...(accessRequestId && { accessRequestId }),
@@ -124,6 +123,7 @@ export function useGetReviewRequestsForModel({
     ErrorInfo
   >(
     `/api/v2/reviews?${qs.stringify({
+      mine: false,
       modelId,
       ...(semver && { semver }),
       ...(accessRequestId && { accessRequestId }),

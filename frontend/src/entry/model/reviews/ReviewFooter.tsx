@@ -54,47 +54,49 @@ export default function ReviewFooter({ accessRequest, release, includeResponses 
   }
 
   return (
-    <>
-      <Stack
-        direction='row'
-        spacing={2}
-        sx={{
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        {reviews.length > 0 && (
-          <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
-        )}
-        {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
-          <IconButton
-            href={
-              `/model/${modelId}` +
-              (release ? `/release/${release.semver}` : `/accessRequest/${accessRequest.id}`) +
-              `#responses`
-            }
-          >
-            <Stack direction='row' spacing={2}>
-              {reviewResponses.length > 0 && (
-                <Tooltip title='Reviews'>
-                  <Stack direction='row' spacing={1}>
-                    <ListAltIcon color='primary' />
-                    <Typography variant='caption'>{reviewResponses.length}</Typography>
-                  </Stack>
-                </Tooltip>
-              )}
-              {commentResponses.length > 0 && (
-                <Tooltip title='Comments'>
-                  <Stack direction='row' spacing={1}>
-                    <CommentIcon color='primary' />
-                    <Typography variant='caption'>{commentResponses.length}</Typography>
-                  </Stack>
-                </Tooltip>
-              )}
-            </Stack>
-          </IconButton>
-        )}
-      </Stack>
-    </>
+    reviews.length > 0 && (
+      <>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {reviews.length > 0 && (
+            <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
+          )}
+          {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
+            <IconButton
+              href={
+                `/model/${modelId}` +
+                (release ? `/release/${release.semver}` : `/accessRequest/${accessRequest.id}`) +
+                `#responses`
+              }
+            >
+              <Stack direction='row' spacing={2}>
+                {reviewResponses.length > 0 && (
+                  <Tooltip title='Reviews'>
+                    <Stack direction='row' spacing={1}>
+                      <ListAltIcon color='primary' />
+                      <Typography variant='caption'>{reviewResponses.length}</Typography>
+                    </Stack>
+                  </Tooltip>
+                )}
+                {commentResponses.length > 0 && (
+                  <Tooltip title='Comments'>
+                    <Stack direction='row' spacing={1}>
+                      <CommentIcon color='primary' />
+                      <Typography variant='caption'>{commentResponses.length}</Typography>
+                    </Stack>
+                  </Tooltip>
+                )}
+              </Stack>
+            </IconButton>
+          )}
+        </Stack>
+      </>
+    )
   )
 }
