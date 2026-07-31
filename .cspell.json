@@ -331,7 +331,8 @@
     "zyxwvu"
   ],
   "dictionaries": ["npm", "softwareTerms", "node", "html", "css", "bash", "en-gb", "misc", "la"],
-  "ignorePaths": ["package.json", "package-lock.json", "node_modules", "*env", "sonar-project.properties"],
+  "ignorePaths": ["package.json", "package-lock.json", "*env", "sonar-project.properties"],
+  "useGitignore": true,
   "import": [
     "@cspell/dict-la/cspell-ext.json",
     "@cspell/dict-lorem-ipsum/cspell-ext.json",

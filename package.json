@@ -9,7 +9,7 @@
     "build": "npm --prefix ./backend/ run build && npm --prefix ./frontend/ run build",
     "test": "npm --prefix ./backend/ run test && npm --prefix ./frontend/ run test",
     "lint": "(npm --prefix ./backend run lint 2>&1 | sed 's/^/[backend] /') & (npm --prefix ./frontend run lint 2>&1 | sed 's/^/[frontend] /') & wait",
-    "lint:spelling": "cspell --gitignore --no-must-find-files \"**/*.*\"",
+    "lint:spelling": "cspell --no-must-find-files \"**/*.*\"",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
