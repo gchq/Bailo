@@ -126,7 +126,7 @@ export default function ReleaseSelector({
             }}
           >
             <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
-            <ReviewFooter model={model} release={release} includeResponses={false} />
+            <ReviewFooter release={release} includeResponsesSummary={false} />
           </Stack>
         </Stack>
       </ListItem>

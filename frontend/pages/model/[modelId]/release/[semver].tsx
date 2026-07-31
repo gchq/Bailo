@@ -80,7 +80,7 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
-              <ReviewFooter release={release} />
+              <ReviewFooter release={release} includeResponsesSummary={false} />
               {release && (
                 <EditableRelease
                   release={release}

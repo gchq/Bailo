@@ -1,21 +1,18 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
-import { useGetResponses } from 'actions/response'
-import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
+import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { ResponseInterface, ReviewKind } from 'types/types'
-import { latestReviewsForEachUser } from 'utils/reviewUtils'
+import { ReviewKind } from 'types/types'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -27,29 +24,9 @@ export default function AccessRequest() {
     modelId,
     accessRequestId,
   )
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId: modelId as string,
-    accessRequestId: accessRequestId || '',
-  })
-  const {
-    responses: reviewResponses,
-    isResponsesLoading: isReviewResponsesLoading,
-    isResponsesError: isReviewResponsesError,
-  } = useGetResponses(reviews.map((review) => review._id))
-
-  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
-
-  useEffect(() => {
-    if (!isReviewsLoading && reviews) {
-      const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
-      setReviewsWithLatestResponses(latestReviews)
-    }
-  }, [reviews, isReviewsLoading, reviewResponses])
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
-    isReviewsError,
-    isReviewResponsesError,
   })
   if (error) {
     return error
@@ -60,7 +37,7 @@ export default function AccessRequest() {
       <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
-          {(isAccessRequestLoading || isReviewsLoading || isReviewResponsesLoading) && <Loading />}
+          {isAccessRequestLoading && <Loading />}
           {accessRequest && (
             <>
               {<ReviewBanner accessRequest={accessRequest} />}
@@ -91,7 +68,7 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
-                <ReviewStatus reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
+                <ReviewFooter accessRequest={accessRequest} includeResponsesSummary={false} />
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}

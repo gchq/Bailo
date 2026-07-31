@@ -13,15 +13,15 @@ export type ReviewFooterProps =
   | {
       release: ReleaseInterface
       accessRequest?: never
-      includeResponses?: boolean
+      includeResponsesSummary?: boolean
     }
   | {
       release?: never
       accessRequest: AccessRequestInterface
-      includeResponses?: boolean
+      includeResponsesSummary?: boolean
     }
 
-export default function ReviewFooter({ accessRequest, release, includeResponses = true }: ReviewFooterProps) {
+export default function ReviewFooter({ accessRequest, release, includeResponsesSummary = true }: ReviewFooterProps) {
   const _id = release ? release._id : accessRequest._id
   const modelId = release ? release.modelId : accessRequest.modelId
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -40,7 +40,7 @@ export default function ReviewFooter({ accessRequest, release, includeResponses 
     isResponsesError: isReviewResponsesError,
   } = useGetResponses([...reviews.map((review) => review._id)])
 
-  const error = MultipleErrorWrapper('Unable to load release', {
+  const error = MultipleErrorWrapper('Unable to load review content', {
     isReviewResponsesError,
     isReviewsError,
     isCommentResponsesError,
@@ -67,7 +67,7 @@ export default function ReviewFooter({ accessRequest, release, includeResponses 
           {reviews.length > 0 && (
             <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
           )}
-          {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
+          {includeResponsesSummary && (
             <IconButton
               href={
                 `/model/${modelId}` +
