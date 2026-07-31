@@ -1,12 +1,11 @@
 import { Box, Divider, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useGetReviewRequestsForModel } from 'actions/review'
 import Loading from 'src/common/Loading'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
 import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
 export interface ReleaseDisplayProps {
@@ -17,22 +16,13 @@ export interface ReleaseDisplayProps {
 }
 
 export default function ReleaseDisplay({ model, release, latestRelease, hideFileDownloads }: ReleaseDisplayProps) {
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId: model.id,
-    semver: release.semver,
-  })
-
   const { isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const error = MultipleErrorWrapper('Unable to load release', {
-    isReviewsError,
-    isReleasesError,
-  })
-  if (error) {
-    return error
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
-  if (isReviewsLoading || isReleasesLoading) {
+  if (isReleasesLoading) {
     return <Loading />
   }
 
@@ -47,7 +37,7 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {reviews.length > 0 && <ReviewBanner release={release} />}
+          {<ReviewBanner release={release} />}
           <Stack
             spacing={1}
             sx={{
