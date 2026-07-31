@@ -3,8 +3,8 @@ import { useGetReleasesForModelId } from 'actions/release'
 import Loading from 'src/common/Loading'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
-import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
+import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
@@ -53,7 +53,7 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
                 mode='interactive'
                 hideFileDownloads={hideFileDownloads}
               />
-              <ReleaseAssetsResponses model={model} release={release} />
+              <ReviewFooter release={release} />
             </Stack>
           </Stack>
         </Box>

@@ -1,61 +1,19 @@
-import CommentIcon from '@mui/icons-material/ChatBubble'
-import ListAltIcon from '@mui/icons-material/ListAlt'
-import { Box, Card, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { useGetResponses } from 'actions/response'
-import { useGetReviewRequestsForModel } from 'actions/review'
+import { Box, Card, Grid, Stack, Typography } from '@mui/material'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
+import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
 import { AccessRequestInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
-import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 type AccessRequestDisplayProps = {
   accessRequest: AccessRequestInterface
 }
 
 export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId: accessRequest.modelId,
-    accessRequestId: accessRequest.id,
-  })
-  const {
-    responses: commentResponses,
-    isResponsesLoading: isCommentResponsesLoading,
-    isResponsesError: isCommentResponsesError,
-  } = useGetResponses([accessRequest._id])
-  const {
-    responses: reviewResponses,
-    isResponsesLoading: isReviewResponsesLoading,
-    isResponsesError: isReviewResponsesError,
-  } = useGetResponses([...reviews.map((review) => review._id)])
-
-  function reviewsWithLatestResponses() {
-    if (!isReviewsLoading && reviews) {
-      return latestReviewsForEachUser(reviews, reviewResponses)
-    } else {
-      return []
-    }
-  }
-
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
-  }
-
-  if (isReviewResponsesError) {
-    return <MessageAlert message={isReviewResponsesError.info.message} severity='error' />
-  }
-  if (isCommentResponsesError) {
-    return <MessageAlert message={isCommentResponsesError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {(isReviewsLoading || isReviewResponsesLoading || isCommentResponsesLoading) && <Loading />}
       <Stack
         direction='row'
         spacing={4}
@@ -168,43 +126,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Grid>
               </Card>
             </Stack>
-            <Stack
-              direction='row'
-              spacing={2}
-              sx={{
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                pt: 2,
-              }}
-            >
-              <ReviewStatus reviewResponses={reviewsWithLatestResponses()} modelId={accessRequest.modelId} />
-              {(reviewResponses.length > 0 || commentResponses.length > 0) && (
-                <IconButton href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}#responses`}>
-                  <Stack direction='row' spacing={2}>
-                    {reviewResponses.length > 0 && (
-                      <Tooltip title='Reviews'>
-                        <Stack direction='row' spacing={1}>
-                          <ListAltIcon color='primary' />
-                          <Typography variant='caption' data-test='reviewCount'>
-                            {reviewResponses.length}
-                          </Typography>
-                        </Stack>
-                      </Tooltip>
-                    )}
-                    {commentResponses.length > 0 && (
-                      <Tooltip title='Comments'>
-                        <Stack direction='row' spacing={1}>
-                          <CommentIcon color='primary' />
-                          <Typography variant='caption' data-test='commentCount'>
-                            {commentResponses.length}
-                          </Typography>
-                        </Stack>
-                      </Tooltip>
-                    )}
-                  </Stack>
-                </IconButton>
-              )}
-            </Stack>
+            <ReviewFooter accessRequest={accessRequest} />
           </Stack>
         </Box>
       </Stack>

@@ -6,30 +6,34 @@ import { useGetReviewRequestsForModel } from 'actions/review'
 import Loading from 'src/common/Loading'
 import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { AccessRequestInterface, ReleaseInterface } from 'types/types'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
-export interface ReleaseAssetsResponsesProps {
-  model: EntryInterface
-  release: ReleaseInterface
-  includeResponses?: boolean
-}
+export type ReviewFooterProps =
+  | {
+      release: ReleaseInterface
+      accessRequest?: never
+      includeResponses?: boolean
+    }
+  | {
+      release?: never
+      accessRequest: AccessRequestInterface
+      includeResponses?: boolean
+    }
 
-export default function ReleaseAssetsResponses({
-  model,
-  release,
-  includeResponses = true,
-}: ReleaseAssetsResponsesProps) {
+export default function ReviewFooter({ accessRequest, release, includeResponses = true }: ReviewFooterProps) {
+  const _id = release ? release._id : accessRequest._id
+  const modelId = release ? release.modelId : accessRequest.modelId
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId: model.id,
-    semver: release.semver,
+    modelId,
+    ...(release ? { semver: release.semver } : { accessRequestId: accessRequest.id }),
   })
 
   const {
     responses: commentResponses,
     isResponsesLoading: isCommentResponsesLoading,
     isResponsesError: isCommentResponsesError,
-  } = useGetResponses([release._id])
+  } = useGetResponses([_id])
   const {
     responses: reviewResponses,
     isResponsesLoading: isReviewResponsesLoading,
@@ -60,10 +64,16 @@ export default function ReleaseAssetsResponses({
         }}
       >
         {reviews.length > 0 && (
-          <ReviewStatus modelId={model.id} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
+          <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
         )}
         {includeResponses && (reviewResponses.length > 0 || commentResponses.length > 0) && (
-          <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
+          <IconButton
+            href={
+              `/model/${modelId}` +
+              (release ? `/release/${release.semver}` : `/accessRequest/${accessRequest.id}`) +
+              `#responses`
+            }
+          >
             <Stack direction='row' spacing={2}>
               {reviewResponses.length > 0 && (
                 <Tooltip title='Reviews'>
