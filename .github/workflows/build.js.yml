@@ -486,7 +486,7 @@ jobs:
       # Python integration
       - name: Set up Python
         if: matrix.job_name == 'integration_python'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.14"
 
