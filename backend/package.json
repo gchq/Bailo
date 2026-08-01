@@ -69,7 +69,7 @@
     "pino": "^10.3.0",
     "pino-http": "^11.0.0",
     "pino-opentelemetry-transport": "^4.0.2",
-    "proxy-agent": "^8.0.1",
+    "proxy-agent": "^8.0.2",
     "qs": "^6.15.2",
     "sanitize-html": "^2.17.4",
     "semver": "^7.8.1",
