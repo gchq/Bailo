@@ -33,7 +33,7 @@
     "@opentelemetry/host-metrics": "^0.38.3",
     "@opentelemetry/sdk-metrics": "^2.10.0",
     "@smithy/node-http-handler": "^4.0.4",
-    "agenda": "^6.2.5",
+    "agenda": "^6.2.6",
     "app-root-path": "^3.1.0",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.3.0",
