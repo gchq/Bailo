@@ -459,7 +459,7 @@ export const AuditInfo = {
   },
   RegistryIssueRefreshToken: {
     typeId: 'RegistryIssueRefreshToken',
-    description: 'Registry has refreshed an already issues access token for a user',
+    description: 'Registry has refreshed an already issued access token for a user',
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Registry,
   },

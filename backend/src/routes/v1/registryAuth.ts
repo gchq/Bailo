@@ -400,10 +400,10 @@ export const getDockerRegistryAuth = [
       throw Forbidden({ requestedAccesses }, 'Requested image is not accessible - no authorised scopes.', rlog)
     }
 
+    const accessToken = await issueAccessToken(user, grantedAccesses)
+
     req.audit = AuditInfo.RegistryIssueAccessToken
     await audit.onRegistryIssueAccessToken(req, user)
-
-    const accessToken = await issueAccessToken(user, grantedAccesses)
     rlog.trace('Successfully generated access token.')
 
     res.json({ token: accessToken })
