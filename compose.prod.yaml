@@ -1,10 +1,6 @@
 name: bailo-prod
 
 services:
-  mongo:
-    ports:
-      - 27017:27017
-
   nginx:
     ports:
       - ${EXTERNAL_PORT}:8080

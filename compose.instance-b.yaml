@@ -12,8 +12,6 @@ services:
       # allow communicating with A's S3 store
       - bailo-shared
 
-  mongo:
-
   minio:
     ports:
       - '9100:9000'

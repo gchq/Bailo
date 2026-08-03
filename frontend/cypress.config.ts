@@ -41,9 +41,9 @@ export default defineConfig({
           })
           try {
             await s3.send(new CreateBucketCommand({ Bucket: 'exports' }))
-          } catch (error: any) {
-            if (error?.name !== 'BucketAlreadyOwnedByYou' && error?.name !== 'BucketAlreadyExists') {
-              throw error
+          } catch (err: unknown) {
+            if (Error.isError(err) && err?.name !== 'BucketAlreadyOwnedByYou' && err?.name !== 'BucketAlreadyExists') {
+              throw err
             }
           }
           return null

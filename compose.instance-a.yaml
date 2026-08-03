@@ -7,8 +7,6 @@ services:
     environment:
       - NODE_CONFIG_ENV=prod_docker_compose
 
-  mongo:
-
   minio:
     ports:
       - '9000:9000'

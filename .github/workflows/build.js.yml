@@ -423,13 +423,13 @@ jobs:
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
           docker image ls -a
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
+          rm -f /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
 
       - name: Load artefactscan image
         if: matrix.job_name != 'cross_instance'
         run: |
           docker load --input /tmp/bailo_artefactscan.tar
-          rm -rf /tmp/bailo_artefactscan.tar
+          rm -f /tmp/bailo_artefactscan.tar
 
       - name: Tag images for cross-instance
         if: matrix.job_name == 'cross_instance'
