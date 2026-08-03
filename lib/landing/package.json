@@ -37,16 +37,16 @@
     "remark-gfm": "4.0.1",
     "shelljs": "^0.10.0",
     "styled-components": "^6.3.12",
-    "swagger-ui-dist": "^5.31.2",
-    "swiper": "^14.0.1"
+    "swagger-ui-dist": "^5.32.11",
+    "swiper": "^14.0.7"
   },
   "devDependencies": {
-    "@types/node": "26.1.0",
+    "@types/node": "26.1.2",
     "@types/react": "19.2.17",
     "@types/styled-components": "^5.1.36",
     "@types/swagger-ui-dist": "^3.30.6",
-    "eslint": "10.6.0",
-    "eslint-config-next": "16.2.9",
+    "eslint": "10.8.0",
+    "eslint-config-next": "16.2.12",
     "typescript": "6.0.3"
   },
   "scarfSettings": {
