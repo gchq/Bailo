@@ -510,6 +510,7 @@ jobs:
         if: matrix.job_name == 'cross_instance'
         with:
           wait-on: 'http://localhost:8081/api/v2/config/ui, http://localhost:8082/api/v2/config/ui'
+          wait-on-timeout: 180
           working-directory: ./frontend
           install: false
           spec: cypress/e2e/cross-instance/**/*
