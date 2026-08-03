@@ -16,12 +16,7 @@ describe('Mirrored Model tests', () => {
   let instanceASourceModelId: string
   let instanceBDestinationModelId: string
 
-  beforeEach(function () {
-    cy.task('log', `TEST ${this.currentTest?.title}`)
-  })
-
   before(() => {
-    cy.task('log', `BEFORE START ${Date.now()}`)
     // Must get `let` vars in `before` otherwise they may not exist in subsequent tests
     instanceAUrl = Cypress.expose('instanceAUrl')
     instanceBUrl = Cypress.expose('instanceBUrl')
