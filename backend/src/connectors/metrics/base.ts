@@ -25,6 +25,7 @@ import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
+import { sortSemvers } from '../../utils/version.js'
 import {
   addInterval,
   buildModelMatchStage,
@@ -489,7 +490,7 @@ function buildUnapprovedReleaseEntries(
       continue
     }
 
-    const sortedReleases = [...unapprovedReleases].sort()
+    const sortedReleases = sortSemvers([...unapprovedReleases])
 
     totalUnapprovedReleases += sortedReleases.length
 
@@ -586,6 +587,7 @@ function buildReleaseRoleMap(reviews: ReleaseReview[], approvedReviewIds: Set<st
 
     entry.requiredRoles.add(review.role)
 
+    // Dependant on just 1 approval - there could be additional in pending state
     if (approvedReviewIds.has(review._id.toString())) {
       entry.approvedRoles.add(review.role)
     }
