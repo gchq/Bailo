@@ -17,7 +17,9 @@ import {
   Tabs,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
@@ -49,6 +51,8 @@ const ALL_KINDS = 'All'
 
 export default function Marketplace() {
   const router = useRouter()
+  const theme = useTheme()
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   function parseQueryArray(value?: string | string[]): string[] {
     if (!value) {
@@ -74,7 +78,11 @@ export default function Marketplace() {
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [titleOnly, setTitleOnly] = useState(false)
-  const [isFiltersHidden, setIsFiltersHidden] = useState(false)
+  const [isFiltersHidden, setIsFiltersHidden] = useState(!isSmOrLarger)
+
+  useEffect(() => {
+    setIsFiltersHidden(!isSmOrLarger)
+  }, [isSmOrLarger])
 
   useEffect(() => {
     if (!router.isReady) {
@@ -202,8 +210,6 @@ export default function Marketplace() {
       }),
     ]
   }, [reviewRoles])
-
-  const theme = useTheme()
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -397,10 +403,10 @@ export default function Marketplace() {
               </Button>
               <Box
                 sx={{
-                  backgroundColor: theme.palette.mode === 'light' ? theme.palette.background.paper : 'unset',
+                  backgroundColor: theme.palette.mode === 'light' ? grey[200] : grey[800],
                   borderRadius: '8px',
                   p: 2,
-                  maxWidth: { sm: '100%', md: '350px' },
+                  width: { sm: '100%', md: '350px' },
                 }}
               >
                 <Stack direction='row' sx={{ justifyContent: 'space-between', width: '100%', mb: 2 }}>
@@ -410,9 +416,11 @@ export default function Marketplace() {
                     </Typography>
                     <HelpDialog title='Search Information' content={<SearchInfo />} />
                   </Stack>
-                  <Button size='small' onClick={() => setIsFiltersHidden(!isFiltersHidden)}>
-                    {isFiltersHidden ? 'Show filters' : 'Hide filters'}
-                  </Button>
+                  {!isSmOrLarger && (
+                    <Button size='small' onClick={() => setIsFiltersHidden(!isFiltersHidden)}>
+                      {isFiltersHidden ? 'Show filters' : 'Hide filters'}
+                    </Button>
+                  )}
                 </Stack>
                 {!isFiltersHidden && (
                   <>
