@@ -490,10 +490,6 @@ jobs:
           up -d
           --wait --wait-timeout 60
 
-      - name: Create shared network
-        if: matrix.job_name == 'cross_instance'
-        run: docker network create bailo-shared
-
       - name: Start cross-instance services
         if: matrix.job_name == 'cross_instance'
         run: |
