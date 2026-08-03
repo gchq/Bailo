@@ -18,4 +18,14 @@ describe('utils > version > sortSemvers', () => {
   test('handles prerelease versions correctly', () => {
     expect(sortSemvers(['1.0.0', '1.0.0-beta.1', '1.0.0-alpha.1'])).toEqual(['1.0.0-alpha.1', '1.0.0-beta.1', '1.0.0'])
   })
+
+  test('handles duplicate semvers', () => {
+    expect(sortSemvers(['7.3.5', '1.0.0', '3.4.4', '9.0.2', '1.0.0'])).toEqual([
+      '1.0.0',
+      '1.0.0',
+      '3.4.4',
+      '7.3.5',
+      '9.0.2',
+    ])
+  })
 })
