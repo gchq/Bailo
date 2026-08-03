@@ -10,7 +10,7 @@ services:
       - default
       - internal
       # allow communicating with A's S3 store
-      - bailo-a_default
+      - bailo-shared
 
   mongo:
 
@@ -39,5 +39,5 @@ networks:
   internal:
     name: bailo-b_internal
 
-  bailo-a_default:
+  bailo-shared:
     external: true

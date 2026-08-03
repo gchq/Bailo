@@ -1,7 +1,13 @@
 const instanceASourceModelName = 'Source Model'
 const instanceASourceModelSummary = 'This model is uploaded to instance A.'
+const instanceASourceModelReleaseSemver = '1.0.0'
+const instanceASourceModelReleaseDescription = 'The first release!'
 
 const instanceBDestinationModelName = 'Destination Model'
+
+const testDockerImage = 'testmodelimage'
+const testDockerImageTag = '1'
+const testFile = 'test.txt'
 
 describe('Mirrored Model tests', () => {
   let instanceAUrl: string
@@ -70,6 +76,60 @@ describe('Mirrored Model tests', () => {
 
         cy.visit(`${instanceAUrl}/model/${instanceASourceModelId}`)
         cy.contains(instanceASourceModelSummary)
+
+        cy.request('POST', `${instanceAUrl}/api/v2/user/tokens`, {
+          description: 'Docker cross instance integration test',
+          scope: 'all',
+          modelIds: [instanceASourceModelId],
+          actions: ['model:read', 'model:write', 'image:read', 'image:write'],
+        }).then((response) => {
+          expect(response.status).to.eq(200)
+          const accessKey = response.body.token.accessKey
+          const secretKey = response.body.token.secretKey
+
+          cy.exec(`docker login ${instanceAUrl} -u ${accessKey} -p ${secretKey}`, { timeout: 60000 })
+          const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
+          const testDockerImageFull = `${instanceAUrl.replace('http://', '')}/${instanceASourceModelId}/${testDockerImageName}`
+          cy.exec(`docker build --tag ${testDockerImage} cypress/fixtures/docker-image`, { timeout: 60000 })
+          cy.exec(`docker tag ${testDockerImage} "${testDockerImageFull}"`, {
+            timeout: 60000,
+          })
+          cy.exec(`docker push "${testDockerImageFull}"`, {
+            timeout: 60000,
+          })
+
+          cy.fixture(testFile).then((file) => {
+            cy.request(
+              'POST',
+              `${instanceAUrl}/api/v2/model/${instanceASourceModelId}/files/upload/simple?name=${testFile}&mime=text/plain`,
+              file,
+            ).then((response) => {
+              expect(response.status).to.eq(200)
+              const fileId = response.body.file.id
+
+              cy.request('POST', `${instanceAUrl}/api/v2/model/${instanceASourceModelId}/releases`, {
+                modelId: instanceASourceModelId,
+                semver: instanceASourceModelReleaseSemver,
+                notes: instanceASourceModelReleaseDescription,
+                minor: false,
+                fileIds: [fileId],
+                images: [
+                  {
+                    repository: instanceASourceModelId,
+                    name: testDockerImage,
+                    tag: testDockerImageTag,
+                  },
+                ],
+                modelCardVersion: 2,
+              })
+
+              cy.visit(`${instanceAUrl}/model/${instanceASourceModelId}/release/${instanceASourceModelReleaseSemver}`)
+              cy.contains(instanceASourceModelReleaseDescription)
+              cy.contains(testFile)
+              cy.contains(testDockerImageName)
+            })
+          })
+        })
       })
     })
   })
@@ -110,9 +170,9 @@ describe('Mirrored Model tests', () => {
     )
   })
 
-  it("exported the source model on instance A's model card and imported to the mirrored model on instance B", () => {
+  it('exported the model card on instance A and imported to instance B', () => {
     cy.visit(`${instanceAUrl}/model/${instanceASourceModelId}?tab=settings&category=mirrored_models`)
-    cy.get('[data-test=createAccessRequestButton]').type(instanceBDestinationModelId)
+    cy.get('[data-test=destinationModelIdTextField]').type(instanceBDestinationModelId)
     cy.contains('I agree that this model is suitable for exporting')
     cy.get('[data-test=destinationModelIdSaveButton]').click()
 
@@ -138,6 +198,103 @@ describe('Mirrored Model tests', () => {
           })
         },
       )
+    })
+  })
+
+  it('exported the updated model card and release with artefacts on instance A and imported to instance B', () => {
+    cy.request('PUT', `${instanceAUrl}/api/v2/model/${instanceASourceModelId}/model-cards`, {
+      metadata: {
+        overview: {
+          modelSummary: instanceASourceModelSummary,
+          metrics: [
+            {
+              name: 'accuracy',
+              value: 100,
+            },
+          ],
+        },
+      },
+    }).then((response) => {
+      expect(response.status).to.eq(200)
+
+      cy.visit(`${instanceAUrl}/model/${instanceASourceModelId}?tab=settings&category=mirrored_models`)
+      cy.contains('I agree that this model is suitable for exporting')
+      cy.get('[data-test=exportModelAgreementCheckbox]').click()
+
+      cy.get('[data-test=releaseSelectorSelectReleasesButton]').click({ force: true })
+      cy.get(`[data-test="releaseSelectorSemverCheckbox${instanceASourceModelReleaseSemver}"]`).click()
+      cy.get('[data-test=releaseSelectorConfirmReleasesButton]').click()
+
+      cy.get('[data-test=exportModelAgreementSubmitButton]').scrollIntoView().click()
+
+      cy.request(
+        'GET',
+        `${instanceAUrl}/api/v2/model/${instanceASourceModelId}/release/${instanceASourceModelReleaseSemver}`,
+      ).then((response) => {
+        expect(response.status).to.eq(200)
+        const fileId = response.body.release.fileIds[0]
+        const imageId = response.body.release.images[0].id
+
+        cy.wait(5000)
+
+        cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedModelUrl) => {
+          cy.task('getSignedUrl', `${fileId}.tar.gz`).then((signedFileUrl) => {
+            cy.task('getSignedUrl', `${imageId}.tar.gz`).then((signedImageUrl) => {
+              const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
+              cy.origin(
+                instanceBUrl,
+                {
+                  args: {
+                    instanceBDestinationModelId,
+                    signedModelUrl,
+                    signedFileUrl,
+                    signedImageUrl,
+                    instanceASourceModelReleaseSemver,
+                    instanceASourceModelReleaseDescription,
+                    testFile,
+                    testDockerImageName,
+                  },
+                },
+                ({
+                  instanceBDestinationModelId,
+                  signedModelUrl,
+                  signedFileUrl,
+                  signedImageUrl,
+                  instanceASourceModelReleaseSemver,
+                  instanceASourceModelReleaseDescription,
+                  testFile,
+                  testDockerImageName,
+                }) => {
+                  cy.request('POST', '/api/v2/model/import/s3', {
+                    payloadUrl: signedModelUrl,
+                  }).then((response) => {
+                    expect(response.status).to.eq(200)
+
+                    cy.request('POST', '/api/v2/model/import/s3', {
+                      payloadUrl: signedFileUrl,
+                    }).then((response) => {
+                      expect(response.status).to.eq(200)
+
+                      cy.request('POST', '/api/v2/model/import/s3', {
+                        payloadUrl: signedImageUrl,
+                      }).then((response) => {
+                        expect(response.status).to.eq(200)
+
+                        cy.wait(5000)
+
+                        cy.visit(`/model/${instanceBDestinationModelId}/release/${instanceASourceModelReleaseSemver}`)
+                        cy.contains(instanceASourceModelReleaseDescription)
+                        cy.contains(testFile)
+                        cy.contains(testDockerImageName)
+                      })
+                    })
+                  })
+                },
+              )
+            })
+          })
+        })
+      })
     })
   })
 })

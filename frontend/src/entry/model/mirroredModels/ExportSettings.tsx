@@ -83,7 +83,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                     value={destinationModelId}
                     onChange={handleDestinationModelId}
                     size='small'
-                    data-test='createAccessRequestButton'
+                    data-test='destinationModelIdTextField'
                   />
                 </LabelledInput>
                 <Button

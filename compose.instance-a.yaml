@@ -6,11 +6,6 @@ services:
   backend:
     environment:
       - NODE_CONFIG_ENV=prod_docker_compose
-    # TODO: remove this when finalised
-    volumes:
-      - ./backend/src:/app/src
-    build:
-      target: dev
 
   mongo:
 
@@ -19,7 +14,8 @@ services:
       - '9000:9000'
       - '9001:9001'
     networks:
-      default:
+      # allow communicating with B's backend
+      shared:
         aliases:
           # prevent minio service name collision
           - minio-a
@@ -34,3 +30,6 @@ networks:
 
   internal:
     name: bailo-a_internal
+
+  shared:
+    name: bailo-shared
