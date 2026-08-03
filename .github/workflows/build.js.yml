@@ -479,6 +479,18 @@ jobs:
                 path: '/home/runner/work/Bailo/Bailo/logs/out.log',
               },
             },
+
+            ui: {
+              modelMirror: {
+                import: {
+                  enabled: true,
+                },
+                export: {
+                  enabled: true,
+                  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+                },
+              },
+            },
             ${{ matrix.job_name == 'cross_instance' && 'connectors: { artefactScanners: { kinds: [] } },' || '' }}
           }
           EOT
