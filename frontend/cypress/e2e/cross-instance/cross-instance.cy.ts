@@ -179,8 +179,6 @@ describe('Mirrored Model tests', () => {
     cy.get('[data-test=exportModelAgreementCheckbox]').click()
     cy.get('[data-test=exportModelAgreementSubmitButton]').scrollIntoView().click()
 
-    cy.wait(1000)
-
     cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedUrl) => {
       cy.origin(
         instanceBUrl,
@@ -191,10 +189,8 @@ describe('Mirrored Model tests', () => {
           }).then((response) => {
             expect(response.status).to.eq(200)
 
-            cy.wait(1000)
-
             cy.visit(`/model/${instanceBDestinationModelId}`)
-            cy.contains(instanceASourceModelSummary)
+            cy.contains(instanceASourceModelSummary, { timeout: 15000 })
           })
         },
       )
@@ -234,8 +230,6 @@ describe('Mirrored Model tests', () => {
         expect(response.status).to.eq(200)
         const fileId = response.body.release.fileIds[0]
         const imageId = response.body.release.images[0].id
-
-        cy.wait(5000)
 
         cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedModelUrl) => {
           cy.task('getSignedUrl', `${fileId}.tar.gz`).then((signedFileUrl) => {
@@ -280,10 +274,8 @@ describe('Mirrored Model tests', () => {
                       }).then((response) => {
                         expect(response.status).to.eq(200)
 
-                        cy.wait(5000)
-
                         cy.visit(`/model/${instanceBDestinationModelId}/release/${instanceASourceModelReleaseSemver}`)
-                        cy.contains(instanceASourceModelReleaseDescription)
+                        cy.contains(instanceASourceModelReleaseDescription, { timeout: 15000 })
                         cy.contains(testFile)
                         cy.contains(testDockerImageName)
                       })
