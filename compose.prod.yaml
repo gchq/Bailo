@@ -51,7 +51,7 @@ services:
         condition: service_healthy
       registry:
         condition: service_started
-      minio:
+      seaweedfs:
         condition: service_started
       mongo:
         condition: service_started

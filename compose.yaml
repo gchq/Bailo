@@ -36,15 +36,24 @@ services:
     ports:
       - 27017:27017
 
-  minio:
-    image: bitnamilegacy/minio:2025.7.23
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.40
     networks:
-      internal:
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      - internal
+    command:
+      - server
+      - -dir=/data
+      - -master.port=9333
+      - -volume.port=8080
+      - -volume.max=100
+      - -filer
+      - -filer.port=8888
+      - -s3
+      - -s3.port=8333
+      - -s3.config=/etc/seaweedfs/s3_config.json
     volumes:
-      - minioVolume:/bitnami/minio
+      - seaweedfsVolume:/data
+      - ./infrastructure/seaweedfs/s3_config.json:/etc/seaweedfs/s3_config.json:ro
 
   nginx:
     image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim
@@ -68,8 +77,8 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
       REGISTRY_HTTP_TLS_KEY: /certs/key.pem
 
-      REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
-      REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+      REGISTRY_STORAGE_S3_ACCESSKEY: bailoadmin
+      REGISTRY_STORAGE_S3_SECRETKEY: bailoadmin
 
       REGISTRY_AUTH: token
       REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
@@ -105,7 +114,7 @@ services:
     depends_on:
       registry:
         condition: service_started
-      minio:
+      seaweedfs:
         condition: service_started
       mongo:
         condition: service_started
@@ -116,8 +125,8 @@ services:
       - NODE_CONFIG_ENV=${INSTANCE_NAME}_docker_compose
 
 volumes:
-  minioVolume:
-    name: ${INSTANCE_NAME}_minioVolume
+  seaweedfsVolume:
+    name: ${INSTANCE_NAME}_seaweedfsVolume
   mongoVolume:
     name: ${INSTANCE_NAME}_mongoVolume
 
