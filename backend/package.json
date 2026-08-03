@@ -20,7 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@agendajs/mongo-backend": "^4.0.3",
-    "@asteasolutions/zod-to-openapi": "^7.3.4",
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@aws-sdk/client-cognito-identity-provider": "3.1058.0",
     "@aws-sdk/client-kms": "3.1058.0",
     "@aws-sdk/client-s3": "3.1058.0",
