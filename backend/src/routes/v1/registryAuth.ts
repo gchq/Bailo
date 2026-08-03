@@ -358,15 +358,14 @@ export const getDockerRegistryAuth = [
     const authResults = await Promise.all(requestedAccesses.map((a) => checkAccess(a, user, admin)))
     const grantedAccesses: Access[] = []
 
-    // for (const [idx, result] of authResults.entries()) {
-    authResults.forEach((result, idx) => {
+    for (const [idx, result] of authResults.entries()) {
       const access = requestedAccesses[idx]
 
       if (!result.success) {
         // Ignore unauthorised read-only scopes (containerd cross-mount)
         if (isReadOnlyActions(access.actions)) {
           rlog.debug({ access }, 'Ignoring unauthorised read-only scope')
-          return
+          continue
         }
 
         throw Forbidden({ access }, result.info, rlog)
@@ -374,19 +373,19 @@ export const getDockerRegistryAuth = [
 
       if (access.actions.includes('push')) {
         const auditReq = Object.assign(Object.create(req), { audit: AuditInfo.RegistryAuthorisePush }) as Request
-        audit.onRegistryAuthorisePush(auditReq, user)
+        await audit.onRegistryAuthorisePush(auditReq, user)
       }
       if (access.actions.includes('pull')) {
         const auditReq = Object.assign(Object.create(req), { audit: AuditInfo.RegistryAuthorisePull }) as Request
-        audit.onRegistryAuthorisePull(auditReq, user)
+        await audit.onRegistryAuthorisePull(auditReq, user)
       }
       if (access.actions.includes('delete')) {
         const auditReq = Object.assign(Object.create(req), { audit: AuditInfo.RegistryAuthoriseDelete }) as Request
-        audit.onRegistryAuthoriseDelete(auditReq, user)
+        await audit.onRegistryAuthoriseDelete(auditReq, user)
       }
 
       grantedAccesses.push(access)
-    })
+    }
 
     // Enforce non-empty write authorisation
     if (
