@@ -124,7 +124,7 @@ export default function NewSchema() {
           return setErrorMessage(error)
         }
 
-        router.push('/schemas/list')
+        router.push('/admin?section=schema-list')
       } catch (e) {
         if (e instanceof SyntaxError) {
           setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
