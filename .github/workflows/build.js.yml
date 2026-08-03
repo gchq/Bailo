@@ -479,6 +479,7 @@ jobs:
                 path: '/home/runner/work/Bailo/Bailo/logs/out.log',
               },
             },
+            ${{ matrix.job_name == 'cross_instance' && 'connectors: { artefactScanners: { kinds: [] } },' || '' }}
           }
           EOT
 
