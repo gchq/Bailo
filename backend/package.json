@@ -65,7 +65,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^9.0.3",
     "outdent": "^0.8.0",
-    "p-queue": "^9.3.0",
+    "p-queue": "^9.3.3",
     "pino": "^10.3.0",
     "pino-http": "^11.0.0",
     "pino-opentelemetry-transport": "^4.0.2",
