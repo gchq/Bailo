@@ -26,7 +26,7 @@
     "@aws-sdk/client-s3": "3.1058.0",
     "@aws-sdk/client-sesv2": "3.1058.0",
     "@aws-sdk/lib-storage": "3.1058.0",
-    "@huggingface/hub": "^2.13.0",
+    "@huggingface/hub": "^2.14.4",
     "@opentelemetry/auto-instrumentations-node": "^0.79.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.221.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.221.0",
