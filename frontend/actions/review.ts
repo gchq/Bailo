@@ -77,21 +77,11 @@ type GetReviewRequestsForModelQuery = {
   open?: boolean
 } & additionalParameters
 
-export function useHeadReviewRequestsForModel({
-  modelId,
-  semver,
-  accessRequestId,
-  reviewId,
-  kind,
-  open,
-}: GetReviewRequestsForModelQuery) {
+export function useHeadReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
   const queryParams = {
     modelId,
     ...(semver && { semver }),
     ...(accessRequestId && { accessRequestId }),
-    ...(reviewId && { reviewId }),
-    ...(kind && { kind }),
-    ...(open !== undefined && { open }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
