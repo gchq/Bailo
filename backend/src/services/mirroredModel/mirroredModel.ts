@@ -18,7 +18,7 @@ import { dedupeByKey } from '../../utils/array.js'
 import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
-import { ManifestListV2 } from '../../utils/registryResponses.js'
+import { isManifestList, ManifestListV2 } from '../../utils/registryResponses.js'
 import { getHttpsAgent } from '../http.js'
 import { getImageLayers } from '../images/getImageLayers.js'
 import log from '../log.js'
@@ -354,7 +354,7 @@ export async function addCompressedRegistryImageComponents(
     })
   }
 
-  const isFatManifest = 'manifests' in tagManifest
+  const isFatManifest = isManifestList(tagManifest)
 
   log.debug(
     {

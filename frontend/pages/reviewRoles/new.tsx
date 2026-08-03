@@ -48,7 +48,7 @@ export default function ReviewRolesForm() {
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
-      router.push(`/reviewRoles/view`)
+      router.push(`/admin?section=roles`)
     }
 
     setLoading(false)

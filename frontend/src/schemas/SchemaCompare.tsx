@@ -11,8 +11,8 @@ import { SchemaInterface } from 'types/types'
 
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
-
   const theme = useTheme()
+
   const isMdOrLarger = useMediaQuery(theme.breakpoints.up('lg'))
 
   const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>(null)
@@ -34,6 +34,7 @@ export default function SchemaCompare() {
           newValue={JSON.stringify(afterSchema, null, 2)}
           splitView={true}
           compareMethod={DiffMethod.WORDS}
+          useDarkTheme={theme.palette.mode === 'dark'}
           styles={{
             gutter: {
               pre: {
@@ -46,7 +47,7 @@ export default function SchemaCompare() {
     } else {
       return <Typography sx={{ textAlign: 'center' }}>Please select two schemas to compare</Typography>
     }
-  }, [beforeSchema, afterSchema])
+  }, [beforeSchema, afterSchema, theme])
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />

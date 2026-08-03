@@ -186,8 +186,13 @@ export const ManifestListV2Schema = z.object({
 })
 export type ManifestListV2 = z.infer<typeof ManifestListV2Schema>
 
-// TODO: handle multi-platform images
 export const ManifestResponseBodySchema = z.union([ImageManifestV2Schema, ManifestListV2Schema])
+export function isManifestList(manifest: ImageManifestV2 | ManifestListV2): manifest is ManifestListV2 {
+  if ('mediaType' in manifest && ManifestListMediaTypeSchema.safeParse(manifest.mediaType).success) {
+    return true
+  }
+  return 'manifests' in manifest
+}
 
 export const ManifestResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
   'docker-content-digest': HeaderValueSchema,
