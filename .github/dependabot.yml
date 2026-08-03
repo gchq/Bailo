@@ -7,12 +7,6 @@ updates:
       interval: 'monthly'
     versioning-strategy: increase
     open-pull-requests-limit: 25
-    groups:
-      formatting-stack:
-        patterns:
-          - prettier
-          - lint-staged
-          - husky
 
   # Frontend
   - package-ecosystem: 'npm'
@@ -26,8 +20,6 @@ updates:
         patterns:
           - react
           - react-dom
-          - react-diff-viewer-continued
-          - react-to-print
           - next
           - next-router-mock
           - '@next/*'
@@ -65,37 +57,6 @@ updates:
       types-stack:
         patterns:
           - '@types/*'
-      typescript-stack:
-        patterns:
-          - typescript
-      utility-stack:
-        patterns:
-          - lodash-es
-          - semver
-          - uuid
-          - clsx
-          - dayjs
-          - pretty-bytes
-          - randomcolor
-          - http-status-codes
-          - is-docker
-          - js-cookie
-          - jsonschema
-          - sharp
-      data-fetching-stack:
-        patterns:
-          - swr
-          - axios
-      swc-optional-stack:
-        patterns:
-          - '@next/swc-*'
-      telemetry-stack:
-        patterns:
-          - '@vercel/otel'
-      formatting-stack:
-        patterns:
-          - prettier
-          - '@fontsource/*'
 
   # Backend
   - package-ecosystem: 'npm'
@@ -136,16 +97,6 @@ updates:
         patterns:
           - pino
           - pino-*
-          - morgan
-      typescript-stack:
-        patterns:
-          - typescript
-          - tsx
-          - vite
-          - vite-tsconfig-paths
-      types-stack:
-        patterns:
-          - '@types/*'
       express-stack:
         patterns:
           - express
@@ -153,67 +104,18 @@ updates:
           - express-session
           - body-parser
           - helmet
-          - swagger-ui-express
-      email-stack:
-        patterns:
-          - mjml
-          - nodemailer
-          - handlebars
       validation-stack:
         patterns:
           - zod
           - zod-error
           - '@asteasolutions/zod-to-openapi'
-          - jsonschema
-          - json-schema-traverse
-      utility-stack:
+      types-stack:
         patterns:
-          - lodash-es
-          - semver
-          - uuid
-          - nanoid
-          - bytes
-          - chalk
-          - dedent-js
-          - outdent
-          - yargs
-          - utility-types
-          - p-queue
-          - node-cache
-          - globals
-      auth-stack:
+          - '@types/*'
+      vite-stack:
         patterns:
-          - grant
-          - jsonwebtoken
-          - bcryptjs
-      file-handling-stack:
-        patterns:
-          - tar-stream
-          - content-disposition
-          - form-data
-          - sanitize-html
-          - showdown
-          - xmlbuilder2
-      network-stack:
-        patterns:
-          - node-fetch
-          - proxy-agent
-          - undici
-          - qs
-      scanning-stack:
-        patterns:
-          - clamscan
-      misc-stack:
-        patterns:
-          - app-root-path
-          - config
-          - dev-null
-          - nodemon
-          - shelljs
-          - '@huggingface/hub'
-      formatting-stack:
-        patterns:
-          - prettier
+          - vite
+          - vite-tsconfig-paths
 
   # Landing page
   - package-ecosystem: 'npm'
@@ -246,13 +148,6 @@ updates:
       types-stack:
         patterns:
           - '@types/*'
-      utility-stack:
-        patterns:
-          - dedent-js
-          - shelljs
-          - swagger-ui-dist
-          - swiper
-          - typescript
 
   # Docker images
   - package-ecosystem: 'docker'
@@ -337,17 +232,13 @@ updates:
           - sphinx-*
           - myst_parser
           - nbsphinx
-      dev-tools-stack:
-        patterns:
-          - pre_commit
-          - ipython
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'monthly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 12
     groups:
       github-actions:
         patterns:
