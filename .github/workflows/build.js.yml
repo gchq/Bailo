@@ -384,7 +384,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        job_name: [end_to_end, integration_python]
+        job_name: [end_to_end, integration_python, cross_instance]
 
     steps:
       # Clone repository
@@ -412,6 +412,7 @@ jobs:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
+        if: matrix.job_name != 'cross_instance'
         uses: actions/download-artifact@v8
         with:
           name: bailo_artefactscan
@@ -421,9 +422,23 @@ jobs:
         run: |
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
-          docker load --input /tmp/bailo_artefactscan.tar
           docker image ls -a
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_artefactscan.tar
+          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
+
+      - name: Load artefactscan image
+        if: matrix.job_name != 'cross_instance'
+        run: |
+          docker load --input /tmp/bailo_artefactscan.tar
+          rm -rf /tmp/bailo_artefactscan.tar
+
+      - name: Tag images for cross-instance
+        if: matrix.job_name == 'cross_instance'
+        run: |
+          docker tag bailo_backend:latest bailo_backend:bailo_a
+          docker tag bailo_backend:latest bailo_backend:bailo_b
+          docker tag bailo_frontend:latest bailo_frontend:bailo_a
+          docker tag bailo_frontend:latest bailo_frontend:bailo_b
+          docker image ls -a
 
       # Create logs directory
       - run: mkdir logs
@@ -468,11 +483,22 @@ jobs:
           EOT
 
       - name: Start services
+        if: matrix.job_name != 'cross_instance'
         run: >
           docker compose -f compose.yaml -f compose.prod.yaml
           --env-file prod.env --progress=plain --parallel=-1
           up -d
           --wait --wait-timeout 60
+
+      - name: Create shared network
+        if: matrix.job_name == 'cross_instance'
+        run: docker network create bailo-shared
+
+      - name: Start cross-instance services
+        if: matrix.job_name == 'cross_instance'
+        run: |
+          INSTANCE_NAME=bailo_a docker compose -f compose.yaml -f compose.instance-a.yaml -p bailo-a --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
+          INSTANCE_NAME=bailo_b docker compose -f compose.yaml -f compose.instance-b.yaml -p bailo-b --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
 
       # e2e with Cypress
       - uses: cypress-io/github-action@v7
@@ -482,6 +508,17 @@ jobs:
           working-directory: ./frontend
           install: false
           spec: cypress/e2e/bailo/**/*
+
+      # Cross-instance mirroring tests
+      - uses: cypress-io/github-action@v7
+        if: matrix.job_name == 'cross_instance'
+        with:
+          wait-on: 'http://localhost:8081/api/v2/config/ui, http://localhost:8082/api/v2/config/ui'
+          working-directory: ./frontend
+          install: false
+          spec: cypress/e2e/cross-instance/**/*
+        env:
+          CYPRESS_BASE_URL: http://localhost:8081
 
       # Python integration
       - name: Set up Python
@@ -533,21 +570,33 @@ jobs:
 
       # Upload all artifacts & logs
       - uses: actions/upload-artifact@v7
-        if: failure() && matrix.job_name == 'end_to_end'
+        if: failure() && (matrix.job_name == 'end_to_end' || matrix.job_name == 'cross_instance')
         with:
-          name: cypress-screenshots-e2e
+          name: cypress-screenshots-${{ matrix.job_name }}
           path: frontend/cypress/screenshots
 
       - name: Dump docker compose logs
-        if: always()
+        if: always() && matrix.job_name != 'cross_instance'
         run: docker compose logs > logs/stack.log
 
+      - name: Dump cross-instance logs
+        if: always() && matrix.job_name == 'cross_instance'
+        run: |
+          docker compose -p bailo-a logs > logs/instance-a.log 2>&1
+          docker compose -p bailo-b logs > logs/instance-b.log 2>&1
+
       - name: Docker Compose Logs
-        if: always()
+        if: always() && matrix.job_name != 'cross_instance'
         run: cat logs/stack.log
 
+      - name: Cross-instance logs
+        if: always() && matrix.job_name == 'cross_instance'
+        run: |
+          cat logs/instance-a.log
+          cat logs/instance-b.log
+
       - uses: actions/upload-artifact@v7
-        if: always() && matrix.job_name == 'end_to_end'
+        if: always() && (matrix.job_name == 'end_to_end' || matrix.job_name == 'cross_instance')
         with:
-          name: logs
+          name: logs-${{ matrix.job_name }}
           path: logs
