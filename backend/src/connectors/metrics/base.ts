@@ -16,6 +16,7 @@ import {
   EntryVolumeInterval,
   GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
+import { GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
 import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
 import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
@@ -680,6 +681,76 @@ function buildEntryVolumeCacheKey(interval: EntryVolumeInterval, start: Date, en
   return ['entryVolume', interval, start.toISOString(), end.toISOString(), timezone ?? 'none'].join(':')
 }
 
+interface CalculatedLifecycleComplianceMetrics {
+  summary: {
+    count: number
+  }
+  entries: {
+    entryId: string
+    dueDate: string
+  }[]
+}
+
+async function calculateLifecycleComplianceMetrics(
+  weeksUntilDue: number,
+  organisation?: string,
+): Promise<CalculatedLifecycleComplianceMetrics> {
+  const dueDateCutOff = new Date()
+  dueDateCutOff.setDate(dueDateCutOff.getDate() + weeksUntilDue * 7)
+  const openLifecycleReviewsPipeline: PipelineStage[] = [
+    {
+      $match: {
+        kind: ReviewKind.Lifecycle,
+        dueDate: { $lte: dueDateCutOff },
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'responses',
+      },
+    },
+    // Reviews with no responses are considered open.
+    { $match: { responses: { $size: 0 } } },
+    // Join the referenced model so we can filter by its organisation.
+    {
+      $lookup: {
+        from: 'v2_models',
+        localField: 'modelId',
+        foreignField: 'id',
+        as: 'model',
+      },
+    },
+    { $unwind: '$model' },
+    {
+      $project: {
+        _id: 0,
+        entryId: '$modelId',
+        dueDate: 1,
+        modelOrganisation: '$model.organisation',
+      },
+    },
+  ]
+
+  // Filter by the referenced model's organisation when one is provided.
+  if (organisation !== undefined) {
+    openLifecycleReviewsPipeline.push({ $match: { modelOrganisation: organisation } })
+  }
+
+  // Drop the temporary organisation field from the final projection.
+  openLifecycleReviewsPipeline.push({ $unset: 'modelOrganisation' })
+
+  const entries = await ReviewModel.aggregate(openLifecycleReviewsPipeline)
+  return {
+    summary: {
+      count: entries.length,
+    },
+    entries,
+  }
+}
+
 export class BaseMetricsConnector {
   organisations: string[]
 
@@ -1206,5 +1277,36 @@ export class BaseMetricsConnector {
           roles: collaborator.roles ?? [],
         })) ?? [],
     }))
+  }
+
+  async getLifecycleComplianceMetrics(
+    user: UserInterface,
+    weeksUntilDue: number,
+  ): Promise<GetLifecycleComplianceMetricsResponse> {
+    await checkUserIsAuthorised(user)
+    const global = await calculateLifecycleComplianceMetrics(weeksUntilDue)
+
+    const organisationIds = await this.getOrganisationIds()
+
+    const byOrganisation = await Promise.all(
+      organisationIds.map(async (org) => ({
+        organisation: org || 'unset',
+        ...(await calculateLifecycleComplianceMetrics(weeksUntilDue, org)),
+      })),
+    )
+
+    const result: Omit<GetLifecycleComplianceMetricsResponse, 'lastUpdated'> = { global, byOrganisation }
+
+    const lastUpdated = new Date().toISOString()
+
+    setCached(MetricsCacheKeys.NO_RELEASES_COMPLIANCE, {
+      data: result,
+      lastUpdated,
+    })
+
+    return {
+      ...result,
+      lastUpdated,
+    }
   }
 }
