@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { Roles } from '../../src/connectors/authentication/constants.js'
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'

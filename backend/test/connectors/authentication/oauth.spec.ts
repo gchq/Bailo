@@ -178,19 +178,13 @@ describe('connectors > authentication > oauth', () => {
 
   test('hasRole > admin access grants untrusted model role', async () => {
     const connector = new OauthAuthenticationConnector()
-    const getEntityMembersSpy = vi
-      .spyOn(connector, 'getEntityMembers')
-      .mockResolvedValueOnce([]) // untrusted model group check fails
-      .mockResolvedValueOnce([user.dn]) // admin group check succeeds
+    const getEntityMembersSpy = vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([user.dn])
 
     const result = await connector.hasRole(user, Roles.UntrustedModel)
 
     expect(result).toBe(true)
-    expect(getEntityMembersSpy).toHaveBeenNthCalledWith(1, toEntity('group', config.oauth.cognito.adminGroupName))
-    expect(getEntityMembersSpy).toHaveBeenNthCalledWith(
-      2,
-      toEntity('group', config.oauth.cognito.untrustedModelGroupName),
-    )
+    expect(getEntityMembersSpy).toHaveBeenCalledTimes(1)
+    expect(getEntityMembersSpy).toHaveBeenCalledWith(toEntity('group', config.oauth.cognito.adminGroupName))
   })
 
   test('hasRole > returns false if user is neither in the untrusted model group nor an admin', async () => {

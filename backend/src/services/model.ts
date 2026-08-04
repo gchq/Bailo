@@ -52,15 +52,6 @@ function checkMirroredModelRestriction(model: ModelInterface) {
   }
 }
 
-async function checkUserIsAuthorisedForUntrustedModel(user: UserInterface) {
-  if (!(await authentication.hasRole(user, Roles.UntrustedModel))) {
-    throw Forbidden('You do not have the required role.', {
-      userDn: user.dn,
-      requiredRole: Roles.UntrustedModel,
-    })
-  }
-}
-
 type UntrustedModelRestrictionCheck = {
   state?: string | undefined
   visibility?: EntryVisibilityKeys
@@ -82,10 +73,6 @@ export type CreateModelParams = Pick<
 > &
   OptionalCreateModelParams
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
-  if (modelParams.kind === EntryKind.UntrustedModel) {
-    await checkUserIsAuthorisedForUntrustedModel(user)
-  }
-
   const modelId = convertStringToId(modelParams.name)
 
   if (modelParams.collaborators) {
