@@ -106,7 +106,9 @@ const config: PartialDeep<Config> = {
       },
       userPoolId: '',
       userIdAttribute: '',
-      untrustedModelGroupName: '',
+      adminGroupName: 'admin',
+      complianceGroupName: 'compliance',
+      untrustedModelGroupName: 'untrusted-model',
     },
   },
   artefactScanning: {

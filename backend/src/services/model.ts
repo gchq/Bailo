@@ -52,9 +52,6 @@ function checkMirroredModelRestriction(model: ModelInterface) {
   }
 }
 
-/**
- * Returns true if the user is authorised to manage untrusted models.
- */
 async function checkUserIsAuthorisedForUntrustedModel(user: UserInterface) {
   if (!(await authentication.hasRole(user, Roles.UntrustedModel))) {
     throw Forbidden('You do not have the required role.', {
