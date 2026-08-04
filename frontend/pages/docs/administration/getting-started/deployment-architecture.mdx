@@ -20,7 +20,7 @@ Bailo requires six core services to operate.
 - **Backend** (Node.js) - API (Application Programming Interface) server handling all business logic and data access
 - **NGINX** - Reverse proxy routing requests to frontend, backend, and registry
 - **MongoDB** - Stores all metadata: models, releases, schemas, reviews, users, tokens
-- **Object Storage** (MinIO, S3-compatible) - Stores model files and registry blobs. S3 stands for Simple Storage
+- **Object Storage** (SeaweedFS, S3-compatible) - Stores model files and registry blobs. S3 stands for Simple Storage
   Service.
 - **Container Registry** (Docker Registry) - Hosts container (Docker) images pushed to models
 
@@ -44,7 +44,7 @@ All requests enter through the NGINX reverse proxy and are routed to the appropr
    - API requests (`/api/...`) go to the **Backend**
    - Container registry requests (`/v2/...`) go to the **Container Registry**
 3. The **Backend** reads and writes metadata to **MongoDB**
-4. File uploads and downloads go through the **Backend** to **Object Storage** (MinIO)
+4. File uploads and downloads go through the **Backend** to **Object Storage** (SeaweedFS)
 5. Container image push/pull operations go through the **Container Registry**, which also uses **Object Storage**
 6. When files or images are uploaded, the **Backend** triggers scans via the **ClamD** and **ArtefactScan** service (if
    configured)
@@ -56,6 +56,9 @@ Bailo can be deployed using Docker Compose for development or Helm for productio
 ### Docker compose (Development & Small Deployments)
 
 The repository includes a `compose.yaml` that runs the core services locally. This is the simplest way to get started.
+The Docker Compose environment uses SeaweedFS as its S3-compatible object store. SeaweedFS exposes its S3 API on
+`http://localhost:8333` and its administration panel through NGINX on `http://localhost:23646`.
+
 There is also ``compose.prod.yaml` to run all services locally. This is also used in the repository's GitHub workflows
 for testing.
 
@@ -75,7 +78,7 @@ For production deployments, Bailo provides Helm charts for deploying to Kubernet
 </Alert>
 
 `Dockerfile.standalone` builds a single container that runs a self-contained Bailo instance. It packages the frontend,
-backend, NGINX, MongoDB, MinIO, the container registry, and Mailcrab into one image using `supervisord`.
+backend, NGINX, MongoDB, SeaweedFS, the container registry, and Mailcrab into one image using `supervisord`.
 
 This is not the normal development path. For day-to-day local development, use `compose.yaml`, because it runs each
 service separately and supports rebuilding, inspecting, and restarting individual services more easily.
@@ -101,7 +104,7 @@ Build and run the standalone image from the repository root:
 
 ```bash
 docker build . -t second-bailo -f Dockerfile.standalone
-docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
+docker run --rm -p 4318:8080 -p 23646:23646 --network dev_internal --name second-bailo second-bailo:latest
 ```
 
 The standalone instance is then available at `http://localhost:4318`.
@@ -114,7 +117,8 @@ name, for example `<INSTANCE_NAME>_internal`.
 Bailo stores structured metadata in MongoDB and binary artefacts in S3-compatible object storage:
 
 - **MongoDB** holds all structured metadata (models, schemas, reviews, tokens, etc.)
-- **Object Storage (MinIO/S3)** holds binary artefacts (model files, container image layers)
+- **Object Storage (SeaweedFS/S3)** holds binary artefacts in both Docker Compose and standalone environments (model
+  files, container image layers).
 
 Both need to be backed up to prevent data loss.
 

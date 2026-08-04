@@ -51,8 +51,9 @@ Follow the instructions below to get a local development environment running. Yo
 #### Development Build
 
 To run in development mode (modified files on your host machine will be reloaded into the running application):
-
-> [!NOTE] Ensure Docker and Docker Compose are installed before running these commands.
+<!-- prettier-ignore -->
+> [!NOTE]
+> Ensure Docker and Docker Compose are installed before running these commands.
 
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
@@ -135,7 +136,7 @@ You can test out your new deployment using the example models which can be found
 | API             | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](#)              |
 | Docker Registry | [![Docker][Docker]](https://www.docker.com/)                                                                                                                                                 |
 | Mongo           | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                |
-| S3              | [![MinIO][Minio]](https://www.min.io/)                                                                                                                                                       |
+| S3              | [![SeaweedFS][SeaweedFS]](https://github.com/seaweedfs/seaweedfs)                                                                                                                            |
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
@@ -226,7 +227,7 @@ more information.
 [Express]: https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB
 [Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff
 [Mongo]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white
-[Minio]: https://img.shields.io/badge/MinIO-C72E49?logo=minio&logoColor=fff
+[SeaweedFS]: https://img.shields.io/badge/SeaweedFS-2F80ED?logo=seaweedfs&logoColor=fff
 [NGINX]: https://img.shields.io/badge/nginx-009639?logo=nginx&logoColor=fff
 [Vitest]: https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=fff
 [Typescript]: https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff

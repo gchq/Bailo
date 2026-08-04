@@ -59,13 +59,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     apt-get update && \
     apt-get install -y --no-install-recommends nodejs
 
-#ENV MINIO_ROOT_USER=minioadmin
-#ENV MINIO_ROOT_PASSWORD=minioadmin
-VOLUME minio-data
-RUN wget -q https://dl.min.io/server/minio/release/linux-amd64/minio && \
-    wget -q https://dl.min.io/client/mc/release/linux-amd64/mc && \
-    install -m755 minio /usr/local/bin/ && \
-    install -m755 mc /usr/local/bin/
+VOLUME /seaweed-data
+RUN wget -q https://github.com/seaweedfs/seaweedfs/releases/download/4.40/linux_amd64.tar.gz && \
+    tar -xzf linux_amd64.tar.gz weed && \
+    install -m755 weed /usr/local/bin/weed && \
+    rm -f linux_amd64.tar.gz weed && \
+    mkdir -p /etc/seaweedfs /seaweed-data
+COPY infrastructure/seaweedfs/s3_config.json /etc/seaweedfs/s3_config.json
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
     wget -qO - https://pgp.mongodb.com/server-8.0.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-8.0.gpg && \
@@ -82,8 +82,8 @@ RUN wget -q https://github.com/distribution/distribution/releases/download/v3.0.
 
 ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem \
     REGISTRY_HTTP_TLS_KEY=/app/backend/certs/key.pem \
-    REGISTRY_STORAGE_S3_ACCESSKEY=minioadmin \
-    REGISTRY_STORAGE_S3_SECRETKEY=minioadmin \
+    REGISTRY_STORAGE_S3_ACCESSKEY=bailoadmin \
+    REGISTRY_STORAGE_S3_SECRETKEY=bailoadmin \
     REGISTRY_AUTH=token \
     REGISTRY_AUTH_TOKEN_REALM=http://localhost:3001/api/v1/registry_auth \
     REGISTRY_AUTH_TOKEN_SERVICE=RegistryAuth \
@@ -124,6 +124,6 @@ COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/superviso
 
 WORKDIR /
 
-EXPOSE 8080 9000 27017
+EXPOSE 8080 8333 23646 27017
 
 ENTRYPOINT ["/usr/bin/supervisord"]
