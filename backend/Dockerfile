@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r req
 
 RUN make html
 
-FROM node:26.5.0-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS node-base
+FROM node:26.5.1-alpine@sha256:233761595746769ebfdb6090f44fc7cdf818ae0ce62d2b37e0367723b9823e36 AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update
