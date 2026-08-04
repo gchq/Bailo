@@ -51,6 +51,7 @@ Follow the instructions below to get a local development environment running. Yo
 #### Development Build
 
 To run in development mode (modified files on your host machine will be reloaded into the running application):
+
 <!-- prettier-ignore -->
 > [!NOTE]
 > Ensure Docker and Docker Compose are installed before running these commands.
@@ -227,7 +228,7 @@ more information.
 [Express]: https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB
 [Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff
 [Mongo]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white
-[SeaweedFS]: https://img.shields.io/badge/SeaweedFS-2F80ED?logo=seaweedfs&logoColor=fff
+[SeaweedFS]: https://img.shields.io/badge/SeaweedFS-2F80ED
 [NGINX]: https://img.shields.io/badge/nginx-009639?logo=nginx&logoColor=fff
 [Vitest]: https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=fff
 [Typescript]: https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff

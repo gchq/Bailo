@@ -57,7 +57,13 @@ Bailo can be deployed using Docker Compose for development or Helm for productio
 
 The repository includes a `compose.yaml` that runs the core services locally. This is the simplest way to get started.
 The Docker Compose environment uses SeaweedFS as its S3-compatible object store. SeaweedFS exposes its S3 API on
-`http://localhost:8333` and its administration panel through NGINX on `http://localhost:23646`.
+`http://localhost:8333`.
+
+Additional user interfaces can be used to aid debugging and testing.
+
+`http://localhost:9333` - Master UI, shows data topology and volume status.
+
+`http://localhost:8888` - Filer UI, shows directory structure and buckets.
 
 There is also ``compose.prod.yaml` to run all services locally. This is also used in the repository's GitHub workflows
 for testing.
