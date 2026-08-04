@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:26.5.0-alpine AS base
+FROM node:26.5.0-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
