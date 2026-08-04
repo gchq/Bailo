@@ -21,7 +21,8 @@
     "package.json",
     "package-lock.json",
     "*env",
-    "sonar-project.properties"
+    "sonar-project.properties",
+    "CHANGELOG.md"
   ],
   "useGitignore": true,
   "import": [
@@ -228,8 +229,6 @@
     "jarrahdale",
     "jslc",
     "kernelspec",
-    "kwarg",
-    "kwargs",
     "layoutflow",
     "libapk",
     "libc",
