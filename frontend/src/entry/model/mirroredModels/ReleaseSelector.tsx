@@ -25,7 +25,7 @@ import MirrorInfo from 'src/common/MirrorInfo'
 import Paginate from 'src/common/Paginate'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
-import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
@@ -126,7 +126,7 @@ export default function ReleaseSelector({
             }}
           >
             <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
-            <ReviewFooter release={release} includeResponsesSummary={false} />
+            <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
           </Stack>
         </Stack>
       </ListItem>

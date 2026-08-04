@@ -7,8 +7,8 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
@@ -68,7 +68,7 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
-                <ReviewFooter accessRequest={accessRequest} includeResponsesSummary={false} />
+                <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} includeResponsesSummary={false} />
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}

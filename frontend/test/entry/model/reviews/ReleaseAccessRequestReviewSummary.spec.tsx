@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import { ReviewStatusProps } from 'src/entry/model/reviews/ReviewStatus'
 import { lightTheme } from 'src/theme'
 import {
@@ -39,7 +39,7 @@ describe('ReviewFooter', () => {
     })
     render(
       <ThemeProvider theme={lightTheme}>
-        <ReviewFooter accessRequest={testAccessRequestWithComments} />
+        <ReleaseAccessRequestReviewSummary accessRequest={testAccessRequestWithComments} />
       </ThemeProvider>,
     )
     await waitFor(async () => {
@@ -62,7 +62,7 @@ describe('ReviewFooter', () => {
     })
     render(
       <ThemeProvider theme={lightTheme}>
-        <ReviewFooter accessRequest={testAccessRequest} />
+        <ReleaseAccessRequestReviewSummary accessRequest={testAccessRequest} />
       </ThemeProvider>,
     )
     await waitFor(async () => {

@@ -9,7 +9,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { AccessRequestInterface, ReleaseInterface } from 'types/types'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
-export type ReviewFooterProps =
+export type ReleaseAccessRequestReviewSummaryPops =
   | {
       release: ReleaseInterface
       accessRequest?: never
@@ -21,7 +21,11 @@ export type ReviewFooterProps =
       includeResponsesSummary?: boolean
     }
 
-export default function ReviewFooter({ accessRequest, release, includeResponsesSummary = true }: ReviewFooterProps) {
+export default function ReleaseAccessRequestReviewSummary({
+  accessRequest,
+  release,
+  includeResponsesSummary = true,
+}: ReleaseAccessRequestReviewSummaryPops) {
   const _id = release ? release._id : accessRequest._id
   const modelId = release ? release.modelId : accessRequest.modelId
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({

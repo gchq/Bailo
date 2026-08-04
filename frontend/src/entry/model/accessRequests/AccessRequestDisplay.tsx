@@ -1,8 +1,8 @@
 import { Box, Card, Grid, Stack, Typography } from '@mui/material'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
 import Link from 'src/Link'
 import { AccessRequestInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
@@ -126,7 +126,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Grid>
               </Card>
             </Stack>
-            <ReviewFooter accessRequest={accessRequest} />
+            <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} />
           </Stack>
         </Box>
       </Stack>

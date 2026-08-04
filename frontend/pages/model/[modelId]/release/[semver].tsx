@@ -8,8 +8,8 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import ReviewFooter from 'src/entry/model/reviews/ReviewFooter'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
@@ -80,7 +80,7 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
-              <ReviewFooter release={release} includeResponsesSummary={false} />
+              <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
               {release && (
                 <EditableRelease
                   release={release}
