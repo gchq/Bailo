@@ -13,6 +13,8 @@ vi.mock('../../../src/services/model.js')
 vi.mock('../../../src/services/schema.js')
 vi.mock('../../../src/models/Schema.js')
 vi.mock('../../../src/models/ReviewRole.js')
+vi.mock('../../../src/models/Review.js')
+vi.mock('../../../src/models/Response.js')
 
 const modelMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
@@ -40,10 +42,32 @@ vi.mock('../../../src/models/Model.js', () => ({
 const releaseMocks = vi.hoisted(() => ({
   aggregate: vi.fn(),
   distinct: vi.fn(),
+  find: vi.fn(),
 }))
 
 vi.mock('../../../src/models/Release.js', () => ({
   default: releaseMocks,
+}))
+
+const reviewMocks = vi.hoisted(() => ({
+  find: vi.fn(),
+}))
+
+vi.mock('../../../src/models/Review.js', () => ({
+  default: reviewMocks,
+}))
+
+const responseMocks = vi.hoisted(() => ({
+  find: vi.fn(),
+}))
+
+vi.mock('../../../src/models/Response.js', () => ({
+  default: responseMocks,
+  Decision: {
+    RequestChanges: 'request_changes',
+    Approve: 'approve',
+    Undo: 'undo',
+  },
 }))
 
 const accessRequestMocks = vi.hoisted(() => ({
@@ -497,6 +521,199 @@ await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', 
     authenticationMocks.hasRole.mockResolvedValue(false)
 
     await expect(connector.getNoReleasesMetrics(mockUser)).rejects.toThrow()
+  })
+})
+
+await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics', async () => {
+  let connector
+  await beforeEach(async () => {
+    vi.resetModules()
+    vi.clearAllMocks()
+
+    // Default: no models, releases, reviews or responses.
+    modelMocks.find.mockReturnValue(mockQuery([]))
+    releaseMocks.find.mockReturnValue(mockQuery([]))
+    reviewMocks.find.mockReturnValue(mockQuery([]))
+    responseMocks.find.mockReturnValue(mockQuery([]))
+
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['a corp'])
+  })
+
+  test('throws Forbidden if user is not admin', async () => {
+    authenticationMocks.hasRole.mockResolvedValue(false)
+
+    await expect(connector.getUnapprovedComplianceMetrics(mockUser)).rejects.toThrow(
+      'You do not have the required role.',
+    )
+  })
+
+  test('returns empty results when there are no models', async () => {
+    modelMocks.find.mockReturnValue(mockQuery([]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(0)
+    expect(result.global.summary.totalUnapprovedReleases).toBe(0)
+    expect(result.global.entries).toEqual([])
+  })
+
+  test('returns empty results when models have no releases', async () => {
+    modelMocks.find.mockReturnValue(mockQuery([{ id: 'model-1', collaborators: [] }]))
+    releaseMocks.find.mockReturnValue(mockQuery([]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(0)
+    expect(result.global.summary.totalUnapprovedReleases).toBe(0)
+    expect(result.global.entries).toEqual([])
+  })
+
+  test('flags a release with no reviews at all as unapproved', async () => {
+    modelMocks.find.mockReturnValue(
+      mockQuery([{ id: 'model-1', collaborators: [{ entity: 'user:owner', roles: ['owner'] }] }]),
+    )
+    releaseMocks.find.mockReturnValue(mockQuery([{ modelId: 'model-1', semver: '1.0.0' }]))
+    reviewMocks.find.mockReturnValue(mockQuery([]))
+    responseMocks.find.mockReturnValue(mockQuery([]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(1)
+    expect(result.global.summary.totalUnapprovedReleases).toBe(1)
+    expect(result.global.entries).toEqual([
+      {
+        entryId: 'model-1',
+        modelOwners: ['user:owner'],
+        unapprovedReleases: ['1.0.0'],
+      },
+    ])
+  })
+
+  test('flags a release when a required review role has no approving response', async () => {
+    modelMocks.find.mockReturnValue(
+      mockQuery([{ id: 'model-1', collaborators: [{ entity: 'user:owner', roles: ['owner'] }] }]),
+    )
+    releaseMocks.find.mockReturnValue(mockQuery([{ modelId: 'model-1', semver: '1.0.0' }]))
+    reviewMocks.find.mockReturnValue(
+      mockQuery([
+        { _id: 'review-msro', modelId: 'model-1', semver: '1.0.0', role: 'msro' },
+        { _id: 'review-mtr', modelId: 'model-1', semver: '1.0.0', role: 'mtr' },
+      ]),
+    )
+    // Only the msro role has approved.
+    responseMocks.find.mockReturnValue(mockQuery([{ parentId: 'review-msro' }]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(1)
+    expect(result.global.summary.totalUnapprovedReleases).toBe(1)
+    expect(result.global.entries).toEqual([
+      {
+        entryId: 'model-1',
+        modelOwners: ['user:owner'],
+        unapprovedReleases: ['1.0.0'],
+      },
+    ])
+  })
+
+  test('does not flag a release when all required review roles have approved', async () => {
+    modelMocks.find.mockReturnValue(
+      mockQuery([{ id: 'model-1', collaborators: [{ entity: 'user:owner', roles: ['owner'] }] }]),
+    )
+    releaseMocks.find.mockReturnValue(mockQuery([{ modelId: 'model-1', semver: '1.0.0' }]))
+    reviewMocks.find.mockReturnValue(
+      mockQuery([
+        { _id: 'review-msro', modelId: 'model-1', semver: '1.0.0', role: 'msro' },
+        { _id: 'review-mtr', modelId: 'model-1', semver: '1.0.0', role: 'mtr' },
+      ]),
+    )
+    // Both roles have approved.
+    responseMocks.find.mockReturnValue(mockQuery([{ parentId: 'review-msro' }, { parentId: 'review-mtr' }]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(0)
+    expect(result.global.summary.totalUnapprovedReleases).toBe(0)
+    expect(result.global.entries).toEqual([])
+  })
+
+  test('reports each unapproved release for a model and counts them all', async () => {
+    modelMocks.find.mockReturnValue(mockQuery([{ id: 'model-1', collaborators: [] }]))
+    releaseMocks.find.mockReturnValue(
+      mockQuery([
+        { modelId: 'model-1', semver: '2.0.0' },
+        { modelId: 'model-1', semver: '1.0.0' },
+        { modelId: 'model-1', semver: '1.5.0' },
+      ]),
+    )
+    reviewMocks.find.mockReturnValue(
+      mockQuery([
+        // 1.0.0 is fully approved
+        { _id: 'review-1', modelId: 'model-1', semver: '1.0.0', role: 'msro' },
+        // 1.5.0 has an outstanding review
+        { _id: 'review-2', modelId: 'model-1', semver: '1.5.0', role: 'msro' },
+      ]),
+    )
+    responseMocks.find.mockReturnValue(mockQuery([{ parentId: 'review-1' }]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(1)
+    // 2.0.0 (no reviews) and 1.5.0 (outstanding) are unapproved, sorted.
+    expect(result.global.summary.totalUnapprovedReleases).toBe(2)
+    expect(result.global.entries).toEqual([
+      {
+        entryId: 'model-1',
+        modelOwners: [],
+        unapprovedReleases: ['1.5.0', '2.0.0'],
+      },
+    ])
+  })
+
+  test('groups unapproved releases by organisation', async () => {
+    modelMocks.find.mockImplementation((filter: any) => {
+      const allModels = [
+        { id: 'model-a', organisation: 'a corp', collaborators: [] },
+        { id: 'model-unset', organisation: '', collaborators: [] },
+      ]
+      const filtered =
+        filter?.organisation !== undefined
+          ? allModels.filter((model) => model.organisation === filter.organisation)
+          : allModels
+      return mockQuery(filtered)
+    })
+
+    releaseMocks.find.mockImplementation((filter: any) => {
+      const allReleases = [
+        { modelId: 'model-a', semver: '1.0.0' },
+        { modelId: 'model-unset', semver: '1.0.0' },
+      ]
+      const filtered = filter?.modelId?.$in
+        ? allReleases.filter((release) => filter.modelId.$in.includes(release.modelId))
+        : allReleases
+      return mockQuery(filtered)
+    })
+
+    reviewMocks.find.mockReturnValue(mockQuery([]))
+    responseMocks.find.mockReturnValue(mockQuery([]))
+
+    const result = await connector.getUnapprovedComplianceMetrics(mockUser)
+
+    expect(result.byOrganisation).toHaveLength(2)
+
+    const aCorp = result.byOrganisation.find((o) => o.organisation === 'a corp')
+    const unset = result.byOrganisation.find((o) => o.organisation === 'unset')
+
+    expect(aCorp?.modelsWithUnapprovedReleases).toBe(1)
+    expect(aCorp?.entries.map((entry) => entry.entryId)).toEqual(['model-a'])
+
+    expect(unset?.modelsWithUnapprovedReleases).toBe(1)
+    expect(unset?.entries.map((entry) => entry.entryId)).toEqual(['model-unset'])
+
+    // Global aggregates both.
+    expect(result.global.summary.totalModelsWithUnapprovedReleases).toBe(2)
+    expect(result.global.summary.totalUnapprovedReleases).toBe(2)
   })
 })
 
