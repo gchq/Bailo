@@ -104,7 +104,7 @@ Build and run the standalone image from the repository root:
 
 ```bash
 docker build . -t second-bailo -f Dockerfile.standalone
-docker run --rm -p 4318:8080 -p 23646:23646 --network dev_internal --name second-bailo second-bailo:latest
+docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 ```
 
 The standalone instance is then available at `http://localhost:4318`.
