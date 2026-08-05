@@ -9,7 +9,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { AccessRequestInterface, ReleaseInterface } from 'types/types'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
-export type ReleaseAccessRequestReviewSummaryPops =
+export type ReleaseAccessRequestReviewSummaryProps =
   | {
       release: ReleaseInterface
       accessRequest?: never
@@ -25,7 +25,7 @@ export default function ReleaseAccessRequestReviewSummary({
   accessRequest,
   release,
   includeResponsesSummary = true,
-}: ReleaseAccessRequestReviewSummaryPops) {
+}: ReleaseAccessRequestReviewSummaryProps) {
   const _id = release ? release._id : accessRequest._id
   const modelId = release ? release.modelId : accessRequest.modelId
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -68,9 +68,7 @@ export default function ReleaseAccessRequestReviewSummary({
             justifyContent: 'space-between',
           }}
         >
-          {reviews.length > 0 && (
-            <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
-          )}
+          <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
           {includeResponsesSummary && (
             <IconButton
               href={

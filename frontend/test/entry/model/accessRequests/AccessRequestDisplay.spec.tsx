@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { UserDisplayProps } from 'src/common/UserDisplay'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
-import { ReleaseAccessRequestReviewSummaryPops } from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
+import { ReleaseAccessRequestReviewSummaryProps } from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import { ReviewBannerProps } from 'src/entry/model/reviews/ReviewBanner'
 import { ReviewStatusProps } from 'src/entry/model/reviews/ReviewStatus'
 import { lightTheme } from 'src/theme'
@@ -16,7 +16,7 @@ vi.mock('src/entry/model/reviews/ReviewDisplay.tsx', () => ({
   default: (_props: ReviewStatusProps) => <></>,
 }))
 vi.mock('src/entry/model/reviews/ReviewFooter.tsx', () => ({
-  default: (_props: ReleaseAccessRequestReviewSummaryPops) => <></>,
+  default: (_props: ReleaseAccessRequestReviewSummaryProps) => <></>,
 }))
 
 describe('AccessRequestDisplay', () => {

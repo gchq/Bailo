@@ -85,7 +85,7 @@ export function useHeadReviewRequestsForModel({ modelId, semver, accessRequestId
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
-      headers: any
+      headers: Record<string, string>
     },
     ErrorInfo
   >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, true))
