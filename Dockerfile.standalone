@@ -124,6 +124,6 @@ COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/superviso
 
 WORKDIR /
 
-EXPOSE 8080 8333 23646 27017
+EXPOSE 8080 8333 27017
 
 ENTRYPOINT ["/usr/bin/supervisord"]
