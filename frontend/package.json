@@ -7,6 +7,7 @@
     "prebuild": "tsx scripts/build-docs-search-index.mjs",
     "build": "next build",
     "build:docs-search-index": "tsx scripts/build-docs-search-index.mjs",
+    "pretest": "tsx scripts/build-docs-search-index.mjs",
     "cy:open": "cypress open",
     "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
     "start": "next start",

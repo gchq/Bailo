@@ -65,7 +65,7 @@ export default function DocsSearch({ open, onClose, onOpen, renderDialog = true 
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = open !== undefined
-  const dialogOpen = isControlled ? open : internalOpen
+  const isDialogOpen = isControlled ? open : internalOpen
 
   const openDialog = useCallback(() => {
     setInternalOpen(true)
@@ -107,7 +107,7 @@ export default function DocsSearch({ open, onClose, onOpen, renderDialog = true 
           onClick={openDialog}
           onKeyDown={handleTriggerKeyDown}
           aria-haspopup='dialog'
-          aria-expanded={dialogOpen}
+          aria-expanded={isDialogOpen ? 'true' : undefined}
           aria-label='Open search'
         >
           <StyledInputBase
@@ -152,7 +152,7 @@ export default function DocsSearch({ open, onClose, onOpen, renderDialog = true 
           </IconButton>
         </Tooltip>
       )}
-      {renderDialog && <DocsSearchDialog open={dialogOpen} onClose={closeDialog} />}
+      {renderDialog && <DocsSearchDialog open={isDialogOpen} onClose={closeDialog} />}
     </Box>
   )
 }
