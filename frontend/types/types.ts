@@ -599,7 +599,7 @@ type PartialReviewInterface = {
   _id: string
   modelId: string
   role: string
-  status?: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
