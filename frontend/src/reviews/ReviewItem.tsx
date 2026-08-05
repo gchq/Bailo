@@ -78,14 +78,7 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
             </Typography>
           </Stack>
           <ReviewRoleDisplay review={review} />
-          {currentUser && (
-            <ReviewDisplay
-              modelId={review.model.id}
-              review={review}
-              showCurrentUserResponses
-              currentUserDn={currentUser.dn}
-            />
-          )}
+          {currentUser && <ReviewDisplay modelId={review.model.id} review={review} showCurrentUserResponses />}
         </Stack>
       )
     }

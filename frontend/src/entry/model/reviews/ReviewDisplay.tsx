@@ -12,7 +12,6 @@ export interface ReviewDisplayProps {
   modelId: string
   review: ReviewRequestInterface
   showCurrentUserResponses?: boolean
-  currentUserDn?: string
 }
 
 export default function ReviewDisplay({ review, modelId, showCurrentUserResponses = false }: ReviewDisplayProps) {
@@ -44,7 +43,7 @@ export default function ReviewDisplay({ review, modelId, showCurrentUserResponse
     <>
       {!review.status && <Typography variant='caption'>Awaiting review</Typography>}
       {review.status === Decision.Approve && (
-        <Stack direction='row' key={roleNameDisplay()} spacing={1}>
+        <Stack direction='row' key={roleNameDisplay()} spacing={1} sx={{ alignItems: 'center' }}>
           <Done color='success' fontSize='small' />
           <Typography variant='caption'>
             {showCurrentUserResponses
