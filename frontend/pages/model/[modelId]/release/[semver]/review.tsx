@@ -219,7 +219,7 @@ export default function ReleaseReview() {
           </Stack>
           <Dialog open={isReleaseDialogOpen} onClose={() => setIsReleaseDialogOpen(false)} maxWidth='md' fullWidth>
             <DialogContent sx={{ p: 4 }}>
-              <EditableRelease release={release} isEdit={false} onIsEditChange={() => {}} readOnly={true} />
+              <EditableRelease release={release} readOnly />
             </DialogContent>
           </Dialog>
         </Paper>

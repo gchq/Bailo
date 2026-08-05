@@ -10,7 +10,7 @@ import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { EntryInterface, ReleaseInterface } from 'types/types'
 import { hasRole } from 'utils/roles'
 
 type ReleasesProps = {
@@ -19,16 +19,17 @@ type ReleasesProps = {
   readOnly?: boolean
 }
 
+export function getLatestRelease(releases: ReleaseInterface[]) {
+  if (releases.length > 0) {
+    const ordered = semver.sort(releases.filter((release) => release.draft !== true).map((release) => release.semver))
+    return ordered[ordered.length - 1]
+  } else {
+    return ''
+  }
+}
+
 export default function Releases({ model, currentUserRoles, readOnly = false }: ReleasesProps) {
   const router = useRouter()
-
-  function getLatestRelease() {
-    if (model && releases.length > 0) {
-      return semver.sort(releases.map((release) => release.semver))[releases.length - 1]
-    } else {
-      return ''
-    }
-  }
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
@@ -38,7 +39,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
       key={data.semver}
       model={model}
       release={data}
-      latestRelease={getLatestRelease()}
+      latestRelease={getLatestRelease(releases)}
       hideReviewBanner={
         !hasRole(
           currentUserRoles,

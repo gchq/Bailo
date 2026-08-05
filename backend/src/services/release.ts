@@ -187,7 +187,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     throw error
   }
 
-  if (!release.minor) {
+  if (!release.minor && !release.draft) {
     try {
       await createReleaseReviews(model, release)
     } catch (error) {
@@ -213,6 +213,13 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   }
   const release = await getReleaseBySemver(user, model, semver)
 
+  const isPublish = release.draft && !delta.draft
+  const isDraft = !release.draft && delta.draft
+
+  if (isDraft) {
+    throw BadReq('Can not draft published release.')
+  }
+
   Object.assign(release, delta)
   await validateRelease(user, model, release)
 
@@ -227,6 +234,15 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  if (isPublish) {
+    try {
+      await createReleaseReviews(model, updatedRelease)
+    } catch (error) {
+      // Transactions here would solve this issue.
+      log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
+    }
   }
 
   dispatchWebhooks(

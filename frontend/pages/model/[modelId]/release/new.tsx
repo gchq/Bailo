@@ -6,7 +6,7 @@ import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -28,7 +28,7 @@ export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [modelCardVersion, setModelCardVersion] = useState(0)
-  const [isMinorRelease, setIsMinorRelease] = useState(false)
+  const draft = useRef(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
@@ -169,8 +169,8 @@ export default function NewRelease() {
     const release: CreateReleaseParams = {
       modelId: model.id,
       semver,
+      draft: draft.current as boolean,
       notes: releaseNotes,
-      minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
       modelCardVersion: modelCardVersion,
@@ -187,6 +187,10 @@ export default function NewRelease() {
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
     setLoading(false)
+  }
+
+  function handleDraftRelease() {
+    draft.current = true
   }
 
   const error = MultipleErrorWrapper(`Unable to load release page`, {
@@ -218,7 +222,7 @@ export default function NewRelease() {
                   }}
                 >
                   <Typography variant='h6' component='h1' color='primary'>
-                    Draft New Release
+                    Create New Release
                   </Typography>
                   <DesignServices color='primary' fontSize='large' />
                   <Typography>
@@ -231,14 +235,12 @@ export default function NewRelease() {
                   formData={{
                     semver,
                     releaseNotes,
-                    isMinorRelease,
                     files,
                     imageList,
                     modelCardVersion,
                   }}
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
-                  onMinorReleaseChange={(value) => setIsMinorRelease(value)}
                   onFilesChange={(value) => handleFileOnChange(value)}
                   onModelCardVersionChange={(value) => setModelCardVersion(value)}
                   filesMetadata={filesMetadata}
@@ -254,16 +256,28 @@ export default function NewRelease() {
                     alignItems: 'flex-end',
                   }}
                 >
-                  <Button
-                    variant='contained'
-                    loading={loading}
-                    type='submit'
-                    disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
-                    sx={{ width: 'fit-content' }}
-                    data-test='createReleaseButton'
-                  >
-                    Create Release
-                  </Button>
+                  <Stack spacing={1} direction='row'>
+                    <Button
+                      variant='outlined'
+                      loading={loading}
+                      onClick={handleDraftRelease}
+                      type='submit'
+                      disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
+                      sx={{ width: 'fit-content' }}
+                    >
+                      Draft Release
+                    </Button>
+                    <Button
+                      variant='contained'
+                      loading={loading}
+                      type='submit'
+                      disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
+                      sx={{ width: 'fit-content' }}
+                      data-test='createReleaseButton'
+                    >
+                      Create Release
+                    </Button>
+                  </Stack>
                   <MessageAlert message={errorMessage} severity='error' />
                 </Stack>
                 {failedFileUploads.length > 0 && (

@@ -36,7 +36,7 @@ export function useGetRelease(modelId?: string, semver?: string) {
 
 export type CreateReleaseParams = Pick<
   ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'draft' | 'fileIds' | 'images'
 >
 
 export async function postRelease(release: CreateReleaseParams) {
@@ -49,7 +49,7 @@ export async function postRelease(release: CreateReleaseParams) {
 
 export type UpdateReleaseParams = Pick<
   ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'draft' | 'fileIds' | 'images'
 >
 
 export function putRelease(release: UpdateReleaseParams) {

@@ -1,4 +1,5 @@
 import { Button, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -26,6 +27,7 @@ export default function ReleaseAssetsMainText({
   includeLinks = true,
 }: ReleaseAssetsMainTextProps) {
   const router = useRouter()
+  const theme = useTheme()
 
   function latestVersionAdornment() {
     if (release.semver === latestRelease) {
@@ -73,7 +75,11 @@ export default function ReleaseAssetsMainText({
               ariaLabel='copy release semver to clipboard'
             />
           )}
-          {latestVersionAdornment()}
+          {release.draft ? (
+            <em style={{ color: theme.palette.secondary.main }}>{'(draft)'}</em>
+          ) : (
+            latestVersionAdornment()
+          )}
         </Stack>
         {includeLinks && (
           <Button onClick={() => router.push(buildModelCardHref(model.id, model.kind, release.modelCardVersion))}>
