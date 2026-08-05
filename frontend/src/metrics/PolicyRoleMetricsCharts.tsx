@@ -144,9 +144,9 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
           Entries missing review roles
         </Typography>
         <Box
-          style={{
+          sx={{
             backgroundColor: theme.palette.container.main,
-            padding: 2,
+            p: 2,
             borderRadius: 1,
             overflow: 'auto',
           }}

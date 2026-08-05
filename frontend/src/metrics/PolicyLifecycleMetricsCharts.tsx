@@ -47,6 +47,19 @@ export default function PolicyLifecycleMetricsCharts({
     setAnchorEl(null)
   }
 
+  const tableTitle = () => {
+    switch (weekFilter) {
+      case 2:
+        return 'Entries two weeks until their due date'
+      case 10:
+        return 'Entries 10 weeks until their due date'
+      case 0:
+        return 'Entries past their due date'
+      default:
+        return 'Entries near or past lifecycle review date'
+    }
+  }
+
   const displayWeekFilters = useMemo(() => {
     return (
       <Stack direction='row' spacing={1}>
@@ -85,7 +98,7 @@ export default function PolicyLifecycleMetricsCharts({
                 <Check />
               </ListItemIcon>
             )}
-            <ListItemText inset={weekFilter !== 10}>Ten weeks</ListItemText>
+            <ListItemText inset={weekFilter !== 10}>10 weeks</ListItemText>
           </MenuItem>
           <MenuItem onClick={() => weekFilterOnChange(0)}>
             {weekFilter === 0 && (
@@ -133,12 +146,12 @@ export default function PolicyLifecycleMetricsCharts({
       <Stack spacing={2} sx={{ width: '100%' }}>
         {displayWeekFilters}
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-          Entries near or past lifecycle review date
+          {tableTitle()}
         </Typography>
         <Box
-          style={{
+          sx={{
             backgroundColor: theme.palette.container.main,
-            padding: 2,
+            p: 2,
             borderRadius: 1,
             overflow: 'auto',
           }}
