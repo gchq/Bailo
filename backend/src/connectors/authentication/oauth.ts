@@ -80,18 +80,28 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return router
   }
 
-  async hasRole(user: UserInterface, role: RoleKeys) {
-    if (role === Roles.Admin) {
-      const adminGroup = config.oauth.cognito.adminGroupName
-      const admins = await this.getEntityMembers(toEntity(OauthEntityKind.Group, adminGroup))
-      return admins.includes(user.dn)
+  private async hasGroupMembership(user: UserInterface, groupName: string): Promise<boolean> {
+    const members = await this.getEntityMembers(toEntity(OauthEntityKind.Group, groupName))
+    return members.includes(user.dn)
+  }
+
+  async hasRole(user: UserInterface, role: RoleKeys): Promise<boolean> {
+    const isAdmin = await this.hasGroupMembership(user, config.oauth.cognito.adminGroupName)
+
+    if (isAdmin) {
+      return true
     }
-    if (role === Roles.Compliance) {
-      const complianceGroup = config.oauth.cognito.complianceGroupName
-      const complianceUsers = await this.getEntityMembers(toEntity(OauthEntityKind.Group, complianceGroup))
-      return complianceUsers.includes(user.dn)
+
+    switch (role) {
+      case Roles.Compliance:
+        return this.hasGroupMembership(user, config.oauth.cognito.complianceGroupName)
+
+      case Roles.UntrustedModel:
+        return this.hasGroupMembership(user, config.oauth.cognito.untrustedModelGroupName)
+
+      default:
+        return false
     }
-    return false
   }
 
   async queryEntities(query: string) {
