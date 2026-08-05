@@ -16,10 +16,11 @@ import { styled, useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { Fragment, ReactElement, ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
+import { DocumentationNavigationTree } from 'types/docs'
 
 import Title from '../common/Title'
 import Copyright from '../Copyright'
-import { directory, DirectoryTree, flatDirectory } from './directory'
+import { directory, flatDirectory } from './directory'
 
 function makeHeadingComponent(tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') {
   return function HeadingComponent({ children, id }: { children?: React.ReactNode; id?: string }) {
@@ -103,7 +104,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   }, [ref, pathname])
 
   const createDocElement = useCallback(
-    (doc: DirectoryTree, paddingLeft = paddingIncrement) => {
+    (doc: DocumentationNavigationTree, paddingLeft = paddingIncrement) => {
       let children: Array<any> = []
       if (doc.children) {
         // eslint-disable-next-line react-hooks/immutability

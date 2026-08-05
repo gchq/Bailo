@@ -1,74 +1,23 @@
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useMemo } from 'react'
 import useDebounce from 'src/hooks/useDebounce'
+import {
+  DocsSearchCategory as SearchCategory,
+  DocsSearchFilter as SearchFilter,
+  DocsSearchHookResult,
+  DocsSearchIndexEntry,
+  DocsSearchQueryTerms as QueryTerms,
+  DocsSearchResult,
+  EntrySearchDocument,
+  IndexedDocsSearchEntry as IndexedEntry,
+  IndexedDocsSearchHeading as IndexedHeading,
+} from 'types/docs'
 import { EntryKindKeys } from 'types/types'
-import { ErrorInfo } from 'utils/fetcher'
 
 import { flatDirectory } from './directory'
 import rawIndex from './searchIndex.generated.json'
 
-export interface RawHeading {
-  depth: number
-  text: string
-  id: string
-  body: string
-}
-
-export interface RawIndexEntry {
-  slug: string
-  title: string
-  text: string
-  headings: RawHeading[]
-}
-
-export type DocsSearchResultKind = 'page' | 'heading'
-export type SearchCategory = 'docs' | 'datacards' | 'models'
-export type SearchFilter = SearchCategory | 'all'
-
-export interface DocsSearchResult {
-  key: string
-  slug: string
-  category: SearchCategory
-  title: string
-  breadcrumb: string
-  snippetHtml?: string
-  score: number
-  kind: DocsSearchResultKind
-  hash?: string
-  href: string
-}
-
-interface QueryTerms {
-  tokens: string[]
-  phrase: string
-  isPhrase: boolean
-}
-
-interface IndexedHeading extends RawHeading {
-  textLower: string
-  bodyLower: string
-}
-
-interface IndexedEntry {
-  slug: string
-  title: string
-  titleLower: string
-  text: string
-  haystack: string
-  headings: IndexedHeading[]
-  headingsLower: string
-  breadcrumb: string
-}
-
-interface EntrySearchDocument {
-  key: string
-  slug: string
-  category: 'datacards' | 'models'
-  title: string
-  breadcrumb: string
-  text: string
-  href: string
-}
+export type { DocsSearchResult, SearchFilter }
 
 const EMPTY_FILTER: never[] = []
 
@@ -149,22 +98,27 @@ function resolveTitle(slug: string, fallback: string): string {
   return flatDirectory.find((entry) => entry.slug === slug && !entry.header)?.title ?? fallback
 }
 
-function buildIndex(): IndexedEntry[] {
-  return (rawIndex as RawIndexEntry[]).map((entry) => {
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize#nfkc
+export function normaliseSearchText(value: string): string {
+  return value.normalize('NFKC').toLocaleLowerCase()
+}
+
+export function buildIndex(entries: DocsSearchIndexEntry[] = rawIndex as DocsSearchIndexEntry[]): IndexedEntry[] {
+  return entries.map((entry) => {
     const title = resolveTitle(entry.slug, entry.title)
 
     const headings = entry.headings.map((heading): IndexedHeading => ({
       ...heading,
-      textLower: heading.text.toLowerCase(),
-      bodyLower: heading.body.toLowerCase(),
+      textLower: normaliseSearchText(heading.text),
+      bodyLower: normaliseSearchText(heading.body),
     }))
 
     return {
       slug: entry.slug,
       title,
-      titleLower: title.toLowerCase(),
+      titleLower: normaliseSearchText(title),
       text: entry.text,
-      haystack: entry.text.toLowerCase(),
+      haystack: normaliseSearchText(entry.text),
       headings,
       headingsLower: headings.map((heading) => heading.textLower).join('\n'),
       breadcrumb: buildBreadcrumb(entry.slug),
@@ -180,8 +134,6 @@ function normaliseEntries(entries: EntrySearchResult[]): EntrySearchDocument[] {
       return []
     }
 
-    const section = category === 'models' ? 'Models' : 'Datacards'
-
     const basePath = category === 'models' ? '/model' : '/data-card'
 
     return [
@@ -190,7 +142,7 @@ function normaliseEntries(entries: EntrySearchResult[]): EntrySearchDocument[] {
         slug: entry.id,
         category,
         title: entry.name,
-        breadcrumb: [section, entry.organisation].filter(Boolean).join(' — '),
+        breadcrumb: entry.description,
         text: [entry.name, entry.description, entry.organisation, ...entry.tags].filter(Boolean).join(' '),
         href: `${basePath}/${encodeURIComponent(entry.id)}`,
       },
@@ -211,8 +163,8 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function tokenise(query: string): QueryTerms {
-  const phrase = query.trim().toLowerCase()
+export function tokenise(query: string): QueryTerms {
+  const phrase = normaliseSearchText(query.trim())
   const rawTokens = phrase.split(/\s+/).filter(Boolean)
 
   return {
@@ -248,12 +200,12 @@ function highlight(source: string, terms: QueryTerms): string {
   return escapedSource.replace(pattern, '<mark>$1</mark>').replace(/<\/mark>(\s+)<mark>/g, '$1')
 }
 
-function buildSnippet(text: string, terms: QueryTerms): string {
+export function buildSnippet(text: string, terms: QueryTerms): string {
   if (!text) {
     return ''
   }
 
-  const lowerText = text.toLowerCase()
+  const lowerText = normaliseSearchText(text)
   const candidates = [...(terms.isPhrase ? [terms.phrase] : []), ...terms.tokens]
 
   let firstHit = -1
@@ -394,9 +346,9 @@ function scoreHeading(heading: IndexedHeading, terms: QueryTerms): number {
 }
 
 function scoreEntry(entry: EntrySearchDocument, terms: QueryTerms): number {
-  const title = entry.title.toLowerCase()
-  const breadcrumb = entry.breadcrumb.toLowerCase()
-  const text = entry.text.toLowerCase()
+  const title = normaliseSearchText(entry.title)
+  const breadcrumb = normaliseSearchText(entry.breadcrumb)
+  const text = normaliseSearchText(entry.text)
 
   let score = 0
 
@@ -465,7 +417,7 @@ function toEntryResult(entry: EntrySearchDocument, terms?: QueryTerms): DocsSear
   }
 }
 
-function searchDocs(index: IndexedEntry[], query: string): DocsSearchResult[] {
+export function searchDocs(index: IndexedEntry[], query: string): DocsSearchResult[] {
   if (!query) {
     return [...START_SCREEN]
   }
@@ -504,7 +456,7 @@ function searchDocs(index: IndexedEntry[], query: string): DocsSearchResult[] {
           category: 'docs',
           hash: heading.id,
           title: heading.text,
-          breadcrumb: [entry.title, entry.breadcrumb].filter(Boolean).join(' — '),
+          breadcrumb: [entry.title, entry.breadcrumb].filter(Boolean).join(' - '),
           snippetHtml: buildSnippet(heading.body || entry.text, terms),
           score,
           kind: 'heading',
@@ -521,7 +473,11 @@ function searchDocs(index: IndexedEntry[], query: string): DocsSearchResult[] {
   return results.sort(compareResults)
 }
 
-function searchEntries(entries: EntrySearchDocument[], query: string, category: SearchFilter): DocsSearchResult[] {
+export function searchEntries(
+  entries: EntrySearchDocument[],
+  query: string,
+  category: SearchFilter,
+): DocsSearchResult[] {
   const matchingCategory = entries.filter((entry) => category === 'all' || entry.category === category)
 
   if (!query) {
@@ -539,7 +495,7 @@ function searchEntries(entries: EntrySearchDocument[], query: string, category: 
   return matchingCategory.map((entry) => toEntryResult(entry, terms)).sort(compareResults)
 }
 
-function limitResults(results: DocsSearchResult[], category: SearchFilter): DocsSearchResult[] {
+export function limitResults(results: DocsSearchResult[], category: SearchFilter): DocsSearchResult[] {
   if (category !== 'all') {
     return results.slice(0, MAX_RESULTS)
   }
@@ -553,12 +509,7 @@ export function useDocsSearchIndex(
   query: string,
   isOpen: boolean = false,
   selectedCategory: SearchFilter = 'all',
-): {
-  results: DocsSearchResult[]
-  size: number
-  isLoading: boolean
-  isError: ErrorInfo | undefined
-} {
+): DocsSearchHookResult {
   const docsIndex = useMemo(() => buildIndex(), [])
 
   const trimmedQuery = query.trim()
