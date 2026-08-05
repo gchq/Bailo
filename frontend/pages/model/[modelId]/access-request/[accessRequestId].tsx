@@ -40,7 +40,7 @@ export default function AccessRequest() {
           {isAccessRequestLoading && <Loading />}
           {accessRequest && (
             <>
-              {<ReviewBanner accessRequest={accessRequest} />}
+              <ReviewBanner accessRequest={accessRequest} />
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}

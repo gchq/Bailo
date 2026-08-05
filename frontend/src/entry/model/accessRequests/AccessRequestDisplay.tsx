@@ -23,7 +23,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {<ReviewBanner accessRequest={accessRequest} />}
+          <ReviewBanner accessRequest={accessRequest} />
           <Stack
             sx={{
               p: 2,
