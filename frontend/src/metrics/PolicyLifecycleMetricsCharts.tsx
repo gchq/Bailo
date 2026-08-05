@@ -18,7 +18,9 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
+import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
+import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
 import { WeekFilterOptions } from 'src/metrics/PolicyMetrics'
 import { GlobalLifecycleMetrics } from 'types/types'
 import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
@@ -109,6 +111,15 @@ export default function PolicyLifecycleMetricsCharts({
         <TableCell>
           <Typography>{formatDateStringAsDayMonthAndYear(row.dueDate)}</Typography>
         </TableCell>
+        <TableCell>
+          {row.modelOwners && row.modelOwners.length > 0 ? (
+            row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
+          ) : (
+            <em>
+              No <OwnerRoleDisplay />s set
+            </em>
+          )}
+        </TableCell>
       </TableRow>
     ))
   }, [data.entries])
@@ -137,6 +148,10 @@ export default function PolicyLifecycleMetricsCharts({
               <TableRow>
                 <TableCell>Model ID</TableCell>
                 <TableCell>Due date</TableCell>
+                <TableCell>
+                  <OwnerRoleDisplay />
+                  (s)
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{tableRows}</TableBody>

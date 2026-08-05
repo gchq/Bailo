@@ -1118,6 +1118,7 @@ export interface LifecycleSummaryMetrics {
 export interface EntryLifecycleMetrics {
   entryId: string
   dueDate: string
+  modelOwners: string[]
 }
 
 export interface GlobalLifecycleMetrics {
@@ -1128,7 +1129,7 @@ export interface GlobalLifecycleMetrics {
 export interface LifecycleMetricsByOrg {
   organisation: string
   summary: LifecycleSummaryMetrics
-  entries: ModelsUnapprovedReleases[]
+  entries: EntryLifecycleMetrics[]
 }
 
 export interface BaseLifecycleMetrics {
