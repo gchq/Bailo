@@ -3,6 +3,7 @@ import { Box, ButtonBase, IconButton, InputBase, Tooltip, useMediaQuery } from '
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import { KeyboardEvent, ReactElement, useCallback, useEffect, useState } from 'react'
 import useIsMac from 'src/hooks/useIsMac'
+import { DocsSearchDialogProps } from 'types/docs'
 
 import DocsSearchDialog from './DocsSearchDialog'
 
@@ -53,19 +54,28 @@ const ShortcutButton = styled(ButtonBase)(({ theme }) => ({
   },
 }))
 
-export default function DocsSearch(): ReactElement {
+interface DocsSearchProps extends Partial<DocsSearchDialogProps> {
+  renderDialog?: boolean
+  onOpen?: () => void
+}
+
+export default function DocsSearch({ open, onClose, onOpen, renderDialog = true }: DocsSearchProps): ReactElement {
   const isMac = useIsMac()
   const theme = useTheme()
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = open !== undefined
+  const dialogOpen = isControlled ? open : internalOpen
 
   const openDialog = useCallback(() => {
-    setOpen(true)
-  }, [])
+    setInternalOpen(true)
+    onOpen?.()
+  }, [onOpen])
 
   const closeDialog = useCallback(() => {
-    setOpen(false)
-  }, [])
+    setInternalOpen(false)
+    onClose?.()
+  }, [onClose])
 
   useEffect(() => {
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
@@ -97,7 +107,7 @@ export default function DocsSearch(): ReactElement {
           onClick={openDialog}
           onKeyDown={handleTriggerKeyDown}
           aria-haspopup='dialog'
-          aria-expanded={open}
+          aria-expanded={dialogOpen}
           aria-label='Open search'
         >
           <StyledInputBase
@@ -142,7 +152,7 @@ export default function DocsSearch(): ReactElement {
           </IconButton>
         </Tooltip>
       )}
-      <DocsSearchDialog open={open} onClose={closeDialog} />
+      {renderDialog && <DocsSearchDialog open={dialogOpen} onClose={closeDialog} />}
     </Box>
   )
 }

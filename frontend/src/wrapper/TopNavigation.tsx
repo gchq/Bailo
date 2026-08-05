@@ -8,6 +8,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import Person from '@mui/icons-material/Person'
 import Settings from '@mui/icons-material/Settings'
 import {
+  Box,
   Button,
   IconButton,
   ListItemIcon,
@@ -18,7 +19,6 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-  useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
@@ -27,6 +27,7 @@ import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import DocsSearch from 'src/docs/DocsSearch'
+import DocsSearchDialog from 'src/docs/DocsSearchDialog'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
@@ -66,12 +67,12 @@ const AppBar = styled(MuiAppBar, {
 
 export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, currentUser }: TopNavigationProps) {
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [docsSearchOpen, setDocsSearchOpen] = useState(false)
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
 
   const router = useRouter()
   const theme = useTheme()
-  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -116,7 +117,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
             width: '100%',
           }}
         >
-          {!isSmOrLarger && (
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, width: '100%' }}>
             <Stack
               direction='row'
               sx={{
@@ -146,7 +147,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 </Link>
               </Stack>
               <Stack direction='row' sx={{ alignItems: 'center' }} spacing={1}>
-                <DocsSearch />
+                <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 <Tooltip title='Create a new model or data card'>
                   <IconButton
                     onClick={handleCreateEntryClick}
@@ -209,8 +210,8 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 )}
               </Stack>
             </Stack>
-          )}
-          {isSmOrLarger && (
+          </Box>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, width: '100%' }}>
             <Stack
               direction='row'
               sx={{
@@ -249,7 +250,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
-                <DocsSearch />
+                <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 {currentUser ? (
                   <>
                     <Button
@@ -295,9 +296,10 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 )}
               </Stack>
             </Stack>
-          )}
+          </Box>
         </Stack>
       </Toolbar>
+      <DocsSearchDialog open={docsSearchOpen} onClose={() => setDocsSearchOpen(false)} />
     </AppBar>
   )
 }

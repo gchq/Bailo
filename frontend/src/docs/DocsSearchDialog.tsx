@@ -20,7 +20,7 @@ import {
 } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { KeyboardEvent, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
@@ -156,6 +156,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<SearchCategory>('all')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
+  const shouldScrollHighlightedResult = useRef(false)
 
   const { results, isLoading, isError } = useDocsSearchIndex(query, open, category)
 
@@ -220,33 +221,41 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
   }, [displayRows.length])
 
   useEffect(() => {
-    if (!open || displayRows.length === 0) {
+    if (!open || displayRows.length === 0 || !shouldScrollHighlightedResult.current) {
       return
     }
 
+    shouldScrollHighlightedResult.current = false
     document.getElementById(`docs-search-result-${highlightedIndex}`)?.scrollIntoView({ block: 'nearest' })
   }, [displayRows.length, highlightedIndex, open])
+
+  const updateHighlightedIndexFromKeyboard = (update: (current: number) => number) => {
+    shouldScrollHighlightedResult.current = true
+    setHighlightedIndex(update)
+  }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault()
-        setHighlightedIndex((current) => (displayRows.length === 0 ? 0 : Math.min(current + 1, displayRows.length - 1)))
+        updateHighlightedIndexFromKeyboard((current) =>
+          displayRows.length === 0 ? 0 : Math.min(current + 1, displayRows.length - 1),
+        )
         break
 
       case 'ArrowUp':
         event.preventDefault()
-        setHighlightedIndex((current) => Math.max(current - 1, 0))
+        updateHighlightedIndexFromKeyboard((current) => Math.max(current - 1, 0))
         break
 
       case 'Home':
         event.preventDefault()
-        setHighlightedIndex(0)
+        updateHighlightedIndexFromKeyboard(() => 0)
         break
 
       case 'End':
         event.preventDefault()
-        setHighlightedIndex(Math.max(displayRows.length - 1, 0))
+        updateHighlightedIndexFromKeyboard(() => Math.max(displayRows.length - 1, 0))
         break
 
       case 'Enter': {
@@ -425,7 +434,10 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
                         id={`docs-search-result-${index}`}
                         selected={selected}
                         aria-selected={selected}
-                        onMouseEnter={() => setHighlightedIndex(index)}
+                        onMouseEnter={() => {
+                          shouldScrollHighlightedResult.current = false
+                          setHighlightedIndex(index)
+                        }}
                         onClick={() => navigateToRow(row)}
                         sx={{
                           alignItems: 'flex-start',
