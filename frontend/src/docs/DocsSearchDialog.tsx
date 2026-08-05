@@ -348,6 +348,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
                 clickable
                 color={selected ? 'primary' : 'default'}
                 variant={selected ? 'filled' : 'outlined'}
+                component='button'
                 aria-pressed={selected}
                 onClick={() => selectCategory(option.value)}
               />
@@ -433,7 +434,6 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
                         key={row.key}
                         id={`docs-search-result-${index}`}
                         selected={selected}
-                        aria-selected={selected}
                         onMouseEnter={() => {
                           shouldScrollHighlightedResult.current = false
                           setHighlightedIndex(index)

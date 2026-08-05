@@ -89,7 +89,8 @@ function cleanText(value) {
 /**
  * Extract page text and H2/H3 search sections from an MDX document.
  *
- * All heading titles contribute to page text. Section prose contributes to
+ * H1 titles are page metadata and are excluded from page text. Section prose
+ * contributes to
  * every active H2/H3 ancestor so parent sections match descendant content.
  *
  * @param {string} raw
@@ -123,7 +124,10 @@ export function extractContent(raw, sourcePath = '<MDX source>') {
         throw new Error(`Empty heading in ${sourcePath}${line ? `:${line}` : ''}`)
       }
 
-      pageParts.push(headingText)
+      if (node.depth > 1) {
+        pageParts.push(headingText)
+      }
+
       const id = slugger.slug(headingText)
 
       while (activeHeadings.at(-1)?.depth >= node.depth) {

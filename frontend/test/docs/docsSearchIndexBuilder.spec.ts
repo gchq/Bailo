@@ -95,7 +95,7 @@ const backtickSecret = true
       },
     ])
 
-    expect(result.text).toContain('Page title')
+    expect(result.text).not.toContain('Page title')
     expect(result.text).toContain('Advanced options')
     expect(result.text).toContain('Searchable JSX text')
     expect(result.text).not.toContain('tildeSecret')
