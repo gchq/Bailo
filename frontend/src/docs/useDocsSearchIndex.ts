@@ -142,8 +142,9 @@ function normaliseEntries(entries: EntrySearchResult[]): EntrySearchDocument[] {
         slug: entry.id,
         category,
         title: entry.name,
-        breadcrumb: entry.description,
-        text: [entry.name, entry.description, entry.organisation, ...entry.tags].filter(Boolean).join(' '),
+        breadcrumb: entry.description.length < 250 ? entry.description : `${entry.description.slice(0, 250)}...`,
+        // Since entry search is server side additional mark rendering is not required
+        text: '',
         href: `${basePath}/${encodeURIComponent(entry.id)}`,
       },
     ]
