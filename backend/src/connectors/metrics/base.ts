@@ -688,6 +688,7 @@ interface CalculatedLifecycleComplianceMetrics {
   entries: {
     entryId: string
     dueDate: string
+    modelOwners: string[]
   }[]
 }
 
@@ -730,6 +731,19 @@ async function calculateLifecycleComplianceMetrics(
         entryId: '$modelId',
         dueDate: 1,
         modelOrganisation: '$model.organisation',
+        modelOwners: {
+          $map: {
+            input: {
+              $filter: {
+                input: '$model.collaborators',
+                as: 'item',
+                cond: { $in: ['owner', { $ifNull: ['$$item.roles', []] }] },
+              },
+            },
+            as: 'owner',
+            in: '$$owner.entity',
+          },
+        },
       },
     },
   ]
