@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.3.7-ubi9
+    image: mongodb/mongodb-community-server:8.3.7-ubi9@sha256:5df20e4e490389b1d2c728e2b5c374aaec7be0c70a11fb7ce17661cf4a2c0432
     networks:
       internal:
     environment:
@@ -37,7 +37,7 @@ services:
       - 27017:27017
 
   minio:
-    image: bitnamilegacy/minio:2025.7.23
+    image: bitnamilegacy/minio:2025.7.23@sha256:8935e75fa5d11295c17171e4aa49efe390a1193cd7f12e4d21b92af9ffef09d7
     networks:
       internal:
     environment:
@@ -47,7 +47,7 @@ services:
       - minioVolume:/bitnami/minio
 
   nginx:
-    image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim
+    image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim@sha256:eed3e4c2f3f9285e80610238e0b18fe1bf311c50559434db1969b1cfabd5518b
     networks:
       default:
       internal:

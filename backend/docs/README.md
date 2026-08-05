@@ -30,7 +30,7 @@
 ## Building Locally
 
 > [!NOTE]
-> **Requires:** Python 3.11 to 3.14, Docker or [Pandoc](https://pandoc.org/installing.html)
+> **Requires:** Python 3.12 to 3.14, Docker or [Pandoc](https://pandoc.org/installing.html)
 
 The following steps are only required for users who wish to extend or develop the documentation package locally.
 

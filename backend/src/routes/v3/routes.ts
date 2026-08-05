@@ -7,6 +7,7 @@ import { getEntryVolume } from './metrics/getEntryVolume.js'
 import { getModelBreakdown } from './metrics/getModelBreakdown.js'
 import { getNoReleasesComplianceMetrics } from './metrics/getNoReleasesComplianceMetrics.js'
 import { getRoleComplianceMetrics } from './metrics/getRoleComplianceMetrics.js'
+import { getUnapprovedComplianceMetrics } from './metrics/getUnapprovedComplianceMetrics.js'
 import { getUsageMetrics } from './metrics/getUsageMetrics.js'
 import { getLatestResponse } from './response/getLatestResponseForReview.js'
 import { postNotifyReviewer } from './review/postNotifyReviewer.js'
@@ -21,6 +22,7 @@ router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
+router.get('/metrics/compliance/unapproved', ...getUnapprovedComplianceMetrics)
 router.get('/metrics/compliance/roles', ...getRoleComplianceMetrics)
 router.get('/metrics/entryVolume', ...getEntryVolume)
 router.get('/metrics/breakdown', ...getModelBreakdown)

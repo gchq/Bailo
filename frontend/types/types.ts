@@ -1079,6 +1079,34 @@ export interface NoReleaseMetricsByOrg {
 
 export interface BaseNoReleaseMetrics {
   global: GlobalNoReleasesMetrics
-  byOrganisation: NoReleaseMetricsByOrg[]
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface UnapprovedReleasesSummaryMetrics {
+  totalModelsWithUnapprovedReleases: number
+  totalUnapprovedReleases: number
+}
+
+export interface ModelsUnapprovedReleases {
+  entryId: string
+  modelOwners: string[]
+  unapprovedReleases: string[]
+}
+
+export interface GlobalUnapprovedReleasesMetrics {
+  summary: UnapprovedReleasesSummaryMetrics
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface UnapprovedReleaseMetricsByOrg {
+  organisation: string
+  modelsWithUnapprovedReleases: number
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface BaseUnapprovedReleaseMetrics {
+  global: GlobalUnapprovedReleasesMetrics
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
   lastUpdated: string
 }

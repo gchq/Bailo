@@ -2,6 +2,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 import {
   BaseNoReleaseMetrics,
+  BaseUnapprovedReleaseMetrics,
   CollaboratorEntry,
   EntryKindKeys,
   ModelVolume,
@@ -114,5 +115,19 @@ export function useGetModelBreakdown({
     entries: data,
     isEntriesLoading: isLoading,
     isEntriesError: error,
+  }
+}
+
+export function useGetUnapprovedReleasesPolicyMetrics() {
+  const { data, isLoading, error, mutate } = useSWR<BaseUnapprovedReleaseMetrics, ErrorInfo>(
+    '/api/v3/metrics/compliance/unapproved',
+    fetcher,
+  )
+
+  return {
+    mutateUnapprovedReleasesPolicyMetrics: mutate,
+    unapprovedReleasesPolicyMetrics: data,
+    isUnapprovedReleasesPolicyMetricsLoading: isLoading,
+    isUnapprovedReleasesPolicyMetricsError: error,
   }
 }

@@ -1,5 +1,9 @@
 import { Container, Stack } from '@mui/material'
-import { useGetNoReleasesPolicyMetrics, useGetRolePolicyMetrics } from 'actions/metrics'
+import {
+  useGetNoReleasesPolicyMetrics,
+  useGetRolePolicyMetrics,
+  useGetUnapprovedReleasesPolicyMetrics,
+} from 'actions/metrics'
 import { ReactElement, useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -7,11 +11,13 @@ import MessageAlert from 'src/MessageAlert'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import PolicyNoReleasesMetricsCharts from 'src/metrics/PolicyNoReleasesMetricsCharts'
 import PolicyRoleMetricsCharts from 'src/metrics/PolicyRoleMetricsCharts'
+import PolicyUnapprovedReleasesCharts from 'src/metrics/PolicyUnapprovedReleasesCharts'
 import { BaseNoReleaseMetrics, PolicyRoleMetrics } from 'types/types'
 
 export const SelectedMetricKind = {
   MISSING_ROLES: 'role',
   NO_RELEASES: 'noReleases',
+  UNAPPROVED_RELEASES: 'unapprovedReleases',
 } as const
 export type SelectedMetricKindKeys = (typeof SelectedMetricKind)[keyof typeof SelectedMetricKind]
 
@@ -19,6 +25,11 @@ export default function PolicyMetrics() {
   const { rolePolicyMetrics, isRolePolicyMetricsLoading, isRolePolicyMetricsError } = useGetRolePolicyMetrics()
   const { noReleasesPolicyMetrics, isNoReleasesPolicyMetricsLoading, isNoReleasesPolicyMetricsError } =
     useGetNoReleasesPolicyMetrics()
+  const {
+    unapprovedReleasesPolicyMetrics,
+    isUnapprovedReleasesPolicyMetricsLoading,
+    isUnapprovedReleasesPolicyMetricsError,
+  } = useGetUnapprovedReleasesPolicyMetrics()
 
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
 
@@ -38,6 +49,8 @@ export default function PolicyMetrics() {
         return rolePolicyMetrics
       case SelectedMetricKind.NO_RELEASES:
         return noReleasesPolicyMetrics
+      case SelectedMetricKind.UNAPPROVED_RELEASES:
+        return noReleasesPolicyMetrics
       default:
         return rolePolicyMetrics
     }
@@ -55,10 +68,19 @@ export default function PolicyMetrics() {
         return <PolicyRoleMetricsCharts data={filteredDataset(rolePolicyMetrics)} />
       case SelectedMetricKind.NO_RELEASES:
         return <PolicyNoReleasesMetricsCharts data={filteredDataset(noReleasesPolicyMetrics)} />
+      case SelectedMetricKind.UNAPPROVED_RELEASES:
+        return <PolicyUnapprovedReleasesCharts data={filteredDataset(unapprovedReleasesPolicyMetrics)} />
       default:
         return <></>
     }
-  }, [filteredDataset, noReleasesPolicyMetrics, rolePolicyMetrics, selectedData, selectedMetric])
+  }, [
+    filteredDataset,
+    noReleasesPolicyMetrics,
+    rolePolicyMetrics,
+    selectedData,
+    selectedMetric,
+    unapprovedReleasesPolicyMetrics,
+  ])
 
   if (isRolePolicyMetricsError) {
     return <MessageAlert message={isRolePolicyMetricsError.info.message} />
@@ -68,7 +90,11 @@ export default function PolicyMetrics() {
     return <MessageAlert message={isNoReleasesPolicyMetricsError.info.message} />
   }
 
-  if (isRolePolicyMetricsLoading || isNoReleasesPolicyMetricsLoading) {
+  if (isUnapprovedReleasesPolicyMetricsError) {
+    return <MessageAlert message={isUnapprovedReleasesPolicyMetricsError.info.message} />
+  }
+
+  if (isRolePolicyMetricsLoading || isNoReleasesPolicyMetricsLoading || isUnapprovedReleasesPolicyMetricsLoading) {
     return <Loading />
   }
 
