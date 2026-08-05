@@ -1,7 +1,6 @@
 import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import semver from 'semver'
@@ -11,15 +10,13 @@ import Restricted from 'src/common/Restricted'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
-import { hasRole } from 'utils/roles'
 
 type ReleasesProps = {
   model: EntryInterface
-  currentUserRoles: string[]
   readOnly?: boolean
 }
 
-export default function Releases({ model, currentUserRoles, readOnly = false }: ReleasesProps) {
+export default function Releases({ model, readOnly = false }: ReleasesProps) {
   const router = useRouter()
 
   function getLatestRelease() {
@@ -31,37 +28,21 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   }
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
 
   const ReleaseListItem = memoize(({ data }) => (
-    <ReleaseDisplay
-      key={data.semver}
-      model={model}
-      release={data}
-      latestRelease={getLatestRelease()}
-      hideReviewBanner={
-        !hasRole(
-          currentUserRoles,
-          reviewRoles.map((role) => role.shortName),
-        ) || readOnly
-      }
-    />
+    <ReleaseDisplay key={data.semver} model={model} release={data} latestRelease={getLatestRelease()} />
   ))
 
   function handleDraftNewRelease() {
     router.push(`/model/${model.id}/release/new`)
   }
 
-  if (isReleasesLoading || isReviewRolesLoading) {
+  if (isReleasesLoading) {
     return <Loading />
   }
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
-  if (isReviewRolesError) {
-    return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
   }
 
   return (

@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { Roles } from '../../../src/connectors/authentication/constants.js'
 import {
   AccessRequestAction,
   FileAction,
@@ -177,6 +178,30 @@ describe('connectors > authorisation > base', () => {
     expect(result).toStrictEqual({
       id: 'testModel',
       success: true,
+    })
+  })
+
+  test('model > create untrusted model without the untrusted model role', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAuthentication.hasRole.mockResolvedValueOnce(false)
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'untrustedModel',
+        kind: EntryKind.UntrustedModel,
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Create,
+    )
+
+    expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.UntrustedModel)
+
+    expect(result).toStrictEqual({
+      id: 'untrustedModel',
+      success: false,
+      info: 'You do not have permission to manage untrusted models.',
     })
   })
 
