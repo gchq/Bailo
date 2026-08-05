@@ -1,6 +1,5 @@
 import { Alert, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
-import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -19,18 +18,14 @@ import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKind } from 'types/types'
-import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
   const { modelId: entryId }: { modelId?: string } = router.query
   const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetModel(entryId)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const uiConfig = useContext(UiConfigContext)
 
   const { userPermissions } = useContext(UserPermissionsContext)
-
-  const currentUserRoles = useMemo(() => getCurrentUserRoles(entry, currentUser), [entry, currentUser])
 
   const settingsPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
 
@@ -46,20 +41,14 @@ export default function Model() {
             {
               title: 'Releases',
               path: 'releases',
-              view: (
-                <Releases
-                  model={entry}
-                  currentUserRoles={currentUserRoles}
-                  readOnly={entry.kind === EntryKind.MIRRORED_MODEL}
-                />
-              ),
+              view: <Releases model={entry} readOnly={entry.kind === EntryKind.MIRRORED_MODEL} />,
               disabled: !entry.card,
               disabledText: 'Select a schema to view this tab.',
             },
             {
               title: 'Access requests',
               path: 'access',
-              view: <AccessRequests model={entry} currentUserRoles={currentUserRoles} />,
+              view: <AccessRequests model={entry} />,
               datatest: 'accessRequestTab',
               disabled: !entry.card || entry.kind === EntryKind.UNTRUSTED_MODEL,
               disabledText:
@@ -95,7 +84,7 @@ export default function Model() {
             },
           ]
         : [],
-    [entry, uiConfig, currentUserRoles, settingsPermission.hasPermission, settingsPermission.info, mutateEntry],
+    [entry, uiConfig, settingsPermission.hasPermission, settingsPermission.info, mutateEntry],
   )
 
   function requestAccess() {
@@ -122,7 +111,6 @@ export default function Model() {
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isEntryError,
-    isCurrentUserError,
   })
   if (error) {
     return error
@@ -131,7 +119,7 @@ export default function Model() {
   return (
     <>
       <Title text={entry ? entry.name : 'Loading...'} />
-      {!entry || isEntryLoading || isCurrentUserLoading ? (
+      {!entry || isEntryLoading ? (
         <Loading />
       ) : (
         <PageWithTabs

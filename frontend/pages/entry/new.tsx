@@ -1,13 +1,17 @@
 import { Card, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useContext, useMemo, useState } from 'react'
 import Title from 'src/common/Title'
+import CurrentUserContext from 'src/contexts/currentUserContext'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import CreateEntry from 'src/entry/CreateEntry'
 import EntryCard from 'src/entry/EntryCard'
-import { EntryKind, EntryKindKeys } from 'types/types'
+import { EntryKind, EntryKindKeys, Roles } from 'types/types'
+import { isAuthorisedToCreateUntrustedModel } from 'utils/roles'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 export default function NewEntry() {
+  const currentUser = useContext(CurrentUserContext)
+  const isAuthorised = isAuthorisedToCreateUntrustedModel(currentUser, Roles.UntrustedModel)
   const [createEntryKind, setCreateEntryKind] = useState<EntryKindKeys | undefined>()
 
   const uiConfig = useContext(UiConfigContext)
@@ -34,13 +38,14 @@ export default function NewEntry() {
           title: 'Untrusted Model',
           description: uiConfig.untrustedModel.untrustedModelLongDescription,
           handleClick: () => setCreateEntryKind(EntryKind.UNTRUSTED_MODEL),
-          disabled: uiConfig.untrustedModel.enabled === false,
+          disabled: uiConfig.untrustedModel.enabled === false || !isAuthorised,
         },
       ].filter((entryCardProp) => !entryCardProp.disabled),
     [
       uiConfig.modelMirror.import.enabled,
       uiConfig.untrustedModel.enabled,
       uiConfig.untrustedModel.untrustedModelLongDescription,
+      isAuthorised,
     ],
   )
 

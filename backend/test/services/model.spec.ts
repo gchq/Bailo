@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { Roles } from '../../src/connectors/authentication/constants.js'
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
@@ -704,6 +705,93 @@ describe('services > model', () => {
 
     await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
       'Model metadata could not be validated against the schema, for Production state.',
+    )
+  })
+
+  test('updateModel > validates mirrored model state against merged card and mirroredCard metadata', async () => {
+    const saveMock = vi.fn()
+    const testModel = {
+      name: 'mirrored model',
+      kind: EntryKind.MirroredModel,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { name: 'Local Name' } },
+      },
+      mirroredCard: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { description: 'Mirrored Description' } },
+      },
+      collaborators: [],
+      settings: { mirror: { sourceModelId: 'source' }, ungovernedAccess: false, allowTemplating: false },
+      save: saveMock,
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: true, errors: [] })
+
+    await updateModel({} as any, 'test123', { state: 'Production' })
+
+    expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
+      'test-schema',
+      { overview: { name: 'Local Name', description: 'Mirrored Description' } },
+      'Production',
+    )
+    expect(saveMock).toHaveBeenCalled()
+  })
+
+  test('updateModel > throws when mirrored model combined card fails state validation', async () => {
+    const testModel = {
+      name: 'mirrored model',
+      kind: EntryKind.MirroredModel,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: {},
+      },
+      mirroredCard: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: {},
+      },
+      collaborators: [],
+      settings: { mirror: { sourceModelId: 'source' }, ungovernedAccess: false, allowTemplating: false },
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+
+    await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
+      'Model metadata could not be validated against the schema, for Production state.',
+    )
+  })
+
+  test('updateModel > validates mirrored model with missing mirroredCard using only local card', async () => {
+    const saveMock = vi.fn()
+    const testModel = {
+      name: 'mirrored model',
+      kind: EntryKind.MirroredModel,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { name: 'Local' } },
+      },
+      mirroredCard: undefined,
+      collaborators: [],
+      settings: { mirror: { sourceModelId: 'source' }, ungovernedAccess: false, allowTemplating: false },
+      save: saveMock,
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: true, errors: [] })
+
+    await updateModel({} as any, 'test123', { state: 'Production' })
+
+    expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
+      'test-schema',
+      { overview: { name: 'Local' } },
+      'Production',
     )
   })
 

@@ -75,6 +75,7 @@ oauth:
     subdomain: "cognito domain"
     adminGroupName: ''
     complianceGroupName: ''
+    untrustedModelGroupName: ''
   identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"
@@ -159,7 +160,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnamilegacy/mongodb
-    tag: 8.0.13-debian-12-r0
+    tag: 8.0.13-debian-12-r0@sha256:2579e968033ec9f97035e91a215a4fb3943eb706eb3871b3d0d1d072e2f45605
 
 # MinIO Dependencies
 minio:
@@ -195,13 +196,13 @@ minio:
   image:
     registry: docker.io
     repository: bitnamilegacy/minio
-    tag: 2025.7.23-debian-12-r1
+    tag: 2025.7.23-debian-12-r1@sha256:ba958aa5e12c8b1426dd95de61d8f1ed14741efa0ec730019ed57086930a4299
     debug: true
 
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 3.1.1
+  tag: 3.1.1@sha256:1be55279f18a2fe1a74edf2664cac61c1bea305b7b4642dab412e7affdcb3e33
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name
@@ -229,7 +230,7 @@ federation:
 # Nginx Dependencies
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unprivileged user.
-  tag: 1.31.1-alpine3.23-slim
+  tag: 1.31.1-alpine3.23-slim@sha256:762e8e4e5e103817c4158400fc3753c8e713ff8153b8c3afbb458ae4572bc9a3
   #host: "bailo-nginx" # service name
   port: 8080
   #certDir: "/certs"
@@ -239,7 +240,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.5
+  image: marlonb/mailcrab:v1.6.5@sha256:36fe6d71fdedc7f3ae7a2765b8f4357334cee31c8bd84b69e2f067fa25b33aa4
 
 # Openshift specific configuration
 openshift:
@@ -384,7 +385,7 @@ frontend:
 clamav:
   enabled: false
   runAsUser: 1002
-  image: clamav/clamav:1.4.3_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  image: clamav/clamav:1.4.3_base@sha256:629a3050df6a706aedb31859fbb8139e9aaf8f56b0ffefbf251b8358a7c9e76c # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   concurrency: 2
   streamMaxLength: 2G
   port: 3310
