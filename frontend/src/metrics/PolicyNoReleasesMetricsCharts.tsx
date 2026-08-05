@@ -34,7 +34,7 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
           </Typography>
         </TableCell>
         <TableCell>
-          {row.modelOwners.length > 0 ? (
+          {row.modelOwners && row.modelOwners.length > 0 ? (
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
           ) : (
             <em>{`No ${ownerRoleDisplayName}s set`}</em>

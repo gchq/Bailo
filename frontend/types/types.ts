@@ -1110,3 +1110,29 @@ export interface BaseUnapprovedReleaseMetrics {
   byOrganisation: UnapprovedReleaseMetricsByOrg[]
   lastUpdated: string
 }
+
+export interface LifecycleSummaryMetrics {
+  count: number
+}
+
+export interface EntryLifecycleMetrics {
+  entryId: string
+  dueDate: string
+}
+
+export interface GlobalLifecycleMetrics {
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface LifecycleMetricsByOrg {
+  organisation: string
+  summary: LifecycleSummaryMetrics
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface BaseLifecycleMetrics {
+  global: GlobalLifecycleMetrics
+  byOrganisation: LifecycleMetricsByOrg[]
+  lastUpdated: string
+}
