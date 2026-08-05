@@ -55,7 +55,7 @@ services:
       - seaweedfsVolume:/data
       - ./infrastructure/seaweedfs/s3_config.json:/etc/seaweedfs/s3_config.json:ro
     healthcheck:
-      test: ['CMD-SHELL', 'curl -fsS http://localhost:8333/dir/status >/dev/null']
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:9333/cluster/status >/dev/null']
       interval: 10s
       timeout: 5s
       retries: 5
