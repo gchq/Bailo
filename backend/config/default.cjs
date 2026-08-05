@@ -189,6 +189,7 @@ module.exports = {
       userIdAttribute: '',
       adminGroupName: '',
       complianceGroupName: '',
+      untrustedModelGroupName: '',
     },
   },
 

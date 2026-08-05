@@ -163,6 +163,7 @@ export interface Config {
       userIdAttribute: string
       adminGroupName: string
       complianceGroupName: string
+      untrustedModelGroupName: string
     }
   }
 
