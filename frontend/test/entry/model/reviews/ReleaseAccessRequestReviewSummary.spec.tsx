@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
-import { ReviewStatusProps } from 'src/entry/model/reviews/ReviewDisplay'
+import { ReviewDisplayProps } from 'src/entry/model/reviews/ReviewDisplay'
 import { lightTheme } from 'src/theme'
 import {
   testAccessRequest,
@@ -21,7 +21,7 @@ vi.mock('actions/response', () => ({
   useGetResponses: vi.fn(),
 }))
 
-vi.mock('src/entry/model/reviews/ReviewStatus.tsx', () => ({ default: (_props: ReviewStatusProps) => <></> }))
+vi.mock('src/entry/model/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
 
 describe('ReviewFooter', () => {
   it('displays comment icon when there are comments', async () => {
