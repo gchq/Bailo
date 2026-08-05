@@ -4,7 +4,7 @@ import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
 import Loading from 'src/common/Loading'
-import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import MessageAlert from 'src/MessageAlert'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewKind, ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
@@ -78,7 +78,7 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
         </Stack>
         <ReviewRoleDisplay review={review} />
         {currentUser && (
-          <ReviewDisplay
+          <ReviewStatus
             modelId={review.model.id}
             reviewResponses={responses}
             showCurrentUserResponses

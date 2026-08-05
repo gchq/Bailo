@@ -77,6 +77,27 @@ type GetReviewRequestsForModelQuery = {
   open?: boolean
 } & additionalParameters
 
+export function useHeadReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
+  const queryParams = {
+    modelId,
+    ...(semver && { semver }),
+    ...(accessRequestId && { accessRequestId }),
+  }
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      headers: Record<string, string>
+    },
+    ErrorInfo
+  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, true))
+
+  return {
+    mutateReviews: mutate,
+    reviewCountHeader: data?.headers['x-count'] ? parseInt(data.headers['x-count']) : 0,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
+
 export function useGetReviewRequestsForModel({
   modelId,
   semver,
