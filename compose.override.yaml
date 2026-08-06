@@ -24,11 +24,10 @@ services:
     ports:
       - ${EXTERNAL_PORT}:8080
 
-  minio:
-    environment:
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/
-      MINIO_SERVER_URL: http://minio:9000
-      MINIO_SKIP_CLIENT: yes
+  seaweedfs:
+    ports:
+      - 9333:9333
+      - 8888:8888
 
 networks:
   debug:

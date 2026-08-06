@@ -189,6 +189,7 @@ module.exports = {
       userIdAttribute: '',
       adminGroupName: '',
       complianceGroupName: '',
+      untrustedModelGroupName: '',
     },
   },
 
@@ -316,7 +317,7 @@ module.exports = {
       accessKeyId: '',
       secretAccessKey: '',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,

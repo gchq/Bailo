@@ -16,7 +16,7 @@ const config: PartialDeep<Config> = {
       accessKeyId: '',
       secretAccessKey: '',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
@@ -106,6 +106,9 @@ const config: PartialDeep<Config> = {
       },
       userPoolId: '',
       userIdAttribute: '',
+      adminGroupName: 'admin',
+      complianceGroupName: 'compliance',
+      untrustedModelGroupName: 'untrusted-model',
     },
   },
   artefactScanning: {

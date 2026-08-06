@@ -11,19 +11,19 @@ import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { fromEntity } from 'utils/entityUtils'
 import { plural } from 'utils/stringUtils'
 
-export interface ReviewDisplayProps {
+export interface ReviewStatusProps {
   modelId: string
   reviewResponses: ResponseInterface[]
   showCurrentUserResponses?: boolean
   currentUserDn?: string
 }
 
-export default function ReviewDisplay({
+export default function ReviewStatus({
   reviewResponses,
   modelId,
   showCurrentUserResponses = false,
   currentUserDn,
-}: ReviewDisplayProps) {
+}: ReviewStatusProps) {
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
   const uiConfig = useContext(UiConfigContext)
   const dynamicRoles = useMemo(() => {

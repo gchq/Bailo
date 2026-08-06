@@ -459,9 +459,15 @@ jobs:
               uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
             },
 
-            minio: {
-              accessKey: 'minioadmin',
-              secretKey: 'minioadmin',
+            s3: {
+              credentials: {
+                accessKeyId: 'bailoadmin',
+                secretAccessKey: 'bailoadmin',
+              },
+              endpoint: 'http://seaweedfs:8333',
+              region: 'ignored',
+              forcePathStyle: true,
+              rejectUnauthorized: true,
             },
 
             smtp: {

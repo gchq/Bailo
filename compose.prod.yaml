@@ -55,8 +55,6 @@ services:
         condition: service_healthy
       registry:
         condition: service_started
-      minio:
-        condition: service_started
       mongo:
         condition: service_started
       artefactscan:

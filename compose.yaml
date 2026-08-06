@@ -34,15 +34,30 @@ services:
       interval: 10s
       start_period: 30s
 
-  minio:
-    image: bitnamilegacy/minio:2025.7.23@sha256:8935e75fa5d11295c17171e4aa49efe390a1193cd7f12e4d21b92af9ffef09d7
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.40@sha256:52194fba4fecd0083c842158b3a902ba6e04a63619b2b0efcd08007bdb6a4602
     networks:
-      internal:
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      - internal
+    command:
+      - server
+      - -dir=/data
+      - -master.port=9333
+      - -volume.port=8080
+      - -volume.max=100
+      - -filer
+      - -filer.port=8888
+      - -s3
+      - -s3.port=8333
+      - -s3.config=/etc/seaweedfs/s3_config.json
     volumes:
-      - minioVolume:/bitnami/minio
+      - seaweedfsVolume:/data
+      - ./infrastructure/seaweedfs/s3_config.json:/etc/seaweedfs/s3_config.json:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:9333/cluster/status >/dev/null']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   nginx:
     image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim@sha256:eed3e4c2f3f9285e80610238e0b18fe1bf311c50559434db1969b1cfabd5518b
@@ -64,8 +79,8 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
       REGISTRY_HTTP_TLS_KEY: /certs/key.pem
 
-      REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
-      REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+      REGISTRY_STORAGE_S3_ACCESSKEY: bailoadmin
+      REGISTRY_STORAGE_S3_SECRETKEY: bailoadmin
 
       REGISTRY_AUTH: token
       REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
@@ -101,8 +116,8 @@ services:
     depends_on:
       registry:
         condition: service_started
-      minio:
-        condition: service_started
+      seaweedfs:
+        condition: service_healthy
       mongo:
         condition: service_started
     security_opt:
@@ -112,8 +127,8 @@ services:
       - NODE_CONFIG_ENV=${INSTANCE_NAME}_docker_compose
 
 volumes:
-  minioVolume:
-    name: ${INSTANCE_NAME}_minioVolume
+  seaweedfsVolume:
+    name: ${INSTANCE_NAME}_seaweedfsVolume
   mongoVolume:
     name: ${INSTANCE_NAME}_mongoVolume
 
