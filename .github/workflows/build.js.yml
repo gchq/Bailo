@@ -471,6 +471,7 @@ jobs:
             },
 
             smtp: {
+              ${{ matrix.job_name == 'cross_instance' && 'enabled: false,' || '' }}
               auth: {
                 user: 'mailuser',
                 pass: 'mailpass',

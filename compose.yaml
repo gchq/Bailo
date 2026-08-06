@@ -54,7 +54,12 @@ services:
       - seaweedfsVolume:/data
       - ./infrastructure/seaweedfs/s3_config.json:/etc/seaweedfs/s3_config.json:ro
     healthcheck:
-      test: ['CMD-SHELL', 'curl -fsS http://localhost:9333/cluster/status >/dev/null && curl -fsS http://localhost:8333/ >/dev/null 2>&1 || curl -so /dev/null -w "%{http_code}" http://localhost:8333/ | grep -q 403']
+      test:
+        [
+          'CMD-SHELL',
+          'curl -fsS http://localhost:9333/cluster/status >/dev/null && curl -fsS http://localhost:8333/ >/dev/null 2>&1
+          || curl -so /dev/null -w "%{http_code}" http://localhost:8333/ | grep -q 403',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
