@@ -174,21 +174,23 @@ describe('Mirrored Model tests', () => {
     cy.get('[data-test=exportModelAgreementCheckbox]').click()
     cy.get('[data-test=exportModelAgreementSubmitButton]').scrollIntoView().click()
 
-    cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedUrl) => {
-      cy.origin(
-        instanceBUrl,
-        { args: { instanceBDestinationModelId, signedUrl, instanceASourceModelSummary } },
-        ({ instanceBDestinationModelId, signedUrl, instanceASourceModelSummary }) => {
-          cy.request('POST', '/api/v2/model/import/s3', {
-            payloadUrl: signedUrl,
-          }).then((response) => {
-            expect(response.status).to.eq(200)
+    cy.task('waitForS3Object', `${instanceASourceModelId}.tar.gz`, { timeout: 60000 }).then(() => {
+      cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedUrl) => {
+        cy.origin(
+          instanceBUrl,
+          { args: { instanceBDestinationModelId, signedUrl, instanceASourceModelSummary } },
+          ({ instanceBDestinationModelId, signedUrl, instanceASourceModelSummary }) => {
+            cy.request('POST', '/api/v2/model/import/s3', {
+              payloadUrl: signedUrl,
+            }).then((response) => {
+              expect(response.status).to.eq(200)
 
-            cy.visit(`/model/${instanceBDestinationModelId}`)
-            cy.contains(instanceASourceModelSummary, { timeout: 15000 })
-          })
-        },
-      )
+              cy.visit(`/model/${instanceBDestinationModelId}`)
+              cy.contains(instanceASourceModelSummary, { timeout: 15000 })
+            })
+          },
+        )
+      })
     })
   })
 
@@ -226,58 +228,66 @@ describe('Mirrored Model tests', () => {
         const fileId = response.body.release.fileIds[0]
         const imageId = response.body.release.images[0].id
 
-        cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedModelUrl) => {
-          cy.task('getSignedUrl', `${fileId}.tar.gz`).then((signedFileUrl) => {
-            cy.task('getSignedUrl', `${imageId}.tar.gz`).then((signedImageUrl) => {
-              const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
-              cy.origin(
-                instanceBUrl,
-                {
-                  args: {
-                    instanceBDestinationModelId,
-                    signedModelUrl,
-                    signedFileUrl,
-                    signedImageUrl,
-                    instanceASourceModelReleaseSemver,
-                    instanceASourceModelReleaseDescription,
-                    testFile,
-                    testDockerImageName,
-                  },
-                },
-                ({
-                  instanceBDestinationModelId,
-                  signedModelUrl,
-                  signedFileUrl,
-                  signedImageUrl,
-                  instanceASourceModelReleaseSemver,
-                  instanceASourceModelReleaseDescription,
-                  testFile,
-                  testDockerImageName,
-                }) => {
-                  cy.request('POST', '/api/v2/model/import/s3', {
-                    payloadUrl: signedModelUrl,
-                  }).then((response) => {
-                    expect(response.status).to.eq(200)
+        cy.task('waitForS3Object', `${instanceASourceModelId}.tar.gz`, { timeout: 60000 }).then(() => {
+          cy.task('waitForS3Object', `${fileId}.tar.gz`, { timeout: 60000 }).then(() => {
+            cy.task('waitForS3Object', `${imageId}.tar.gz`, { timeout: 60000 }).then(() => {
+              cy.task('getSignedUrl', `${instanceASourceModelId}.tar.gz`).then((signedModelUrl) => {
+                cy.task('getSignedUrl', `${fileId}.tar.gz`).then((signedFileUrl) => {
+                  cy.task('getSignedUrl', `${imageId}.tar.gz`).then((signedImageUrl) => {
+                    const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
+                    cy.origin(
+                      instanceBUrl,
+                      {
+                        args: {
+                          instanceBDestinationModelId,
+                          signedModelUrl,
+                          signedFileUrl,
+                          signedImageUrl,
+                          instanceASourceModelReleaseSemver,
+                          instanceASourceModelReleaseDescription,
+                          testFile,
+                          testDockerImageName,
+                        },
+                      },
+                      ({
+                        instanceBDestinationModelId,
+                        signedModelUrl,
+                        signedFileUrl,
+                        signedImageUrl,
+                        instanceASourceModelReleaseSemver,
+                        instanceASourceModelReleaseDescription,
+                        testFile,
+                        testDockerImageName,
+                      }) => {
+                        cy.request('POST', '/api/v2/model/import/s3', {
+                          payloadUrl: signedModelUrl,
+                        }).then((response) => {
+                          expect(response.status).to.eq(200)
 
-                    cy.request('POST', '/api/v2/model/import/s3', {
-                      payloadUrl: signedFileUrl,
-                    }).then((response) => {
-                      expect(response.status).to.eq(200)
+                          cy.request('POST', '/api/v2/model/import/s3', {
+                            payloadUrl: signedFileUrl,
+                          }).then((response) => {
+                            expect(response.status).to.eq(200)
 
-                      cy.request('POST', '/api/v2/model/import/s3', {
-                        payloadUrl: signedImageUrl,
-                      }).then((response) => {
-                        expect(response.status).to.eq(200)
+                            cy.request('POST', '/api/v2/model/import/s3', {
+                              payloadUrl: signedImageUrl,
+                            }).then((response) => {
+                              expect(response.status).to.eq(200)
 
-                        cy.visit(`/model/${instanceBDestinationModelId}/release/${instanceASourceModelReleaseSemver}`)
-                        cy.contains(instanceASourceModelReleaseDescription, { timeout: 15000 })
-                        cy.contains(testFile)
-                        cy.contains(testDockerImageName)
-                      })
-                    })
+                              cy.visit(
+                                `/model/${instanceBDestinationModelId}/release/${instanceASourceModelReleaseSemver}`,
+                              )
+                              cy.contains(instanceASourceModelReleaseDescription, { timeout: 15000 })
+                              cy.contains(testFile)
+                              cy.contains(testDockerImageName)
+                            })
+                          })
+                        })
+                      },
+                    )
                   })
-                },
-              )
+                })
+              })
             })
           })
         })

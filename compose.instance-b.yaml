@@ -12,11 +12,6 @@ services:
       # allow communicating with A's S3 store
       - bailo-shared
 
-  minio:
-    ports:
-      - '9100:9000'
-      - '9101:9001'
-
   registry:
     ports:
       - '5001:5000'

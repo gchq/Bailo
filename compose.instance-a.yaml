@@ -7,16 +7,15 @@ services:
     environment:
       - NODE_CONFIG_ENV=prod_docker_compose
 
-  minio:
+  seaweedfs:
     ports:
-      - '9000:9000'
-      - '9001:9001'
+      - 8333:8333
     networks:
       # allow communicating with B's backend
       shared:
         aliases:
-          # prevent minio service name collision
-          - minio-a
+          # prevent service name collision
+          - s3-a
 
   registry:
     ports:
