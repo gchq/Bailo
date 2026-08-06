@@ -1,5 +1,6 @@
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import Check from '@mui/icons-material/Check'
+import Warning from '@mui/icons-material/Warning'
 import {
   Box,
   Button,
@@ -13,6 +14,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -57,6 +59,18 @@ export default function PolicyLifecycleMetricsCharts({
         return 'Entries past their due date'
       default:
         return 'Entries near or past lifecycle review date'
+    }
+  }
+
+  const overDueWarning = (dueDate: string) => {
+    const today = new Date().setHours(0, 0, 0, 0)
+    const dateToCheck = new Date(dueDate).setHours(0, 0, 0, 0)
+    if (dateToCheck <= today) {
+      return (
+        <Tooltip title='This lifecycle review is overdue'>
+          <Warning color='warning' />
+        </Tooltip>
+      )
     }
   }
 
@@ -122,7 +136,10 @@ export default function PolicyLifecycleMetricsCharts({
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography>{formatDateStringAsDayMonthAndYear(row.dueDate)}</Typography>
+          <Stack spacing={1} sx={{ alignItems: 'center' }} direction='row'>
+            <Typography>{formatDateStringAsDayMonthAndYear(row.dueDate)}</Typography>
+            {overDueWarning(row.dueDate)}
+          </Stack>
         </TableCell>
         <TableCell>
           {row.modelOwners && row.modelOwners.length > 0 ? (
