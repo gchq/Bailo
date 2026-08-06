@@ -19,10 +19,10 @@ module.exports = {
 
   s3: {
     credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
+      accessKeyId: 'bailoadmin',
+      secretAccessKey: 'bailoadmin',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
