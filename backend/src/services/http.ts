@@ -1,5 +1,5 @@
 import { ProxyAgent, ProxyAgentOptions } from 'proxy-agent'
-import { Agent } from 'undici'
+import { Agent, Dispatcher1Wrapper } from 'undici'
 
 import config from '../utils/config.js'
 
@@ -22,7 +22,9 @@ export function getHttpsAgent(opts?: ProxyAgentOptions) {
 }
 
 export function getHttpsUndiciAgent(opts?: Agent.Options) {
+  const agent = new Agent(opts)
+
   // Workaround for @types/node being wrong for undici here and throwing:
   // Type 'Agent' is not assignable to type 'Dispatcher'.
-  return new Agent({ ...opts }) as unknown as RequestInit['dispatcher']
+  return new Dispatcher1Wrapper(agent) as unknown as RequestInit['dispatcher']
 }

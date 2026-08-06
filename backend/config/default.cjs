@@ -84,6 +84,12 @@ module.exports = {
       },
     },
 
+    // Refer to: https://github.com/agenda/human-interval#uses
+    lifecycle: {
+      preReminderIntervals: ['1 day', '2 weeks', '10 weeks'],
+      postReminderInterval: '1 day',
+    },
+
     // Set the email address that Bailo should use, can be different from the SMTP server details.
     from: '"Bailo 📝" <bailo@example.org>',
   },
@@ -182,12 +188,15 @@ module.exports = {
       userPoolId: '',
       userIdAttribute: '',
       adminGroupName: '',
+      complianceGroupName: '',
+      untrustedModelGroupName: '',
     },
   },
 
   artefactScanning: {
     clamdscan: {
       concurrency: 2,
+      streamMaxLength: '2G',
       host: '127.0.0.1',
       port: 3310,
     },
@@ -262,6 +271,19 @@ module.exports = {
       contributor: 'Contributor',
       consumer: 'Consumer',
     },
+
+    untrustedModel: {
+      enabled: false,
+      untrustedModelLongDescription:
+        'Untrusted models are private-only models with the Registry tab disabled. They have not been verified or validated to the same standard as regular models.',
+      untrustedModelShortDescription:
+        'An untrusted model repository contains all files, history, and information associated with a private model.',
+      fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.',
+    },
+
+    llmImport: {
+      enabled: false,
+    },
   },
 
   connectors: {
@@ -282,6 +304,11 @@ module.exports = {
       retryDelayInMinutes: 60,
       maxInitRetries: 5,
       initRetryDelay: 5000,
+      scanTimeoutMs: 60_000,
+    },
+
+    metrics: {
+      kind: 'simple',
     },
   },
 
@@ -290,7 +317,7 @@ module.exports = {
       accessKeyId: '',
       secretAccessKey: '',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
@@ -350,5 +377,32 @@ module.exports = {
 
   inference: {
     authorisationToken: '',
+  },
+
+  llm: {
+    endpoint: '',
+    apiKey: '',
+    model: '',
+    maxTokens: 16384,
+    timeoutMs: 120000,
+    temperature: 0,
+    systemPrompt: `You are a data extraction assistant. You will be given a model card text document and a target JSON schema. Extract information from the document into the schema format.
+
+CRITICAL RULES:
+- Only extract information that is EXPLICITLY stated in the source document.
+- If a field cannot be populated from the document, omit it entirely from the output.
+- Do NOT infer, guess, or hallucinate any values.
+- Do NOT generate placeholder text like "Not specified", "N/A", or "Unknown" — leave the field out.
+- Do NOT generate placeholder or example URLs. Only include a URL if it appears verbatim in the source document.
+- Do NOT infer or generate dates. Only populate date fields if an explicit date is clearly stated in the source document for that specific purpose.
+- Return valid JSON matching the schema structure exactly.
+- For string fields, extract the relevant text verbatim or as a close summary.
+- For array fields, extract all matching items found in the document.
+- For enum fields (where allowed values are listed), you MUST use one of the allowed values exactly as written. Match the closest value semantically if the document uses different wording.
+- For number fields, extract numeric values only if explicitly stated.
+- For boolean fields, extract true/false only if the answer is clearly stated.
+- When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
+- The output JSON must use the exact property names from the schema (the "path" field).
+- When the document contains tabular data, check if the schema has a matching array or nested structure for that data. If so, map the rows into that structure. If the closest matching field is a string or text field, preserve the table in a readable format such as a markdown table or key-value pairs.`,
   },
 }

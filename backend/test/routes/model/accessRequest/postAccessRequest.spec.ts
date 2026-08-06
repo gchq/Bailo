@@ -50,7 +50,7 @@ describe('routes > accessRequest > postAccessRequest', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/access-requests`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateAccessRequest).toBeCalled()
+    expect(audit.onCreateAccessRequest).toHaveBeenCalled()
     expect(audit.onCreateAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

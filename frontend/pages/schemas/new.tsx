@@ -1,4 +1,5 @@
-import { ArrowBack, Schema } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import Schema from '@mui/icons-material/Schema'
 import {
   Autocomplete,
   Box,
@@ -123,7 +124,7 @@ export default function NewSchema() {
           return setErrorMessage(error)
         }
 
-        router.push('/schemas/list')
+        router.push('/admin?section=schema-list')
       } catch (e) {
         if (e instanceof SyntaxError) {
           setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
@@ -149,16 +150,23 @@ export default function NewSchema() {
   return (
     <>
       <Title text='Upload a new Schema' />
-      <Container maxWidth='sm' sx={{ my: 4 }}>
+      <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 4, m: 'auto' }}>
-          <Link href={`/schemas/list`}>
+          <Link href={`/admin?section=schema-list`}>
             <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
               Back to schema list
             </Button>
           </Link>
-          <Stack spacing={2} alignItems='center' justifyContent='center' sx={{ mt: 2 }}>
+          <Stack
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              mt: 2,
+            }}
+          >
             <Typography variant='h6' component='h1' color='primary'>
-              Upload a new Schema
+              Upload a new schema
             </Typography>
             <Schema color='primary' fontSize='large' />
             <Typography>Schemas are used to construct both model and access request forms.</Typography>
@@ -167,7 +175,11 @@ export default function NewSchema() {
             <Stack spacing={2} sx={{ mt: 2 }}>
               <Stack direction='row' spacing={2}>
                 <Stack>
-                  <Typography fontWeight='bold'>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     Id <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
                   <TextField
@@ -183,8 +195,12 @@ export default function NewSchema() {
                   />
                   <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
                 </Stack>
-                <Stack>
-                  <Typography fontWeight='bold'>
+                <Stack sx={{ width: '100%' }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     Name <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
                   <TextField
@@ -199,7 +215,11 @@ export default function NewSchema() {
                 </Stack>
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Description <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <RichTextEditor
@@ -210,7 +230,13 @@ export default function NewSchema() {
                 <Typography variant='caption'>A short description describing the purpose of this schema</Typography>
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Default Review Roles</Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Default Review Roles
+                </Typography>
                 <Autocomplete
                   multiple
                   size='small'
@@ -229,7 +255,12 @@ export default function NewSchema() {
                 />
               </Stack>
               <Stack>
-                <Typography fontWeight='bold' id='schema-type-label'>
+                <Typography
+                  id='schema-type-label'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   Schema Type <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <Select
@@ -247,7 +278,11 @@ export default function NewSchema() {
                 {fileName !== '' ? fileName : 'Select schema'}
                 <VisuallyHiddenInput type='file' onChange={handleUploadChange} />
               </Button>
-              <Stack alignItems='flex-end'>
+              <Stack
+                sx={{
+                  alignItems: 'flex-end',
+                }}
+              >
                 <Button
                   variant='contained'
                   loading={loading}

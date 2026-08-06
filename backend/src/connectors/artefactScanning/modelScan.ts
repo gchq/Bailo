@@ -5,27 +5,47 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
 import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
+const UNSUPPORTED_FILE_TYPE_MESSAGE = 'File type is not compatible with this scanner.'
+const TOOL_NAME = 'ModelScan'
+export function isScanAllowedSkip(scan: ArtefactScanResult): boolean {
+  return (
+    (scan.state === ArtefactScanState.Skipped &&
+      scan.toolName === TOOL_NAME &&
+      scan.summary?.includes(UNSUPPORTED_FILE_TYPE_MESSAGE)) ||
+    false
+  )
+}
+
 export class ModelScanFileScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })
-  artefactType: ArtefactKindKeys = ArtefactKind.FILE
-  toolName: string = 'ModelScan'
+  readonly artefactType: ArtefactKindKeys = ArtefactKind.FILE
+  readonly toolName: string = TOOL_NAME
+  protected supportedExtensions: string[] = []
 
-  async init() {
-    if (!this.version) {
-      const artefactScanInfo = await getCachedArtefactScanInfo()
-      this.version = artefactScanInfo.modelscanVersion
-    }
-    return this
+  async init(): Promise<void> {
+    const artefactScanInfo = await getCachedArtefactScanInfo()
+
+    this.version = artefactScanInfo.modelscanVersion
+    this.supportedExtensions = artefactScanInfo.modelscanSupportedExtensions ?? this.supportedExtensions
+    this.maxSize = artefactScanInfo.maxFileSizeBytes ?? this.maxSize
   }
 
-  async _scan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
-    await this.init()
-    const scannerInfo = this.info()
-    if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ArtefactScan as it is not running.', { ...scannerInfo })
+  protected async executeScan(file: FileInterfaceDoc): Promise<ArtefactScanResult> {
+    const scannerInfo = this.getConnectorInfo()
+
+    if (file.size > this.maxSize) {
+      return this.buildSizeExceededResult(file, file.size)
+    }
+
+    const lowerFileName = file.name.toLowerCase()
+    // Do not use `path.extname` as it will not handle compound extensions e.g. `.tar.gz`
+    const isSupported = this.supportedExtensions.some((ext) => lowerFileName.endsWith(ext.toLowerCase()))
+    if (this.supportedExtensions.length > 0 && !isSupported) {
+      return this.buildUnsupportedFileType()
     }
 
     const s3Stream = await getObjectStream(file.path)
@@ -34,11 +54,15 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
       const scanResults = await scanFileStream(s3Stream, file.name)
 
       if (scanResults.errors.length !== 0) {
-        return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+        return this.buildErrorResult(`This file could not be scanned due to an error caused by ${this.toolName}`, {
           errors: scanResults.errors,
           file,
           ...scannerInfo,
         })
+      }
+
+      if (scanResults.summary.skipped.total_skipped > 0) {
+        return this.buildUnsupportedFileType()
       }
 
       const summary: ArtefactScanSummary[] = scanResults.issues.map(
@@ -58,8 +82,12 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
         lastRunAt: new Date(),
       }
     } catch (error) {
-      return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
-        error: Error.isError(error) ? { name: error.name, stack: error.stack } : error,
+      // Content too large
+      if (isBailoError(error) && error.code === 413) {
+        return this.buildSizeExceededResult(file, file.size)
+      }
+      return this.buildErrorResult(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+        error,
         file,
       })
     } finally {
@@ -69,5 +97,9 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
         }
       }
     }
+  }
+
+  protected buildUnsupportedFileType(): ArtefactScanResult {
+    return this.buildSkipResult([UNSUPPORTED_FILE_TYPE_MESSAGE])
   }
 }

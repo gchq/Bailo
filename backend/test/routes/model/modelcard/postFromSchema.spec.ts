@@ -29,7 +29,7 @@ describe('routes > model > postModel > schema', () => {
     const res = await testPost('/api/v2/model/example/setup/from-schema', fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateModelCard).toBeCalled()
+    expect(audit.onCreateModelCard).toHaveBeenCalled()
     expect(audit.onCreateModelCard.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onCreateModelCard.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

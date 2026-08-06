@@ -1,9 +1,7 @@
 import { Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useMemo, useState } from 'react'
 import SplitButton from 'src/common/SplitButton'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import { getRktCredentialsConfig } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
@@ -17,24 +15,27 @@ type RocketConfigurationProps = {
 }
 
 export default function RocketConfiguration({ token }: RocketConfigurationProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const [showFilePreview, setShowFilePreview] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-auth.json`, [token.description])
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
-  }
-
   return (
     <Stack spacing={4}>
-      <Stack spacing={2} alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 1: Download credentials config
+        </Typography>
         <Typography>First, download the rkt credentials file for the personal access token:</Typography>
         <SplitButton
           aria-label='download rocket credentials file'
@@ -64,8 +65,19 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
           </CodeSnippet>
         )}
       </Stack>
-      <Stack spacing={2} alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 2: Write to disk</Typography>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 2: Write to disk
+        </Typography>
         <Typography>Second, place the file in the rkt configuration directory:</Typography>
         <TokenCommand disableVisibilityToggle token={token} command={`mv ${configFileName} /etc/rkt/auth.d/`} />
       </Stack>

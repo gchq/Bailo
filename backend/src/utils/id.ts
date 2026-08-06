@@ -1,11 +1,19 @@
 import { customAlphabet } from 'nanoid'
 import { v4 as generateUuidv4 } from 'uuid'
 
+const uppercaseAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const lowercaseAlphabet = uppercaseAlphabet.toLowerCase()
+const numbers = '0123456789'
+
+const shortAlphabetCharacters = `${numbers}${lowercaseAlphabet}`
+export const shortAlphabet = customAlphabet(`${numbers}${uppercaseAlphabet}`)
+export const longAlphabet = customAlphabet(`${numbers}${uppercaseAlphabet}${lowercaseAlphabet}`)
+
 export function longId() {
   return generateUuidv4()
 }
 
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
+const nanoid = customAlphabet(shortAlphabetCharacters, 6)
 export function shortId() {
   return nanoid()
 }

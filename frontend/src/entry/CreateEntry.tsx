@@ -1,5 +1,10 @@
-import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import FileUpload from '@mui/icons-material/FileUpload'
+import FolderCopy from '@mui/icons-material/FolderCopy'
+import Gavel from '@mui/icons-material/Gavel'
+import Lock from '@mui/icons-material/Lock'
+import LockOpen from '@mui/icons-material/LockOpen'
 import {
   Accordion,
   AccordionDetails,
@@ -19,14 +24,16 @@ import {
 import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelInput'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TagSelector from 'src/MuiForms/TagSelector'
 import {
@@ -49,13 +56,16 @@ type CreateEntryProps = {
 export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
 
+  const uiConfig = useContext(UiConfigContext)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [name, setName] = useState('')
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
-  const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
+  const [visibility, setVisibility] = useState<EntryForm['visibility']>(
+    createEntryKind !== EntryKind.UNTRUSTED_MODEL ? EntryVisibility.Public : EntryVisibility.Private,
+  )
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
@@ -76,12 +86,29 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   }, [])
 
   const entryKindForRedirect = useMemo(() => {
-    return createEntryKind === EntryKind.MODEL || createEntryKind === EntryKind.MIRRORED_MODEL
+    return createEntryKind === EntryKind.MODEL ||
+      createEntryKind === EntryKind.MIRRORED_MODEL ||
+      createEntryKind === EntryKind.UNTRUSTED_MODEL
       ? EntryKind.MODEL
       : createEntryKind
   }, [createEntryKind])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const createEntryKindShortDescription = useMemo(() => {
+    switch (createEntryKind) {
+      case EntryKind.MODEL:
+        return 'A model repository contains all files, history, and information associated with a model.'
+      case EntryKind.MIRRORED_MODEL:
+        return 'A mirrored model contains a read-only copy of a model imported from another Bailo deployment, with local details recorded alongside the imported model card.'
+      case EntryKind.UNTRUSTED_MODEL:
+        return uiConfig.untrustedModel.untrustedModelShortDescription
+      case EntryKind.DATA_CARD:
+        return 'A data card tracks and references training data used to generate models, including storage location and accreditation information.'
+      default:
+        return `Create a new ${EntryKindLabel[createEntryKind]}.`
+    }
+  }, [createEntryKind, uiConfig.untrustedModel.untrustedModelShortDescription])
+
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
     setErrorMessage('')
@@ -115,10 +142,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const privateLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Private</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Private
+          </Typography>
           <Typography variant='caption'>
             {`Only named individuals will be able to view this ${EntryKindLabel[createEntryKind]}`}
           </Typography>
@@ -129,10 +169,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const publicLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Public</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Public
+          </Typography>
           <Typography variant='caption'>
             {`Any authorised user will be able to see this ${EntryKindLabel[createEntryKind]}`}
           </Typography>
@@ -143,10 +196,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const allowTemplatingLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <FolderCopy />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Templating</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Templating
+          </Typography>
           <Typography variant='caption'>
             {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
           </Typography>
@@ -157,10 +223,23 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const ungovernedAccessLabel = useMemo(() => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Gavel />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Ungoverned Access Requests
+          </Typography>
           <Typography variant='caption'>
             {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
           </Typography>
@@ -185,16 +264,18 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
           <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
             Back
           </Button>
-          <Stack spacing={2} alignItems='center' justifyContent='center'>
+          <Stack
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <Typography variant='h6' component='h1' color='primary'>
               {`Create ${toTitleCase(createEntryKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
-            {createEntryKind === EntryKind.MODEL && (
-              <Typography>
-                A model repository contains all files, history and information related to a model.
-              </Typography>
-            )}
+            <Typography>{createEntryKindShortDescription}</Typography>
           </Stack>
         </Stack>
         <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>
@@ -204,10 +285,16 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 Overview
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                <EntryNameInput autoFocus value={name} kind={createEntryKind} onChange={(value) => setName(value)} />
-                <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
+                <Box sx={{ width: '100%' }}>
+                  <EntryNameInput autoFocus value={name} kind={createEntryKind} onChange={(value) => setName(value)} />
+                </Box>
+                <Box sx={{ width: '100%' }}>
+                  <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
+                </Box>
                 {createEntryKind === EntryKind.MIRRORED_MODEL && (
-                  <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                  <Box sx={{ width: '100%' }}>
+                    <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                  </Box>
                 )}
               </Stack>
               <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
@@ -217,24 +304,29 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               <Typography component='h3' variant='h6'>
                 Access control
               </Typography>
-              <RadioGroup
-                defaultValue='public'
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
-              >
-                <FormControlLabel
-                  value='public'
-                  control={<Radio />}
-                  label={publicLabel}
-                  data-test='publicButtonSelector'
-                />
-                <FormControlLabel
-                  value='private'
-                  control={<Radio />}
-                  label={privateLabel}
-                  data-test='privateButtonSelector'
-                />
-              </RadioGroup>
+              {createEntryKind === EntryKind.UNTRUSTED_MODEL && (
+                <Typography color='warning'>Untrusted models can only be private.</Typography>
+              )}
+              {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (
+                <RadioGroup
+                  defaultValue='public'
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+                >
+                  <FormControlLabel
+                    value='public'
+                    control={<Radio />}
+                    label={publicLabel}
+                    data-test='publicButtonSelector'
+                  />
+                  <FormControlLabel
+                    value='private'
+                    control={<Radio />}
+                    label={privateLabel}
+                    data-test='privateButtonSelector'
+                  />
+                </RadioGroup>
+              )}
             </>
             <Accordion sx={{ borderTop: 'none' }}>
               <AccordionSummary
@@ -254,8 +346,11 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       Manage access list
                     </Typography>
                     <Typography variant='caption'>
-                      Please note that only entry roles can be added at this stage, and review roles should be added
-                      once a schema has been selected.
+                      Please note that only{' '}
+                      <Link href='/docs/getting-started/core-concepts#system-roles' target='_blank'>
+                        system roles
+                      </Link>{' '}
+                      can be added at this stage, and review roles should be added once a schema has been selected.
                     </Typography>
                     <Box sx={{ my: 1 }}>
                       {isEntryRolesLoading ? (
@@ -279,34 +374,36 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       value={tags}
                       label=''
                       id='entry-tag-selector'
-                      formContext={{ editMode: true }}
+                      editable
                     />
                   </Stack>
-                  <Stack spacing={2}>
-                    <Typography variant='h6' component='h2'>
-                      Additional settings
-                    </Typography>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          onChange={(e) => setUngovernedAccess(e.target.checked)}
-                          checked={ungovernedAccess}
-                          size='small'
-                        />
-                      }
-                      label={ungovernedAccessLabel}
-                    />
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          onChange={(event) => setAllowTemplating(event.target.checked)}
-                          checked={allowTemplating}
-                          size='small'
-                        />
-                      }
-                      label={allowTemplatingLabel}
-                    />
-                  </Stack>
+                  {createEntryKind !== EntryKind.UNTRUSTED_MODEL && (
+                    <Stack spacing={2}>
+                      <Typography variant='h6' component='h2'>
+                        Additional settings
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={(e) => setUngovernedAccess(e.target.checked)}
+                            checked={ungovernedAccess}
+                            size='small'
+                          />
+                        }
+                        label={ungovernedAccessLabel}
+                      />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={(event) => setAllowTemplating(event.target.checked)}
+                            checked={allowTemplating}
+                            size='small'
+                          />
+                        }
+                        label={allowTemplatingLabel}
+                      />
+                    </Stack>
+                  )}
                 </Stack>
               </AccordionDetails>
             </Accordion>

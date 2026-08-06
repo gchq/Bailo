@@ -1,17 +1,20 @@
-import { Delete, Edit, FileCopy, ImportExport, Key, ManageAccounts } from '@mui/icons-material'
+import Delete from '@mui/icons-material/Delete'
+import Edit from '@mui/icons-material/Edit'
+import FileCopy from '@mui/icons-material/FileCopy'
+import ImportExport from '@mui/icons-material/ImportExport'
+import Key from '@mui/icons-material/Key'
+import ManageAccounts from '@mui/icons-material/ManageAccounts'
 import { Container, Divider, List, Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDeletion from 'src/entry/settings/EntryDeletion'
 import EntryDetails from 'src/entry/settings/EntryDetails'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind } from 'types/types'
 
 export const SettingsCategory = {
@@ -51,6 +54,12 @@ function isSettingsCategory(
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.DELETION
       )
+    case EntryKind.UNTRUSTED_MODEL:
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.DELETION
+      )
     default:
       return false
   }
@@ -58,26 +67,22 @@ function isSettingsCategory(
 
 type SettingsProps = {
   entry: EntryInterface
+  mutateEntry?: () => void
 }
 
-export default function Settings({ entry }: SettingsProps) {
+export default function Settings({ entry, mutateEntry }: SettingsProps) {
   const router = useRouter()
 
   const { category } = router.query
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
-  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
-
-  const onSelectedCategoryChange = useEffectEvent((category: SettingsCategoryKeys) => {
-    setSelectedCategory(category)
-  })
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(
+    isSettingsCategory(category, entry) ? category : SettingsCategory.DETAILS,
+  )
 
   useEffect(() => {
-    if (isSettingsCategory(category, entry)) {
-      onSelectedCategoryChange(category)
-    } else if (category) {
-      onSelectedCategoryChange(SettingsCategory.DETAILS)
+    if (!isSettingsCategory(category, entry)) {
       router.replace({
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })
@@ -89,14 +94,6 @@ export default function Settings({ entry }: SettingsProps) {
     router.replace({
       query: { ...router.query, category },
     })
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
   }
 
   return (
@@ -169,7 +166,7 @@ export default function Settings({ entry }: SettingsProps) {
           </SimpleListItemButton>
         </List>
         <Container sx={{ my: 2 }}>
-          {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
+          {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} onSave={mutateEntry} />}
           {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessTab entry={entry} />}
           {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
           {selectedCategory === SettingsCategory.TEMPLATING && <TemplateSettings model={entry} />}

@@ -331,7 +331,7 @@ class Model(Entry):
 
         :param model_card: Model card dictionary, defaults to None
 
-        ..note:: If a model card is not provided, the current model card attribute value is used
+        .. note:: If a model card is not provided, the current model card attribute value is used
         """
         self._update_card(card=model_card)
 
@@ -356,9 +356,9 @@ class Model(Entry):
         """Call the Release.create method to build a release from Bailo and upload it.
 
         :param version: A semantic version for the release
-        :param notes: Notes on release, defaults to ""
-        :param files: A list of files for release, defaults to []
-        :param images: A list of images for release, defaults to []
+        :param notes: Notes on release
+        :param files: A list of files for release, defaults to None
+        :param images: A list of images for release, defaults to None
         :param minor: Is a minor release?, defaults to False
         :param draft: Is a draft release?, defaults to True
         :return: Release object
@@ -494,7 +494,7 @@ class Model(Entry):
     def __str__(self) -> str:
         """Return the human-readable string representation of the model.
 
-        :return: String value of the enum.
+        :return: String representation of the model.
         """
         return f"{self.model_id}"
 
@@ -665,8 +665,8 @@ class Experiment:
         :param run_id: Local experiment run ID to be selected, defaults to None
         :param select_by: String describing experiment to be selected (e.g. "accuracy MIN|MAX"), defaults to None
 
-        ..note:: mc_loc is dependent on the model card schema being used
-        ..warning:: User must specify either run_id or select_by, otherwise the code will error
+        .. note:: mc_loc is dependent on the model card schema being used
+        .. warning:: User must specify either run_id or select_by, otherwise the code will error
         """
 
         # Check if already published, can only published once

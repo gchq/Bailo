@@ -1,4 +1,6 @@
-import { Close, Info, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Info from '@mui/icons-material/Info'
+import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
 import {
   deleteAccessRequest,
@@ -9,7 +11,7 @@ import {
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useEffect, useEffectEvent, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -17,7 +19,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { AccessRequestInterface, SplitSchemaNoRender, StepNoRender } from 'types/types'
+import { AccessRequestInterface, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
 
@@ -35,7 +37,6 @@ export default function EditableAccessRequestForm({
   readOnly = false,
 }: EditableAccessRequestFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
@@ -50,21 +51,26 @@ export default function EditableAccessRequestForm({
 
   const router = useRouter()
 
-  const updateSplitSchema = useEffectEvent((schemaId: string, steps: StepNoRender[]) => {
-    setSplitSchema({ reference: schemaId, steps })
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({
+    reference: '',
+    steps: [],
   })
 
   useEffect(() => {
-    if (isEdit === false && schema) {
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
-      for (const step of steps) {
-        step.steps = steps
-      }
-      updateSplitSchema(schema.id, steps)
+    if (!schema || isEdit) {
+      return
     }
-  }, [accessRequest.metadata, isEdit, schema])
 
-  const handleDeleteConfirm = useCallback(async () => {
+    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
+
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    setSplitSchema({ reference: schema.id, steps })
+  }, [schema, accessRequest.metadata, isEdit])
+
+  const handleDeleteConfirm = async () => {
     setDeleteErrorMessage('')
     const res = await deleteAccessRequest(accessRequest.modelId, accessRequest.id)
     if (!res.ok) {
@@ -75,7 +81,7 @@ export default function EditableAccessRequestForm({
       setOpen(false)
       router.push(`/model/${accessRequest.modelId}?tab=access`)
     }
-  }, [accessRequest.modelId, accessRequest.id, mutateAccessRequests, mutateReviews, router])
+  }
 
   async function handleSubmit() {
     if (schema) {
@@ -103,7 +109,7 @@ export default function EditableAccessRequestForm({
     }
   }
 
-  const resetForm = useCallback(() => {
+  const resetForm = () => {
     if (schema) {
       const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
       for (const step of steps) {
@@ -111,7 +117,7 @@ export default function EditableAccessRequestForm({
       }
       setSplitSchema({ reference: schema.id, steps })
     }
-  }, [accessRequest.metadata, schema])
+  }
 
   function handleEdit() {
     onIsEditChange(true)
@@ -146,8 +152,19 @@ export default function EditableAccessRequestForm({
           heading={
             schema && (
               <div>
-                <Typography fontWeight='bold'>Schema</Typography>
-                <Stack direction='row' alignItems='center'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Schema
+                </Typography>
+                <Stack
+                  direction='row'
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   <Typography>{schema?.name}</Typography>
                   <IconButton onClick={() => setSchemaInformationOpen(true)}>
                     <Info color='primary' fontSize='small' />
@@ -184,7 +201,15 @@ export default function EditableAccessRequestForm({
           dialogMessage={'Are you sure you want to delete this access request?'}
         />
         {isEdit && (
-          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              mb: { xs: 2 },
+            }}
+          >
             <Button variant='outlined' onClick={handleCancel} startIcon={<Close />}>
               Cancel
             </Button>

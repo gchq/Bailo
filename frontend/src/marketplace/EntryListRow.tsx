@@ -1,12 +1,15 @@
-import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
-import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
+import CloudQueue from '@mui/icons-material/CloudQueue'
+import CorporateFare from '@mui/icons-material/CorporateFare'
+import LaunchOutlined from '@mui/icons-material/LaunchOutlined'
+import { Box, Button, Chip, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/entry'
-import { CSSProperties, useMemo } from 'react'
+import { CSSProperties, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
 import { EntryKind, PeerConfigStatus } from 'types/types'
 import { getEntryUrl } from 'utils/peerUtils'
+import { entryKindForRedirect } from 'utils/routerUtils'
 
 interface EntryListRowProps {
   selectedChips: string[]
@@ -25,6 +28,8 @@ interface EntryListRowProps {
   peers?: Map<string, PeerConfigStatus>
 }
 
+const descriptionTextLimit = 170
+
 export default function EntryListRow({
   selectedChips,
   onSelectedChipsChange,
@@ -42,19 +47,19 @@ export default function EntryListRow({
   peers,
 }: EntryListRowProps) {
   const theme = useTheme()
+  const [expanded, setExpanded] = useState(false)
 
-  const entryKindForRedirect = useMemo(() => {
-    return entry.kind === EntryKind.MODEL || entry.kind === EntryKind.MIRRORED_MODEL ? EntryKind.MODEL : entry.kind
-  }, [entry])
-
-  const mirroredLabel = useMemo(() => {
-    if (entry.kind === EntryKind.MIRRORED_MODEL) {
-      return <Typography>Mirrored</Typography>
+  const label = useMemo(() => {
+    switch (entry.kind) {
+      case EntryKind.MIRRORED_MODEL:
+        return <Chip size='small' color='secondary' variant='outlined' label='Mirrored' />
+      case EntryKind.UNTRUSTED_MODEL:
+        return <Chip size='small' color='warning' variant='outlined' label='Untrusted' />
     }
   }, [entry])
 
   // Link to view this entry, defaults to 'this' instance
-  let href = `${entryKindForRedirect}/${entry.id}`
+  let href = `${entryKindForRedirect(entry.kind)}/${entry.id}`
 
   // Handle the case where the entry must be viewed on a different peer
   const peerId = entry.peerId
@@ -70,66 +75,70 @@ export default function EntryListRow({
 
   return (
     <Box
-      justifyContent='flex-start'
-      alignItems='center'
+      key={entry.id}
       sx={{
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         px: 3,
         py: 1,
         margin: 'auto',
         ...style,
       }}
-      key={entry.id}
     >
-      <Stack spacing={1}>
-        <Link
-          sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-          href={href}
-          target={isExternal ? '_blank' : '_self'}
-        >
-          <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
-            <Typography
-              variant='h5'
-              component='h2'
-              sx={{
-                fontWeight: '500',
-                textDecoration: 'none',
-                color: theme.palette.primary.main,
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-              }}
-            >
-              {entry.name}
-            </Typography>
-            <Stack spacing={2} direction='row'>
-              {entry.kind === EntryKind.MIRRORED_MODEL && (
-                <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
-              )}
-              {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
-              {isExternal && <LaunchOutlined />}
-            </Stack>
+      <Link sx={{ textDecoration: 'none', overflow: 'hidden' }} href={href} target={isExternal ? '_blank' : '_self'}>
+        <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+          <Typography
+            variant='h5'
+            component='h2'
+            sx={{
+              fontWeight: '500',
+              textDecoration: 'none',
+              color: theme.palette.primary.main,
+              overflow: 'hidden',
+              wordBreak: 'break-word',
+              minWidth: 0,
+              flex: 1,
+            }}
+          >
+            {entry.name}
+          </Typography>
+          <Stack spacing={2} direction='row'>
+            {label}
+            {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
+            {isExternal && <LaunchOutlined />}
           </Stack>
-          {displayPeers && isExternal && (
-            <ChipSelector
-              chipTooltipTitle={'Filter by external repository'}
-              options={peers && entry?.peerId && peers.has(entry.peerId) ? [entry.peerId] : []}
-              expandThreshold={10}
-              variant='outlined'
-              multiple
-              selectedChips={selectedPeers}
-              onChange={onSelectedPeersChange}
-              size='small'
-              ariaLabel='add external repository to search filter'
-              style={{ padding: 1, marginLeft: 'auto' }}
-              icon={<CloudQueue />}
-            />
-          )}
-        </Link>
-      </Stack>
-      <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-        {entry.description}
-      </Typography>
-      <Stack direction='row' spacing={1} alignItems='center' sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-        <Stack direction='row' spacing={1}>
+        </Stack>
+        {displayPeers && isExternal && (
+          <ChipSelector
+            chipTooltipTitle={'Filter by external repository'}
+            options={peers && entry?.peerId && peers.has(entry.peerId) ? [entry.peerId] : []}
+            expandThreshold={10}
+            variant='outlined'
+            multiple
+            selectedChips={selectedPeers}
+            onChange={onSelectedPeersChange}
+            size='small'
+            ariaLabel='add external repository to search filter'
+            style={{ padding: 1, marginLeft: 'auto' }}
+            icon={<CloudQueue />}
+          />
+        )}
+      </Link>
+      <>
+        {!expanded && (
+          <Typography
+            sx={{ wordBreak: 'break-word' }}
+          >{`${entry.description.slice(0, descriptionTextLimit)}${entry.description.length > descriptionTextLimit ? '...' : ''}`}</Typography>
+        )}
+        {expanded && <Typography sx={{ wordBreak: 'break-word' }}>{entry.description}</Typography>}
+        {entry.description.length > descriptionTextLimit && (
+          <Button sx={{ width: 'max-content' }} onClick={() => setExpanded(!expanded)}>
+            {expanded ? 'Show less' : 'Show more...'}
+          </Button>
+        )}
+      </>
+      <Box>
+        <Stack direction={{ sm: 'column', md: 'row' }}>
           {displayOrganisation && entry.organisation && (
             <ChipSelector
               chipTooltipTitle={'Filter by organisation'}
@@ -160,9 +169,8 @@ export default function EntryListRow({
             />
           )}
         </Stack>
-        {(entry.state || entry.organisation) && (displayOrganisation || displayState) && entry.tags.length > 0 && (
-          <Divider flexItem orientation='vertical' />
-        )}
+      </Box>
+      {entry.tags.length > 0 && (
         <ChipSelector
           chipTooltipTitle={'Filter by tag'}
           options={entry.tags.slice(0, 10)}
@@ -172,8 +180,9 @@ export default function EntryListRow({
           onChange={onSelectedChipsChange}
           size='small'
           ariaLabel='add tag to search filter'
+          style={{ maxWidth: '400px' }}
         />
-      </Stack>
+      )}
     </Box>
   )
 }

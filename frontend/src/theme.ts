@@ -1,5 +1,6 @@
 import { green, red, yellow } from '@mui/material/colors'
 import { createTheme, PaletteColor, PaletteColorOptions, ThemeOptions } from '@mui/material/styles'
+import type {} from '@mui/x-date-pickers/themeAugmentation'
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -51,16 +52,6 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
       },
     },
   },
-  MuiTab: {
-    styleOverrides: {
-      root: {
-        textTransform: 'none',
-        '&:hover': {
-          backgroundColor: '#ececec',
-        },
-      },
-    },
-  },
   MuiMenu: {
     defaultProps: {
       anchorOrigin: {
@@ -80,6 +71,14 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
     styleOverrides: {
       root: {
         marginTop: 4,
+      },
+    },
+  },
+  MuiPickersOutlinedInput: {
+    styleOverrides: {
+      sectionsContainer: {
+        paddingTop: 10,
+        paddingBottom: 10,
       },
     },
   },
@@ -114,7 +113,7 @@ export const lightTheme = createTheme({
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#d62560',
+            borderColor: '#b5497d',
           },
         },
       },
@@ -128,14 +127,24 @@ export const lightTheme = createTheme({
         },
       },
     },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          '&:hover': {
+            backgroundColor: '#ececec',
+          },
+        },
+      },
+    },
   },
   palette: {
     mode: 'light',
     primary: {
-      main: '#54278e',
+      main: '#4d3075',
     },
     secondary: {
-      main: '#d62560',
+      main: '#b5497d',
     },
     error: {
       main: red.A700,
@@ -183,11 +192,11 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#f37f58',
+      main: '#E4E4E4',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#ecc3b1',
+      main: '#B39CD0',
     },
     error: {
       main: red.A200,
@@ -202,7 +211,8 @@ export const darkTheme = createTheme({
       main: green.A700,
     },
     background: {
-      paper: '#242424',
+      paper: '#282828;',
+      default: '#2d2d2d',
     },
     action: {
       active: '#fff',
@@ -253,12 +263,12 @@ export const darkTheme = createTheme({
             backgroundColor: '#5c5c5c',
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#f7a4c0',
+            borderColor: '#cbbfda',
           },
           '&.Mui-selected': {
             borderRight: 'solid',
             borderWidth: '2px',
-            borderColor: '#d62560',
+            borderColor: '#b5a0ce',
           },
         },
       },
@@ -273,12 +283,19 @@ export const darkTheme = createTheme({
       },
     },
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
         outlined: {
           color: '#fff',
         },
         contained: {
-          color: '#fff',
+          color: '#202020 !important',
+          backgroundColor: '#B39CD0',
         },
         text: {
           color: '#fff',
@@ -307,6 +324,43 @@ export const darkTheme = createTheme({
           color: '#3f3f3f',
         },
       },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: '#e3e3e3',
+        },
+      },
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        root: {
+          color: '#e3e3e3',
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          '&:hover': {
+            backgroundColor: '#363636',
+          },
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: (theme) => ({
+        div: {
+          color: theme.palette.text.primary,
+        },
+        a: {
+          color: theme.palette.primary.main,
+          '&:visited': {
+            color: theme.palette.primary.main,
+          },
+        },
+      }),
     },
   },
 })

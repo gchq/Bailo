@@ -178,8 +178,7 @@ export abstract class BaseExporter {
    * Provides parameters for `initialiseTarGzUpload()`.
    */
   protected abstract getInitialiseTarGzUploadParams():
-    | Promise<Parameters<typeof initialiseTarGzUpload>>
-    | Parameters<typeof initialiseTarGzUpload>
+    Promise<Parameters<typeof initialiseTarGzUpload>> | Parameters<typeof initialiseTarGzUpload>
 
   protected readonly logData: MirrorExportLogData
   protected readonly user: UserInterface
@@ -317,6 +316,7 @@ export abstract class BaseExporter {
   async finalise() {
     log.trace(this.logData, `Finalising ${this.constructor.name}.`)
 
+    // Non-null assertion operator used due to `withStreams` performing assertion
     await finaliseTarGzUpload(this.tarStream!, this.uploadPromise!)
 
     log.trace(this.logData, `Finished finalising ${this.constructor.name}.`)

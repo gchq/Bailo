@@ -18,7 +18,13 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
       entry.collaborators.map((collaborator) => (
         <Fragment key={collaborator.entity}>
           <Grid size={{ xs: 6 }}>
-            <Stack direction='row' alignItems='center' spacing={1}>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <EntityNameDisplay entryCollaborator={collaborator} />
             </Stack>
           </Grid>

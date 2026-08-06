@@ -16,7 +16,7 @@ const config: PartialDeep<Config> = {
       accessKeyId: '',
       secretAccessKey: '',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
@@ -39,6 +39,9 @@ const config: PartialDeep<Config> = {
     },
     artefactScanners: {
       kinds: [],
+    },
+    metrics: {
+      kind: 'simple',
     },
   },
   smtp: {
@@ -103,6 +106,9 @@ const config: PartialDeep<Config> = {
       },
       userPoolId: '',
       userIdAttribute: '',
+      adminGroupName: 'admin',
+      complianceGroupName: 'compliance',
+      untrustedModelGroupName: 'untrusted-model',
     },
   },
   artefactScanning: {
@@ -110,6 +116,7 @@ const config: PartialDeep<Config> = {
       host: '127.0.0.1',
       port: 8080,
       concurrency: 1,
+      streamMaxLength: '10M',
     },
 
     artefactscan: {
@@ -120,7 +127,7 @@ const config: PartialDeep<Config> = {
     },
   },
   mongo: {
-    uri: 'mongodb://localhost:27017/bailo?directConnection=true',
+    uri: 'mongodb://mock',
     user: undefined,
     pass: undefined,
     transactions: false,
@@ -132,6 +139,11 @@ const config: PartialDeep<Config> = {
     modelDetails: {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],
+    },
+    untrustedModel: {
+      enabled: false,
+      untrustedModelLongDescription: 'tbd',
+      untrustedModelShortDescription: 'tbd',
     },
   },
   modelMirror: {

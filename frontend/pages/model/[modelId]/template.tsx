@@ -1,4 +1,5 @@
-import { ArrowBack, FileCopy } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import FileCopy from '@mui/icons-material/FileCopy'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { postFromTemplate } from 'actions/modelCard'
@@ -79,7 +80,13 @@ export default function ModelTemplateSelect() {
                   {`Back to ${EntryKindLabel[model.kind]}`}
                 </Button>
               </Link>
-              <Stack spacing={2} justifyContent='center' alignItems='center'>
+              <Stack
+                spacing={2}
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <Typography variant='h5' component='h1' color='primary'>
                   Select a model to use as a template
                 </Typography>

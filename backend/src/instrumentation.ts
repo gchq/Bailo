@@ -26,12 +26,12 @@ if (config.instrumentation.enabled) {
       headers: { Authorization: `Bearer ${config.instrumentation.authenticationToken}` },
     }),
     logRecordProcessors: [
-      new logs.SimpleLogRecordProcessor(
-        new OTLPLogExporter({
+      new logs.SimpleLogRecordProcessor({
+        exporter: new OTLPLogExporter({
           url: `${config.instrumentation.endpoint}/v1/logs`,
           headers: { Authorization: `Bearer ${config.instrumentation.authenticationToken}` },
         }),
-      ),
+      }),
     ],
     instrumentations: [
       getNodeAutoInstrumentations({

@@ -76,6 +76,7 @@ export const testModelCard: EntryCardInterface = {
   metadata: {},
   version: 1,
   createdBy: testEntity,
+  createdAt: new Date().toISOString(),
 }
 
 export const testV2Model: EntryInterface = {
@@ -116,7 +117,7 @@ export const testAccessRequestReview: ReviewRequestInterface = {
   _id: '123125123',
   model: testV2Model,
   role: 'msro',
-  semver: '1.0.0',
+  accessRequestId: '1.0.0',
   kind: 'access',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -145,10 +146,10 @@ export const testReleaseReviewNoResponses: ReviewRequestInterface = {
   _id: '123125123',
   model: testV2Model,
   role: 'msro',
+  semver: '1.1.1',
   kind: 'release',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  accessRequestId: 'my-release',
 }
 
 export const testAccessRequestSchema: SchemaInterface = {
@@ -253,6 +254,17 @@ export const testUiConfig: UiConfig = {
       enabled: false,
       disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
     },
+  },
+
+  untrustedModel: {
+    untrustedModelLongDescription: '',
+    untrustedModelShortDescription: '',
+    enabled: true,
+    fileUploadGuidance: '',
+  },
+
+  llmImport: {
+    enabled: false,
   },
 
   announcement: {

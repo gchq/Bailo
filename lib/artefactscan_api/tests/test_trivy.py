@@ -11,32 +11,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import BackgroundTasks, HTTPException, UploadFile
-from fastapi.testclient import TestClient
 
 # isort: split
 
 import bailo_artefactscan_api.trivy as trivy
-from bailo_artefactscan_api.main import app
-
-client = TestClient(app)
 
 EMPTY_CONTENTS = b""
 EMPTY_DIGEST = hashlib.sha256(EMPTY_CONTENTS).hexdigest()
-TAR_MIME_TYPE = "application/x-tar"
-
-
-@patch("bailo_artefactscan_api.trivy.scan")
-@pytest.mark.parametrize(
-    ("file_name", "file_content", "file_mime_type"),
-    [(EMPTY_DIGEST, EMPTY_CONTENTS, TAR_MIME_TYPE)],
-)
-def test_scan_blob(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
-    mock_scan.return_value = {}
-    files = {"in_file": (file_name, file_content, file_mime_type)}
-
-    response = client.post("/scan/image", files=files)
-    assert response.status_code == HTTPStatus.OK.value
-    mock_scan.assert_called_once()
 
 
 @pytest.mark.parametrize(

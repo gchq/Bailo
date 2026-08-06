@@ -1,17 +1,19 @@
-import { Button, Box, Divider, Grid, Stack, Typography } from '@mui/material'
-import imageLoader from '../src/imageLoader'
-import Image from 'next/image'
-import localFont from '@next/font/local'
-import Link from '../src/Link'
-import { createRef } from 'react'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
+import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import Image from 'next/image'
+import { createRef } from 'react'
+import imageLoader from '../src/imageLoader'
+import Link from '../src/Link'
 import Slideshow from '../src/Slideshow'
-import React from 'react'
 
 import bailoLogo from '../public/vertical-white.png'
+import navigationLinks from '../src/navigationLinks'
 
 export default function Home() {
   const ref = createRef<HTMLDivElement>()
+
+  const theme = useTheme()
 
   const scrollToContent = () => {
     if (ref.current) {
@@ -23,7 +25,7 @@ export default function Home() {
       <Box
         sx={{
           backgroundColor: '#f8e6dc',
-          background: 'linear-gradient(#54278e, #d62560)',
+          background: `linear-gradient(${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
           backgroundSize: '400% 400%',
           minHeight: '100vh',
         }}
@@ -36,17 +38,21 @@ export default function Home() {
             textAlign: 'center',
             pt: 2,
             minHeight: '100vh',
+            alignItems: 'center',
           }}
-          alignItems='center'
           spacing={1}
         >
-          <Stack justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 2 }}>
+          <Stack spacing={1} sx={{ mb: 2, alignItems: 'center', justifyContent: 'center' }}>
             <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={250} height={350} />
             <Typography variant='h5' sx={{ color: 'white' }}>
               Making it easy to compliantly manage the machine learning lifecycle
             </Typography>
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ p: 4 }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            sx={{ p: 4, maxWidth: '100%', justifyContent: 'center', alignItems: 'center' }}
+          >
             <Button
               onClick={scrollToContent}
               sx={{ minWidth: '200px', color: 'white' }}
@@ -56,16 +62,15 @@ export default function Home() {
             >
               Read more
             </Button>
-            <Link href='/docs'>
-              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
-                Documentation
-              </Button>
-            </Link>
-            <Link href='/accessibility/statement'>
-              <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
-                Accessibility
-              </Button>
-            </Link>
+            {navigationLinks
+              .filter((link) => link.primary)
+              .map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='outlined'>
+                    {link.label}
+                  </Button>
+                </Link>
+              ))}
           </Stack>
         </Stack>
       </Box>
@@ -76,17 +81,19 @@ export default function Home() {
           borderLeft: '50px solid transparent',
           borderRight: '50px solid transparent',
           margin: 'auto',
-          borderTop: '50px solid #742783',
+          borderTop: '50px solid #673677',
         }}
       />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
-        <Grid container alignItems='center' spacing={4}>
+        <Grid container sx={{ alignItems: 'center' }} spacing={4}>
           <Grid size={{ lg: 6 }}>
             <Box sx={{ px: 10, py: 4, textAlign: 'center', height: '100%' }}>
               <Stack
                 spacing={4}
-                justifyContent='center'
-                alignItems='center'
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
                 divider={
                   <Divider flexItem>
                     <StarPurple500Icon color='secondary' />

@@ -18,7 +18,7 @@ describe('routes > artefactscanning > getArtefactScanningInfo', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
-    expect(scannersMocks.default.scannersInfo).toBeCalled()
+    expect(scannersMocks.default.scannersInfo).toHaveBeenCalled()
   })
 
   test('audit > expected call', async () => {
@@ -26,7 +26,7 @@ describe('routes > artefactscanning > getArtefactScanningInfo', () => {
     const res = await testGet('/api/v2/filescanning/info', fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewScanners).toBeCalled()
+    expect(audit.onViewScanners).toHaveBeenCalled()
     expect(audit.onViewScanners.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

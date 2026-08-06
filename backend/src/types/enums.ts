@@ -9,6 +9,7 @@ export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 export const ReviewKind = {
   Release: 'release',
   Access: 'access',
+  Lifecycle: 'lifecycle',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
@@ -33,4 +34,11 @@ export const HttpHeader = {
   ACCEPT_RANGES: 'Accept-Ranges',
   CONTENT_RANGE: 'Content-Range',
   IF_NONE_MATCH: 'If-None-Match',
+}
+
+export const MetricsCacheKeys = {
+  USAGE: 'usageMetrics',
+  ROLE_COMPLIANCE: 'roleComplianceMetrics',
+  NO_RELEASES_COMPLIANCE: 'noReleasesComplianceMetrics',
+  UNAPPROVED_RELEASES_COMPLIANCE: 'unapprovedReleasesComplianceMetrics',
 }

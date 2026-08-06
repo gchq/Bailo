@@ -16,16 +16,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
   authenticationMiddleware() {
     return [
       {
-        path: '/api/v2',
-        middleware: [
-          function (req, res, next) {
-            req.user = { dn: 'user' }
-            return next()
-          },
-        ],
-      },
-      {
-        path: '/api/v3',
+        path: ['/api/v2', '/api/v3'],
         middleware: [
           function (req, res, next) {
             req.user = { dn: 'user' }
@@ -38,10 +29,8 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   async hasRole(_user: UserInterface, role: RoleKeys) {
-    if (role === Roles.Admin) {
-      return true
-    }
-    return false
+    const availableRoles = [Roles.Admin, Roles.Compliance, Roles.UntrustedModel]
+    return availableRoles.includes(role)
   }
 
   async queryEntities(_query: string) {

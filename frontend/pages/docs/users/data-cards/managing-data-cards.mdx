@@ -1,0 +1,84 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Managing Data Cards
+
+Once a data card has been created, you can edit its content, view its version history, manage collaborators, and link it
+to models.
+
+> **Common questions this page answers:**
+>
+> - How do I edit a data card?
+> - How do I add collaborators to a data card?
+> - Can I change the schema on a data card?
+> - How do I link a data card to a model?
+
+## Editing a data card
+
+Edit a data card by navigating to it and using the Edit data card button:
+
+1. Navigate to the data card page
+2. The **Overview** tab shows the current content
+3. Click **Edit data card** and edit any section of the data card form
+4. Click **Save** to create a new version
+
+## Viewing version history
+
+Every edit creates a new version, and you can view the full history to track changes over time:
+
+1. Open the data card page
+2. Navigate to the version history
+3. Select a previous version to view what the data card looked like at that point in time
+
+This is useful for tracking how documentation has evolved and understanding what changed between versions.
+
+## Managing collaborators
+
+Add users or groups as collaborators with specific roles to control access to the data card:
+
+1. Navigate to the **Settings** tab on the data card page
+2. Under **Access**, search for users or groups to add as collaborators
+3. Assign an appropriate role:
+   - **Owner**: Full control, including editing and deleting the data card
+   - **Contributor**: Can edit the data card content
+   - **Consumer**: Can view the data card
+
+## Changing the schema
+
+Schema changes are managed through administrator-created migration plans rather than direct switching.
+
+It is not possible to directly switch the schema used by a data card, however it is possible for a newer schema to be
+published by the Bailo administrators (for example, if your organisation has updated its data governance requirements).
+See [Schema Migrations](../../administration/schemas/schema-migrations) for further details. Note that changing schemas
+may require you to re-enter some information if the new schema has different fields.
+
+## Linking data cards to models
+
+Data cards and models can reference each other to maintain traceability between datasets and the models trained on them.
+When filling in a model card, look for fields that allow you to reference related data cards.
+
+## Using the Python client
+
+Use the Bailo Python client to retrieve and update data cards programmatically:
+
+```python
+from bailo import Client, Datacard
+
+client = Client("https://your-bailo-instance.com")
+
+# Get an existing data card
+data_card = Datacard.from_id(client=client, data_card_id="my-data-card-id")
+
+# Update metadata
+data_card.update_data_card(metadata={"overview": {"tags": ["updated"]}})
+
+# Get the current data card content
+card = data_card.data_card
+```
+
+## Related pages
+
+- [Creating a Data Card](creating-a-data-card) - How to create a new data card
+- [Roles & Permissions](../../reference/roles-and-permissions) - What each role allows
+- [Python Client](../programmatically-using-bailo/python-client) - Full programmatic access guide
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

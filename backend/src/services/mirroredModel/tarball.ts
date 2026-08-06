@@ -14,6 +14,7 @@ import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
+import { handleStartEmail } from '../modelTransfer.js'
 import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
 import { getImporter } from './mirroredModel.js'
@@ -176,25 +177,27 @@ export async function extractTarGzStream(
 
     // Successful completion of the tar stream
     untarStream.once('finish', () => {
-      if (settled) {
-        return
-      }
+      ;(async () => {
+        if (settled) {
+          return
+        }
 
-      if (!importer) {
-        fail(
-          InternalError('Tarball finished before importer initialisation.', {
-            ...logData,
-          }),
-        )
-        return
-      }
+        if (!importer) {
+          fail(
+            InternalError('Tarball finished before importer initialisation.', {
+              ...logData,
+            }),
+          )
+          return
+        }
 
-      try {
-        importer.handleStreamCompletion(resolve, reject)
-        settled = true
-      } catch (err) {
-        fail(err)
-      }
+        try {
+          await importer.handleStreamCompletion(resolve, reject)
+          settled = true
+        } catch (err) {
+          fail(err)
+        }
+      })().catch((err) => fail(err))
     })
 
     // Handle each tar entry.
@@ -227,7 +230,8 @@ export async function extractTarGzStream(
             }
 
             importer = getImporter(metadata, user, logData)
-
+            const importMetadata = importer.getMetadata()
+            await handleStartEmail(importMetadata.exportId, importMetadata.mirroredModelId, importMetadata.exporter)
             // Drain and continue
             next()
             return

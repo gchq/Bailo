@@ -37,6 +37,7 @@ const useNotification = () => {
         autoHideDuration: 5000,
         action,
         anchorOrigin: conf.anchorOrigin,
+        style: { whiteSpace: 'pre-line' },
       })
     }
   }, [conf, enqueueSnackbar, closeSnackbar])

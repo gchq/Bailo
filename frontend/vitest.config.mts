@@ -1,11 +1,18 @@
 import react from '@vitejs/plugin-react'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { defineConfig, ViteUserConfig } from 'vitest/config'
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()] as ViteUserConfig['plugins'],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  plugins: [react()] as ViteUserConfig['plugins'],
   test: {
     globals: true,
+    server: {
+      deps: {
+        inline: ['@mui/material', '@mui/system', '@mui/utils', '@mui/styled-engine'],
+      },
+    },
     environment: 'jsdom',
     setupFiles: ['./utils/test/testUtils.ts'],
   },

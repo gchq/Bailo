@@ -19,7 +19,6 @@ import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
 
 const ReviewModelMock = getTypedModelMock('ReviewModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
-const SchemaModelMock = getTypedModelMock('SchemaModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ResponseModelMock = getTypedModelMock('ResponseModel')
 
@@ -47,8 +46,15 @@ vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
+  getRoleEntities: vi.fn((roles, _collaborators) => ({ [roles[0]]: ['user:user'] })),
 }))
 vi.mock('../../src/services/model.js', async () => modelMock)
+
+const schemaServiceMock = vi.hoisted(() => ({
+  getSchemaById: vi.fn(() => ({ id: 'test123' })),
+  searchSchemas: vi.fn(() => [{ ...testModelSchema, save: vi.fn() }]),
+}))
+vi.mock('../../src/services/schema.js', async () => schemaServiceMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -122,32 +128,29 @@ describe('services > review', () => {
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
-    ReviewRoleModelMock.find.mockResolvedValueOnce([])
+    modelMock.getRoleEntities.mockReturnValueOnce({})
     const result: Promise<void> = createReleaseReviews(
       { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] } as any,
       {} as any,
     )
 
-    await expect(result).resolves.not.toThrowError()
-    expect(smtpMock.requestReviewForRelease).not.toBeCalled()
-    expect(ReviewModelMock.save).not.toBeCalled()
+    await expect(result).resolves.not.toThrow()
+    expect(smtpMock.requestReviewForRelease).not.toHaveBeenCalled()
+    expect(ReviewModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createReleaseReviews > successful', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
     await createReleaseReviews(
       { collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr', 'reviewer'] }], card: {} } as any,
       {} as any,
     )
 
-    expect(ReviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForRelease).toBeCalled()
+    expect(ReviewModelMock.save).toHaveBeenCalled()
+    expect(smtpMock.requestReviewForRelease).toHaveBeenCalled()
   })
 
   test('createAccessRequestReviews > successful', async () => {
-    SchemaModelMock.findOne.mockResolvedValueOnce({ id: 'test123' })
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
 
     await createAccessRequestReviews(
@@ -155,8 +158,8 @@ describe('services > review', () => {
       {} as any,
     )
 
-    expect(ReviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
+    expect(ReviewModelMock.save).toHaveBeenCalled()
+    expect(smtpMock.requestReviewForAccessRequest).toHaveBeenCalled()
   })
 
   test('removeAccessRequestReviews > successful', async () => {
@@ -165,7 +168,7 @@ describe('services > review', () => {
     await removeAccessRequestReviews('accessRequestId')
 
     expect(ReviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewModelMock.delete).toBeCalled()
+    expect(ReviewModelMock.delete).toHaveBeenCalled()
   })
 
   test('removeAccessRequestReviews > could not delete failure', async () => {
@@ -174,7 +177,7 @@ describe('services > review', () => {
       throw Error('Error deleting object')
     })
 
-    await expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
+    await expect(() => removeAccessRequestReviews('')).rejects.toThrow(
       /^The requested access request review could not be deleted./,
     )
   })
@@ -193,9 +196,8 @@ describe('services > review', () => {
     ReviewRoleModelMock.find.mockImplementationOnce(() => ({
       lean: vi.fn(),
     }))
-    SchemaModelMock.find.mockResolvedValue([testModelSchema])
     ReviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
-    await findReviewRoles('test123')
+    await findReviewRoles(['test123'])
 
     expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
@@ -213,21 +215,20 @@ describe('services > review', () => {
   })
 
   test('addDefaultReviewRoles > successfully added default review roles', async () => {
-    ReviewRoleModelMock.findOne.mockResolvedValue(undefined)
+    ReviewRoleModelMock.lean.mockResolvedValue([])
     await addDefaultReviewRoles()
-    expect(ReviewRoleModelMock.save).toBeCalled()
+    expect(ReviewRoleModelMock.insertMany).toHaveBeenCalledWith(configMock.defaultReviewRoles)
   })
 
   test('removeReviewRole > successful', async () => {
     ReviewRoleModelMock.findOne.mockResolvedValue({ ...testReviewRole, delete: vi.fn() })
-    SchemaModelMock.find.mockResolvedValue([{ ...testModelSchema, save: vi.fn() }])
     ModelModelMock.find.mockResolvedValue([
       { id: 'test-1234', collaborators: [{ entity: 'user:user', roles: ['reviewer'] }], save: vi.fn() },
     ])
     await removeReviewRole({} as any, 'reviewer')
 
     expect(ReviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(SchemaModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(schemaServiceMock.searchSchemas.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('updateReviewRole > successful', async () => {
@@ -240,7 +241,7 @@ describe('services > review', () => {
       defaultEntities: ['user:user2'],
     })
 
-    expect(ReviewRoleModelMock.save).toBeCalled()
+    expect(ReviewRoleModelMock.save).toHaveBeenCalled()
   })
 
   test('updateReviewRole > failure', async () => {
@@ -256,6 +257,6 @@ describe('services > review', () => {
       defaultEntities: ['user:user2'],
     })
 
-    await expect(res).rejects.toThrowError(/^The requested review role was not found/)
+    await expect(res).rejects.toThrow(/^The requested review role was not found/)
   })
 })

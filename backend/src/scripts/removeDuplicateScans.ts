@@ -7,7 +7,8 @@ const STATE_PRIORITY: Record<ArtefactScanStateKeys, number> = {
   [ArtefactScanState.Complete]: 0,
   [ArtefactScanState.Error]: 1,
   [ArtefactScanState.InProgress]: 2,
-  [ArtefactScanState.NotScanned]: 3,
+  [ArtefactScanState.Skipped]: 3,
+  [ArtefactScanState.NotScanned]: 4,
 }
 
 async function script() {

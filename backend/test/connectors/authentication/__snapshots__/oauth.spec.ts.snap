@@ -36,6 +36,19 @@ exports[`connectors > authentication > oauth > authenticationMiddleware > return
     ],
     "path": "/api/v2",
   },
+  {
+    "middleware": [
+      "Token Middleware",
+    ],
+    "path": "/api/v3/token",
+  },
+  {
+    "middleware": [
+      "Token Middleware",
+      "Authentication Check Middleware",
+    ],
+    "path": "/api/v3",
+  },
 ]
 `;
 

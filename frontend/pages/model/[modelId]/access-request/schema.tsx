@@ -1,4 +1,4 @@
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -9,7 +9,7 @@ import { SchemaKind } from 'types/types'
 export default function AccessRequestSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isModelError,

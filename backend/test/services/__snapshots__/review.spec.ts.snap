@@ -281,4 +281,10 @@ exports[`services > review > removeAccessRequestReviews > successful 1`] = `
 
 exports[`services > review > removeReviewRole > successful 1`] = `undefined`;
 
-exports[`services > review > removeReviewRole > successful 2`] = `undefined`;
+exports[`services > review > removeReviewRole > successful 2`] = `
+[
+  undefined,
+  undefined,
+  "reviewer",
+]
+`;

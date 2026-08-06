@@ -30,7 +30,7 @@ describe('routes > model > file > postSimpleUpload', () => {
     const res = await testPost(`/api/v2/model/${modelId}/files/upload/simple?${qs.stringify(fixture.query)}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateFile).toBeCalled()
+    expect(audit.onCreateFile).toHaveBeenCalled()
     expect(audit.onCreateFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

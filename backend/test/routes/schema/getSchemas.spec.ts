@@ -28,7 +28,7 @@ describe('routes > schema > getSchemas', () => {
     const res = await testGet(`/api/v2/schemas`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onSearchSchemas).toBeCalled()
+    expect(audit.onSearchSchemas).toHaveBeenCalled()
     expect(audit.onSearchSchemas.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
@@ -51,7 +51,7 @@ describe('routes > schema > getSchemas', () => {
   test('rejects unknown query parameter', async () => {
     const res = await testGet(`/api/v2/schemas?kind=notValid`)
 
-    expect(mockSchemaService.searchSchemas).not.toBeCalled()
+    expect(mockSchemaService.searchSchemas).not.toHaveBeenCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })

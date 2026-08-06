@@ -130,7 +130,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     })
 
     // @ts-expect-error calling protected method
-    expect(() => exporter._init()).toThrowError(expectedErr)
+    expect(() => exporter._init()).toThrow(expectedErr)
   })
 
   test('_init throws BadReq if vulnerability scans missing', () => {
@@ -143,7 +143,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     })
 
     // @ts-expect-error calling protected method
-    expect(() => exporter._init()).toThrowError(expectedErr)
+    expect(() => exporter._init()).toThrow(expectedErr)
   })
 
   test('_init throws BadReq if vulnerability scans incomplete', () => {
@@ -156,7 +156,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     })
 
     // @ts-expect-error calling protected method
-    expect(() => exporter._init()).toThrowError(expectedErr)
+    expect(() => exporter._init()).toThrow(expectedErr)
   })
 
   test('_init throws BadReq if vulnerability scans infected', () => {
@@ -172,7 +172,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     })
 
     // @ts-expect-error calling protected method
-    expect(() => exporter._init()).toThrowError(expectedErr)
+    expect(() => exporter._init()).toThrow(expectedErr)
   })
 
   test('getInitialiseTarGzUploadParams returns correct params', () => {
@@ -196,7 +196,7 @@ describe('services > mirroredModel > exporters > FileExporter', () => {
     const exporter = new FileExporter(mockUser, undefined as any, mockFile, mockLogData)
 
     // @ts-expect-error calling protected method
-    expect(() => exporter.getInitialiseTarGzUploadParams()).toThrowError(
+    expect(() => exporter.getInitialiseTarGzUploadParams()).toThrow(
       /^Method `FileExporter.getInitialiseTarGzUploadParams` failed./,
     )
   })

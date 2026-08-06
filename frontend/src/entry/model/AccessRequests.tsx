@@ -1,63 +1,31 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
-import { useGetReviewRoles } from 'actions/reviewRoles'
-import { useGetSchemas } from 'actions/schema'
 import { memoize } from 'lodash-es'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, SchemaKind } from 'types/types'
-import { hasRole } from 'utils/roles'
+import { EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
   model: EntryInterface
-  currentUserRoles: string[]
 }
 
-export default function AccessRequests({ model, currentUserRoles }: AccessRequestsProps) {
+export default function AccessRequests({ model }: AccessRequestsProps) {
   const { accessRequests, isAccessRequestsLoading, isAccessRequestsError } = useGetAccessRequestsForModelId(model.id)
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
 
   const AccessRequestListItem = memoize(({ data }) => (
-    <AccessRequestDisplay
-      accessRequest={data}
-      key={data.metadata.overview.name}
-      hideReviewBanner={
-        !hasRole(
-          currentUserRoles,
-          reviewRoles
-            .filter((role) => {
-              const accessRequestSchema = schemas.find((schema) => schema.id === data.schemaId)
-              if (accessRequestSchema && accessRequestSchema.reviewRoles) {
-                return accessRequestSchema.reviewRoles.includes(role.shortName)
-              } else {
-                return
-              }
-            })
-            .map((role) => role.shortName),
-        )
-      }
-    />
+    <AccessRequestDisplay accessRequest={data} key={data.metadata.overview.name} />
   ))
 
-  if (isAccessRequestsLoading || isReviewRolesLoading || isSchemasLoading) {
+  if (isAccessRequestsLoading) {
     return <Loading />
   }
 
   if (isAccessRequestsError) {
     return <MessageAlert message={isAccessRequestsError.info.message} severity='error' />
-  }
-
-  if (isReviewRolesError) {
-    return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
-  }
-
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} severity='error' />
   }
 
   return (

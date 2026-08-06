@@ -4,7 +4,6 @@ import { ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js
 import {
   checkUserAuth,
   getImageBlob,
-  getImageManifest,
   getModelImageWithScanResults,
   joinDistributionPackageName,
   listModelImages,
@@ -55,7 +54,7 @@ const registryClientMocks = vi.hoisted(() => ({
   putManifest: vi.fn(),
   isImageTagManifestList: vi.fn(() => false),
 }))
-vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
+vi.mock('../../src/clients/registry.js', () => registryClientMocks)
 
 const getImageLayersMocks = vi.hoisted(() => ({
   getImageLayers: vi.fn(() => [{ digest: 'sha256:layer1', size: 42134 }] as any),
@@ -133,15 +132,13 @@ describe('services > registry', () => {
     })
 
     test('splitDistributionPackageName > error', () => {
-      expect(() => splitDistributionPackageName('bad-name')).toThrowError('Could not parse Distribution Package Name.')
-      expect(() => splitDistributionPackageName('foo:bar:baz')).toThrowError(
+      expect(() => splitDistributionPackageName('bad-name')).toThrow('Could not parse Distribution Package Name.')
+      expect(() => splitDistributionPackageName('foo:bar:baz')).toThrow('Could not parse Distribution Package Name.')
+      expect(() => splitDistributionPackageName('')).toThrow('Could not parse Distribution Package Name.')
+      expect(() => splitDistributionPackageName('bad-name@:0123456789abcdef0123456789abcdef')).toThrow(
         'Could not parse Distribution Package Name.',
       )
-      expect(() => splitDistributionPackageName('')).toThrowError('Could not parse Distribution Package Name.')
-      expect(() => splitDistributionPackageName('bad-name@:0123456789abcdef0123456789abcdef')).toThrowError(
-        'Could not parse Distribution Package Name.',
-      )
-      expect(() => splitDistributionPackageName('bad-name@sha256:0')).toThrowError(
+      expect(() => splitDistributionPackageName('bad-name@sha256:0')).toThrow(
         'Could not parse Distribution Package Name.',
       )
     })
@@ -248,19 +245,19 @@ describe('services > registry', () => {
     })
 
     test('joinDistributionPackageName > error', () => {
-      expect(() => joinDistributionPackageName({ path: 'bad-name', tag: '' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: 'bad-name', tag: '' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ path: '', tag: 'foo:bar:baz' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: '', tag: 'foo:bar:baz' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ path: '', tag: '' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: '', tag: '' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ path: '', digest: ':0123456789abcdef0123456789abcdef' })).toThrowError(
+      expect(() => joinDistributionPackageName({ path: '', digest: ':0123456789abcdef0123456789abcdef' })).toThrow(
         'Could not join Distribution Package Name.',
       )
-      expect(() => joinDistributionPackageName({ domain: 'bad-name', path: '', digest: 'sha256:0' })).toThrowError(
+      expect(() => joinDistributionPackageName({ domain: 'bad-name', path: '', digest: 'sha256:0' })).toThrow(
         'Could not join Distribution Package Name.',
       )
     })
@@ -342,8 +339,8 @@ describe('services > registry', () => {
     test('checkUserAuth > success', async () => {
       await checkUserAuth({ dn: 'user' }, 'modelId', ['list'])
 
-      expect(modelMocks.getModelById).toBeCalledWith({ dn: 'user' }, 'modelId')
-      expect(authMocks.default.image).toBeCalledWith(
+      expect(modelMocks.getModelById).toHaveBeenCalledWith({ dn: 'user' }, 'modelId')
+      expect(authMocks.default.image).toHaveBeenCalledWith(
         { dn: 'user' },
         { _id: 'test' },
         { type: 'repository', name: 'modelId', actions: ['list'] },
@@ -355,42 +352,25 @@ describe('services > registry', () => {
 
       const promise = checkUserAuth({ dn: 'user' }, 'modelId', ['list'])
 
-      await expect(promise).rejects.toThrowError('Error')
-      expect(modelMocks.getModelById).toBeCalledWith({ dn: 'user' }, 'modelId')
-      expect(authMocks.default.image).toBeCalledWith(
+      await expect(promise).rejects.toThrow('Error')
+      expect(modelMocks.getModelById).toHaveBeenCalledWith({ dn: 'user' }, 'modelId')
+      expect(authMocks.default.image).toHaveBeenCalledWith(
         { dn: 'user' },
         { _id: 'test' },
         { type: 'repository', name: 'modelId', actions: ['list'] },
       )
     })
 
-    test('getImageManifest > success', async () => {
-      await getImageManifest({} as any, {} as any)
-
-      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
-      expect(registryClientMocks.getImageTagManifest).toHaveBeenCalled()
-    })
-
-    test('getImageManifest > bad response', async () => {
-      registryClientMocks.getImageTagManifest.mockRejectedValue('Error')
-
-      await expect(getImageManifest({} as any, {} as any)).rejects.toThrowError('Error')
-
-      expect(registryAuthMocks.issueAccessToken).toHaveBeenCalled()
-    })
-
     test('renameImage > source manifest not found', async () => {
       registryClientMocks.getImageTagManifests.mockRejectedValueOnce(RegistryError({} as any, { status: 404 }))
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
-        'The requested image was not found.',
-      )
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow('The requested image was not found.')
     })
 
     test('renameImage > manifest body missing', async () => {
       registryClientMocks.getImageTagManifests.mockResolvedValueOnce({})
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow(
         'The registry returned a response but the body was missing.',
       )
     })
@@ -401,7 +381,7 @@ describe('services > registry', () => {
         headers: {},
       })
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow(
         'The registry returned a response but the source digest header was missing.',
       )
     })
@@ -409,7 +389,7 @@ describe('services > registry', () => {
     test('renameImage > source manifest other error', async () => {
       registryClientMocks.getImageTagManifests.mockRejectedValueOnce(InternalError('Error'))
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Error')
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow('Error')
     })
 
     test('renameImage > config missing digest', async () => {
@@ -418,7 +398,7 @@ describe('services > registry', () => {
         headers: { 'docker-content-digest': 'digest' },
       })
 
-      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Could not extract layer digest.')
+      await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrow('Could not extract layer digest.')
     })
 
     test('renameImage > success and delete orphan', async () => {
@@ -438,15 +418,15 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
         repository: source.repository,
         name: source.name,
         digest: 'digest',
@@ -465,14 +445,14 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
       expect(registryClientMocks.deleteManifest).toHaveBeenCalledOnce()
     })
 
@@ -488,15 +468,15 @@ describe('services > registry', () => {
 
       await renameImage({} as any, source, destination)
 
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', {
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
         repository: source.repository,
         name: source.name,
         digest: 'digest',
@@ -515,15 +495,15 @@ describe('services > registry', () => {
 
       const promise = renameImage({} as any, source, destination)
 
-      await expect(promise).rejects.toThrowError('Error')
-      expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
-      expect(registryClientMocks.putManifest).toBeCalledWith(
+      await expect(promise).rejects.toThrow('Error')
+      expect(registryClientMocks.mountBlob).toHaveBeenCalledTimes(2)
+      expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
         'token',
         destination,
         JSON.stringify(mockBody),
         'mediaType',
       )
-      expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
       expect(registryClientMocks.deleteManifest).toHaveBeenCalledTimes(1)
     })
 
@@ -583,7 +563,7 @@ describe('services > registry', () => {
       const source = { repository: 'repo', name: 'img', tag: 'v1' }
       const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
 
-      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Platform manifest missing.')
+      await expect(renameImage({} as any, source, dest)).rejects.toThrow('Platform manifest missing.')
     })
 
     test('renameImage > multi manifest child PUT missing digest', async () => {
@@ -610,7 +590,321 @@ describe('services > registry', () => {
       const source = { repository: 'repo', name: 'img', tag: 'v1' }
       const dest = { repository: 'repo2', name: 'img', tag: 'v1' }
 
-      await expect(renameImage({} as any, source, dest)).rejects.toThrowError('Child manifest digest missing after PUT')
+      await expect(renameImage({} as any, source, dest)).rejects.toThrow('Child manifest digest missing after PUT')
+    })
+
+    test('renameImage > multi manifest shared child digests preserved when another tag references them', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          { digest: 'sha256:childAmd64', platform: { architecture: 'amd64', os: 'linux' } },
+          { digest: 'sha256:childArm64', platform: { architecture: 'arm64', os: 'linux' } },
+        ],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer1' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        // initial GET of source fat manifest
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:rootDigest' } })
+        // getTagDigestReferenceMap GET for sibling tag "latest-2" (same fat manifest, same root digest)
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:rootDigest' } })
+        // GET child amd64 platform manifest
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+        // GET child arm64 platform manifest
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+      // sibling tag still present in source repo
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest-2'])
+      registryClientMocks.putManifest
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChildAmd64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChildArm64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newRootDigest' })
+      const source = { repository: 'modelid-123', name: 'alpine', tag: 'latest' }
+      const destination = { repository: 'soft_deleted/modelid-123', name: 'alpine', tag: 'latest' }
+
+      await renameImage({} as any, source, destination)
+
+      // Only the source tag should be deleted, never the shared child digests nor the shared root digest
+      // Also deletes the 2 temporary tags
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledTimes(3)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: destination.repository,
+        name: destination.name,
+        tag: expect.stringMatching(/^__bailo_tmp_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}__$/),
+      })
+      // Specifically assert the extra deletes did not happen
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:childAmd64',
+      })
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:childArm64',
+      })
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:rootDigest',
+      })
+    })
+
+    test('renameImage > multi manifest orphaned child and root digests are deleted when no other tag references them', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          { digest: 'sha256:childAmd64', platform: { architecture: 'amd64', os: 'linux' } },
+          { digest: 'sha256:childArm64', platform: { architecture: 'arm64', os: 'linux' } },
+        ],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer1' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:rootDigest' } })
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+      // no other tags reference the fat manifest
+      registryClientMocks.listImageTags.mockResolvedValueOnce([])
+      registryClientMocks.putManifest
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChildAmd64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChildArm64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newRootDigest' })
+
+      const source = { repository: 'modelid-123', name: 'alpine', tag: 'latest' }
+      const destination = { repository: 'soft_deleted/modelid-123', name: 'alpine', tag: 'latest' }
+
+      await renameImage({} as any, source, destination)
+
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:childAmd64',
+      })
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:childArm64',
+      })
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:rootDigest',
+      })
+    })
+
+    test('renameImage > multi manifest only deletes child digests not referenced by other tags', async () => {
+      const sourceManifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          { digest: 'sha256:sharedAmd64', platform: { architecture: 'amd64', os: 'linux' } },
+          { digest: 'sha256:uniqueArm64', platform: { architecture: 'arm64', os: 'linux' } },
+        ],
+      }
+      const siblingManifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          { digest: 'sha256:sharedAmd64', platform: { architecture: 'amd64', os: 'linux' } },
+          { digest: 'sha256:otherArm64', platform: { architecture: 'arm64', os: 'linux' } },
+        ],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer1' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        // initial fetch of source fat manifest
+        .mockResolvedValueOnce({ body: sourceManifestList, headers: { 'docker-content-digest': 'sha256:sourceRoot' } })
+        // getTagDigestReferenceMap fetch for sibling tag
+        .mockResolvedValueOnce({
+          body: siblingManifestList,
+          headers: { 'docker-content-digest': 'sha256:siblingRoot' },
+        })
+        // GET shared amd64 child manifest
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+        // GET unique arm64 child manifest
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['sibling-tag'])
+      registryClientMocks.putManifest
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newAmd64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newArm64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newRoot' })
+      const source = { repository: 'modelid-123', name: 'alpine', tag: 'latest' }
+      const destination = { repository: 'soft_deleted/modelid-123', name: 'alpine', tag: 'latest' }
+
+      await renameImage({} as any, source, destination)
+
+      // shared amd64 must not be deleted
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:sharedAmd64',
+      })
+      // unique arm64 must be deleted
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:uniqueArm64',
+      })
+      // sourceRoot is not referenced by sibling tag, so it is orphaned and deleted
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:sourceRoot',
+      })
+      // source tag itself deleted
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+    })
+
+    test('renameImage > multi manifest excludes source tag from its own reference set', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:root' } })
+        // getTagDigestReferenceMap fetch for the source tag itself (should be excluded from refs)
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:root' } })
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+      // listImageTags returns only the source tag (so after exclusion, the reference set is empty)
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest'])
+      registryClientMocks.putManifest
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChild' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newRoot' })
+      const source = { repository: 'modelid-123', name: 'alpine', tag: 'latest' }
+      const destination = { repository: 'soft_deleted/modelid-123', name: 'alpine', tag: 'latest' }
+
+      await renameImage({} as any, source, destination)
+
+      // because the source tag is excluded from its own ref set, both child and root are treated as orphaned
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:child1',
+      })
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:root',
+      })
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+    })
+
+    test('softDeleteImage > multi manifest does not delete digests still referenced by sibling tag', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [
+          { digest: 'sha256:childAmd64', platform: { architecture: 'amd64', os: 'linux' } },
+          { digest: 'sha256:childArm64', platform: { architecture: 'arm64', os: 'linux' } },
+        ],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer1' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:rootDigest' } })
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:rootDigest' } })
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['latest-2'])
+      registryClientMocks.putManifest
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChildAmd64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChildArm64' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newRootDigest' })
+      const source = { name: 'alpine', repository: 'modelid-123', tag: 'latest' }
+
+      await softDeleteImage({} as any, source)
+
+      // tag deleted, but nothing else in the source repo. Also delete temp tags
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledTimes(3)
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:childAmd64',
+      })
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:childArm64',
+      })
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:rootDigest',
+      })
+      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith({}, 'modelid-123', source, undefined)
+    })
+
+    test('renameImage > multi manifest handles 404 when listing source tags during reference map build', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      const childManifest = {
+        config: { digest: 'sha256:config' },
+        layers: [{ digest: 'sha256:layer' }],
+        mediaType: 'mediaType',
+      }
+      registryClientMocks.getImageTagManifests
+        .mockResolvedValueOnce({ body: manifestList, headers: { 'docker-content-digest': 'sha256:root' } })
+        .mockResolvedValueOnce({ body: childManifest, headers: {} })
+      registryClientMocks.listImageTags.mockRejectedValueOnce(InternalError('Not found', { status: 404 }))
+      registryClientMocks.putManifest
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newChild' })
+        .mockResolvedValueOnce({ 'docker-content-digest': 'sha256:newRoot' })
+      const source = { repository: 'modelid-123', name: 'alpine', tag: 'latest' }
+      const destination = { repository: 'soft_deleted/modelid-123', name: 'alpine', tag: 'latest' }
+
+      await renameImage({} as any, source, destination)
+
+      // empty ref map -> child and root are both orphaned
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:child1',
+      })
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', {
+        repository: source.repository,
+        name: source.name,
+        digest: 'sha256:root',
+      })
+      expect(registryClientMocks.deleteManifest).toHaveBeenCalledWith('token', source)
+    })
+
+    test('renameImage > multi manifest rethrows non-404 errors when building reference map', async () => {
+      const manifestList = {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:child1', platform: { architecture: 'amd64', os: 'linux' } }],
+      }
+      registryClientMocks.getImageTagManifests.mockResolvedValueOnce({
+        body: manifestList,
+        headers: { 'docker-content-digest': 'sha256:root' },
+      })
+      registryClientMocks.listImageTags.mockRejectedValueOnce(InternalError('Registry unavailable'))
+      const source = { repository: 'modelid-123', name: 'alpine', tag: 'latest' }
+      const destination = { repository: 'soft_deleted/modelid-123', name: 'alpine', tag: 'latest' }
+
+      await expect(renameImage({} as any, source, destination)).rejects.toThrow('Registry unavailable')
+
+      // we should not have proceeded to delete anything
+      expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
+      expect(registryClientMocks.putManifest).not.toHaveBeenCalled()
     })
 
     test('softDeleteImage > success', async () => {
@@ -663,7 +957,7 @@ describe('services > registry', () => {
 
       const promise = softDeleteImage({} as any, {} as any)
 
-      await expect(promise).rejects.toThrowError(/^Cannot remove image from a mirrored model./)
+      await expect(promise).rejects.toThrow(/^Cannot remove image from a mirrored model./)
       expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
       expect(releaseMocks.findAndDeleteImageFromReleases).not.toHaveBeenCalled()
     })
@@ -679,6 +973,22 @@ describe('services > registry', () => {
           repository: 'repo1',
           name: 'image1',
           tags: ['tag1', 'tag2'],
+        },
+      ])
+    })
+
+    test('listModelImages > includeTokens returns repositoryToken', async () => {
+      registryClientMocks.listModelRepos.mockResolvedValueOnce(['repo1/image1'])
+      registryClientMocks.listImageTags.mockResolvedValueOnce(['tag1', 'tag2'])
+
+      const result = await listModelImages({ dn: 'user' } as any, 'modelId', true)
+
+      expect(result).toEqual([
+        {
+          repository: 'repo1',
+          name: 'image1',
+          tags: ['tag1', 'tag2'],
+          repositoryToken: 'token',
         },
       ])
     })
@@ -923,7 +1233,7 @@ describe('services > registry', () => {
 
       const promise = restoreSoftDeletedImage({} as any, {} as any)
 
-      await expect(promise).rejects.toThrowError(/^Cannot restore image to a mirrored model./)
+      await expect(promise).rejects.toThrow(/^Cannot restore image to a mirrored model./)
       expect(registryClientMocks.deleteManifest).not.toHaveBeenCalled()
     })
   })

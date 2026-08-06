@@ -1,0 +1,70 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Federation and Peer Integration
+
+> **Common questions this page answers:**
+>
+> - How do I connect Bailo to other instances?
+> - What is federation in Bailo?
+> - What federation states are available?
+
+Federation connects your Bailo instance to other Bailo instances or external model repositories, allowing users to
+discover and mirror models from external sources.
+
+## Federation states
+
+Your Bailo instance can operate in one of three federation states, controlled by the administrator:
+
+- **Disabled** - Federation is turned off. No external sources are visible
+- **Read Only** - Your instance can browse and mirror models from connected peers, but does not share its own models
+- **Enabled** - Full federation: your instance both reads from and shares models with connected peers
+
+The federation state is configured by your administrator in the application configuration.
+
+## Peer types
+
+Bailo supports connecting to different types of external model sources.
+
+- **Bailo** - Another Bailo instance
+- **HuggingFace Hub** - The HuggingFace model repository
+
+Additional sources can be set up by your Bailo administrator.
+
+## Configuring peers
+
+Peers are configured in the application's backend configuration. Each peer requires:
+
+- **Base URL**: The URL of the external Bailo instance or repository
+- **Label**: A display name for the peer (shown in the Marketplace filter)
+- **Kind**: The type of peer (Bailo or HuggingFace Hub)
+- **State**: Whether federation with this peer is disabled, read-only, or enabled
+
+Peer configuration is done through the app configuration file - see
+[App Configuration](../getting-started/app-configuration).
+
+## How federation appears to users
+
+Users see external models alongside local models in the Marketplace, with filtering by external source.
+
+When federation is enabled and peers are configured:
+
+- Users see a **filter by external sources** option in the Marketplace
+- Models from external sources appear alongside local models
+- Each external model shows its source
+- External models can be clicked to view the source
+
+## Checking peer status
+
+Check the reachability of connected peers through the API.
+
+You can check the status of connected peers [via the API](../../../api/docs#/system).
+
+Each peer has a reachability status indicating whether Bailo can communicate with it.
+
+## Related pages
+
+- [App Configuration](../getting-started/app-configuration) - Where peers are configured
+- [Creating a Mirrored Model](../../users/model-mirroring/creating-a-mirrored-model) - Mirroring external models
+- [Browsing the Marketplace](../../users/using-a-model/browsing-the-marketplace) - Filtering by external sources
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

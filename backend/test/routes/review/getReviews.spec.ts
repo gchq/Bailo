@@ -22,7 +22,7 @@ describe('routes > review > getReviews', () => {
     const res = await testGet(`${endpoint}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onSearchReviews).toBeCalled()
+    expect(audit.onSearchReviews).toHaveBeenCalled()
     expect(audit.onSearchReviews.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

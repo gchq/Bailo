@@ -74,6 +74,8 @@ oauth:
     callback: "" # example /
     subdomain: "cognito domain"
     adminGroupName: ''
+    complianceGroupName: ''
+    untrustedModelGroupName: ''
   identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"
@@ -158,7 +160,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnamilegacy/mongodb
-    tag: 8.0.13-debian-12-r0
+    tag: 8.0.13-debian-12-r0@sha256:2579e968033ec9f97035e91a215a4fb3943eb706eb3871b3d0d1d072e2f45605
 
 # MinIO Dependencies
 minio:
@@ -194,13 +196,13 @@ minio:
   image:
     registry: docker.io
     repository: bitnamilegacy/minio
-    tag: 2025.7.23-debian-12-r1
+    tag: 2025.7.23-debian-12-r1@sha256:ba958aa5e12c8b1426dd95de61d8f1ed14741efa0ec730019ed57086930a4299
     debug: true
 
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 3.0.0
+  tag: 3.1.1@sha256:1be55279f18a2fe1a74edf2664cac61c1bea305b7b4642dab412e7affdcb3e33
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name
@@ -228,7 +230,7 @@ federation:
 # Nginx Dependencies
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unprivileged user.
-  tag: 1.28.0-alpine3.21-slim
+  tag: 1.31.1-alpine3.23-slim@sha256:762e8e4e5e103817c4158400fc3753c8e713ff8153b8c3afbb458ae4572bc9a3
   #host: "bailo-nginx" # service name
   port: 8080
   #certDir: "/certs"
@@ -238,7 +240,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.5
+  image: marlonb/mailcrab:v1.6.5@sha256:36fe6d71fdedc7f3ae7a2765b8f4357334cee31c8bd84b69e2f067fa25b33aa4
 
 # Openshift specific configuration
 openshift:
@@ -273,6 +275,15 @@ config:
       consumer: 'Consumer'
       contributor: 'Contributor'
 
+    untrustedModel:
+      enabled: false
+      untrustedModelLongDescription: 'Untrusted models are private-only models with the Registry tab disabled. They have not been verified or validated to the same standard as regular models.'
+      untrustedModelLongDescription: 'An untrusted model repository contains all files, history, and information associated with a private model.'
+      fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.'
+
+    llmImport:
+      enabled: false
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -282,6 +293,8 @@ config:
     pass: "mailpass"
     from: "bailo@example.com"
     transporter: "smtp"
+    preReminderIntervals: ['1 day', '2 weeks', '10 weeks']
+    postReminderInterval: '1 day'
 
   app:
     protocol: "https"
@@ -306,6 +319,7 @@ connectors:
     retryDelayInMinutes: 60
     maxInitRetries: 5
     initRetryDelay: 5000
+    scanTimeoutMs: 60000
 
 instrumentation:
   enabled: false
@@ -371,8 +385,9 @@ frontend:
 clamav:
   enabled: false
   runAsUser: 1002
-  image: clamav/clamav:1.4.3_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  image: clamav/clamav:1.4.3_base@sha256:629a3050df6a706aedb31859fbb8139e9aaf8f56b0ffefbf251b8358a7c9e76c # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   concurrency: 2
+  streamMaxLength: 2G
   port: 3310
   accessModes:
     - ReadWriteOnce
@@ -395,3 +410,29 @@ artefactscan:
   env: # Override settings here
     # TRIVY_DB_INSECURE: false
     # TRIVY_DB_HOSTNAME: ghcr.io
+
+llm:
+  endpoint: ''
+  model: ''
+  maxTokens: 16384
+  timeoutMs: 120000
+  temperature: 0
+  systemPrompt: |
+    You are a data extraction assistant. You will be given a model card text document and a target JSON schema. Extract information from the document into the schema format.
+
+    CRITICAL RULES:
+    - Only extract information that is EXPLICITLY stated in the source document.
+    - If a field cannot be populated from the document, omit it entirely from the output.
+    - Do NOT infer, guess, or hallucinate any values.
+    - Do NOT generate placeholder text like "Not specified", "N/A", or "Unknown" — leave the field out.
+    - Do NOT generate placeholder or example URLs. Only include a URL if it appears verbatim in the source document.
+    - Do NOT infer or generate dates. Only populate date fields if an explicit date is clearly stated in the source document for that specific purpose.
+    - Return valid JSON matching the schema structure exactly.
+    - For string fields, extract the relevant text verbatim or as a close summary.
+    - For array fields, extract all matching items found in the document.
+    - For enum fields (where allowed values are listed), you MUST use one of the allowed values exactly as written. Match the closest value semantically if the document uses different wording.
+    - For number fields, extract numeric values only if explicitly stated.
+    - For boolean fields, extract true/false only if the answer is clearly stated.
+    - When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
+    - The output JSON must use the exact property names from the schema (the "path" field).
+    - When the document contains tabular data, check if the schema has a matching array or nested structure for that data. If so, map the rows into that structure. If the closest matching field is a string or text field, preserve the table in a readable format such as a markdown table or key-value pairs.

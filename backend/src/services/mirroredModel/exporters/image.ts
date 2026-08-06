@@ -40,12 +40,12 @@ export class ImageExporter extends BaseExporter {
   }
 
   protected async _init() {
-    const imageCheck = this.release.images.find((image) => image._id.toString() === this.image._id.toString())
+    const imageCheck = this.release.images.find((image) => image.id === this.image.id)
     if (!imageCheck) {
       throw InternalError('Could not find image associated with release.', {
         modelId: this.model.id,
         semver: this.release.semver,
-        imageId: this.image._id.toString(),
+        imageId: this.image.id,
         ...this.logData,
       })
     }
@@ -53,7 +53,6 @@ export class ImageExporter extends BaseExporter {
     // update the distributionPackageName to use the mirroredModelId
     const modelIdRe = new RegExp(String.raw`^${this.model.id}`)
     this.distributionPackageName = joinDistributionPackageName({
-      domain: '',
       path: this.image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
       tag: this.image.tag,
     })
@@ -80,7 +79,7 @@ export class ImageExporter extends BaseExporter {
         userDn: this.user.dn,
         modelId: this.model.id,
         semver: this.release.semver,
-        imageId: this.image._id.toString(),
+        imageId: this.image.id,
         ...this.logData,
       })
     }
@@ -101,7 +100,7 @@ export class ImageExporter extends BaseExporter {
       )
     }
     return [
-      `${this.image._id.toString()}.tar.gz`,
+      `${this.image.id}.tar.gz`,
       {
         schemaVersion: 1,
         exporter: this.user.dn,

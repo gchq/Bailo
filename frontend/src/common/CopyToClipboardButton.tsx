@@ -1,4 +1,4 @@
-import { ContentCopy } from '@mui/icons-material'
+import ContentCopy from '@mui/icons-material/ContentCopy'
 import { IconButton, Tooltip } from '@mui/material'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 

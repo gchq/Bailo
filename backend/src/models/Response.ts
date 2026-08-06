@@ -1,4 +1,4 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -16,13 +16,13 @@ export const ResponseKind = {
 export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
-  _id: ObjectId
+  _id: Types.ObjectId
   entity: string
   kind: ResponseKindKeys
   role?: string
   decision?: DecisionKeys
   comment?: string
-  parentId: Schema.Types.ObjectId
+  parentId: Types.ObjectId
   reactions: ResponseReaction[]
   commentEditedAt?: string
 
@@ -46,7 +46,7 @@ export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ResponseDoc = ResponseInterface & SoftDeleteDocument
+export type ResponseDoc = HydratedDocument<ResponseInterface> & SoftDeleteDocument
 
 const ResponseSchema = new Schema<ResponseDoc>(
   {

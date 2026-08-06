@@ -1,4 +1,3 @@
-import { Validator } from 'jsonschema'
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
@@ -6,13 +5,12 @@ import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
-import { ModelDoc } from '../models/Model.js'
+import { EntryKind, ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { AccessRequestUserPermissions } from '../types/types.js'
-import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -21,8 +19,8 @@ import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
-import { getSchemaById } from './schema.js'
-import { sendWebhooks } from './webhook.js'
+import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -33,21 +31,21 @@ export async function createAccessRequest(
   // Check the model exists and the user can view it before creating an access request
   const model = await getModelById(user, modelId)
 
+  // Untrusted models cannot have access requests
+  if (model.kind === EntryKind.UntrustedModel) {
+    throw BadReq('Cannot create an access request for an untrusted model.', { modelId })
+  }
+
   // Ensure that the AR meets the schema
   const schema = await getSchemaById(accessRequestInfo.schemaId)
   if (schema.hidden) {
     throw BadReq('Cannot create new Access Request using a hidden schema.', { schemaId: accessRequestInfo.schemaId })
   }
-  try {
-    new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema, { throwAll: true, required: true })
-  } catch (error) {
-    if (isValidatorResultError(error)) {
-      throw BadReq('Access Request Metadata could not be validated against the schema.', {
-        schemaId: accessRequestInfo.schemaId,
-        validationErrors: error.errors,
-      })
-    }
-    throw error
+  const { valid, errors } = await validateContentAgainstSchema(accessRequestInfo.schemaId, accessRequestInfo.metadata)
+  if (!valid) {
+    throw BadReq('Access Request Metadata could not be validated against the schema.', {
+      errors,
+    })
   }
 
   const accessRequestId = convertStringToId(accessRequestInfo.metadata.overview.name)
@@ -73,7 +71,7 @@ export async function createAccessRequest(
     log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this Access Request')
   }
 
-  sendWebhooks(
+  dispatchWebhooks(
     accessRequest.modelId,
     WebhookEvent.CreateAccessRequest,
     `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
@@ -87,6 +85,7 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
   // Model cache
   const models: Record<string, ModelDoc> = {}
 
+  const accessRequests: AccessRequestDoc[] = []
   for (const accessRequestId of accessRequestIds) {
     const accessRequest = await getAccessRequestById(user, accessRequestId)
     let model: ModelDoc
@@ -106,19 +105,19 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
 
     await accessRequest.delete(session)
     await removeAccessRequestReviews(accessRequestId, session)
+    // do NOT use `accessRequest.id` as this (usually mongoose) property is overridden by a custom ID
     await removeResponsesByParentIds(
-      [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest['_id']] as string[],
+      [...reviewsForAccessRequest.map((review) => review.id), accessRequest._id.toString()],
       session,
     )
+    accessRequests.push(accessRequest)
   }
 
-  return { accessRequestIds }
+  return accessRequests
 }
 
 export async function removeAccessRequest(user: UserInterface, accessRequestId: string, session?: ClientSession) {
-  await removeAccessRequests(user, [accessRequestId], session)
-
-  return { accessRequestId }
+  return (await removeAccessRequests(user, [accessRequestId], session))[0]
 }
 
 export async function getAccessRequestsByModel(user: UserInterface, modelId: string) {
@@ -228,17 +227,11 @@ export async function updateAccessRequest(
   }
 
   // Ensure that the AR meets the schema
-  const schema = await getSchemaById(accessRequest.schemaId)
-  try {
-    new Validator().validate(accessRequest.metadata, schema.jsonSchema, { throwAll: true, required: true })
-  } catch (error) {
-    if (isValidatorResultError(error)) {
-      throw BadReq('Access Request Metadata could not be validated against the schema.', {
-        schemaId: accessRequest.schemaId,
-        validationErrors: error.errors,
-      })
-    }
-    throw error
+  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
+  if (!valid) {
+    throw BadReq('Access Request Metadata could not be validated against the schema.', {
+      errors,
+    })
   }
 
   if (diff.metadata) {

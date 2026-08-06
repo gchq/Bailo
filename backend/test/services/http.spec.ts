@@ -1,6 +1,6 @@
 import https from 'node:http'
 
-import { Agent } from 'undici'
+import { Dispatcher1Wrapper } from 'undici'
 import { describe, expect, test } from 'vitest'
 
 import { getHttpsAgent, getHttpsUndiciAgent } from '../../src/services/http.js'
@@ -11,6 +11,6 @@ describe('services > http', () => {
   })
 
   test('getHttpsUndiciAgent', () => {
-    expect(getHttpsUndiciAgent()).toBeInstanceOf(Agent)
+    expect(getHttpsUndiciAgent()).toBeInstanceOf(Dispatcher1Wrapper)
   })
 })

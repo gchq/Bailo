@@ -9,6 +9,7 @@ import useDebounce from 'src/hooks/useDebounce'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKindLabel } from 'types/types'
+import { entryKindForRedirect } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 const Search = styled('div')(({ theme }) => ({
@@ -63,7 +64,7 @@ export default function EntrySearch() {
     () =>
       entries.map((entry) => (
         <Box key={entry.id} sx={{ maxWidth: '400px' }}>
-          <Link href={`/${entry.kind}/${entry.id}`} noLinkStyle>
+          <Link href={`/${entryKindForRedirect(entry.kind)}/${entry.id}`} noLinkStyle>
             <ListItem
               disablePadding
               secondaryAction={<Chip label={toTitleCase(EntryKindLabel[entry.kind])} size='small' />}
@@ -111,7 +112,14 @@ export default function EntrySearch() {
   return (
     <Stack>
       <Search sx={{ pl: 1 }}>
-        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <SearchIcon />
           <StyledInputBase
             placeholder='Search'

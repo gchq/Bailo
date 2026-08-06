@@ -1,24 +1,22 @@
-import { ClientSession, PipelineStage } from 'mongoose'
+import { ClientSession, PipelineStage, QueryFilter, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
-import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
-import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
-import { getModelById } from './model.js'
-import { getSchemaById } from './schema.js'
+import { getModelById, getRoleEntities } from './model.js'
+import { getSchemaById, searchSchemas } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
-
 export interface DefaultReviewRole {
   name: string
   shortName: string
@@ -33,15 +31,20 @@ export async function findReviews(
   open?: boolean,
   modelId?: string,
   semver?: string,
+  reviewId?: string,
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
+  if (reviewId && !Types.ObjectId.isValid(reviewId)) {
+    throw BadReq('Review ID is not a valid object ID')
+  }
   const stages: PipelineStage[] = [
     {
       $match: {
         ...(modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
+        ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
         ...(kind && { kind }),
       },
     },
@@ -88,17 +91,15 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
     model.collaborators,
   )
 
-  const createReviews = roleEntities.map((roleInfo) => {
+  const createReviews = Object.entries(roleEntities).map(([role, entities]) => {
     const review = new ReviewModel({
       semver: release.semver,
       modelId: model.id,
       kind: ReviewKind.Release,
-      role: roleInfo.role,
+      role,
     })
-    roleInfo.entities.forEach((entity) =>
-      requestReviewForRelease(entity, review, release).catch((error) =>
-        log.warn({ error }, 'Error when sending notifications requesting review for release.'),
-      ),
+    requestReviewForRelease(entities, review, release).catch((error) =>
+      log.warn({ error, entities }, 'Error when sending notifications requesting review for release.'),
     )
     return review.save()
   })
@@ -106,7 +107,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const accessRequestSchema = await SchemaModel.findOne({ id: accessRequest.schemaId })
+  const accessRequestSchema = await getSchemaById(accessRequest.schemaId)
   if (!accessRequestSchema) {
     throw BadReq('Cannot find schema for associated model', { modelId: model._id })
   }
@@ -120,17 +121,15 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
     model.collaborators,
   )
 
-  const createReviews = roleEntities.map((roleInfo) => {
+  const createReviews = Object.entries(roleEntities).map(([role, entities]) => {
     const review = new ReviewModel({
       accessRequestId: accessRequest.id,
       modelId: model.id,
       kind: ReviewKind.Access,
-      role: roleInfo.role,
+      role,
     })
-    roleInfo.entities.forEach((entity) =>
-      requestReviewForAccessRequest(entity, review, accessRequest).catch((error) =>
-        log.warn({ error }, 'Error when sending notifications requesting review for Access Request.'),
-      ),
+    requestReviewForAccessRequest(entities, review, accessRequest).catch((error) =>
+      log.warn({ error, entities }, 'Error when sending notifications requesting review for Access Request.'),
     )
     return review.save()
   })
@@ -161,28 +160,17 @@ export async function removeReleaseReviews(
   semver: string,
   session?: ClientSession,
 ): Promise<ReviewDoc[]> {
-  // finding and then calling potentially multiple deletes is inefficient but our soft delete
-  // plugin doesn't cover bulkDelete
-  const reviews: ReviewDoc[] = await ReviewModel.find({
-    modelId,
-    semver,
-  })
+  const reviews = await ReviewModel.find({ modelId, semver }, undefined, { session })
 
-  const reviewDeletions: ReviewDoc[] = []
+  await ReviewModel.deleteMany(
+    {
+      modelId,
+      semver,
+    },
+    session,
+  )
 
-  for (const review of reviews) {
-    try {
-      reviewDeletions.push(await review.delete(session))
-    } catch (error) {
-      throw InternalError('The requested release review could not be deleted.', {
-        modelId,
-        semver,
-        error,
-      })
-    }
-  }
-
-  return reviewDeletions
+  return reviews
 }
 
 export async function findReviewForResponse(
@@ -236,21 +224,12 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   })
 }
 
-export function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
-  return roles.map((role) => {
-    const entities = collaborators
-      .filter((collaborator) => collaborator.roles.includes(role))
-      .map((collaborator) => collaborator.entity)
-    return { role, entities }
-  })
-}
-
 /**
  * Requires the model attribute.
  * Return the models where one of the user's entities is in the model's collaborators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
-async function findUserInCollaborators(user: UserInterface) {
+export async function findUserInCollaborators(user: UserInterface) {
   return {
     $expr: {
       $gt: [
@@ -338,37 +317,37 @@ export async function findReviewRole(user: UserInterface, shortName: string) {
   return reviewRole
 }
 
-export async function findReviewRoles(schemaId?: string | string[]): Promise<ReviewRoleInterface[]> {
-  let reviewRoles: ReviewRoleDoc[] = []
-  let schemaIds: string[] = []
-  if (schemaId) {
-    if (typeof schemaId === 'string') {
-      schemaIds.push(schemaId)
-    } else {
-      schemaIds = schemaId
-    }
-    const schemas = await SchemaModel.find({ id: schemaIds })
+export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleDoc[]> {
+  const mongoQuery: QueryFilter<ReviewRoleInterface> = {}
+
+  if (schemaIds) {
+    const schemas = await searchSchemas(undefined, undefined, undefined, schemaIds)
     if (!schemas || schemas.length === 0) {
       throw BadReq('Unable to find schemas', { schemaIds })
     }
-    if (schemas.length > 0) {
-      const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
-      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
-    }
-  } else {
-    reviewRoles = await ReviewRoleModel.find()
+    const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
+    mongoQuery.shortName = { $in: uniqueRoles }
   }
-  return reviewRoles
+
+  return await ReviewRoleModel.find(mongoQuery)
 }
 
 export async function addDefaultReviewRoles() {
-  for (const reviewRole of config.defaultReviewRoles) {
-    log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
-    const defaultRole = await ReviewRoleModel.findOne({ shortName: reviewRole.shortName })
-    if (!defaultRole) {
-      const newRole = new ReviewRoleModel({ ...reviewRole })
-      newRole.save()
-    }
+  const shortNames = config.defaultReviewRoles.map((role) => role.shortName)
+
+  const existingRoles = await ReviewRoleModel.find({ shortName: { $in: shortNames } }).lean()
+
+  for (const reviewRole of existingRoles) {
+    log.info({ name: reviewRole.name }, `Review role already exists`)
+  }
+  const existingShortNames = new Set(existingRoles.map((role) => role.shortName))
+  const rolesToCreate = config.defaultReviewRoles.filter((role) => !existingShortNames.has(role.shortName))
+
+  for (const reviewRole of rolesToCreate) {
+    log.info({ name: reviewRole.name }, 'Creating review role')
+  }
+  if (rolesToCreate.length > 0) {
+    await ReviewRoleModel.insertMany(rolesToCreate)
   }
 }
 
@@ -385,7 +364,7 @@ export async function removeReviewRole(user: UserInterface, reviewRoleShortName:
     })
   }
 
-  const schemas = await SchemaModel.find({ reviewRoles: reviewRole.shortName })
+  const schemas = await searchSchemas(undefined, undefined, reviewRole.shortName)
 
   for (const schema of schemas) {
     // Remove role from schemas
@@ -407,6 +386,8 @@ export async function removeReviewRole(user: UserInterface, reviewRoleShortName:
   }
 
   await reviewRole.delete()
+
+  return reviewRole
 }
 
 export async function addReviewsForNewRole(user: UserInterface, newReviewRole: ReviewRoleInterface, model: ModelDoc) {

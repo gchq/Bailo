@@ -1,9 +1,7 @@
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 
 const htmlId = 'entry-organisation-input'
 
@@ -13,7 +11,7 @@ type EntryOrganisationInputProps = {
 }
 
 export default function EntryOrganisationInput({ value, onChange }: EntryOrganisationInputProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(event.target.value)
@@ -35,14 +33,6 @@ export default function EntryOrganisationInput({ value, onChange }: EntryOrganis
         : [],
     [uiConfig],
   )
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (!uiConfig || isUiConfigLoading) {
-    return <Loading />
-  }
 
   if (uiConfig.modelDetails.organisations.length === 0) {
     return <></>

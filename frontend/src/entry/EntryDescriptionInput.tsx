@@ -18,6 +18,8 @@ export default function EntryDescriptionInput({ value, onChange }: EntryDescript
     <LabelledInput fullWidth required label='Description' htmlFor={htmlId}>
       <TextField
         fullWidth
+        multiline
+        rows={3}
         id={htmlId}
         value={value}
         size='small'

@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { FileWithScanResultsInterface } from '../../../models/File.js'
+import { FileWithScanResultsAggregate } from '../../../models/File.js'
 import { ReleaseInterface } from '../../../models/Release.js'
 import { ResponseKind } from '../../../models/Response.js'
 import { getFilesByIds } from '../../../services/file.js'
@@ -39,7 +39,7 @@ registerPath({
 })
 
 interface getReleaseResponse {
-  release: ReleaseInterface & { files: FileWithScanResultsInterface[] }
+  release: ReleaseInterface & { files: FileWithScanResultsAggregate[] }
 }
 
 export const getRelease = [

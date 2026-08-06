@@ -13,6 +13,7 @@ import {
 } from '../services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation, FileMirrorMetadata } from '../services/mirroredModel/importers/file.js'
 import { ImageMirrorInformation, ImageMirrorMetadata } from '../services/mirroredModel/importers/image.js'
+import { getEnumValues } from '../utils/enum.js'
 import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
 import { BailoError } from './error.js'
 
@@ -172,6 +173,17 @@ export interface UiConfig {
     contributor: string
     consumer: string
   }
+
+  untrustedModel: {
+    enabled: boolean
+    untrustedModelLongDescription: string
+    untrustedModelShortDescription: string
+    fileUploadGuidance: string
+  }
+
+  llmImport: {
+    enabled: boolean
+  }
 }
 
 export interface EntrySearchResult {
@@ -197,7 +209,7 @@ export interface EntrySearchResultWithErrors {
 }
 
 export interface EntrySearchOptions {
-  kind: EntryKindKeys
+  kind: Array<EntryKindKeys>
   libraries: Array<string>
   organisations: Array<string>
   states: Array<string>
@@ -214,7 +226,7 @@ export interface EntrySearchOptions {
 export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
 
 export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
-  kind: z.nativeEnum(EntryKind).optional(),
+  kind: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
   task: z.string().toLowerCase().optional(),
   libraries: coerceArray(z.array(z.string().toLowerCase()).optional()),
   organisations: coerceArray(z.array(z.string()).optional()),
@@ -227,6 +239,42 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   peers: coerceArray(z.array(z.string()).optional()),
   titleOnly: strictCoerceBoolean(z.boolean().optional()),
 })
+
+export const EntryFilter = {
+  WITH: 'with',
+  WITHOUT: 'without',
+} as const
+
+export interface MetricsEntrySearchOptions {
+  organisation: string
+  state: string
+  schemaId: string
+  kinds: Array<EntryKindKeys>
+  release: string
+  accessRequest: string
+  startMonth: string
+  endMonth: string
+}
+
+export type MetricsEntrySearchOptionsParams = Optional<MetricsEntrySearchOptions>
+
+export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOptionsParams, ZodTypeDef, unknown> =
+  z.object({
+    organisation: z.string().optional(),
+    state: z.string().optional(),
+    schemaId: z.string().optional(),
+    kinds: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
+    release: z.enum(getEnumValues(EntryFilter)).optional(),
+    accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
+    startMonth: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .optional(),
+    endMonth: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .optional(),
+  })
 
 export type ModelImages = ModelImageTags[]
 export type LayerScanSummary = Pick<

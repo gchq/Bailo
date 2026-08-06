@@ -30,7 +30,7 @@ export default function EntryTagSelector({
       }}
     >
       <Stack sx={{ p: 2 }}>
-        <TagSelector value={tags} onChange={onChange} label={''} formContext={{ editMode: true }} id='tag-selector' />
+        <TagSelector value={tags} onChange={onChange} label={''} editable id='tag-selector' />
         <Typography variant='caption' color={theme.palette.error.main}>
           {errorText}
         </Typography>

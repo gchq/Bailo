@@ -2,7 +2,50 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.7.1 - dd/mm/2026
+## 3.10.0 - dd/mm/2026
+
+### Breaking Changes
+
+- Fix `Client.get_model_roles` URL from `/api/v2/model/{modelId}/roles` (non-existent) to `/api/v2/roles` with
+  `modelId` as an optional query parameter, matching the backend. The `model_id` parameter is now optional
+  (`str | None = None`). Existing callers passing `model_id` as a keyword argument are unaffected
+
+### Changes
+
+- Add `Client.patch_file` method for updating file metadata (name, mime, tags, metadata)
+- Add multipart file upload support: `Client.start_multipart_upload`, `Client.upload_multipart_part`, and `Client.finish_multipart_upload` for chunked large-file uploads
+- Add `Client.get_filescanning_info` method for retrieving available scanner information
+- Add `Client.post_webhook`, `Client.get_webhooks`, `Client.put_webhook`, and `Client.delete_webhook` methods for model webhook management
+- Add `Client.get_model_tags` method for retrieving popular tags across all models
+- Add API coverage regression test (`test_api_coverage.py`) that dynamically discovers client routes and compares against the live backend Swagger spec
+
+## 3.9.0 - 21/07/2026
+
+### Changes
+
+- Align Python client with full backend `patchModel`, `postModel`, and `getModel` API specs
+- Add `settings` kwarg to `Client.post_model` and `Client.patch_model`; add `kind` kwarg to `Client.get_model`
+- Add `UNTRUSTED_MODEL` to `EntryKind` enum; improve `Client.patch_model` type hints to accept enum types
+- `Entry._unpack` now hydrates all fields (`organisation`, `state`, `tags`, `collaborators`, `kind`, `settings`) from API responses; `Entry.update` sends `settings` to the server
+- `MirroredModel.update` tracks `sourceModelId` changes and only sends them when modified
+- Fix boolean settings (`ungovernedAccess`, `allowTemplating`) being stringified in JSON request bodies
+- Extend unit and integration test coverage
+
+## 3.8.0 - 26/06/2026
+
+### Changes
+
+- Improve Python error handling for non-success connected `Client` responses.
+- Correct some docstrings.
+- Add error handling to Jupyter Notebook docs.
+- Update dependencies.
+
+## 3.7.2 - 11/05/2026
+
+- Fix boolean to string conversion for API requests.
+- Extend unit & integration test coverage.
+
+## 3.7.1 - 27/04/2026
 
 ### Changes
 

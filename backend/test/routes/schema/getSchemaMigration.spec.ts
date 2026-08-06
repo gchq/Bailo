@@ -30,7 +30,7 @@ describe('routes > schema > getSchemaMigration', async () => {
     const res = await testGet(`/api/v2/schema-migration/${fixture.params.schemaMigrationId}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewSchemaMigration).toBeCalled()
+    expect(audit.onViewSchemaMigration).toHaveBeenCalled()
     expect(audit.onViewSchemaMigration.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

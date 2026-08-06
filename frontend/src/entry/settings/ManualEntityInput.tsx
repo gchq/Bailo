@@ -1,9 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, TextField, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
-import Loading from 'src/common/Loading'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 
 interface ManualEntityInputProps {
@@ -14,7 +13,7 @@ interface ManualEntityInputProps {
 export default function ManualEntityInput({ onAddEntityManually, errorMessage }: ManualEntityInputProps) {
   const [manualEntityName, setManualEntityName] = useState('')
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const handleAddEntityManuallyOnClick = () => {
     if (manualEntityName !== undefined && manualEntityName !== '') {
@@ -23,14 +22,10 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
     }
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   return (
     <Accordion sx={{ borderTop: 'none' }}>
       <AccordionSummary
-        sx={{ pl: 0, borderTop: 'none' }}
+        sx={{ pl: 2, borderTop: 'none' }}
         expandIcon={<ExpandMoreIcon />}
         aria-controls='manual-user-add-content'
         id='manual-user-add-header'
@@ -40,24 +35,27 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0 }}>
-        {isUiConfigLoading && <Loading />}
-        {!isUiConfigLoading && uiConfig && (
-          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
-            <TextField
-              size='small'
-              fullWidth
-              label='User'
-              value={manualEntityName}
-              onChange={(e) => setManualEntityName(e.target.value)}
-            />
-            {uiConfig.helpPopoverText.manualEntryAccess && (
-              <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>
-            )}
-            <Button variant='contained' disabled={manualEntityName === ''} onClick={handleAddEntityManuallyOnClick}>
-              Add
-            </Button>
-          </Stack>
-        )}
+        <Stack
+          spacing={2}
+          direction={{ xs: 'column', sm: 'row' }}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <TextField
+            size='small'
+            fullWidth
+            label='User'
+            value={manualEntityName}
+            onChange={(e) => setManualEntityName(e.target.value)}
+          />
+          {uiConfig.helpPopoverText.manualEntryAccess && (
+            <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>
+          )}
+          <Button variant='contained' disabled={manualEntityName === ''} onClick={handleAddEntityManuallyOnClick}>
+            Add
+          </Button>
+        </Stack>
         <MessageAlert message={errorMessage} severity='error' />
       </AccordionDetails>
     </Accordion>

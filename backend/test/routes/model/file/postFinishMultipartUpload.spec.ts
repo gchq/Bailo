@@ -26,7 +26,7 @@ describe('routes > model > file > postFinishMultipartUpload', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/files/upload/multipart/finish`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateFile).toBeCalled()
+    expect(audit.onUpdateFile).toHaveBeenCalled()
     expect(audit.onUpdateFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

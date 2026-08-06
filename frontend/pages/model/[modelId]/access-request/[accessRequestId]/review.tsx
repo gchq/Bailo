@@ -1,7 +1,7 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Card, Container, Dialog, DialogContent, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -25,11 +25,11 @@ export default function AccessRequestReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isOpenAccessRequestDialogOpen, setIsOpenAccessRequestDialogOpen] = useState(false)
 
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
-  const { mutateReviews } = useGetReviewRequestsForModel({
-    modelId,
+  const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
+    modelId: modelId as string,
     accessRequestId: `${accessRequestId}`,
   })
 
@@ -71,13 +71,14 @@ export default function AccessRequestReview() {
     }
   }, [accessRequest])
 
-  if (!accessRequest || !model || isAccessRequestLoading || isModelLoading) {
+  if (!accessRequest || !model || !reviews || isReviewsLoading || isAccessRequestLoading || isModelLoading) {
     return <Loading />
   }
 
   const error = MultipleErrorWrapper(`Unable to load release review page`, {
     isAccessRequestError,
     isModelError,
+    isReviewsError,
   })
   if (error) {
     return error
@@ -106,20 +107,43 @@ export default function AccessRequestReview() {
               </Typography>
               <Button onClick={() => setIsOpenAccessRequestDialogOpen(true)}>View access request</Button>
             </Stack>
-            <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} loading={isReviewButtonLoading} />
+            <ReviewWithComment
+              onSubmit={handleSubmit}
+              reviews={reviews}
+              loading={isReviewButtonLoading}
+              modelId={modelId as string}
+            />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
-            <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
+            <Stack
+              spacing={1}
+              direction='row'
+              sx={{
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
               <Typography variant='caption'>
                 Created by {<UserDisplay dn={accessRequest.createdBy} />} on
-                <Typography variant='caption' fontWeight='bold'>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
               </Typography>
               {accessRequest.metadata.overview.endDate && (
                 <Typography variant='caption'>
                   End Date:
-                  <Typography variant='caption' fontWeight='bold' data-test='accessRequestEndDate'>
+                  <Typography
+                    variant='caption'
+                    data-test='accessRequestEndDate'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
                   </Typography>
                 </Typography>
@@ -127,9 +151,11 @@ export default function AccessRequestReview() {
             </Stack>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
-              alignItems='flex-end'
-              justifyContent='space-between'
               spacing={4}
+              sx={{
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+              }}
             >
               <Card
                 sx={{
@@ -139,7 +165,13 @@ export default function AccessRequestReview() {
                   width: '100%',
                 }}
               >
-                <Typography variant='subtitle2' component='h3' mb={1}>
+                <Typography
+                  variant='subtitle2'
+                  component='h3'
+                  sx={{
+                    mb: 1,
+                  }}
+                >
                   Users
                 </Typography>
                 <Grid container>{accessRequestEntities}</Grid>

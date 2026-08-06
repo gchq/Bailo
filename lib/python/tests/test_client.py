@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 
 import pytest
 
@@ -9,6 +10,8 @@ import pytest
 from bailo import Client, ModelVisibility, SchemaKind
 from bailo.core.enums import CollaboratorEntry, EntryKind, Role
 from bailo.core.exceptions import BailoException, ResponseException
+from bailo.core.utils import normalise_query_params
+from example_schemas import METRICS_JSON_SCHEMA
 
 mock_result = {"success": True}
 
@@ -29,6 +32,91 @@ def test_response_exception(requests_mock):
     client = Client("https://example.com")
     with pytest.raises(ResponseException):
         client.get_model("test_model")
+
+
+def test_bailo_exception_with_validation_context(requests_mock):
+    error_response = {
+        "error": {
+            "name": "Bailo Error",
+            "message": "Model metadata could not be validated against the schema.",
+            "context": {
+                "validationErrors": [
+                    {"property": "instance.overview.tags", "message": "String does not match pattern"},
+                    {"property": "instance.overview.modelSummary", "message": "is required"},
+                ]
+            },
+        }
+    }
+    requests_mock.put(
+        "https://example.com/api/v2/model/test_id/model-cards",
+        status_code=400,
+        json=error_response,
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as exc_info:
+        client.put_model_card(model_id="test_id", metadata={"invalid": "data"})
+
+    exc = exc_info.value
+    assert exc.status_code == 400
+    assert exc.context is not None
+    assert "validationErrors" in exc.context
+    assert len(exc.context["validationErrors"]) == 2
+
+    error_str = str(exc)
+    assert "[400]" in error_str
+    assert "Validation errors:" in error_str
+    assert "instance.overview.tags" in error_str
+    assert "instance.overview.modelSummary" in error_str
+
+
+def test_bailo_exception_with_generic_context(requests_mock):
+    error_response = {
+        "error": {
+            "name": "Bailo Error",
+            "message": "Schema not found.",
+            "context": {"modelId": "abc-123"},
+        }
+    }
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id",
+        status_code=404,
+        json=error_response,
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as exc_info:
+        client.get_model("test_id")
+
+    exc = exc_info.value
+    assert exc.status_code == 404
+    assert exc.context == {"modelId": "abc-123"}
+    assert "Context:" in str(exc)
+
+
+def test_parse_json_error_in_success_response(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id",
+        status_code=200,
+        json={"error": {"message": "Unexpected error in 200 response", "context": {"key": "value"}}},
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as exc_info:
+        client.get_model("test_id")
+
+    exc = exc_info.value
+    assert exc.message == "Unexpected error in 200 response"
+    assert exc.status_code == 200
+    assert exc.context == {"key": "value"}
+
+
+def test_parse_json_non_json_response(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id",
+        status_code=200,
+        text="This is not JSON",
+    )
+    client = Client("https://example.com")
+    with pytest.raises(ResponseException):
+        client.get_model("test_id")
 
 
 def test_post_model(requests_mock):
@@ -109,7 +197,8 @@ def test_get_models(
         "titleOnly": title_only,
     }
 
-    query = "&".join(f"{k}={v}" for k, v in params.items() if v is not None)
+    normalised_params = normalise_query_params(params)
+    query = "&".join(f"{k}={v}" for k, v in normalised_params.items() if v is not None)
     requests_mock.get(
         f"{base_url}?{query}",
         json={"success": True},
@@ -153,6 +242,66 @@ def test_patch_model(requests_mock):
         state="Development",
         tags=["taga", "tagb", "tagc"],
     )
+
+    assert result == {"success": True}
+
+
+def test_patch_model_with_settings(requests_mock):
+    requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.patch_model(
+        model_id="test_id",
+        settings={"mirror": {"sourceModelId": "new-source-123"}},
+    )
+
+    assert result == {"success": True}
+    assert requests_mock.last_request.json()["settings"]["mirror"]["sourceModelId"] == "new-source-123"
+
+
+def test_patch_model_with_enum_types(requests_mock):
+    requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.patch_model(
+        model_id="test_id",
+        kind=EntryKind.MODEL,
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    assert result == {"success": True}
+    body = requests_mock.last_request.json()
+    assert body["kind"] == "model"
+    assert body["visibility"] == "public"
+
+
+def test_post_model_with_settings(requests_mock):
+    requests_mock.post("https://example.com/api/v2/models", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.post_model(
+        name="test",
+        kind=EntryKind.MIRRORED_MODEL,
+        description="test",
+        sourceModelId="source-123",
+        settings={"ungovernedAccess": True, "allowTemplating": True},
+    )
+
+    assert result == {"success": True}
+    body = requests_mock.last_request.json()
+    assert body["settings"]["ungovernedAccess"] is True
+    assert body["settings"]["allowTemplating"] is True
+    assert body["settings"]["mirror"]["sourceModelId"] == "source-123"
+
+
+def test_get_model_with_kind(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id?kind=model&kind=mirrored-model",
+        json={"success": True},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_model(model_id="test_id", kind=["model", "mirrored-model"])
 
     assert result == {"success": True}
 
@@ -210,6 +359,21 @@ def test_model_card_from_template(requests_mock):
     client = Client("https://example.com")
     result = client.model_card_from_template(model_id="test_id", template_id="test_id")
     assert result == {"success": True}
+
+
+def test_import_model_card_text(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/import-model-card-text",
+        json={"metadata": {"overview": {"modelSummary": "A test model"}}},
+    )
+
+    client = Client("https://example.com")
+    result = client.import_model_card_text(
+        model_id="test_id",
+        text="# Test Model\n\nThis is a test model that does classification.",
+    )
+
+    assert result == {"metadata": {"overview": {"modelSummary": "A test model"}}}
 
 
 def test_post_release(requests_mock):
@@ -317,8 +481,8 @@ def test_post_schema(requests_mock):
         name="test",
         description="example_description",
         kind=SchemaKind.MODEL,
-        json_schema={"test": "test"},
-        review_roles=["test"],
+        json_schema=METRICS_JSON_SCHEMA,
+        review_roles=["reviewer"],
     )
 
     assert result == {"success": True}
@@ -370,7 +534,7 @@ def test_post_access_request_review(comment, requests_mock):
 
 
 def test_get_model_roles(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/roles", json={"success": True})
+    requests_mock.get("https://example.com/api/v2/roles", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_model_roles(
@@ -378,6 +542,17 @@ def test_get_model_roles(requests_mock):
     )
 
     assert result == {"success": True}
+    assert "modelId" in requests_mock.last_request.url
+
+
+def test_get_model_roles_without_model_id(requests_mock):
+    requests_mock.get("https://example.com/api/v2/roles", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.get_model_roles()
+
+    assert result == {"success": True}
+    assert requests_mock.last_request.qs == {}
 
 
 def test_get_access_request(requests_mock):
@@ -471,3 +646,459 @@ def test_put_image_scan(requests_mock):
     result = client.put_image_scan(model_id="test_model_id", image_name="test_image_name", image_tag="test_image_tag")
 
     assert result == {"status": "Scan started"}
+
+
+def test_patch_file(requests_mock):
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test_model_id/file/test_file_id",
+        json={"file": {"name": "renamed.bin"}},
+    )
+
+    client = Client("https://example.com")
+    result = client.patch_file(
+        model_id="test_model_id",
+        file_id="test_file_id",
+        name="renamed.bin",
+        tags=["v2"],
+    )
+
+    assert result == {"file": {"name": "renamed.bin"}}
+    body = requests_mock.last_request.json()
+    assert body["name"] == "renamed.bin"
+    assert body["tags"] == ["v2"]
+
+
+def test_get_filescanning_info(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/filescanning/info",
+        json={"scanners": [{"toolName": "ClamAV"}]},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_filescanning_info()
+
+    assert result == {"scanners": [{"toolName": "ClamAV"}]}
+
+
+def test_get_model_tags(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/models/tags",
+        json={"tags": ["nlp", "vision"]},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_model_tags()
+
+    assert result == {"tags": ["nlp", "vision"]}
+
+
+def test_start_multipart_upload(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_model_id/files/upload/multipart/start",
+        json={"fileId": "f1", "uploadId": "u1", "chunks": [{"startByte": 0, "endByte": 1024}]},
+    )
+
+    client = Client("https://example.com")
+    result = client.start_multipart_upload(
+        model_id="test_model_id",
+        name="large.bin",
+        size=1024,
+    )
+
+    assert result["fileId"] == "f1"
+    body = requests_mock.last_request.json()
+    assert body["name"] == "large.bin"
+    assert body["size"] == 1024
+
+
+def test_upload_multipart_part(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_model_id/files/upload/multipart/part",
+        json={"ETag": "abc123"},
+    )
+
+    client = Client("https://example.com")
+    result = client.upload_multipart_part(
+        model_id="test_model_id",
+        file_id="f1",
+        upload_id="u1",
+        part_number=1,
+        data=b"chunk-data",
+    )
+
+    assert result == {"ETag": "abc123"}
+    assert "fileId" in requests_mock.last_request.url
+    assert "uploadId" in requests_mock.last_request.url
+    assert "partNumber" in requests_mock.last_request.url
+
+
+def test_finish_multipart_upload(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_model_id/files/upload/multipart/finish",
+        json={"file": {"name": "large.bin", "complete": True}},
+    )
+
+    client = Client("https://example.com")
+    result = client.finish_multipart_upload(
+        model_id="test_model_id",
+        file_id="f1",
+        upload_id="u1",
+        parts=[{"ETag": "abc123", "PartNumber": 1}],
+    )
+
+    assert result["file"]["complete"] is True
+    body = requests_mock.last_request.json()
+    assert body["fileId"] == "f1"
+    assert body["parts"] == [{"ETag": "abc123", "PartNumber": 1}]
+
+
+def test_post_webhook(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/webhooks",
+        json={"webhook": {"id": "wh1", "name": "my-hook"}},
+    )
+
+    client = Client("https://example.com")
+    result = client.post_webhook(
+        model_id="test_id",
+        name="my-hook",
+        uri="https://hook.example.com",
+        events=["createRelease"],
+    )
+
+    assert result["webhook"]["name"] == "my-hook"
+    body = requests_mock.last_request.json()
+    assert body["name"] == "my-hook"
+    assert body["uri"] == "https://hook.example.com"
+    assert body["events"] == ["createRelease"]
+
+
+def test_get_webhooks(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id/webhooks",
+        json={"webhooks": [{"id": "wh1"}]},
+    )
+
+    client = Client("https://example.com")
+    result = client.get_webhooks(model_id="test_id")
+
+    assert len(result["webhooks"]) == 1
+
+
+def test_put_webhook(requests_mock):
+    requests_mock.put(
+        "https://example.com/api/v2/model/test_id/webhook/wh1",
+        json={"webhook": {"id": "wh1", "name": "updated-hook"}},
+    )
+
+    client = Client("https://example.com")
+    result = client.put_webhook(
+        model_id="test_id",
+        webhook_id="wh1",
+        name="updated-hook",
+        uri="https://hook.example.com/v2",
+        active=False,
+    )
+
+    assert result["webhook"]["name"] == "updated-hook"
+    body = requests_mock.last_request.json()
+    assert body["name"] == "updated-hook"
+    assert body["active"] is False
+
+
+def test_delete_webhook(requests_mock):
+    requests_mock.delete(
+        "https://example.com/api/v2/model/test_id/webhook/wh1",
+        json={"message": "Successfully removed webhook"},
+    )
+
+    client = Client("https://example.com")
+    result = client.delete_webhook(model_id="test_id", webhook_id="wh1")
+
+    assert result == {"message": "Successfully removed webhook"}
+
+
+@pytest.mark.integration
+def test_integration_webhook_lifecycle(integration_client: Client):
+    model = integration_client.post_model(
+        name="webhook-test-model",
+        kind=EntryKind.MODEL,
+        description="webhook integration test",
+        visibility=ModelVisibility.PUBLIC,
+    )
+    model_id = model["model"]["id"]
+
+    created = integration_client.post_webhook(
+        model_id=model_id,
+        name="test-hook",
+        uri="https://example.com/webhook",
+        events=["createRelease"],
+    )
+    assert "webhook" in created
+    webhook_id = created["webhook"]["id"]
+
+    listed = integration_client.get_webhooks(model_id=model_id)
+    assert any(w["id"] == webhook_id for w in listed["webhooks"])
+
+    updated = integration_client.put_webhook(
+        model_id=model_id,
+        webhook_id=webhook_id,
+        name="updated-hook",
+        uri="https://example.com/webhook/v2",
+        active=False,
+    )
+    assert updated["webhook"]["name"] == "updated-hook"
+
+    deleted = integration_client.delete_webhook(model_id=model_id, webhook_id=webhook_id)
+    assert "message" in deleted
+
+    after_delete = integration_client.get_webhooks(model_id=model_id)
+    assert not any(w["id"] == webhook_id for w in after_delete["webhooks"])
+
+
+@pytest.mark.integration
+def test_integration_create_and_fetch_model(integration_client: Client):
+    result = integration_client.post_model(
+        name="integration-test-model",
+        kind=EntryKind.MODEL,
+        description="integration test",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    assert "model" in result
+    assert "id" in result["model"]
+
+    model_id = result["model"]["id"]
+    fetched = integration_client.get_model(model_id=model_id)
+
+    assert fetched["model"]["id"] == model_id
+
+
+@pytest.mark.integration
+def test_integration_patch_model(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-test-model",
+        kind=EntryKind.MODEL,
+        description="integration test",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    patched = integration_client.patch_model(
+        model_id=model_id,
+        name="integration-test-model-updated",
+    )
+
+    assert patched is not None
+
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["name"] == "integration-test-model-updated"
+
+
+@pytest.mark.integration
+def test_integration_delete_model(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-delete-model",
+        kind=EntryKind.MODEL,
+        description="integration delete test",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    result = integration_client.delete_model(model_id=model_id)
+    assert result is True or result is not None
+
+    with pytest.raises(BailoException):
+        integration_client.get_model(model_id=model_id)
+
+
+@pytest.mark.integration
+def test_integration_get_models_with_filters(integration_client: Client):
+    models = integration_client.get_models(
+        search="integration",
+        allow_templating=False,
+        title_only=True,
+    )
+
+    assert isinstance(models["models"], list)
+
+
+@pytest.mark.integration
+def test_integration_schema_lifecycle(integration_client: Client):
+    schema_id = str(random.randint(1, 1000000))
+
+    created = integration_client.post_schema(
+        schema_id=schema_id,
+        name="Integration Test Schema",
+        description="integration schema test",
+        kind=SchemaKind.MODEL,
+        json_schema=METRICS_JSON_SCHEMA,
+        review_roles=["reviewer"],
+    )
+
+    assert created is not None
+
+    schema = integration_client.get_schema(schema_id=schema_id)
+    assert schema["schema"]["id"] == schema_id
+
+
+@pytest.mark.integration
+def test_integration_release_lifecycle(integration_client: Client):
+    schema_id = str(random.randint(1, 1000000))
+
+    integration_client.post_schema(
+        schema_id=schema_id,
+        name="Integration Test Schema",
+        description="integration schema test",
+        kind=SchemaKind.MODEL,
+        json_schema=METRICS_JSON_SCHEMA,
+        review_roles=["reviewer"],
+    )
+
+    created = integration_client.post_model(
+        name="integration-release-model",
+        kind=EntryKind.MODEL,
+        description="integration release test",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    integration_client.model_card_from_schema(model_id, schema_id)
+
+    card = integration_client.put_model_card(
+        model_id=model_id,
+        metadata={"overview": {"modelSummary": "Model summary"}, "performance": {}},
+    )
+
+    assert card is not None
+    assert card["card"] is not None
+    assert card["card"]["modelId"] == model_id
+    assert card["card"]["schemaId"] == schema_id
+
+    release = integration_client.post_release(
+        model_id=model_id,
+        model_card_version=1,
+        release_version="1.0.0",
+        notes="integration release",
+        file_ids=[],
+        images=[],
+    )
+
+    assert release is not None
+
+    fetched = integration_client.get_release(model_id=model_id, release_version="1.0.0")
+    assert fetched is not None
+
+
+@pytest.mark.integration
+def test_integration_put_model_card_validation_error(integration_client: Client):
+    schema_id = str(random.randint(1, 1000000))
+
+    integration_client.post_schema(
+        schema_id=schema_id,
+        name="Strict Schema",
+        description="Schema with additionalProperties false",
+        kind=SchemaKind.MODEL,
+        json_schema=METRICS_JSON_SCHEMA,
+        review_roles=["reviewer"],
+    )
+
+    created = integration_client.post_model(
+        name="integration-validation-error-model",
+        kind=EntryKind.MODEL,
+        description="test validation error",
+        visibility=ModelVisibility.PUBLIC,
+    )
+    model_id = created["model"]["id"]
+    integration_client.model_card_from_schema(model_id, schema_id)
+
+    with pytest.raises(BailoException) as exc_info:
+        integration_client.put_model_card(
+            model_id=model_id,
+            metadata={"overview": {"modelSummary": "Valid"}, "invalidTopLevelField": "this should fail"},
+        )
+
+    exc = exc_info.value
+    assert exc.status_code == 400
+    assert exc.context is not None
+    assert "validationErrors" in exc.context
+    assert len(exc.context["validationErrors"]) > 0
+
+    error_str = str(exc)
+    assert "Validation errors:" in error_str
+
+
+@pytest.mark.integration
+def test_integration_post_model_with_settings(integration_client: Client):
+    result = integration_client.post_model(
+        name="integration-settings-model",
+        kind=EntryKind.MODEL,
+        description="test settings on create",
+        visibility=ModelVisibility.PUBLIC,
+        settings={"allowTemplating": True},
+    )
+
+    model_id = result["model"]["id"]
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["settings"]["allowTemplating"] is True
+
+
+@pytest.mark.integration
+def test_integration_patch_model_with_settings(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-patch-settings",
+        kind=EntryKind.MODEL,
+        description="test patching settings",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    integration_client.patch_model(
+        model_id=model_id,
+        settings={"allowTemplating": True},
+    )
+
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["settings"]["allowTemplating"] is True
+
+
+@pytest.mark.integration
+def test_integration_patch_model_with_enum_types(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-enum-patch",
+        kind=EntryKind.MODEL,
+        description="test enum types in patch",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    integration_client.patch_model(
+        model_id=model_id,
+        visibility=ModelVisibility.PRIVATE,
+    )
+
+    fetched = integration_client.get_model(model_id=model_id)
+    assert fetched["model"]["visibility"] == "private"
+
+
+@pytest.mark.integration
+def test_integration_get_model_with_kind(integration_client: Client):
+    created = integration_client.post_model(
+        name="integration-kind-filter",
+        kind=EntryKind.MODEL,
+        description="test kind filter",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model_id = created["model"]["id"]
+
+    fetched = integration_client.get_model(model_id=model_id, kind=["model"])
+    assert fetched["model"]["id"] == model_id
+
+    with pytest.raises(BailoException):
+        integration_client.get_model(model_id=model_id, kind=["data-card"])

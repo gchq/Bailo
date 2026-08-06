@@ -31,7 +31,7 @@ describe('routes > model > getModel', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card/latest`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewModelCard).toBeCalled()
+    expect(audit.onViewModelCard).toHaveBeenCalled()
     expect(audit.onViewModelCard.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onViewModelCard.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

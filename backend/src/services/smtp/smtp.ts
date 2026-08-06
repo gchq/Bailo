@@ -1,19 +1,26 @@
 import nodemailer, { Transporter } from 'nodemailer'
-import Mail from 'nodemailer/lib/mailer/index.js'
 
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { SystemRoles } from '../../models/Model.js'
+import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
-import { ReviewDoc } from '../../models/Review.js'
+import { ReviewDoc, ReviewInterface } from '../../models/Review.js'
+import { UserInterface } from '../../models/User.js'
+import { ReviewKind } from '../../types/enums.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
-import { sanitiseEmail } from '../../utils/smtp.js'
+import { BadReq, NotFound } from '../../utils/error.js'
+import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
-import { buildEmail, EmailContent } from './emailBuilder.js'
+import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
+import { checkAccessRequestsApproved } from '../response.js'
+import { buildEmail, EmailContent, Info } from './emailBuilder.js'
 
+const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 const transporter = await generateTransporter(config.smtp.transporter)
+const LINE_BREAK = '<br />'
 
 /**
  * Generates a Node Mailer Transporter.
@@ -22,7 +29,7 @@ const transporter = await generateTransporter(config.smtp.transporter)
  * @param transportOption {TransportOption} the option to use depending on the environment
  * @returns the transporter to use
  */
-export async function generateTransporter(transportOption: TransportOption): Promise<Transporter> {
+async function generateTransporter(transportOption: TransportOption): Promise<Transporter> {
   if (transportOption === 'aws') {
     // If deployed to AWS then use AWS SES as our transport medium
     log.info('Generating transporter: Using AWS SES')
@@ -40,24 +47,52 @@ export async function generateTransporter(transportOption: TransportOption): Pro
   }
 }
 
-async function dispatchEmail(entity: string, emailContent: EmailContent) {
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
-  }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
+async function dispatchEmail(entities: string[], emailContent: EmailContent) {
+  const userInfoLists = await Promise.all(
+    entities.map(async (entity) => Promise.all(await authentication.getUserInformationList(entity))),
   )
-  await Promise.all(sendEmailResponses)
+
+  const uniqueEmails = [
+    ...new Set(
+      userInfoLists
+        .flat()
+        .map((userInfo) => userInfo.email)
+        .filter((email) => email !== undefined),
+    ),
+  ]
+
+  if (uniqueEmails.length === 0) {
+    log.warn({ entities }, 'No valid recipients found; skipping email dispatch')
+    return
+  }
+
+  const email = {
+    from: config.smtp.from,
+    bcc: uniqueEmails,
+    ...emailContent,
+  }
+  try {
+    const info = await transporter.sendMail(email)
+    log.info({ messageId: info.messageId }, 'Email sent')
+  } catch (error) {
+    const content = { bcc: email.bcc, subject: email.subject, text: email.text }
+    log.warn({ content, error }, `Unable to send email`)
+    return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
+  }
 }
 
-const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
-export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+export async function getApprovedAccessRequests(modelId: string) {
+  const accessRequests = await AccessRequestModel.find({
+    modelId,
+  })
+  const approvalResults = await Promise.all(
+    accessRequests.map((accessRequest) => checkAccessRequestsApproved([accessRequest.id])),
+  )
+  const approvedAccessRequests = accessRequests.filter((_, index) => approvalResults[index])
+  return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
+}
+
+export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -76,12 +111,12 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     ],
     [
       { name: 'Open Release', url: getReleaseUrl(release) },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=release` },
     ],
     true,
   )
 
-  await dispatchEmail(entity, await emailContent)
+  await dispatchEmail(entities, await emailContent)
 }
 
 const requestingEntitiesText = (value: number) => {
@@ -89,7 +124,7 @@ const requestingEntitiesText = (value: number) => {
 }
 
 export async function requestReviewForAccessRequest(
-  entity: string,
+  entities: string[],
   review: ReviewDoc,
   accessRequest: AccessRequestDoc,
 ) {
@@ -115,12 +150,12 @@ export async function requestReviewForAccessRequest(
         name: 'Open Access Request',
         url: getAccessRequestUrl(accessRequest),
       },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
     ],
     true,
   )
 
-  await dispatchEmail(entity, await emailContent)
+  await dispatchEmail(entities, await emailContent)
 }
 
 export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
@@ -155,10 +190,38 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
     ],
     [
       { name: 'Open Release', url: getReleaseUrl(release) },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=release` },
     ],
   )
-  await dispatchEmail(toEntity('user', release.createdBy), await emailContent)
+
+  const model = await getModelByIdNoAuth(release.modelId)
+  const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
+  await dispatchEmail([toEntity('user', release.createdBy), ...reviewRoleEntities], await emailContent)
+}
+
+export async function notifyLifeCycleReview(modelId: string, reviewId: string, dueIn?: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const model = await getModelByIdNoAuth(modelId)
+  const emailContent = buildEmail(
+    dueIn
+      ? `A lifecycle review for ${model.name} is due in ${dueIn}`
+      : `A lifecycle review for ${model.name} has past it's due date`,
+    [],
+    [
+      { name: `See ${toTitleCase(model.kind, '-')}`, url: `${appBaseUrl}/${resolveKindToUrl(model.kind)}/${modelId}` },
+      {
+        name: 'Review Lifecycle',
+        url: `${appBaseUrl}/${model.kind}/${modelId}/lifecycle/${reviewId}/review?role=owner`,
+      },
+    ],
+  )
+
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 export async function notifyReviewResponseForAccess(
@@ -195,25 +258,154 @@ export async function notifyReviewResponseForAccess(
     ],
     [
       { name: 'Open Access Request', url: getAccessRequestUrl(accessRequest) },
-      { name: 'See Reviews', url: `${appBaseUrl}/review` },
+      { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
     ],
   )
-  await dispatchEmail(toEntity('user', accessRequest.createdBy), await emailContent)
+  const model = await getModelByIdNoAuth(accessRequest.modelId)
+  const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
+  await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], await emailContent)
 }
 
-async function sendEmail(email: Mail.Options) {
-  try {
-    const sanitisedEmail = sanitiseEmail({
-      from: config.smtp.from,
-      ...email,
+export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent) {
+  const model = await getModelByIdNoAuth(modelId)
+  const reviewRoleEntities = getRoleEntities([role], model.collaborators)[role]
+  await dispatchEmail(reviewRoleEntities, await emailContent)
+}
+
+async function notifyRole(review: ReviewInterface, title: string, fields: Info[], actionUrl: string) {
+  const emailContent = await buildEmail(title, fields, [
+    { name: 'Open item', url: actionUrl },
+    { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
+  ])
+
+  await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
+}
+
+export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
+  if (review.kind === ReviewKind.Release) {
+    const release = await ReleaseModel.findOne({
+      modelId: review.modelId,
+      semver: review.semver,
     })
-    const info = await transporter.sendMail(sanitisedEmail)
-    log.info({ messageId: info.messageId }, 'Email sent')
-  } catch (error) {
-    const content = { to: email.to, subject: email.subject, text: email.text }
-    log.warn({ content, error }, `Unable to send email`)
-    return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
+
+    if (!release) {
+      throw NotFound(`The requested release was not found.`, { modelId: review.modelId, semver: review.semver })
+    }
+    await notifyRole(
+      review,
+      `${user.dn} has requested an additional review on a release.`,
+      [
+        { title: 'Model ID', data: review.modelId },
+        { title: 'Release version', data: review.semver },
+        { title: 'Review Role', data: review.role.toUpperCase() },
+      ],
+      getReleaseUrl(release),
+    )
+  } else if (review.kind === ReviewKind.Access) {
+    const accessRequest = await AccessRequestModel.findOne({ id: review.accessRequestId })
+    if (!accessRequest) {
+      throw NotFound('The requested access request was not found.', { accessRequestId: review.accessRequestId })
+    }
+    await notifyRole(
+      review,
+      `${user.dn} has requested an additional review on an access request.`,
+      [
+        { title: 'Model ID', data: review.modelId },
+        { title: 'Access request ID', data: review.accessRequestId },
+        { title: 'Review Role', data: review.role.toUpperCase() },
+      ],
+      getAccessRequestUrl(accessRequest),
+    )
+  } else {
+    throw BadReq('Unknown review kind given, unable to notify reviewer.', { kind: review.kind })
   }
+  return
+}
+
+export async function startImportNotification(modelId: string) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+  const emailContent = buildEmail(
+    `${mirroredModel.name} has begun importing`,
+    [],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+    ],
+  )
+
+  const model = await getModelByIdNoAuth(modelId)
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
+}
+
+export async function notifyReleaseOnApproval(modelId: string, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `A new release has been approved`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Semver', data: release.semver },
+    ],
+    [
+      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+      { name: 'See Release', url: getReleaseUrl(release) },
+    ],
+  )
+  const model = await getModelByIdNoAuth(modelId)
+  const entries = Object.values(
+    getRoleEntities([SystemRoles.Consumer, SystemRoles.Owner, SystemRoles.Contributor], model.collaborators),
+  )
+    .flat()
+    .concat(await getApprovedAccessRequests(modelId))
+  await dispatchEmail(entries, await emailContent)
+}
+
+export async function transferCompleteNotification(
+  modelId: string,
+  failed: boolean,
+  artefacts: Record<string, string[]>,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const mirroredModel = await getModelByIdNoAuth(modelId)
+
+  const title = failed
+    ? `Oh no there was a problem with importing ${mirroredModel.name}!`
+    : `${mirroredModel.name} has finished importing`
+
+  const infoArray: Info[] = []
+  for (const [key, values] of Object.entries(artefacts)) {
+    if (values.length > 0) {
+      infoArray.push({ title: key, data: values.join(LINE_BREAK) })
+    }
+  }
+
+  const actions = [
+    { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
+    { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
+  ]
+
+  if (failed) {
+    actions.push({ name: 'Contact Support', url: config.ui.issues.contactHref })
+  }
+
+  const emailContent = buildEmail(title, infoArray, actions)
+
+  const model = await getModelByIdNoAuth(modelId)
+  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  await dispatchEmail(ownerEntities, await emailContent)
 }
 
 function getReleaseUrl(release: ReleaseDoc) {

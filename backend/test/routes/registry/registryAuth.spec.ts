@@ -435,7 +435,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^No authorisation header found/)
+      await expect(result).rejects.toThrow(/^No authorisation header found/)
     })
 
     test('reject > getUserFromAuthHeader err', async () => {
@@ -444,7 +444,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^error/)
+      await expect(result).rejects.toThrow(/^error/)
     })
 
     test('reject > no user', async () => {
@@ -453,7 +453,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^User authentication failed/)
+      await expect(result).rejects.toThrow(/^User authentication failed/)
     })
 
     test('reject > broken service', async () => {
@@ -462,7 +462,7 @@ describe('registryAuth', () => {
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 
-      await expect(result).rejects.toThrowError(/^Received registry auth request from unexpected service/)
+      await expect(result).rejects.toThrow(/^Received registry auth request from unexpected service/)
     })
 
     test('reject > unauthorised push', async () => {

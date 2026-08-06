@@ -13,6 +13,7 @@ describe('Check A11y violations', () => {
   })
 
   it('Check A11y violations, Front Page', () => {
+    cy.wait(500)
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
@@ -22,7 +23,7 @@ describe('Check A11y violations', () => {
   })
 
   it('Check A11y violations, API Page', () => {
-    cy.get('a[href="/api/v2/docs"]').click()
+    cy.get('a[href="/api/docs"]').click()
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
@@ -33,17 +34,6 @@ describe('Check A11y violations', () => {
 
   it('Check A11y violations, Help Page', () => {
     cy.get('a[href="/help"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations)
-  })
-
-  it('Check A11y violations, Schemas Page', () => {
-    cy.get('a[href="/schemas/list"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations)
-  })
-
-  it('Check A11y violations, Review Roles Page', () => {
-    cy.get('a[href="/reviewRoles/view"]').click()
-    cy.get('[data-test=ReviewRolesTitle]').should('be.visible')
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 

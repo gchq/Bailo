@@ -2,7 +2,6 @@ import FileModel from '../models/File.js'
 import Model from '../models/Model.js'
 
 export async function up() {
-  const query = { tags: { $exists: true, $type: 'array' }, 'tags.0': { $exists: true } }
   const lowercaseTagsPipeline = [
     {
       $set: {
@@ -20,8 +19,16 @@ export async function up() {
       },
     },
   ]
-  await Model.updateMany(query, lowercaseTagsPipeline)
-  await FileModel.updateMany(query, lowercaseTagsPipeline)
+  await Model.updateMany(
+    { tags: { $exists: true, $type: 'array' }, 'tags.0': { $exists: true } },
+    lowercaseTagsPipeline,
+    { updatePipeline: true },
+  )
+  await FileModel.updateMany(
+    { tags: { $exists: true, $type: 'array' }, 'tags.0': { $exists: true } },
+    lowercaseTagsPipeline,
+    { updatePipeline: true },
+  )
 }
 
 export async function down() {}

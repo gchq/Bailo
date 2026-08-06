@@ -1,10 +1,8 @@
-import {
-  CelebrationTwoTone,
-  FavoriteTwoTone,
-  InsertEmoticon,
-  ThumbDownTwoTone,
-  ThumbUpTwoTone,
-} from '@mui/icons-material'
+import CelebrationTwoTone from '@mui/icons-material/CelebrationTwoTone'
+import FavoriteTwoTone from '@mui/icons-material/FavoriteTwoTone'
+import InsertEmoticon from '@mui/icons-material/InsertEmoticon'
+import ThumbDownTwoTone from '@mui/icons-material/ThumbDownTwoTone'
+import ThumbUpTwoTone from '@mui/icons-material/ThumbUpTwoTone'
 import { IconButton, Popover, Stack } from '@mui/material'
 import { patchResponseReaction } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
@@ -33,7 +31,7 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
 
   const handleReactionClick = useCallback(
     async (kind: ReactionKindKeys) => {
-      const res = await patchResponseReaction(response['_id'], kind)
+      const res = await patchResponseReaction(response._id, kind)
       if (!res.ok) {
         onError(await getErrorMessage(res))
       }
@@ -107,7 +105,12 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <IconButton aria-label='Add reaction' color='primary' onClick={(event) => setAnchorEl(event.currentTarget)}>
           <InsertEmoticon fontSize='small' />
         </IconButton>

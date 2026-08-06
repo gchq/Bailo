@@ -3,7 +3,8 @@ import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { MirrorImportLogData } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
-import { createFilePath, isFileInterfaceDoc } from '../../utils/fileUtils.js'
+import { createFilePath, isFileWithScanResultsInterface } from '../../utils/fileUtils.js'
+import log from '../log.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
 
@@ -21,9 +22,8 @@ export function parseModelCard(
       ...logData,
     })
   }
-  const modelId = modelCard.modelId
-  modelCard.modelId = mirroredModelId
-  delete modelCard._id
+  // destructure and clone to omit old _id, rather than delete modelCard._id
+  const { _id, modelId, ...rest } = modelCard
   if (sourceModelId !== modelId) {
     throw InternalError(
       'Compressed file contains model cards that have a model ID that does not match the source model Id.',
@@ -34,7 +34,11 @@ export function parseModelCard(
       },
     )
   }
-  return modelCard
+
+  return {
+    ...rest,
+    modelId: mirroredModelId,
+  }
 }
 
 export function parseRelease(
@@ -51,11 +55,8 @@ export function parseRelease(
       ...logData,
     })
   }
-
-  const modelId = release.modelId
-  release.modelId = mirroredModelId
-  delete release._id
-
+  // destructure and clone to omit old _id, rather than delete release._id
+  const { _id, modelId, ...rest } = release
   if (sourceModelId !== modelId) {
     throw InternalError(
       'Compressed file contains releases that have a model ID that does not match the source model Id.',
@@ -68,19 +69,24 @@ export function parseRelease(
     )
   }
 
-  return release
+  return {
+    ...rest,
+    modelId: mirroredModelId,
+  }
 }
+
 export async function parseFile(
   file: unknown,
   mirroredModelId: string,
   sourceModelId: string,
   logData: MirrorImportLogData,
 ) {
-  if (!isFileInterfaceDoc(file)) {
+  log.info({ file })
+  if (!isFileWithScanResultsInterface(file)) {
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
   }
 
-  file.path = createFilePath(mirroredModelId, file.id)
+  file.path = createFilePath(mirroredModelId, file._id.toString())
 
   try {
     file.complete = await objectExists(file.path)

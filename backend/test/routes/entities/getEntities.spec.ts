@@ -19,12 +19,12 @@ vi.mock('../../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
 }))
 
+vi.mock('../../../src/services/model.js', () => ({
+  getModelById: vi.fn(() => ({ _id: 'test' })),
+}))
+
 describe('routes > entities > getEntities', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      getModelById: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const res = await testGet(`/api/v2/entities?q=bob`)
 
     expect(res.statusCode).toBe(200)

@@ -21,7 +21,7 @@ describe('routes > review > postReviewRole', () => {
     const res = await testPost(`${endpoint}`, createFixture(postReviewRoleSchema))
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateReviewRole).toBeCalled()
+    expect(audit.onCreateReviewRole).toHaveBeenCalled()
     expect(audit.onCreateReviewRole.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

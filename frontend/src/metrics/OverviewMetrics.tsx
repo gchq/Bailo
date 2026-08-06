@@ -1,0 +1,87 @@
+import { Container, Stack } from '@mui/material'
+import { useGetOverviewMetrics } from 'actions/metrics'
+import { useGetSchemas } from 'actions/schema'
+import { useRouter } from 'next/router'
+import { useCallback, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
+import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
+import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
+
+export default function OverviewMetrics() {
+  const router = useRouter()
+  const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
+  const { schemas } = useGetSchemas()
+
+  const [selectedOrganisation, setSelectedOrganisation] = useState(filterSelectTypes.ALL)
+
+  const filteredDataset = useMemo(() => {
+    if (!overviewMetrics) {
+      return undefined
+    }
+    if (selectedOrganisation === filterSelectTypes.ALL) {
+      return overviewMetrics.global
+    }
+    return overviewMetrics.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
+  }, [overviewMetrics, selectedOrganisation])
+
+  const handleBreakdownSelection = useCallback(
+    (type: BreakdownQueryType, value: string) => {
+      const href = buildEntriesTabHref(type, value, { organisation: selectedOrganisation, schemas: schemas ?? [] })
+      router.push(href)
+    },
+    [router, selectedOrganisation, schemas],
+  )
+
+  const handleMonthSelection = useCallback(
+    (month: string) => {
+      router.push(
+        buildEntriesHref({
+          organisation: selectedOrganisation !== filterSelectTypes.ALL ? selectedOrganisation : undefined,
+          startMonth: month,
+          endMonth: month,
+        }),
+      )
+    },
+    [router, selectedOrganisation],
+  )
+
+  const handleOrganisationChange = useCallback((newOrganisation: string) => {
+    setSelectedOrganisation(newOrganisation)
+  }, [])
+
+  if (isOverviewMetricsError) {
+    return <MessageAlert message={isOverviewMetricsError.info.message} />
+  }
+
+  if (isOverviewMetricsLoading) {
+    return <Loading />
+  }
+
+  return (
+    <Container maxWidth='lg'>
+      <Stack spacing={4} sx={{ mt: 2, mb: 4 }}>
+        {filteredDataset && overviewMetrics && (
+          <MetricsHeader
+            organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={overviewMetrics.lastUpdated}
+            onOrganisationChange={handleOrganisationChange}
+            selectedOrganisation={selectedOrganisation}
+            exportDocumentTitle='Bailo overview metrics'
+          >
+            <OverviewMetricsCharts
+              data={filteredDataset}
+              organisationList={overviewMetrics.byOrganisation.map(
+                (organisationSubset) => organisationSubset.organisation,
+              )}
+              selectedOrganisation={selectedOrganisation}
+              onSelect={handleBreakdownSelection}
+              onSelectMonth={handleMonthSelection}
+            />
+          </MetricsHeader>
+        )}
+      </Stack>
+    </Container>
+  )
+}

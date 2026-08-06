@@ -15,7 +15,7 @@ const rangeMock = vi.hoisted(() => ({
 vi.mock('../../../../src/utils/range.js', () => rangeMock)
 
 const mockFileObject = {
-  _id: { toString: vi.fn(() => 'fileId') },
+  id: 'fileId',
   updatedAt: { getTime: vi.fn(() => 123456789) },
   size: 100,
   name: 'test-file.txt',
@@ -67,7 +67,7 @@ describe('routes > files > getDownloadFile', () => {
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(200)
-      expect(audit.onViewFile).toBeCalled()
+      expect(audit.onViewFile).toHaveBeenCalled()
       expect(audit.onViewFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
       expect(audit.onViewFile.mock.calls.at(0)?.at(2)).toMatchSnapshot()
     })

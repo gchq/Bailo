@@ -142,7 +142,7 @@ class Datacard(Entry):
 
         :param data_card: Datacard dictionary, defaults to None
 
-        ..note:: If a datacard is not provided, the current datacard attribute value is used
+        .. note:: If a datacard is not provided, the current datacard attribute value is used
         """
         self._update_card(card=data_card)
 

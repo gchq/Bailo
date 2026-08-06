@@ -21,6 +21,7 @@ exports[`services > inference > removeInferences > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "at": [MockFunction],
     "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
@@ -47,6 +48,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "at": [MockFunction],
             "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
@@ -72,6 +74,9 @@ exports[`services > inference > removeInferences > success 1`] = `
             "findOneAndUpdate": [MockFunction],
             "group": [MockFunction],
             "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
             "lookup": [MockFunction],
             "markModified": [MockFunction],
             "match": [MockFunction],
@@ -91,6 +96,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "at": [MockFunction],
             "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
@@ -116,6 +122,9 @@ exports[`services > inference > removeInferences > success 1`] = `
             "findOneAndUpdate": [MockFunction],
             "group": [MockFunction],
             "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
             "lookup": [MockFunction],
             "markModified": [MockFunction],
             "match": [MockFunction],
@@ -139,6 +148,9 @@ exports[`services > inference > removeInferences > success 1`] = `
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
     "id": "mock-id",
+    "insertMany": [MockFunction],
+    "lean": [MockFunction],
+    "limit": [MockFunction],
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],
@@ -155,6 +167,7 @@ exports[`services > inference > removeInferences > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "at": [MockFunction],
     "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
@@ -177,6 +190,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "at": [MockFunction],
             "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
@@ -202,6 +216,9 @@ exports[`services > inference > removeInferences > success 1`] = `
             "findOneAndUpdate": [MockFunction],
             "group": [MockFunction],
             "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
             "lookup": [MockFunction],
             "markModified": [MockFunction],
             "match": [MockFunction],
@@ -225,6 +242,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "at": [MockFunction],
             "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
@@ -250,6 +268,9 @@ exports[`services > inference > removeInferences > success 1`] = `
             "findOneAndUpdate": [MockFunction],
             "group": [MockFunction],
             "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
             "lookup": [MockFunction],
             "markModified": [MockFunction],
             "match": [MockFunction],
@@ -273,6 +294,9 @@ exports[`services > inference > removeInferences > success 1`] = `
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
     "id": "mock-id",
+    "insertMany": [MockFunction],
+    "lean": [MockFunction],
+    "limit": [MockFunction],
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],
@@ -289,6 +313,7 @@ exports[`services > inference > removeInferences > success 1`] = `
     },
     "aggregate": [MockFunction],
     "append": [MockFunction],
+    "at": [MockFunction],
     "bulkWrite": [MockFunction],
     "delete": [MockFunction] {
       "calls": [
@@ -311,6 +336,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "at": [MockFunction],
             "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
@@ -336,6 +362,9 @@ exports[`services > inference > removeInferences > success 1`] = `
             "findOneAndUpdate": [MockFunction],
             "group": [MockFunction],
             "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
             "lookup": [MockFunction],
             "markModified": [MockFunction],
             "match": [MockFunction],
@@ -355,6 +384,7 @@ exports[`services > inference > removeInferences > success 1`] = `
             },
             "aggregate": [MockFunction],
             "append": [MockFunction],
+            "at": [MockFunction],
             "bulkWrite": [MockFunction],
             "delete": [MockFunction] {
               "calls": [
@@ -380,6 +410,9 @@ exports[`services > inference > removeInferences > success 1`] = `
             "findOneAndUpdate": [MockFunction],
             "group": [MockFunction],
             "id": "mock-id",
+            "insertMany": [MockFunction],
+            "lean": [MockFunction],
+            "limit": [MockFunction],
             "lookup": [MockFunction],
             "markModified": [MockFunction],
             "match": [MockFunction],
@@ -407,6 +440,9 @@ exports[`services > inference > removeInferences > success 1`] = `
     "findOneAndUpdate": [MockFunction],
     "group": [MockFunction],
     "id": "mock-id",
+    "insertMany": [MockFunction],
+    "lean": [MockFunction],
+    "limit": [MockFunction],
     "lookup": [MockFunction],
     "markModified": [MockFunction],
     "match": [MockFunction],

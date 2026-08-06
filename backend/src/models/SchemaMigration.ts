@@ -1,4 +1,4 @@
-import { Document, model, Schema } from 'mongoose'
+import { Document, HydratedDocument, model, Schema } from 'mongoose'
 
 import { SchemaMigrationKind, SchemaMigrationKindKeys } from '../types/enums.js'
 
@@ -26,7 +26,8 @@ export interface SchemaMigrationInterface {
   updatedAt: Date
 }
 
-export type SchemaMigrationDoc = SchemaMigrationInterface & Document<any, any, SchemaMigrationInterface>
+export type SchemaMigrationDoc = HydratedDocument<SchemaMigrationInterface> &
+  Document<any, any, SchemaMigrationInterface>
 
 const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
   {

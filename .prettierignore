@@ -24,6 +24,7 @@ mlruns/
 backend/coverage
 backend/dist
 backend/docs
+backend/openapi-specs
 
 # frontend build components
 frontend/.next
@@ -34,6 +35,10 @@ lib/landing/.next
 lib/landing/.scannerwork
 lib/landing/coverage
 lib/landing/dist
+lib/landing/out
+lib/landing/pages/accessibility
+lib/landing/pages/docs
+lib/landing/public
 
 # infrastructure dir
 infrastructure
@@ -45,3 +50,4 @@ lib/python
 # Other files
 *env
 .dockerignore
+.pytest_cache

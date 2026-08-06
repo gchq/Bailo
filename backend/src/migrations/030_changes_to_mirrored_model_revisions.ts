@@ -1,4 +1,4 @@
-import Model, { EntryKind } from '../models/Model.js'
+import ModelModel, { EntryKind } from '../models/Model.js'
 import ModelCardRevisionModel from '../models/ModelCardRevision.js'
 
 export async function up() {
@@ -6,7 +6,7 @@ export async function up() {
   if ('modelId_1_version_1' in indexes) {
     await ModelCardRevisionModel.collection.dropIndex('modelId_1_version_1')
   }
-  const mirroredModels = await Model.find({ kind: EntryKind.MirroredModel })
+  const mirroredModels = await ModelModel.find({ kind: EntryKind.MirroredModel })
   const mirroredModelIds: string[] = mirroredModels.map((model) => model.id)
   await ModelCardRevisionModel.updateMany(
     { modelId: { $in: mirroredModelIds }, mirrored: { $exists: false } },

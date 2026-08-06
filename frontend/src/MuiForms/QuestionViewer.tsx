@@ -1,11 +1,6 @@
-import 'dayjs/locale/en-gb'
-
 import { Box, Button } from '@mui/material'
 import { FieldPathId, Registry, RJSFSchema } from '@rjsf/utils'
-import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
 import MessageAlert from 'src/MessageAlert'
-dayjs.extend(customParseFormat)
 
 interface QuestionViewProps {
   label?: string

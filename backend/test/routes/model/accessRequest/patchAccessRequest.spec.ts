@@ -26,7 +26,7 @@ describe('routes > accessRequest > patchAccessRequest', () => {
     const res = await testPatch(`/api/v2/model/anything/access-request/${fixture.params.accessRequestId}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateAccessRequest).toBeCalled()
+    expect(audit.onUpdateAccessRequest).toHaveBeenCalled()
     expect(audit.onUpdateAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

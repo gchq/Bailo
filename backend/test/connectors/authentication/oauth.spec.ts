@@ -1,10 +1,15 @@
 import { Request, Response } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
+import { RoleKeys, Roles } from '../../../src/connectors/authentication/constants.js'
 import { OauthAuthenticationConnector } from '../../../src/connectors/authentication/oauth.js'
+import { UserInterface } from '../../../src/models/User.js'
+import config from '../../../src/utils/config.js'
+import { toEntity } from '../../../src/utils/entity.js'
 
 const mockCognitoClient = vi.hoisted(() => ({
   listUsers: vi.fn(),
+  getGroupMembership: vi.fn(),
 }))
 vi.mock('../../../src/clients/cognito.js', () => mockCognitoClient)
 
@@ -22,6 +27,8 @@ vi.mock('connect-mongo', () => ({ default: { create: vi.fn() } }))
 vi.mock('body-parser', () => ({ default: { urlencoded: vi.fn(() => 'body parser middleware') } }))
 
 vi.mock('grant', () => ({ default: { default: { express: vi.fn(() => 'grant middleware') } } }))
+
+const user = { dn: 'user-dn' } as UserInterface
 
 describe('connectors > authentication > oauth', () => {
   test('authenticationMiddleware > returns expected middleware', async () => {
@@ -43,7 +50,7 @@ describe('connectors > authentication > oauth', () => {
     await connector.getUser(request, {} as Response, next)
 
     expect(request.user).toEqual({ dn: email })
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
 
   test('getUser > user does not get set if no jwt', async () => {
@@ -57,7 +64,7 @@ describe('connectors > authentication > oauth', () => {
     await connector.getUser(request, {} as Response, next)
 
     expect(request.user).toBeUndefined()
-    expect(next).toBeCalled()
+    expect(next).toHaveBeenCalled()
   })
 
   test('getRoutes > returns expected routes', async () => {
@@ -81,7 +88,7 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('group:name')
 
-    await expect(response).rejects.toThrowError('Cannot get user information for a non-user entity: group:name')
+    await expect(response).rejects.toThrow('Cannot get user information for a non-user entity: group:name')
   })
 
   test('getUserInformation > returns user information', async () => {
@@ -92,7 +99,7 @@ describe('connectors > authentication > oauth', () => {
     const userInfo = await connector.getUserInformation('user:name')
 
     expect(userInfo).toStrictEqual(user)
-    expect(mockCognitoClient.listUsers).toBeCalledWith('name', true)
+    expect(mockCognitoClient.listUsers).toHaveBeenCalledWith('name', true)
   })
 
   test('getUserInformation > throws error if more than one user is found', async () => {
@@ -102,7 +109,7 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('user:name')
 
-    await expect(response).rejects.toThrowError('Cannot get user information. Found more than one user.')
+    await expect(response).rejects.toThrow('Cannot get user information. Found more than one user.')
   })
 
   test('getUserInformation > throws error no user is found', async () => {
@@ -111,14 +118,14 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('user:name')
 
-    await expect(response).rejects.toThrowError('Cannot get user information. User not found.')
+    await expect(response).rejects.toThrow('Cannot get user information. User not found.')
   })
 
   test('getEntityMembers > throws error if not a user', async () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getEntityMembers('unknown:name')
 
-    await expect(response).rejects.toThrowError('Unable to get members, entity kind not recognised')
+    await expect(response).rejects.toThrow('Unable to get members, entity kind not recognised')
   })
 
   test('getEntityMembers > returns entity', async () => {
@@ -126,5 +133,77 @@ describe('connectors > authentication > oauth', () => {
     const entity = await connector.getEntityMembers('user:name')
 
     expect(entity).toStrictEqual(['user:name'])
+  })
+
+  test('hasRole > returns true if user is in the admin group', async () => {
+    const connector = new OauthAuthenticationConnector()
+    const getEntityMembersSpy = vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([user.dn])
+
+    const result = await connector.hasRole(user, Roles.Admin)
+
+    expect(result).toBe(true)
+    expect(getEntityMembersSpy).toHaveBeenCalledWith(toEntity('group', config.oauth.cognito.adminGroupName))
+  })
+
+  test('hasRole > returns false if user is not in the admin group', async () => {
+    const connector = new OauthAuthenticationConnector()
+    vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce(['someone-else'])
+
+    const result = await connector.hasRole(user, Roles.Admin)
+
+    expect(result).toBe(false)
+  })
+
+  test('hasRole > returns true if user is in the compliance group', async () => {
+    const connector = new OauthAuthenticationConnector()
+    const getEntityMembersSpy = vi
+      .spyOn(connector, 'getEntityMembers')
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([user.dn])
+
+    const result = await connector.hasRole(user, Roles.Compliance)
+
+    expect(result).toBe(true)
+    expect(getEntityMembersSpy).toHaveBeenCalledWith(toEntity('group', config.oauth.cognito.complianceGroupName))
+  })
+
+  test('hasRole > returns false if user is not in the compliance group', async () => {
+    const connector = new OauthAuthenticationConnector()
+    vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([]).mockResolvedValueOnce([])
+
+    const result = await connector.hasRole(user, Roles.Compliance)
+
+    expect(result).toBe(false)
+  })
+
+  test('hasRole > admin access grants untrusted model role', async () => {
+    const connector = new OauthAuthenticationConnector()
+    const getEntityMembersSpy = vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([user.dn])
+
+    const result = await connector.hasRole(user, Roles.UntrustedModel)
+
+    expect(result).toBe(true)
+    expect(getEntityMembersSpy).toHaveBeenCalledTimes(1)
+    expect(getEntityMembersSpy).toHaveBeenCalledWith(toEntity('group', config.oauth.cognito.adminGroupName))
+  })
+
+  test('hasRole > returns false if user is neither in the untrusted model group nor an admin', async () => {
+    const connector = new OauthAuthenticationConnector()
+    vi.spyOn(connector, 'getEntityMembers').mockResolvedValue([])
+
+    const result = await connector.hasRole(user, Roles.UntrustedModel)
+
+    expect(result).toBe(false)
+  })
+
+  test('hasRole > returns false for an unrecognised role', async () => {
+    const connector = new OauthAuthenticationConnector()
+    const getEntityMembersSpy = vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([])
+
+    const result = await connector.hasRole(user, 'SomeUnknownRole' as RoleKeys)
+
+    expect(result).toBe(false)
+    expect(getEntityMembersSpy).toHaveBeenCalledTimes(1)
+    expect(getEntityMembersSpy).toHaveBeenCalledWith(toEntity('group', config.oauth.cognito.adminGroupName))
   })
 })

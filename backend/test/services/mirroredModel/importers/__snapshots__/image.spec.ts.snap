@@ -10,6 +10,7 @@ ImageImporter {
     "importerType": "ImageImporter",
   },
   "manifestBody": null,
+  "manifestsToUpload": Map {},
   "metadata": {
     "distributionPackageName": "domain/imageName:tag",
     "importKind": "image",
@@ -46,6 +47,7 @@ ImageImporter {
     "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
     "schemaVersion": 2,
   },
+  "manifestsToUpload": Map {},
   "metadata": {
     "distributionPackageName": "domain/imageName:tag",
     "importKind": "image",

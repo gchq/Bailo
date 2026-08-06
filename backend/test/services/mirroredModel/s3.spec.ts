@@ -127,7 +127,7 @@ describe('services > mirroredModel > s3', () => {
 
     await uploadToS3('', {} as unknown as Readable, {} as any)
 
-    expect(logMock.error).toBeCalledWith(expect.objectContaining({}), 'Error generating signature for export.')
+    expect(logMock.error).toHaveBeenCalledWith(expect.objectContaining({}), 'Error generating signature for export.')
     expect(s3Mocks.getObjectStream).toHaveBeenCalled()
   })
 
@@ -198,7 +198,7 @@ describe('services > mirroredModel > s3', () => {
 
     const promise = getObjectFromExportS3Location('', {} as any)
 
-    await expect(promise).rejects.toThrowError('Error')
+    await expect(promise).rejects.toThrow('Error')
     expect(logMock.error).toHaveBeenCalled()
   })
 })

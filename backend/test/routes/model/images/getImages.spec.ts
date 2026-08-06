@@ -24,7 +24,7 @@ describe('routes > images > getImages', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/images`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewModelImages).toBeCalled()
+    expect(audit.onViewModelImages).toHaveBeenCalled()
     expect(audit.onViewModelImages.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onViewModelImages.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

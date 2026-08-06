@@ -15,6 +15,7 @@ import { getErrorMessage } from 'utils/fetcher'
 type ReviewCommentDisplayProps = {
   response: ResponseInterface
   onReplyButtonClick: (value: string) => void
+  showReplyButton?: boolean
   currentUser: User | undefined
   mutateResponses: () => void
 }
@@ -22,6 +23,7 @@ type ReviewCommentDisplayProps = {
 export default function ReviewCommentDisplay({
   response,
   onReplyButtonClick,
+  showReplyButton = true,
   currentUser,
   mutateResponses,
 }: ReviewCommentDisplayProps) {
@@ -82,7 +84,13 @@ export default function ReviewCommentDisplay({
 
   return (
     <>
-      <Stack direction='row' spacing={2} alignItems='flex-start'>
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
         <Box sx={{ pt: 2, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
@@ -92,13 +100,33 @@ export default function ReviewCommentDisplay({
             p: 1,
           }}
         >
-          <Stack direction='row' spacing={1} alignItems='center' sx={{ width: '100%' }} justifyContent='space-between'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
+          >
             <Stack direction='row' spacing={1}>
               <UserDisplay dn={username} />
               <span>{' has left a comment'}</span>
             </Stack>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {formatDateString(response.createdAt)}
+              </Typography>
               <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
                 <MoreHorizIcon />
               </IconButton>
@@ -119,7 +147,7 @@ export default function ReviewCommentDisplay({
         </Box>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
+        {showReplyButton && <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>}
         {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit</MenuItem>}
       </Menu>
     </>

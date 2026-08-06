@@ -4,19 +4,28 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { ReviewListStatusKeys } from 'types/types'
+import { ReviewKind, ReviewListStatusKeys } from 'types/types'
 
 type ReviewsListProps = {
-  kind: 'release' | 'access'
+  kind: 'release' | 'access' | 'lifecycle'
   status: ReviewListStatusKeys
 }
 
 export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(status === 'open')
 
-  const ReviewListItem = memoize(({ data }) => (
-    <ReviewItem review={data} key={`${data.model.id}-${data.semver || data.accessRequestId}-${data.role}`} />
-  ))
+  const ReviewListItem = memoize(({ data }) => <ReviewItem review={data} key={`${data._id}`} status={status} />)
+
+  const determineSearchFilterProperty = () => {
+    switch (kind) {
+      case ReviewKind.RELEASE:
+        return 'semver'
+      case ReviewKind.ACCESS:
+        return 'accessRequestId'
+      case ReviewKind.LIFECYCLE:
+        return 'dueDate'
+    }
+  }
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -35,8 +44,8 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
           { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
         ]}
         defaultSortProperty='createdAt'
-        searchFilterProperty={kind === 'release' ? 'semver' : 'accessRequestId'}
-        searchPlaceholderText={`Search for ${kind === 'release' ? 'semver' : 'access request name'}`}
+        searchFilterProperty={determineSearchFilterProperty()}
+        searchPlaceholderText={'Search'}
       >
         {ReviewListItem}
       </Paginate>

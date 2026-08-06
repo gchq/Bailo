@@ -77,6 +77,17 @@ export interface UiConfig {
     contributor: string
     consumer: string
   }
+
+  untrustedModel: {
+    enabled: boolean
+    untrustedModelLongDescription: string
+    untrustedModelShortDescription: string
+    fileUploadGuidance: string
+  }
+
+  llmImport: {
+    enabled: boolean
+  }
 }
 
 export interface FileInterface {
@@ -104,9 +115,10 @@ export type FileWithScanResultsInterface = FileInterface & { scanResults: ScanRe
 
 export interface ScanResultInterface {
   _id: string
-  state: ScanStateKeys
+  state: ArtefactScanStateKeys
   scannerVersion?: string
-  summary?: Array<ModelScanSummary | ClamAVScanSummary>
+  summary?: ScanSummary
+  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
   platform?: string
   toolName: string
   lastRunAt: string
@@ -114,9 +126,6 @@ export interface ScanResultInterface {
   createdAt: Date
   updatedAt: Date
 }
-
-export type ModelScanSummary = { severity: SeverityLevelKeys; vulnerabilityDescription: string }
-export type ClamAVScanSummary = { virus: string }
 
 export const SeverityLevel = {
   UNKNOWN: 'unknown',
@@ -127,13 +136,14 @@ export const SeverityLevel = {
 } as const
 export type SeverityLevelKeys = (typeof SeverityLevel)[keyof typeof SeverityLevel]
 
-export const ScanState = {
+export const ArtefactScanState = {
   NotScanned: 'notScanned',
   InProgress: 'inProgress',
   Complete: 'complete',
+  Skipped: 'skipped',
   Error: 'error',
 } as const
-export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type AvScanResult = ScanResultInterface &
   (
@@ -298,6 +308,11 @@ export interface User {
   isAdmin: boolean
 }
 
+export interface UserV3 {
+  dn: string
+  systemRoles: string[]
+}
+
 export interface EntityObject {
   kind: string
   id: string
@@ -394,6 +409,8 @@ export interface StepNoRender {
 
   state: any
   mirroredState?: any
+  compareFromState?: any
+  compareFromMirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>
@@ -416,7 +433,8 @@ export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVis
 export const EntryCardKindLabel = {
   model: 'model card',
   'data-card': 'data card',
-  'mirrored-model': 'mirrored model',
+  'mirrored-model': 'model card',
+  'untrusted-model': 'model card',
 } as const
 export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
 
@@ -424,6 +442,7 @@ export const EntryCardKind = {
   model: 'model-card',
   'data-card': 'data-card',
   'mirrored-model': 'mirrored-model',
+  'untrusted-model': 'untrusted-model',
 } as const
 export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
 
@@ -431,6 +450,7 @@ export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  createdAt: string
   mirrored: boolean
   metadata: unknown
 }
@@ -444,6 +464,7 @@ export const EntryKindLabel = {
   model: 'model',
   'data-card': 'data card',
   'mirrored-model': 'mirrored model',
+  'untrusted-model': 'untrusted model',
 } as const
 export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
@@ -451,8 +472,12 @@ export const EntryKind = {
   MODEL: 'model',
   DATA_CARD: 'data-card',
   MIRRORED_MODEL: 'mirrored-model',
+  UNTRUSTED_MODEL: 'untrusted-model',
+  MIRRORED_DATA_CARD: 'mirrored-data-card',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
+export const MODEL_ENTRY_KINDS = [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD || value === EntryKind.MIRRORED_MODEL)
@@ -550,30 +575,68 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-type PartialReviewRequestInterface =
-  | {
+export type ReviewInterface =
+  | ({
+      kind: 'access'
+      dueDate?: undefined
+      semver?: undefined
       accessRequestId: string
-      semver?: never
-    }
-  | {
-      accessRequestId?: never
+    } & PartialReviewInterface)
+  | ({
+      kind: 'release'
+      dueDate?: undefined
       semver: string
-    }
+      accessRequestId?: undefined
+    } & PartialReviewInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: undefined
+      accessRequestId?: undefined
+    } & PartialReviewInterface)
+
+type PartialReviewInterface = {
+  _id: string
+  modelId: string
+  role: string
+  createdAt: string
+  updatedAt: string
+}
 
 export const ReviewKind = {
   ACCESS: 'access',
   RELEASE: 'release',
+  LIFECYCLE: 'lifecycle',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
-export type ReviewRequestInterface = {
+export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
-  kind: 'release' | 'access'
   createdAt: string
   updatedAt: string
-} & PartialReviewRequestInterface
+}
+
+export type ReviewRequestInterface =
+  | ({
+      kind: 'access'
+      dueDate?: never
+      semver?: never
+      accessRequestId: string
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'release'
+      dueDate?: never
+      semver: string
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'lifecycle'
+      dueDate: Date
+      semver?: never
+      accessRequestId?: never
+    } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {
   modelId: string
@@ -742,41 +805,23 @@ export interface ModelFormStats extends FormStats {
 
 export type SeverityCounts = Record<SeverityLevelKeys, number>
 
-export type ScanInterface = {
-  toolName: string
-  scannerVersion?: string
-  state: ArtefactScanStateKeys
-  summary?: ScanSummary
-  additionalInfo?: TrivyScanResultResponse | ModelScanResponse
-
-  lastRunAt: string
-
-  createdAt: string
-  updatedAt: string
-} & (
-  | {
-      artefactKind: typeof ArtefactKind.FILE
-      fileId: string
-    }
-  | {
-      artefactKind: typeof ArtefactKind.IMAGE
-      layerDigest: string
-    }
-)
+export type ScanInterface = ScanResultInterface &
+  (
+    | {
+        artefactKind: typeof ArtefactKind.FILE
+        fileId: string
+      }
+    | {
+        artefactKind: typeof ArtefactKind.IMAGE
+        layerDigest: string
+      }
+  )
 
 export type ScanInfoInterface = {
   toolName: string
   scannerVersion: string
   artefactKind: ArtefactKindKeys
 }
-
-export const ArtefactScanState = {
-  NotScanned: 'notScanned',
-  InProgress: 'inProgress',
-  Complete: 'complete',
-  Error: 'error',
-} as const
-export type ArtefactScanStateKeys = (typeof ArtefactScanState)[keyof typeof ArtefactScanState]
 
 export type ModelScanResponse = {
   summary: {
@@ -825,9 +870,9 @@ export type ModelScanResponse = {
   }
 }
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ModelScanSummary | ClamAVSummary | string)[]
 
-export type ArtefactScanSummary = {
+export type ModelScanSummary = {
   severity: SeverityLevelKeys
   vulnerabilityDescription: string
 }
@@ -921,3 +966,148 @@ export type ImageScanResults = {
 }
 
 export type ModelImagesWithScanResults = ModelImageTags & ImageScanResults
+
+export type ModelVolumeData = {
+  startDate: string
+  endDate: string
+  count: number
+  organisations: Record<string, number>
+}
+
+export type ModelVolume = {
+  data: ModelVolumeData[]
+  bucket: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  startDate: string
+  endDate: string
+}
+
+export interface SchemaBreakDownMetrics {
+  schemaId: string
+  schemaName: string
+  count: number
+}
+
+export interface ModelStateMetrics {
+  state: string
+  count: number
+}
+
+export interface OverviewBaseMetrics {
+  users: number
+  entries: number
+  schemaBreakdown: SchemaBreakDownMetrics[]
+  entryState: ModelStateMetrics[]
+  withReleases: number
+  withAccessRequest: number
+}
+
+export interface OrganisationOverviewMetrics extends OverviewBaseMetrics {
+  organisation: string
+}
+
+export interface OverviewMetrics {
+  global: OverviewBaseMetrics
+  byOrganisation: OrganisationOverviewMetrics[]
+  lastUpdated: string
+}
+
+export interface PolicyRoleSummaryMetrics {
+  roleId: string
+  roleName: string
+  count: number
+}
+
+export interface PolicyRoleMetric {
+  roleId: string
+  roleName: string
+}
+
+export interface PolicyModelRoleMetrics {
+  entryId: string
+  missingRoles: PolicyRoleMetric[]
+  modelOwners: string[]
+}
+
+export interface PolicyRoleBaseMetrics {
+  summary: PolicyRoleSummaryMetrics[]
+  entries: PolicyModelRoleMetrics[]
+}
+
+export interface OrganisationPolicyMetrics extends PolicyRoleBaseMetrics {
+  organisation: string
+}
+
+export interface PolicyRoleMetrics {
+  global: PolicyRoleBaseMetrics
+  byOrganisation: OrganisationPolicyMetrics[]
+  lastUpdated: string
+}
+
+export interface ModelBreakdown {
+  entryId: string
+  entryName: string
+  entryKind: EntryKindKeys
+  modelOwners: string[]
+}
+
+export const Roles = {
+  Admin: 'admin',
+  Compliance: 'compliance',
+  UntrustedModel: 'untrusted-model',
+} as const
+export type RoleKeys = (typeof Roles)[keyof typeof Roles]
+
+export interface NoReleasesSummaryMetrics {
+  modelsWithNoReleases: number
+}
+
+export interface ModelsNoReleases {
+  entryId: string
+  organisation: string
+  modelOwners: string[]
+}
+
+export interface GlobalNoReleasesMetrics {
+  summary: NoReleasesSummaryMetrics
+  entries: ModelsNoReleases[]
+}
+
+export interface NoReleaseMetricsByOrg {
+  organisation: string
+  summary: NoReleasesSummaryMetrics
+  entries: ModelsNoReleases[]
+}
+
+export interface BaseNoReleaseMetrics {
+  global: GlobalNoReleasesMetrics
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface UnapprovedReleasesSummaryMetrics {
+  totalModelsWithUnapprovedReleases: number
+  totalUnapprovedReleases: number
+}
+
+export interface ModelsUnapprovedReleases {
+  entryId: string
+  modelOwners: string[]
+  unapprovedReleases: string[]
+}
+
+export interface GlobalUnapprovedReleasesMetrics {
+  summary: UnapprovedReleasesSummaryMetrics
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface UnapprovedReleaseMetricsByOrg {
+  organisation: string
+  modelsWithUnapprovedReleases: number
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface BaseUnapprovedReleaseMetrics {
+  global: GlobalUnapprovedReleasesMetrics
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}

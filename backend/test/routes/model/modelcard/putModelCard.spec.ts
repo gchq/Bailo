@@ -42,7 +42,7 @@ describe('routes > model > putModelCard', () => {
     )
     const res = await testPut(`/api/v2/model/${fixture.params.modelId}/model-cards`, fixture)
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateModelCard).toBeCalled()
+    expect(audit.onUpdateModelCard).toHaveBeenCalled()
     expect(audit.onUpdateModelCard.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onUpdateModelCard.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

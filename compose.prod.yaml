@@ -2,7 +2,7 @@ name: bailo-prod
 
 services:
   clamd:
-    image: clamav/clamav:1.4.3_base
+    image: clamav/clamav:1.4.3_base@sha256:629a3050df6a706aedb31859fbb8139e9aaf8f56b0ffefbf251b8358a7c9e76c
     networks:
       internal:
     healthcheck:
@@ -22,7 +22,7 @@ services:
     volumes:
       - ./backend/certs:/certs:ro
     healthcheck:
-      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3311/info')"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,13 +34,13 @@ services:
     ports:
       - 1080:1080
       - 1025:1025
-    image: marlonb/mailcrab:v1.6.5
+    image: marlonb/mailcrab:v1.8.0@sha256:8d19e5c1ffe1750993da7bd63724331ccc0bd226159cc4dfa89156209fe34b4a
 
   webhook-tester:
     networks:
       default:
       internal:
-    image: tarampampam/webhook-tester:2.3.0
+    image: tarampampam/webhook-tester:2.3.0@sha256:85818267b450d3d386cad6510c561e09b974183ed2832c373bc83b125fc1b221
     command: serve --auto-create-sessions
     ports:
       - 8082:8080
@@ -50,8 +50,6 @@ services:
       clamd:
         condition: service_healthy
       registry:
-        condition: service_started
-      minio:
         condition: service_started
       mongo:
         condition: service_started

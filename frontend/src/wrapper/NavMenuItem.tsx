@@ -1,7 +1,9 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement } from 'react'
+import { ReactElement, useContext } from 'react'
+import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
+import { RoleKeys } from 'types/types'
 
 interface NavMenuItemProps {
   menuPage: string
@@ -13,6 +15,7 @@ interface NavMenuItemProps {
   title: string
   badgeCount?: number
   openLinkInNewTab?: boolean
+  requiredRole?: RoleKeys
 }
 export function NavMenuItem({
   menuPage,
@@ -24,13 +27,18 @@ export function NavMenuItem({
   title,
   badgeCount = 0,
   openLinkInNewTab = false,
+  requiredRole,
 }: NavMenuItemProps) {
+  const currentUser = useContext(CurrentUserContext)
   const theme = useTheme()
+  if (requiredRole && !currentUser.systemRoles.includes(requiredRole)) {
+    return
+  }
   return (
     <ListItem disablePadding>
-      <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%' }}>
+      <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%', textDecoration: 'none' }}>
         <ListItemButton selected={selectedPage === menuPage}>
-          <ListItemIcon>
+          <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
                 <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>

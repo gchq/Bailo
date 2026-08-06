@@ -1,4 +1,4 @@
-import { ExpandMore } from '@mui/icons-material'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -98,17 +98,22 @@ export default function ChipSelector({
               alignItems: 'center',
             }}
           >
-            <Typography component='h2' variant='h6'>
+            <Typography component='h2' variant='h6' sx={{ px: 1 }}>
               {`${label}`}
             </Typography>
             <Typography variant='caption'>{subheading ? subheading : ''}</Typography>
           </Stack>
         </AccordionSummary>
-        <AccordionDetails sx={{ p: 0 }}>
+        <AccordionDetails sx={{ p: 0, pb: 1 }}>
           <>
             {!expanded && allOptions.slice(0, expandThreshold)}
             {allOptions.length === 0 && (
-              <Typography color='text.secondary' textAlign='center'>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                  textAlign: 'center',
+                }}
+              >
                 No items available
               </Typography>
             )}
@@ -125,7 +130,15 @@ export default function ChipSelector({
   return (
     <>
       {label && (
-        <Typography component='h2' variant='h6' alignContent='center' sx={{ height: '56px' }}>{`${label}`}</Typography>
+        <Typography
+          component='h2'
+          variant='h6'
+          sx={{
+            alignContent: 'center',
+            height: '56px',
+            px: 1,
+          }}
+        >{`${label}`}</Typography>
       )}
       {!expanded && allOptions.slice(0, expandThreshold)}
       {expanded && allOptions}
@@ -168,7 +181,7 @@ function ChipItem({
           color={activeChip ? 'secondary' : 'default'}
           size={size}
           key={chip}
-          sx={{ mx: 0.5, mb: 1, ...style }}
+          sx={{ mx: 0.5, my: 0.5, ...style }}
           label={chip}
           data-test={`chipOption-${chip}`}
           onClick={() => handleChange(chip)}

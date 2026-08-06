@@ -1,0 +1,37 @@
+name: Docs style check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'frontend/pages/docs/**/*.mdx'
+              - 'frontend/scripts/check-docs-style.sh'
+              - '.github/workflows/docs-style.yml'
+
+  docs_style_check:
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check docs style guide compliance
+        run: bash frontend/scripts/check-docs-style.sh

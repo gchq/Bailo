@@ -130,7 +130,10 @@ const DockerImageManifestV2Schema = z.object({
   schemaVersion: z.literal(2),
   mediaType: z.literal(DockerManifestMediaType),
   config: BaseDescriptorSchema,
-  layers: z.array(DockerDescriptorSchema),
+  layers: z
+    .array(DockerDescriptorSchema)
+    .nullish()
+    .transform((layers) => layers ?? []),
 })
 
 // helper for conditional setting
@@ -139,7 +142,10 @@ const OCIImageBaseManifestV2Schema = z.object({
   mediaType: z.literal(OCIManifestMediaType).optional(),
   artifactType: z.string().optional(),
   config: OCIDescriptorSchema,
-  layers: z.array(OCIDescriptorSchema),
+  layers: z
+    .array(OCIDescriptorSchema)
+    .nullish()
+    .transform((layers) => layers ?? []),
   subject: OCIDescriptorSchema.optional(),
   annotations: OCIAnnotationsSchema.optional(),
 })
@@ -180,8 +186,13 @@ export const ManifestListV2Schema = z.object({
 })
 export type ManifestListV2 = z.infer<typeof ManifestListV2Schema>
 
-// TODO: handle multi-platform images
 export const ManifestResponseBodySchema = z.union([ImageManifestV2Schema, ManifestListV2Schema])
+export function isManifestList(manifest: ImageManifestV2 | ManifestListV2): manifest is ManifestListV2 {
+  if ('mediaType' in manifest && ManifestListMediaTypeSchema.safeParse(manifest.mediaType).success) {
+    return true
+  }
+  return 'manifests' in manifest
+}
 
 export const ManifestResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
   'docker-content-digest': HeaderValueSchema,

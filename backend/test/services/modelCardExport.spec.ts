@@ -6,13 +6,13 @@ import { getModelById } from '../../src/services/model.js'
 import { renderToHtml, renderToMarkdown, ReviewExport } from '../../src/services/modelCardExport.js'
 import { getSchemaById } from '../../src/services/schema.js'
 
-vi.mock('../../src/services/model.js')
 vi.mock('../../src/services/schema.js')
 
-const reviewServiceMock = vi.hoisted(() => ({
-  getRoleEntities: vi.fn(() => [{ role: 'msro', entities: ['user:user'] }]),
+const modelServiceMocks = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+  getRoleEntities: vi.fn((roles, _collaborators) => ({ [roles[0]]: ['user:user'] })),
 }))
-vi.mock('../../src/services/review.js', async () => reviewServiceMock)
+vi.mock('../../src/services/model.js', () => modelServiceMocks)
 
 describe('services > export', () => {
   const mockModelId = 'model123'

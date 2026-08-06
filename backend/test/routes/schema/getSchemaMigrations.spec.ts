@@ -27,7 +27,7 @@ describe('routes > schema > getSchemaMigrations', () => {
     const res = await testGet('/api/v2/schema-migrations')
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewSchemaMigrations).toBeCalled()
+    expect(audit.onViewSchemaMigrations).toHaveBeenCalled()
     expect(audit.onViewSchemaMigrations.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

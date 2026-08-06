@@ -10,6 +10,7 @@ import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
+import { MetricsKindKeys } from '../connectors/metrics/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
@@ -55,6 +56,11 @@ export interface Config {
       retryDelayInMinutes: number
       maxInitRetries: number
       initRetryDelay: number
+      scanTimeoutMs: number
+    }
+
+    metrics: {
+      kind: MetricsKindKeys
     }
   }
 
@@ -80,6 +86,11 @@ export interface Config {
       tls: {
         rejectUnauthorized: boolean
       }
+    }
+
+    lifecycle: {
+      preReminderIntervals: string[]
+      postReminderInterval: string
     }
 
     from: string
@@ -151,6 +162,8 @@ export interface Config {
       userPoolId: string
       userIdAttribute: string
       adminGroupName: string
+      complianceGroupName: string
+      untrustedModelGroupName: string
     }
   }
 
@@ -186,6 +199,7 @@ export interface Config {
   artefactScanning: {
     clamdscan: {
       concurrency: number
+      streamMaxLength: string
       host: string
       port: number
     }
@@ -221,6 +235,16 @@ export interface Config {
 
   inference: {
     authorisationToken: string
+  }
+
+  llm: {
+    endpoint: string
+    apiKey: string
+    model: string
+    maxTokens: number
+    timeoutMs: number
+    temperature: number
+    systemPrompt: string
   }
 }
 

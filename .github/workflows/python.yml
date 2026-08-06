@@ -6,23 +6,43 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Restrict PR execution to files that affect this workflow to reduce CI runtime and GitHub Actions consumption
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'lib/python/**'
+              - '.github/workflows/python.yml'
+
   python_static_checks:
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     outputs:
       black: ${{ steps.black.outputs.status }}
       pylint: ${{ steps.pylint.outputs.status }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
 
       - name: Cache pip dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-static-${{ hashFiles('lib/python/pyproject.toml') }}-python3.14
@@ -51,22 +71,23 @@ jobs:
 
 
   python_test:
-    needs: python_static_checks
+    needs: [changes, python_static_checks]
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache pip dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-test-${{ matrix.python-version }}-${{ hashFiles('lib/python/pyproject.toml') }}
@@ -86,3 +107,14 @@ jobs:
           python -m pytest
         env:
           PYTEST_RUN_PATH: "lib/python"
+
+  # Gate job for branch protection: always runs so the required check is never left pending when the matrix is skipped
+  python_test_result:
+    if: always()
+    needs: [changes, python_test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        if: >-
+          needs.python_test.result == 'failure'
+          || (needs.changes.outputs.relevant == 'true' && needs.python_test.result != 'success')

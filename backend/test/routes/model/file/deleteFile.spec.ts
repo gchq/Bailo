@@ -6,12 +6,12 @@ import { createFixture, testDelete } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
+vi.mock('../../../../src/services/file.js', () => ({
+  removeFile: vi.fn(() => ({ message: 'Successfully removed release.' })),
+}))
+
 describe('routes > file > deleteFile', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../../src/services/file.js', () => ({
-      removeFile: vi.fn(() => ({ message: 'Successfully removed release.' })),
-    }))
-
     const fixture = createFixture(deleteFileSchema)
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/file/${fixture.params.fileId}`)
 
@@ -20,15 +20,11 @@ describe('routes > file > deleteFile', () => {
   })
 
   test('audit > expected call', async () => {
-    vi.mock('../../../../src/services/file.js', () => ({
-      removeFile: vi.fn(() => ({ message: 'Successfully removed release.' })),
-    }))
-
     const fixture = createFixture(deleteFileSchema)
     const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/file/${fixture.params.fileId}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onDeleteFile).toBeCalled()
+    expect(audit.onDeleteFile).toHaveBeenCalled()
     expect(audit.onDeleteFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
     expect(audit.onDeleteFile.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })

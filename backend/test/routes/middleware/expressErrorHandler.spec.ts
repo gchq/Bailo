@@ -30,8 +30,8 @@ describe('middleware > expressErrorHandler', () => {
     const res: any = { status: vi.fn(() => ({ json })) }
     await expressErrorHandler(error, req, res, vi.fn() as any)
 
-    expect(res.status).toBeCalledWith(error.code)
-    expect(json).toBeCalled()
+    expect(res.status).toHaveBeenCalledWith(error.code)
+    expect(json).toHaveBeenCalled()
     expect(json.mock.calls.at(-1)).toMatchSnapshot()
   })
 
@@ -43,7 +43,7 @@ describe('middleware > expressErrorHandler', () => {
     const res: any = { status: vi.fn(() => ({ json })) }
     await expressErrorHandler(error, req, res, vi.fn() as any)
 
-    expect(audit.onError).toBeCalled()
+    expect(audit.onError).toHaveBeenCalled()
     expect(audit.onError.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

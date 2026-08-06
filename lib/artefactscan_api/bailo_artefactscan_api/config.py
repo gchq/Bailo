@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from ssl import SSLContext
 from typing import Any
 
-from httpx._types import CertTypes
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -25,7 +23,7 @@ class Settings(BaseSettings):
         "\n"
         "Clients can upload files or image layers and retrieve structured scan results via a REST interface."
     )
-    app_version: str = "4.0.2"
+    app_version: str = "4.1.0"
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB

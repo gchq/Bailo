@@ -46,8 +46,6 @@ describe('connectors > authentication', () => {
     const invalidConnector = 'invalid'
     configMock.connectors.authentication.kind = invalidConnector
 
-    expect(() => getAuthenticationConnector(false)).toThrowError(
-      `'${invalidConnector}' is not a valid authentication kind.`,
-    )
+    expect(() => getAuthenticationConnector(false)).toThrow(`'${invalidConnector}' is not a valid authentication kind.`)
   })
 })

@@ -88,11 +88,11 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     }
 
     // Only supports searching for models, not data cards etc.
-    if (opts.kind && opts.kind != 'model') {
+    if (opts.kind && opts.kind.length === 1 && !opts.kind.includes('model')) {
       return {
         models: [],
         errors: {
-          [this.getId()]: NotImplemented(`HuggingFace does not support ${opts.kind}`, {
+          [this.getId()]: NotImplemented(`HuggingFace does not support ${opts.kind.join(', ')}`, {
             query: opts.search,
             kind: opts.kind,
           }),

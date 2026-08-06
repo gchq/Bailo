@@ -11,7 +11,7 @@
  *    For Releases with Images, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the number of Images per Release;
  *    For Releases with Images, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the total (summed) `size` of all Images in the Release;
  */
-import prettyBytes from 'pretty-bytes'
+import bytes from 'bytes'
 
 import FileModel from '../models/File.js'
 import ModelModel, { EntryKind } from '../models/Model.js'
@@ -78,18 +78,18 @@ async function script() {
   if (fileSizesArray.length > 0) {
     const fileZ = calculateAverages(fileSizesArray)
     const fileStats = {
-      min: prettyBytes(Math.min(...fileSizesArray)),
-      max: prettyBytes(Math.max(...fileSizesArray)),
-      p5: prettyBytes(percentile(fileSizesArray, 5)),
-      p10: prettyBytes(percentile(fileSizesArray, 10)),
-      p25: prettyBytes(percentile(fileSizesArray, 25)),
-      p75: prettyBytes(percentile(fileSizesArray, 75)),
-      p90: prettyBytes(percentile(fileSizesArray, 90)),
-      p95: prettyBytes(percentile(fileSizesArray, 95)),
-      mean: prettyBytes(fileZ.mean),
-      median: prettyBytes(percentile(fileSizesArray, 50)),
-      stdDev: prettyBytes(fileZ.stdDev),
-      variance: `${prettyBytes(fileZ.variance)}^2`,
+      min: bytes.format(Math.min(...fileSizesArray)),
+      max: bytes.format(Math.max(...fileSizesArray)),
+      p5: bytes.format(percentile(fileSizesArray, 5)),
+      p10: bytes.format(percentile(fileSizesArray, 10)),
+      p25: bytes.format(percentile(fileSizesArray, 25)),
+      p75: bytes.format(percentile(fileSizesArray, 75)),
+      p90: bytes.format(percentile(fileSizesArray, 90)),
+      p95: bytes.format(percentile(fileSizesArray, 95)),
+      mean: bytes.format(fileZ.mean),
+      median: bytes.format(percentile(fileSizesArray, 50)),
+      stdDev: bytes.format(fileZ.stdDev),
+      variance: `${bytes.format(fileZ.variance)}^2`,
     }
     log.info(fileStats, 'File size stats')
   } else {
@@ -140,18 +140,18 @@ async function script() {
     const totalSizesArray = releaseFileSizesAgg.map((r) => r.totalSize || 0)
     const totalSizeZ = calculateAverages(totalSizesArray)
     const totalSizeStats = {
-      min: prettyBytes(Math.min(...totalSizesArray)),
-      max: prettyBytes(Math.max(...totalSizesArray)),
-      p5: prettyBytes(percentile(totalSizesArray, 5)),
-      p10: prettyBytes(percentile(totalSizesArray, 10)),
-      p25: prettyBytes(percentile(totalSizesArray, 25)),
-      p75: prettyBytes(percentile(totalSizesArray, 75)),
-      p90: prettyBytes(percentile(totalSizesArray, 90)),
-      p95: prettyBytes(percentile(totalSizesArray, 95)),
-      mean: prettyBytes(totalSizeZ.mean),
-      median: prettyBytes(percentile(totalSizesArray, 50)),
-      stdDev: prettyBytes(totalSizeZ.stdDev),
-      variance: `${prettyBytes(totalSizeZ.variance)}^2`,
+      min: bytes.format(Math.min(...totalSizesArray)),
+      max: bytes.format(Math.max(...totalSizesArray)),
+      p5: bytes.format(percentile(totalSizesArray, 5)),
+      p10: bytes.format(percentile(totalSizesArray, 10)),
+      p25: bytes.format(percentile(totalSizesArray, 25)),
+      p75: bytes.format(percentile(totalSizesArray, 75)),
+      p90: bytes.format(percentile(totalSizesArray, 90)),
+      p95: bytes.format(percentile(totalSizesArray, 95)),
+      mean: bytes.format(totalSizeZ.mean),
+      median: bytes.format(percentile(totalSizesArray, 50)),
+      stdDev: bytes.format(totalSizeZ.stdDev),
+      variance: `${bytes.format(totalSizeZ.variance)}^2`,
     }
     log.info(totalSizeStats, 'Total file size per release stats')
   }
@@ -251,18 +251,18 @@ async function script() {
   if (imageSizesArray.length > 0) {
     const imgZ = calculateAverages(imageSizesArray)
     const imageStats = {
-      min: prettyBytes(Math.min(...imageSizesArray)),
-      max: prettyBytes(Math.max(...imageSizesArray)),
-      p5: prettyBytes(percentile(imageSizesArray, 5)),
-      p10: prettyBytes(percentile(imageSizesArray, 10)),
-      p25: prettyBytes(percentile(imageSizesArray, 25)),
-      p75: prettyBytes(percentile(imageSizesArray, 75)),
-      p90: prettyBytes(percentile(imageSizesArray, 90)),
-      p95: prettyBytes(percentile(imageSizesArray, 95)),
-      mean: prettyBytes(imgZ.mean),
-      median: prettyBytes(percentile(imageSizesArray, 50, false)),
-      stdDev: prettyBytes(imgZ.stdDev),
-      variance: `${prettyBytes(imgZ.variance)}^2`,
+      min: bytes.format(Math.min(...imageSizesArray)),
+      max: bytes.format(Math.max(...imageSizesArray)),
+      p5: bytes.format(percentile(imageSizesArray, 5)),
+      p10: bytes.format(percentile(imageSizesArray, 10)),
+      p25: bytes.format(percentile(imageSizesArray, 25)),
+      p75: bytes.format(percentile(imageSizesArray, 75)),
+      p90: bytes.format(percentile(imageSizesArray, 90)),
+      p95: bytes.format(percentile(imageSizesArray, 95)),
+      mean: bytes.format(imgZ.mean),
+      median: bytes.format(percentile(imageSizesArray, 50, false)),
+      stdDev: bytes.format(imgZ.stdDev),
+      variance: `${bytes.format(imgZ.variance)}^2`,
     }
     log.info(imageStats, 'Image size stats (all images)')
   } else {
@@ -294,18 +294,18 @@ async function script() {
   if (totalImageSizesArray.length > 0) {
     const totalImgSizeZ = calculateAverages(totalImageSizesArray)
     const totalImageSizeStats = {
-      min: prettyBytes(Math.min(...totalImageSizesArray)),
-      max: prettyBytes(Math.max(...totalImageSizesArray)),
-      p5: prettyBytes(percentile(totalImageSizesArray, 5)),
-      p10: prettyBytes(percentile(totalImageSizesArray, 10)),
-      p25: prettyBytes(percentile(totalImageSizesArray, 25)),
-      p75: prettyBytes(percentile(totalImageSizesArray, 75)),
-      p90: prettyBytes(percentile(totalImageSizesArray, 90)),
-      p95: prettyBytes(percentile(totalImageSizesArray, 95)),
-      mean: prettyBytes(totalImgSizeZ.mean),
-      median: prettyBytes(percentile(totalImageSizesArray, 50, false)),
-      stdDev: prettyBytes(totalImgSizeZ.stdDev),
-      variance: `${prettyBytes(totalImgSizeZ.variance)}^2`,
+      min: bytes.format(Math.min(...totalImageSizesArray)),
+      max: bytes.format(Math.max(...totalImageSizesArray)),
+      p5: bytes.format(percentile(totalImageSizesArray, 5)),
+      p10: bytes.format(percentile(totalImageSizesArray, 10)),
+      p25: bytes.format(percentile(totalImageSizesArray, 25)),
+      p75: bytes.format(percentile(totalImageSizesArray, 75)),
+      p90: bytes.format(percentile(totalImageSizesArray, 90)),
+      p95: bytes.format(percentile(totalImageSizesArray, 95)),
+      mean: bytes.format(totalImgSizeZ.mean),
+      median: bytes.format(percentile(totalImageSizesArray, 50, false)),
+      stdDev: bytes.format(totalImgSizeZ.stdDev),
+      variance: `${bytes.format(totalImgSizeZ.variance)}^2`,
     }
     log.info(totalImageSizeStats, 'Total image size per release stats')
   }

@@ -1,6 +1,12 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-## Bailo DataBase Migration Scripts
+# Database Migration Scripts
+
+> **Common questions this page answers:**
+>
+> - How do Bailo migration scripts work?
+> - How do I write a new migration script?
+> - What are common pitfalls when writing migrations?
 
 As Bailo develops, the requirements for storing data also change. Sometimes this will simply be adding a new property or
 Document to MongoDB, and other times it will require migrating a collection of properties to a new object and
@@ -47,7 +53,9 @@ data.
 
 ### Common gotchas
 
-- Using `{lean: true}` in a `find` query returns POJOs (not Mongoose Documents) as per
+These are common pitfalls to avoid when writing or updating migration scripts.
+
+- Using `{lean: true}` in a `find` query returns POJOs (Plain Old JavaScript Objects) (not Mongoose Documents) as per
   [the docs](<https://mongoosejs.com/docs/7.x/docs/api/query.html#Query.prototype.lean()>). The POJO does not have some
   commonly needed such as `save`, not getters/setters which are commonly used in migration scripts when working with
   properties that have been removed from a Document.

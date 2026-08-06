@@ -1,8 +1,9 @@
-import { getImageTagManifest, listImageTags, listModelRepos } from '../clients/registry.js'
+import { getImageTagManifests, listImageTags, listModelRepos } from '../clients/registry.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { isManifestList } from '../utils/registryResponses.js'
 
 const digestsToSearchFor: string[] = []
 
@@ -40,13 +41,13 @@ async function script() {
       const baseInfo = { modelId, image, tag }
 
       try {
-        const { body: manifest, headers } = await getImageTagManifest(repoToken, {
+        const { body: manifest, headers } = await getImageTagManifests(repoToken, {
           repository,
           name: '',
           tag,
         })
 
-        if (!manifest) {
+        if (!manifest || isManifestList(manifest)) {
           continue
         }
 

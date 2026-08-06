@@ -29,7 +29,7 @@ describe('services > stroom', () => {
   test('saveEvent > success', async () => {
     await saveEvent({} as StroomEventObject)
 
-    expect(StroomEventModelMock.save).toBeCalled()
+    expect(StroomEventModelMock.save).toHaveBeenCalled()
   })
 
   test('processBatch > log on failed events', async () => {
@@ -39,7 +39,7 @@ describe('services > stroom', () => {
     await processBatch()
 
     expect(logMock.error.mock.calls).toMatchSnapshot()
-    expect(mockStroomClient.sendEvents).toBeCalled()
+    expect(mockStroomClient.sendEvents).toHaveBeenCalled()
   })
 
   test('processBatch > no new logs', async () => {
@@ -47,9 +47,9 @@ describe('services > stroom', () => {
 
     await processBatch()
 
-    expect(mockStroomClient.sendEvents).not.toBeCalled()
-    expect(logMock.error).not.toBeCalled()
-    expect(logMock.warn).not.toBeCalled()
+    expect(mockStroomClient.sendEvents).not.toHaveBeenCalled()
+    expect(logMock.error).not.toHaveBeenCalled()
+    expect(logMock.warn).not.toHaveBeenCalled()
   })
 
   test('processBatch > cannot send logs', async () => {
@@ -58,8 +58,8 @@ describe('services > stroom', () => {
 
     await processBatch()
 
-    expect(mockStroomClient.sendEvents).not.toBeCalled()
-    expect(logMock.error).not.toBeCalled()
+    expect(mockStroomClient.sendEvents).not.toHaveBeenCalled()
+    expect(logMock.error).not.toHaveBeenCalled()
     expect(logMock.warn.mock.calls).toMatchSnapshot()
   })
 })

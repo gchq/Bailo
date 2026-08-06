@@ -1,5 +1,5 @@
 import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import {
   deleteRelease,
@@ -56,7 +56,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(release.modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
 
@@ -83,7 +83,12 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     () =>
       failedFileUploads.map((file) => (
         <div key={file.fileName}>
-          <Box component='span' fontWeight='bold'>
+          <Box
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {file.fileName}
           </Box>
           {` - ${file.error}`}
@@ -235,11 +240,22 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     <Stack spacing={2}>
       <EditableFormHeading
         heading={
-          <Stack overflow='hidden' justifyContent='center'>
+          <Stack
+            sx={{
+              overflow: 'hidden',
+              justifyContent: 'center',
+            }}
+          >
             <Stack direction='row' spacing={1}>
-              <Typography fontWeight='bold'>Release name</Typography>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                Release name
+              </Typography>
               <HelpPopover>
-                The release name is automatically generated using the model name and release semantic version
+                The release name is automatically generated using the model name and release semantic version.
               </HelpPopover>
             </Stack>
             <Typography noWrap>{`${model.name} - ${release.semver}`}</Typography>

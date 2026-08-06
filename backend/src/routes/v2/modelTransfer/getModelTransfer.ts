@@ -8,13 +8,13 @@ import { parse } from '../../../utils/validate.js'
 
 export const getModelTransferSchema = z.object({
   params: z.object({
-    transferId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+    exportId: z.string().openapi({ example: 'abc123' }),
   }),
 })
 
 registerPath({
   method: 'get',
-  path: '/api/v2/transfer/{transferId}',
+  path: '/api/v2/transfer/{exportId}',
   tags: ['transfer'],
   description: 'Get the details for a given model transfer',
   schema: getModelTransferSchema,
@@ -36,9 +36,11 @@ interface ModelTransferResponse {
 
 export const getModelTransfer = [
   async (req: Request, res: Response<ModelTransferResponse>): Promise<void> => {
-    const { params } = parse(req, getModelTransferSchema)
+    const {
+      params: { exportId },
+    } = parse(req, getModelTransferSchema)
 
-    const modelTransfer = await findModelTransferById(req.user, params.transferId)
+    const modelTransfer = await findModelTransferById(req.user, exportId)
 
     res.json({
       transfer: modelTransfer,

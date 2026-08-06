@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.14.2-bookworm AS sphinx-docs
+FROM python:3.14.2-trixie@sha256:4878b7ad12a3c49e49c775ea617df0d2169605eaffc5ede31977e1c3dd913eae AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -23,25 +23,31 @@ COPY --from=python src /app/python/src
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
 
-RUN make dirhtml
+RUN make html
 
-FROM node:24.15.0-alpine AS base
+FROM node:26.5.1-alpine@sha256:233761595746769ebfdb6090f44fc7cdf818ae0ce62d2b37e0367723b9823e36 AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update
 
 WORKDIR /app
 
-COPY --from=sphinx-docs /app/docs/python-docs python-docs
+FROM node-base AS node-build
 
 COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --omit=dev --cache=/cache/npm
+
+FROM node-base AS base
+
+COPY --from=sphinx-docs /app/docs/python-docs python-docs
+COPY --from=node-build /app/node_modules node_modules
 
 EXPOSE 3001
 
 FROM base AS dev
 
 # Pickup dev packages too
+COPY --from=node-build /app/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .

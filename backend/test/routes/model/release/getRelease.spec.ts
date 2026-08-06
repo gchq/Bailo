@@ -28,7 +28,7 @@ describe('routes > release > getRelease', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
     expect(res.statusCode).toBe(200)
-    expect(getFilesByIds).toBeCalled()
+    expect(getFilesByIds).toHaveBeenCalled()
     expect(res.body).matchSnapshot()
   })
 
@@ -37,7 +37,7 @@ describe('routes > release > getRelease', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onViewRelease).toBeCalled()
+    expect(audit.onViewRelease).toHaveBeenCalled()
     expect(audit.onViewRelease.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

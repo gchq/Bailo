@@ -16,16 +16,10 @@ export type ArtefactScanKindKeys = (typeof ArtefactScanKind)[keyof typeof Artefa
 const artefactScanConnectors: Set<BaseArtefactScanningConnector> = new Set<BaseArtefactScanningConnector>()
 let scannerWrapper: undefined | ArtefactScanningWrapper = undefined
 
-function initScanner<T extends BaseArtefactScanningConnector>(
-  Scanner: new () => T,
-  artefactScanner: ArtefactScanKindKeys,
-) {
-  try {
-    const scanner = new Scanner()
-    artefactScanConnectors.add(scanner)
-  } catch (error) {
-    throw ConfigurationError(`Could not configure or initialise scanner ${artefactScanner}`, { error })
-  }
+const ArtefactScanKindConstructors: Record<ArtefactScanKindKeys, new () => BaseArtefactScanningConnector> = {
+  [ArtefactScanKind.ClamAv]: ClamAvFileScanningConnector,
+  [ArtefactScanKind.ModelScan]: ModelScanFileScanningConnector,
+  [ArtefactScanKind.Trivy]: TrivyImageScanningConnector,
 }
 
 async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrapper> {
@@ -33,21 +27,19 @@ async function addArtefactScanners(cache = true): Promise<ArtefactScanningWrappe
     return scannerWrapper
   }
   artefactScanConnectors.clear()
-  for (const artefactScanner of config.connectors.artefactScanners.kinds) {
-    switch (artefactScanner) {
-      case ArtefactScanKind.ClamAv:
-        initScanner(ClamAvFileScanningConnector, artefactScanner)
-        break
-      case ArtefactScanKind.ModelScan:
-        initScanner(ModelScanFileScanningConnector, artefactScanner)
-        break
-      case ArtefactScanKind.Trivy:
-        initScanner(TrivyImageScanningConnector, artefactScanner)
-        break
-      default:
-        throw ConfigurationError(`'${artefactScanner}' is not a valid scanning kind.`, {
-          validKinds: Object.values(ArtefactScanKind),
-        })
+  for (const scannerKind of config.connectors.artefactScanners.kinds) {
+    const Scanner = ArtefactScanKindConstructors[scannerKind]
+
+    if (!Scanner) {
+      throw ConfigurationError(`'${scannerKind}' is not a valid scanning kind.`, {
+        validKinds: Object.keys(ArtefactScanKindConstructors),
+      })
+    }
+
+    try {
+      artefactScanConnectors.add(new Scanner())
+    } catch (error) {
+      throw ConfigurationError(`Could not configure or initialise scanner ${scannerKind}`, { error })
     }
   }
 

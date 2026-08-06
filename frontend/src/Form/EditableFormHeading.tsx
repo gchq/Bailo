@@ -1,4 +1,7 @@
-import { Close, Create, Delete, Save } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Create from '@mui/icons-material/Create'
+import Delete from '@mui/icons-material/Delete'
+import Save from '@mui/icons-material/Save'
 import { Button, Stack } from '@mui/material'
 import { ReactNode } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -42,10 +45,25 @@ export default function EditableFormHeading({
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
-      <Stack direction='row' justifyContent={{ xs: 'center', sm: 'space-between' }} alignItems='center' spacing={2}>
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          justifyContent: { xs: 'center', sm: 'space-between' },
+          alignItems: 'center',
+        }}
+      >
         {heading}
         {!isEdit && !readOnly && (
-          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              mb: { xs: 2 },
+            }}
+          >
             <Restricted action={editAction} fallback={<Button disabled>{editButtonText}</Button>}>
               <Button
                 variant='outlined'
@@ -74,7 +92,15 @@ export default function EditableFormHeading({
           </Stack>
         )}
         {isEdit && (
-          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              mb: { xs: 2 },
+            }}
+          >
             <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton' startIcon={<Close />}>
               Cancel
             </Button>

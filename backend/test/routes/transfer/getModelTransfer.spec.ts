@@ -21,7 +21,7 @@ vi.mock('../../../src/services/modelTransfer.js', () => mockModelTransferService
 describe('routes > model > getModelTransfer', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getModelTransferSchema)
-    const res = await testGet(`/api/v2/transfer/${fixture.params.transferId}`)
+    const res = await testGet(`/api/v2/transfer/${fixture.params.exportId}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

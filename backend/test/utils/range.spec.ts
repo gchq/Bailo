@@ -27,13 +27,13 @@ describe('utils > range', () => {
 
   it('throws UnsatisfiableRange and sets Content-Range for unsatisfiable', () => {
     const req = createReq(-1, 'bytes=12345679000000-')
-    expect(() => parseRangeHeaders(req as any, res as any, maxSize)).toThrowError(/Unsatisfiable range/)
+    expect(() => parseRangeHeaders(req as any, res as any, maxSize)).toThrow(/Unsatisfiable range/)
     expect(res.set).toHaveBeenCalledWith('Content-Range', `bytes */${maxSize}`)
   })
 
   it('throws BadReq for malformed range', () => {
     const req = createReq(-2, 'justIncorrect<1>2')
-    expect(() => parseRangeHeaders(req as any, res as any, maxSize)).toThrowError(/Malformed range header/)
+    expect(() => parseRangeHeaders(req as any, res as any, maxSize)).toThrow(/Malformed range header/)
   })
 
   it('throws NotImplemented if multiple ranges', () => {
@@ -56,7 +56,7 @@ describe('utils > range', () => {
       range: vi.fn().mockReturnValue(ranges),
       headers: { range: 'somethingElse=0-10' },
     }
-    expect(() => parseRangeHeaders(req as any, res as any, maxSize)).toThrowError(/Only byte ranges are supported/)
+    expect(() => parseRangeHeaders(req as any, res as any, maxSize)).toThrow(/Only byte ranges are supported/)
   })
 
   it('returns correct start/end and sets headers for valid range bytes=0-', () => {

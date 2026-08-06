@@ -4,11 +4,11 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileWithScanResultsInterface } from '../models/File.js'
+import { FileWithScanResultsAggregate, FileWithScanResultsInterface } from '../models/File.js'
 import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
-import Review, { ReviewDoc } from '../models/Review.js'
+import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
@@ -23,7 +23,7 @@ import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createReleaseReviews, removeReleaseReviews } from './review.js'
-import { sendWebhooks } from './webhook.js'
+import { dispatchWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
   return (
@@ -82,7 +82,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file: FileWithScanResultsInterface | undefined
+      let file: FileWithScanResultsAggregate | undefined
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
@@ -195,8 +195,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
       log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
     }
   }
-
-  sendWebhooks(
+  dispatchWebhooks(
     release.modelId,
     WebhookEvent.CreateRelease,
     `Release ${release.semver} has been created for model ${release.modelId}`,
@@ -224,14 +223,13 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-  const semverObj = semverStringToObject(semver)
-  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
+  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver }, { $set: release })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  sendWebhooks(
+  dispatchWebhooks(
     release.modelId,
     WebhookEvent.UpdateRelease,
     `ReleaseModel ${release.semver} has been updated for model ${release.modelId}`,
@@ -247,8 +245,7 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
 
-  const semverObj = semverStringToObject(semver)
-  const release = await ReleaseModel.findOne({ modelId, semver: semverObj })
+  const release = await ReleaseModel.findOne({ modelId, semver })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -323,10 +320,9 @@ export async function getModelReleases(
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
-  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const releases = await ReleaseModel.find({
     modelId,
-    semver: semverObjs,
+    semver: { $in: semvers },
   })
 
   const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
@@ -375,11 +371,7 @@ export async function getReleaseBySemver(user: UserInterface, model: string | Mo
   if (typeof model === 'string') {
     model = await getModelById(user, model)
   }
-  const semverObj = semverStringToObject(semver)
-  const release = await ReleaseModel.findOne({
-    modelId: model.id,
-    semver: semverObj,
-  })
+  const release = await ReleaseModel.findOne({ modelId: model.id, semver })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId: model.id, semver })
@@ -534,6 +526,7 @@ export async function deleteReleases(
   if (EntryKind.MirroredModel === model.kind && !deleteMirroredModel) {
     throw BadReq('Cannot delete a release on a mirrored model.')
   }
+  const releases: ReleaseDoc[] = []
   for (const semver of semvers) {
     const release = await getReleaseBySemver(user, model, semver)
 
@@ -542,20 +535,15 @@ export async function deleteReleases(
       throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
     }
 
-    const reviewsForRelease: ReviewDoc[] = await Review.find({
-      modelId,
-      semver,
-    })
+    const reviewsForRelease = await ReviewModel.find({ modelId, semver })
 
     await release.delete(session)
     await removeReleaseReviews(modelId, semver, session)
-    await removeResponsesByParentIds(
-      [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
-      session,
-    )
+    await removeResponsesByParentIds([...reviewsForRelease.map((review) => review.id), release.id], session)
+    releases.push(release)
   }
 
-  return { modelId, semvers }
+  return releases
 }
 
 export async function deleteRelease(
@@ -565,8 +553,7 @@ export async function deleteRelease(
   deleteMirroredModel: boolean = false,
   session?: ClientSession,
 ) {
-  await deleteReleases(user, modelId, [semver], deleteMirroredModel, session)
-  return { modelId, semver }
+  return (await deleteReleases(user, modelId, [semver], deleteMirroredModel, session))[0]
 }
 
 export function getReleaseName(release: ReleaseDoc): string {
@@ -625,9 +612,9 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 }
 
 export async function getAllFileIds(modelId: string, semvers: string[]): Promise<string[]> {
-  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
+  const semverObjects = semvers.flatMap((semverString) => semverStringToObject(semverString))
   const result = await ReleaseModel.aggregate()
-    .match({ modelId, semver: { $in: semverObjs } })
+    .match({ modelId, semver: { $in: semverObjects } })
     .unwind({ path: '$fileIds' })
     .group({
       _id: null,
@@ -643,7 +630,7 @@ export async function getAllFileIds(modelId: string, semvers: string[]): Promise
 
 export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
   const foundRelease = await ReleaseModel.findOneAndUpdate(
-    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    { modelId: release.modelId, semver: release.semver },
     release,
     {
       upsert: true,

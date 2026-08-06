@@ -1,11 +1,11 @@
-import { model, type ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export type ScanInterface = {
-  _id: ObjectId
+  _id: Types.ObjectId
 
   toolName: string
   scannerVersion?: string
@@ -28,7 +28,7 @@ export type ScanInterface = {
     }
 )
 
-export type ScanSummary = (ArtefactScanSummary | ClamAVSummary)[]
+export type ScanSummary = (ArtefactScanSummary | ClamAVSummary | string)[]
 
 export type ArtefactScanSummary = {
   severity: SeverityLevelKeys
@@ -54,7 +54,7 @@ export const ArtefactKind = {
 } as const
 export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
-export type ScanInterfaceDoc = ScanInterface & SoftDeleteDocument
+export type ScanInterfaceDoc = HydratedDocument<ScanInterface> & SoftDeleteDocument
 
 const ScanSchema = new Schema<ScanInterfaceDoc>(
   {

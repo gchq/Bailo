@@ -33,7 +33,7 @@ describe('routes > model > file > postStartMultipartUpload', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onUpdateFile).toBeCalled()
+    expect(audit.onUpdateFile).toHaveBeenCalled()
     expect(audit.onUpdateFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 

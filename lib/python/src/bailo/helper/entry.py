@@ -49,6 +49,7 @@ class Entry:
         self.state = state
         self.tags = tags
         self.collaborators = collaborators
+        self.settings: dict | None = None
 
         self._card = None
         self._card_version = None
@@ -66,6 +67,7 @@ class Entry:
             state=self.state,
             tags=self.tags,
             collaborators=self.collaborators,
+            settings=self.settings,
         )
         self._unpack(res["model"])
 
@@ -97,7 +99,10 @@ class Entry:
         logger.info("Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
     def card_from_template(self, template_id: str) -> None:
-        """Create a card using a template."""
+        """Create a card using a template.
+
+        :param template_id: Previous model's unique ID to be used as template
+        """
         res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
         self._unpack_card(res["card"])
 
@@ -159,6 +164,15 @@ class Entry:
             self.visibility = ModelVisibility.PRIVATE
         else:
             self.visibility = ModelVisibility.PUBLIC
+
+        if "kind" in res:
+            self.kind = EntryKind(res["kind"])
+
+        self.organisation = res.get("organisation", self.organisation)
+        self.state = res.get("state", self.state)
+        self.tags = res.get("tags", self.tags)
+        self.collaborators = res.get("collaborators", self.collaborators)
+        self.settings = res.get("settings", self.settings)
 
         logger.info("Attributes for ID %s successfully unpacked.", self.id)
 
