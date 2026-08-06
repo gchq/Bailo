@@ -1304,7 +1304,9 @@ export class BaseMetricsConnector {
   ): Promise<GetLifecycleComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
-    const cached = getCached<CachedMetrics<GetLifecycleComplianceMetricsResponse>>(MetricsCacheKeys.LIFECYCLE)
+    const cached = getCached<CachedMetrics<GetLifecycleComplianceMetricsResponse>>(
+      `${MetricsCacheKeys.LIFECYCLE}-${weeksUntilDue}`,
+    )
     if (cached !== undefined) {
       return {
         ...cached.data,
@@ -1327,7 +1329,7 @@ export class BaseMetricsConnector {
 
     const lastUpdated = new Date().toISOString()
 
-    setCached(MetricsCacheKeys.LIFECYCLE, {
+    setCached(`${MetricsCacheKeys.LIFECYCLE}-${weeksUntilDue}`, {
       data: result,
       lastUpdated,
     })
