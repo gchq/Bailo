@@ -10,9 +10,7 @@ import { parse } from '../../../utils/validate.js'
 export const getLifecycleComplianceMetricsSchema = z.object({
   query: z
     .object({
-      weeksUntilDue: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
-        message: 'Expected number, received a string',
-      }),
+      weeksUntilDue: z.coerce.number(),
     })
     .strict(),
 })
@@ -73,7 +71,7 @@ export const getLifecycleComplianceMetrics = [
       query: { weeksUntilDue },
     } = parse(req, getLifecycleComplianceMetricsSchema)
 
-    const complianceMetrics = await metrics.getLifecycleComplianceMetrics(req.user, parseInt(weeksUntilDue))
+    const complianceMetrics = await metrics.getLifecycleComplianceMetrics(req.user, weeksUntilDue)
 
     await audit.onViewMetric(req)
 

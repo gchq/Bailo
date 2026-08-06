@@ -746,6 +746,11 @@ async function calculateLifecycleComplianceMetrics(
         },
       },
     },
+    {
+      $sort: {
+        dueDate: 1,
+      },
+    },
   ]
 
   // Filter by the referenced model's organisation when one is provided.
@@ -1298,6 +1303,15 @@ export class BaseMetricsConnector {
     weeksUntilDue: number,
   ): Promise<GetLifecycleComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
+
+    const cached = getCached<CachedMetrics<GetLifecycleComplianceMetricsResponse>>(MetricsCacheKeys.LIFECYCLE)
+    if (cached !== undefined) {
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
+    }
+
     const global = await calculateLifecycleComplianceMetrics(weeksUntilDue)
 
     const organisationIds = await this.getOrganisationIds()
@@ -1313,7 +1327,7 @@ export class BaseMetricsConnector {
 
     const lastUpdated = new Date().toISOString()
 
-    setCached(MetricsCacheKeys.NO_RELEASES_COMPLIANCE, {
+    setCached(MetricsCacheKeys.LIFECYCLE, {
       data: result,
       lastUpdated,
     })
