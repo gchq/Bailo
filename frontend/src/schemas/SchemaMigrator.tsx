@@ -134,7 +134,7 @@ export default function SchemaMigrator({
             >
               <Close color='error' />
             </IconButton>
-            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
+            <Typography sx={{ overflow: 'hidden', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> deleted
             </Typography>
           </Stack>
