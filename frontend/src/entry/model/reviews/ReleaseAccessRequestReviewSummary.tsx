@@ -4,10 +4,9 @@ import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import Loading from 'src/common/Loading'
-import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
+import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { AccessRequestInterface, ReleaseInterface } from 'types/types'
-import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 export type ReleaseAccessRequestReviewSummaryProps =
   | {
@@ -68,7 +67,11 @@ export default function ReleaseAccessRequestReviewSummary({
             justifyContent: 'space-between',
           }}
         >
-          <ReviewStatus modelId={modelId} reviewResponses={latestReviewsForEachUser(reviews, reviewResponses)} />
+          <Stack>
+            {reviews.map((review) => (
+              <ReviewDisplay key={review._id} modelId={modelId} review={review} />
+            ))}
+          </Stack>
           {includeResponsesSummary && (
             <IconButton
               href={
