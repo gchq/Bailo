@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import hashlib
+import hmac
 import json
 import logging
 import os
@@ -15,6 +16,7 @@ from tempfile import mkdtemp
 from typing import Any
 
 import oras.client
+import oras.container
 from fastapi import BackgroundTasks, HTTPException, UploadFile
 from filelock import FileLock
 from pydantic import SecretStr
@@ -38,8 +40,8 @@ def get_trivy_version() -> str:
         for line in result.stdout.splitlines():
             if line.startswith("Version:"):
                 return line.split(":", 1)[1].strip()
-    except Exception:
-        pass
+    except (OSError, subprocess.SubprocessError):
+        logger.warning("Failed to determine Trivy version", exc_info=True)
     return "unknown"
 
 
@@ -224,6 +226,23 @@ def scan_sbom(blob_digest: str) -> Any:
     return sbom
 
 
+def verify_file_sha256(file_path: str, expected_digest: str) -> None:
+    """Verify that a file's SHA-256 hash matches the expected digest.
+
+    :param file_path: path to the file to verify
+    :param expected_digest: expected digest in the form "sha256:<hex>" or plain hex
+    :raises RuntimeError: if the computed digest does not match
+    """
+    expected_hex = expected_digest.removeprefix("sha256:")
+    sha = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(8192):
+            sha.update(chunk)
+    actual_hex = sha.hexdigest()
+    if not hmac.compare_digest(actual_hex, expected_hex):
+        raise RuntimeError(f"SHA-256 mismatch for {file_path}: expected {expected_hex}, got {actual_hex}")
+
+
 def download_database():
     """Download trivy database into a container using oras
 
@@ -242,15 +261,28 @@ def download_database():
                 tls_verify=settings.DB_TLS_VERIFY != False,  # Verify TLS unless pulling from an insecure registry
                 hostname=settings.DB_HOSTNAME,
             )
-        dbpaths = client.pull(target=settings.DB_IMAGE, outdir=settings.DB_DIR, overwrite=True)
-        for path in dbpaths:
-            logger.info("Extracting file %s into %s", path, settings.DB_DIR)
-            with tarfile.open(path) as tarf:
+        container = oras.container.Container(settings.DB_IMAGE)
+        manifest = client.get_manifest(container)
+        layers = manifest.get("layers", [])
+        if not layers:
+            raise RuntimeError(f"OCI manifest for {settings.DB_IMAGE} contains no layers")
+        os.makedirs(settings.DB_DIR, exist_ok=True)
+        for layer in layers:
+            digest = layer["digest"]
+            outfile = os.path.join(settings.DB_DIR, digest.replace("sha256:", "") + ".tar")
+            client.download_blob(container, digest, outfile)
+            try:
+                verify_file_sha256(outfile, digest)
+            except RuntimeError:
+                os.remove(outfile)
+                raise
+            logger.info("Extracting file %s into %s", outfile, settings.DB_DIR)
+            with tarfile.open(outfile) as tarf:
                 safe_extract(tarf, settings.DB_DIR)
             try:
-                os.remove(path)
+                os.remove(outfile)
             except OSError:
-                logger.warning("Was unable to remove %s", path)
+                logger.warning("Was unable to remove %s", outfile)
 
 
 def get_next_update() -> datetime.datetime | None:

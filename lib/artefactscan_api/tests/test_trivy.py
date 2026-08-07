@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import pathlib
 import tarfile
 from http import HTTPStatus
@@ -67,3 +68,94 @@ def test_unable_to_extract_tar_file(
             trivy.scan(UploadFile(BytesIO(EMPTY_CONTENTS), filename=EMPTY_DIGEST), BackgroundTasks([]))
 
     assert exception.value.detail.startswith("An error occurred while extracting image layer:")
+
+
+def test_verify_file_sha256_valid(tmp_path):
+    file = tmp_path / "test.bin"
+    file.write_bytes(b"hello world")
+    expected = "sha256:" + hashlib.sha256(b"hello world").hexdigest()
+    trivy.verify_file_sha256(str(file), expected)
+
+
+def test_verify_file_sha256_valid_plain_hex(tmp_path):
+    file = tmp_path / "test.bin"
+    file.write_bytes(b"hello world")
+    expected = hashlib.sha256(b"hello world").hexdigest()
+    trivy.verify_file_sha256(str(file), expected)
+
+
+def test_verify_file_sha256_mismatch(tmp_path):
+    file = tmp_path / "test.bin"
+    file.write_bytes(b"hello world")
+    with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
+        trivy.verify_file_sha256(str(file), "sha256:deadbeef")
+
+
+@patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
+@patch("bailo_artefactscan_api.trivy.oras.container.Container")
+def test_download_database_verifies_digest(mock_container_cls, mock_client_cls, tmp_path):
+    content = b"fake tar content"
+    digest = "sha256:" + hashlib.sha256(content).hexdigest()
+    manifest = {"layers": [{"digest": digest, "mediaType": "application/vnd.oci.image.layer.v1.tar"}]}
+
+    mock_client = mock_client_cls.return_value
+    mock_client.get_manifest.return_value = manifest
+
+    def fake_download(container, dig, outfile):
+        os.makedirs(os.path.dirname(outfile), exist_ok=True)
+        with open(outfile, "wb") as f:
+            f.write(content)
+        return outfile
+
+    mock_client.download_blob.side_effect = fake_download
+
+    settings = trivy.Settings(DB_DIR=str(tmp_path / "db"))
+
+    with patch.object(trivy, "get_settings", return_value=settings), patch("tarfile.open") as mock_tar:
+        mock_tar.return_value.__enter__ = Mock()
+        mock_tar.return_value.__exit__ = Mock(return_value=False)
+        with patch.object(trivy, "safe_extract"):
+            trivy.download_database()
+
+    mock_container_cls.assert_called_once_with(settings.DB_IMAGE)
+    mock_client.get_manifest.assert_called_once()
+    mock_client.download_blob.assert_called_once()
+
+
+@patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
+@patch("bailo_artefactscan_api.trivy.oras.container.Container")
+def test_download_database_rejects_bad_digest(mock_container_cls, mock_client_cls, tmp_path):
+    manifest = {"layers": [{"digest": "sha256:expectedhash", "mediaType": "application/vnd.oci.image.layer.v1.tar"}]}
+
+    mock_client = mock_client_cls.return_value
+    mock_client.get_manifest.return_value = manifest
+
+    def fake_download(container, dig, outfile):
+        os.makedirs(os.path.dirname(outfile), exist_ok=True)
+        with open(outfile, "wb") as f:
+            f.write(b"corrupted content")
+        return outfile
+
+    mock_client.download_blob.side_effect = fake_download
+
+    settings = trivy.Settings(DB_DIR=str(tmp_path / "db"))
+
+    with patch.object(trivy, "get_settings", return_value=settings):
+        with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
+            trivy.download_database()
+
+    outfile = os.path.join(str(tmp_path / "db"), "expectedhash.tar")
+    assert not os.path.exists(outfile), "Corrupted file should be cleaned up"
+
+
+@patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
+@patch("bailo_artefactscan_api.trivy.oras.container.Container")
+def test_download_database_rejects_empty_manifest(mock_container_cls, mock_client_cls, tmp_path):
+    mock_client = mock_client_cls.return_value
+    mock_client.get_manifest.return_value = {"layers": []}
+
+    settings = trivy.Settings(DB_DIR=str(tmp_path / "db"))
+
+    with patch.object(trivy, "get_settings", return_value=settings):
+        with pytest.raises(RuntimeError, match="contains no layers"):
+            trivy.download_database()
