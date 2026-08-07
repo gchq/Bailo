@@ -1,7 +1,7 @@
 import { Button, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import ExpandableTypography from 'src/common/ExpandableTypography'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import { EntryInterface, ReleaseInterface } from 'types/types'
@@ -104,7 +104,11 @@ export default function ReleaseAssetsMainText({
           {` ${formatDateString(release.createdAt)}`}
         </Typography>
       </Stack>
-      {!hideDescription && <MarkdownDisplay>{release.notes}</MarkdownDisplay>}
+      {!hideDescription && (
+        <ExpandableTypography maxLength={500} showMarkdown showMoreDirection='column'>
+          {release.notes}
+        </ExpandableTypography>
+      )}
     </>
   )
 }
