@@ -6,8 +6,8 @@ import pathlib
 import tarfile
 from http import HTTPStatus
 from io import BytesIO
+from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -25,7 +25,7 @@ EMPTY_DIGEST = hashlib.sha256(EMPTY_CONTENTS).hexdigest()
     ("file_name", "file_content"),
     [("deadbeef", EMPTY_CONTENTS)],
 )
-def test_scan_wrong_digest(file_name: str, file_content: Any):
+def test_scan_wrong_digest(file_name: str, file_content: bytes) -> None:
     with pytest.raises(HTTPException) as exception:
         trivy.scan(UploadFile(BytesIO(file_content), filename=file_name), BackgroundTasks([]))
 
@@ -34,7 +34,7 @@ def test_scan_wrong_digest(file_name: str, file_content: Any):
 
 
 @patch("subprocess.Popen")
-def test_unable_to_create_sbom(mock_run: Mock):
+def test_unable_to_create_sbom(mock_run: Mock) -> None:
     mock_run.side_effect = CalledProcessError(1, "trivy")
     with pytest.raises(HTTPException) as exception:
         trivy.create_sbom("tempfile", "deadbeef")
@@ -44,7 +44,7 @@ def test_unable_to_create_sbom(mock_run: Mock):
 
 
 @patch("builtins.open")
-def test_unable_to_find_sbom(mock_open: Mock):
+def test_unable_to_find_sbom(mock_open: Mock) -> None:
     mock_open.side_effect = FileNotFoundError
     with pytest.raises(HTTPException) as exception:
         trivy.scan_sbom("deadbeef")
@@ -58,7 +58,7 @@ def test_unable_to_find_sbom(mock_open: Mock):
 def test_unable_to_extract_tar_file(
     mock_tarfile_istarfile: Mock,
     mock_tarfile_open: Mock,
-):
+) -> None:
     mock_tarfile_istarfile.return_value = True
     mock_tarfile_open.side_effect = tarfile.ReadError
 
@@ -70,21 +70,21 @@ def test_unable_to_extract_tar_file(
     assert exception.value.detail.startswith("An error occurred while extracting image layer:")
 
 
-def test_verify_file_sha256_valid(tmp_path):
+def test_verify_file_sha256_valid(tmp_path: Path) -> None:
     file = tmp_path / "test.bin"
     file.write_bytes(b"hello world")
     expected = "sha256:" + hashlib.sha256(b"hello world").hexdigest()
     trivy.verify_file_sha256(str(file), expected)
 
 
-def test_verify_file_sha256_valid_plain_hex(tmp_path):
+def test_verify_file_sha256_valid_plain_hex(tmp_path: Path) -> None:
     file = tmp_path / "test.bin"
     file.write_bytes(b"hello world")
     expected = hashlib.sha256(b"hello world").hexdigest()
     trivy.verify_file_sha256(str(file), expected)
 
 
-def test_verify_file_sha256_mismatch(tmp_path):
+def test_verify_file_sha256_mismatch(tmp_path: Path) -> None:
     file = tmp_path / "test.bin"
     file.write_bytes(b"hello world")
     with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
@@ -93,7 +93,7 @@ def test_verify_file_sha256_mismatch(tmp_path):
 
 @patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
 @patch("bailo_artefactscan_api.trivy.oras.container.Container")
-def test_download_database_verifies_digest(mock_container_cls, mock_client_cls, tmp_path):
+def test_download_database_verifies_digest(mock_container_cls: Mock, mock_client_cls: Mock, tmp_path: Path) -> None:
     content = b"fake tar content"
     digest = "sha256:" + hashlib.sha256(content).hexdigest()
     manifest = {"layers": [{"digest": digest, "mediaType": "application/vnd.oci.image.layer.v1.tar"}]}
@@ -101,7 +101,7 @@ def test_download_database_verifies_digest(mock_container_cls, mock_client_cls, 
     mock_client = mock_client_cls.return_value
     mock_client.get_manifest.return_value = manifest
 
-    def fake_download(container, dig, outfile):
+    def fake_download(container: Mock, dig: str, outfile: str) -> str:
         os.makedirs(os.path.dirname(outfile), exist_ok=True)
         with open(outfile, "wb") as f:
             f.write(content)
@@ -124,14 +124,13 @@ def test_download_database_verifies_digest(mock_container_cls, mock_client_cls, 
 
 
 @patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
-@patch("bailo_artefactscan_api.trivy.oras.container.Container")
-def test_download_database_rejects_bad_digest(mock_container_cls, mock_client_cls, tmp_path):
+def test_download_database_rejects_bad_digest(mock_client_cls: Mock, tmp_path: Path) -> None:
     manifest = {"layers": [{"digest": "sha256:expectedhash", "mediaType": "application/vnd.oci.image.layer.v1.tar"}]}
 
     mock_client = mock_client_cls.return_value
     mock_client.get_manifest.return_value = manifest
 
-    def fake_download(container, dig, outfile):
+    def fake_download(container: Mock, dig: str, outfile: str) -> str:
         os.makedirs(os.path.dirname(outfile), exist_ok=True)
         with open(outfile, "wb") as f:
             f.write(b"corrupted content")
@@ -149,8 +148,7 @@ def test_download_database_rejects_bad_digest(mock_container_cls, mock_client_cl
 
 
 @patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
-@patch("bailo_artefactscan_api.trivy.oras.container.Container")
-def test_download_database_rejects_empty_manifest(mock_container_cls, mock_client_cls, tmp_path):
+def test_download_database_rejects_empty_manifest(mock_client_cls: Mock, tmp_path: Path) -> None:
     mock_client = mock_client_cls.return_value
     mock_client.get_manifest.return_value = {"layers": []}
 
@@ -162,8 +160,7 @@ def test_download_database_rejects_empty_manifest(mock_container_cls, mock_clien
 
 
 @patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
-@patch("bailo_artefactscan_api.trivy.oras.container.Container")
-def test_download_database_atomic_on_failure(mock_container_cls, mock_client_cls, tmp_path):
+def test_download_database_atomic_on_failure(mock_client_cls: Mock, tmp_path: Path) -> None:
     """If second layer fails, original DB_DIR stays intact."""
     good_content = b"good layer"
     good_digest = "sha256:" + hashlib.sha256(good_content).hexdigest()
@@ -180,7 +177,7 @@ def test_download_database_atomic_on_failure(mock_container_cls, mock_client_cls
 
     call_count = 0
 
-    def fake_download(container, dig, outfile):
+    def fake_download(container: Mock, dig: str, outfile: str) -> str:
         nonlocal call_count
         os.makedirs(os.path.dirname(outfile), exist_ok=True)
         with open(outfile, "wb") as f:
