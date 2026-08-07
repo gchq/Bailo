@@ -450,6 +450,24 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onRegistryImagePull(req: Request, userDn: string): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryAuthorisePull, req)
+    const event = this.generateEvent(req, { userDn: userDn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImagePush(req: Request, userDn: string): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryAuthorisePush, req)
+    const event = this.generateEvent(req, { userDn: userDn })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImageDelete(req: Request, userDn: string): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryAuthoriseDelete, req)
+    const event = this.generateEvent(req, { userDn: userDn })
+    req.log.info(event, req.audit.description)
+  }
+
   async onError(req: Request, error: BailoError) {
     if (!req.audit) {
       // No audit information has been attached to the request

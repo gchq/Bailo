@@ -44,6 +44,7 @@ export const ResourceKind = {
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
   User: 'user',
+  Registry: 'registry',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -443,6 +444,42 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Review,
   },
+  RegistryLogin: {
+    typeId: 'RegistryLogin',
+    description: 'User has logged into the registry',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryIssueAccessToken: {
+    typeId: 'RegistryIssueAccessToken',
+    description: 'Registry has issued an access token for a user',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryIssueRefreshToken: {
+    typeId: 'RegistryIssueRefreshToken',
+    description: 'Registry has refreshed an already issued access token for a user',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryAuthorisePull: {
+    typeId: 'RegistryAuthorisePull',
+    description: 'Registry has authorised a user to pull an image',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryAuthorisePush: {
+    typeId: 'RegistryAuthorisePush',
+    description: 'Registry has authorised a user to push an image',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryAuthoriseDelete: {
+    typeId: 'RegistryAuthoriseDelete',
+    description: 'Registry has authorised a user to delete an image',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.Registry,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -532,6 +569,10 @@ export abstract class BaseAuditConnector {
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
+
+  abstract onRegistryImagePull(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImagePush(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImageDelete(req: Request, userDn: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
