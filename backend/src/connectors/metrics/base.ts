@@ -1,3 +1,4 @@
+import humanInterval from 'human-interval'
 import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
@@ -24,7 +25,7 @@ import { GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
-import { BadReq, Forbidden } from '../../utils/error.js'
+import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import { sortSemvers } from '../../utils/version.js'
 import {
@@ -697,7 +698,11 @@ async function calculateLifecycleComplianceMetrics(
   organisation?: string,
 ): Promise<CalculatedLifecycleComplianceMetrics> {
   const dueDateCutOff = new Date()
-  dueDateCutOff.setDate(dueDateCutOff.getDate() + weeksUntilDue * 7)
+  const interval = humanInterval(`${weeksUntilDue} weeks`)
+  if (!interval) {
+    throw InternalError('The time interval provided could not be converted to a numerical value.', { weeksUntilDue })
+  }
+  dueDateCutOff.setTime(dueDateCutOff.getTime() + interval)
   const openLifecycleReviewsPipeline: PipelineStage[] = [
     {
       $match: {
@@ -713,9 +718,7 @@ async function calculateLifecycleComplianceMetrics(
         as: 'responses',
       },
     },
-    // Reviews with no responses are considered open.
     { $match: { responses: { $size: 0 } } },
-    // Join the referenced model so we can filter by its organisation.
     {
       $lookup: {
         from: 'v2_models',
@@ -727,7 +730,7 @@ async function calculateLifecycleComplianceMetrics(
     { $unwind: '$model' },
     {
       $match: {
-        ...(organisation && {
+        ...(organisation !== undefined && {
           'model.organisation': organisation,
         }),
       },
@@ -760,7 +763,6 @@ async function calculateLifecycleComplianceMetrics(
     },
   ]
 
-  // Drop the temporary organisation field from the final projection.
   openLifecycleReviewsPipeline.push({ $unset: 'modelOrganisation' })
 
   const entries = await ReviewModel.aggregate(openLifecycleReviewsPipeline)
