@@ -9,12 +9,23 @@
     "build": "npm --prefix ./backend/ run build && npm --prefix ./frontend/ run build",
     "test": "npm --prefix ./backend/ run test && npm --prefix ./frontend/ run test",
     "lint": "(npm --prefix ./backend run lint 2>&1 | sed 's/^/[backend] /') & (npm --prefix ./frontend run lint 2>&1 | sed 's/^/[frontend] /') & wait",
+    "lint:spelling": "cspell --no-must-find-files \"**/*.*\"",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@cspell/dict-docker": "^1.1.17",
+    "@cspell/dict-html-symbol-entities": "^4.0.5",
+    "@cspell/dict-k8s": "^1.0.13",
+    "@cspell/dict-la": "^1.1.2",
+    "@cspell/dict-lorem-ipsum": "^4.0.5",
+    "@cspell/dict-markdown": "^2.0.17",
+    "@cspell/dict-python": "^4.2.29",
+    "@cspell/dict-scientific-terms-gb": "^1.0.6",
+    "@cspell/dict-typescript": "^3.2.3",
+    "cspell": "^10.0.1",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
     "prettier": "^3.9.6"
