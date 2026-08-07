@@ -6,7 +6,7 @@ import { buildSearchIndex, writeSearchIndex } from './docs-search-index.mjs'
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const frontendRoot = resolve(scriptDirectory, '..')
 const docsRoot = resolve(frontendRoot, 'pages/docs')
-const output = resolve(frontendRoot, 'src/docs/searchIndex.generated.json')
+const output = resolve(frontendRoot, 'public/docs-search-index.generated.json')
 
 export function main() {
   const entries = buildSearchIndex({

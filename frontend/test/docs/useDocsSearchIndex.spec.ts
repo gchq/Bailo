@@ -1,9 +1,10 @@
 import { DocsSearchIndexEntry, DocsSearchResult } from 'types/docs'
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import {
   buildIndex,
   buildSnippet,
+  fetchDocsSearchIndex,
   limitResults,
   normaliseSearchText,
   searchDocs,
@@ -51,6 +52,23 @@ const entries: DocsSearchIndexEntry[] = [
 ]
 
 describe('documentation runtime search', () => {
+  test('falls back to an empty index when the generated JSON is unavailable or invalid', async () => {
+    const originalFetch = globalThis.fetch
+
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Unavailable'))
+
+    await expect(fetchDocsSearchIndex('/missing.json')).resolves.toEqual([])
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ invalid: true }),
+    })
+
+    await expect(fetchDocsSearchIndex('/invalid.json')).resolves.toEqual([])
+
+    globalThis.fetch = originalFetch
+  })
+
   test('normalises and tokenises Unicode queries consistently', () => {
     expect(normaliseSearchText('ＣAFÉ')).toBe('café')
     expect(tokenise('  Install   BAILO ')).toEqual({
@@ -109,9 +127,9 @@ describe('documentation runtime search', () => {
     const limited = limitResults(results, 'all')
 
     expect(limited).toHaveLength(60)
-    expect(limited.slice(0, 20).every((result) => result.category === 'docs')).toBe(true)
+    expect(limited.slice(0, 20).every((result) => result.category === 'models')).toBe(true)
     expect(limited.slice(20, 40).every((result) => result.category === 'datacards')).toBe(true)
-    expect(limited.slice(40).every((result) => result.category === 'models')).toBe(true)
+    expect(limited.slice(40).every((result) => result.category === 'docs')).toBe(true)
     expect(limitResults(results, 'docs')).toHaveLength(50)
   })
 })

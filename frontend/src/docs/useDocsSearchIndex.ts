@@ -1,6 +1,7 @@
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useMemo } from 'react'
 import useDebounce from 'src/hooks/useDebounce'
+import useSWR from 'swr'
 import {
   DocsSearchCategory as SearchCategory,
   DocsSearchFilter as SearchFilter,
@@ -8,14 +9,12 @@ import {
   DocsSearchIndexEntry,
   DocsSearchQueryTerms as QueryTerms,
   DocsSearchResult,
-  EntrySearchDocument,
   IndexedDocsSearchEntry as IndexedEntry,
   IndexedDocsSearchHeading as IndexedHeading,
 } from 'types/docs'
-import { EntryKindKeys } from 'types/types'
+import { EntryKind, EntryKindKeys, MODEL_ENTRY_KINDS } from 'types/types'
 
 import { flatDirectory } from './directory'
-import rawIndex from './searchIndex.generated.json'
 
 export type { DocsSearchResult, SearchFilter }
 
@@ -24,21 +23,25 @@ const EMPTY_FILTER: never[] = []
 const MAX_RESULTS = 50
 const MAX_RESULTS_PER_CATEGORY = 20
 const MAX_HEADING_RESULTS_PER_PAGE = 3
+const MAX_START_SCREEN_ENTRIES_PER_CATEGORY = 3
 const MIN_BACKEND_QUERY_LENGTH = 1
 const SEARCH_DEBOUNCE_MS = 250
 const SNIPPET_RADIUS = 60
 const MIN_TOKEN_LENGTH = 2
 
-const CATEGORY_ORDER: SearchCategory[] = ['docs', 'datacards', 'models']
+const CATEGORY_ORDER: SearchCategory[] = ['models', 'datacards', 'docs']
+
+const ALL_SEARCHABLE_ENTRY_KINDS = [...MODEL_ENTRY_KINDS, EntryKind.DATA_CARD, EntryKind.MIRRORED_DATA_CARD]
 
 const ENTRY_CATEGORIES: Partial<Record<EntryKindKeys, 'models' | 'datacards'>> = {
   model: 'models',
   'data-card': 'datacards',
   'mirrored-model': 'models',
   'untrusted-model': 'models',
+  'mirrored-data-card': 'datacards',
 }
 
-const START_SCREEN: DocsSearchResult[] = [
+const HELP_PAGES: DocsSearchResult[] = [
   {
     breadcrumb: 'Getting Started',
     category: 'docs',
@@ -47,8 +50,8 @@ const START_SCREEN: DocsSearchResult[] = [
     kind: 'page',
     score: 0,
     slug: 'getting-started/quick-start',
-    snippetHtml: 'Create your first model in ~15 minutes',
-    title: 'New to Bailo?',
+    snippetHtml: 'Create your first model in minutes.',
+    title: 'New to Bailo',
   },
   {
     breadcrumb: 'Core Concepts',
@@ -58,8 +61,30 @@ const START_SCREEN: DocsSearchResult[] = [
     kind: 'page',
     score: 0,
     slug: 'getting-started/core-concepts',
-    snippetHtml: 'You want to understand more about the lifecycle of a model',
+    snippetHtml: 'Learn about compliance requirements and the model lifecycle.',
     title: 'What is Bailo?',
+  },
+  {
+    breadcrumb: 'Getting Started',
+    category: 'docs',
+    href: '/docs/users/models/creating-a-model',
+    key: 'docs:users/models/creating-a-model',
+    kind: 'page',
+    score: 0,
+    slug: 'users/models/creating-a-model',
+    snippetHtml: 'Create, manage and share models in the Marketplace.',
+    title: 'Create a Model',
+  },
+  {
+    breadcrumb: 'Reference',
+    category: 'docs',
+    href: '/docs/reference/glossary',
+    key: 'docs:reference/glossary',
+    kind: 'page',
+    score: 0,
+    slug: 'reference/glossary',
+    snippetHtml: 'Definitions of terminology used throughout Bailo.',
+    title: 'Glossary',
   },
   {
     breadcrumb: 'Reference',
@@ -69,7 +94,7 @@ const START_SCREEN: DocsSearchResult[] = [
     kind: 'page',
     score: 0,
     slug: 'reference/troubleshooting',
-    snippetHtml: "You've got a problem with Bailo and are not sure where to start",
+    snippetHtml: 'Frequently asked questions and solutions to common issues.',
     title: 'Troubleshooting & FAQ',
   },
 ]
@@ -103,7 +128,7 @@ export function normaliseSearchText(value: string): string {
   return value.normalize('NFKC').toLocaleLowerCase()
 }
 
-export function buildIndex(entries: DocsSearchIndexEntry[] = rawIndex as DocsSearchIndexEntry[]): IndexedEntry[] {
+export function buildIndex(entries: DocsSearchIndexEntry[] = []): IndexedEntry[] {
   return entries.map((entry) => {
     const title = resolveTitle(entry.slug, entry.title)
 
@@ -126,7 +151,7 @@ export function buildIndex(entries: DocsSearchIndexEntry[] = rawIndex as DocsSea
   })
 }
 
-function normaliseEntries(entries: EntrySearchResult[]): EntrySearchDocument[] {
+function mapEntryResults(entries: EntrySearchResult[]): DocsSearchResult[] {
   return entries.flatMap((entry) => {
     const category = ENTRY_CATEGORIES[entry.kind]
 
@@ -143,8 +168,8 @@ function normaliseEntries(entries: EntrySearchResult[]): EntrySearchDocument[] {
         category,
         title: entry.name,
         breadcrumb: entry.description.length < 250 ? entry.description : `${entry.description.slice(0, 250)}...`,
-        // Since entry search is server side additional mark rendering is not required
-        text: '',
+        score: 0,
+        kind: 'page',
         href: `${basePath}/${encodeURIComponent(entry.id)}`,
       },
     ]
@@ -346,52 +371,6 @@ function scoreHeading(heading: IndexedHeading, terms: QueryTerms): number {
   return score + Math.max(0, 4 - heading.depth)
 }
 
-function scoreEntry(entry: EntrySearchDocument, terms: QueryTerms): number {
-  const title = normaliseSearchText(entry.title)
-  const breadcrumb = normaliseSearchText(entry.breadcrumb)
-  const text = normaliseSearchText(entry.text)
-
-  let score = 0
-
-  if (terms.phrase) {
-    if (title === terms.phrase) {
-      score += 100
-    } else if (title.startsWith(terms.phrase)) {
-      score += 75
-    } else if (title.includes(terms.phrase)) {
-      score += 50
-    }
-
-    if (breadcrumb.includes(terms.phrase)) {
-      score += 20
-    }
-
-    if (text.includes(terms.phrase)) {
-      score += 10
-    }
-  }
-
-  for (const token of terms.tokens) {
-    if (title === token) {
-      score += 40
-    } else if (title.startsWith(token)) {
-      score += 30
-    } else if (title.includes(token)) {
-      score += 20
-    }
-
-    if (breadcrumb.includes(token)) {
-      score += 8
-    }
-
-    if (text.includes(token)) {
-      score += 4
-    }
-  }
-
-  return score
-}
-
 function compareResults(left: DocsSearchResult, right: DocsSearchResult): number {
   if (left.score !== right.score) {
     return right.score - left.score
@@ -404,23 +383,9 @@ function compareResults(left: DocsSearchResult, right: DocsSearchResult): number
   return left.title.localeCompare(right.title)
 }
 
-function toEntryResult(entry: EntrySearchDocument, terms?: QueryTerms): DocsSearchResult {
-  return {
-    key: entry.key,
-    slug: entry.slug,
-    category: entry.category,
-    title: entry.title,
-    breadcrumb: entry.breadcrumb,
-    snippetHtml: terms ? buildSnippet(entry.text, terms) : undefined,
-    score: terms ? Math.max(scoreEntry(entry, terms), 1) : 0,
-    kind: 'page',
-    href: entry.href,
-  }
-}
-
 export function searchDocs(index: IndexedEntry[], query: string): DocsSearchResult[] {
   if (!query) {
-    return [...START_SCREEN]
+    return [...HELP_PAGES]
   }
 
   const terms = tokenise(query)
@@ -474,28 +439,6 @@ export function searchDocs(index: IndexedEntry[], query: string): DocsSearchResu
   return results.sort(compareResults)
 }
 
-export function searchEntries(
-  entries: EntrySearchDocument[],
-  query: string,
-  category: SearchFilter,
-): DocsSearchResult[] {
-  const matchingCategory = entries.filter((entry) => category === 'all' || entry.category === category)
-
-  if (!query) {
-    return matchingCategory
-      .map((entry) => toEntryResult(entry))
-      .sort((left, right) => left.title.localeCompare(right.title))
-  }
-
-  if (query.length < MIN_BACKEND_QUERY_LENGTH) {
-    return []
-  }
-
-  const terms = tokenise(query)
-
-  return matchingCategory.map((entry) => toEntryResult(entry, terms)).sort(compareResults)
-}
-
 export function limitResults(results: DocsSearchResult[], category: SearchFilter): DocsSearchResult[] {
   if (category !== 'all') {
     return results.slice(0, MAX_RESULTS)
@@ -506,12 +449,32 @@ export function limitResults(results: DocsSearchResult[], category: SearchFilter
   )
 }
 
+export async function fetchDocsSearchIndex(url: string): Promise<DocsSearchIndexEntry[]> {
+  try {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      return []
+    }
+
+    const index: unknown = await response.json()
+
+    return Array.isArray(index) ? index : []
+  } catch {
+    return []
+  }
+}
+
 export function useDocsSearchIndex(
   query: string,
   isOpen: boolean = false,
   selectedCategory: SearchFilter = 'all',
 ): DocsSearchHookResult {
-  const docsIndex = useMemo(() => buildIndex(), [])
+  const { data: rawDocsIndex = [] } = useSWR<DocsSearchIndexEntry[]>(
+    isOpen ? '/docs-search-index.generated.json' : null,
+    fetchDocsSearchIndex,
+  )
+  const docsIndex = useMemo(() => buildIndex(rawDocsIndex), [rawDocsIndex])
 
   const trimmedQuery = query.trim()
   const debouncedQuery = useDebounce(trimmedQuery, SEARCH_DEBOUNCE_MS)
@@ -523,12 +486,21 @@ export function useDocsSearchIndex(
 
   const backendQuery = debouncedQuery.length >= MIN_BACKEND_QUERY_LENGTH ? debouncedQuery : ''
 
+  const entryKinds =
+    selectedCategory === 'models'
+      ? MODEL_ENTRY_KINDS
+      : selectedCategory === 'datacards'
+        ? [EntryKind.DATA_CARD, EntryKind.MIRRORED_DATA_CARD]
+        : ALL_SEARCHABLE_ENTRY_KINDS
+
+  const shouldSearchEntries = includesEntries && isOpen
+
   const {
     entries = [],
     isEntriesLoading,
     isEntriesError,
   } = useListEntries(
-    undefined,
+    entryKinds,
     EMPTY_FILTER,
     '',
     EMPTY_FILTER,
@@ -538,10 +510,12 @@ export function useDocsSearchIndex(
     backendQuery,
     false,
     '',
-    includesEntries && isOpen,
+    true,
+    false,
+    shouldSearchEntries,
   )
 
-  const entryIndex = useMemo(() => normaliseEntries(entries), [entries])
+  const entryResults = useMemo(() => mapEntryResults(entries), [entries])
 
   const docsResults = useMemo(
     () => (includesDocs ? searchDocs(docsIndex, trimmedQuery) : []),
@@ -551,27 +525,26 @@ export function useDocsSearchIndex(
   const isDebouncing =
     includesEntries && trimmedQuery.length >= MIN_BACKEND_QUERY_LENGTH && trimmedQuery !== debouncedQuery
 
-  const entryResults = useMemo(() => {
-    if (!includesEntries || isDebouncing) {
-      return []
+  const showEntryResults = shouldSearchEntries && !isDebouncing
+
+  const visibleEntryResults = useMemo(() => {
+    if (trimmedQuery || selectedCategory !== 'all') {
+      return entryResults
     }
 
-    return searchEntries(entryIndex, debouncedQuery, selectedCategory)
-  }, [debouncedQuery, entryIndex, includesEntries, isDebouncing, selectedCategory])
+    return CATEGORY_ORDER.filter((category) => category !== 'docs').flatMap((category) =>
+      entryResults.filter((result) => result.category === category).slice(0, MAX_START_SCREEN_ENTRIES_PER_CATEGORY),
+    )
+  }, [entryResults, selectedCategory, trimmedQuery])
 
-  const results = useMemo(() => {
-    const combined = [...docsResults, ...entryResults]
-
-    if (trimmedQuery) {
-      combined.sort(compareResults)
-    }
-
-    return limitResults(combined, selectedCategory)
-  }, [docsResults, entryResults, selectedCategory, trimmedQuery])
+  const results = useMemo(
+    () => limitResults([...docsResults, ...(showEntryResults ? visibleEntryResults : [])], selectedCategory),
+    [docsResults, selectedCategory, showEntryResults, visibleEntryResults],
+  )
 
   return {
     results,
-    size: docsIndex.length + entryIndex.length,
+    size: docsIndex.length + entryResults.length,
     isLoading: includesEntries && (isEntriesLoading || isDebouncing),
     isError: isEntriesError,
   }

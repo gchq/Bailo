@@ -59,7 +59,6 @@ export interface DocsSearchQueryTerms {
 
 export type DocsSearchResultKind = 'page' | 'heading'
 export type DocsSearchCategory = 'docs' | 'datacards' | 'models'
-export type EntrySearchCategory = Exclude<DocsSearchCategory, 'docs'>
 export type DocsSearchFilter = DocsSearchCategory | 'all'
 
 export interface DocsSearchCategoryOption {
@@ -70,16 +69,6 @@ export interface DocsSearchCategoryOption {
 export interface DocsSearchDialogProps {
   open: boolean
   onClose: () => void
-}
-
-export interface EntrySearchDocument {
-  key: string
-  slug: string
-  category: EntrySearchCategory
-  title: string
-  breadcrumb: string
-  text: string
-  href: string
 }
 
 export interface DocsSearchResult {

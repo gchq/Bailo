@@ -41,12 +41,14 @@ type SearchCategory = SearchFilter
 
 const CATEGORY_OPTIONS: DocsSearchCategoryOption[] = [
   { value: 'all', label: 'All' },
-  { value: 'docs', label: 'Docs' },
-  { value: 'datacards', label: 'Datacards' },
+
   { value: 'models', label: 'Models' },
+  { value: 'datacards', label: 'Datacards' },
+  { value: 'docs', label: 'Docs' },
 ]
 
-const SECTION_ORDER: DocsSearchCategory[] = ['docs', 'models', 'datacards']
+const DEFAULT_SECTION_ORDER: DocsSearchCategory[] = ['models', 'datacards', 'docs']
+const HELP_SECTION_ORDER: DocsSearchCategory[] = ['docs', 'models', 'datacards']
 
 const SECTION_TITLES: Record<DocsSearchCategory, string> = {
   docs: 'User documentation',
@@ -160,6 +162,8 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
 
   const { results, isLoading, isError } = useDocsSearchIndex(query, open, category)
 
+  const sectionOrder = router.pathname === '/help' ? HELP_SECTION_ORDER : DEFAULT_SECTION_ORDER
+
   const sections = useMemo<ResultSection[]>(() => {
     const grouped: Record<DocsSearchCategory, DocsSearchResult[]> = {
       docs: [],
@@ -171,7 +175,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
       grouped[result.category].push(result)
     }
 
-    return SECTION_ORDER.flatMap((sectionCategory) => {
+    return sectionOrder.flatMap((sectionCategory) => {
       const rows = groupResults(grouped[sectionCategory], sectionCategory)
 
       return rows.length > 0
@@ -184,7 +188,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
           ]
         : []
     })
-  }, [results])
+  }, [results, sectionOrder])
 
   const displayRows = useMemo(() => sections.flatMap((section) => section.rows), [sections])
   const rowIndexes = useMemo(() => new Map(displayRows.map((row, index) => [row.key, index])), [displayRows])
@@ -359,7 +363,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
       <DialogContent
         sx={{
           p: 0,
-          maxHeight: 'min(60vh, 480px)',
+          maxHeight: 'min(60vh, 720px)',
         }}
       >
         {entriesUnavailable && (
