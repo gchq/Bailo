@@ -726,6 +726,13 @@ async function calculateLifecycleComplianceMetrics(
     },
     { $unwind: '$model' },
     {
+      $match: {
+        ...(organisation && {
+          'model.organisation': organisation,
+        }),
+      },
+    },
+    {
       $project: {
         _id: 0,
         entryId: '$modelId',
@@ -752,11 +759,6 @@ async function calculateLifecycleComplianceMetrics(
       },
     },
   ]
-
-  // Filter by the referenced model's organisation when one is provided.
-  if (organisation !== undefined) {
-    openLifecycleReviewsPipeline.push({ $match: { modelOrganisation: organisation } })
-  }
 
   // Drop the temporary organisation field from the final projection.
   openLifecycleReviewsPipeline.push({ $unset: 'modelOrganisation' })
