@@ -1,6 +1,8 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { ImageRef } from '../../../models/Release.js'
 import log from '../../../services/log.js'
@@ -65,6 +67,20 @@ export const handleRegistryEvents = [
      */
 
     for (const event of events) {
+      const user = event.actor?.name ?? ''
+
+      if (event?.action === 'pull') {
+        const auditReq = Object.assign(Object.create(req), { audit: AuditInfo.RegistryAuthorisePull }) as Request
+        await audit.onRegistryImagePull(auditReq, user)
+        continue
+      }
+
+      if (event?.action === 'delete') {
+        const auditReq = Object.assign(Object.create(req), { audit: AuditInfo.RegistryAuthoriseDelete }) as Request
+        await audit.onRegistryImageDelete(auditReq, user)
+        continue
+      }
+
       if (event?.action !== 'push') {
         log.debug({ event }, 'Ignoring registry event for non-push action')
         continue
@@ -108,6 +124,9 @@ export const handleRegistryEvents = [
       const repositoryToken = await issueAccessToken({ dn: config.registry.service }, [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
+
+      const auditReqPush = Object.assign(Object.create(req), { audit: AuditInfo.RegistryAuthorisePush }) as Request
+      await audit.onRegistryImagePush(auditReqPush, user)
 
       try {
         const status = await rerunImageScanNoAuth(imageRef, repositoryToken)

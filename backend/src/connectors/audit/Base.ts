@@ -11,7 +11,6 @@ import { ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { UserInterface } from '../../models/User.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
@@ -571,12 +570,9 @@ export abstract class BaseAuditConnector {
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 
-  abstract onRegistryLogin(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryIssueAccessToken(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryIssueRefreshToken(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryAuthorisePull(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryAuthorisePush(req: Request, user: UserInterface): Promise<void>
-  abstract onRegistryAuthoriseDelete(req: Request, user: UserInterface): Promise<void>
+  abstract onRegistryImagePull(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImagePush(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImageDelete(req: Request, userDn: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
