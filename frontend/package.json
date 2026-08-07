@@ -58,7 +58,7 @@
     "remark-gfm": "4.0.1",
     "semver": "^7.8.1",
     "sharp": "^0.35.3",
-    "swr": "^2.4.1",
+    "swr": "^2.5.0",
     "uuid": "^14.0.0"
   },
   "devDependencies": {
