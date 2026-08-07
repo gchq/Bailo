@@ -14,10 +14,9 @@
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-ARG MAILCRAB_VERSION=v1.6.4
-
 FROM chrislusf/seaweedfs:4.40@sha256:52194fba4fecd0083c842158b3a902ba6e04a63619b2b0efcd08007bdb6a4602 AS seaweedfs-bin
 FROM distribution/distribution@sha256:1eda63c5b5ba2c53b8b7e7071d7e67ca42e93c4ea5d9015c2b8160eb09a95d61 AS registry-bin
+FROM marlonb/mailcrab:v1.8.0@sha256:8d19e5c1ffe1750993da7bd63724331ccc0bd226159cc4dfa89156209fe34b4a AS mailcrab-bin
 
 FROM python:3.14.2-trixie@sha256:4878b7ad12a3c49e49c775ea617df0d2169605eaffc5ede31977e1c3dd913eae AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -95,10 +94,7 @@ ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem \
 
 COPY infrastructure/standalone/registry.conf /registry.conf
 
-ARG MAILCRAB_VERSION
-RUN wget -q https://github.com/tweedegolf/mailcrab/releases/download/${MAILCRAB_VERSION}/mailcrab-linux-x86-64-gnu-${MAILCRAB_VERSION} && \
-    install -m755 mailcrab-linux-x86-64-gnu-${MAILCRAB_VERSION} /usr/local/bin/mailcrab && \
-    rm -f mailcrab-linux-x86-64-gnu-${MAILCRAB_VERSION}
+COPY --from=mailcrab-bin /app/mailcrab /usr/local/bin/mailcrab
 
 # Backend
 WORKDIR /app/backend
