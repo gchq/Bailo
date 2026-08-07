@@ -46,7 +46,7 @@
     "@types/styled-components": "^5.1.36",
     "@types/swagger-ui-dist": "^3.30.6",
     "eslint": "10.8.0",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.3.0",
     "typescript": "6.0.3"
   },
   "scarfSettings": {
