@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 export const getLifecycleComplianceMetricsSchema = z.object({
   query: z
     .object({
-      weeksUntilDue: z.coerce.number(),
+      weeksUntilDue: z.coerce.number().int().min(0).max(52),
     })
     .strict(),
 })

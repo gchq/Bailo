@@ -1302,7 +1302,7 @@ export class BaseMetricsConnector {
 
   async getLifecycleComplianceMetrics(
     user: UserInterface,
-    weeksUntilDue: number,
+    weeksUntilDue: number = Infinity,
   ): Promise<GetLifecycleComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
