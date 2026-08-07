@@ -1,6 +1,7 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
+import { EntryKind } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
@@ -141,6 +142,14 @@ export class BasicAuthorisationConnector {
           !(await authentication.hasRole(user, Roles.Admin))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
+        }
+
+        if (
+          ModelAction.Create === action &&
+          model.kind === EntryKind.UntrustedModel &&
+          !(await authentication.hasRole(user, Roles.UntrustedModel))
+        ) {
+          return { id: model.id, success: false, info: 'You do not have permission to manage untrusted models.' }
         }
 
         if (ModelAction.Import === action && (await missingRequiredRole(user, model, ['owner']))) {

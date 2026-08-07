@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.3.7-ubi9
+    image: mongodb/mongodb-community-server:8.3.7-ubi9@sha256:5df20e4e490389b1d2c728e2b5c374aaec7be0c70a11fb7ce17661cf4a2c0432
     networks:
       internal:
     environment:
@@ -33,28 +33,45 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       start_period: 30s
-    ports:
-      - 27017:27017
 
-  minio:
-    image: bitnamilegacy/minio:2025.7.23
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.40@sha256:52194fba4fecd0083c842158b3a902ba6e04a63619b2b0efcd08007bdb6a4602
     networks:
-      internal:
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      - internal
+    command:
+      - server
+      - -dir=/data
+      - -master.port=9333
+      - -volume.port=8080
+      - -volume.max=100
+      - -filer
+      - -filer.port=8888
+      - -s3
+      - -s3.port=8333
+      - -s3.config=/etc/seaweedfs/s3_config.json
+      - -ip.bind=0.0.0.0
     volumes:
-      - minioVolume:/bitnami/minio
+      - seaweedfsVolume:/data
+      - ./infrastructure/seaweedfs/s3_config.json:/etc/seaweedfs/s3_config.json:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -fsS http://localhost:9333/cluster/status >/dev/null && curl -fsS http://localhost:8333/ >/dev/null 2>&1
+          || curl -so /dev/null -w "%{http_code}" http://localhost:8333/ | grep -q 403',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   nginx:
-    image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim
+    image: nginxinc/nginx-unprivileged:1.31.2-alpine3.23-slim@sha256:eed3e4c2f3f9285e80610238e0b18fe1bf311c50559434db1969b1cfabd5518b
     networks:
       default:
       internal:
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - ${EXTERNAL_PORT}:8080
     depends_on:
       - frontend
       - backend
@@ -68,8 +85,8 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
       REGISTRY_HTTP_TLS_KEY: /certs/key.pem
 
-      REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
-      REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+      REGISTRY_STORAGE_S3_ACCESSKEY: bailoadmin
+      REGISTRY_STORAGE_S3_SECRETKEY: bailoadmin
 
       REGISTRY_AUTH: token
       REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
@@ -105,8 +122,8 @@ services:
     depends_on:
       registry:
         condition: service_started
-      minio:
-        condition: service_started
+      seaweedfs:
+        condition: service_healthy
       mongo:
         condition: service_started
     security_opt:
@@ -116,8 +133,8 @@ services:
       - NODE_CONFIG_ENV=${INSTANCE_NAME}_docker_compose
 
 volumes:
-  minioVolume:
-    name: ${INSTANCE_NAME}_minioVolume
+  seaweedfsVolume:
+    name: ${INSTANCE_NAME}_seaweedfsVolume
   mongoVolume:
     name: ${INSTANCE_NAME}_mongoVolume
 
