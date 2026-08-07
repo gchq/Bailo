@@ -5,7 +5,11 @@ import { popularTagsForEntries } from '../../../../services/model.js'
 import { registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
-export const getPopularTagsSchema = z.object({})
+export const getPopularTagsSchema = z.object({
+  query: z.object({
+    limit: z.coerce.number().int().positive().max(100).optional(),
+  }),
+})
 
 registerPath({
   method: 'get',
@@ -31,8 +35,10 @@ interface GetPopularTagsResponse {
 
 export const getPopularTags = [
   async (req: Request, res: Response<GetPopularTagsResponse>): Promise<void> => {
-    const _ = parse(req, getPopularTagsSchema)
-    const tags = await popularTagsForEntries()
+    const {
+      query: { limit },
+    } = parse(req, getPopularTagsSchema)
+    const tags = await popularTagsForEntries(limit)
     res.json({ tags })
   },
 ]

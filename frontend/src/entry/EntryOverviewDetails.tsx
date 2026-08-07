@@ -1,4 +1,3 @@
-import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -8,17 +7,16 @@ import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
-import Restricted from 'src/common/Restricted'
+import TagSelector from 'src/common/TagSelector'
 import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import { EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -30,7 +28,6 @@ interface OrganisationAndStateDetailsProps {
 
 export default function EntryOverviewDetails({ entry, mutateEntry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
   const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
   const [reviewDate, setReviewDate] = useState<PickerValue>()
@@ -213,23 +210,15 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
           {collaboratorList}
         </Stack>
         <Box>
-          <Restricted action='editEntry' fallback={<></>}>
-            <Button
-              sx={{ width: 'fit-content' }}
-              size='small'
-              startIcon={<LocalOffer />}
-              onClick={(event) => setAnchorEl(event.currentTarget)}
-            >
-              {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
-            </Button>
-          </Restricted>
-          <EntryTagSelector
-            anchorEl={anchorEl}
-            setAnchorEl={setAnchorEl}
+          <Typography>
+            <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Tags: </span>
+          </Typography>
+          <TagSelector
             onChange={handleEntryTagOnChange}
-            tags={entry.tags}
             errorText={entryTagUpdateErrorMessage}
-          />
+            tags={entry.tags}
+            restrictedToAction={'editEntry'}
+          ></TagSelector>
         </Box>
       </Stack>
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
