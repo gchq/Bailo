@@ -117,6 +117,7 @@ def test_download_database_verifies_digest(mock_container_cls, mock_client_cls, 
         with patch.object(trivy, "safe_extract"):
             trivy.download_database()
 
+    assert os.path.isdir(str(tmp_path / "db")), "DB_DIR should exist after successful download"
     mock_container_cls.assert_called_once_with(settings.DB_IMAGE)
     mock_client.get_manifest.assert_called_once()
     mock_client.download_blob.assert_called_once()
@@ -144,8 +145,7 @@ def test_download_database_rejects_bad_digest(mock_container_cls, mock_client_cl
         with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
             trivy.download_database()
 
-    outfile = os.path.join(str(tmp_path / "db"), "expectedhash.tar")
-    assert not os.path.exists(outfile), "Corrupted file should be cleaned up"
+    assert not os.path.exists(str(tmp_path / "db")), "DB_DIR should not be created on failure"
 
 
 @patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
@@ -159,3 +159,49 @@ def test_download_database_rejects_empty_manifest(mock_container_cls, mock_clien
     with patch.object(trivy, "get_settings", return_value=settings):
         with pytest.raises(RuntimeError, match="contains no layers"):
             trivy.download_database()
+
+
+@patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
+@patch("bailo_artefactscan_api.trivy.oras.container.Container")
+def test_download_database_atomic_on_failure(mock_container_cls, mock_client_cls, tmp_path):
+    """If second layer fails, original DB_DIR stays intact."""
+    good_content = b"good layer"
+    good_digest = "sha256:" + hashlib.sha256(good_content).hexdigest()
+    bad_digest = "sha256:badhash"
+    manifest = {
+        "layers": [
+            {"digest": good_digest, "mediaType": "application/vnd.oci.image.layer.v1.tar"},
+            {"digest": bad_digest, "mediaType": "application/vnd.oci.image.layer.v1.tar"},
+        ]
+    }
+
+    mock_client = mock_client_cls.return_value
+    mock_client.get_manifest.return_value = manifest
+
+    call_count = 0
+
+    def fake_download(container, dig, outfile):
+        nonlocal call_count
+        os.makedirs(os.path.dirname(outfile), exist_ok=True)
+        with open(outfile, "wb") as f:
+            call_count += 1
+            f.write(good_content if call_count == 1 else b"corrupted")
+        return outfile
+
+    mock_client.download_blob.side_effect = fake_download
+
+    db_dir = tmp_path / "db"
+    db_dir.mkdir()
+    sentinel = db_dir / "existing.txt"
+    sentinel.write_text("original")
+
+    settings = trivy.Settings(DB_DIR=str(db_dir))
+
+    with patch.object(trivy, "get_settings", return_value=settings), patch("tarfile.open") as mock_tar:
+        mock_tar.return_value.__enter__ = Mock()
+        mock_tar.return_value.__exit__ = Mock(return_value=False)
+        with patch.object(trivy, "safe_extract"):
+            with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
+                trivy.download_database()
+
+    assert sentinel.read_text() == "original", "Original DB should be preserved on failure"
