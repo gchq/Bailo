@@ -3,25 +3,33 @@ import {
   useGetNoReleasesPolicyMetrics,
   useGetRolePolicyMetrics,
   useGetUnapprovedReleasesPolicyMetrics,
+  useLifecyclePolicyMetrics,
 } from 'actions/metrics'
 import { ReactElement, useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
+import PolicyLifecycleMetricsCharts from 'src/metrics/PolicyLifecycleMetricsCharts'
 import PolicyNoReleasesMetricsCharts from 'src/metrics/PolicyNoReleasesMetricsCharts'
 import PolicyRoleMetricsCharts from 'src/metrics/PolicyRoleMetricsCharts'
 import PolicyUnapprovedReleasesCharts from 'src/metrics/PolicyUnapprovedReleasesCharts'
-import { BaseNoReleaseMetrics, PolicyRoleMetrics } from 'types/types'
+import { BaseLifecycleMetrics, BaseNoReleaseMetrics, PolicyRoleMetrics } from 'types/types'
 
 export const SelectedMetricKind = {
   MISSING_ROLES: 'role',
   NO_RELEASES: 'noReleases',
   UNAPPROVED_RELEASES: 'unapprovedReleases',
+  LIFECYCLE: 'lifecycle',
 } as const
 export type SelectedMetricKindKeys = (typeof SelectedMetricKind)[keyof typeof SelectedMetricKind]
 
+export type WeekFilterOptions = 0 | 2 | 10
+
 export default function PolicyMetrics() {
+  const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const [dueDateWeekFilter, setDueDateWeekFilter] = useState<WeekFilterOptions>(2)
+
   const { rolePolicyMetrics, isRolePolicyMetricsLoading, isRolePolicyMetricsError } = useGetRolePolicyMetrics()
   const { noReleasesPolicyMetrics, isNoReleasesPolicyMetricsLoading, isNoReleasesPolicyMetricsError } =
     useGetNoReleasesPolicyMetrics()
@@ -30,8 +38,8 @@ export default function PolicyMetrics() {
     isUnapprovedReleasesPolicyMetricsLoading,
     isUnapprovedReleasesPolicyMetricsError,
   } = useGetUnapprovedReleasesPolicyMetrics()
-
-  const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const { lifecyclePolicyMetrics, isLifecyclePolicyMetricsLoading, isLifecyclePolicyMetricsError } =
+    useLifecyclePolicyMetrics(dueDateWeekFilter)
 
   const filteredDataset = useCallback(
     (metricData) => {
@@ -43,7 +51,7 @@ export default function PolicyMetrics() {
     [selectedOrganisation],
   )
   const [selectedMetric, setSelectedMetric] = useState<SelectedMetricKindKeys>(SelectedMetricKind.MISSING_ROLES)
-  const selectedData: undefined | PolicyRoleMetrics | BaseNoReleaseMetrics = (() => {
+  const selectedData: undefined | PolicyRoleMetrics | BaseNoReleaseMetrics | BaseLifecycleMetrics = (() => {
     switch (selectedMetric) {
       case SelectedMetricKind.MISSING_ROLES:
         return rolePolicyMetrics
@@ -51,6 +59,8 @@ export default function PolicyMetrics() {
         return noReleasesPolicyMetrics
       case SelectedMetricKind.UNAPPROVED_RELEASES:
         return noReleasesPolicyMetrics
+      case SelectedMetricKind.LIFECYCLE:
+        return lifecyclePolicyMetrics
       default:
         return rolePolicyMetrics
     }
@@ -70,11 +80,21 @@ export default function PolicyMetrics() {
         return <PolicyNoReleasesMetricsCharts data={filteredDataset(noReleasesPolicyMetrics)} />
       case SelectedMetricKind.UNAPPROVED_RELEASES:
         return <PolicyUnapprovedReleasesCharts data={filteredDataset(unapprovedReleasesPolicyMetrics)} />
+      case SelectedMetricKind.LIFECYCLE:
+        return (
+          <PolicyLifecycleMetricsCharts
+            data={filteredDataset(lifecyclePolicyMetrics)}
+            weekFilter={dueDateWeekFilter}
+            weekFilterOnChange={(newFilter) => setDueDateWeekFilter(newFilter)}
+          />
+        )
       default:
         return <></>
     }
   }, [
+    dueDateWeekFilter,
     filteredDataset,
+    lifecyclePolicyMetrics,
     noReleasesPolicyMetrics,
     rolePolicyMetrics,
     selectedData,
@@ -94,7 +114,16 @@ export default function PolicyMetrics() {
     return <MessageAlert message={isUnapprovedReleasesPolicyMetricsError.info.message} />
   }
 
-  if (isRolePolicyMetricsLoading || isNoReleasesPolicyMetricsLoading || isUnapprovedReleasesPolicyMetricsLoading) {
+  if (isLifecyclePolicyMetricsError) {
+    return <MessageAlert message={isLifecyclePolicyMetricsError.info.message} />
+  }
+
+  if (
+    isRolePolicyMetricsLoading ||
+    isNoReleasesPolicyMetricsLoading ||
+    isUnapprovedReleasesPolicyMetricsLoading ||
+    isLifecyclePolicyMetricsLoading
+  ) {
     return <Loading />
   }
 
