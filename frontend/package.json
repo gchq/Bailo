@@ -62,8 +62,8 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.1098.0",
-    "@aws-sdk/s3-request-presigner": "^3.1098.0",
+    "@aws-sdk/client-s3": "^3.1102.0",
+    "@aws-sdk/s3-request-presigner": "^3.1102.0",
     "@eslint/js": "10.0.1",
     "@next/bundle-analyzer": "^16.3.0",
     "@testing-library/react": "^16.3.2",
