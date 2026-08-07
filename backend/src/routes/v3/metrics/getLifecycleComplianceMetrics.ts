@@ -21,7 +21,7 @@ export const LifecycleSummarySchema = z.object({
 
 export const EntryLifecycleMetricsSchema = z.object({
   entryId: z.string(),
-  dueDate: z.string(),
+  dueDate: z.string().datetime(),
   modelOwners: z.array(z.string()).openapi({ example: ['user:user'] }),
 })
 
