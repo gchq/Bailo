@@ -1,6 +1,10 @@
 name: bailo-prod
 
 services:
+  nginx:
+    ports:
+      - ${EXTERNAL_PORT}:8080
+
   clamd:
     image: clamav/clamav:1.4.3_base@sha256:629a3050df6a706aedb31859fbb8139e9aaf8f56b0ffefbf251b8358a7c9e76c
     networks:

@@ -6,6 +6,7 @@
     "build": "next build",
     "cy:open": "cypress open",
     "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
+    "cy:run-mirror": "cypress run --spec  \"cypress/e2e/cross-instance/**/*\"",
     "start": "next start",
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings 0 actions cypress pages src types utils",
     "style": "prettier --write .",
@@ -61,6 +62,8 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1098.0",
+    "@aws-sdk/s3-request-presigner": "^3.1098.0",
     "@eslint/js": "10.0.1",
     "@next/bundle-analyzer": "^16.2.12",
     "@testing-library/react": "^16.3.2",

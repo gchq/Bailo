@@ -57,6 +57,10 @@ updates:
       types-stack:
         patterns:
           - '@types/*'
+      aws-sdk-stack:
+        patterns:
+          - '@aws-sdk/*'
+          - '@smithy/*'
 
   # Backend
   - package-ecosystem: 'npm'
