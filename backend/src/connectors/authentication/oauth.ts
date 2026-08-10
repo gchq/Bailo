@@ -21,7 +21,7 @@ const OauthEntityKind = {
 const defaultLoginRedirect = '/'
 
 function getSafeLoginRedirect(redirect: unknown): string {
-  if (typeof redirect !== 'string' || redirect.startsWith('//')) {
+  if (typeof redirect !== 'string') {
     return defaultLoginRedirect
   }
 
@@ -30,6 +30,16 @@ function getSafeLoginRedirect(redirect: unknown): string {
   }
 
   try {
+    const decodedPath = decodeURIComponent(redirect.split(/[?#]/, 1)[0]) // Normalise encoded paths
+    if (
+      decodedPath.startsWith('//') || // Double path
+      decodedPath.includes('\\') || // Backslash
+      /[\r\n]/.test(decodedPath) || // Newline
+      decodedPath.split('/').some((segment) => segment === '.' || segment === '..') // Path traversal
+    ) {
+      return defaultLoginRedirect
+    }
+
     const baseUrl = new URL(
       `${config.app.protocol || 'http'}://${config.app.host || 'localhost'}${config.app.port ? `:${config.app.port}` : ''}`,
     )

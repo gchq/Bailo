@@ -79,7 +79,14 @@ describe('connectors > authentication > oauth', () => {
     ['/model/example?tab=files#content', '/model/example?tab=files#content'],
     ['https://malicious.example/path', '/'],
     ['//malicious.example/path', '/'],
+    ['/../secret', '/'],
+    ['/%2e%2e/secret', '/'],
+    ['/folder/..%2fsecret', '/'],
     ['not-a-path', '/'],
+    [String.raw`/\evil`, '/'],
+    ['/%2F%2Fmalicious.example', '/'],
+    ['/%5C%5Cevil', '/'],
+    ['/%0d%0aLocation:https://evil.example', '/'],
   ])(
     'getRoutes > redirects through login and returns to a safe location',
     async (requestedRedirect, expectedRedirect) => {
