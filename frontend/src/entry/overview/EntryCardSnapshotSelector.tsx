@@ -39,8 +39,15 @@ type EntryCardSnapshotSelectorProps = {
   onSelect: (snapshot: EntryCardSnapshot) => void
 }
 
-export function buildSnapshots(revisions: EntryCardRevisionInterface[]): EntryCardSnapshot[] {
-  const ordered = [...revisions].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+export type EntryCardSnapshotStream = 'local' | 'mirrored'
+
+export function buildSnapshots(
+  revisions: EntryCardRevisionInterface[],
+  stream?: EntryCardSnapshotStream,
+): EntryCardSnapshot[] {
+  const ordered = [...revisions]
+    .filter((revision) => stream === undefined || revision.mirrored === (stream === 'mirrored'))
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 
   let currentLocal: number | undefined
   let currentMirrored: number | undefined

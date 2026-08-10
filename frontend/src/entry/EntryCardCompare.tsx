@@ -20,6 +20,7 @@ import Loading from 'src/common/Loading'
 import EntryCardSnapshotSelector, {
   buildSnapshots,
   EntryCardSnapshot,
+  EntryCardSnapshotStream,
 } from 'src/entry/overview/EntryCardSnapshotSelector'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -138,6 +139,20 @@ export default function EntryCardCompare({
 
   const hasLocalPair = !!fromLocalCard && !!toLocalCard
   const hasMirroredPair = !!fromMirroredCard && !!toMirroredCard
+  const fromIsMirroredModel = fromEntry?.kind === EntryKind.MIRRORED_MODEL
+  const toIsMirroredModel = toEntry?.kind === EntryKind.MIRRORED_MODEL
+  const isMixedModelComparison =
+    !!fromEntryId &&
+    !!toEntryId &&
+    fromIsMirroredModel !== toIsMirroredModel &&
+    (fromIsMirroredModel || toIsMirroredModel)
+
+  const effectiveFromCard = isMixedModelComparison
+    ? fromIsMirroredModel
+      ? fromMirroredCard
+      : fromLocalCard
+    : undefined
+  const effectiveToCard = isMixedModelComparison ? (toIsMirroredModel ? toMirroredCard : toLocalCard) : undefined
 
   const hasFromCard = !!fromLocalCard || !!fromMirroredCard
   const hasToCard = !!toLocalCard || !!toMirroredCard
@@ -145,13 +160,21 @@ export default function EntryCardCompare({
 
   const previewCard = fromLocalCard ?? fromMirroredCard
 
+  const mixedSchemaId =
+    effectiveFromCard && effectiveToCard && effectiveFromCard.schemaId === effectiveToCard.schemaId
+      ? effectiveToCard.schemaId
+      : undefined
   const localSchemaId =
-    hasLocalPair && fromLocalCard.schemaId === toLocalCard.schemaId ? toLocalCard.schemaId : undefined
+    !isMixedModelComparison && hasLocalPair && fromLocalCard.schemaId === toLocalCard.schemaId
+      ? toLocalCard.schemaId
+      : undefined
   const mirroredSchemaId =
-    hasMirroredPair && fromMirroredCard.schemaId === toMirroredCard.schemaId ? toMirroredCard.schemaId : undefined
+    !isMixedModelComparison && hasMirroredPair && fromMirroredCard.schemaId === toMirroredCard.schemaId
+      ? toMirroredCard.schemaId
+      : undefined
 
   const singleSideSchemaId = fromOnly ? previewCard?.schemaId : undefined
-  const chosenSchemaId = localSchemaId ?? mirroredSchemaId ?? singleSideSchemaId
+  const chosenSchemaId = mixedSchemaId ?? localSchemaId ?? mirroredSchemaId ?? singleSideSchemaId
 
   const {
     schema: chosenSchema,
@@ -159,8 +182,21 @@ export default function EntryCardCompare({
     isSchemaError: isSchemaError,
   } = useGetSchema(chosenSchemaId ?? '')
 
-  const fromSnapshots = useMemo(() => buildSnapshots(fromRevisions), [fromRevisions])
-  const toSnapshots = useMemo(() => buildSnapshots(toRevisions), [toRevisions])
+  const fromSnapshotStream: EntryCardSnapshotStream | undefined = isMixedModelComparison
+    ? fromIsMirroredModel
+      ? 'mirrored'
+      : 'local'
+    : undefined
+  const toSnapshotStream: EntryCardSnapshotStream | undefined = isMixedModelComparison
+    ? toIsMirroredModel
+      ? 'mirrored'
+      : 'local'
+    : undefined
+  const fromSnapshots = useMemo(
+    () => buildSnapshots(fromRevisions, fromSnapshotStream),
+    [fromRevisions, fromSnapshotStream],
+  )
+  const toSnapshots = useMemo(() => buildSnapshots(toRevisions, toSnapshotStream), [toRevisions, toSnapshotStream])
 
   const useMirroredLayout = hasMirroredPair
 
@@ -174,15 +210,24 @@ export default function EntryCardCompare({
     const fromMirroredState = fromMirroredCard?.metadata ?? {}
     const steps = fromOnly
       ? getStepsFromSchema(chosenSchema, {}, ['properties.contacts'], fromState, fromMirroredState)
-      : getStepsFromSchema(
-          chosenSchema,
-          {},
-          ['properties.contacts'],
-          toState,
-          toMirroredState,
-          fromState,
-          fromMirroredState,
-        )
+      : isMixedModelComparison
+        ? getStepsFromSchema(
+            chosenSchema,
+            {},
+            ['properties.contacts'],
+            effectiveToCard?.metadata ?? {},
+            {},
+            effectiveFromCard?.metadata ?? {},
+          )
+        : getStepsFromSchema(
+            chosenSchema,
+            {},
+            ['properties.contacts'],
+            toState,
+            toMirroredState,
+            fromState,
+            fromMirroredState,
+          )
     for (const step of steps) {
       step.steps = steps
     }
@@ -192,6 +237,9 @@ export default function EntryCardCompare({
     fromLocalCard?.metadata,
     fromMirroredCard?.metadata,
     fromOnly,
+    isMixedModelComparison,
+    effectiveFromCard?.metadata,
+    effectiveToCard?.metadata,
     toLocalCard?.metadata,
     toMirroredCard?.metadata,
   ])
@@ -251,7 +299,48 @@ export default function EntryCardCompare({
   }, [toEntry, toEntryId])
 
   useEffect(() => {
-    if (fromVersion !== undefined || fromMirroredVersion !== undefined) {
+    if (!isMixedModelComparison) {
+      return
+    }
+
+    const hasIrrelevantFromVersion =
+      (fromSnapshotStream === 'local' && fromMirroredVersion !== undefined) ||
+      (fromSnapshotStream === 'mirrored' && fromVersion !== undefined)
+    const hasIrrelevantToVersion =
+      (toSnapshotStream === 'local' && toMirroredVersion !== undefined) ||
+      (toSnapshotStream === 'mirrored' && toVersion !== undefined)
+
+    if (!hasIrrelevantFromVersion && !hasIrrelevantToVersion) {
+      return
+    }
+
+    updateQuery(router, {
+      ...(hasIrrelevantFromVersion && {
+        [fromSnapshotStream === 'local' ? 'fromMirroredVersion' : 'fromVersion']: undefined,
+      }),
+      ...(hasIrrelevantToVersion && {
+        [toSnapshotStream === 'local' ? 'toMirroredVersion' : 'toVersion']: undefined,
+      }),
+    })
+  }, [
+    fromMirroredVersion,
+    fromSnapshotStream,
+    fromVersion,
+    isMixedModelComparison,
+    router,
+    toMirroredVersion,
+    toSnapshotStream,
+    toVersion,
+  ])
+
+  useEffect(() => {
+    const selectedVersion =
+      fromSnapshotStream === 'mirrored'
+        ? fromMirroredVersion
+        : fromSnapshotStream === 'local'
+          ? fromVersion
+          : (fromVersion ?? fromMirroredVersion)
+    if (selectedVersion !== undefined) {
       defaultedFromEntryId.current = undefined
       return
     }
@@ -260,10 +349,24 @@ export default function EntryCardCompare({
       defaultedFromEntryId.current = fromEntryId
       setSnapshot(QueryDiffSide.From, latestSnapshot)
     }
-  }, [fromEntryId, fromMirroredVersion, fromSnapshots, fromVersion, isFromRevisionsLoading, setSnapshot])
+  }, [
+    fromEntryId,
+    fromMirroredVersion,
+    fromSnapshots,
+    fromSnapshotStream,
+    fromVersion,
+    isFromRevisionsLoading,
+    setSnapshot,
+  ])
 
   useEffect(() => {
-    if (toVersion !== undefined || toMirroredVersion !== undefined) {
+    const selectedVersion =
+      toSnapshotStream === 'mirrored'
+        ? toMirroredVersion
+        : toSnapshotStream === 'local'
+          ? toVersion
+          : (toVersion ?? toMirroredVersion)
+    if (selectedVersion !== undefined) {
       defaultedToEntryId.current = undefined
       return
     }
@@ -272,7 +375,7 @@ export default function EntryCardCompare({
       defaultedToEntryId.current = toEntryId
       setSnapshot(QueryDiffSide.To, latestSnapshot)
     }
-  }, [isToRevisionsLoading, setSnapshot, toEntryId, toMirroredVersion, toSnapshots, toVersion])
+  }, [isToRevisionsLoading, setSnapshot, toEntryId, toMirroredVersion, toSnapshots, toSnapshotStream, toVersion])
 
   useEffect(() => {
     setSplitSchema(initialSplit)
@@ -328,9 +431,15 @@ export default function EntryCardCompare({
   const hasAnyVersionFrom = !!fromEntryId && (fromVersion !== undefined || fromMirroredVersion !== undefined)
   const hasAnyVersionTo = !!toEntryId && (toVersion !== undefined || toMirroredVersion !== undefined)
 
-  const localSchemasDiverge = hasLocalPair && fromLocalCard.schemaId !== toLocalCard.schemaId
-  const mirroredSchemasDiverge = hasMirroredPair && fromMirroredCard.schemaId !== toMirroredCard.schemaId
-  const schemasDiverge = localSchemasDiverge || mirroredSchemasDiverge
+  const mixedSchemasDiverge =
+    isMixedModelComparison &&
+    !!effectiveFromCard &&
+    !!effectiveToCard &&
+    effectiveFromCard.schemaId !== effectiveToCard.schemaId
+  const localSchemasDiverge = !isMixedModelComparison && hasLocalPair && fromLocalCard.schemaId !== toLocalCard.schemaId
+  const mirroredSchemasDiverge =
+    !isMixedModelComparison && hasMirroredPair && fromMirroredCard.schemaId !== toMirroredCard.schemaId
+  const schemasDiverge = mixedSchemasDiverge || localSchemasDiverge || mirroredSchemasDiverge
 
   const canRenderForm = !loading && !!chosenSchema && splitSchema.steps.length > 0 && !schemasDiverge
 
@@ -484,7 +593,7 @@ export default function EntryCardCompare({
               setSplitSchema={setSplitSchema}
               canEdit={false}
               compareMode={!fromOnly}
-              mirroredModel={fromOnly ? !!fromMirroredCard : useMirroredLayout}
+              mirroredModel={fromOnly ? !!fromMirroredCard : !isMixedModelComparison && useMirroredLayout}
             />
           )}
         </Stack>
