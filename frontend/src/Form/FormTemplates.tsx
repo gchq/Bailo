@@ -142,11 +142,14 @@ export function ObjectFieldTemplate({
               {title}
             </Typography>
             <Tooltip title='Share'>
-              <Link href={`#${fieldPathId.$id}`} onClick={() => registry.formContext.onShare(fieldPathId.$id)}>
-                <IconButton>
-                  <Share fontSize='small' color='secondary' />
-                </IconButton>
-              </Link>
+              <IconButton
+                component={Link}
+                href={`#${fieldPathId.$id}`}
+                onClick={() => registry.formContext.onShare(fieldPathId.$id)}
+                aria-label='Share'
+              >
+                <Share fontSize='small' color='secondary' />
+              </IconButton>
             </Tooltip>
           </Stack>
           <Typography variant='caption'>{description}</Typography>

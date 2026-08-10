@@ -95,6 +95,12 @@ export default function MetricsHeader({
                       <MenuItem key={SelectedMetricKind.NO_RELEASES} value={SelectedMetricKind.NO_RELEASES}>
                         models with no releases
                       </MenuItem>
+                      <MenuItem
+                        key={SelectedMetricKind.UNAPPROVED_RELEASES}
+                        value={SelectedMetricKind.UNAPPROVED_RELEASES}
+                      >
+                        models with unapproved releases
+                      </MenuItem>
                     </Select>
                     <em>for</em>
                   </>

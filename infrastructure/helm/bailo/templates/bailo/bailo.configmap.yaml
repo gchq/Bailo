@@ -169,6 +169,7 @@ data:
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
           adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}',
           complianceGroupName: '{{ .Values.oauth.cognito.complianceGroupName }}',
+          untrustedModelGroupName: '{{ .Values.oauth.cognito.untrustedModelGroupName }}',
         },
       },
 

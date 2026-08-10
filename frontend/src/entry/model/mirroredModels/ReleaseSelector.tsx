@@ -25,7 +25,7 @@ import MirrorInfo from 'src/common/MirrorInfo'
 import Paginate from 'src/common/Paginate'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
-import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
@@ -97,7 +97,13 @@ export default function ReleaseSelector({
         >
           <ListItemButton dense disabled={isAlreadySelected} onClick={handleToggle(release)}>
             <ListItemIcon>
-              <Checkbox edge='start' checked={isAlreadySelected || isChecked} tabIndex={-1} disableRipple />
+              <Checkbox
+                edge='start'
+                checked={isAlreadySelected || isChecked}
+                tabIndex={-1}
+                disableRipple
+                data-test={`releaseSelectorSemverCheckbox${release.semver}`}
+              />
             </ListItemIcon>
             <ListItemText
               primary={
@@ -126,7 +132,7 @@ export default function ReleaseSelector({
             }}
           >
             <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
-            <ReleaseAssetsResponses model={model} release={release} includeResponses={false} />
+            <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
           </Stack>
         </Stack>
       </ListItem>
@@ -166,7 +172,12 @@ export default function ReleaseSelector({
         </Typography>
         <HelpDialog title='Mirror Export Info' content={<MirrorInfo />} />
       </Stack>
-      <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
+      <Button
+        variant='outlined'
+        disabled={isReadOnly}
+        onClick={() => setIsDialogOpen(true)}
+        data-test='releaseSelectorSelectReleasesButton'
+      >
         Select releases
       </Button>
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} maxWidth='md' fullWidth>
@@ -188,7 +199,12 @@ export default function ReleaseSelector({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-          <Button onClick={handleAddReleases} disabled={checkedReleases.length === 0} variant='contained'>
+          <Button
+            onClick={handleAddReleases}
+            disabled={checkedReleases.length === 0}
+            variant='contained'
+            data-test='releaseSelectorConfirmReleasesButton'
+          >
             Add releases
           </Button>
         </DialogActions>
