@@ -36,6 +36,100 @@ exports[`services > review > findReviews > active reviews for a specific model 1
       },
       {
         "$lookup": {
+          "as": "status",
+          "from": "v2_responses",
+          "let": {
+            "reviewId": "$_id",
+          },
+          "pipeline": [
+            {
+              "$match": {
+                "$expr": {
+                  "$and": [
+                    {
+                      "$eq": [
+                        "$parentId",
+                        "$$reviewId",
+                      ],
+                    },
+                    {
+                      "$eq": [
+                        "$kind",
+                        "review",
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              "$sort": {
+                "createdAt": -1,
+              },
+            },
+            {
+              "$group": {
+                "_id": "$entity",
+                "decision": {
+                  "$first": "$decision",
+                },
+              },
+            },
+            {
+              "$group": {
+                "_id": null,
+                "decisions": {
+                  "$addToSet": "$decision",
+                },
+              },
+            },
+            {
+              "$project": {
+                "_id": 0,
+                "decision": {
+                  "$switch": {
+                    "branches": [
+                      {
+                        "case": {
+                          "$in": [
+                            "request_changes",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "request_changes",
+                      },
+                      {
+                        "case": {
+                          "$in": [
+                            "approve",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "approve",
+                      },
+                    ],
+                    "default": null,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        "$set": {
+          "status": {
+            "$ifNull": [
+              {
+                "$first": "$status.decision",
+              },
+              null,
+            ],
+          },
+        },
+      },
+      {
+        "$lookup": {
           "as": "responses",
           "foreignField": "parentId",
           "from": "v2_responses",
@@ -129,6 +223,100 @@ exports[`services > review > findReviews > all open reviews for user 1`] = `
       },
       {
         "$lookup": {
+          "as": "status",
+          "from": "v2_responses",
+          "let": {
+            "reviewId": "$_id",
+          },
+          "pipeline": [
+            {
+              "$match": {
+                "$expr": {
+                  "$and": [
+                    {
+                      "$eq": [
+                        "$parentId",
+                        "$$reviewId",
+                      ],
+                    },
+                    {
+                      "$eq": [
+                        "$kind",
+                        "review",
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              "$sort": {
+                "createdAt": -1,
+              },
+            },
+            {
+              "$group": {
+                "_id": "$entity",
+                "decision": {
+                  "$first": "$decision",
+                },
+              },
+            },
+            {
+              "$group": {
+                "_id": null,
+                "decisions": {
+                  "$addToSet": "$decision",
+                },
+              },
+            },
+            {
+              "$project": {
+                "_id": 0,
+                "decision": {
+                  "$switch": {
+                    "branches": [
+                      {
+                        "case": {
+                          "$in": [
+                            "request_changes",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "request_changes",
+                      },
+                      {
+                        "case": {
+                          "$in": [
+                            "approve",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "approve",
+                      },
+                    ],
+                    "default": null,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        "$set": {
+          "status": {
+            "$ifNull": [
+              {
+                "$first": "$status.decision",
+              },
+              null,
+            ],
+          },
+        },
+      },
+      {
+        "$lookup": {
           "as": "responses",
           "foreignField": "parentId",
           "from": "v2_responses",
@@ -214,6 +402,100 @@ exports[`services > review > findReviews > all reviews for user 1`] = `
                 },
               },
               0,
+            ],
+          },
+        },
+      },
+      {
+        "$lookup": {
+          "as": "status",
+          "from": "v2_responses",
+          "let": {
+            "reviewId": "$_id",
+          },
+          "pipeline": [
+            {
+              "$match": {
+                "$expr": {
+                  "$and": [
+                    {
+                      "$eq": [
+                        "$parentId",
+                        "$$reviewId",
+                      ],
+                    },
+                    {
+                      "$eq": [
+                        "$kind",
+                        "review",
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              "$sort": {
+                "createdAt": -1,
+              },
+            },
+            {
+              "$group": {
+                "_id": "$entity",
+                "decision": {
+                  "$first": "$decision",
+                },
+              },
+            },
+            {
+              "$group": {
+                "_id": null,
+                "decisions": {
+                  "$addToSet": "$decision",
+                },
+              },
+            },
+            {
+              "$project": {
+                "_id": 0,
+                "decision": {
+                  "$switch": {
+                    "branches": [
+                      {
+                        "case": {
+                          "$in": [
+                            "request_changes",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "request_changes",
+                      },
+                      {
+                        "case": {
+                          "$in": [
+                            "approve",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "approve",
+                      },
+                    ],
+                    "default": null,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        "$set": {
+          "status": {
+            "$ifNull": [
+              {
+                "$first": "$status.decision",
+              },
+              null,
             ],
           },
         },
