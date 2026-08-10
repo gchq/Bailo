@@ -1,3 +1,4 @@
+import humanInterval from 'human-interval'
 import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
@@ -16,6 +17,7 @@ import {
   EntryVolumeInterval,
   GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
+import { GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
 import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
 import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
@@ -680,6 +682,95 @@ function buildEntryVolumeCacheKey(interval: EntryVolumeInterval, start: Date, en
   return ['entryVolume', interval, start.toISOString(), end.toISOString(), timezone ?? 'none'].join(':')
 }
 
+interface CalculatedLifecycleComplianceMetrics {
+  summary: {
+    count: number
+  }
+  entries: {
+    entryId: string
+    dueDate: string
+    modelOwners: string[]
+  }[]
+}
+
+async function calculateLifecycleComplianceMetrics(
+  weeksUntilDue: number,
+  organisation?: string,
+): Promise<CalculatedLifecycleComplianceMetrics> {
+  const dueDateCutOff = new Date()
+  const interval = humanInterval(`${weeksUntilDue} weeks`)
+  dueDateCutOff.setTime(dueDateCutOff.getTime() + (interval as number))
+  const openLifecycleReviewsPipeline: PipelineStage[] = [
+    {
+      $match: {
+        kind: ReviewKind.Lifecycle,
+        dueDate: { $lte: dueDateCutOff },
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'responses',
+      },
+    },
+    { $match: { responses: { $size: 0 } } },
+    {
+      $lookup: {
+        from: 'v2_models',
+        localField: 'modelId',
+        foreignField: 'id',
+        as: 'model',
+      },
+    },
+    { $unwind: '$model' },
+    {
+      $match: {
+        ...(organisation !== undefined && {
+          'model.organisation': organisation,
+        }),
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        entryId: '$modelId',
+        dueDate: 1,
+        modelOrganisation: '$model.organisation',
+        modelOwners: {
+          $map: {
+            input: {
+              $filter: {
+                input: '$model.collaborators',
+                as: 'item',
+                cond: { $in: ['owner', { $ifNull: ['$$item.roles', []] }] },
+              },
+            },
+            as: 'owner',
+            in: '$$owner.entity',
+          },
+        },
+      },
+    },
+    {
+      $sort: {
+        dueDate: 1,
+      },
+    },
+  ]
+
+  openLifecycleReviewsPipeline.push({ $unset: 'modelOrganisation' })
+
+  const entries = await ReviewModel.aggregate(openLifecycleReviewsPipeline)
+  return {
+    summary: {
+      count: entries.length,
+    },
+    entries,
+  }
+}
+
 export class BaseMetricsConnector {
   organisations: string[]
 
@@ -1206,5 +1297,47 @@ export class BaseMetricsConnector {
           roles: collaborator.roles ?? [],
         })) ?? [],
     }))
+  }
+
+  async getLifecycleComplianceMetrics(
+    user: UserInterface,
+    weeksUntilDue: number,
+  ): Promise<GetLifecycleComplianceMetricsResponse> {
+    await checkUserIsAuthorised(user)
+
+    const cached = getCached<CachedMetrics<GetLifecycleComplianceMetricsResponse>>(
+      `${MetricsCacheKeys.LIFECYCLE}-${weeksUntilDue}`,
+    )
+    if (cached !== undefined) {
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
+    }
+
+    const global = await calculateLifecycleComplianceMetrics(weeksUntilDue)
+
+    const organisationIds = await this.getOrganisationIds()
+
+    const byOrganisation = await Promise.all(
+      organisationIds.map(async (org) => ({
+        organisation: org || 'unset',
+        ...(await calculateLifecycleComplianceMetrics(weeksUntilDue, org)),
+      })),
+    )
+
+    const result: Omit<GetLifecycleComplianceMetricsResponse, 'lastUpdated'> = { global, byOrganisation }
+
+    const lastUpdated = new Date().toISOString()
+
+    setCached(`${MetricsCacheKeys.LIFECYCLE}-${weeksUntilDue}`, {
+      data: result,
+      lastUpdated,
+    })
+
+    return {
+      ...result,
+      lastUpdated,
+    }
   }
 }
