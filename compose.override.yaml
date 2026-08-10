@@ -16,6 +16,14 @@ services:
     build:
       target: dev
 
+  mongo:
+    ports:
+      - 27017:27017
+
+  nginx:
+    ports:
+      - ${EXTERNAL_PORT}:8080
+
   seaweedfs:
     ports:
       - 9333:9333

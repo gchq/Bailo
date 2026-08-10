@@ -73,7 +73,7 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
           >
             <MarkdownDisplay>{uiConfig.modelMirror.export.disclaimer}</MarkdownDisplay>
             <FormControlLabel
-              control={<Checkbox checked={checked} onChange={handleChecked} />}
+              control={<Checkbox checked={checked} onChange={handleChecked} data-test='exportModelAgreementCheckbox' />}
               label='I agree to the terms and conditions of this model export agreement'
             />
             <Divider />
@@ -85,7 +85,13 @@ export default function ExportModelAgreement({ model }: ExportModelAgreementProp
             />
           </Stack>
           <Restricted action='exportMirroredModel' fallback={<Button disabled>Submit</Button>}>
-            <Button variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>
+            <Button
+              variant='contained'
+              loading={loading}
+              disabled={!checked}
+              onClick={handleSubmit}
+              data-test='exportModelAgreementSubmitButton'
+            >
               Submit
             </Button>
           </Restricted>

@@ -109,7 +109,7 @@ The main instance is then available at `http://localhost:8080`.
 Build and run the standalone image from the repository root:
 
 ```bash
-docker build . -t second-bailo -f Dockerfile.standalone
+docker build . -t second-bailo -f Dockerfile.standalone --build-context python=./lib/python
 docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 ```
 

@@ -316,6 +316,8 @@ export const reviewInterfaceSchema = z.object({
 
   responses: z.array(z.string().optional()),
 
+  status: z.nativeEnum(Decision).nullable(),
+
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
