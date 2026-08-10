@@ -23,11 +23,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 RUN apk add --no-cache pandoc make
 WORKDIR /app/docs
-COPY backend/docs .
+COPY backend/docs/requirements.txt .
 COPY --from=python pyproject.toml /app/python/
 COPY --from=python README.md /app/python/
 COPY --from=python src /app/python/src
 RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
+COPY backend/docs .
 RUN make html
 
 FROM node:26.5.1-alpine@sha256:233761595746769ebfdb6090f44fc7cdf818ae0ce62d2b37e0367723b9823e36 AS backend
@@ -90,6 +91,8 @@ COPY infrastructure/standalone/registry.conf /registry.conf
 
 COPY --from=mailcrab-bin /app/mailcrab /usr/local/bin/mailcrab
 
+COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 # Backend
 WORKDIR /app/backend
 COPY backend/package*.json ./
@@ -114,8 +117,6 @@ COPY --from=frontend /app/.next/static ./.next/static
 COPY --from=frontend /app/public ./public
 ENV NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0
-
-COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 WORKDIR /
 

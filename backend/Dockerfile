@@ -10,13 +10,14 @@ RUN apk add --no-cache pandoc make
 
 WORKDIR /app/docs
 
-COPY docs .
-# Only get the required dirs & files (ignore tests etc.)
+COPY docs/requirements.txt .
 COPY --from=python pyproject.toml /app/python/
 COPY --from=python README.md /app/python/
 COPY --from=python src /app/python/src
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
+
+COPY docs .
 
 RUN make html
 

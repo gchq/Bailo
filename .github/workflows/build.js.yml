@@ -75,6 +75,7 @@ jobs:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
+          target: prod
           tags: ${{ matrix.component.tag }}
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
@@ -155,6 +156,7 @@ jobs:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
+          target: prod
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name || inputs.release_tag }}
@@ -168,6 +170,7 @@ jobs:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
+          target: prod
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version || inputs.artefactscan_tag }}
