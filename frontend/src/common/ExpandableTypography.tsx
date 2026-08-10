@@ -17,12 +17,13 @@ export default function ExpandableTypography({
   ...props
 }: ExpandableTypographyProps) {
   const [expanded, setExpanded] = useState(false)
+  const textWithoutImages = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '[image]')
 
-  if (text.length > maxLength) {
+  if (textWithoutImages.length > maxLength) {
     return (
       <Stack sx={{ mb: 1, alignItems: 'center' }} direction={expanded ? 'column' : showMoreDirection} spacing={1}>
         {showMarkdown ? (
-          <MarkdownDisplay>{expanded ? text : `${text.slice(0, maxLength).trimEnd()}...`}</MarkdownDisplay>
+          <MarkdownDisplay>{expanded ? text : `${textWithoutImages.slice(0, maxLength).trimEnd()}...`}</MarkdownDisplay>
         ) : (
           <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength).trimEnd()}...`}</Typography>
         )}
@@ -32,6 +33,6 @@ export default function ExpandableTypography({
       </Stack>
     )
   } else {
-    return <Typography {...props}>{text}</Typography>
+    return <Typography {...props}>{textWithoutImages}</Typography>
   }
 }
