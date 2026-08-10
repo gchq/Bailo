@@ -50,6 +50,7 @@ vi.mock('../../../src/models/Release.js', () => ({
 }))
 
 const reviewMocks = vi.hoisted(() => ({
+  aggregate: vi.fn(),
   find: vi.fn(),
 }))
 
@@ -1197,5 +1198,45 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
         endMonth: '2026-01',
       } as any),
     ).rejects.toThrow(BadReq('startMonth must be before or equal to endMonth'))
+  })
+})
+
+await describe('connectors > metrics > simple > getLifecycleComplianceMetrics', async () => {
+  let connector
+  await beforeEach(async () => {
+    vi.resetModules()
+    vi.clearAllMocks()
+
+    const { BaseMetricsConnector } = await loadConnector()
+    connector = new BaseMetricsConnector(['a corp', 'b corp'])
+  })
+
+  test('groups results by organisation correctly', async () => {
+    reviewMocks.aggregate.mockImplementation(() => {
+      const allModels = [
+        {
+          entryId: 'orgA-model',
+          dueDate: new Date().toISOString(),
+        },
+        {
+          entryId: 'orgB-model',
+          dueDate: new Date().toISOString(),
+        },
+        {
+          entryId: 'orgC-model',
+          dueDate: new Date().toISOString(),
+        },
+      ]
+      return allModels
+    })
+
+    const result = await connector.getLifecycleComplianceMetrics(mockUser, 2)
+    expect(result.byOrganisation).toHaveLength(3)
+  })
+
+  test('throws Forbidden if user is not admin', async () => {
+    authenticationMocks.hasRole.mockResolvedValue(false)
+
+    await expect(connector.getLifecycleComplianceMetrics(mockUser, 2)).rejects.toThrow()
   })
 })
