@@ -1,4 +1,5 @@
-import { Request, Response } from 'express'
+import express, { Request, Response } from 'express'
+import supertest from 'supertest'
 import { describe, expect, test, vi } from 'vitest'
 
 import { RoleKeys, Roles } from '../../../src/connectors/authentication/constants.js'
@@ -72,6 +73,57 @@ describe('connectors > authentication > oauth', () => {
     const router = await connector.getRoutes()
 
     expect(router.stack).toMatchSnapshot()
+  })
+
+  test.each([
+    ['/model/example?tab=files#content', '/model/example?tab=files#content'],
+    ['https://malicious.example/path', '/'],
+    ['//malicious.example/path', '/'],
+    ['/../secret', '/'],
+    ['/%2e%2e/secret', '/'],
+    ['/folder/..%2fsecret', '/'],
+    ['not-a-path', '/'],
+    [String.raw`/\evil`, '/'],
+    ['/%2F%2Fmalicious.example', '/'],
+    ['/%5C%5Cevil', '/'],
+    ['/%0d%0aLocation:https://evil.example', '/'],
+  ])(
+    'getRoutes > redirects through login and returns to a safe location',
+    async (requestedRedirect, expectedRedirect) => {
+      const session = { grant: undefined, loginRedirect: undefined as string | undefined }
+      const app = express()
+      app.use((req, _res, next) => {
+        req.session = session as Request['session']
+        next()
+      })
+      app.use(new OauthAuthenticationConnector().getRoutes())
+
+      const loginResponse = await supertest(app).get('/api/login').query({ redirect: requestedRedirect })
+
+      expect(loginResponse.status).toBe(302)
+      expect(loginResponse.headers.location).toBe(`/api/connect/${config.oauth.provider}/login`)
+      expect(session.loginRedirect).toBe(expectedRedirect)
+
+      const callbackResponse = await supertest(app).get('/api/login/callback')
+
+      expect(callbackResponse.status).toBe(302)
+      expect(callbackResponse.headers.location).toBe(expectedRedirect)
+      expect(session.loginRedirect).toBeUndefined()
+    },
+  )
+
+  test('getRoutes > callback defaults to the home page when no redirect was stored', async () => {
+    const app = express()
+    app.use((req, _res, next) => {
+      req.session = { grant: undefined } as Request['session']
+      next()
+    })
+    app.use(new OauthAuthenticationConnector().getRoutes())
+
+    const response = await supertest(app).get('/api/login/callback')
+
+    expect(response.status).toBe(302)
+    expect(response.headers.location).toBe('/')
   })
 
   test('queryEntities > returns in expected format', async () => {
