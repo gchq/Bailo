@@ -4,7 +4,7 @@ import { UserDisplayProps } from 'src/common/UserDisplay'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
 import { ReleaseAccessRequestReviewSummaryProps } from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import { ReviewBannerProps } from 'src/entry/model/reviews/ReviewBanner'
-import { ReviewDisplayProps } from 'src/entry/model/reviews/ReviewDisplay'
+import { ReviewStatusProps } from 'src/entry/model/reviews/ReviewStatus'
 import { lightTheme } from 'src/theme'
 import { formatDateString } from 'utils/dateUtils'
 import { testAccessRequest } from 'utils/test/testModels'
@@ -12,8 +12,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('src/entry/model/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
 vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProps) => <></> }))
-vi.mock('src/entry/model/reviews/ReviewDisplay.tsx', () => ({
-  default: (_props: ReviewDisplayProps) => <></>,
+vi.mock('src/entry/model/reviews/ReviewStatus.tsx', () => ({
+  default: (_props: ReviewStatusProps) => <></>,
 }))
 vi.mock('src/entry/model/reviews/ReviewFooter.tsx', () => ({
   default: (_props: ReleaseAccessRequestReviewSummaryProps) => <></>,

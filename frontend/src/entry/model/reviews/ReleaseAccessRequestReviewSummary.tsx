@@ -4,7 +4,7 @@ import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import Loading from 'src/common/Loading'
-import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { AccessRequestInterface, ReleaseInterface } from 'types/types'
 
@@ -69,7 +69,7 @@ export default function ReleaseAccessRequestReviewSummary({
         >
           <Stack>
             {reviews.map((review) => (
-              <ReviewDisplay key={review._id} modelId={modelId} review={review} />
+              <ReviewStatus key={review._id} modelId={modelId} review={review} />
             ))}
           </Stack>
           {includeResponsesSummary && (
