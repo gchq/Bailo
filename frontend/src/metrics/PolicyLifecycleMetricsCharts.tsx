@@ -151,10 +151,6 @@ export default function PolicyLifecycleMetricsCharts({
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
   }
 
-  if (data.entries.length === 0) {
-    return <EmptyBlob text='No items to display.' />
-  }
-
   return (
     <Stack spacing={2}>
       <Stack spacing={2} sx={{ width: '100%' }}>
