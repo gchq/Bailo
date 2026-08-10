@@ -5,18 +5,18 @@ import { postNotifyReviewer } from 'actions/review'
 import { useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import useNotification from 'src/hooks/useNotification'
-import { ResponseInterface } from 'types/types'
+import { ReviewRequestInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ChangesRequestedDisplayProps {
-  response: ResponseInterface
-  roleNameDisplay: (response: ResponseInterface) => string | undefined
+  review: ReviewRequestInterface
+  roleNameDisplay: () => string | undefined
   setErrorMessage: (errorMessage: string) => void
   showCurrentUserResponses: boolean
 }
 
 export function ChangesRequestedDisplay({
-  response,
+  review,
   roleNameDisplay,
   setErrorMessage,
   showCurrentUserResponses,
@@ -45,19 +45,19 @@ export function ChangesRequestedDisplay({
   }
 
   return (
-    <Stack direction='row' key={response._id} sx={{ alignItems: 'center' }} spacing={1}>
+    <Stack direction='row' key={review._id} sx={{ alignItems: 'center' }} spacing={1}>
       <HourglassEmpty color='warning' fontSize='small' />
       <Typography variant='caption'>
         {showCurrentUserResponses
-          ? `You have requested changes as a ${roleNameDisplay(response)}`
-          : `Changes requested by  ${roleNameDisplay(response)}`}
+          ? `You have requested changes as a ${roleNameDisplay()}`
+          : `Changes requested by  ${roleNameDisplay()}`}
       </Typography>
       <Restricted action='editRelease' fallback={<></>}>
         <>
           {
             <Button
               size='small'
-              onClick={() => handleNotifyReviewerOnClick(response.parentId)}
+              onClick={() => handleNotifyReviewerOnClick(review._id)}
               startIcon={<Refresh />}
               loading={isNotifyButtonLoading}
             >
