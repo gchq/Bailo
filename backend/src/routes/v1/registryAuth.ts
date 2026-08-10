@@ -347,21 +347,21 @@ export const getDockerRegistryAuth = [
     const authResults = await Promise.all(requestedAccesses.map((a) => checkAccess(a, user, admin)))
     const grantedAccesses: Access[] = []
 
-    for (const [idx, result] of authResults.entries()) {
+    authResults.forEach((result, idx) => {
       const access = requestedAccesses[idx]
 
       if (!result.success) {
         // Ignore unauthorised read-only scopes (containerd cross-mount)
         if (isReadOnlyActions(access.actions)) {
           rlog.debug({ access }, 'Ignoring unauthorised read-only scope')
-          continue
+          return
         }
 
         throw Forbidden({ access }, result.info, rlog)
       }
 
       grantedAccesses.push(access)
-    }
+    })
 
     // Enforce non-empty write authorisation
     if (
@@ -377,7 +377,6 @@ export const getDockerRegistryAuth = [
     }
 
     const accessToken = await issueAccessToken(user, grantedAccesses)
-
     rlog.trace('Successfully generated access token.')
 
     res.json({ token: accessToken })
