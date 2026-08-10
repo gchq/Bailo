@@ -88,8 +88,8 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onCreateReview(_req: Request, _modelId: string) {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
   async onNotifyReviewers(_req: Request, _reviewId: string): Promise<void> {}
-  async onRegistryImagePull(_req: Request, _userDn: string): Promise<void> {}
-  async onRegistryImagePush(_req: Request, _userDn: string): Promise<void> {}
-  async onRegistryImageDelete(_req: Request, _userDn: string): Promise<void> {}
+  async onRegistryImagePulled(_req: Request, _userDn: string): Promise<void> {}
+  async onRegistryImagePushed(_req: Request, _userDn: string): Promise<void> {}
+  async onRegistryImageDeleted(_req: Request, _userDn: string): Promise<void> {}
   async onError(_req: Request, _error: BailoError): Promise<void> {}
 }
