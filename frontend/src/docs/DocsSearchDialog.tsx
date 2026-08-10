@@ -44,7 +44,7 @@ const CATEGORY_OPTIONS: DocsSearchCategoryOption[] = [
 
   { value: 'models', label: 'Models' },
   { value: 'datacards', label: 'Datacards' },
-  { value: 'docs', label: 'Docs' },
+  { value: 'docs', label: 'Documentation' },
 ]
 
 const DEFAULT_SECTION_ORDER: DocsSearchCategory[] = ['models', 'datacards', 'docs']
@@ -151,6 +151,7 @@ const VisuallyHidden = styled('span')({
 })
 
 export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProps): ReactElement {
+  const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const theme = useTheme()
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
@@ -206,6 +207,10 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
   const selectCategory = useCallback((nextCategory: SearchCategory) => {
     setCategory(nextCategory)
     setHighlightedIndex(0)
+
+    requestAnimationFrame(() => {
+      inputRef.current?.focus()
+    })
   }, [])
 
   const navigateToRow = useCallback(
@@ -306,6 +311,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
       >
         <Box sx={{ p: 1.5 }}>
           <TextField
+            inputRef={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={handleKeyDown}
