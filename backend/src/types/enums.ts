@@ -41,4 +41,5 @@ export const MetricsCacheKeys = {
   ROLE_COMPLIANCE: 'roleComplianceMetrics',
   NO_RELEASES_COMPLIANCE: 'noReleasesComplianceMetrics',
   UNAPPROVED_RELEASES_COMPLIANCE: 'unapprovedReleasesComplianceMetrics',
+  LIFECYCLE: 'lifecycleComplianceMetrics',
 }
