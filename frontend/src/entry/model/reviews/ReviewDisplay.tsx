@@ -41,7 +41,7 @@ export default function ReviewDisplay({ review, modelId, showCurrentUserResponse
 
   return (
     <>
-      {!review.status && <Typography variant='caption'>Awaiting review</Typography>}
+      {!review.status && <Typography variant='caption'>{`Awaiting review for ${roleNameDisplay()}`}</Typography>}
       {review.status === Decision.Approve && (
         <Stack direction='row' key={roleNameDisplay()} spacing={1} sx={{ alignItems: 'center' }}>
           <Done color='success' fontSize='small' />
