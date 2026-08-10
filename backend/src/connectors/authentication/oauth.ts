@@ -17,6 +17,30 @@ const OauthEntityKind = {
   Group: 'group',
 } as const
 
+// Redirect users to the Market Place if the callback is unsafe cross origin ect.
+const defaultLoginRedirect = '/'
+
+function getSafeLoginRedirect(redirect: unknown): string {
+  if (typeof redirect !== 'string' || redirect.startsWith('//')) {
+    return defaultLoginRedirect
+  }
+
+  if (!redirect.startsWith('/')) {
+    return defaultLoginRedirect
+  }
+
+  try {
+    const baseUrl = new URL(
+      `${config.app.protocol || 'http'}://${config.app.host || 'localhost'}${config.app.port ? `:${config.app.port}` : ''}`,
+    )
+    const redirectUrl = new URL(redirect, baseUrl)
+
+    return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`
+  } catch {
+    return defaultLoginRedirect
+  }
+}
+
 export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   constructor() {
     super()
@@ -66,7 +90,14 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   getRoutes() {
     const router = Router()
     router.get('/api/login', (req, res) => {
+      req.session.loginRedirect = getSafeLoginRedirect(req.query.redirect)
       res.redirect(`/api/connect/${config.oauth.provider}/login`)
+    })
+
+    router.get('/api/login/callback', (req, res) => {
+      const redirect = getSafeLoginRedirect(req.session.loginRedirect)
+      delete req.session.loginRedirect
+      res.redirect(redirect)
     })
 
     router.get('/api/logout', (req, res) => {
