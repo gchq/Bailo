@@ -104,6 +104,7 @@ services:
     image: bailo_frontend:${INSTANCE_NAME}
     build:
       context: ./frontend/
+      target: prod
     depends_on:
       - backend
 
@@ -113,6 +114,7 @@ services:
     image: bailo_backend:${INSTANCE_NAME}
     build:
       context: ./backend/
+      target: prod
       additional_contexts:
         python: ./lib/python
     volumes:

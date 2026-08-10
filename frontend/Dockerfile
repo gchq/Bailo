@@ -3,14 +3,9 @@
 FROM node:26.5.1-alpine@sha256:233761595746769ebfdb6090f44fc7cdf818ae0ce62d2b37e0367723b9823e36 AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache libc6-compat ca-certificates && \
-    apk update
+RUN apk add --no-cache libc6-compat ca-certificates
 
 WORKDIR /app
-
-# Don't run production as root
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
 
 COPY package*.json ./
 
@@ -32,10 +27,11 @@ RUN npm run build
 FROM base AS prod
 ENV PORT=3000
 
-COPY --from=dev --chown=nextjs:0 /app/next.config.mjs .
-COPY --from=dev --chown=nextjs:0 /app/package.json .
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Automatically leverage output traces to reduce image size
+COPY --from=build --chown=nextjs:0 /app/next.config.mjs .
+COPY --from=build --chown=nextjs:0 /app/package.json .
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=build --chown=nextjs:0 /app/.next/standalone ./
 COPY --from=build --chown=nextjs:0 /app/.next/static ./.next/static

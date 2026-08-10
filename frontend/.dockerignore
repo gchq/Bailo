@@ -36,9 +36,28 @@ cache
 # swc
 .swc
 
-# cypress
+# Cypress
 cypress/screenshots/
 cypress/downloads/
 
 # Tests
 test
+
+# Environment files
+.env*
+
+# Lint/format configs
+eslint.config.mjs
+.prettierrc.json
+.prettierignore
+lint-staged.config.mjs
+
+# Test configs
+vitest.config.mts
+cypress.config.ts
+
+# TSConfig for eslint only
+tsconfig.eslint.json
+
+# README
+README.md
