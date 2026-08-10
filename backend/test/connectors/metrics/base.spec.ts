@@ -1230,13 +1230,13 @@ await describe('connectors > metrics > simple > getLifecycleComplianceMetrics', 
       return allModels
     })
 
-    const result = await connector.getLifecycleComplianceMetrics(mockUser)
+    const result = await connector.getLifecycleComplianceMetrics(mockUser, 2)
     expect(result.byOrganisation).toHaveLength(3)
   })
 
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
-    await expect(connector.getLifecycleComplianceMetrics(mockUser)).rejects.toThrow()
+    await expect(connector.getLifecycleComplianceMetrics(mockUser, 2)).rejects.toThrow()
   })
 })

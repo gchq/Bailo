@@ -1,5 +1,20 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > metrics > compliance > model lifecycle metrics > 200 > ok 1`] = `""`;
+exports[`routes > metrics > compliance > model lifecycle metrics > 200 > ok 1`] = `
+{
+  "global": {
+    "entries": [
+      {
+        "dueDate": "2026-07-18T23:00:00.000Z",
+        "entryId": "my-model-123",
+        "modelOwners": "user:user",
+      },
+    ],
+    "summary": {
+      "count": 1,
+    },
+  },
+}
+`;
 
 exports[`routes > metrics > compliance > model lifecycle metrics > audit > expected call 1`] = `undefined`;

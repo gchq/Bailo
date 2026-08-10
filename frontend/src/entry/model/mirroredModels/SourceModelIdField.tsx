@@ -55,9 +55,15 @@ export default function SourceModelIdField({ entry, mutateEntry }: SourceModelId
               autoFocus
               sx={{ minWidth: 250 }}
               slotProps={{ input: { sx: { fontSize: 'caption.fontSize' } } }}
-              data-test='sourceModelIdInput'
+              data-test='editMirroredModelSourceModelIdInput'
             />
-            <IconButton size='small' onClick={handleSave} disabled={!value.trim()} aria-label='Save source model ID'>
+            <IconButton
+              size='small'
+              onClick={handleSave}
+              disabled={!value.trim()}
+              aria-label='Save source model ID'
+              data-test='editMirroredModelSourceModelIdSave'
+            >
               <Check fontSize='small' />
             </IconButton>
             <IconButton size='small' onClick={handleCancel} aria-label='Cancel editing'>
@@ -74,7 +80,12 @@ export default function SourceModelIdField({ entry, mutateEntry }: SourceModelId
               <>
                 <Typography variant='caption'>{currentValue || <em>Not set</em>}</Typography>
                 <Restricted action='editEntry' fallback={<></>}>
-                  <IconButton size='small' onClick={() => setIsEditing(true)} aria-label='Edit source model ID'>
+                  <IconButton
+                    size='small'
+                    onClick={() => setIsEditing(true)}
+                    aria-label='Edit source model ID'
+                    data-test='editMirroredModelSourceModelIdButton'
+                  >
                     <EditIcon fontSize='small' />
                   </IconButton>
                 </Restricted>

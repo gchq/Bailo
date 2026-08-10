@@ -102,7 +102,7 @@ The above `docker compose` approaches are preferred, however we also provide a m
 run in standalone mode, not development mode (http://localhost:8080). Not for production use:
 
 ```bash
-docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
+docker build -t "bailo:standalone" -f ./Dockerfile.standalone --build-context python=./lib/python .
 docker run --name bailo -p 8080:8080 -d bailo:standalone
 ```
 

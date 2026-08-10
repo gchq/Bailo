@@ -1,3 +1,4 @@
+import humanInterval from 'human-interval'
 import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
@@ -697,7 +698,8 @@ async function calculateLifecycleComplianceMetrics(
   organisation?: string,
 ): Promise<CalculatedLifecycleComplianceMetrics> {
   const dueDateCutOff = new Date()
-  dueDateCutOff.setDate(dueDateCutOff.getDate() + weeksUntilDue * 7)
+  const interval = humanInterval(`${weeksUntilDue} weeks`)
+  dueDateCutOff.setTime(dueDateCutOff.getTime() + (interval as number))
   const openLifecycleReviewsPipeline: PipelineStage[] = [
     {
       $match: {
@@ -713,9 +715,7 @@ async function calculateLifecycleComplianceMetrics(
         as: 'responses',
       },
     },
-    // Reviews with no responses are considered open.
     { $match: { responses: { $size: 0 } } },
-    // Join the referenced model so we can filter by its organisation.
     {
       $lookup: {
         from: 'v2_models',
@@ -725,6 +725,13 @@ async function calculateLifecycleComplianceMetrics(
       },
     },
     { $unwind: '$model' },
+    {
+      $match: {
+        ...(organisation !== undefined && {
+          'model.organisation': organisation,
+        }),
+      },
+    },
     {
       $project: {
         _id: 0,
@@ -753,12 +760,6 @@ async function calculateLifecycleComplianceMetrics(
     },
   ]
 
-  // Filter by the referenced model's organisation when one is provided.
-  if (organisation !== undefined) {
-    openLifecycleReviewsPipeline.push({ $match: { modelOrganisation: organisation } })
-  }
-
-  // Drop the temporary organisation field from the final projection.
   openLifecycleReviewsPipeline.push({ $unset: 'modelOrganisation' })
 
   const entries = await ReviewModel.aggregate(openLifecycleReviewsPipeline)
