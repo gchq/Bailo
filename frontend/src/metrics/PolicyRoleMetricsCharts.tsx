@@ -23,13 +23,14 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { PolicyRoleBaseMetrics } from 'types/types'
+import { EntryRole, PolicyRoleBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
   data: PolicyRoleBaseMetrics
+  entryRoles: EntryRole[]
 }
 
-export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsProps) {
+export default function PolicyRoleMetricsCharts({ data, entryRoles }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
   const [missingRoleFilters, setMissingRolesFilters] = useState<string[]>([])
@@ -124,16 +125,20 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
               row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
             ) : (
               <em>
-                No <OwnerRoleDisplay />s set
+                No <OwnerRoleDisplay entryRoles={entryRoles} />s set
               </em>
             )}
           </TableCell>
         </TableRow>
       ))
-  }, [data.entries, missingRoleFilters])
+  }, [data.entries, entryRoles, missingRoleFilters])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
+  }
+
+  if (data.entries.length === 0) {
+    return <EmptyBlob text='No items to display.' />
   }
 
   return (
@@ -157,7 +162,7 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
                 <TableCell>Model ID</TableCell>
                 <TableCell>Missing roles</TableCell>
                 <TableCell>
-                  <OwnerRoleDisplay />
+                  <OwnerRoleDisplay entryRoles={entryRoles} />
                   (s)
                 </TableCell>
               </TableRow>

@@ -5,13 +5,14 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { GlobalUnapprovedReleasesMetrics } from 'types/types'
+import { EntryRole, GlobalUnapprovedReleasesMetrics } from 'types/types'
 
 interface PolicyUnapprovedReleasesMetricsProps {
   data: GlobalUnapprovedReleasesMetrics
+  entryRoles: EntryRole[]
 }
 
-export default function PolicyUnapprovedReleasesCharts({ data }: PolicyUnapprovedReleasesMetricsProps) {
+export default function PolicyUnapprovedReleasesCharts({ data, entryRoles }: PolicyUnapprovedReleasesMetricsProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
@@ -34,16 +35,20 @@ export default function PolicyUnapprovedReleasesCharts({ data }: PolicyUnapprove
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
           ) : (
             <em>
-              No <OwnerRoleDisplay />s set
+              No <OwnerRoleDisplay entryRoles={entryRoles} />s set
             </em>
           )}
         </TableCell>
       </TableRow>
     ))
-  }, [data.entries])
+  }, [data.entries, entryRoles])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
+  }
+
+  if (data.entries.length === 0) {
+    return <EmptyBlob text='No items to display.' />
   }
 
   return (
@@ -59,7 +64,7 @@ export default function PolicyUnapprovedReleasesCharts({ data }: PolicyUnapprove
                 <TableCell>Model ID</TableCell>
                 <TableCell>Unapproved releases</TableCell>
                 <TableCell>
-                  <OwnerRoleDisplay />
+                  <OwnerRoleDisplay entryRoles={entryRoles} />
                   (s)
                 </TableCell>
               </TableRow>

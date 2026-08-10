@@ -5,13 +5,14 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { GlobalNoReleasesMetrics } from 'types/types'
+import { EntryRole, GlobalNoReleasesMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
   data: GlobalNoReleasesMetrics
+  entryRoles: EntryRole[]
 }
 
-export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsChartsProps) {
+export default function PolicyNoReleasesMetricsCharts({ data, entryRoles }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
   const tableRows = useMemo(() => {
@@ -27,16 +28,20 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
           ) : (
             <em>
-              No <OwnerRoleDisplay />s set
+              No <OwnerRoleDisplay entryRoles={entryRoles} />s set
             </em>
           )}
         </TableCell>
       </TableRow>
     ))
-  }, [data.entries])
+  }, [data.entries, entryRoles])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
+  }
+
+  if (data.entries.length === 0) {
+    return <EmptyBlob text='No items to display.' />
   }
 
   return (
@@ -51,7 +56,7 @@ export default function PolicyNoReleasesMetricsCharts({ data }: PolicyMetricsCha
               <TableRow>
                 <TableCell>Model ID</TableCell>
                 <TableCell>
-                  <OwnerRoleDisplay />
+                  <OwnerRoleDisplay entryRoles={entryRoles} />
                   (s)
                 </TableCell>
               </TableRow>

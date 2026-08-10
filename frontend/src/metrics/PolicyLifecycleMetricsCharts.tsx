@@ -18,25 +18,27 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { WeekFilterOptions } from 'src/metrics/PolicyMetrics'
-import { GlobalLifecycleMetrics } from 'types/types'
-import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
+import { WeekFilterOptions, WeekFilterOptionsKeys } from 'src/metrics/PolicyMetrics'
+import { EntryRole, GlobalLifecycleMetrics } from 'types/types'
+import { formatDateStringAsDayMonthAndYear, isOverdue } from 'utils/dateUtils'
 
 interface PolicyMetricsChartsProps {
   data: GlobalLifecycleMetrics
-  weekFilter: WeekFilterOptions
-  weekFilterOnChange: (newFilter: WeekFilterOptions) => void
+  weekFilter: WeekFilterOptionsKeys
+  weekFilterOnChange: (newFilter: WeekFilterOptionsKeys) => void
+  entryRoles: EntryRole[]
 }
 
 export default function PolicyLifecycleMetricsCharts({
   data,
   weekFilter,
   weekFilterOnChange,
+  entryRoles,
 }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
@@ -49,23 +51,21 @@ export default function PolicyLifecycleMetricsCharts({
     setAnchorEl(null)
   }
 
-  const tableTitle = () => {
+  const tableTitle = useMemo(() => {
     switch (weekFilter) {
-      case 2:
-        return 'Entries two weeks until their due date'
-      case 10:
+      case WeekFilterOptions.TWO_WEEKS:
+        return 'Entries 2 weeks until their due date'
+      case WeekFilterOptions.TEN_WEEKS:
         return 'Entries 10 weeks until their due date'
-      case 0:
+      case WeekFilterOptions.OVERDUE:
         return 'Entries past their due date'
       default:
         return 'Entries near or past lifecycle review date'
     }
-  }
+  }, [weekFilter])
 
   const overDueWarning = (dueDate: string) => {
-    const today = new Date().setHours(0, 0, 0, 0)
-    const dateToCheck = new Date(dueDate).setHours(0, 0, 0, 0)
-    if (dateToCheck <= today) {
+    if (isOverdue(dueDate)) {
       return (
         <Tooltip title='This lifecycle review is overdue'>
           <Warning color='warning' />
@@ -73,6 +73,22 @@ export default function PolicyLifecycleMetricsCharts({
       )
     }
   }
+
+  const weekFilterMenuOptions = useCallback(() => {
+    const options = [WeekFilterOptions.TWO_WEEKS, WeekFilterOptions.TEN_WEEKS, WeekFilterOptions.OVERDUE]
+    return options.map((option) => (
+      <MenuItem key={option} onClick={() => weekFilterOnChange(option)}>
+        {weekFilter === option && (
+          <ListItemIcon>
+            <Check />
+          </ListItemIcon>
+        )}
+        <ListItemText inset={weekFilter !== option}>
+          {option !== WeekFilterOptions.OVERDUE ? `${option} weeks` : 'Overdue'}{' '}
+        </ListItemText>
+      </MenuItem>
+    ))
+  }, [weekFilter, weekFilterOnChange])
 
   const displayWeekFilters = useMemo(() => {
     return (
@@ -98,34 +114,11 @@ export default function PolicyLifecycleMetricsCharts({
             },
           }}
         >
-          <MenuItem onClick={() => weekFilterOnChange(2)}>
-            {weekFilter === 2 && (
-              <ListItemIcon>
-                <Check />
-              </ListItemIcon>
-            )}
-            <ListItemText inset={weekFilter !== 2}>Two weeks</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={() => weekFilterOnChange(10)}>
-            {weekFilter === 10 && (
-              <ListItemIcon>
-                <Check />
-              </ListItemIcon>
-            )}
-            <ListItemText inset={weekFilter !== 10}>10 weeks</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={() => weekFilterOnChange(0)}>
-            {weekFilter === 0 && (
-              <ListItemIcon>
-                <Check />
-              </ListItemIcon>
-            )}
-            <ListItemText inset={weekFilter !== 0}>Past due date</ListItemText>
-          </MenuItem>
+          {weekFilterMenuOptions()}
         </Menu>
       </Stack>
     )
-  }, [anchorEl, open, weekFilter, weekFilterOnChange])
+  }, [anchorEl, open, weekFilterMenuOptions])
 
   const tableRows = useMemo(() => {
     return data.entries.map((row) => (
@@ -146,16 +139,20 @@ export default function PolicyLifecycleMetricsCharts({
             row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
           ) : (
             <em>
-              No <OwnerRoleDisplay />s set
+              No <OwnerRoleDisplay entryRoles={entryRoles} />s set
             </em>
           )}
         </TableCell>
       </TableRow>
     ))
-  }, [data.entries])
+  }, [data.entries, entryRoles])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
+  }
+
+  if (data.entries.length === 0) {
+    return <EmptyBlob text='No items to display.' />
   }
 
   return (
@@ -163,7 +160,7 @@ export default function PolicyLifecycleMetricsCharts({
       <Stack spacing={2} sx={{ width: '100%' }}>
         {displayWeekFilters}
         <Typography sx={{ fontWeight: 'bold' }} variant='h6' color='primary'>
-          {tableTitle()}
+          {tableTitle}
         </Typography>
         <Box
           sx={{
@@ -179,7 +176,7 @@ export default function PolicyLifecycleMetricsCharts({
                 <TableCell>Model ID</TableCell>
                 <TableCell>Due date</TableCell>
                 <TableCell>
-                  <OwnerRoleDisplay />
+                  <OwnerRoleDisplay entryRoles={entryRoles} />
                   (s)
                 </TableCell>
               </TableRow>
