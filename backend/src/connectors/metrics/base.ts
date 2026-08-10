@@ -25,7 +25,7 @@ import { GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
 import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
 import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
-import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
+import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import { sortSemvers } from '../../utils/version.js'
 import {
@@ -699,10 +699,7 @@ async function calculateLifecycleComplianceMetrics(
 ): Promise<CalculatedLifecycleComplianceMetrics> {
   const dueDateCutOff = new Date()
   const interval = humanInterval(`${weeksUntilDue} weeks`)
-  if (!interval) {
-    throw InternalError('The time interval provided could not be converted to a numerical value.', { weeksUntilDue })
-  }
-  dueDateCutOff.setTime(dueDateCutOff.getTime() + interval)
+  dueDateCutOff.setTime(dueDateCutOff.getTime() + (interval as number))
   const openLifecycleReviewsPipeline: PipelineStage[] = [
     {
       $match: {
@@ -1304,7 +1301,7 @@ export class BaseMetricsConnector {
 
   async getLifecycleComplianceMetrics(
     user: UserInterface,
-    weeksUntilDue: number = Infinity,
+    weeksUntilDue: number,
   ): Promise<GetLifecycleComplianceMetricsResponse> {
     await checkUserIsAuthorised(user)
 
