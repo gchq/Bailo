@@ -51,6 +51,14 @@ export default function PolicyLifecycleMetricsCharts({
     setAnchorEl(null)
   }
 
+  const handleWeekFilterOnChange = useCallback(
+    (newFilter: WeekFilterOptionsKeys) => {
+      weekFilterOnChange(newFilter)
+      handleClose()
+    },
+    [weekFilterOnChange],
+  )
+
   const tableTitle = useMemo(() => {
     switch (weekFilter) {
       case WeekFilterOptions.TWO_WEEKS:
@@ -77,7 +85,7 @@ export default function PolicyLifecycleMetricsCharts({
   const weekFilterMenuOptions = useCallback(() => {
     const options = [WeekFilterOptions.TWO_WEEKS, WeekFilterOptions.TEN_WEEKS, WeekFilterOptions.OVERDUE]
     return options.map((option) => (
-      <MenuItem key={option} onClick={() => weekFilterOnChange(option)}>
+      <MenuItem key={option} onClick={() => handleWeekFilterOnChange(option)}>
         {weekFilter === option && (
           <ListItemIcon>
             <Check />
@@ -88,11 +96,11 @@ export default function PolicyLifecycleMetricsCharts({
         </ListItemText>
       </MenuItem>
     ))
-  }, [weekFilter, weekFilterOnChange])
+  }, [handleWeekFilterOnChange, weekFilter])
 
   const displayWeekFilters = useMemo(() => {
     return (
-      <Stack direction='row' spacing={1}>
+      <>
         <Button
           id='menu-button'
           aria-label='filter-menu-button'
@@ -116,7 +124,7 @@ export default function PolicyLifecycleMetricsCharts({
         >
           {weekFilterMenuOptions()}
         </Menu>
-      </Stack>
+      </>
     )
   }, [anchorEl, open, weekFilterMenuOptions])
 
