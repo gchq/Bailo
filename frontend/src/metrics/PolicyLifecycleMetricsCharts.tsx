@@ -62,13 +62,13 @@ export default function PolicyLifecycleMetricsCharts({
   const tableTitle = useMemo(() => {
     switch (weekFilter) {
       case WeekFilterOptions.TWO_WEEKS:
-        return 'Entries 2 weeks until their due date'
+        return 'Models to review in 2 weeks or less'
       case WeekFilterOptions.TEN_WEEKS:
-        return 'Entries 10 weeks until their due date'
+        return 'Models to review in 10 weeks or less'
       case WeekFilterOptions.OVERDUE:
-        return 'Entries past their due date'
+        return 'Models past their review date'
       default:
-        return 'Entries near or past lifecycle review date'
+        return 'Models near or past lifecycle review date'
     }
   }, [weekFilter])
 
@@ -110,7 +110,7 @@ export default function PolicyLifecycleMetricsCharts({
           size='small'
           endIcon={<ArrowDropDown />}
         >
-          Filter by missing role weeks until review is due
+          Filter by weeks until review is due
         </Button>
         <Menu
           anchorEl={anchorEl}
