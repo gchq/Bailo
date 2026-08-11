@@ -1,20 +1,6 @@
-import Router from 'next/router'
-import { useEffect } from 'react'
+import { DocumentationNavigationEntry, DocumentationNavigationTree } from 'types/docs'
 
-export default function RedirectDirectoryVisitor() {
-  useEffect(() => {
-    Router.push('/docs')
-  }, [])
-}
-
-export interface DirectoryEntry {
-  title: string
-  slug: string
-  header?: boolean
-  level?: number
-}
-
-export const flatDirectory: Array<DirectoryEntry> = [
+export const flatDirectory: DocumentationNavigationEntry[] = [
   // Main Docs
   { title: 'Overview', slug: '', header: true },
 
@@ -140,16 +126,8 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Troubleshooting & FAQ', slug: 'reference/troubleshooting' },
 ]
 
-export interface DirectoryTree {
-  slug: string
-  title: string
-  header?: boolean
-  level: number
-  children?: DirectoryTree[]
-}
-
-function slugsToTree(paths: Array<DirectoryEntry>) {
-  const tree: DirectoryTree = {
+function slugsToTree(paths: DocumentationNavigationEntry[]) {
+  const tree: DocumentationNavigationTree = {
     slug: '',
     title: 'Root',
     header: true,
