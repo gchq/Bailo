@@ -16,7 +16,7 @@
 
 FROM chrislusf/seaweedfs:4.40@sha256:52194fba4fecd0083c842158b3a902ba6e04a63619b2b0efcd08007bdb6a4602 AS seaweedfs-bin
 FROM distribution/distribution@sha256:1eda63c5b5ba2c53b8b7e7071d7e67ca42e93c4ea5d9015c2b8160eb09a95d61 AS registry-bin
-FROM marlonb/mailcrab:v1.8.0@sha256:8d19e5c1ffe1750993da7bd63724331ccc0bd226159cc4dfa89156209fe34b4a AS mailcrab-bin
+FROM marlonb/mailcrab:v1.9.0@sha256:fbe35c063cb4c8c169e32f4d91e09ee44459843a005a567cfd3dc9876779e194 AS mailcrab-bin
 
 FROM python:3.14.2-trixie@sha256:4878b7ad12a3c49e49c775ea617df0d2169605eaffc5ede31977e1c3dd913eae AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
