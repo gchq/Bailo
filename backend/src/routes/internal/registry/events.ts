@@ -70,12 +70,12 @@ export const handleRegistryEvents = [
       const user = event.actor?.name ?? ''
 
       if (event?.action === 'pull') {
-        await audit.onRegistryImagePulled(withAudit(req, AuditInfo.RegistryAuthorisePulled), user)
+        await audit.onRegistryImagePulled(withAudit(req, AuditInfo.RegistryImagePulled), user)
         continue
       }
 
       if (event?.action === 'delete') {
-        await audit.onRegistryImageDeleted(withAudit(req, AuditInfo.RegistryAuthoriseDeleted), user)
+        await audit.onRegistryImageDeleted(withAudit(req, AuditInfo.RegistryImageDeleted), user)
         continue
       }
 
@@ -123,7 +123,7 @@ export const handleRegistryEvents = [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
 
-      await audit.onRegistryImagePushed(withAudit(req, AuditInfo.RegistryAuthorisePushed), user)
+      await audit.onRegistryImagePushed(withAudit(req, AuditInfo.RegistryImagePushed), user)
 
       try {
         const status = await rerunImageScanNoAuth(imageRef, repositoryToken)

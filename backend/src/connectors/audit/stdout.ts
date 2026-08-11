@@ -451,19 +451,19 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   async onRegistryImagePulled(req: Request, userDn: string): Promise<void> {
-    this.checkEventType(AuditInfo.RegistryAuthorisePulled, req)
+    this.checkEventType(AuditInfo.RegistryImagePulled, req)
     const event = this.generateEvent(req, { userDn: userDn })
     req.log.info(event, req.audit.description)
   }
 
   async onRegistryImagePushed(req: Request, userDn: string): Promise<void> {
-    this.checkEventType(AuditInfo.RegistryAuthorisePushed, req)
+    this.checkEventType(AuditInfo.RegistryImagePushed, req)
     const event = this.generateEvent(req, { userDn: userDn })
     req.log.info(event, req.audit.description)
   }
 
   async onRegistryImageDeleted(req: Request, userDn: string): Promise<void> {
-    this.checkEventType(AuditInfo.RegistryAuthoriseDeleted, req)
+    this.checkEventType(AuditInfo.RegistryImageDeleted, req)
     const event = this.generateEvent(req, { userDn: userDn })
     req.log.info(event, req.audit.description)
   }

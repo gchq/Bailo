@@ -444,20 +444,20 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Review,
   },
-  RegistryAuthorisePulled: {
-    typeId: 'RegistryAuthorisePulled',
+  RegistryImagePulled: {
+    typeId: 'RegistryImagePulled',
     description: 'Image has been pulled from the registry',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Registry,
   },
-  RegistryAuthorisePushed: {
-    typeId: 'RegistryAuthorisePushed',
+  RegistryImagePushed: {
+    typeId: 'RegistryImagePushed',
     description: 'Image has been pushed to the registry',
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Registry,
   },
-  RegistryAuthoriseDeleted: {
-    typeId: 'RegistryAuthoriseDeleted',
+  RegistryImageDeleted: {
+    typeId: 'RegistryImageDeleted',
     description: 'Image has been deleted from the registry',
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Registry,
