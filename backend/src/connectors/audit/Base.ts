@@ -44,6 +44,7 @@ export const ResourceKind = {
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
   User: 'user',
+  Registry: 'registry',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -443,6 +444,24 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Review,
   },
+  RegistryImagePulled: {
+    typeId: 'RegistryImagePulled',
+    description: 'Image has been pulled from the registry',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImagePushed: {
+    typeId: 'RegistryImagePushed',
+    description: 'Image has been pushed to the registry',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImageDeleted: {
+    typeId: 'RegistryImageDeleted',
+    description: 'Image has been deleted from the registry',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.Registry,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -532,6 +551,10 @@ export abstract class BaseAuditConnector {
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
+
+  abstract onRegistryImagePulled(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImagePushed(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImageDeleted(req: Request, userDn: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

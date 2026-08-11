@@ -6,9 +6,9 @@ import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
 import Person from '@mui/icons-material/Person'
-import Search from '@mui/icons-material/Search'
 import Settings from '@mui/icons-material/Settings'
 import {
+  Box,
   Button,
   IconButton,
   ListItemIcon,
@@ -19,7 +19,6 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-  useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
@@ -27,8 +26,8 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import EntrySearch from 'src/wrapper/EntrySearch'
-import TopNavSearchDialog from 'src/wrapper/TopNavSearchDialog'
+import DocsSearch from 'src/docs/DocsSearch'
+import DocsSearchDialog from 'src/docs/DocsSearchDialog'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
@@ -68,13 +67,12 @@ const AppBar = styled(MuiAppBar, {
 
 export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, currentUser }: TopNavigationProps) {
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const [isTopNavSearchOpen, setIsTopNavSearchOpen] = useState(false)
+  const [docsSearchOpen, setDocsSearchOpen] = useState(false)
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
 
   const router = useRouter()
   const theme = useTheme()
-  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -119,7 +117,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
             width: '100%',
           }}
         >
-          {!isSmOrLarger && (
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, width: '100%' }}>
             <Stack
               direction='row'
               sx={{
@@ -149,22 +147,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 </Link>
               </Stack>
               <Stack direction='row' sx={{ alignItems: 'center' }} spacing={1}>
-                <Tooltip title='Search'>
-                  <IconButton
-                    onClick={() => setIsTopNavSearchOpen(true)}
-                    sx={{
-                      color: 'white',
-                      backgroundColor: alpha(theme.palette.common.white, 0.15),
-                      '&:hover, &:focus': {
-                        backgroundColor: alpha(theme.palette.common.white, 0.25),
-                      },
-                      textTransform: 'capitalize',
-                      height: 'max-content',
-                    }}
-                  >
-                    <Search />
-                  </IconButton>
-                </Tooltip>
+                <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 <Tooltip title='Create a new model or data card'>
                   <IconButton
                     onClick={handleCreateEntryClick}
@@ -227,8 +210,8 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 )}
               </Stack>
             </Stack>
-          )}
-          {isSmOrLarger && (
+          </Box>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, width: '100%' }}>
             <Stack
               direction='row'
               sx={{
@@ -267,7 +250,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
-                <EntrySearch />
+                <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 {currentUser ? (
                   <>
                     <Button
@@ -313,10 +296,10 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                 )}
               </Stack>
             </Stack>
-          )}
+          </Box>
         </Stack>
       </Toolbar>
-      <TopNavSearchDialog open={isTopNavSearchOpen} setOpen={(isOpen: boolean) => setIsTopNavSearchOpen(isOpen)} />
+      <DocsSearchDialog open={docsSearchOpen} onClose={() => setDocsSearchOpen(false)} />
     </AppBar>
   )
 }
