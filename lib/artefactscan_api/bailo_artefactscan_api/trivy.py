@@ -25,6 +25,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 logger = logging.getLogger("uvicorn.error")
 
 _DB_LOCK = FileLock("/tmp/trivy-db.lock", timeout=600)
+SHA_STRING = "sha256:"
 
 
 @lru_cache
@@ -226,6 +227,48 @@ def scan_sbom(blob_digest: str) -> Any:
     return sbom
 
 
+def _login_to_database_registry(client: oras.client.OrasClient, settings: Settings) -> None:
+    """Log in to the configured database registry when credentials are provided."""
+    if settings.DB_USERNAME and settings.DB_PASSWORD:
+        client.login(
+            username=settings.DB_USERNAME,
+            password=settings.DB_PASSWORD.get_secret_value(),
+            tls_verify=settings.DB_TLS_VERIFY is not False,
+            hostname=settings.DB_HOSTNAME,
+        )
+
+
+def _download_and_extract_layers(
+    client: oras.client.OrasClient,
+    container: oras.container.Container,
+    layers: list[dict[str, str]],
+    staging_dir: str,
+) -> None:
+    """Download, verify, and safely extract each OCI layer into the staging directory."""
+    for layer in layers:
+        digest = layer["digest"]
+        outfile = os.path.join(staging_dir, digest.replace(SHA_STRING, "") + ".tar")
+
+        client.download_blob(container, digest, outfile)
+
+        # Verify downloaded blob matches the digest from the manifest.
+        verify_file_sha256(outfile, digest)
+
+        logger.info("Extracting file %s into %s", outfile, staging_dir)
+        with tarfile.open(outfile) as tarf:
+            safe_extract(tarf, staging_dir)
+
+        os.remove(outfile)
+
+
+def _replace_database_dir(staging_dir: str, db_dir: str) -> None:
+    """Replace the existing database directory with the fully prepared staging directory."""
+    if os.path.exists(db_dir):
+        shutil.rmtree(db_dir)
+
+    os.rename(staging_dir, db_dir)
+
+
 def verify_file_sha256(file_path: str, expected_digest: str) -> None:
     """Verify that a file's SHA-256 hash matches the expected digest.
 
@@ -233,7 +276,7 @@ def verify_file_sha256(file_path: str, expected_digest: str) -> None:
     :param expected_digest: expected digest in the form "sha256:<hex>" or plain hex
     :raises RuntimeError: if the computed digest does not match
     """
-    expected_hex = expected_digest.removeprefix("sha256:")
+    expected_hex = expected_digest.removeprefix(SHA_STRING)
     sha = hashlib.sha256()
     with open(file_path, "rb") as f:
         while chunk := f.read(8192):
@@ -244,7 +287,7 @@ def verify_file_sha256(file_path: str, expected_digest: str) -> None:
 
 
 def download_database():
-    """Download trivy database into a container using oras
+    """Download, verify, and atomically install the Trivy database using the ORAS API.
 
     Trivy updates their database every 6 hours. Decompressed it's about 1GB
 
@@ -254,13 +297,8 @@ def download_database():
         settings = get_settings()
         logger.info("Pulling trivy database via Oras API (image=%s)", settings.DB_IMAGE)
         client = oras.client.OrasClient(settings.DB_HOSTNAME, settings.DB_INSECURE, settings.DB_TLS_VERIFY)
-        if settings.DB_USERNAME and settings.DB_PASSWORD:
-            client.login(
-                username=settings.DB_USERNAME,
-                password=settings.DB_PASSWORD.get_secret_value(),
-                tls_verify=settings.DB_TLS_VERIFY != False,  # Verify TLS unless pulling from an insecure registry
-                hostname=settings.DB_HOSTNAME,
-            )
+        _login_to_database_registry(client, settings)
+
         # Fetch the OCI manifest to get layer digests for SHA-256 verification.
         # Call `get_manifest` + `download_blob` instead of `client.pull()` to verify each layer's hash against the manifest before extracting
         container = oras.container.Container(settings.DB_IMAGE)
@@ -275,20 +313,8 @@ def download_database():
         os.makedirs(db_parent, exist_ok=True)
         staging_dir = mkdtemp(dir=db_parent)
         try:
-            for layer in layers:
-                digest = layer["digest"]
-                outfile = os.path.join(staging_dir, digest.replace("sha256:", "") + ".tar")
-                client.download_blob(container, digest, outfile)
-                # Verify downloaded blob matches the digest from the manifest
-                verify_file_sha256(outfile, digest)
-                logger.info("Extracting file %s into %s", outfile, staging_dir)
-                with tarfile.open(outfile) as tarf:
-                    safe_extract(tarf, staging_dir)
-                os.remove(outfile)
-            # Atomic swap: replace old DB with fully-verified new one
-            if os.path.exists(settings.DB_DIR):
-                shutil.rmtree(settings.DB_DIR)
-            os.rename(staging_dir, settings.DB_DIR)
+            _download_and_extract_layers(client, container, layers, staging_dir)
+            _replace_database_dir(staging_dir, settings.DB_DIR)
         except Exception:
             shutil.rmtree(staging_dir, ignore_errors=True)
             raise
