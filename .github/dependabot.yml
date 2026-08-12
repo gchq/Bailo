@@ -1,294 +1,191 @@
-# Basic dependabot.yml file with
-# minimum configuration for two package managers
-
 version: 2
 updates:
-  # Enable version updates for npm
+  # Root package.json (workspaces orchestrator)
   - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
     directory: '/'
-    # Check the npm registry for updates every month
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    # Limit the number of open pull requests for node dependencies
     open-pull-requests-limit: 25
-    # group related packages into one PR
-    # dependabot doesn't support YAML aliases so this is copied-and-pasted for all npm ecosystems https://github.com/dependabot/dependabot-core/issues/1582
-    groups:
-      react-stack:
-        patterns:
-          - react
-          - react-dom
-          - next
-          - "@next/*"
-          - "@mdx-js/*"
-      mui-stack:
-        patterns:
-          - "@mui/*"
-          - "@emotion/*"
-          - styled-components
-      eslint-stack:
-        patterns:
-          - eslint
-          - eslint-*
-          - "@eslint/*"
-          - "@typescript-eslint/*"
-      typescript-stack:
-        patterns:
-          - typescript
-          - ts-node
-          - "vite-tsconfig-paths"
-      testing-stack:
-        patterns:
-          - vitest
-          - "@vitest/*"
-          - "@testing-library/*"
-          - cypress
-          - supertest
-          - jsdom
-      aws-sdk-stack:
-        patterns:
-          - "@aws-sdk/*"
-          - "@smithy/*"
-      rjsf-stack:
-        patterns:
-          - "@rjsf/*"
-      opentelemetry-stack:
-        patterns:
-          - "@opentelemetry/*"
-          - "@vercel/otel"
-      formatting-stack:
-        patterns:
-          - prettier
-          - eslint-plugin-prettier
-      markdown-stack:
-        patterns:
-          - markdown-*
-          - remark-*
-          - rehype-*
-          - "@uiw/react-markdown-preview"
-          - "@uiw/react-md-editor"
 
+  # Frontend
   - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `/frontend` directory
     directory: '/frontend'
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
     open-pull-requests-limit: 25
-    # dependabot doesn't support YAML aliases so this is copied-and-pasted for all npm ecosystems https://github.com/dependabot/dependabot-core/issues/1582
     groups:
       react-stack:
         patterns:
           - react
           - react-dom
           - next
-          - "@next/*"
-          - "@mdx-js/*"
+          - next-router-mock
+          - '@next/*'
+          - '@mdx-js/*'
+          - '@vitejs/plugin-react'
       mui-stack:
         patterns:
-          - "@mui/*"
-          - "@emotion/*"
-          - styled-components
+          - '@mui/*'
+          - '@emotion/*'
+          - notistack
       eslint-stack:
         patterns:
           - eslint
           - eslint-*
-          - "@eslint/*"
-          - "@typescript-eslint/*"
-      typescript-stack:
-        patterns:
-          - typescript
-          - ts-node
-          - "vite-tsconfig-paths"
+          - '@eslint/*'
+          - '@typescript-eslint/*'
       testing-stack:
         patterns:
           - vitest
-          - "@vitest/*"
-          - "@testing-library/*"
+          - '@testing-library/*'
           - cypress
-          - supertest
+          - cypress-axe
+          - axe-core
           - jsdom
-      aws-sdk-stack:
-        patterns:
-          - "@aws-sdk/*"
-          - "@smithy/*"
       rjsf-stack:
         patterns:
-          - "@rjsf/*"
-      opentelemetry-stack:
-        patterns:
-          - "@opentelemetry/*"
-          - "@vercel/otel"
-      formatting-stack:
-        patterns:
-          - prettier
-          - eslint-plugin-prettier
+          - '@rjsf/*'
       markdown-stack:
         patterns:
           - markdown-*
           - remark-*
           - rehype-*
-          - "@uiw/react-markdown-preview"
-          - "@uiw/react-md-editor"
-
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `/lib/landing` directory
-    directory: '/lib/landing'
-    schedule:
-      interval: 'monthly'
-    versioning-strategy: increase
-    open-pull-requests-limit: 25
-    # dependabot doesn't support YAML aliases so this is copied-and-pasted for all npm ecosystems https://github.com/dependabot/dependabot-core/issues/1582
-    groups:
-      react-stack:
+          - '@uiw/react-markdown-preview'
+          - '@uiw/react-md-editor'
+      types-stack:
         patterns:
-          - react
-          - react-dom
-          - next
-          - "@next/*"
-          - "@mdx-js/*"
-      mui-stack:
-        patterns:
-          - "@mui/*"
-          - "@emotion/*"
-          - styled-components
-      eslint-stack:
-        patterns:
-          - eslint
-          - eslint-*
-          - "@eslint/*"
-          - "@typescript-eslint/*"
-      typescript-stack:
-        patterns:
-          - typescript
-          - ts-node
-          - "vite-tsconfig-paths"
-      testing-stack:
-        patterns:
-          - vitest
-          - "@vitest/*"
-          - "@testing-library/*"
-          - cypress
-          - supertest
-          - jsdom
+          - '@types/*'
       aws-sdk-stack:
         patterns:
-          - "@aws-sdk/*"
-          - "@smithy/*"
-      rjsf-stack:
-        patterns:
-          - "@rjsf/*"
-      opentelemetry-stack:
-        patterns:
-          - "@opentelemetry/*"
-          - "@vercel/otel"
-      formatting-stack:
-        patterns:
-          - prettier
-          - eslint-plugin-prettier
-      markdown-stack:
-        patterns:
-          - markdown-*
-          - remark-*
-          - rehype-*
-          - "@uiw/react-markdown-preview"
-          - "@uiw/react-md-editor"
+          - '@aws-sdk/*'
+          - '@smithy/*'
 
+  # Backend
   - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `/backend` directory
     directory: '/backend'
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
     open-pull-requests-limit: 25
-    # dependabot doesn't support YAML aliases so this is copied-and-pasted for all npm ecosystems https://github.com/dependabot/dependabot-core/issues/1582
+    groups:
+      aws-sdk-stack:
+        patterns:
+          - '@aws-sdk/*'
+          - '@smithy/*'
+      opentelemetry-stack:
+        patterns:
+          - '@opentelemetry/*'
+      eslint-stack:
+        patterns:
+          - eslint
+          - eslint-*
+          - '@eslint/*'
+          - '@typescript-eslint/*'
+          - typescript-eslint
+      testing-stack:
+        patterns:
+          - vitest
+          - '@vitest/*'
+          - '@anatine/zod-mock'
+          - supertest
+      mongoose-stack:
+        patterns:
+          - mongoose
+          - mongodb
+          - connect-mongo
+          - '@agendajs/mongo-backend'
+          - agenda
+      logging-stack:
+        patterns:
+          - pino
+          - pino-*
+      express-stack:
+        patterns:
+          - express
+          - express-rate-limit
+          - express-session
+          - body-parser
+          - helmet
+      validation-stack:
+        patterns:
+          - zod
+          - zod-error
+          - '@asteasolutions/zod-to-openapi'
+      types-stack:
+        patterns:
+          - '@types/*'
+      vite-stack:
+        patterns:
+          - vite
+          - vite-tsconfig-paths
+
+  # Landing page
+  - package-ecosystem: 'npm'
+    directory: '/lib/landing'
+    schedule:
+      interval: 'monthly'
+    versioning-strategy: increase
+    open-pull-requests-limit: 25
     groups:
       react-stack:
         patterns:
           - react
           - react-dom
           - next
-          - "@next/*"
-          - "@mdx-js/*"
+          - '@next/*'
+          - '@mdx-js/*'
       mui-stack:
         patterns:
-          - "@mui/*"
-          - "@emotion/*"
+          - '@mui/*'
+          - '@emotion/*'
           - styled-components
       eslint-stack:
         patterns:
           - eslint
           - eslint-*
-          - "@eslint/*"
-          - "@typescript-eslint/*"
-      typescript-stack:
-        patterns:
-          - typescript
-          - ts-node
-          - "vite-tsconfig-paths"
-      testing-stack:
-        patterns:
-          - vitest
-          - "@vitest/*"
-          - "@testing-library/*"
-          - cypress
-          - supertest
-          - jsdom
-      aws-sdk-stack:
-        patterns:
-          - "@aws-sdk/*"
-          - "@smithy/*"
-      rjsf-stack:
-        patterns:
-          - "@rjsf/*"
-      opentelemetry-stack:
-        patterns:
-          - "@opentelemetry/*"
-          - "@vercel/otel"
-      formatting-stack:
-        patterns:
-          - prettier
-          - eslint-plugin-prettier
       markdown-stack:
         patterns:
-          - markdown-*
           - remark-*
           - rehype-*
-          - "@uiw/react-markdown-preview"
-          - "@uiw/react-md-editor"
+      types-stack:
+        patterns:
+          - '@types/*'
 
-  # Enable version updates for Docker
+  # Docker images
   - package-ecosystem: 'docker'
-    # Look for a `Dockerfile` in these directories
     directories:
       - '/'
       - '/backend'
       - '/frontend'
       - '/lib/artefactscan_api'
-    # Check for updates once a week
     schedule:
       interval: 'weekly'
+    groups:
+      node-images:
+        patterns:
+          - node
+      python-images:
+        patterns:
+          - python
 
-  # Enable version updates for Docker Compose
+  # Docker Compose
   - package-ecosystem: 'docker-compose'
-    # Look for docker-compose in these directories
     directories:
       - '/'
-    # Check for updates once a week
     schedule:
       interval: 'weekly'
 
+  # Helm
   - package-ecosystem: 'helm'
     directories:
       - '/infrastructure/helm/bailo'
     schedule:
       interval: 'weekly'
 
-  # Enable version updates for python bailo package
+  # Python - bailo client library
   - package-ecosystem: 'pip'
-    # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
       - '/lib/python'
     schedule:
@@ -296,29 +193,59 @@ updates:
     versioning-strategy: increase
     open-pull-requests-limit: 10
 
-  # Enable version updates for python artefactscan api
+  # Python - artefactscan API
   - package-ecosystem: 'pip'
-    # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
       - '/lib/artefactscan_api'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase
     open-pull-requests-limit: 10
+    groups:
+      scanning-stack:
+        patterns:
+          - modelscan
+          - modelscan[*]
+          - oras
+      server-stack:
+        patterns:
+          - fastapi
+          - fastapi[*]
+          - uvicorn
+          - pydantic_settings
+          - python-multipart
+          - content-size-limit-asgi
+      testing-stack:
+        patterns:
+          - pytest
+          - pytest-*
+          - pre_commit
 
-  # Enable version updates for python docs
+  # Python - backend docs
   - package-ecosystem: 'pip'
-    # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
       - '/backend/docs'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase
     open-pull-requests-limit: 10
+    groups:
+      sphinx-stack:
+        patterns:
+          - sphinx
+          - sphinx-*
+          - myst_parser
+          - nbsphinx
 
-  # Set update schedule for GitHub Actions
+  # GitHub Actions
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'monthly'
     open-pull-requests-limit: 12
+    groups:
+      github-actions:
+        patterns:
+          - actions/*
+          - github/*
+          - docker/*

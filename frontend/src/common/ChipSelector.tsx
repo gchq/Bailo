@@ -8,15 +8,11 @@ import { CSSProperties, ReactElement, useState } from 'react'
 type PartialChipSelectorProps =
   | {
       multiple: true
-      options: string[]
-      unreachableOptions?: string[]
       selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
-      options: string[]
-      unreachableOptions?: string[]
       selectedChips: string
       onChange: (value: string) => void
     }
@@ -32,6 +28,8 @@ type ChipSelectorProps = {
   variant?: 'filled' | 'outlined'
   icon?: ReactElement
   style?: CSSProperties
+  options: string[]
+  unreachableOptions?: string[]
 } & PartialChipSelectorProps
 
 export default function ChipSelector({
@@ -98,7 +96,7 @@ export default function ChipSelector({
               alignItems: 'center',
             }}
           >
-            <Typography component='h2' variant='h6'>
+            <Typography component='h2' variant='h6' sx={{ px: 1 }}>
               {`${label}`}
             </Typography>
             <Typography variant='caption'>{subheading ? subheading : ''}</Typography>
@@ -136,6 +134,7 @@ export default function ChipSelector({
           sx={{
             alignContent: 'center',
             height: '56px',
+            px: 1,
           }}
         >{`${label}`}</Typography>
       )}

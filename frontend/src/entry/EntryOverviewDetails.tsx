@@ -114,7 +114,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
       <Stack
         spacing={2}
         divider={<Divider flexItem />}
-        sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}
+        sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
       >
         <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} details

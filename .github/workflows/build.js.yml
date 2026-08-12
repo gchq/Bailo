@@ -10,6 +10,15 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Version tag for backend & frontend (e.g. 2.19.0)'
+        required: false
+        type: string
+      artefactscan_tag:
+        description: 'Version tag for artefactscan (e.g. 4.1.0)'
+        required: false
+        type: string
 
 # jobs define their own required permissions
 permissions: {}
@@ -52,16 +61,16 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Build ${{ matrix.component.name }} image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
@@ -101,45 +110,72 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      # Log in to GHCR if release made or artefactscan_api version changed
+      - name: Determine push targets
+        id: push_targets
+        # use env to safely prevent potential shell injection
+        env:
+          IS_RELEASE: ${{ github.event_name == 'release' }}
+          IS_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+          IS_ARTEFACTSCAN: ${{ matrix.component.name == 'artefactscan' }}
+          ARTEFACTSCAN_CHANGED: ${{ steps.artefactscan_version_changed.outputs.changed == 'true' }}
+          IS_MAIN: ${{ github.ref == 'refs/heads/main' }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          ARTEFACTSCAN_TAG: ${{ inputs.artefactscan_tag }}
+        run: |
+          PUSH_RELEASE="false"
+          if [[ "$IS_ARTEFACTSCAN" == "false" ]]; then
+            if [[ "$IS_RELEASE" == "true" || ("$IS_DISPATCH" == "true" && -n "$RELEASE_TAG") ]]; then
+              PUSH_RELEASE="true"
+            fi
+          fi
+
+          PUSH_ARTEFACTSCAN="false"
+          if [[ "$IS_ARTEFACTSCAN" == "true" ]]; then
+            # ARTEFACTSCAN_CHANGED is empty (not 'true') when the version check step is skipped for non-artefactscan matrix entries
+            if [[ ("$IS_MAIN" == "true" && "$ARTEFACTSCAN_CHANGED" == "true") || ("$IS_DISPATCH" == "true" && -n "$ARTEFACTSCAN_TAG") ]]; then
+              PUSH_ARTEFACTSCAN="true"
+            fi
+          fi
+
+          echo "push_release=$PUSH_RELEASE" >> $GITHUB_OUTPUT
+          echo "push_artefactscan=$PUSH_ARTEFACTSCAN" >> $GITHUB_OUTPUT
+
       - name: Log in to GHCR
-        if: (github.event_name == 'release' && matrix.component.name != 'artefactscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true')
-        uses: docker/login-action@v4
+        if: steps.push_targets.outputs.push_release == 'true' || steps.push_targets.outputs.push_artefactscan == 'true'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Push backend & frontend to GHCR if release made (ignoring artefactscan_api which is published separately)
-      - name: Tag & push backend & frontend images to GHCR
-        if: github.event_name == 'release' && matrix.component.name != 'artefactscan'
-        run: |
-          docker load -i ${{ matrix.component.tar }}
-          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name }}"
-          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
+      - name: Push backend & frontend images to GHCR
+        if: steps.push_targets.outputs.push_release == 'true'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ${{ matrix.component.context }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name || inputs.release_tag }}
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
 
-          docker tag $IMAGE_ID $VERSION_TAG
-          docker tag $IMAGE_ID $LATEST_TAG
-          docker push $VERSION_TAG
-          docker push $LATEST_TAG
-
-      # Push artefactscan_api to GHCR if version bumped
-      - name: Tag & push artefactscan image to GHCR
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan' && steps.artefactscan_version_changed.outputs.changed == 'true'
-        run: |
-          docker load -i ${{ matrix.component.tar }}
-          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version }}"
-          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
-
-          docker tag $IMAGE_ID $VERSION_TAG
-          docker tag $IMAGE_ID $LATEST_TAG
-          docker push $VERSION_TAG
-          docker push $LATEST_TAG
+      - name: Push artefactscan image to GHCR
+        if: steps.push_targets.outputs.push_artefactscan == 'true'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ${{ matrix.component.context }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version || inputs.artefactscan_tag }}
+            ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.component.artifact }}
           path: ${{ matrix.component.tar }}
@@ -152,16 +188,16 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 26
           cache: "npm"
 
       - name: Cache npm dependencies
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
@@ -191,11 +227,11 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       # jq is required so that `npm ci` is not needed to generate certs
       - name: Install jq
@@ -203,7 +239,7 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: bailo_*
           path: /tmp
@@ -212,7 +248,7 @@ jobs:
         run: ls -R /tmp/bailo_*
 
       - name: Start minikube
-        uses: medyagh/setup-minikube@latest
+        uses: medyagh/setup-minikube@e9e035a86bbc3caea26a450bd4dbf9d0c453682e # v0.0.21
         with:
           driver: docker
           kubernetes-version: v1.35.0
@@ -348,35 +384,36 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        job_name: [end_to_end, integration_python]
+        job_name: [end_to_end, integration_python, cross_instance]
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 26
           cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        if: matrix.job_name != 'cross_instance'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bailo_artefactscan
           path: /tmp
@@ -385,9 +422,23 @@ jobs:
         run: |
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
-          docker load --input /tmp/bailo_artefactscan.tar
           docker image ls -a
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_artefactscan.tar
+          rm -f /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
+
+      - name: Load artefactscan image
+        if: matrix.job_name != 'cross_instance'
+        run: |
+          docker load --input /tmp/bailo_artefactscan.tar
+          rm -f /tmp/bailo_artefactscan.tar
+
+      - name: Tag images for cross-instance
+        if: matrix.job_name == 'cross_instance'
+        run: |
+          docker tag bailo_backend:latest bailo_backend:bailo_a
+          docker tag bailo_backend:latest bailo_backend:bailo_b
+          docker tag bailo_frontend:latest bailo_frontend:bailo_a
+          docker tag bailo_frontend:latest bailo_frontend:bailo_b
+          docker image ls -a
 
       # Create logs directory
       - run: mkdir logs
@@ -408,12 +459,19 @@ jobs:
               uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
             },
 
-            minio: {
-              accessKey: 'minioadmin',
-              secretKey: 'minioadmin',
+            s3: {
+              credentials: {
+                accessKeyId: 'bailoadmin',
+                secretAccessKey: 'bailoadmin',
+              },
+              endpoint: 'http://seaweedfs:8333',
+              region: 'ignored',
+              forcePathStyle: true,
+              rejectUnauthorized: true,
             },
 
             smtp: {
+              ${{ matrix.job_name == 'cross_instance' && 'enabled: false,' || '' }}
               auth: {
                 user: 'mailuser',
                 pass: 'mailpass',
@@ -428,18 +486,38 @@ jobs:
                 path: '/home/runner/work/Bailo/Bailo/logs/out.log',
               },
             },
+
+            ui: {
+              modelMirror: {
+                import: {
+                  enabled: true,
+                },
+                export: {
+                  enabled: true,
+                  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+                },
+              },
+            },
+            ${{ matrix.job_name == 'cross_instance' && 'connectors: { artefactScanners: { kinds: [] } },' || '' }}
           }
           EOT
 
       - name: Start services
+        if: matrix.job_name != 'cross_instance'
         run: >
           docker compose -f compose.yaml -f compose.prod.yaml
           --env-file prod.env --progress=plain --parallel=-1
           up -d
           --wait --wait-timeout 60
 
+      - name: Start cross-instance services
+        if: matrix.job_name == 'cross_instance'
+        run: |
+          INSTANCE_NAME=bailo_a docker compose -f compose.yaml -f compose.instance-a.yaml -p bailo-a --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
+          INSTANCE_NAME=bailo_b docker compose -f compose.yaml -f compose.instance-b.yaml -p bailo-b --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
+
       # e2e with Cypress
-      - uses: cypress-io/github-action@v7
+      - uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7.4.1
         if: matrix.job_name == 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
@@ -447,16 +525,28 @@ jobs:
           install: false
           spec: cypress/e2e/bailo/**/*
 
+      # Cross-instance mirroring tests
+      - uses: cypress-io/github-action@v7
+        if: matrix.job_name == 'cross_instance'
+        with:
+          wait-on: 'http://localhost:8081/api/v2/config/ui, http://localhost:8082/api/v2/config/ui'
+          wait-on-timeout: 180
+          working-directory: ./frontend
+          install: false
+          spec: cypress/e2e/cross-instance/**/*
+        env:
+          CYPRESS_BASE_URL: http://localhost:8081
+
       # Python integration
       - name: Set up Python
         if: matrix.job_name == 'integration_python'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
 
       - name: Cache python pip
         if: matrix.job_name == 'integration_python'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -496,22 +586,34 @@ jobs:
           PYTEST_RUN_PATH: "lib/python"
 
       # Upload all artifacts & logs
-      - uses: actions/upload-artifact@v7
-        if: failure() && matrix.job_name == 'end_to_end'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure() && (matrix.job_name == 'end_to_end' || matrix.job_name == 'cross_instance')
         with:
-          name: cypress-screenshots-e2e
+          name: cypress-screenshots-${{ matrix.job_name }}
           path: frontend/cypress/screenshots
 
       - name: Dump docker compose logs
-        if: always()
+        if: always() && matrix.job_name != 'cross_instance'
         run: docker compose logs > logs/stack.log
 
+      - name: Dump cross-instance logs
+        if: always() && matrix.job_name == 'cross_instance'
+        run: |
+          docker compose -p bailo-a logs > logs/instance-a.log 2>&1
+          docker compose -p bailo-b logs > logs/instance-b.log 2>&1
+
       - name: Docker Compose Logs
-        if: always()
+        if: always() && matrix.job_name != 'cross_instance'
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v7
-        if: always() && matrix.job_name == 'end_to_end'
+      - name: Cross-instance logs
+        if: always() && matrix.job_name == 'cross_instance'
+        run: |
+          cat logs/instance-a.log
+          cat logs/instance-b.log
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always() && (matrix.job_name == 'end_to_end' || matrix.job_name == 'cross_instance')
         with:
-          name: logs
+          name: logs-${{ matrix.job_name }}
           path: logs

@@ -1,7 +1,9 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
+  BaseLifecycleMetrics,
   BaseNoReleaseMetrics,
+  BaseUnapprovedReleaseMetrics,
   CollaboratorEntry,
   EntryKindKeys,
   ModelVolume,
@@ -114,5 +116,36 @@ export function useGetModelBreakdown({
     entries: data,
     isEntriesLoading: isLoading,
     isEntriesError: error,
+  }
+}
+
+export function useGetUnapprovedReleasesPolicyMetrics() {
+  const { data, isLoading, error, mutate } = useSWR<BaseUnapprovedReleaseMetrics, ErrorInfo>(
+    '/api/v3/metrics/compliance/unapproved',
+    fetcher,
+  )
+
+  return {
+    mutateUnapprovedReleasesPolicyMetrics: mutate,
+    unapprovedReleasesPolicyMetrics: data,
+    isUnapprovedReleasesPolicyMetricsLoading: isLoading,
+    isUnapprovedReleasesPolicyMetricsError: error,
+  }
+}
+
+export function useLifecyclePolicyMetrics(weeksUntilDue: number) {
+  const queryParams = {
+    weeksUntilDue,
+  }
+  const { data, isLoading, error, mutate } = useSWR<BaseLifecycleMetrics, ErrorInfo>(
+    `/api/v3/metrics/compliance/lifecycle?${qs.stringify(queryParams)}`,
+    fetcher,
+  )
+
+  return {
+    mutateLifecyclePolicyMetrics: mutate,
+    lifecyclePolicyMetrics: data,
+    isLifecyclePolicyMetricsLoading: isLoading,
+    isLifecyclePolicyMetricsError: error,
   }
 }

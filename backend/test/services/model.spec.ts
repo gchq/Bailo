@@ -707,6 +707,93 @@ describe('services > model', () => {
     )
   })
 
+  test('updateModel > validates mirrored model state against merged card and mirroredCard metadata', async () => {
+    const saveMock = vi.fn()
+    const testModel = {
+      name: 'mirrored model',
+      kind: EntryKind.MirroredModel,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { name: 'Local Name' } },
+      },
+      mirroredCard: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { description: 'Mirrored Description' } },
+      },
+      collaborators: [],
+      settings: { mirror: { sourceModelId: 'source' }, ungovernedAccess: false, allowTemplating: false },
+      save: saveMock,
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: true, errors: [] })
+
+    await updateModel({} as any, 'test123', { state: 'Production' })
+
+    expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
+      'test-schema',
+      { overview: { name: 'Local Name', description: 'Mirrored Description' } },
+      'Production',
+    )
+    expect(saveMock).toHaveBeenCalled()
+  })
+
+  test('updateModel > throws when mirrored model combined card fails state validation', async () => {
+    const testModel = {
+      name: 'mirrored model',
+      kind: EntryKind.MirroredModel,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: {},
+      },
+      mirroredCard: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: {},
+      },
+      collaborators: [],
+      settings: { mirror: { sourceModelId: 'source' }, ungovernedAccess: false, allowTemplating: false },
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+
+    await expect(() => updateModel({} as any, 'test123', { state: 'Production' })).rejects.toThrow(
+      'Model metadata could not be validated against the schema, for Production state.',
+    )
+  })
+
+  test('updateModel > validates mirrored model with missing mirroredCard using only local card', async () => {
+    const saveMock = vi.fn()
+    const testModel = {
+      name: 'mirrored model',
+      kind: EntryKind.MirroredModel,
+      card: {
+        schemaId: 'test-schema',
+        version: 1,
+        metadata: { overview: { name: 'Local' } },
+      },
+      mirroredCard: undefined,
+      collaborators: [],
+      settings: { mirror: { sourceModelId: 'source' }, ungovernedAccess: false, allowTemplating: false },
+      save: saveMock,
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel)
+    vi.mocked(authorisation.model).mockResolvedValue({ success: true, id: '' })
+    schemaMock.validateContentAgainstSchema.mockResolvedValueOnce({ valid: true, errors: [] })
+
+    await updateModel({} as any, 'test123', { state: 'Production' })
+
+    expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
+      'test-schema',
+      { overview: { name: 'Local' } },
+      'Production',
+    )
+  })
+
   test('createModelCardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'Cannot alter a mirrored model.',
@@ -769,15 +856,16 @@ describe('services > model', () => {
       expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
     })
 
-    test('not save version 1 with undefined metadata even when no existing revision', async () => {
+    test('save version 1 with undefined metadata', async () => {
       // create from schema has v1 be undefined
       const revisionV1 = { ...modelCardRevision, version: 1, metadata: undefined }
       ModelCardRevisionModelMock.findOne.mockResolvedValueOnce(undefined)
 
       const result = await saveImportedModelCard(revisionV1 as any)
 
-      expect(result).toBeUndefined()
-      expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
+      expect(schemaMock.validateContentAgainstSchema).not.toHaveBeenCalled()
+      expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
+      expect(result).toEqual(revisionV1)
     })
 
     test('should validate version 1 with defined metadata', async () => {

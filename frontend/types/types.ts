@@ -599,6 +599,7 @@ type PartialReviewInterface = {
   _id: string
   modelId: string
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
@@ -614,6 +615,7 @@ export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
@@ -1053,6 +1055,7 @@ export interface ModelBreakdown {
 export const Roles = {
   Admin: 'admin',
   Compliance: 'compliance',
+  UntrustedModel: 'untrusted-model',
 } as const
 export type RoleKeys = (typeof Roles)[keyof typeof Roles]
 
@@ -1079,6 +1082,61 @@ export interface NoReleaseMetricsByOrg {
 
 export interface BaseNoReleaseMetrics {
   global: GlobalNoReleasesMetrics
-  byOrganisation: NoReleaseMetricsByOrg[]
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface UnapprovedReleasesSummaryMetrics {
+  totalModelsWithUnapprovedReleases: number
+  totalUnapprovedReleases: number
+}
+
+export interface ModelsUnapprovedReleases {
+  entryId: string
+  modelOwners: string[]
+  unapprovedReleases: string[]
+}
+
+export interface GlobalUnapprovedReleasesMetrics {
+  summary: UnapprovedReleasesSummaryMetrics
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface UnapprovedReleaseMetricsByOrg {
+  organisation: string
+  modelsWithUnapprovedReleases: number
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface BaseUnapprovedReleaseMetrics {
+  global: GlobalUnapprovedReleasesMetrics
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface LifecycleSummaryMetrics {
+  count: number
+}
+
+export interface EntryLifecycleMetrics {
+  entryId: string
+  dueDate: string
+  modelOwners: string[]
+}
+
+export interface GlobalLifecycleMetrics {
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface LifecycleMetricsByOrg {
+  organisation: string
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface BaseLifecycleMetrics {
+  global: GlobalLifecycleMetrics
+  byOrganisation: LifecycleMetricsByOrg[]
   lastUpdated: string
 }

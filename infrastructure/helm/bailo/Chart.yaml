@@ -31,5 +31,5 @@ dependencies:
   condition: minio.enabled
 - name: mongodb
   repository: "https://charts.bitnami.com/bitnami"
-  version: 19.1.21
+  version: 19.1.24
   condition: mongodb.enabled

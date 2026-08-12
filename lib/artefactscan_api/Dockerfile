@@ -3,7 +3,7 @@
 ARG UID=65532
 ARG GID=65532
 
-FROM python:3.12.13-slim-trixie AS build
+FROM python:3.12.13-slim-trixie@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36 AS build
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-compile -r requirements.txt
 
 
-FROM python:3.12.13-slim-trixie AS base
+FROM python:3.12.13-slim-trixie@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36 AS base
 ARG UID
 ARG GID
 
@@ -37,7 +37,7 @@ RUN groupadd --gid ${GID} appuser && \
 
 WORKDIR /app
 
-FROM aquasec/trivy:0.72.0 AS trivy
+FROM aquasec/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c AS trivy
 
 FROM base AS dev
 

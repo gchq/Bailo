@@ -17,6 +17,40 @@ const OauthEntityKind = {
   Group: 'group',
 } as const
 
+// Redirect users to the Market Place if the callback is unsafe cross origin ect.
+const defaultLoginRedirect = '/'
+
+function getSafeLoginRedirect(redirect: unknown): string {
+  if (typeof redirect !== 'string') {
+    return defaultLoginRedirect
+  }
+
+  if (!redirect.startsWith('/')) {
+    return defaultLoginRedirect
+  }
+
+  try {
+    const decodedPath = decodeURIComponent(redirect.split(/[?#]/, 1)[0]) // Normalise encoded paths
+    if (
+      decodedPath.startsWith('//') || // Double path
+      decodedPath.includes('\\') || // Backslash
+      /[\r\n]/.test(decodedPath) || // Newline
+      decodedPath.split('/').some((segment) => segment === '.' || segment === '..') // Path traversal
+    ) {
+      return defaultLoginRedirect
+    }
+
+    const baseUrl = new URL(
+      `${config.app.protocol || 'http'}://${config.app.host || 'localhost'}${config.app.port ? `:${config.app.port}` : ''}`,
+    )
+    const redirectUrl = new URL(redirect, baseUrl)
+
+    return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`
+  } catch {
+    return defaultLoginRedirect
+  }
+}
+
 export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   constructor() {
     super()
@@ -66,7 +100,14 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   getRoutes() {
     const router = Router()
     router.get('/api/login', (req, res) => {
+      req.session.loginRedirect = getSafeLoginRedirect(req.query.redirect)
       res.redirect(`/api/connect/${config.oauth.provider}/login`)
+    })
+
+    router.get('/api/login/callback', (req, res) => {
+      const redirect = getSafeLoginRedirect(req.session.loginRedirect)
+      delete req.session.loginRedirect
+      res.redirect(redirect)
     })
 
     router.get('/api/logout', (req, res) => {
@@ -80,18 +121,28 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return router
   }
 
-  async hasRole(user: UserInterface, role: RoleKeys) {
-    if (role === Roles.Admin) {
-      const adminGroup = config.oauth.cognito.adminGroupName
-      const admins = await this.getEntityMembers(toEntity(OauthEntityKind.Group, adminGroup))
-      return admins.includes(user.dn)
+  private async hasGroupMembership(user: UserInterface, groupName: string): Promise<boolean> {
+    const members = await this.getEntityMembers(toEntity(OauthEntityKind.Group, groupName))
+    return members.includes(user.dn)
+  }
+
+  async hasRole(user: UserInterface, role: RoleKeys): Promise<boolean> {
+    const isAdmin = await this.hasGroupMembership(user, config.oauth.cognito.adminGroupName)
+
+    if (isAdmin) {
+      return true
     }
-    if (role === Roles.Compliance) {
-      const complianceGroup = config.oauth.cognito.complianceGroupName
-      const complianceUsers = await this.getEntityMembers(toEntity(OauthEntityKind.Group, complianceGroup))
-      return complianceUsers.includes(user.dn)
+
+    switch (role) {
+      case Roles.Compliance:
+        return this.hasGroupMembership(user, config.oauth.cognito.complianceGroupName)
+
+      case Roles.UntrustedModel:
+        return this.hasGroupMembership(user, config.oauth.cognito.untrustedModelGroupName)
+
+      default:
+        return false
     }
-    return false
   }
 
   async queryEntities(query: string) {

@@ -27,6 +27,56 @@ describe('services > images > getImageLayers', () => {
     expect(result).toEqual([{ digest: 'sha256:config' }, { digest: 'sha256:layer1' }, { digest: 'sha256:layer2' }])
   })
 
+  test('return layers from manifest list by fetching each platform manifest', async () => {
+    registryMocks.getImageTagManifests
+      .mockResolvedValueOnce({
+        body: {
+          mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+          manifests: [
+            { digest: 'sha256:amd64digest', mediaType: 'application/vnd.docker.distribution.manifest.v2+json' },
+            { digest: 'sha256:arm64digest', mediaType: 'application/vnd.docker.distribution.manifest.v2+json' },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        body: {
+          config: { digest: 'sha256:config1' },
+          layers: [{ digest: 'sha256:layer1' }],
+        },
+      })
+      .mockResolvedValueOnce({
+        body: {
+          config: { digest: 'sha256:config2' },
+          layers: [{ digest: 'sha256:layer2' }],
+        },
+      })
+
+    const result = await getImageLayers('token', {
+      repository: 'repo',
+      name: 'image',
+      tag: 'latest',
+    } as any)
+
+    expect(result).toEqual([
+      { digest: 'sha256:config1' },
+      { digest: 'sha256:layer1' },
+      { digest: 'sha256:config2' },
+      { digest: 'sha256:layer2' },
+    ])
+
+    expect(registryMocks.getImageTagManifests).toHaveBeenCalledTimes(3)
+    expect(registryMocks.getImageTagManifests).toHaveBeenNthCalledWith(2, 'token', {
+      repository: 'repo',
+      name: 'image',
+      digest: 'sha256:amd64digest',
+    })
+    expect(registryMocks.getImageTagManifests).toHaveBeenNthCalledWith(3, 'token', {
+      repository: 'repo',
+      name: 'image',
+      digest: 'sha256:arm64digest',
+    })
+  })
+
   test('throw InternalError when manifest body is missing', async () => {
     registryMocks.getImageTagManifests.mockResolvedValueOnce({})
 
@@ -75,5 +125,18 @@ describe('services > images > getImageLayers', () => {
     await expect(
       getLayersForImage('token', { repository: 'repo', name: 'image', tag: 'latest' } as any),
     ).rejects.toThrow(/^The registry returned a response but the body was missing./)
+  })
+
+  test('getLayersForImage > throws InternalError when response is a manifest list', async () => {
+    registryMocks.getImageTagManifests.mockResolvedValueOnce({
+      body: {
+        mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+        manifests: [{ digest: 'sha256:abc' }],
+      },
+    })
+
+    await expect(
+      getLayersForImage('token', { repository: 'repo', name: 'image', tag: 'latest' } as any),
+    ).rejects.toThrow(/^Expected a single image manifest but received a manifest list./)
   })
 })

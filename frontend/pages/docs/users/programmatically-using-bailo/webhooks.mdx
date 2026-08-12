@@ -48,6 +48,7 @@ A Bailo model's webhook can be triggered by the following events:
 - **updateRelease** - Fires when an existing release is updated
 - **createReviewResponse** - Fires when a reviewer submits a response (approval or change request)
 - **createAccessRequest** - Fires when a user submits an access request for the model
+- **importModel** - Fires when a mirrored model completes an import of all data and artefacts.
 
 ## Request format
 
@@ -120,6 +121,33 @@ The body of the webhook's request varies depending on the type of event.
   "createdBy": "user",
   "createdAt": "2025-01-21T12:00:00.000Z",
   "updatedAt": "2025-01-21T12:00:00.000Z"
+}
+```
+
+### importModel
+
+```json
+{
+  "event": "importModel",
+  "description": "Model has been imported",
+  "transfer": {
+    "exportId": "abc123",
+    "artefactStatus": [
+      {
+        "key": "documents",
+        "status": "completed",
+        "kind": "documents",
+        "id": "documentId"
+      }
+    ],
+    "completedNotificationSent": false,
+    "createdAt": "2025-01-21T12:00:00.000Z",
+    "createdBy": "user",
+    "modelId": "model-abc123",
+    "createdAt": "2025-01-21T12:00:00.000Z",
+    "status": "completed",
+    "completed": true
+  }
 }
 ```
 

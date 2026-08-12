@@ -31,6 +31,7 @@ import {
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { deepMergePreferFirst } from '../utils/object.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
@@ -625,7 +626,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   if (modelDiff.state && model.card) {
-    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    const card =
+      model.kind === EntryKind.MirroredModel && model.mirroredCard?.metadata
+        ? deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata)
+        : model.card.metadata
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, modelDiff.state)
+
     if (!valid) {
       throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
     }
@@ -783,9 +789,8 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     mirrored: true,
   })
 
-  if (!foundModelCardRevision && !(modelCardRevision.version === 1 && modelCardRevision.metadata === undefined)) {
+  if (!foundModelCardRevision) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
-    // Conditionally ignore model cards with a version number of 1 as these will be blank if created from schema.
     const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
     await newModelCardRevision.save()
     return modelCardRevision
@@ -793,7 +798,8 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
 }
 
 /**
- * Note that we do not authorise that the user can access the model here.
+ * @remarks
+ * Note that we do _not_ authorise that the user can access the model here.
  * This function should only be used during the import model card process.
  * Do not expose this functionality to users.
  */

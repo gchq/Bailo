@@ -95,6 +95,15 @@ export default function MetricsHeader({
                       <MenuItem key={SelectedMetricKind.NO_RELEASES} value={SelectedMetricKind.NO_RELEASES}>
                         models with no releases
                       </MenuItem>
+                      <MenuItem
+                        key={SelectedMetricKind.UNAPPROVED_RELEASES}
+                        value={SelectedMetricKind.UNAPPROVED_RELEASES}
+                      >
+                        models with unapproved releases
+                      </MenuItem>
+                      <MenuItem key={SelectedMetricKind.LIFECYCLE} value={SelectedMetricKind.LIFECYCLE}>
+                        models near or past their lifecycle review date
+                      </MenuItem>
                     </Select>
                     <em>for</em>
                   </>

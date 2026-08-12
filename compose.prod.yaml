@@ -1,8 +1,12 @@
 name: bailo-prod
 
 services:
+  nginx:
+    ports:
+      - ${EXTERNAL_PORT}:8080
+
   clamd:
-    image: clamav/clamav:1.4.3_base
+    image: clamav/clamav:1.4.3_base@sha256:629a3050df6a706aedb31859fbb8139e9aaf8f56b0ffefbf251b8358a7c9e76c
     networks:
       internal:
     healthcheck:
@@ -34,13 +38,13 @@ services:
     ports:
       - 1080:1080
       - 1025:1025
-    image: marlonb/mailcrab:v1.8.0
+    image: marlonb/mailcrab:v1.9.0@sha256:fbe35c063cb4c8c169e32f4d91e09ee44459843a005a567cfd3dc9876779e194
 
   webhook-tester:
     networks:
       default:
       internal:
-    image: tarampampam/webhook-tester:2.3.0
+    image: tarampampam/webhook-tester:2.3.0@sha256:85818267b450d3d386cad6510c561e09b974183ed2832c373bc83b125fc1b221
     command: serve --auto-create-sessions
     ports:
       - 8082:8080
@@ -50,8 +54,6 @@ services:
       clamd:
         condition: service_healthy
       registry:
-        condition: service_started
-      minio:
         condition: service_started
       mongo:
         condition: service_started
