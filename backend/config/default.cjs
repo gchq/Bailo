@@ -150,6 +150,14 @@ module.exports = {
         reviewRoles: ['msro'],
       },
     ],
+    deploymentAssessments: [
+      {
+        name: 'Minimal Deployment Assessment Schema v1',
+        id: 'minimal-deployment-assessment-schema-v1',
+        description: 'TBC',
+        jsonSchema: require('../src/scripts/example_schemas/minimal_deployment_assessment.json'),
+      },
+    ],
   },
 
   session: {

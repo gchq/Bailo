@@ -171,6 +171,7 @@ export interface Config {
     modelCards: Array<DefaultSchema>
     accessRequests: Array<DefaultSchema>
     dataCards: Array<DefaultSchema>
+    deploymentAssessments: Array<DefaultSchema>
   }
 
   defaultReviewRoles: Array<DefaultReviewRole>

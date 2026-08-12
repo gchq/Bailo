@@ -292,6 +292,18 @@ export async function addDefaultSchemas() {
     await SchemaModel.deleteOne({ id: schema.id })
     await modelSchema.save()
   }
+
+  for (const schema of config.defaultSchemas.deploymentAssessments) {
+    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
+    const modelSchema = new SchemaModel({
+      ...schema,
+      kind: SchemaKind.DeploymentAssessment,
+      active: true,
+      hidden: false,
+    })
+    await SchemaModel.deleteOne({ id: schema.id })
+    await modelSchema.save()
+  }
 }
 
 export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {

@@ -57,6 +57,7 @@ export default function JsonSchemaViewer({
     SelectWidget: QuestionViewer,
     multiSelector: QuestionViewer,
     dataCardSelector: QuestionViewer,
+    modelSelector: QuestionViewer,
     metricsWidget: QuestionViewer,
     nothing: Nothing,
   }
