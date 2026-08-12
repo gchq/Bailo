@@ -28,6 +28,7 @@ export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [modelCardVersion, setModelCardVersion] = useState(0)
+  const [isMinorRelease, setIsMinorRelease] = useState(false)
   const draft = useRef(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
@@ -172,6 +173,7 @@ export default function NewRelease() {
       draft: draft.current as boolean,
       notes: releaseNotes,
       fileIds: successfulFiles.map((file) => file.fileId),
+      minor: isMinorRelease,
       images: imageList,
       modelCardVersion: modelCardVersion,
     }
@@ -233,6 +235,7 @@ export default function NewRelease() {
                 <ReleaseForm
                   model={model}
                   formData={{
+                    isMinorRelease,
                     semver,
                     releaseNotes,
                     files,
@@ -242,6 +245,7 @@ export default function NewRelease() {
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
                   onFilesChange={(value) => handleFileOnChange(value)}
+                  onMinorReleaseChange={(value) => setIsMinorRelease(value)}
                   onModelCardVersionChange={(value) => setModelCardVersion(value)}
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}

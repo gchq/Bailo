@@ -1,5 +1,4 @@
 import { Button, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -21,19 +20,11 @@ export interface ReleaseAssetsMainTextProps {
 export default function ReleaseAssetsMainText({
   model,
   release,
-  latestRelease,
   hideCopySemver = false,
   hideDescription = false,
   includeLinks = true,
 }: ReleaseAssetsMainTextProps) {
   const router = useRouter()
-  const theme = useTheme()
-
-  function latestVersionAdornment() {
-    if (release.semver === latestRelease) {
-      return <Typography color='secondary'>(Latest)</Typography>
-    }
-  }
 
   return (
     <>
@@ -74,11 +65,6 @@ export default function ReleaseAssetsMainText({
               notificationText='Copied release semver to clipboard'
               ariaLabel='copy release semver to clipboard'
             />
-          )}
-          {release.draft ? (
-            <em style={{ color: theme.palette.secondary.main }}>{'(draft)'}</em>
-          ) : (
-            latestVersionAdornment()
           )}
         </Stack>
         {includeLinks && (

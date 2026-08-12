@@ -292,7 +292,7 @@ export async function getModelReleases(
   const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
   const results = await ReleaseModel.aggregate()
     .match(query)
-    .sort({ updatedAt: -1 })
+    .sort({ draft: -1, updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .lookup({
       from: 'v2_files',

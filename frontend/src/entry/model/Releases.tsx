@@ -87,6 +87,7 @@ export default function Releases({ model, readOnly = false }: ReleasesProps) {
           ]}
           searchPlaceholderText='Search by version'
           defaultSortProperty='semver'
+          prioritiseItems={(a, b) => Number(b.draft === true) - Number(a.draft === true)}
         >
           {ReleaseListItem}
         </Paginate>

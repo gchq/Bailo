@@ -113,6 +113,7 @@ function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
         formData={{
           semver: release.semver,
           releaseNotes: release.notes,
+          isMinorRelease: release.minor,
           files: release.files,
           imageList: release.images,
           modelCardVersion: release.modelCardVersion,
@@ -121,6 +122,7 @@ function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
         onSemverChange={noop}
         onReleaseNotesChange={noop}
         onFilesChange={noop}
+        onMinorReleaseChange={noop}
         onFilesMetadataChange={noop}
         onModelCardVersionChange={noop}
         onImageListChange={noop}
@@ -136,6 +138,7 @@ function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
 function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setIsLoading }: EditableReleaseInnerProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
+  const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
   const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
@@ -194,10 +197,11 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
   const resetForm = useCallback(() => {
     setSemver(release.semver)
     setReleaseNotes(release.notes)
+    setIsMinorRelease(!!release.minor)
     setFiles(release.files)
     setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: { tags: [], text: '' } })))
     setImageList(release.images)
-  }, [release.semver, release.notes, release.files, release.images])
+  }, [release.semver, release.notes, release.minor, release.files, release.images])
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -386,6 +390,7 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
         formData={{
           semver,
           releaseNotes,
+          isMinorRelease,
           files,
           imageList,
           modelCardVersion,
@@ -393,6 +398,7 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
         filesMetadata={filesMetadata}
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
+        onMinorReleaseChange={(value) => setIsMinorRelease(value)}
         onFilesChange={(value) => handleFileOnChange(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onModelCardVersionChange={(value) => setModelCardVersion(value)}

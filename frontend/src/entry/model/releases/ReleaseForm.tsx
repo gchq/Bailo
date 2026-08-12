@@ -5,7 +5,10 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Checkbox,
   Divider,
+  FormControl,
+  FormControlLabel,
   LinearProgress,
   MenuItem,
   Select,
@@ -54,6 +57,7 @@ import { isValidSemver } from 'utils/stringUtils'
 type ReleaseFormData = {
   semver: string
   releaseNotes: string
+  isMinorRelease?: boolean
   files: (File | FileInterface)[]
   imageList: FlattenedModelImage[]
   modelCardVersion: number
@@ -74,6 +78,7 @@ type ReleaseFormProps = {
   formData: ReleaseFormData
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
+  onMinorReleaseChange: (value: boolean) => void
   onFilesChange: (value: (File | FileInterface)[]) => void
   onModelCardVersionChange: (value: number) => void
   filesMetadata: FileWithMetadataAndTags[]
@@ -90,6 +95,7 @@ export default function ReleaseForm({
   formData,
   onSemverChange,
   onReleaseNotesChange,
+  onMinorReleaseChange,
   onFilesChange,
   onModelCardVersionChange,
   filesMetadata,
@@ -115,6 +121,10 @@ export default function ReleaseForm({
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
+  }
+
+  const handleMinorReleaseChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    onMinorReleaseChange(checked)
   }
 
   const handleModelCardVersionChange = useCallback(
@@ -316,6 +326,27 @@ export default function ReleaseForm({
             textareaProps={{ autoFocus: isEdit, id: 'release-notes-input' }}
             dataTest='releaseNotesInput'
           />
+        )}
+      </Stack>
+      <Stack>
+        {isReadOnly || isEdit ? (
+          <>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Minor Release
+            </Typography>
+            <ReadOnlyAnswer value={formData.isMinorRelease ? 'Yes' : 'No'} />
+          </>
+        ) : (
+          <FormControl>
+            <FormControlLabel
+              control={<Checkbox size='small' checked={formData.isMinorRelease} onChange={handleMinorReleaseChange} />}
+              label='Minor release - No significant changes, does not require release re-approval'
+            />
+          </FormControl>
         )}
       </Stack>
       <Stack>

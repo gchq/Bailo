@@ -246,25 +246,25 @@ export class BasicAuthorisationConnector {
     releases: Array<ReleaseDoc | ReleaseInterface>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
-    // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
-    // We do need to map some actions to other model actions.
-    const actionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+    const actionMap: Record<Exclude<ReleaseActionKeys, typeof ReleaseAction.View>, ModelActionKeys> = {
       [ReleaseAction.Create]: ModelAction.Write,
       [ReleaseAction.Delete]: ModelAction.Write,
       [ReleaseAction.Update]: ModelAction.Update,
-      [ReleaseAction.View]: ModelAction.View,
       [ReleaseAction.Import]: ModelAction.Import,
       [ReleaseAction.Export]: ModelAction.Export,
     }
 
+    // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
+    // We do need to map some actions to other model actions.
+    const releaseActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+      ...actionMap,
+      [ReleaseAction.View]: ModelAction.View,
+    }
+
     //If release is draft, map view action to update instead
     const draftActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
-      [ReleaseAction.Create]: ModelAction.Write,
-      [ReleaseAction.Delete]: ModelAction.Write,
-      [ReleaseAction.Update]: ModelAction.Update,
+      ...actionMap,
       [ReleaseAction.View]: ModelAction.Update,
-      [ReleaseAction.Import]: ModelAction.Import,
-      [ReleaseAction.Export]: ModelAction.Export,
     }
 
     // Is this a constrained user token.
@@ -273,13 +273,8 @@ export class BasicAuthorisationConnector {
       return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    if (!releases || releases.length === 0) {
-      const response = await this.model(user, model, actionMap[action])
-      return [response]
-    }
-
     const draftResponse = await this.model(user, model, draftActionMap[action])
-    const response = await this.model(user, model, actionMap[action])
+    const response = await this.model(user, model, releaseActionMap[action])
 
     return releases.map((release) => (release.draft ? draftResponse : response))
   }
