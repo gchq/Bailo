@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('src/entry/model/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
 vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProps) => <></> }))
-vi.mock('src/entry/model/reviews/ReviewDisplay.tsx', () => ({
+vi.mock('src/entry/model/reviews/ReviewStatus.tsx', () => ({
   default: (_props: ReviewStatusProps) => <></>,
 }))
 vi.mock('src/entry/model/reviews/ReviewFooter.tsx', () => ({
