@@ -1,21 +1,20 @@
 {
-  "version": "0.2",
-  "language": "en",
+  "version": "1.0",
+  "language": "en-GB, en_US",
   "caseSensitive": false,
   "dictionaries": [
-    "npm",
-    "softwareTerms",
-    "node",
-    "html",
-    "css",
     "bash",
-    "en-gb",
-    "misc",
+    "css",
+    "docker",
+    "html",
+    "k8s",
     "la",
+    "misc",
+    "node",
+    "npm",
     "python",
     "python-common",
-    "docker",
-    "k8"
+    "softwareTerms"
   ],
   "ignorePaths": [
     "package.json",
@@ -26,15 +25,15 @@
   ],
   "useGitignore": true,
   "import": [
+    "@cspell/dict-docker/cspell-ext.json",
+    "@cspell/dict-html-symbol-entities/cspell-ext.json",
+    "@cspell/dict-k8s/cspell-ext.json",
     "@cspell/dict-la/cspell-ext.json",
     "@cspell/dict-lorem-ipsum/cspell-ext.json",
-    "@cspell/dict-html-symbol-entities/cspell-ext.json",
-    "@cspell/dict-scientific-terms-gb/cspell-ext.json",
+    "@cspell/dict-markdown/cspell-ext.json",
     "@cspell/dict-python/cspell-ext.json",
-    "@cspell/dict-docker/cspell-ext.json",
-    "@cspell/dict-k8s/cspell-ext.json",
-    "@cspell/dict-typescript/cspell-ext.json",
-    "@cspell/dict-markdown/cspell-ext.json"
+    "@cspell/dict-scientific-terms-gb/cspell-ext.json",
+    "@cspell/dict-typescript/cspell-ext.json"
   ],
   "words": [
     "GCHQ",
