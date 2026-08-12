@@ -164,7 +164,7 @@ export default function ModelSelector({
         </Box>
       ) : (
         <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
-          Unansweredtest
+          Unanswered
         </Typography>
       )}
     </CompareField>
