@@ -181,7 +181,7 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > create untrusted model without the untrusted model role', async () => {
+  test('model > manage untrusted model without the untrusted model role', async () => {
     const connector = new BasicAuthorisationConnector()
 
     mockAuthentication.hasRole.mockResolvedValueOnce(false)
