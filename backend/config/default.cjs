@@ -154,7 +154,7 @@ module.exports = {
       {
         name: 'Minimal Deployment Assessment Schema v1',
         id: 'minimal-deployment-assessment-schema-v1',
-        description: 'TBC',
+        description: 'A minimal deployment assessment capturing the deployment name and details.',
         jsonSchema: require('../src/scripts/example_schemas/minimal_deployment_assessment.json'),
       },
     ],

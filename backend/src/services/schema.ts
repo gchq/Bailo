@@ -256,54 +256,25 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
   return schema
 }
 
+async function addSchemas(schemas: DefaultSchema[], kind: SchemaKindKeys) {
+  for (const schema of schemas) {
+    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
+    const schemaModel = new SchemaModel({
+      ...schema,
+      kind,
+      active: true,
+      hidden: false,
+    })
+    await SchemaModel.deleteOne({ id: schema.id })
+    await schemaModel.save()
+  }
+}
+
 export async function addDefaultSchemas() {
-  for (const schema of config.defaultSchemas.modelCards) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.Model,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
-  }
-
-  for (const schema of config.defaultSchemas.dataCards) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const dataCardSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.DataCard,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await dataCardSchema.save()
-  }
-
-  for (const schema of config.defaultSchemas.accessRequests) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.AccessRequest,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
-  }
-
-  for (const schema of config.defaultSchemas.deploymentAssessments) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.DeploymentAssessment,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
-  }
+  await addSchemas(config.defaultSchemas.modelCards, SchemaKind.Model)
+  await addSchemas(config.defaultSchemas.dataCards, SchemaKind.DataCard)
+  await addSchemas(config.defaultSchemas.accessRequests, SchemaKind.AccessRequest)
+  await addSchemas(config.defaultSchemas.deploymentAssessments, SchemaKind.DeploymentAssessment)
 }
 
 export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {

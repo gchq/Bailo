@@ -1,13 +1,13 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
     "about": {
       "title": "About the deployment",
       "type": "object",
       "properties": {
-        "name": {
-          "deploymentSummary": "What is the name of the deployment assessment?",
+        "deploymentSummary": {
+          "title": "What is the name of the deployment assessment?",
           "description": "This will be used to distinguish your deployment assessment.",
           "type": "string"
         },
@@ -21,6 +21,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["overview"],
+  "required": ["about"],
   "additionalProperties": false
 }
