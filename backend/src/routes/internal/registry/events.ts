@@ -1,6 +1,8 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
+import { AuditInfo, AuditInfoKeys } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { ImageRef } from '../../../models/Release.js'
 import log from '../../../services/log.js'
@@ -65,6 +67,18 @@ export const handleRegistryEvents = [
      */
 
     for (const event of events) {
+      const user = event.actor?.name ?? ''
+
+      if (event?.action === 'pull') {
+        await audit.onRegistryImagePulled(withAudit(req, AuditInfo.RegistryImagePulled), user)
+        continue
+      }
+
+      if (event?.action === 'delete') {
+        await audit.onRegistryImageDeleted(withAudit(req, AuditInfo.RegistryImageDeleted), user)
+        continue
+      }
+
       if (event?.action !== 'push') {
         log.debug({ event }, 'Ignoring registry event for non-push action')
         continue
@@ -109,6 +123,8 @@ export const handleRegistryEvents = [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
 
+      await audit.onRegistryImagePushed(withAudit(req, AuditInfo.RegistryImagePushed), user)
+
       try {
         const status = await rerunImageScanNoAuth(imageRef, repositoryToken)
         log.debug({ event }, status)
@@ -120,3 +136,7 @@ export const handleRegistryEvents = [
     }
   },
 ]
+
+function withAudit(req: Request, auditInfo: AuditInfoKeys): Request {
+  return Object.assign(Object.create(req), { audit: auditInfo })
+}

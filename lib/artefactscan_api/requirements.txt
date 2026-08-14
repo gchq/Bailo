@@ -3,6 +3,6 @@ fastapi[standard-no-fastapi-cloud-cli]==0.141.1
 filelock==3.32.2
 modelscan[tensorflow,h5py]==0.8.8
 oras==0.2.42
-pydantic_settings==2.14.2
+pydantic_settings==2.15.0
 python-multipart==0.0.32
-uvicorn==0.52.0
+uvicorn==0.52.1

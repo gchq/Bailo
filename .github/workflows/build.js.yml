@@ -384,7 +384,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        job_name: [end_to_end, integration_python]
+        job_name: [end_to_end, integration_python, cross_instance]
 
     steps:
       # Clone repository
@@ -412,6 +412,7 @@ jobs:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
+        if: matrix.job_name != 'cross_instance'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bailo_artefactscan
@@ -421,9 +422,23 @@ jobs:
         run: |
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
-          docker load --input /tmp/bailo_artefactscan.tar
           docker image ls -a
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_artefactscan.tar
+          rm -f /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
+
+      - name: Load artefactscan image
+        if: matrix.job_name != 'cross_instance'
+        run: |
+          docker load --input /tmp/bailo_artefactscan.tar
+          rm -f /tmp/bailo_artefactscan.tar
+
+      - name: Tag images for cross-instance
+        if: matrix.job_name == 'cross_instance'
+        run: |
+          docker tag bailo_backend:latest bailo_backend:bailo_a
+          docker tag bailo_backend:latest bailo_backend:bailo_b
+          docker tag bailo_frontend:latest bailo_frontend:bailo_a
+          docker tag bailo_frontend:latest bailo_frontend:bailo_b
+          docker image ls -a
 
       # Create logs directory
       - run: mkdir logs
@@ -456,6 +471,7 @@ jobs:
             },
 
             smtp: {
+              ${{ matrix.job_name == 'cross_instance' && 'enabled: false,' || '' }}
               auth: {
                 user: 'mailuser',
                 pass: 'mailpass',
@@ -470,15 +486,35 @@ jobs:
                 path: '/home/runner/work/Bailo/Bailo/logs/out.log',
               },
             },
+
+            ui: {
+              modelMirror: {
+                import: {
+                  enabled: true,
+                },
+                export: {
+                  enabled: true,
+                  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+                },
+              },
+            },
+            ${{ matrix.job_name == 'cross_instance' && 'connectors: { artefactScanners: { kinds: [] } },' || '' }}
           }
           EOT
 
       - name: Start services
+        if: matrix.job_name != 'cross_instance'
         run: >
           docker compose -f compose.yaml -f compose.prod.yaml
           --env-file prod.env --progress=plain --parallel=-1
           up -d
           --wait --wait-timeout 60
+
+      - name: Start cross-instance services
+        if: matrix.job_name == 'cross_instance'
+        run: |
+          INSTANCE_NAME=bailo_a docker compose -f compose.yaml -f compose.instance-a.yaml -p bailo-a --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
+          INSTANCE_NAME=bailo_b docker compose -f compose.yaml -f compose.instance-b.yaml -p bailo-b --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
 
       # e2e with Cypress
       - uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7.4.1
@@ -488,6 +524,18 @@ jobs:
           working-directory: ./frontend
           install: false
           spec: cypress/e2e/bailo/**/*
+
+      # Cross-instance mirroring tests
+      - uses: cypress-io/github-action@v7
+        if: matrix.job_name == 'cross_instance'
+        with:
+          wait-on: 'http://localhost:8081/api/v2/config/ui, http://localhost:8082/api/v2/config/ui'
+          wait-on-timeout: 180
+          working-directory: ./frontend
+          install: false
+          spec: cypress/e2e/cross-instance/**/*
+        env:
+          CYPRESS_BASE_URL: http://localhost:8081
 
       # Python integration
       - name: Set up Python
@@ -539,21 +587,33 @@ jobs:
 
       # Upload all artifacts & logs
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure() && matrix.job_name == 'end_to_end'
+        if: failure() && (matrix.job_name == 'end_to_end' || matrix.job_name == 'cross_instance')
         with:
-          name: cypress-screenshots-e2e
+          name: cypress-screenshots-${{ matrix.job_name }}
           path: frontend/cypress/screenshots
 
       - name: Dump docker compose logs
-        if: always()
+        if: always() && matrix.job_name != 'cross_instance'
         run: docker compose logs > logs/stack.log
 
+      - name: Dump cross-instance logs
+        if: always() && matrix.job_name == 'cross_instance'
+        run: |
+          docker compose -p bailo-a logs > logs/instance-a.log 2>&1
+          docker compose -p bailo-b logs > logs/instance-b.log 2>&1
+
       - name: Docker Compose Logs
-        if: always()
+        if: always() && matrix.job_name != 'cross_instance'
         run: cat logs/stack.log
 
+      - name: Cross-instance logs
+        if: always() && matrix.job_name == 'cross_instance'
+        run: |
+          cat logs/instance-a.log
+          cat logs/instance-b.log
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always() && matrix.job_name == 'end_to_end'
+        if: always() && (matrix.job_name == 'end_to_end' || matrix.job_name == 'cross_instance')
         with:
-          name: logs
+          name: logs-${{ matrix.job_name }}
           path: logs

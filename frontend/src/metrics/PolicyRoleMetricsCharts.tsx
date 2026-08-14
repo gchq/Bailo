@@ -18,20 +18,19 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetEntryRoles } from 'actions/entry'
 import { useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
-import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
-import { PolicyRoleBaseMetrics } from 'types/types'
+import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
+import { EntryRole, PolicyRoleBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
   data: PolicyRoleBaseMetrics
+  entryRoles: EntryRole[]
 }
 
-export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsProps) {
+export default function PolicyRoleMetricsCharts({ data, entryRoles }: PolicyMetricsChartsProps) {
   const theme = useTheme()
 
   const [missingRoleFilters, setMissingRolesFilters] = useState<string[]>([])
@@ -43,15 +42,6 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
   const handleClose = () => {
     setAnchorEl(null)
   }
-
-  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
-
-  const ownerRoleDisplayName = useMemo(() => {
-    if (entryRoles) {
-      const displayName = entryRoles.find((role) => role.shortName === 'owner')
-      return displayName ? displayName.name : 'Owner'
-    }
-  }, [entryRoles])
 
   const handleChipFilterOnClick = useCallback(
     (roleId: string) => {
@@ -122,13 +112,6 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
             </Typography>
           </TableCell>
           <TableCell>
-            {row.modelOwners.length > 0 ? (
-              row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
-            ) : (
-              <em>{`No ${ownerRoleDisplayName}s set`}</em>
-            )}
-          </TableCell>
-          <TableCell>
             <List dense>
               {row.missingRoles.map((missingRole) => (
                 <ListItem key={missingRole.roleId} sx={{ pl: 0 }}>
@@ -137,20 +120,21 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
               ))}
             </List>
           </TableCell>
+          <TableCell>
+            {row.modelOwners.length > 0 ? (
+              row.modelOwners.map((owner) => <UserDisplay key={owner} dn={owner} />)
+            ) : (
+              <em>
+                No <OwnerRoleDisplay entryRoles={entryRoles} />s set
+              </em>
+            )}
+          </TableCell>
         </TableRow>
       ))
-  }, [data.entries, missingRoleFilters, ownerRoleDisplayName])
+  }, [data.entries, entryRoles, missingRoleFilters])
 
   if (!data) {
     return <EmptyBlob text='Cannot find any metrics for selected organisation' />
-  }
-
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} />
-  }
-
-  if (isEntryRolesLoading) {
-    return <Loading />
   }
 
   return (
@@ -161,9 +145,9 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
           Entries missing review roles
         </Typography>
         <Box
-          style={{
+          sx={{
             backgroundColor: theme.palette.container.main,
-            padding: 2,
+            p: 2,
             borderRadius: 1,
             overflow: 'auto',
           }}
@@ -172,8 +156,11 @@ export default function PolicyRoleMetricsCharts({ data }: PolicyMetricsChartsPro
             <TableHead>
               <TableRow>
                 <TableCell>Model ID</TableCell>
-                <TableCell>{ownerRoleDisplayName}</TableCell>
                 <TableCell>Missing roles</TableCell>
+                <TableCell>
+                  <OwnerRoleDisplay entryRoles={entryRoles} />
+                  (s)
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{tableRows}</TableBody>

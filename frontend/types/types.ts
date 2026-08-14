@@ -599,6 +599,7 @@ type PartialReviewInterface = {
   _id: string
   modelId: string
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
@@ -614,6 +615,7 @@ export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
@@ -1109,5 +1111,32 @@ export interface UnapprovedReleaseMetricsByOrg {
 export interface BaseUnapprovedReleaseMetrics {
   global: GlobalUnapprovedReleasesMetrics
   byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface LifecycleSummaryMetrics {
+  count: number
+}
+
+export interface EntryLifecycleMetrics {
+  entryId: string
+  dueDate: string
+  modelOwners: string[]
+}
+
+export interface GlobalLifecycleMetrics {
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface LifecycleMetricsByOrg {
+  organisation: string
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface BaseLifecycleMetrics {
+  global: GlobalLifecycleMetrics
+  byOrganisation: LifecycleMetricsByOrg[]
   lastUpdated: string
 }

@@ -53,6 +53,7 @@ export function useListEntries(
   schemaId?: string,
   titleOnly?: boolean,
   adminAccess?: boolean,
+  enabled = true,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -74,7 +75,10 @@ export function useListEntries(
       errors: Record<string, BailoError>
     },
     ErrorInfo
-  >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
+  >(
+    enabled && Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
 
   return {
     mutateEntries: mutate,
