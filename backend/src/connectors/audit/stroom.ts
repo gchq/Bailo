@@ -504,6 +504,18 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, reviewId)
   }
 
+  async onRegistryImagePulled(req: Request, userDn: string): Promise<void> {
+    this.auditGenericEvent(req, userDn)
+  }
+
+  async onRegistryImagePushed(req: Request, userDn: string): Promise<void> {
+    this.auditGenericEvent(req, userDn)
+  }
+
+  async onRegistryImageDeleted(req: Request, userDn: string): Promise<void> {
+    this.auditGenericEvent(req, userDn)
+  }
+
   async onError(req: Request, error: BailoError): Promise<void> {
     if (!req.audit) {
       log.warn({ url: req.url }, 'Unable to audit')

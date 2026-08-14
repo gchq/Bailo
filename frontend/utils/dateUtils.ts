@@ -95,3 +95,9 @@ export const increaseCurrentDateInDays = (daysToAdd: number) => {
   const currentDate = dayjs(new Date())
   return currentDate.add(daysToAdd, 'day')
 }
+
+export const isOverdue = (dueDate: string): boolean => {
+  const today = new Date().setHours(0, 0, 0, 0)
+  const dateToCheck = new Date(dueDate).setHours(0, 0, 0, 0)
+  return dateToCheck < today
+}
