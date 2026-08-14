@@ -32,6 +32,9 @@ htmlcov/
 # IDE
 .vscode/
 
+# resnet artefact from notebooks
+resnet50_weights.pth
+
 # Environment files
 .env*
 
@@ -41,3 +44,9 @@ mlruns/
 
 # Misc
 CHANGELOG.md
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

@@ -26,3 +26,9 @@ pytest.ini
 
 # Environment files
 .env*
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

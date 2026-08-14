@@ -61,3 +61,9 @@ tsconfig.eslint.json
 
 # README
 README.md
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

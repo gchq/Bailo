@@ -67,3 +67,17 @@ frontend/coverage
 frontend/cypress/
 frontend/node_modules
 frontend/test
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json
+.aider*
+
+# MLFlow
+mlartifacts/
+mlruns/
+
+# Misc
+.DS_Store
