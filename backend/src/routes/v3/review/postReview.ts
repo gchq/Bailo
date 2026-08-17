@@ -16,9 +16,7 @@ export const postReviewSchema = z.object({
   body: z.discriminatedUnion('kind', [
     z.object({
       kind: z.literal(ReviewKind.Lifecycle),
-      dueDate: z.coerce.date().refine((date) => date.getTime() > Date.now(), {
-        message: 'Due date of next review cannot be in the past.',
-      }),
+      dueDate: z.coerce.date(),
     }),
     z.object({
       kind: z.literal(ReviewKind.Release),
