@@ -167,6 +167,7 @@ export default function SideNavigation({
                   menuPage='deployments'
                   title='Deployment Assessments'
                   icon={<FactCheckIcon />}
+                  // TODO : Update the badge count to reflect the number of DAs in the `Needs Action` tab
                   badgeCount={0}
                   isNew
                 />

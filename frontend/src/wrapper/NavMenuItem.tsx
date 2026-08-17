@@ -34,7 +34,9 @@ export function NavMenuItem({
   const currentUser = useContext(CurrentUserContext)
   const theme = useTheme()
   const newBadgeStorageKey = `nav-new-dismissed-${menuPage}`
-  const [newBadgeDismissed, setNewBadgeDismissed] = useState(false)
+  const [newBadgeDismissed, setNewBadgeDismissed] = useState(
+    () => isNew && localStorage.getItem(newBadgeStorageKey) === 'true',
+  )
 
   useEffect(() => {
     if (isNew) {
