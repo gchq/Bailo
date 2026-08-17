@@ -404,13 +404,10 @@ jobs:
       # Configure application
       - name: Configure Bailo
         run: |
-          cp .github/resources/config/local.cjs.template backend/config/local.cjs
           if [ "${{ matrix.job_name }}" = "cross_instance" ]; then
-            sed -i 's|{{SMTP_ENABLED}}|enabled: false,|' backend/config/local.cjs
-            sed -i "s|{{EXTRA_CONNECTORS}}|connectors: { artefactScanners: { kinds: [] } },|" backend/config/local.cjs
+            cp .github/resources/config/cross_instance.cjs backend/config/local.cjs
           else
-            sed -i 's|{{SMTP_ENABLED}}||' backend/config/local.cjs
-            sed -i 's|{{EXTRA_CONNECTORS}}||' backend/config/local.cjs
+            cp .github/resources/config/integration.cjs backend/config/local.cjs
           fi
 
       - name: Start services

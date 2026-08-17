@@ -15,14 +15,7 @@ module.exports = {
   },
 
   smtp: {
-    {{SMTP_ENABLED}}
-    auth: {
-      user: 'mailuser',
-      pass: 'mailpass',
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
+    enabled: false,
   },
 
   logging: {
@@ -42,5 +35,10 @@ module.exports = {
       },
     },
   },
-  {{EXTRA_CONNECTORS}}
+
+  connectors: {
+    artefactScanners: {
+      kinds: []
+    }
+  },
 }
