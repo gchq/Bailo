@@ -173,7 +173,6 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
       <FileToBeUploaded
         key={fileWithMetadata.file.name}
         fileWithMetadata={fileWithMetadata}
-        showMetaDataInput
         onFileMetadataChange={handleFileMetadataOnChange}
         onDelete={handleDeleteFileFromUploadList}
       />
