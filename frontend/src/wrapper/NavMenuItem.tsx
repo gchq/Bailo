@@ -1,6 +1,6 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement, useContext } from 'react'
+import { ReactElement, useContext, useEffect, useState } from 'react'
 import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
 import { RoleKeys } from 'types/types'
@@ -16,6 +16,7 @@ interface NavMenuItemProps {
   badgeCount?: number
   openLinkInNewTab?: boolean
   requiredRole?: RoleKeys
+  isNew?: boolean
 }
 export function NavMenuItem({
   menuPage,
@@ -28,29 +29,51 @@ export function NavMenuItem({
   badgeCount = 0,
   openLinkInNewTab = false,
   requiredRole,
+  isNew = false,
 }: NavMenuItemProps) {
   const currentUser = useContext(CurrentUserContext)
   const theme = useTheme()
+  const newBadgeStorageKey = `nav-new-dismissed-${menuPage}`
+  const [newBadgeDismissed, setNewBadgeDismissed] = useState(
+    () => isNew && localStorage.getItem(newBadgeStorageKey) === 'true',
+  )
+
+  useEffect(() => {
+    if (isNew) {
+      setNewBadgeDismissed(localStorage.getItem(newBadgeStorageKey) === 'true')
+    }
+  }, [isNew, newBadgeStorageKey])
+
+  const dismissNewBadge = () => {
+    if (isNew && !newBadgeDismissed) {
+      localStorage.setItem(newBadgeStorageKey, 'true')
+      setNewBadgeDismissed(true)
+    }
+  }
+
   if (requiredRole && !currentUser.systemRoles.includes(requiredRole)) {
     return
   }
+
+  const iconWithBadges = (
+    <Badge badgeContent='New' color='success' invisible={!isNew || newBadgeDismissed}>
+      <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
+        {icon}
+      </Badge>
+    </Badge>
+  )
+
   return (
     <ListItem disablePadding>
       <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%', textDecoration: 'none' }}>
-        <ListItemButton selected={selectedPage === menuPage}>
+        <ListItemButton selected={selectedPage === menuPage} onClick={dismissNewBadge}>
           <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
-                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                  {icon}
-                </Badge>
+                {iconWithBadges}
               </Tooltip>
             ) : (
-              <>
-                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                  {icon}
-                </Badge>
-              </>
+              iconWithBadges
             )}
           </ListItemIcon>
           <ListItemText primary={primaryText} sx={{ textDecoration: 'none', color: theme.palette.primary.main }} />
