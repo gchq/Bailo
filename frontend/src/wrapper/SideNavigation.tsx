@@ -4,6 +4,7 @@ import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DescriptionIcon from '@mui/icons-material/Description'
 import Equalizer from '@mui/icons-material/Equalizer'
+import FactCheckIcon from '@mui/icons-material/FactCheck'
 import KeyboardDoubleArrowLeft from '@mui/icons-material/KeyboardDoubleArrowLeft'
 import KeyboardDoubleArrowRight from '@mui/icons-material/KeyboardDoubleArrowRight'
 import LinkIcon from '@mui/icons-material/Link'
@@ -157,6 +158,18 @@ export default function SideNavigation({
                   title='Review'
                   icon={<ListAltIcon />}
                   badgeCount={reviewCount}
+                />
+                <NavMenuItem
+                  href='/deployments'
+                  selectedPage={page}
+                  primaryText='Deployment Assessments'
+                  drawerOpen={drawerOpen}
+                  menuPage='deployments'
+                  title='Deployment Assessments'
+                  icon={<FactCheckIcon />}
+                  // TODO : Update the badge count to reflect the number of DAs in the `Needs Action` tab
+                  badgeCount={0}
+                  isNew
                 />
                 <Divider aria-hidden='true' />
                 <NavMenuItem
