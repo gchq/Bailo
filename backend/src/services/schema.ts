@@ -39,15 +39,17 @@ export async function searchSchemas(
     ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
 
-  // for (const schema of schemas) {
-  //   if (schema.kind === SchemaKind.DeploymentAssessment) {
-  //     schema.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schema.jsonSchema)
-  //   }
-  // }
-
   return schemas
 }
 
+/**
+ * Deployment assessment schemas have some hard-code questions that the application
+ * will need to make use of. By appending them using this function, we can keep
+ * the actual schema to be purely customisable.
+ *
+ * @param jsonSchema
+ * @returns
+ */
 function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
   const updatedProperties = {
     overview: {
@@ -105,9 +107,9 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   const schemaObject = schema.toObject()
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
 
-  // if (schema.kind === SchemaKind.DeploymentAssessment) {
-  //   schemaObject.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
-  // }
+  if (schema.kind === SchemaKind.DeploymentAssessment) {
+    schemaObject.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
+  }
 
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject
