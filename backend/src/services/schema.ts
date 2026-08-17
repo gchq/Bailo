@@ -38,7 +38,52 @@ export async function searchSchemas(
     ...(reviewRoles && { reviewRoles }),
     ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
+
+  // for (const schema of schemas) {
+  //   if (schema.kind === SchemaKind.DeploymentAssessment) {
+  //     schema.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schema.jsonSchema)
+  //   }
+  // }
+
   return schemas
+}
+
+function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
+  const updatedProperties = {
+    overview: {
+      title: 'Details',
+      type: 'object',
+      properties: {
+        name: {
+          title: 'What is the name of the deployment assessment?',
+          description: 'This will be used to distinguish your deployment assessment.',
+          type: 'string',
+        },
+        riskOwner: {
+          title: 'Who is the risk owner attached to this deployment assessment?',
+          type: 'string',
+          widget: 'entitySelector',
+        },
+        riskOwnerJustification: {
+          title: 'Justify why the risk owner has been assigned',
+          type: 'string',
+        },
+        entryList: {
+          title: 'List all models assigned to this deployment assessment',
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          minItems: 1,
+          widget: 'modelSelector',
+        },
+      },
+      required: ['name', 'riskOwner', 'entryList'],
+      additionalProperties: false,
+    },
+    ...jsonSchema.properties,
+  }
+  return updatedProperties
 }
 
 export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
@@ -59,6 +104,10 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
 
   const schemaObject = schema.toObject()
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
+
+  // if (schema.kind === SchemaKind.DeploymentAssessment) {
+  //   schemaObject.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
+  // }
 
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject

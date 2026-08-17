@@ -57,6 +57,46 @@ function setSchema(schema: unknown) {
   return JSON.stringify(schema)
 }
 
+// SchemaSchema.virtual('jsonSchema').get(function () {
+//   if (this.kind === SchemaKind.DeploymentAssessment) {
+//     const updatedProperties = {
+//       overview: {
+//         title: 'Details',
+//         type: 'object',
+//         properties: {
+//           name: {
+//             title: 'What is the name of the deployment assessment?',
+//             description: 'This will be used to distinguish your deployment assessment.',
+//             type: 'string',
+//           },
+//           riskOwner: {
+//             title: 'Who is the risk owner attached to this deployment assessment?',
+//             type: 'string',
+//             widget: 'entitySelector',
+//           },
+//           riskOwnerJustification: {
+//             title: 'Justify why the risk owner has been assigned',
+//             type: 'string',
+//           },
+//           entryList: {
+//             title: 'List all models assigned to this deployment assessment',
+//             type: 'array',
+//             items: {
+//               type: 'string',
+//             },
+//             minItems: 1,
+//             widget: 'modelSelector',
+//           },
+//         },
+//         required: ['name', 'riskOwner', 'entryList'],
+//         additionalProperties: false,
+//       },
+//       ...this.jsonSchema.properties,
+//     }
+//     return updatedProperties
+//   }
+// })
+
 const SchemaModel = model<SchemaInterface>('v2_Schema', SchemaSchema)
 
 export default SchemaModel
