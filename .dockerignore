@@ -1,10 +1,28 @@
 # Docker artefacts
 Dockerfile
+Dockerfile.standalone
 .dockerignore
 
 # Git artefacts
 .git
 .gitignore
+
+# Dev/CI tooling
+.devcontainer/
+.github/
+.vscode/
+
+# Compose and env files
+compose*.yaml
+.env*
+
+# Documentation
+CONTRIBUTING.md
+LICENSE.txt
+CODE_OF_CONDUCT.md
+AGENTS.md
+CLAUDE.md
+README.md
 
 # Dependency directories
 node_modules/
@@ -12,11 +30,24 @@ node_modules/
 # Test artefacts
 .pytest_cache
 
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimised / DLL files
 **/__pycache__/
 **/*.py[cod]
 **$py.class
 
+# Infrastructure dirs not used by standalone build
+infrastructure/eks/
+infrastructure/helm/
+infrastructure/mongodb/
+infrastructure/nginx/
+
+# Landing site (not Docker-built)
+lib/landing/
+
+# Scanning API (built separately)
+lib/artefactscan_api/
+
+# Backend build artefacts
 backend/.git
 backend/coverage
 backend/dist
@@ -26,15 +57,27 @@ backend/docs/_build
 backend/docs/python-docs
 backend/test
 
+# Frontend build artefacts
 frontend/.git
 frontend/.next
 frontend/.swc
 frontend/.turbo
 frontend/cache
 frontend/coverage
-frontend/cypress/screenshots/
-frontend/cypress/downloads/
+frontend/cypress/
 frontend/node_modules
 frontend/test
 
-README.md
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json
+.aider*
+
+# MLFlow
+mlartifacts/
+mlruns/
+
+# Misc
+.DS_Store

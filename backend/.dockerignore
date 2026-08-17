@@ -38,8 +38,32 @@ docs/backenddocsvenv
 # Tests
 test
 
+# Environment files
+.env*
+
+# Lint/format configs
+eslint.config.mjs
+.prettierrc.json
+.prettierignore
+lint-staged.config.js
+
+# Test config
+vitest.config.ts
+
+# Dev tool config
+nodemon.json
+
+# TSConfig for eslint only
+tsconfig.eslint.json
+
 # Extras
 README.md
 
 # Statically built Swagger/OpenAPI spec
 openapi-specs/
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json
