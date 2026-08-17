@@ -181,7 +181,7 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > manage untrusted model without the untrusted model role', async () => {
+  test('model > create untrusted model without the untrusted model role', async () => {
     const connector = new BasicAuthorisationConnector()
 
     mockAuthentication.hasRole.mockResolvedValueOnce(false)
@@ -202,6 +202,29 @@ describe('connectors > authorisation > base', () => {
       id: 'untrustedModel',
       success: false,
       info: 'You do not have permission to manage untrusted models.',
+    })
+  })
+
+  test('model > create untrusted model with the untrusted model role', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAuthentication.hasRole.mockResolvedValueOnce(true)
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'untrustedModel',
+        kind: EntryKind.UntrustedModel,
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Create,
+    )
+
+    expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.UntrustedModel)
+
+    expect(result).toStrictEqual({
+      id: 'untrustedModel',
+      success: true,
     })
   })
 
