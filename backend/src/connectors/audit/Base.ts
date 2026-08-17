@@ -183,19 +183,19 @@ export const AuditInfo = {
     typeId: 'CreateUserToken',
     description: 'Token Created',
     auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
     typeId: 'ViewUserToken',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   DeleteUserToken: {
     typeId: 'DeleteUserToken',
     description: 'Token Deleted',
     auditKind: AuditKind.Delete,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
 
   CreateAccessRequest: {
@@ -219,7 +219,7 @@ export const AuditInfo = {
   DeleteAccessRequest: {
     typeId: 'UpdateAccessRequest',
     description: 'Access Request Deleted',
-    auditKind: AuditKind.Update,
+    auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.AccessRequest,
   },
   ViewAccessRequests: {
