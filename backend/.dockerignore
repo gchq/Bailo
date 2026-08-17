@@ -50,9 +50,6 @@ lint-staged.config.js
 # Test config
 vitest.config.ts
 
-# Dev tool config
-nodemon.json
-
 # TSConfig for eslint only
 tsconfig.eslint.json
 
