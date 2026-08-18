@@ -197,15 +197,17 @@ export default function PageWithTabs({
       </Stack>
       <Box
         sx={{
-          pl: 2,
+          px: 2,
           pb: 1,
           flexGrow: 1,
           minWidth: 0,
-          maxWidth: '900px',
         }}
       >
         {additionalInfo && (
-          <ExpandableTypography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+          <ExpandableTypography
+            sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
+            maxLines={2}
+          >
             {additionalInfo}
           </ExpandableTypography>
         )}
