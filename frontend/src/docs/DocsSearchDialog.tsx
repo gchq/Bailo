@@ -299,6 +299,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
           sx: {
             alignSelf: 'flex-start',
             mt: { xs: 4, sm: 8 },
+            overflow: 'hidden',
           },
         },
       }}
@@ -307,6 +308,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
       <Box
         sx={(theme) => ({
           borderBottom: `1px solid ${theme.palette.divider}`,
+          flexShrink: 0,
         })}
       >
         <Box sx={{ p: 1.5 }}>
@@ -341,10 +343,11 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
         <Stack
           direction='row'
           spacing={1}
+          useFlexGap
           sx={{
             px: 1.5,
             pb: 1.5,
-            overflowX: 'auto',
+            flexWrap: 'wrap',
           }}
           aria-label='Filter search results'
         >
@@ -370,6 +373,8 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
         sx={{
           p: 0,
           maxHeight: 'min(60vh, 720px)',
+          overflowX: 'hidden',
+          overflowY: 'auto',
         }}
       >
         {entriesUnavailable && (
@@ -465,6 +470,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
                           {resultIcon}
                         </Box>
                         <ListItemText
+                          sx={{ minWidth: 0 }}
                           primary={
                             <Box
                               component='span'
@@ -477,7 +483,16 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
                                 {title}
                               </Typography>
                               {breadcrumb && (
-                                <Typography component='span' variant='caption' color='textSecondary'>
+                                <Typography
+                                  component='span'
+                                  variant='caption'
+                                  color='textSecondary'
+                                  sx={{
+                                    overflowWrap: 'anywhere',
+                                    whiteSpace: 'normal',
+                                    wordBreak: 'break-word',
+                                  }}
+                                >
                                   {breadcrumb}
                                 </Typography>
                               )}
