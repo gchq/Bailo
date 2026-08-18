@@ -49,6 +49,10 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
+  if (release && release.draft) {
+    return <></>
+  }
+
   return (
     reviewCountHeader > 0 && (
       <Paper

@@ -9,6 +9,7 @@ import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 
 type DraftBannerProps = {
   text: string
+  draft?: boolean
 } & (
   | {
       showButton: false
@@ -28,6 +29,7 @@ type DraftBannerProps = {
 
 export function DraftBanner({
   text,
+  draft = false,
   isLoading,
   errorMessage = '',
   handlePublish,
@@ -36,6 +38,9 @@ export function DraftBanner({
 }: DraftBannerProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
+  if (!draft) {
+    return <></>
+  }
   return (
     <>
       <Paper
@@ -73,7 +78,7 @@ export function DraftBanner({
                 onConfirm={handlePublish}
                 onCancel={() => setOpen(false)}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this release? This is irreversable.'}
+                dialogMessage={'Are you sure you want to publish this release? This is irreversible.'}
                 confirmLoading={isLoading}
               />
             </>

@@ -38,11 +38,8 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {release.draft ? (
-            <DraftBanner text='This is a draft release' showButton={false} />
-          ) : (
-            <ReviewBanner release={release} />
-          )}
+          <DraftBanner text='This is a draft release' draft={release.draft} showButton={false} />
+          <ReviewBanner release={release} />
           <Stack
             spacing={1}
             sx={{

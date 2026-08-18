@@ -213,11 +213,9 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   }
   const release = await getReleaseBySemver(user, model, semver)
 
-  const isPublish = release.draft && !delta.draft
-  const isDraft = !release.draft && delta.draft
-
-  if (isDraft) {
-    throw BadReq('Can not draft published release.')
+  //Attempt to draft a published release
+  if (!release.draft && delta.draft) {
+    throw BadReq('Once a release has been published, it cannot be returned to draft status.')
   }
 
   Object.assign(release, delta)
@@ -236,7 +234,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  if (isPublish) {
+  if (release.draft && !delta.draft) {
     try {
       await createReleaseReviews(model, updatedRelease)
     } catch (error) {

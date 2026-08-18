@@ -314,6 +314,7 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
       semver,
       modelCardVersion: modelCardVersion,
       notes: releaseNotes,
+      draft: release.draft,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
     }

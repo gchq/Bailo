@@ -44,7 +44,7 @@ export default function Release() {
     return <Loading />
   }
 
-  async function handleDraftRelease() {
+  async function handlePublishRelease() {
     if (!model || !release || !semver) {
       return
     }
@@ -52,9 +52,10 @@ export default function Release() {
       modelId: model.id,
       semver,
       modelCardVersion: release.modelCardVersion,
+      draft: false,
       notes: release.notes,
-      fileIds: [],
-      images: [],
+      fileIds: release.fileIds,
+      images: release.images,
     }
 
     setIsLoading(true)
@@ -78,16 +79,15 @@ export default function Release() {
         <Paper>
           <>
             <ReviewBanner release={release} />
-            {release.draft && (
-              <DraftBanner
-                text='This is a draft release'
-                handlePublish={handleDraftRelease}
-                showButton={true}
-                disableButton={isEdit}
-                isLoading={isLoading}
-                errorMessage={putErrorMessage}
-              />
-            )}
+            <DraftBanner
+              text='This is a draft release'
+              draft={release.draft}
+              handlePublish={handlePublishRelease}
+              showButton={true}
+              disableButton={isEdit}
+              isLoading={isLoading}
+              errorMessage={putErrorMessage}
+            />
             <Stack spacing={2} sx={{ px: 4, py: 2 }}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}

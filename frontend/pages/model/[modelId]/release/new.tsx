@@ -269,7 +269,7 @@ export default function NewRelease() {
                       disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
                       sx={{ width: 'fit-content' }}
                     >
-                      Draft Release
+                      Draft release
                     </Button>
                     <Button
                       variant='contained'
@@ -279,7 +279,7 @@ export default function NewRelease() {
                       sx={{ width: 'fit-content' }}
                       data-test='createReleaseButton'
                     >
-                      Create Release
+                      Create new release
                     </Button>
                   </Stack>
                   <MessageAlert message={errorMessage} severity='error' />
