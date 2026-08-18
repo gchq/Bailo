@@ -1,3 +1,4 @@
+import dayjs from '@dayjs'
 import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -20,7 +21,7 @@ import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
-import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
+import { formatDateStringAsDayMonthAndYear, utcStartOfCurrentDate } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -101,7 +102,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
   }, [entry.id, mutateArchivedReviews, mutateReviews, reviewDate, sendNotification])
 
   const handleReviewConfirmationModal = useCallback(async () => {
-    if (reviewDate && reviewDate < increaseCurrentDateInDays(1)) {
+    if (reviewDate && reviewDate < utcStartOfCurrentDate()) {
       setReviewConfirmationOpen(true)
     } else {
       await handleConfirmReviewDate()
@@ -168,6 +169,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                     onChange={(newValue) => {
                       setReviewDate(newValue)
                     }}
+                    minDate={dayjs('2000/01/01')}
                   />
                   <Button
                     disabled={!reviewDate}
