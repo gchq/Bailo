@@ -13,6 +13,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules/@next # use container-built @next SWC binaries (musl), not the host's (e.g. glibc)
+      - /app/.next # prevent `uncaughtException [Error: EACCES: permission denied, open '.../Bailo/frontend/.next/...']` on `npm run build`
     build:
       target: dev
 

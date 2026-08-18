@@ -22,5 +22,5 @@
     "noImplicitAny": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "vitest.config.mts", "**/*.mdx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "public/docs-search-index.generated.json"]
 }

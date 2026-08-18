@@ -25,6 +25,7 @@ node_modules/
 # Next.js build output
 .next
 out
+next-env.d.ts
 
 # cache
 cache
