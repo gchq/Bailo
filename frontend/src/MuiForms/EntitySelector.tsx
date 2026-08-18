@@ -26,6 +26,19 @@ interface EntitySelectorProps {
   schema: RJSFSchema
 }
 
+export function getEntitySelectorValue(
+  selectedEntities: EntityObject[] | EntityObject,
+  isMultiple: boolean,
+): string[] | string {
+  if (isMultiple) {
+    const entities = Array.isArray(selectedEntities) ? selectedEntities : [selectedEntities]
+    return entities.map((entity) => `${entity.kind}:${entity.id}`)
+  }
+
+  const entity = Array.isArray(selectedEntities) ? selectedEntities[0] : selectedEntities
+  return `${entity.kind}:${entity.id}`
+}
+
 function formatEntityValue(value: string[] | string | undefined): string {
   if (!value || value.length === 0) {
     return ''
@@ -86,15 +99,8 @@ export default function EntitySelector({
 
   const handleUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject[] | EntityObject) => {
-      if (isMultiple) {
-        const entities = Array.isArray(newValue) ? newValue : [newValue]
-        onChange(entities.map((value) => `${value.kind}:${value.id}`))
-        setSelectedEntities(entities)
-      } else {
-        const entity = Array.isArray(newValue) ? newValue[0] : newValue
-        onChange(`${entity.kind}:${entity.id}`)
-        setSelectedEntities(entity)
-      }
+      onChange(getEntitySelectorValue(newValue, isMultiple))
+      setSelectedEntities(newValue)
     },
     [isMultiple, onChange],
   )
