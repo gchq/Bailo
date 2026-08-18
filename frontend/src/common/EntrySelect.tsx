@@ -117,25 +117,25 @@ export default function EntrySelect({
           <>
             {value ? (
               <Typography>{value}</Typography>
-            ) : (
-              <Stack
-                direction='row'
-                spacing={0.5}
-                sx={{
-                  alignItems: 'center',
-                  ...(showWarningWhenUnset && {
+            ) : showWarningWhenUnset ? (
+              <Tooltip title={`No ${labelLowerCase} has been set`}>
+                <Stack
+                  direction='row'
+                  spacing={0.5}
+                  sx={{
+                    alignItems: 'center',
                     backgroundColor: alpha(theme.palette.warning.main, 0.1),
                     borderRadius: 1,
                     px: 0.5,
-                  }),
-                }}
-              >
+                  }}
+                >
+                  <em>Unset</em>
+                  <WarningIcon color='warning' fontSize='small' />
+                </Stack>
+              </Tooltip>
+            ) : (
+              <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
                 <em>Unset</em>
-                {showWarningWhenUnset && (
-                  <Tooltip title={`No ${labelLowerCase} has been set`}>
-                    <WarningIcon color='warning' fontSize='small' />
-                  </Tooltip>
-                )}
               </Stack>
             )}
             {editable && (
