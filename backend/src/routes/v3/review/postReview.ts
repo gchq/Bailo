@@ -5,8 +5,9 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { ReviewInterface } from '../../../models/Review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
-import { createReview } from '../../../services/v3/review.js'
+import { createReview, isLifecycleReviewDateValid } from '../../../services/v3/review.js'
 import { ReviewKind } from '../../../types/enums.js'
+import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postReviewSchema = z.object({
@@ -16,7 +17,9 @@ export const postReviewSchema = z.object({
   body: z.discriminatedUnion('kind', [
     z.object({
       kind: z.literal(ReviewKind.Lifecycle),
-      dueDate: z.coerce.date(),
+      dueDate: z.coerce.date().refine((date) => isLifecycleReviewDateValid(date), {
+        message: `Due date of next review cannot be further than ${config.ui.lifecycle.maxReviewInterval} in the future.`,
+      }),
     }),
     z.object({
       kind: z.literal(ReviewKind.Release),
