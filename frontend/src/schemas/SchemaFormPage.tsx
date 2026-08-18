@@ -65,7 +65,6 @@ export default function SchemaFormPage({
                   setSplitSchema={setSplitSchema}
                   canEdit
                   displayLabelValidation={formValidationErrorState}
-                  defaultCurrentUserInEntityList
                 />
                 <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
                   <Stack direction='row' spacing={2} sx={{ justifyContent: 'flex-end' }}>
