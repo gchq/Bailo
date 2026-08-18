@@ -38,7 +38,54 @@ export async function searchSchemas(
     ...(reviewRoles && { reviewRoles }),
     ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
+
   return schemas
+}
+
+/**
+ * Deployment assessment schemas have some hard-code questions that the application
+ * will need to make use of. By appending them using this function, we can keep
+ * the actual schema to be purely customisable.
+ *
+ * @param jsonSchema
+ * @returns
+ */
+function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
+  const updatedProperties = {
+    overview: {
+      title: 'Details',
+      type: 'object',
+      properties: {
+        name: {
+          title: 'What is the name of the deployment assessment?',
+          description: 'This will be used to distinguish your deployment assessment.',
+          type: 'string',
+        },
+        riskOwner: {
+          title: 'Who is the risk owner attached to this deployment assessment?',
+          type: 'string',
+          widget: 'entitySelector',
+        },
+        riskOwnerJustification: {
+          title: 'Justify why the risk owner has been assigned',
+          type: 'string',
+        },
+        entryList: {
+          title: 'List all models assigned to this deployment assessment',
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          minItems: 1,
+          widget: 'modelSelector',
+        },
+      },
+      required: ['name', 'riskOwner', 'riskOwnerJustification', 'entryList'],
+      additionalProperties: false,
+    },
+    ...jsonSchema.properties,
+  }
+  return updatedProperties
 }
 
 export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
@@ -59,6 +106,10 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
 
   const schemaObject = schema.toObject()
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
+
+  if (schema.kind === SchemaKind.DeploymentAssessment) {
+    schemaObject.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
+  }
 
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject
@@ -256,42 +307,29 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
   return schema
 }
 
+async function addSchemas(schemas: DefaultSchema[], kind: SchemaKindKeys) {
+  for (const schema of schemas) {
+    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
+    await SchemaModel.findOneAndUpdate(
+      { id: schema.id },
+      {
+        ...schema,
+        kind,
+        active: true,
+        hidden: false,
+      },
+      {
+        upsert: true,
+      },
+    )
+  }
+}
+
 export async function addDefaultSchemas() {
-  for (const schema of config.defaultSchemas.modelCards) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.Model,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
-  }
-
-  for (const schema of config.defaultSchemas.dataCards) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const dataCardSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.DataCard,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await dataCardSchema.save()
-  }
-
-  for (const schema of config.defaultSchemas.accessRequests) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.AccessRequest,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
-  }
+  await addSchemas(config.defaultSchemas.modelCards, SchemaKind.Model)
+  await addSchemas(config.defaultSchemas.dataCards, SchemaKind.DataCard)
+  await addSchemas(config.defaultSchemas.accessRequests, SchemaKind.AccessRequest)
+  await addSchemas(config.defaultSchemas.deploymentAssessments, SchemaKind.DeploymentAssessment)
 }
 
 export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {

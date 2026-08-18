@@ -43,4 +43,17 @@ From the schema list page you can also convert a schema to inactive by pressing 
 **Actions** menu. If a schema is deleted, any models associated with it will be deleted. Converting a schema to
 'inactive' reduces it's priority within the UI but does not break any existing models uploaded with it.
 
+### Deployment assessment schemas
+
+When uploading a deployment assessment schema, mandatory questions will be automatically added to those in your uploaded
+schema. These are:
+
+- Name
+- Deployment risk owner
+- Deployment risk owner justification
+- Entry list
+
+The above questions are used throughout the application, and therefore they are provided automatically as the first page
+of the deployment assessment form. This allows schemas provided by Bailo administrators to be entirely customisable.
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
