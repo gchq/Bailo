@@ -1,31 +1,73 @@
 import { Button, Stack, Typography, TypographyProps } from '@mui/material'
-import { useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 interface ExpandableTypographyProps extends Omit<TypographyProps, 'children'> {
   children: string
-  maxLength?: number
-  showMoreDirection?: 'column' | 'row' | 'row-reverse' | 'column-reverse'
+  maxLines?: number
 }
 
 export default function ExpandableTypography({
   children: text,
-  maxLength = 100,
-  showMoreDirection = 'row',
+  maxLines = 3,
+  sx,
   ...props
 }: ExpandableTypographyProps) {
   const [expanded, setExpanded] = useState(false)
-  const isTruncated = text.length > maxLength
+  const [overflows, setOverflows] = useState(false)
+  const typographyRef = useRef<HTMLElement>(null)
 
-  if (isTruncated) {
-    return (
-      <Stack sx={{ mb: 1 }} direction={expanded ? 'column' : showMoreDirection} spacing={1}>
-        <Typography {...props}>{expanded ? text : `${text.slice(0, maxLength).trimEnd()}...`}</Typography>
-        <Button size='small' onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'Show less' : 'Show more'}
-        </Button>
-      </Stack>
-    )
-  } else {
-    return <Typography {...props}>{text}</Typography>
+  const measureOverflow = useCallback(() => {
+    if (!expanded && typographyRef.current) {
+      setOverflows(typographyRef.current.scrollHeight > typographyRef.current.clientHeight)
+    }
+  }, [expanded])
+
+  useLayoutEffect(() => {
+    const typography = typographyRef.current
+    if (!typography) {
+      return
+    }
+
+    measureOverflow()
+    const resizeObserver = new ResizeObserver(measureOverflow)
+    resizeObserver.observe(typography)
+    window.addEventListener('resize', measureOverflow)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', measureOverflow)
+    }
+  }, [maxLines, measureOverflow, text])
+
+  const typography = (
+    <Typography
+      {...props}
+      ref={typographyRef}
+      sx={[
+        ...(Array.isArray(sx) ? sx : [sx]),
+        // Styles with vendor prefixes may not support all browsers. Use with caution
+        !expanded && {
+          display: '-webkit-box',
+          overflow: 'hidden',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: maxLines,
+        },
+      ]}
+    >
+      {text}
+    </Typography>
+  )
+
+  if (!overflows) {
+    return typography
   }
+
+  return (
+    <Stack sx={{ mb: 1, alignItems: 'center' }} direction={expanded ? 'column' : 'row'} spacing={1}>
+      {typography}
+      <Button size='small' onClick={() => setExpanded(!expanded)}>
+        {expanded ? 'Show less' : 'Show more'}
+      </Button>
+    </Stack>
+  )
 }
