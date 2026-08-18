@@ -125,12 +125,6 @@ function truncateNodes(nodes: ASTNode[], maxLength: number): ASTNode[] {
         return header.length > 0 || cells.length > 0 ? { ...node, header, cells } : null
       }
       case RuleType.image:
-        return {
-          ...node,
-          type: RuleType.htmlBlock,
-          text: `<img src="${node.target}" />`,
-          tag: 'img',
-        }
       default:
         return node
     }
