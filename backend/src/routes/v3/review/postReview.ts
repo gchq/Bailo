@@ -22,7 +22,7 @@ export const postReviewSchema = z.object({
         .refine((date) => isLifecycleReviewDateValid(date), {
           message: `Due date of next review cannot be further than ${config.ui.lifecycle.maxReviewInterval} in the future.`,
         })
-        .refine((date) => date.getTime() < Date.UTC(2000), {
+        .refine((date) => date.getTime() >= Date.UTC(2000), {
           message: 'Due date of next review cannot be before year 2000.',
         }),
     }),
