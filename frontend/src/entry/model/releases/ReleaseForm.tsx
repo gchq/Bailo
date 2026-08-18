@@ -314,10 +314,20 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         {isReadOnly ? (
-          <>
-            {releaseNotesLabel}
-            <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
-          </>
+          <Accordion defaultExpanded sx={{ p: 0 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {releaseNotesLabel}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
+            </AccordionDetails>
+          </Accordion>
         ) : (
           <RichTextEditor
             value={formData.releaseNotes}
