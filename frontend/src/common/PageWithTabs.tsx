@@ -197,11 +197,10 @@ export default function PageWithTabs({
       </Stack>
       <Box
         sx={{
-          pl: 2,
+          px: 2,
           pb: 1,
           flexGrow: 1,
           minWidth: 0,
-          maxWidth: '900px',
         }}
       >
         {additionalInfo && (
