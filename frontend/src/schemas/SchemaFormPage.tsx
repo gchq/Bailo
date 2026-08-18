@@ -22,8 +22,6 @@ type SchemaFormPageProps = {
   onSaveDraft?: () => void
   draftButtonLoading?: boolean
   draftSuccessText?: string
-  submitDataTest?: string
-  draftDataTest?: string
   /** When true the form and action buttons are hidden; only children are shown inside the Paper. */
   hideForm?: boolean
   /** Optional content rendered inside the Paper before the form (e.g. a warning when no model card exists). */
@@ -44,8 +42,6 @@ export default function SchemaFormPage({
   onSaveDraft,
   draftButtonLoading = false,
   draftSuccessText = '',
-  submitDataTest,
-  draftDataTest,
   hideForm = false,
   children,
 }: SchemaFormPageProps) {
@@ -80,7 +76,6 @@ export default function SchemaFormPage({
                         onClick={onSaveDraft}
                         loading={draftButtonLoading}
                         disabled={submitButtonLoading}
-                        data-test={draftDataTest}
                       >
                         Save draft
                       </Button>
@@ -91,7 +86,6 @@ export default function SchemaFormPage({
                       onClick={onSubmit}
                       loading={submitButtonLoading}
                       disabled={draftButtonLoading}
-                      data-test={submitDataTest}
                     >
                       Submit
                     </Button>

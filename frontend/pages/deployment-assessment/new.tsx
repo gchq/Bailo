@@ -143,8 +143,6 @@ export default function NewDeploymentAssessment() {
       onSaveDraft={onSaveDraft}
       draftButtonLoading={draftButtonLoading}
       draftSuccessText={draftSuccessText}
-      submitDataTest='createDeploymentAssessmentButton'
-      draftDataTest='saveDraftDeploymentAssessmentButton'
     />
   )
 }

@@ -118,7 +118,6 @@ export default function NewAccessRequest() {
       submitButtonLoading={submitButtonLoading}
       formValidationErrorState={formValidationErrorState}
       errorText={submissionErrorText}
-      submitDataTest='createAccessRequestButton'
       hideForm={noModelCard}
     >
       {noModelCard && (
