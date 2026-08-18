@@ -1,20 +1,9 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from '@mui/material'
+import { List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material'
 import { useGetUsageBySchema } from 'actions/schema'
 import { useMemo } from 'react'
+import DisplayDialog from 'src/common/DisplayDialog'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
-import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { SchemaInterface } from 'types/types'
@@ -88,16 +77,12 @@ export default function UsageListDialog({ open = false, onClose, schema }: Schem
   }
 
   return (
-    <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
-      <DialogTitle>{`${camelCaseToTitleCase(schema.kind)}s associated to schema (${data.length})`}</DialogTitle>
-      <DialogContent>
-        {data.length ? dataList : <EmptyBlob text={`No associated ${camelCaseToTitleCase(schema.kind)}s`} />}
-      </DialogContent>
-      <DialogActions>
-        <Button variant='contained' onClick={onClose}>
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <DisplayDialog
+      open={open}
+      onClose={onClose}
+      title={`${camelCaseToTitleCase(schema.kind)}s associated to schema (${data.length})`}
+    >
+      {data.length ? dataList : <EmptyBlob text={`No associated ${camelCaseToTitleCase(schema.kind)}s`} />}
+    </DisplayDialog>
   )
 }
