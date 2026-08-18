@@ -80,7 +80,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
           widget: 'modelSelector',
         },
       },
-      required: ['name', 'riskOwner', 'entryList'],
+      required: ['name', 'riskOwner', 'riskOwnerJustification', 'entryList'],
       additionalProperties: false,
     },
     ...jsonSchema.properties,
@@ -310,14 +310,18 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 async function addSchemas(schemas: DefaultSchema[], kind: SchemaKindKeys) {
   for (const schema of schemas) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const schemaModel = new SchemaModel({
-      ...schema,
-      kind,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await schemaModel.save()
+    await SchemaModel.findOneAndUpdate(
+      { id: schema.id },
+      {
+        ...schema,
+        kind,
+        active: true,
+        hidden: false,
+      },
+      {
+        upsert: true,
+      },
+    )
   }
 }
 
