@@ -45,6 +45,7 @@ export default function ExpandableTypography({
       ref={typographyRef}
       sx={[
         ...(Array.isArray(sx) ? sx : [sx]),
+        // Styles with vendor prefixes may not support all browsers. Use with caution
         !expanded && {
           display: '-webkit-box',
           overflow: 'hidden',
