@@ -44,7 +44,7 @@ type SchemaSelectProps = {
 
 export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHref, backLabel }: SchemaSelectProps) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [loadingSchemaId, setLoadingSchemaId] = useState<string | null>(null)
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -60,7 +60,7 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
 
   const accessRequestCallback = useCallback(
     async (newSchema: SchemaInterface) => {
-      setLoading(true)
+      setLoadingSchemaId(newSchema.id)
       router.push(`/model/${entry!.id}/access-request/new?schemaId=${newSchema.id}`)
     },
     [entry, router],
@@ -69,7 +69,7 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
   const entryCallback = useCallback(
     async (newSchema: SchemaInterface) => {
       if (currentUser && entry) {
-        setLoading(true)
+        setLoadingSchemaId(newSchema.id)
 
         const response = await postFromSchema(entry.id, newSchema.id)
 
@@ -77,7 +77,7 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
           await mutateEntry()
           router.push(`/${entryKindForRedirect(entry.kind)}/${entry.id}`)
         } else {
-          setLoading(false)
+          setLoadingSchemaId(null)
         }
       }
     },
@@ -94,7 +94,7 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
   const selectionCallback = useMemo(() => {
     if (onSchemaSelect) {
       return (newSchema: SchemaInterface) => {
-        setLoading(true)
+        setLoadingSchemaId(newSchema.id)
         onSchemaSelect(newSchema)
       }
     }
@@ -108,14 +108,14 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
           <SchemaButton
             key={activeSchema.id}
             schema={activeSchema}
-            loading={loading}
+            loading={loadingSchemaId === activeSchema.id}
             onClick={() => selectionCallback(activeSchema)}
           />
         ))
       ) : (
         <EmptyBlob text='Could not find any active schemas' />
       ),
-    [activeSchemas, selectionCallback, loading],
+    [activeSchemas, selectionCallback, loadingSchemaId],
   )
 
   const inactiveSchemaButtons = useMemo(
@@ -125,14 +125,14 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
           <SchemaButton
             key={inactiveSchema.id}
             schema={inactiveSchema}
-            loading={loading}
+            loading={loadingSchemaId === inactiveSchema.id}
             onClick={() => selectionCallback(inactiveSchema)}
           />
         ))
       ) : (
         <EmptyBlob text='Could not find any inactive schemas' />
       ),
-    [inactiveSchemas, selectionCallback, loading],
+    [inactiveSchemas, selectionCallback, loadingSchemaId],
   )
 
   const link =
