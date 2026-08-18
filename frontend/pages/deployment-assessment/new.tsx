@@ -119,7 +119,7 @@ export default function NewDeploymentAssessment() {
       <>
         <Title text='Select a schema' />
         <SchemaSelect
-          schemaKind={SchemaKind.ACCESS_REQUEST}
+          schemaKind={SchemaKind.DEPLOYMENT_ASSESSMENT}
           onSchemaSelect={handleSchemaSelect}
           backHref='/deployments'
           backLabel='Back to Deployment Assessments'
