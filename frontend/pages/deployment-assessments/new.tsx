@@ -40,7 +40,7 @@ export default function NewDeploymentAssessment() {
   }, [schema, currentUser])
 
   function handleSchemaSelect(selected: SchemaInterface) {
-    router.push(`/deployment-assessment/new?schemaId=${selected.id}`)
+    router.push(`/deployment-assessments/new?schemaId=${selected.id}`)
   }
 
   async function onSaveDraft() {
@@ -103,7 +103,7 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    router.push('/deployments')
+    router.push('/deployment-assessments')
   }
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment page', {
@@ -121,7 +121,7 @@ export default function NewDeploymentAssessment() {
         <SchemaSelect
           schemaKind={SchemaKind.DEPLOYMENT_ASSESSMENT}
           onSchemaSelect={handleSchemaSelect}
-          backHref='/deployments'
+          backHref='/deployment-assessments'
           backLabel='Back to Deployment Assessments'
         />
       </>
@@ -134,7 +134,7 @@ export default function NewDeploymentAssessment() {
       isLoading={isFormLoading}
       splitSchema={splitSchema}
       setSplitSchema={setSplitSchema}
-      backHref='/deployment-assessment/new'
+      backHref='/deployment-assessments/new'
       backLabel='Select a different schema'
       onSubmit={onSubmit}
       submitButtonLoading={submitButtonLoading}
