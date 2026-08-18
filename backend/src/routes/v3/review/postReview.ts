@@ -17,9 +17,14 @@ export const postReviewSchema = z.object({
   body: z.discriminatedUnion('kind', [
     z.object({
       kind: z.literal(ReviewKind.Lifecycle),
-      dueDate: z.coerce.date().refine((date) => isLifecycleReviewDateValid(date), {
-        message: `Due date of next review cannot be further than ${config.ui.lifecycle.maxReviewInterval} in the future.`,
-      }),
+      dueDate: z.coerce
+        .date()
+        .refine((date) => isLifecycleReviewDateValid(date), {
+          message: `Due date of next review cannot be further than ${config.ui.lifecycle.maxReviewInterval} in the future.`,
+        })
+        .refine((date) => date.getTime() < Date.UTC(2000), {
+          message: 'Due date of next review cannot be before year 2000.',
+        }),
     }),
     z.object({
       kind: z.literal(ReviewKind.Release),
