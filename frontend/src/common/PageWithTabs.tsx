@@ -204,7 +204,10 @@ export default function PageWithTabs({
         }}
       >
         {additionalInfo && (
-          <ExpandableTypography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+          <ExpandableTypography
+            sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
+            maxLines={2}
+          >
             {additionalInfo}
           </ExpandableTypography>
         )}
