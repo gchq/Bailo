@@ -160,7 +160,7 @@ export default function SideNavigation({
                   badgeCount={reviewCount}
                 />
                 <NavMenuItem
-                  href='/deployments'
+                  href='/deployment-assessment'
                   selectedPage={page}
                   primaryText='Deployment Assessments'
                   drawerOpen={drawerOpen}
