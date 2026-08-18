@@ -1,6 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { createReview, findReviewById, notifyReviewer } from '../../../src/services/v3/review.js'
+import {
+  createReview,
+  findReviewById,
+  isLifecycleReviewDateValid,
+  notifyReviewer,
+} from '../../../src/services/v3/review.js'
 import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 
@@ -65,15 +70,18 @@ describe('services > review', () => {
     ReviewModel.findOne.mockResolvedValueOnce(undefined)
     authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
     authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
+    const dueDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
     const newReview = await createReview({} as any, 'test-1234', {
       kind: ReviewKind.Lifecycle,
-      dueDate: new Date('2050-05-28T12:54:03.780Z'),
+      dueDate,
     })
-    expect(newReview).toMatchSnapshot()
+    expect(newReview).toBeDefined()
+    expect(newReview.kind).toBe(ReviewKind.Lifecycle)
+    expect(newReview.modelId).toBe('test-1234')
   })
 
   test('createReview > schedules lifecycle review emails after creating a lifecycle review', async () => {
-    const dueDate = new Date('2050-05-28T12:54:03.780Z')
+    const dueDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
     modelMock.getModelById.mockResolvedValueOnce({
       id: 'test-1234',
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
@@ -95,6 +103,26 @@ describe('services > review', () => {
       expect.any(String),
       dueDate,
     )
+  })
+
+  test('isLifecycleReviewDateValid > returns true for date within max interval', () => {
+    const validDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    expect(isLifecycleReviewDateValid(validDate)).toBe(true)
+  })
+
+  test('isLifecycleReviewDateValid > returns false for date beyond max interval', () => {
+    const twoYearsFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 2)
+    expect(isLifecycleReviewDateValid(twoYearsFromNow)).toBe(false)
+  })
+
+  test('isLifecycleReviewDateValid > returns true for date exactly at max interval boundary', () => {
+    const oneYearFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+    expect(isLifecycleReviewDateValid(oneYearFromNow)).toBe(true)
+  })
+
+  test('isLifecycleReviewDateValid > returns true for date in the past', () => {
+    const pastDate = new Date(Date.now() - 1000 * 60 * 60 * 24)
+    expect(isLifecycleReviewDateValid(pastDate)).toBe(true)
   })
 
   test('createReview > cannot create lifecycle review if existing review is open', async () => {
@@ -121,7 +149,7 @@ describe('services > review', () => {
     await expect(() =>
       createReview({} as any, 'test-1234', {
         kind: ReviewKind.Lifecycle,
-        dueDate: new Date('2050-05-28T12:54:03.780Z'),
+        dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
       }),
     ).rejects.toThrow(/^This model has an open lifecycle review./)
   })
