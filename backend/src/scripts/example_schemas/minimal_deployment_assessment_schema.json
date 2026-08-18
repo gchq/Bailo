@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "about": {
+      "title": "About the deployment",
+      "type": "object",
+      "properties": {
+        "deploymentSummary": {
+          "title": "What is the name of the deployment assessment?",
+          "description": "This will be used to distinguish your deployment assessment.",
+          "type": "string"
+        },
+        "deploymentDate": {
+          "title": "When is this deployment due to start?",
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": ["deploymentSummary", "deploymentDate"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["about"],
+  "additionalProperties": false
+}

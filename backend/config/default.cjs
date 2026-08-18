@@ -150,6 +150,14 @@ module.exports = {
         reviewRoles: ['msro'],
       },
     ],
+    deploymentAssessments: [
+      {
+        name: 'Minimal Deployment Assessment Schema v1',
+        id: 'minimal-deployment-assessment-schema-v1',
+        description: 'A minimal deployment assessment capturing the deployment name and details.',
+        jsonSchema: require('../src/scripts/example_schemas/minimal_deployment_assessment_schema.json'),
+      },
+    ],
   },
 
   session: {

@@ -9,6 +9,7 @@ import {
   updateSchema,
   validateContentAgainstSchema,
 } from '../../src/services/schema.js'
+import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
@@ -64,6 +65,41 @@ describe('services > schema', () => {
 
     const result = await searchSchemas('model')
     expect(result).toEqual(['schema-1', 'schema-2'])
+  })
+
+  test('that deployment assessment schemas include summary properties when searched', async () => {
+    const deploymentAssessmentSchema = {
+      kind: SchemaKind.DeploymentAssessment,
+      jsonSchema: {
+        properties: {
+          assessment: {
+            type: 'object',
+          },
+        },
+      },
+    }
+    SchemaModelModelMock.sort.mockResolvedValueOnce([deploymentAssessmentSchema])
+
+    const result = await searchSchemas(SchemaKind.DeploymentAssessment)
+
+    expect(result[0].jsonSchema.properties).toEqual({
+      overview: expect.objectContaining({
+        title: 'Details',
+        required: ['name', 'riskOwner', 'entryList'],
+      }),
+      assessment: {
+        type: 'object',
+      },
+    })
+  })
+
+  test('that non-deployment assessment schemas are unchanged when searched', async () => {
+    const modelSchema = structuredClone(testModelSchema)
+    SchemaModelModelMock.sort.mockResolvedValueOnce([modelSchema])
+
+    const result = await searchSchemas(SchemaKind.Model)
+
+    expect(result[0].jsonSchema).toEqual(testModelSchema.jsonSchema)
   })
 
   test('a schema can be created', async () => {

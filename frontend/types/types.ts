@@ -287,6 +287,7 @@ export const SchemaKind = {
   MODEL: 'model',
   ACCESS_REQUEST: 'accessRequest',
   DATA_CARD: 'dataCard',
+  DEPLOYMENT_ASSESSMENT: 'deploymentAssessment',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
