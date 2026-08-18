@@ -153,6 +153,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                 field='state'
                 mutate={mutateEntry}
                 options={uiConfig.modelDetails.states}
+                showWarningWhenUnset
               />
             )}
           </Stack>
