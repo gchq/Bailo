@@ -552,9 +552,9 @@ export abstract class BaseAuditConnector {
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 
-  abstract onRegistryImagePulled(req: Request, userDn: string): Promise<void>
-  abstract onRegistryImagePushed(req: Request, userDn: string): Promise<void>
-  abstract onRegistryImageDeleted(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImagePulled(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImagePushed(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImageDeleted(req: Request, registryImage: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

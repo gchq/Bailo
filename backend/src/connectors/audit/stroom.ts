@@ -504,16 +504,16 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, reviewId)
   }
 
-  async onRegistryImagePulled(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImagePulled(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
-  async onRegistryImagePushed(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImagePushed(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
-  async onRegistryImageDeleted(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
   async onError(req: Request, error: BailoError): Promise<void> {
