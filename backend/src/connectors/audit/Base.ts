@@ -183,19 +183,19 @@ export const AuditInfo = {
     typeId: 'CreateUserToken',
     description: 'Token Created',
     auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
     typeId: 'ViewUserToken',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   DeleteUserToken: {
     typeId: 'DeleteUserToken',
     description: 'Token Deleted',
     auditKind: AuditKind.Delete,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
 
   CreateAccessRequest: {
@@ -219,7 +219,7 @@ export const AuditInfo = {
   DeleteAccessRequest: {
     typeId: 'UpdateAccessRequest',
     description: 'Access Request Deleted',
-    auditKind: AuditKind.Update,
+    auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.AccessRequest,
   },
   ViewAccessRequests: {
@@ -559,7 +559,7 @@ export abstract class BaseAuditConnector {
   abstract onError(req: Request, error: BailoError): Promise<void>
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
+    if (auditInfo.typeId !== req.audit.typeId || auditInfo.description !== req.audit.description) {
       throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but received '${JSON.stringify(req.audit)}'`)
     }
   }

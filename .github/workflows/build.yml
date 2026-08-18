@@ -75,6 +75,7 @@ jobs:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
+          target: prod
           tags: ${{ matrix.component.tag }}
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
@@ -155,6 +156,7 @@ jobs:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
+          target: prod
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name || inputs.release_tag }}
@@ -168,6 +170,7 @@ jobs:
           context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
+          target: prod
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.artefactscan_version_changed.outputs.version || inputs.artefactscan_tag }}
@@ -284,63 +287,11 @@ jobs:
 
       # Add bailo NodePort
       - name: Create NodePort Config
-        run: |
-          cat << EOT >> infrastructure/helm/bailo/templates/nodePort.yaml
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: node-port
-          spec:
-            type: NodePort
-            ports:
-              - port: {{ .Values.nginxAuth.port }}
-                targetPort: {{ .Values.nginxAuth.port }}
-            selector:
-               name: nginx
-          EOT
+        run: cp .github/resources/helm/nodePort.yaml infrastructure/helm/bailo/templates/nodePort.yaml
 
       # Create local.yaml
       - name: Create local.yaml
-        run: |
-          cat << EOT >> infrastructure/helm/bailo/local.yaml
-          ---
-          # Instance Settings
-          frontend:
-            podSecurityContext:
-              runAsUser: 1001
-          backend:
-            podSecurityContext:
-              runAsUser: 1001
-          config:
-            ui:
-              banner:
-                enabled: "true"
-                text: "BAILO TEST"
-            build:
-              environment: img
-          # Bailo
-          image:
-            frontendRepository: "bailo_frontend"
-            frontendTag: latest
-            backendRepository: "bailo_backend"
-            backendTag: latest
-            artefactscanRepository: "bailo_artefactscan"
-            artefactscanTag: latest
-          # Used for k8s not openshift
-          ingress:
-            enabled: false
-          route:
-            enabled: false
-            appPublicRoute: localhost
-          mongodb:
-            architecture: standalone
-            auth:
-              passwords:
-                - MongoDBPassword
-              usernames:
-                - bailo_user
-          EOT
+        run: cp .github/resources/helm/local.yaml infrastructure/helm/bailo/local.yaml
 
       - name: Set Bailo image pull policy to Never
         run: sed -i 's/{{ .Values.image.pullPolicy }}/Never/g' infrastructure/helm/bailo/templates/bailo/bailo.deployment.yaml
@@ -453,54 +404,11 @@ jobs:
       # Configure application
       - name: Configure Bailo
         run: |
-          cat <<EOT >> backend/config/local.cjs
-          module.exports = {
-            mongo: {
-              uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
-            },
-
-            s3: {
-              credentials: {
-                accessKeyId: 'bailoadmin',
-                secretAccessKey: 'bailoadmin',
-              },
-              endpoint: 'http://seaweedfs:8333',
-              region: 'ignored',
-              forcePathStyle: true,
-              rejectUnauthorized: true,
-            },
-
-            smtp: {
-              ${{ matrix.job_name == 'cross_instance' && 'enabled: false,' || '' }}
-              auth: {
-                user: 'mailuser',
-                pass: 'mailpass',
-              },
-              tls: {
-                rejectUnauthorized: false,
-              },
-            },
-
-            logging: {
-              file: {
-                path: '/home/runner/work/Bailo/Bailo/logs/out.log',
-              },
-            },
-
-            ui: {
-              modelMirror: {
-                import: {
-                  enabled: true,
-                },
-                export: {
-                  enabled: true,
-                  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
-                },
-              },
-            },
-            ${{ matrix.job_name == 'cross_instance' && 'connectors: { artefactScanners: { kinds: [] } },' || '' }}
-          }
-          EOT
+          if [ "${{ matrix.job_name }}" = "cross_instance" ]; then
+            cp .github/resources/config/cross_instance.cjs backend/config/local.cjs
+          else
+            cp .github/resources/config/integration.cjs backend/config/local.cjs
+          fi
 
       - name: Start services
         if: matrix.job_name != 'cross_instance'
@@ -513,8 +421,8 @@ jobs:
       - name: Start cross-instance services
         if: matrix.job_name == 'cross_instance'
         run: |
-          INSTANCE_NAME=bailo_a docker compose -f compose.yaml -f compose.instance-a.yaml -p bailo-a --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
-          INSTANCE_NAME=bailo_b docker compose -f compose.yaml -f compose.instance-b.yaml -p bailo-b --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
+          INSTANCE_NAME=bailo_a docker compose -f compose.yaml -f .github/resources/compose/compose.instance-a.yaml -p bailo-a --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
+          INSTANCE_NAME=bailo_b docker compose -f compose.yaml -f .github/resources/compose/compose.instance-b.yaml -p bailo-b --progress=plain --parallel=-1 up -d --wait --wait-timeout 120
 
       # e2e with Cypress
       - uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7.4.1
