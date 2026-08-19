@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   createReview,
@@ -40,8 +40,18 @@ const smtpMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/smtp/smtp.js', () => smtpMock)
 
+const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z')
+
 describe('services > review', () => {
   const user: any = { dn: 'test' }
+
+  beforeEach(() => {
+    vi.setSystemTime(FIXED_DATE)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
 
   test('findReviewById > can find a review using a given reviewId', async () => {
     modelMock.getModelById.mockResolvedValueOnce([
@@ -70,7 +80,7 @@ describe('services > review', () => {
     ReviewModel.findOne.mockResolvedValueOnce(undefined)
     authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
     authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
-    const dueDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    const dueDate = new Date('2026-01-02T00:00:00.000Z')
     const newReview = await createReview({} as any, 'test-1234', {
       kind: ReviewKind.Lifecycle,
       dueDate,
@@ -81,7 +91,7 @@ describe('services > review', () => {
   })
 
   test('createReview > schedules lifecycle review emails after creating a lifecycle review', async () => {
-    const dueDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    const dueDate = new Date('2026-01-02T00:00:00.000Z')
     modelMock.getModelById.mockResolvedValueOnce({
       id: 'test-1234',
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
@@ -105,24 +115,28 @@ describe('services > review', () => {
     )
   })
 
-  test('isLifecycleReviewDateValid > returns true for date within max interval', () => {
-    const validDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-    expect(isLifecycleReviewDateValid(validDate)).toBe(true)
-  })
+  describe('isLifecycleReviewDateValid', () => {
+    test('returns true for date within max interval', () => {
+      expect(isLifecycleReviewDateValid(new Date('2026-07-01T00:00:00.000Z'))).toBe(true)
+    })
 
-  test('isLifecycleReviewDateValid > returns false for date beyond max interval', () => {
-    const twoYearsFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 2)
-    expect(isLifecycleReviewDateValid(twoYearsFromNow)).toBe(false)
-  })
+    test('returns false for date beyond max interval', () => {
+      expect(isLifecycleReviewDateValid(new Date('2028-01-01T00:00:00.000Z'))).toBe(false)
+    })
 
-  test('isLifecycleReviewDateValid > returns true for date exactly at max interval boundary', () => {
-    const oneYearFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
-    expect(isLifecycleReviewDateValid(oneYearFromNow)).toBe(true)
-  })
+    test('returns true for date exactly at max interval boundary', () => {
+      const boundary = new Date(FIXED_DATE.getTime() + 1000 * 60 * 60 * 24 * 365)
+      expect(isLifecycleReviewDateValid(boundary)).toBe(true)
+    })
 
-  test('isLifecycleReviewDateValid > returns true for date in the past', () => {
-    const pastDate = new Date(Date.now() - 1000 * 60 * 60 * 24)
-    expect(isLifecycleReviewDateValid(pastDate)).toBe(true)
+    test('returns false for date one millisecond beyond boundary', () => {
+      const justOver = new Date(FIXED_DATE.getTime() + 1000 * 60 * 60 * 24 * 365 + 1)
+      expect(isLifecycleReviewDateValid(justOver)).toBe(false)
+    })
+
+    test('returns true for date in the past', () => {
+      expect(isLifecycleReviewDateValid(new Date('2024-01-01T00:00:00.000Z'))).toBe(true)
+    })
   })
 
   test('createReview > cannot create lifecycle review if existing review is open', async () => {
@@ -149,7 +163,7 @@ describe('services > review', () => {
     await expect(() =>
       createReview({} as any, 'test-1234', {
         kind: ReviewKind.Lifecycle,
-        dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        dueDate: new Date('2026-01-02T00:00:00.000Z'),
       }),
     ).rejects.toThrow(/^This model has an open lifecycle review./)
   })
