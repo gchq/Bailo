@@ -76,6 +76,7 @@ const audit = {
   onViewMetric: vi.fn(),
 
   onCreateReview: vi.fn(),
+  onCreateDeploymentAssessment: vi.fn(),
 
   onViewCurrentUserInformation: vi.fn(),
 

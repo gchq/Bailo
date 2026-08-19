@@ -39,7 +39,13 @@ export async function searchSchemas(
     ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
 
-  return schemas
+  return schemas.map((schema) => {
+    if (schema.kind === SchemaKind.DeploymentAssessment) {
+      schema.jsonSchema = structuredClone(schema.jsonSchema)
+      schema.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schema.jsonSchema)
+    }
+    return schema
+  })
 }
 
 /**
@@ -66,11 +72,11 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
           type: 'string',
           widget: 'entitySelector',
         },
-        riskOwnerJustification: {
+        justification: {
           title: 'Justify why the risk owner has been assigned',
           type: 'string',
         },
-        entryList: {
+        models: {
           title: 'List all models assigned to this deployment assessment',
           type: 'array',
           items: {
@@ -80,7 +86,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
           widget: 'modelSelector',
         },
       },
-      required: ['name', 'riskOwner', 'riskOwnerJustification', 'entryList'],
+      required: ['name', 'riskOwner', 'justification', 'models'],
       additionalProperties: false,
     },
     ...jsonSchema.properties,
