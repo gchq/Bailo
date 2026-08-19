@@ -174,7 +174,11 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                       setReviewDate(newValue)
                     }}
                     minDate={dayjs('2000/01/01')}
-                    maxDate={increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)}
+                    maxDate={
+                      uiConfig.lifecycle.maxReviewInterval === ''
+                        ? undefined
+                        : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
+                    }
                   />
                   <Button
                     disabled={!reviewDate}

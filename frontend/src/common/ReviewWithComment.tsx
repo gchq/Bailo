@@ -149,7 +149,11 @@ export default function ReviewWithComment({
                     setDueDate(newValue)
                   }}
                   minDate={increaseCurrentDateInDays(1)}
-                  maxDate={increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)}
+                  maxDate={
+                    uiConfig.lifecycle.maxReviewInterval === ''
+                      ? undefined
+                      : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
+                  }
                 />
               </Stack>
             )}
