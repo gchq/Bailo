@@ -40,6 +40,15 @@ const smtpMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/smtp/smtp.js', () => smtpMock)
 
+const mockLifecycleConfig = vi.hoisted(() => ({ maxReviewInterval: '1 year' }))
+vi.mock('../../../src/utils/config.js', async () => {
+  const base = (await vi.importActual('../../../src/utils/__mocks__/config.js')) as any
+  return {
+    __esModule: true,
+    default: { ...base.default, ui: { ...base.default.ui, lifecycle: mockLifecycleConfig } },
+  }
+})
+
 const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z')
 
 describe('services > review', () => {
@@ -182,4 +191,33 @@ test('notifyReviewer > successfully notifies a review role', async () => {
   ])
   smtpMock.notifyReviewRoleOfAdditionalReview.mockResolvedValueOnce(() => Promise.resolve())
   await notifyReviewer({} as any, '6a2c20a481e52c790216eaaa')
+})
+
+describe('isLifecycleReviewDateValid > config variants', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    mockLifecycleConfig.maxReviewInterval = '1 year'
+    vi.useRealTimers()
+  })
+
+  test('allows any date when maxReviewInterval is empty string', async () => {
+    mockLifecycleConfig.maxReviewInterval = ''
+    const mod = await import('../../../src/services/v3/review.js')
+    vi.setSystemTime(FIXED_DATE)
+
+    expect(mod.isLifecycleReviewDateValid(new Date('2099-01-01T00:00:00.000Z'))).toBe(true)
+    expect(mod.isLifecycleReviewDateValid(new Date('2020-01-01T00:00:00.000Z'))).toBe(true)
+  })
+
+  test('restricts dates with 1 month interval', async () => {
+    mockLifecycleConfig.maxReviewInterval = '1 month'
+    const mod = await import('../../../src/services/v3/review.js')
+    vi.setSystemTime(FIXED_DATE)
+
+    expect(mod.isLifecycleReviewDateValid(new Date('2026-01-02T00:00:00.000Z'))).toBe(true)
+    expect(mod.isLifecycleReviewDateValid(new Date('2026-03-01T00:00:00.000Z'))).toBe(false)
+  })
 })
