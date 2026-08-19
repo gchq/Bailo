@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetModel } from 'actions/entry'
+import { useGetEntry } from 'actions/entry'
 import { postFromSchema } from 'actions/modelCard'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -27,6 +27,7 @@ import SchemaButton from 'src/schemas/SchemaButton'
 import {
   EntryInterface,
   EntryKindLabel,
+  MODEL_ENTRY_KINDS,
   SchemaInterface,
   SchemaKind,
   SchemaKindKeys,
@@ -45,7 +46,10 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const { mutateEntry } = useGetModel(entry.id)
+  // workaround different callers having different SWR cache keys
+  const entryKind = entry.kind in MODEL_ENTRY_KINDS ? MODEL_ENTRY_KINDS : entry.kind
+  // `useGetEntry(entry.id, MODEL_ENTRY_KINDS)` === `useGetModel(entry.id)`
+  const { mutateEntry } = useGetEntry(entry.id, entryKind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
