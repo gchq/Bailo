@@ -280,6 +280,7 @@ export const SchemaKindLabel = {
   model: 'model',
   accessRequest: 'access request',
   dataCard: 'data card',
+  deploymentAssessment: 'deployment assessment',
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
 

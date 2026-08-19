@@ -1,18 +1,13 @@
 import dayjs from '@dayjs'
-import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
 import { useGetModel } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
-import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import JsonSchemaForm from 'src/Form/JsonSchemaForm'
-import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
+import SchemaFormPage from 'src/schemas/SchemaFormPage'
 import { SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
@@ -109,51 +104,25 @@ export default function NewAccessRequest() {
     return error
   }
 
+  const noModelCard = !model || !model.card
+
   return (
-    <>
-      <Title text='Access Request' />
-      {isLoading && <Loading />}
-      {!isLoading && (
-        <Container maxWidth='lg'>
-          <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
-            {(!model || !model.card) && (
-              <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
-            )}
-            {model && model.card && (
-              <Stack spacing={4}>
-                <Link href={`/model/${modelId}/access-request/schema`}>
-                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                    Select a different schema
-                  </Button>
-                </Link>
-                <JsonSchemaForm
-                  splitSchema={splitSchema}
-                  setSplitSchema={setSplitSchema}
-                  canEdit
-                  displayLabelValidation={formValidationErrorState}
-                  defaultCurrentUserInEntityList
-                />
-                <Stack
-                  sx={{
-                    alignItems: 'flex-end',
-                  }}
-                >
-                  <Button
-                    sx={{ width: 'fit-content' }}
-                    variant='contained'
-                    onClick={onSubmit}
-                    loading={submitButtonLoading}
-                    data-test='createAccessRequestButton'
-                  >
-                    Submit
-                  </Button>
-                  <MessageAlert message={submissionErrorText} severity='error' />
-                </Stack>
-              </Stack>
-            )}
-          </Paper>
-        </Container>
+    <SchemaFormPage
+      title='Access Request'
+      isLoading={isLoading}
+      splitSchema={splitSchema}
+      setSplitSchema={setSplitSchema}
+      backHref={`/model/${modelId}/access-request/schema`}
+      backLabel='Select a different schema'
+      onSubmit={onSubmit}
+      submitButtonLoading={submitButtonLoading}
+      formValidationErrorState={formValidationErrorState}
+      errorText={submissionErrorText}
+      hideForm={noModelCard}
+    >
+      {noModelCard && (
+        <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
       )}
-    </>
+    </SchemaFormPage>
   )
 }
