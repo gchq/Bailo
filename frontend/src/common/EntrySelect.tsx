@@ -80,14 +80,6 @@ export default function EntrySelect({
               value={value ?? ''}
               onChange={handleSelectOption}
               displayEmpty
-              sx={
-                showWarningWhenUnset && !value
-                  ? {
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: theme.palette.warning.main },
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: theme.palette.warning.dark },
-                    }
-                  : {}
-              }
               renderValue={(value: string) =>
                 value ? (
                   value
@@ -96,7 +88,7 @@ export default function EntrySelect({
                     <em>Unset</em>
                     {showWarningWhenUnset && (
                       <Tooltip title={`No ${labelLowerCase} has been set`}>
-                        <WarningIcon color='warning' fontSize='small' />
+                        <WarningIcon role='alert' color='warning' fontSize='small' />
                       </Tooltip>
                     )}
                   </Stack>
@@ -130,7 +122,7 @@ export default function EntrySelect({
                   }}
                 >
                   <em>Unset</em>
-                  <WarningIcon color='warning' fontSize='small' />
+                  <WarningIcon role='alert' color='warning' fontSize='small' />
                 </Stack>
               </Tooltip>
             ) : (
