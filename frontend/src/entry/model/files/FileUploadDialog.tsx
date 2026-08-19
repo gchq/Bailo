@@ -1,26 +1,11 @@
 import styled from '@emotion/styled'
-import Close from '@mui/icons-material/Close'
-import UploadFile from '@mui/icons-material/UploadFile'
-import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  LinearProgress,
-  Stack,
-  Typography,
-} from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import FileUpload from '@mui/icons-material/FileUpload'
+import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, DragEvent, useCallback, useContext, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
-import { Transition } from 'src/common/Transition'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import MessageAlert from 'src/MessageAlert'
@@ -39,18 +24,20 @@ const Input = styled('input')({
 })
 
 export default function FileUploadDialog({ open, onDialogClose, model, mutateModelFiles }: FileUploadDialogProps) {
-  const theme = useTheme()
   const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
-  const [isDraggingOver, setIsDraggingOver] = useState(false)
 
-  const addNewFiles = useCallback(
-    (newFileList: FileList | null) => {
-      const newFiles = newFileList ? Array.from(newFileList).map((newFile) => ({ file: newFile })) : []
+  const handleAddNewFiles = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const newFiles = event.target.files
+        ? Array.from(event.target.files).map((newFile) => {
+            return { file: newFile }
+          })
+        : []
       const filteredNewFiles = newFiles.filter(
         (newFile) =>
           filesToBeUploaded.find((existingFile) => existingFile.file.name === newFile.file.name) === undefined,
@@ -59,34 +46,6 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
       setFilesToBeUpload([...filteredNewFiles, ...filesToBeUploaded])
     },
     [filesToBeUploaded],
-  )
-
-  const handleAddNewFiles = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      addNewFiles(event.target.files)
-      // Clear the input so that re-selecting a previously removed file triggers onChange again
-      event.target.value = ''
-    },
-    [addNewFiles],
-  )
-
-  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDraggingOver(true)
-  }, [])
-
-  const handleDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDraggingOver(false)
-  }, [])
-
-  const handleDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      event.preventDefault()
-      setIsDraggingOver(false)
-      addNewFiles(event.dataTransfer.files)
-    },
-    [addNewFiles],
   )
 
   const handleFileMetadataOnChange = useCallback(
@@ -162,12 +121,6 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     [filesToBeUploaded],
   )
 
-  const handleDialogClose = useCallback(() => {
-    if (!isFilesUploading) {
-      onDialogClose()
-    }
-  }, [isFilesUploading, onDialogClose])
-
   const fileListToUpload = useMemo(() => {
     return filesToBeUploaded.map((fileWithMetadata) => (
       <FileToBeUploaded
@@ -198,51 +151,19 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
   )
 
   return (
-    <Dialog open={open} onClose={handleDialogClose} maxWidth='md' fullWidth slots={{ transition: Transition }}>
-      <DialogTitle
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        Upload Files
-        <IconButton aria-label='close upload files dialog' onClick={handleDialogClose} disabled={isFilesUploading}>
-          <Close />
-        </IconButton>
-      </DialogTitle>
+    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
-          <label htmlFor='add-files-button' style={{ width: '100%' }}>
-            <Box
+          <label htmlFor='add-files-button' style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <Button
+              loading={isFilesUploading}
+              endIcon={<FileUpload />}
               component='span'
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                py: 3,
-                borderStyle: 'dashed',
-                borderWidth: 2,
-                borderRadius: 1,
-                borderColor: isDraggingOver ? theme.palette.primary.main : theme.palette.divider,
-                backgroundColor: isDraggingOver ? theme.palette.action.hover : 'transparent',
-                cursor: 'pointer',
-              }}
+              variant='outlined'
+              sx={{ width: '40%' }}
             >
-              <Stack spacing={1} sx={{ alignItems: 'center' }}>
-                <UploadFile color='primary' fontSize='large' />
-                <Typography>
-                  Drag &amp; drop files here or{' '}
-                  <Box component='span' sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-                    click to browse
-                  </Box>
-                </Typography>
-              </Stack>
-            </Box>
+              Select files
+            </Button>
           </label>
           {model.kind === EntryKind.UNTRUSTED_MODEL && (
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -264,7 +185,9 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               Files to upload
             </Typography>
           )}
-          <Stack spacing={1.5}>{fileListToUpload}</Stack>
+          <Stack divider={<Divider />} spacing={1}>
+            {fileListToUpload}
+          </Stack>
           {currentFileUploadProgress && (
             <>
               <LinearProgress
@@ -278,6 +201,18 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               />
             </>
           )}
+          <Box sx={{ width: '100%' }}>
+            <Button
+              disabled={filesToBeUploaded.length === 0}
+              loading={isFilesUploading}
+              onClick={handleFileUpload}
+              variant='contained'
+              color='primary'
+              sx={{ maxWidth: 'fit-content', float: 'right' }}
+            >
+              Upload files
+            </Button>
+          </Box>
           {failedFileUploads.length > 0 && (
             <Alert severity='error' sx={{ my: 2 }}>
               <Stack spacing={1}>
@@ -288,20 +223,6 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
           )}
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button variant='outlined' onClick={handleDialogClose} disabled={isFilesUploading}>
-          Cancel
-        </Button>
-        <Button
-          disabled={filesToBeUploaded.length === 0}
-          loading={isFilesUploading}
-          onClick={handleFileUpload}
-          variant='contained'
-          color='primary'
-        >
-          Upload
-        </Button>
-      </DialogActions>
     </Dialog>
   )
 }
