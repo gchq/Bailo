@@ -499,7 +499,7 @@ export default function Marketplace() {
                         <Box>
                           <ChipSelector
                             label='External repositories'
-                            chipTooltipTitle={'Include external repostories'}
+                            chipTooltipTitle={'Include external repositories'}
                             options={Array.from(peers.keys())}
                             unreachableOptions={unreachablePeerList}
                             expandThreshold={10}
