@@ -286,7 +286,7 @@ module.exports = {
     },
 
     lifecycle: {
-      maxReviewInterval: '1 year',
+      maxReviewInterval: '',
     },
   },
 

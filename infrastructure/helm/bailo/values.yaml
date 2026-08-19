@@ -285,7 +285,7 @@ config:
       enabled: false
 
     lifecycle:
-      maxReviewInterval: '1 year'
+      maxReviewInterval: ''
 
   smtp:
     #host: 'mail' #service name
