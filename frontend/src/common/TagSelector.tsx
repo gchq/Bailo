@@ -62,7 +62,7 @@ export default function TagSelector({
           }}
           filterSelectedOptions
           disabled={!canEdit}
-          sx={{ marginBottom: 2, marginTop: 1 }}
+          sx={{ marginBottom: 2, marginTop: 1, maxWidth: 240 }}
           renderInput={(params) => (
             <TextField
               {...params}

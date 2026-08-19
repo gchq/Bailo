@@ -363,24 +363,16 @@ export default function FileDisplay({
               </Stack>
             </Stack>
           </Stack>
-          <Stack
-            spacing={2}
-            direction='row'
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            {!hideTags && (
-              <>
-                <TagSelector
-                  restrictedToAction={'editEntry'}
-                  onChange={handleFileTagSelectorOnChange}
-                  tags={file.tags || []}
-                  errorText={fileTagErrorMessage}
-                />
-              </>
-            )}
-          </Stack>
+          {!hideTags && (
+            <>
+              <TagSelector
+                restrictedToAction={'editEntry'}
+                onChange={handleFileTagSelectorOnChange}
+                tags={file.tags || []}
+                errorText={fileTagErrorMessage}
+              />
+            </>
+          )}
         </Stack>
       )}
       <AssociatedReleasesDialog
