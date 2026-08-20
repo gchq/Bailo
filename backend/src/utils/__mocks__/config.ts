@@ -70,11 +70,11 @@ const config: PartialDeep<Config> = {
     enabled: false,
   },
   stroom: {
-    logOnlyMode: true,
-    feed: 'feed',
+    sendEvents: true,
     url: 'https://url',
     environment: 'local',
     interval: 1000 * 50,
+    headers: {},
   },
   session: {
     secret: '',

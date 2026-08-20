@@ -440,7 +440,7 @@ The following tables describe selected configuration options available in `value
 | `connectors.artefactScanners.scanTimeoutMs` | Number of milliseconds waited until the microservice is considered unresponsive | `60000` |
 | `instrumentation.enabled` | Enable OpenTelemetry instrumentation | `false` |
 | `instrumentation.debug` | Enable instrumentation debugging | `false` |
-| `stroom.logOnlyMode` | Enable Stroom audit logging | `true` |
+| `stroom.sendEvents` | Enable Stroom audit logging | `true` |
 | `stroom.feed` | Name of the Stroom feed | `feed` |
 | `stroom.url` | URL for the associated Stroom feed | `https://url` |
 | `stroom.environment` | Stroom environment | `local` |
