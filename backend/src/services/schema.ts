@@ -361,7 +361,7 @@ export async function validateContentAgainstSchema(
   const schema = await getSchemaById(schemaId, modelState)
   const jsonSchema = allowIncomplete ? makeSchemaOptional(schema.jsonSchema) : schema.jsonSchema
   const result = jsonSchemaValidator.validate(content, jsonSchema, {
-    required: allowIncomplete,
+    required: true,
   })
   return {
     valid: result.valid,
