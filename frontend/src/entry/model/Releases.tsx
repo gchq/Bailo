@@ -64,7 +64,7 @@ export default function Releases({ model, readOnly = false }: ReleasesProps) {
                   data-test='draftNewReleaseButton'
                   startIcon={<Create />}
                 >
-                  Draft new release
+                  Create new release
                 </Button>
               </Restricted>
             </Box>

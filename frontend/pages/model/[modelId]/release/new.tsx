@@ -224,7 +224,7 @@ export default function NewRelease() {
                   }}
                 >
                   <Typography variant='h6' component='h1' color='primary'>
-                    Create New Release
+                    Create new release
                   </Typography>
                   <DesignServices color='primary' fontSize='large' />
                   <Typography>
@@ -279,7 +279,7 @@ export default function NewRelease() {
                       sx={{ width: 'fit-content' }}
                       data-test='createReleaseButton'
                     >
-                      Create new release
+                      Publish release
                     </Button>
                   </Stack>
                   <MessageAlert message={errorMessage} severity='error' />
