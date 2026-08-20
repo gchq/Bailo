@@ -74,7 +74,7 @@ describe('Create new model', () => {
     cy.log('Navigating to releases tab to create a new release')
     cy.get('[data-test=releasesTab]').click({ force: true })
     cy.contains('Create new release')
-    cy.get('[data-test=CreateNewReleaseButton').click()
+    cy.get('[data-test=createNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
     cy.log('Filling out release form and submitting')

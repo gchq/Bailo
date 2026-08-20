@@ -55,14 +55,14 @@ describe('Make and approve an access request', () => {
     })
   })
 
-  it('can select the image when drafting a release', () => {
+  it('can select the image when creating a release', () => {
     cy.log('Navigating to the model page and then to the releases tab')
     cy.visit(`/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
     cy.get('[data-test=releasesTab]').click({ force: true })
-    cy.log('Opening the draft release page to see if we can see our image in the drop down list')
+    cy.log('Opening the create release page to see if we can see our image in the drop down list')
     cy.contains('Create new release')
-    cy.get('[data-test=draftNewReleaseButton').click({ force: true })
+    cy.get('[data-test=createNewReleaseButton').click({ force: true })
     cy.get('[data-test=imageListAutocomplete').type(testModelImageTag)
     cy.contains(testModelImageTag)
     cy.contains(`${testModelImage}`)
