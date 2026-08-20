@@ -45,6 +45,10 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     return queryState
   }
 
+  if (release && release.draft) {
+    return <></>
+  }
+
   return (
     reviewCountHeader > 0 && (
       <Paper

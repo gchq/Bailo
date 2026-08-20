@@ -20,18 +20,11 @@ export interface ReleaseAssetsMainTextProps {
 export default function ReleaseAssetsMainText({
   model,
   release,
-  latestRelease,
   hideCopySemver = false,
   hideDescription = false,
   includeLinks = true,
 }: ReleaseAssetsMainTextProps) {
   const router = useRouter()
-
-  function latestVersionAdornment() {
-    if (release.semver === latestRelease) {
-      return <Typography color='secondary'>(Latest)</Typography>
-    }
-  }
 
   return (
     <>
@@ -73,7 +66,6 @@ export default function ReleaseAssetsMainText({
               ariaLabel='copy release semver to clipboard'
             />
           )}
-          {latestVersionAdornment()}
         </Stack>
         {includeLinks && (
           <Button onClick={() => router.push(buildModelCardHref(model.id, model.kind, release.modelCardVersion))}>
