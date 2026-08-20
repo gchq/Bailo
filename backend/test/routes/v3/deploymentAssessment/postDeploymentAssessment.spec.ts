@@ -13,7 +13,7 @@ const deploymentAssessment = {
       name: 'Assessment',
       riskOwner: 'user:risk-owner',
       justification: 'Owns the deployment risk.',
-      models: ['model-one'],
+      modelIds: ['model-one'],
     },
   },
   draft: false,
@@ -54,9 +54,8 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
 
   test.each([
     { name: 'Assessment' },
-    { name: 'Assessment', riskOwner: 'user:risk-owner', models: [] },
-    { name: 'Assessment', justification: 'Owns the deployment risk.', models: ['model-one'] },
-    {},
+    { name: 'Assessment', riskOwner: 'user:risk-owner', modelIds: [] },
+    { name: 'Assessment', justification: 'Owns the deployment risk.', modelIds: ['model-one'] },
   ])('creates a draft with overview fields set to %j', async (overview) => {
     const draftAssessment = {
       ...deploymentAssessment,
@@ -91,6 +90,10 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
 
   test.each([
     { body: {}, description: 'missing required fields' },
+    {
+      body: { schemaId: 'deployment-assessment-schema', metadata: { overview: {} } },
+      description: 'missing deployment assessment name',
+    },
     { body: { schemaId: 'deployment-assessment-schema', metadata: 'invalid' }, description: 'non-object metadata' },
     {
       body: {

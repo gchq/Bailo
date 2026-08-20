@@ -7,7 +7,7 @@ export interface DeploymentAssessmentMetadata {
     name: string
     riskOwner?: string
     justification?: string
-    models?: string[]
+    modelIds?: string[]
     [key: string]: unknown
   }
   [key: string]: unknown
@@ -40,8 +40,9 @@ const DeploymentAssessmentSchema = new Schema<DeploymentAssessmentDoc>(
 )
 
 DeploymentAssessmentSchema.plugin(softDeletionPlugin)
-DeploymentAssessmentSchema.index({ 'metadata.overview.models': 1 })
+DeploymentAssessmentSchema.index({ 'metadata.overview.modelIds': 1 })
 DeploymentAssessmentSchema.index({ 'metadata.overview.riskOwner': 1 })
+DeploymentAssessmentSchema.index({ createdBy: 1 })
 
 const DeploymentAssessmentModel = model<DeploymentAssessmentDoc>('v3_Deployment_Assessment', DeploymentAssessmentSchema)
 

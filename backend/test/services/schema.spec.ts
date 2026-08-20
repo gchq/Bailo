@@ -85,10 +85,10 @@ describe('services > schema', () => {
     expect(result[0].jsonSchema.properties).toEqual({
       overview: expect.objectContaining({
         title: 'Details',
-        required: ['name', 'riskOwner', 'justification', 'models'],
+        required: ['name', 'riskOwner', 'justification', 'modelIds'],
         properties: expect.objectContaining({
           name: expect.objectContaining({ minLength: 1, requiredForDraft: true }),
-          models: expect.objectContaining({ minItems: 1, uniqueItems: true }),
+          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
       }),
       assessment: {
@@ -300,10 +300,10 @@ describe('services > schema', () => {
       properties: {
         overview: {
           type: 'object',
-          required: ['name', 'models'],
+          required: ['name', 'modelIds'],
           properties: {
             name: { type: 'string', minLength: 1, requiredForDraft: true },
-            models: { type: 'array', minItems: 1, uniqueItems: true },
+            modelIds: { type: 'array', minItems: 1, uniqueItems: true },
           },
         },
       },
@@ -314,10 +314,10 @@ describe('services > schema', () => {
       toObject: vi.fn().mockReturnValue({ id: 'draft-schema', jsonSchema }),
     })
 
-    await validateContentAgainstSchema('draft-schema', { overview: { name: 'Draft', models: [] } }, { draft: true })
+    await validateContentAgainstSchema('draft-schema', { overview: { name: 'Draft', modelIds: [] } }, { draft: true })
 
     expect(validatorMock.validate).toHaveBeenCalledWith(
-      { overview: { name: 'Draft', models: [] } },
+      { overview: { name: 'Draft', modelIds: [] } },
       {
         type: 'object',
         properties: {
@@ -325,7 +325,7 @@ describe('services > schema', () => {
             type: 'object',
             properties: {
               name: { type: 'string', minLength: 1, requiredForDraft: true },
-              models: { type: 'array', uniqueItems: true },
+              modelIds: { type: 'array', uniqueItems: true },
             },
             required: ['name'],
           },
@@ -343,10 +343,10 @@ describe('services > schema', () => {
       properties: {
         overview: {
           type: 'object',
-          required: ['name', 'models'],
+          required: ['name', 'modelIds'],
           properties: {
             name: { type: 'string', minLength: 1, requiredForDraft: true },
-            models: { type: 'array', minItems: 1, uniqueItems: true },
+            modelIds: { type: 'array', minItems: 1, uniqueItems: true },
           },
         },
       },

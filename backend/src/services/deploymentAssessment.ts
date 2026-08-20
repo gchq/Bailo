@@ -52,7 +52,7 @@ async function validateModels(modelIds: string[]) {
     .map((model) => model.id)
   if (nonDeployableStateModelIds.length > 0) {
     throw BadReq(
-      `Deployment assessments can only use ${config.deploymentAssessments.deployableModelState.toLowerCase()} models.`,
+      `Deployment assessments can only use models with a ${config.deploymentAssessments.deployableModelState.toLowerCase()} state.`,
       {
         modelIds: nonDeployableStateModelIds,
         deployableModelState: config.deploymentAssessments.deployableModelState,
@@ -78,13 +78,13 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   }
 
   const metadata = params.metadata as DeploymentAssessmentMetadata
-  const { name, riskOwner, models } = metadata.overview
+  const { name, riskOwner, modelIds } = metadata.overview
 
   if (riskOwner) {
     await validateRiskOwner(riskOwner)
   }
-  if (models?.length) {
-    await validateModels(models)
+  if (modelIds?.length) {
+    await validateModels(modelIds)
   }
 
   const deploymentAssessment = new DeploymentAssessmentModel({

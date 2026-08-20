@@ -83,7 +83,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             type: 'string',
             minLength: 1,
           },
-          models: {
+          modelIds: {
             title: 'List all models assigned to this deployment assessment',
             type: 'array',
             items: {
@@ -95,7 +95,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'modelSelector',
           },
         },
-        required: ['name', 'riskOwner', 'justification', 'models'],
+        required: ['name', 'riskOwner', 'justification', 'modelIds'],
         additionalProperties: false,
       },
       ...jsonSchema.properties,

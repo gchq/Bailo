@@ -30,7 +30,7 @@ const params = {
       name: 'Assessment',
       riskOwner: 'user:risk-owner',
       justification: 'Owns the deployment risk.',
-      models: ['model-one'],
+      modelIds: ['model-one'],
     },
     assessment: { summary: 'Summary' },
   },
@@ -153,7 +153,7 @@ describe('services > deploymentAssessment', () => {
   test.each([
     [{ ...liveModel, kind: EntryKind.DataCard }, 'One or more models could not be found.'],
     [{ ...liveModel, visibility: EntryVisibility.Private }, 'Deployment assessments can only use public models.'],
-    [{ ...liveModel, state: 'Review' }, 'Deployment assessments can only use production models.'],
+    [{ ...liveModel, state: 'Review' }, 'Deployment assessments can only use models with a production state.'],
   ])('rejects an ineligible model', async (model, message) => {
     ModelModelMock.find.mockResolvedValueOnce([model])
 

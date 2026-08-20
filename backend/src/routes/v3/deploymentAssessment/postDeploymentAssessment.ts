@@ -20,7 +20,7 @@ const overview = z
       .min(1, 'You must provide a justification')
       .openapi({ example: 'The risk owner is accountable for the deployed service.' })
       .optional(),
-    models: z
+    modelIds: z
       .array(z.string())
       .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
       .optional(),
@@ -28,13 +28,12 @@ const overview = z
   .passthrough()
 
 const metadata = z.object({ overview }).passthrough()
-const requestMetadata = z.record(z.unknown()).openapi({ type: 'object' })
 
 const schemaId = z
   .string()
   .min(1, 'You must provide a schema ID')
   .openapi({ example: 'stark-deployment-assessment-schema-v1' })
-const draft = z.boolean().openapi({ example: false })
+const draft = z.boolean().openapi({ example: true })
 
 export const deploymentAssessmentInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
@@ -50,7 +49,7 @@ export const postDeploymentAssessmentSchema = z.object({
   body: z
     .object({
       schemaId,
-      metadata: requestMetadata,
+      metadata,
       draft: draft.optional().default(true),
     })
     .strict(),
