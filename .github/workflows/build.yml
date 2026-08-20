@@ -97,7 +97,7 @@ jobs:
           PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
           echo "Previous main commit: $PREV_MAIN_COMMIT"
 
-          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/artefactscan_api/pyproject.toml" | grep '^version' | head -n1 | cut -d'"' -f2)
+          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/artefactscan_api/pyproject.toml" 2>/dev/null | grep '^version' | head -n1 | cut -d'"' -f2 || echo "")
           NEW_VERSION=$(grep '^version' lib/artefactscan_api/pyproject.toml | head -n1 | cut -d'"' -f2)
           echo "OLD_VERSION=$OLD_VERSION"
           echo "NEW_VERSION=$NEW_VERSION"
