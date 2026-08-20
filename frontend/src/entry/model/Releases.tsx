@@ -61,7 +61,7 @@ export default function Releases({ model, readOnly = false }: ReleasesProps) {
                   variant='outlined'
                   onClick={handleDraftNewRelease}
                   disabled={!model.card}
-                  data-test='draftNewReleaseButton'
+                  data-test='createNewReleaseButton'
                   startIcon={<Create />}
                 >
                   Create new release
