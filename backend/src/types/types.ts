@@ -184,6 +184,10 @@ export interface UiConfig {
   llmImport: {
     enabled: boolean
   }
+
+  lifecycle: {
+    maxReviewInterval: string
+  }
 }
 
 export interface EntrySearchResult {

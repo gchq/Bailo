@@ -284,6 +284,10 @@ module.exports = {
     llmImport: {
       enabled: false,
     },
+
+    lifecycle: {
+      maxReviewInterval: '',
+    },
   },
 
   connectors: {

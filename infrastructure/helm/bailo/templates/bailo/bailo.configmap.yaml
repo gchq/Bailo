@@ -244,6 +244,10 @@ data:
           untrustedModelShortDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelShortDescription }}',
           fileUploadGuidance: '{{ .Values.config.ui.untrustedModel.fileUploadGuidance }}',
         },
+
+        lifecycle: {
+          maxReviewInterval: '{{ .Values.config.ui.lifecycle.maxReviewInterval }}',
+        },
       },
 
       connectors: {

@@ -1,3 +1,4 @@
+import humanInterval from 'human-interval'
 import { PipelineStage, Types } from 'mongoose'
 
 import authentication from '../../connectors/authentication/index.js'
@@ -16,6 +17,14 @@ import { notifyReviewRoleOfAdditionalReview } from '../smtp/smtp.js'
 
 type ReviewWithModel = ReviewDoc & {
   model: ModelInterface
+}
+
+const dateInterval = humanInterval(config.ui.lifecycle.maxReviewInterval)
+
+export function isLifecycleReviewDateValid(dueDate: Date): boolean {
+  // `dueDate` must be set
+  // `dateInterval` must either be unset (any future date case) or `dueDate` must be within `dateInterval` (if set)
+  return Boolean(dueDate && (!dateInterval || (dateInterval && dueDate.getTime() <= Date.now() + dateInterval)))
 }
 
 // v3 function for retrieving a review using the id
