@@ -56,6 +56,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
     { name: 'Assessment' },
     { name: 'Assessment', riskOwner: 'user:risk-owner', models: [] },
     { name: 'Assessment', justification: 'Owns the deployment risk.', models: ['model-one'] },
+    {},
   ])('creates a draft with overview fields set to %j', async (overview) => {
     const draftAssessment = {
       ...deploymentAssessment,
@@ -90,37 +91,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
 
   test.each([
     { body: {}, description: 'missing required fields' },
-    {
-      body: {
-        schemaId: 'deployment-assessment-schema',
-        metadata: { overview: { models: ['model-one'] } },
-        draft: false,
-      },
-      description: 'incomplete non-draft overview',
-    },
-    {
-      body: {
-        schemaId: 'deployment-assessment-schema',
-        metadata: { overview: {} },
-        draft: true,
-      },
-      description: 'nameless draft',
-    },
-    {
-      body: {
-        schemaId: 'deployment-assessment-schema',
-        metadata: { overview: { ...deploymentAssessment.metadata.overview, models: [] } },
-        draft: false,
-      },
-      description: 'empty model list',
-    },
-    {
-      body: {
-        schemaId: 'deployment-assessment-schema',
-        metadata: { overview: { ...deploymentAssessment.metadata.overview, models: ['model-one', 'model-one'] } },
-      },
-      description: 'duplicate model IDs',
-    },
+    { body: { schemaId: 'deployment-assessment-schema', metadata: 'invalid' }, description: 'non-object metadata' },
     {
       body: {
         schemaId: 'deployment-assessment-schema',

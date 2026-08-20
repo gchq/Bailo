@@ -8,13 +8,6 @@ import { createDeploymentAssessment } from '../../../services/deploymentAssessme
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-const uniqueModelIds = z
-  .array(z.string().min(1))
-  .refine((modelIds) => new Set(modelIds).size === modelIds.length, {
-    message: 'Model IDs must be unique.',
-  })
-  .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
-
 const overview = z
   .object({
     name: z
@@ -27,11 +20,15 @@ const overview = z
       .min(1, 'You must provide a justification')
       .openapi({ example: 'The risk owner is accountable for the deployed service.' })
       .optional(),
-    models: uniqueModelIds.optional(),
+    models: z
+      .array(z.string())
+      .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
+      .optional(),
   })
   .passthrough()
 
 const metadata = z.object({ overview }).passthrough()
+const requestMetadata = z.record(z.unknown()).openapi({ type: 'object' })
 
 const schemaId = z
   .string()
@@ -53,19 +50,10 @@ export const postDeploymentAssessmentSchema = z.object({
   body: z
     .object({
       schemaId,
-      metadata,
+      metadata: requestMetadata,
       draft: draft.optional().default(true),
     })
-    .strict()
-    .refine(
-      ({ draft, metadata }) =>
-        draft ||
-        Boolean(metadata.overview.riskOwner && metadata.overview.justification && metadata.overview.models?.length),
-      {
-        message: 'You must provide a risk owner, justification and at least one model for a deployment assessment.',
-        path: ['metadata', 'overview'],
-      },
-    ),
+    .strict(),
 })
 
 registerPath(

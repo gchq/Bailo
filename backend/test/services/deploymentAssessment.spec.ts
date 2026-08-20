@@ -66,7 +66,9 @@ describe('services > deploymentAssessment', () => {
       draft: params.draft,
       createdBy: 'creator',
     })
-    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, params.metadata)
+    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, params.metadata, {
+      draft: false,
+    })
     expect(result.save).toHaveBeenCalled()
   })
 
@@ -76,7 +78,7 @@ describe('services > deploymentAssessment', () => {
     await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ draft: true }))
-    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, undefined, true)
+    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: true })
     expect(authentication.getUserInformation).not.toHaveBeenCalled()
     expect(ModelModelMock.find).not.toHaveBeenCalled()
     expect(idMocks.convertStringToId).toHaveBeenCalledWith('Draft assessment')
@@ -89,29 +91,6 @@ describe('services > deploymentAssessment', () => {
     expect(ModelModelMock.find).toHaveBeenCalledWith({
       id: { $in: ['model-one'] },
     })
-  })
-
-  test.each([{ riskOwner: undefined }, { justification: undefined }, { models: undefined }, { models: [] }])(
-    'rejects an incomplete non-draft assessment: %j',
-    async (overviewDiff) => {
-      await expect(
-        createDeploymentAssessment(
-          { dn: 'creator' },
-          {
-            ...params,
-            metadata: { ...params.metadata, overview: { ...params.metadata.overview, ...overviewDiff } },
-          },
-        ),
-      ).rejects.toThrow('A risk owner, justification and at least one model are required for a non-draft assessment.')
-      expect(schemaMocks.getSchemaById).not.toHaveBeenCalled()
-    },
-  )
-
-  test('rejects a draft without a name', async () => {
-    await expect(
-      createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata: { overview: { name: '' } } }),
-    ).rejects.toThrow('A name is required for a deployment assessment.')
-    expect(schemaMocks.getSchemaById).not.toHaveBeenCalled()
   })
 
   test('rejects a risk owner that is not a user entity', async () => {
@@ -180,22 +159,6 @@ describe('services > deploymentAssessment', () => {
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })).rejects.toThrow(message)
     expect(DeploymentAssessmentModelMock).not.toHaveBeenCalled()
-  })
-
-  test('rejects duplicate model IDs before loading references', async () => {
-    await expect(
-      createDeploymentAssessment(
-        { dn: 'creator' },
-        {
-          ...params,
-          metadata: {
-            ...params.metadata,
-            overview: { ...params.metadata.overview, models: ['model-one', 'model-one'] },
-          },
-        },
-      ),
-    ).rejects.toThrow('A model cannot be used more than once.')
-    expect(authentication.getUserInformation).not.toHaveBeenCalled()
   })
 
   test('returns a conflict when the generated ID already exists', async () => {

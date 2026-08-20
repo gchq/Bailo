@@ -41,8 +41,7 @@ export async function searchSchemas(
 
   return schemas.map((schema) => {
     if (schema.kind === SchemaKind.DeploymentAssessment) {
-      schema.jsonSchema = structuredClone(schema.jsonSchema)
-      schema.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schema.jsonSchema)
+      schema.jsonSchema = prefixDeploymentAssessmentWithSummary(schema.jsonSchema)
     }
     return schema
   })
@@ -57,41 +56,52 @@ export async function searchSchemas(
  * @returns
  */
 function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
-  const updatedProperties = {
-    overview: {
-      title: 'Details',
-      type: 'object',
-      properties: {
-        name: {
-          title: 'What is the name of the deployment assessment?',
-          description: 'This will be used to distinguish your deployment assessment.',
-          type: 'string',
-        },
-        riskOwner: {
-          title: 'Who is the risk owner attached to this deployment assessment?',
-          type: 'string',
-          widget: 'entitySelector',
-        },
-        justification: {
-          title: 'Justify why the risk owner has been assigned',
-          type: 'string',
-        },
-        models: {
-          title: 'List all models assigned to this deployment assessment',
-          type: 'array',
-          items: {
+  const requiredProperties = Array.isArray(jsonSchema.required) ? jsonSchema.required : []
+
+  return {
+    ...structuredClone(jsonSchema),
+    properties: {
+      overview: {
+        title: 'Details',
+        type: 'object',
+        properties: {
+          name: {
+            title: 'What is the name of the deployment assessment?',
+            description: 'This will be used to distinguish your deployment assessment.',
             type: 'string',
+            minLength: 1,
+            requiredForDraft: true,
           },
-          minItems: 1,
-          widget: 'modelSelector',
+          riskOwner: {
+            title: 'Who is the risk owner attached to this deployment assessment?',
+            type: 'string',
+            minLength: 1,
+            widget: 'entitySelector',
+          },
+          justification: {
+            title: 'Justify why the risk owner has been assigned',
+            type: 'string',
+            minLength: 1,
+          },
+          models: {
+            title: 'List all models assigned to this deployment assessment',
+            type: 'array',
+            items: {
+              type: 'string',
+              minLength: 1,
+            },
+            minItems: 1,
+            uniqueItems: true,
+            widget: 'modelSelector',
+          },
         },
+        required: ['name', 'riskOwner', 'justification', 'models'],
+        additionalProperties: false,
       },
-      required: ['name', 'riskOwner', 'justification', 'models'],
-      additionalProperties: false,
+      ...jsonSchema.properties,
     },
-    ...jsonSchema.properties,
+    required: ['overview', ...requiredProperties.filter((property) => property !== 'overview')],
   }
-  return updatedProperties
 }
 
 export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
@@ -114,7 +124,7 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
 
   if (schema.kind === SchemaKind.DeploymentAssessment) {
-    schemaObject.jsonSchema.properties = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
+    schemaObject.jsonSchema = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
   }
 
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
@@ -340,26 +350,45 @@ export async function addDefaultSchemas() {
 
 function makeSchemaOptional(jsonSchema: JsonSchema) {
   const optionalSchema = structuredClone(jsonSchema)
+  const requiredForDraft = new WeakSet<object>()
   traverse(optionalSchema, {
     allKeys: true,
     cb: (subschema) => {
       if (subschema && typeof subschema === 'object') {
         delete subschema.required
+        delete subschema.minItems
       }
     },
   })
-  _.unset(optionalSchema, 'properties.overview.properties.models.minItems')
+  traverse(optionalSchema, {
+    allKeys: true,
+    cb: {
+      post: (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
+        if (!subschema || typeof subschema !== 'object') {
+          return
+        }
+
+        if (subschema.requiredForDraft === true || requiredForDraft.has(subschema)) {
+          addToParentRequired(pointer, requiredForDraft, parentKeyword, parentSchema)
+        }
+      },
+    },
+  })
   return optionalSchema
+}
+
+interface ValidateContentAgainstSchemaOptions {
+  modelState?: string
+  draft?: boolean
 }
 
 export async function validateContentAgainstSchema(
   schemaId: string,
   content: unknown,
-  modelState?: string,
-  allowIncomplete = false,
+  options: ValidateContentAgainstSchemaOptions = {},
 ) {
-  const schema = await getSchemaById(schemaId, modelState)
-  const jsonSchema = allowIncomplete ? makeSchemaOptional(schema.jsonSchema) : schema.jsonSchema
+  const schema = await getSchemaById(schemaId, options.modelState)
+  const jsonSchema = options.draft ? makeSchemaOptional(schema.jsonSchema) : schema.jsonSchema
   const result = jsonSchemaValidator.validate(content, jsonSchema, {
     required: true,
   })

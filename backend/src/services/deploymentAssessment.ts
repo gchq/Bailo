@@ -1,5 +1,8 @@
 import authentication from '../connectors/authentication/index.js'
-import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
+import DeploymentAssessmentModel, {
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentMetadata,
+} from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind } from '../types/enums.js'
@@ -10,7 +13,9 @@ import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 
-export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'metadata' | 'draft'>
+export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
+  metadata: unknown
+}
 
 async function validateRiskOwner(riskOwner: string) {
   const { kind, value } = fromEntity(riskOwner)
@@ -57,17 +62,6 @@ async function validateModels(modelIds: string[]) {
 }
 
 export async function createDeploymentAssessment(user: UserInterface, params: CreateDeploymentAssessmentParams) {
-  const { name, riskOwner, justification, models } = params.metadata.overview
-  if (!name) {
-    throw BadReq('A name is required for a deployment assessment.')
-  }
-  if (!params.draft && (!riskOwner || !justification || !models || models.length === 0)) {
-    throw BadReq('A risk owner, justification and at least one model are required for a non-draft assessment.')
-  }
-  if (models && new Set(models).size !== models.length) {
-    throw BadReq('A model cannot be used more than once.', { modelIds: models })
-  }
-
   const schema = await getSchemaById(params.schemaId)
   if (schema.hidden) {
     throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId: params.schemaId })
@@ -76,12 +70,15 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
   }
 
-  const { valid, errors } = params.draft
-    ? await validateContentAgainstSchema(params.schemaId, params.metadata, undefined, true)
-    : await validateContentAgainstSchema(params.schemaId, params.metadata)
+  const { valid, errors } = await validateContentAgainstSchema(params.schemaId, params.metadata, {
+    draft: params.draft,
+  })
   if (!valid) {
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
+
+  const metadata = params.metadata as DeploymentAssessmentMetadata
+  const { name, riskOwner, models } = metadata.overview
 
   if (riskOwner) {
     await validateRiskOwner(riskOwner)
@@ -93,7 +90,7 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   const deploymentAssessment = new DeploymentAssessmentModel({
     id: convertStringToId(name),
     schemaId: params.schemaId,
-    metadata: params.metadata,
+    metadata,
     draft: params.draft,
     createdBy: user.dn,
   })
