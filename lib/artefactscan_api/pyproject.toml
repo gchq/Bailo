@@ -20,11 +20,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black==26.5.1",
     "pre-commit==4.6.2",
     "pytest==9.1.1",
     "pytest-github-actions-annotate-failures==0.4.2",
     "pytest-mock==3.15.1",
+    "ruff==0.16.3",
 ]
 
 [tool.flit.module]

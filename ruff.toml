@@ -1,0 +1,38 @@
+target-version = "py310"
+line-length = 120
+
+[lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "UP",     # pyupgrade
+    "N",      # pep8-naming
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "LOG",    # flake8-logging
+    "PLC",    # pylint convention
+    "PLE",    # pylint error
+    "PLR",    # pylint refactor
+    "PLW",    # pylint warning
+]
+
+[lint.per-file-ignores]
+"backend/docs/**" = ["UP"]
+
+[lint.isort]
+required-imports = ["from __future__ import annotations"]
+
+[lint.pylint]
+max-args = 5
+max-returns = 6
+max-branches = 12
+max-locals = 15
+max-statements = 50
+max-nested-blocks = 5
+max-bool-expr = 5
+max-public-methods = 20
+
+[format]
+docstring-code-format = true
