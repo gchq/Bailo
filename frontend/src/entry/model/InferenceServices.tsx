@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
@@ -94,16 +95,9 @@ export default function InferenceServices({ model }: InferenceProps) {
     router.push(`/model/${model.id}/inference/new`)
   }
 
-  if (isInferencesError) {
-    return <MessageAlert message={isInferencesError.info.message} severity='error' />
-  }
-
-  if (isTokensError) {
-    return <MessageAlert message={isTokensError.info.message} severity='error' />
-  }
-
-  if (isTokensLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isInferencesError, isTokensError], isTokensLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
