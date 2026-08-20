@@ -1,7 +1,7 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Stack, Typography } from '@mui/material'
+import { Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import DisplayDialog from 'src/common/DisplayDialog'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import { Transition } from 'src/common/Transition'
 import { SchemaInterface } from 'types/types'
 
 type SchemaDialogProps = {
@@ -14,54 +14,46 @@ export default function InformationDialog({ open = false, onClose, schema }: Sch
   const theme = useTheme()
 
   return (
-    <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
-      <DialogTitle>Schema information</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} divider={<Divider flexItem />}>
-          <Stack spacing={1}>
-            <Stack
-              direction='row'
-              spacing={1}
+    <DisplayDialog open={open} onClose={onClose} title='Schema information'>
+      <Stack spacing={2} divider={<Divider flexItem />}>
+        <Stack spacing={1}>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography
               sx={{
-                alignItems: 'center',
+                fontWeight: 'bold',
+                color: theme.palette.primary.main,
               }}
             >
-              <Typography
-                sx={{
-                  fontWeight: 'bold',
-                  color: theme.palette.primary.main,
-                }}
-              >
-                ID:
-              </Typography>
-              <Typography>{schema.id}</Typography>
-            </Stack>
-            <Stack
-              direction='row'
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-              }}
-            >
-              <Typography
-                sx={{
-                  fontWeight: 'bold',
-                  color: theme.palette.primary.main,
-                }}
-              >
-                Name:
-              </Typography>
-              <Typography>{schema.name}</Typography>
-            </Stack>
-            <MarkdownDisplay>{schema.description}</MarkdownDisplay>
+              ID:
+            </Typography>
+            <Typography>{schema.id}</Typography>
           </Stack>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+                color: theme.palette.primary.main,
+              }}
+            >
+              Name:
+            </Typography>
+            <Typography>{schema.name}</Typography>
+          </Stack>
+          <MarkdownDisplay>{schema.description}</MarkdownDisplay>
         </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button variant='contained' onClick={onClose}>
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </Stack>
+    </DisplayDialog>
   )
 }

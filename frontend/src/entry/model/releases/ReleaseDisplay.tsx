@@ -1,12 +1,11 @@
 import { Box, Divider, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
 export interface ReleaseDisplayProps {
@@ -19,12 +18,9 @@ export interface ReleaseDisplayProps {
 export default function ReleaseDisplay({ model, release, latestRelease, hideFileDownloads }: ReleaseDisplayProps) {
   const { isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
-  if (isReleasesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isReleasesError], isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

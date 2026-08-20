@@ -34,10 +34,10 @@ registerPath(
 export const getCurrentUser = [
   async (req: Request, res: Response<GetCurrentUserResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewCurrentUserInformation
-    const systemRoles = [
-      ...((await authentication.hasRole(req.user, Roles.Admin)) ? [Roles.Admin] : []),
-      ...((await authentication.hasRole(req.user, Roles.Compliance)) ? [Roles.Compliance] : []),
-    ]
+    const roleChecks = await Promise.all(
+      Object.values(Roles).map(async (role) => ((await authentication.hasRole(req.user, role)) ? role : undefined)),
+    )
+    const systemRoles = roleChecks.filter((role) => role !== undefined)
     const response = { user: { ...req.user, systemRoles } }
     await audit.onViewCurrentUserInformation(req, response)
 

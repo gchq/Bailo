@@ -6,8 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import { useHeadReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import { AccessRequestInterface, ReleaseInterface } from 'types/types'
 
 export type ReviewBannerProps =
@@ -41,12 +40,9 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     router.push(`/model/${modelId}/${urlParam}/${semverOrAccessRequestId}/review`)
   }
 
-  if (isReviewsLoading) {
-    return <Loading />
-  }
-
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  const queryState = renderQueryState([isReviewsError], isReviewsLoading)
+  if (queryState) {
+    return queryState
   }
 
   if (release && release.draft) {

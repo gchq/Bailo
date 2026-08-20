@@ -4,11 +4,10 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import semver from 'semver'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
 type ReleasesProps = {
@@ -38,12 +37,9 @@ export default function Releases({ model, readOnly = false }: ReleasesProps) {
     router.push(`/model/${model.id}/release/new`)
   }
 
-  if (isReleasesLoading) {
-    return <Loading />
-  }
-
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  const queryState = renderQueryState([isReleasesError], isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
