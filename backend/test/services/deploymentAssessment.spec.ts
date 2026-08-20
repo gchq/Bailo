@@ -11,7 +11,8 @@ vi.mock('../../src/connectors/authentication/index.js', () => ({
   default: { getUserInformation: vi.fn() },
 }))
 
-vi.mock('../../src/utils/id.js', () => ({ convertStringToId: vi.fn(() => 'assessment-abc123') }))
+const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'assessment-abc123') }))
+vi.mock('../../src/utils/id.js', () => idMocks)
 
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
@@ -57,7 +58,6 @@ describe('services > deploymentAssessment', () => {
     expect(authentication.getUserInformation).toHaveBeenCalledWith('user:risk-owner')
     expect(ModelModelMock.find).toHaveBeenCalledWith({
       id: { $in: ['model-one'] },
-      deleted: { $ne: true },
     })
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith({
       id: 'assessment-abc123',
@@ -70,21 +70,48 @@ describe('services > deploymentAssessment', () => {
     expect(result.save).toHaveBeenCalled()
   })
 
-  test('creates a draft assessment without validating model eligibility', async () => {
-    await createDeploymentAssessment(
-      { dn: 'creator' },
-      {
-        ...params,
-        draft: true,
-        metadata: {
-          ...params.metadata,
-          overview: { ...params.metadata.overview, models: ['unknown-private-model'] },
-        },
-      },
-    )
+  test('creates an incomplete draft without requiring optional fields', async () => {
+    const metadata = { overview: { name: 'Draft assessment' } }
+
+    await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ draft: true }))
+    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, undefined, true)
+    expect(authentication.getUserInformation).not.toHaveBeenCalled()
     expect(ModelModelMock.find).not.toHaveBeenCalled()
+    expect(idMocks.convertStringToId).toHaveBeenCalledWith('Draft assessment')
+  })
+
+  test('validates references supplied in a draft', async () => {
+    await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })
+
+    expect(authentication.getUserInformation).toHaveBeenCalledWith('user:risk-owner')
+    expect(ModelModelMock.find).toHaveBeenCalledWith({
+      id: { $in: ['model-one'] },
+    })
+  })
+
+  test.each([{ riskOwner: undefined }, { justification: undefined }, { models: undefined }, { models: [] }])(
+    'rejects an incomplete non-draft assessment: %j',
+    async (overviewDiff) => {
+      await expect(
+        createDeploymentAssessment(
+          { dn: 'creator' },
+          {
+            ...params,
+            metadata: { ...params.metadata, overview: { ...params.metadata.overview, ...overviewDiff } },
+          },
+        ),
+      ).rejects.toThrow('A risk owner, justification and at least one model are required for a non-draft assessment.')
+      expect(schemaMocks.getSchemaById).not.toHaveBeenCalled()
+    },
+  )
+
+  test('rejects a draft without a name', async () => {
+    await expect(
+      createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata: { overview: { name: '' } } }),
+    ).rejects.toThrow('A name is required for a deployment assessment.')
+    expect(schemaMocks.getSchemaById).not.toHaveBeenCalled()
   })
 
   test('rejects a risk owner that is not a user entity', async () => {
@@ -113,7 +140,7 @@ describe('services > deploymentAssessment', () => {
     ModelModelMock.find.mockResolvedValueOnce([])
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'One or more referenced models could not be found.',
+      'One or more models could not be found.',
     )
   })
 
@@ -145,13 +172,13 @@ describe('services > deploymentAssessment', () => {
   })
 
   test.each([
-    [{ ...liveModel, kind: EntryKind.DataCard }, 'Deployment assessments can only reference models.'],
-    [{ ...liveModel, visibility: EntryVisibility.Private }, 'Deployment assessments can only reference public models.'],
-    [{ ...liveModel, state: 'Review' }, 'Deployment assessments can only reference live models.'],
+    [{ ...liveModel, kind: EntryKind.DataCard }, 'One or more models could not be found.'],
+    [{ ...liveModel, visibility: EntryVisibility.Private }, 'Deployment assessments can only use public models.'],
+    [{ ...liveModel, state: 'Review' }, 'Deployment assessments can only use production models.'],
   ])('rejects an ineligible model', async (model, message) => {
     ModelModelMock.find.mockResolvedValueOnce([model])
 
-    await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(message)
+    await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })).rejects.toThrow(message)
     expect(DeploymentAssessmentModelMock).not.toHaveBeenCalled()
   })
 
@@ -167,7 +194,7 @@ describe('services > deploymentAssessment', () => {
           },
         },
       ),
-    ).rejects.toThrow('A model cannot be referenced more than once.')
+    ).rejects.toThrow('A model cannot be used more than once.')
     expect(authentication.getUserInformation).not.toHaveBeenCalled()
   })
 

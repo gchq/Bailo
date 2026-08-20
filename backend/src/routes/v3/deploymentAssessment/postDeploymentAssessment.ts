@@ -10,37 +10,40 @@ import { parse } from '../../../utils/validate.js'
 
 const uniqueModelIds = z
   .array(z.string().min(1))
-  .min(1)
   .refine((modelIds) => new Set(modelIds).size === modelIds.length, {
     message: 'Model IDs must be unique.',
   })
+  .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
 
-const overview = z.object({
-  name: z.string().min(1, 'You must provide a deployment assessment name'),
-  riskOwner: z.string().min(1, 'You must provide a risk owner'),
-  justification: z.string().min(1, 'You must provide a justification'),
-  models: uniqueModelIds,
-})
+const overview = z
+  .object({
+    name: z
+      .string()
+      .min(1, 'You must provide a deployment assessment name')
+      .openapi({ example: 'Just A Rather Very Intelligent System' }),
+    riskOwner: z.string().min(1, 'You must provide a risk owner').openapi({ example: 'user:tony' }).optional(),
+    justification: z
+      .string()
+      .min(1, 'You must provide a justification')
+      .openapi({ example: 'The risk owner is accountable for the deployed service.' })
+      .optional(),
+    models: uniqueModelIds.optional(),
+  })
+  .passthrough()
 
-const metadata = z.intersection(
-  z.object({ overview: z.intersection(overview, z.record(z.unknown())) }),
-  z.record(z.unknown()),
-)
+const metadata = z.object({ overview }).passthrough()
+
+const schemaId = z
+  .string()
+  .min(1, 'You must provide a schema ID')
+  .openapi({ example: 'stark-deployment-assessment-schema-v1' })
+const draft = z.boolean().openapi({ example: false })
 
 export const deploymentAssessmentInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
-  schemaId: z.string().openapi({ example: 'stark-deployment-assessment-schema-v1' }),
-  metadata: metadata.openapi({
-    example: {
-      overview: {
-        name: 'Just A Rather Very Intelligent System',
-        riskOwner: 'user:tony',
-        justification: 'The risk owner is accountable for the deployed service.',
-        models: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'],
-      },
-    },
-  }),
-  draft: z.boolean().openapi({ example: false }),
+  schemaId,
+  metadata,
+  draft,
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
@@ -49,11 +52,20 @@ export const deploymentAssessmentInterfaceSchema = z.object({
 export const postDeploymentAssessmentSchema = z.object({
   body: z
     .object({
-      schemaId: z.string().min(1, 'You must provide a schema ID'),
+      schemaId,
       metadata,
-      draft: z.boolean().optional().default(false),
+      draft: draft.optional().default(true),
     })
-    .strict(),
+    .strict()
+    .refine(
+      ({ draft, metadata }) =>
+        draft ||
+        Boolean(metadata.overview.riskOwner && metadata.overview.justification && metadata.overview.models?.length),
+      {
+        message: 'You must provide a risk owner, justification and at least one model for a deployment assessment.',
+        path: ['metadata', 'overview'],
+      },
+    ),
 })
 
 registerPath(

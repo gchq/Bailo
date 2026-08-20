@@ -53,11 +53,64 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
   })
 
   test.each([
+    { name: 'Assessment' },
+    { name: 'Assessment', riskOwner: 'user:risk-owner', models: [] },
+    { name: 'Assessment', justification: 'Owns the deployment risk.', models: ['model-one'] },
+  ])('creates a draft with overview fields set to %j', async (overview) => {
+    const draftAssessment = {
+      ...deploymentAssessment,
+      metadata: { overview },
+      draft: true,
+    }
+    serviceMock.createDeploymentAssessment.mockResolvedValueOnce(draftAssessment)
+    const body = {
+      schemaId: 'deployment-assessment-schema',
+      metadata: { overview },
+      draft: true,
+    }
+
+    const res = await testPost('/api/v3/deployment-assessments', { body })
+
+    expect(res.statusCode).toBe(201)
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
+  })
+
+  test('creates a draft by default', async () => {
+    serviceMock.createDeploymentAssessment.mockResolvedValueOnce({ ...deploymentAssessment, draft: true })
+    const body = {
+      schemaId: 'deployment-assessment-schema',
+      metadata: { overview: { name: 'Assessment' } },
+    }
+
+    const res = await testPost('/api/v3/deployment-assessments', { body })
+
+    expect(res.statusCode).toBe(201)
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
+  })
+
+  test.each([
     { body: {}, description: 'missing required fields' },
     {
       body: {
         schemaId: 'deployment-assessment-schema',
+        metadata: { overview: { models: ['model-one'] } },
+        draft: false,
+      },
+      description: 'incomplete non-draft overview',
+    },
+    {
+      body: {
+        schemaId: 'deployment-assessment-schema',
+        metadata: { overview: {} },
+        draft: true,
+      },
+      description: 'nameless draft',
+    },
+    {
+      body: {
+        schemaId: 'deployment-assessment-schema',
         metadata: { overview: { ...deploymentAssessment.metadata.overview, models: [] } },
+        draft: false,
       },
       description: 'empty model list',
     },

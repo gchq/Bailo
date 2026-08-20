@@ -288,6 +288,41 @@ describe('services > schema', () => {
     expect(validatorMock.validate).toHaveBeenCalled()
   })
 
+  test('validateContentAgainstSchema > allows required fields and models to be incomplete for drafts', async () => {
+    const jsonSchema = {
+      type: 'object',
+      required: ['overview', 'assessment'],
+      properties: {
+        overview: {
+          type: 'object',
+          required: ['name', 'models'],
+          properties: { models: { type: 'array', minItems: 1 } },
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'draft-schema',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'draft-schema', jsonSchema }),
+    })
+
+    await validateContentAgainstSchema('draft-schema', { overview: { models: [] } }, undefined, true)
+
+    expect(validatorMock.validate).toHaveBeenCalledWith(
+      { overview: { models: [] } },
+      {
+        type: 'object',
+        properties: {
+          overview: {
+            type: 'object',
+            properties: { models: { type: 'array' } },
+          },
+        },
+      },
+      { required: true },
+    )
+  })
+
   test('validateContentAgainstSchema > should throw NotFound when schema does not exist', async () => {
     SchemaModelModelMock.findOne.mockResolvedValueOnce(undefined)
 

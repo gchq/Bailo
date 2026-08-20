@@ -338,10 +338,30 @@ export async function addDefaultSchemas() {
   await addSchemas(config.defaultSchemas.deploymentAssessments, SchemaKind.DeploymentAssessment)
 }
 
-export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {
+function makeSchemaOptional(jsonSchema: JsonSchema) {
+  const optionalSchema = structuredClone(jsonSchema)
+  traverse(optionalSchema, {
+    allKeys: true,
+    cb: (subschema) => {
+      if (subschema && typeof subschema === 'object') {
+        delete subschema.required
+      }
+    },
+  })
+  _.unset(optionalSchema, 'properties.overview.properties.models.minItems')
+  return optionalSchema
+}
+
+export async function validateContentAgainstSchema(
+  schemaId: string,
+  content: unknown,
+  modelState?: string,
+  allowIncomplete = false,
+) {
   const schema = await getSchemaById(schemaId, modelState)
-  const result = jsonSchemaValidator.validate(content, schema.jsonSchema, {
-    required: true,
+  const jsonSchema = allowIncomplete ? makeSchemaOptional(schema.jsonSchema) : schema.jsonSchema
+  const result = jsonSchemaValidator.validate(content, jsonSchema, {
+    required: allowIncomplete,
   })
   return {
     valid: result.valid,

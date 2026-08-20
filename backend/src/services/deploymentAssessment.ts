@@ -26,40 +26,46 @@ async function validateRiskOwner(riskOwner: string) {
 }
 
 async function validateModels(modelIds: string[]) {
-  const models = await ModelModel.find({ id: { $in: modelIds }, deleted: { $ne: true } })
-  const modelsById = new Map(models.map((model) => [model.id, model]))
+  const models = await ModelModel.find({ id: { $in: modelIds } })
+  const modelKinds = new Set([EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] as string[])
+  const modelsById = new Set(models.map((model) => model.id))
 
   const missingModelIds = modelIds.filter((modelId) => !modelsById.has(modelId))
+  const nonModelIds = models.filter((model) => !modelKinds.has(model.kind)).map((model) => model.id)
 
-  if (missingModelIds.length > 0) {
-    throw BadReq('One or more referenced models could not be found.', { modelIds: missingModelIds })
-  }
-
-  const nonModelIds = models.filter((model) => model.kind !== EntryKind.Model).map((model) => model.id)
-  if (nonModelIds.length > 0) {
-    throw BadReq('Deployment assessments can only reference models.', { modelIds: nonModelIds })
+  if (missingModelIds.length > 0 || nonModelIds.length > 0) {
+    throw BadReq('One or more models could not be found.', { modelIds: missingModelIds })
   }
 
   const privateModelIds = models.filter((model) => model.visibility !== EntryVisibility.Public).map((model) => model.id)
   if (privateModelIds.length > 0) {
-    throw BadReq('Deployment assessments can only reference public models.', { modelIds: privateModelIds })
+    throw BadReq('Deployment assessments can only use public models.', { modelIds: privateModelIds })
   }
 
-  const nonLiveModelIds = models
+  const nonDeployableStateModelIds = models
     .filter((model) => model.state !== config.deploymentAssessments.deployableModelState)
     .map((model) => model.id)
-  if (nonLiveModelIds.length > 0) {
-    throw BadReq('Deployment assessments can only reference live models.', {
-      modelIds: nonLiveModelIds,
-      deployableModelState: config.deploymentAssessments.deployableModelState,
-    })
+  if (nonDeployableStateModelIds.length > 0) {
+    throw BadReq(
+      `Deployment assessments can only use ${config.deploymentAssessments.deployableModelState.toLowerCase()} models.`,
+      {
+        modelIds: nonDeployableStateModelIds,
+        deployableModelState: config.deploymentAssessments.deployableModelState,
+      },
+    )
   }
 }
 
 export async function createDeploymentAssessment(user: UserInterface, params: CreateDeploymentAssessmentParams) {
-  const { name, riskOwner, models } = params.metadata.overview
-  if (new Set(models).size !== models.length) {
-    throw BadReq('A model cannot be referenced more than once.', { modelIds: models })
+  const { name, riskOwner, justification, models } = params.metadata.overview
+  if (!name) {
+    throw BadReq('A name is required for a deployment assessment.')
+  }
+  if (!params.draft && (!riskOwner || !justification || !models || models.length === 0)) {
+    throw BadReq('A risk owner, justification and at least one model are required for a non-draft assessment.')
+  }
+  if (models && new Set(models).size !== models.length) {
+    throw BadReq('A model cannot be used more than once.', { modelIds: models })
   }
 
   const schema = await getSchemaById(params.schemaId)
@@ -70,13 +76,17 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
   }
 
-  const { valid, errors } = await validateContentAgainstSchema(params.schemaId, params.metadata)
+  const { valid, errors } = params.draft
+    ? await validateContentAgainstSchema(params.schemaId, params.metadata, undefined, true)
+    : await validateContentAgainstSchema(params.schemaId, params.metadata)
   if (!valid) {
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  await validateRiskOwner(riskOwner)
-  if (!params.draft) {
+  if (riskOwner) {
+    await validateRiskOwner(riskOwner)
+  }
+  if (models?.length) {
     await validateModels(models)
   }
 
