@@ -78,7 +78,7 @@ export default function InferenceServices({ model }: InferenceProps) {
         try {
           const inferenceCheck = await sendTokenToService(`${uiConfig.inference.connection.host}/api/login`, token)
           if (!inferenceCheck.ok) {
-            setErrorMessage('Login failed when when accessing the inferencing service')
+            setErrorMessage('Login failed when accessing the inferencing service')
           } else {
             router.reload()
           }
@@ -133,7 +133,7 @@ export default function InferenceServices({ model }: InferenceProps) {
       ) : (
         <Stack spacing={2}>
           <Typography>
-            Access to inferencing services requires token a with model access. Are you sure you want to proceed?
+            Access to inferencing services requires a token with model access. Are you sure you want to proceed?
           </Typography>
           <Stack spacing={2} direction='row'>
             <Button variant='contained' onClick={handleCreateToken}>
