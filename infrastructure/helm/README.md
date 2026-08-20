@@ -441,7 +441,6 @@ The following tables describe selected configuration options available in `value
 | `instrumentation.enabled` | Enable OpenTelemetry instrumentation | `false` |
 | `instrumentation.debug` | Enable instrumentation debugging | `false` |
 | `stroom.sendEvents` | Enable Stroom audit logging | `true` |
-| `stroom.feed` | Name of the Stroom feed | `feed` |
 | `stroom.url` | URL for the associated Stroom feed | `https://url` |
 | `stroom.environment` | Stroom environment | `local` |
 | `stroom.interval` | Interval (in ms) on how frequently events should be sent to stroom | 1000 * 50 |

@@ -327,7 +327,6 @@ instrumentation:
 
 stroom:
   sendEvents: true
-  feed: 'feed'
   url: 'https://url'
   environment: 'local'
   interval: 1000 * 50
