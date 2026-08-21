@@ -6,9 +6,10 @@ import { useGetModel } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
@@ -25,10 +26,26 @@ export default function NewAccessRequest() {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [formTouched, setFormTouched] = useState(false)
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
   const [formValidationErrorState, setFormValidationErrorState] = useState(false)
+
+  useEffect(() => {
+    setUnsavedChanges(formTouched)
+  }, [formTouched, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
+
+  const handleFormChange: typeof setSplitSchema = useCallback((value) => {
+    setSplitSchema(value)
+    setFormTouched(true)
+  }, [])
 
   const isLoading = useMemo(
     () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
@@ -97,6 +114,7 @@ export default function NewAccessRequest() {
     }
 
     const body = await res.json()
+    setUnsavedChanges(false)
     router.push(`/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
@@ -128,7 +146,7 @@ export default function NewAccessRequest() {
                 </Link>
                 <JsonSchemaForm
                   splitSchema={splitSchema}
-                  setSplitSchema={setSplitSchema}
+                  setSplitSchema={handleFormChange}
                   canEdit
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList

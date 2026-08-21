@@ -22,7 +22,7 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
-  const [isDirty, setIsDirty] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -30,8 +30,8 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
   const sendNotification = useNotification()
 
   useEffect(() => {
-    setUnsavedChanges(isDirty)
-  }, [isDirty, setUnsavedChanges])
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
 
   useEffect(() => {
     return () => setUnsavedChanges(false)
@@ -68,7 +68,7 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
         msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      setIsDirty(false)
+      setHasUnsavedChanges(false)
       mutateEntry()
       onSave?.()
     }
@@ -143,14 +143,14 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
             kind={entry.kind}
             onChange={(value) => {
               setName(value)
-              setIsDirty(true)
+              setHasUnsavedChanges(true)
             }}
           />
           <EntryDescriptionInput
             value={description}
             onChange={(value) => {
               setDescription(value)
-              setIsDirty(true)
+              setHasUnsavedChanges(true)
             }}
           />
         </>
@@ -168,7 +168,7 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
               value={visibility}
               onChange={(e) => {
                 setVisibility(e.target.value as UpdateEntryForm['visibility'])
-                setIsDirty(true)
+                setHasUnsavedChanges(true)
               }}
             >
               <FormControlLabel
