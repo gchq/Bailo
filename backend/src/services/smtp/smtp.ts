@@ -93,7 +93,11 @@ export async function getApprovedAccessRequests(modelId: string) {
   return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
 }
 
-export async function notifyDeploymentRiskOwner(riskOwner: string, deployment: DeploymentAssessmentInterface) {
+export async function notifyDeploymentRiskOwner(
+  riskOwner: string,
+  deployment: DeploymentAssessmentInterface,
+  creatorName: string,
+) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -106,13 +110,11 @@ export async function notifyDeploymentRiskOwner(riskOwner: string, deployment: D
       { title: 'Deployment assessment ID', data: deployment.id },
       {
         title: 'Created By',
-        data:
-          (await authentication.getUserInformation(toEntity('user', deployment.createdBy))).name ||
-          deployment.createdBy,
+        data: creatorName,
       },
     ],
     [
-      { name: 'Open Deployment assessment', url: `${appBaseUrl}/deployments/${deployment.id}` },
+      { name: 'Open Deployment assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
       { name: 'See Deployment assessments', url: `${appBaseUrl}/deployments` },
     ],
     true,
@@ -125,11 +127,14 @@ export async function notifyDeploymentModelOwners(
   entities: string[],
   deployment: DeploymentAssessmentInterface,
   model: ModelInterface,
+  creatorName: string,
 ) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
+
+  const modelUrl = `${appBaseUrl}/${encodeURIComponent(model.kind)}` + `/${encodeURIComponent(model.id)}`
 
   const emailContent = buildEmail(
     `A model you manage has been included in the deployment assessment ${deployment.metadata.overview.name}`,
@@ -139,15 +144,13 @@ export async function notifyDeploymentModelOwners(
       { title: 'Model ID', data: model.id },
       {
         title: 'Created By',
-        data:
-          (await authentication.getUserInformation(toEntity('user', deployment.createdBy))).name ||
-          deployment.createdBy,
+        data: creatorName,
       },
     ],
     [
-      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${deployment.id}` },
+      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
       { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
-      { name: 'Open Model', url: `${appBaseUrl}/${model.kind}/${model.id}` },
+      { name: 'Open Model', url: modelUrl },
     ],
     false,
   )

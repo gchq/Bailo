@@ -42,7 +42,7 @@ const liveModel = {
   kind: EntryKind.Model,
   visibility: EntryVisibility.Public,
   state: 'Production',
-  collaborators: [{ entity: 'user:user', roles: 'owner' }],
+  collaborators: [{ entity: 'user:user', roles: ['owner'] }],
 }
 
 describe('services > deploymentAssessment', () => {
@@ -74,13 +74,13 @@ describe('services > deploymentAssessment', () => {
   })
 
   test('creates an incomplete draft without requiring optional fields', async () => {
-    const metadata = { overview: { name: 'Draft assessment', riskOwner: 'user:user' } }
+    const metadata = { overview: { name: 'Draft assessment' } }
 
     await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ draft: true }))
     expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: true })
-    expect(authentication.getUserInformation).toHaveBeenCalled()
+    expect(authentication.getUserInformation).not.toHaveBeenCalled()
     expect(ModelModelMock.find).not.toHaveBeenCalled()
     expect(idMocks.convertStringToId).toHaveBeenCalledWith('Draft assessment')
   })
@@ -168,5 +168,17 @@ describe('services > deploymentAssessment', () => {
     DeploymentAssessmentModelMock.save.mockRejectedValueOnce(mongoError)
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toMatchObject({ code: 409 })
+  })
+
+  test('rejects a non-draft assessment without a risk owner', async () => {
+    const metadata = {
+      overview: {
+        name: 'Submitted assessment',
+      },
+    }
+
+    await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: false, metadata })).rejects.toThrow(
+      'Deployment risk owner is required',
+    )
   })
 })

@@ -18,6 +18,7 @@ import {
 import { fromEntity } from '../../../src/utils/entity.js'
 import {
   testDeploymentAssessment,
+  testModel,
   testRelease,
   testReleaseReview,
   testReviewResponse,
@@ -199,17 +200,14 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is not sent to a DRO after a deployment assessment is created if disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await notifyDeploymentRiskOwner('user:test', testDeploymentAssessment)
+    await notifyDeploymentRiskOwner('user:test', testDeploymentAssessment, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent to model owners after a deployment assessment is created if disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, {
-      id: 'my-model-123',
-      name: 'My Model',
-    } as any)
+    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, testModel, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
@@ -340,38 +338,20 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent to all stakeholders on release', async () => {
-    getModelByIdMock.mockReturnValue({
-      id: 'modelId',
-      name: 'Test Model',
-      kind: 'model',
-      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
-    } as any)
+    getModelByIdMock.mockReturnValue(testModel)
     await notifyReleaseOnApproval('modelId', release)
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
   test('that an email is sent to a DRO on deployment assessment creation', async () => {
-    getModelByIdMock.mockReturnValue({
-      id: 'modelId',
-      name: 'Test Model',
-      kind: 'model',
-      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
-    } as any)
-    await notifyDeploymentRiskOwner('user:user', testDeploymentAssessment)
+    getModelByIdMock.mockReturnValue(testModel)
+    await notifyDeploymentRiskOwner('user:user', testDeploymentAssessment, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
   test('that an email is sent to all model owners on deployment assessment creation', async () => {
-    getModelByIdMock.mockReturnValue({
-      id: 'modelId',
-      name: 'Test Model',
-      kind: 'model',
-      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
-    } as any)
-    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, {
-      id: 'my-model-123',
-      name: 'My Model',
-    } as any)
+    getModelByIdMock.mockReturnValue(testModel)
+    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, testModel, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })
