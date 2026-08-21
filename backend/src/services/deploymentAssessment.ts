@@ -114,7 +114,10 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     log.warn({ error }, 'Error when sending notifications requesting review for release.'),
   )
 
-  const models = await ModelModel.find({ id: deploymentAssessment.metadata.overview.modelIds })
+  const models = await ModelModel.find({
+    id: { $in: modelIds ?? [] },
+  })
+
   for (const model of models) {
     notifyDeploymentModelOwners(
       model.collaborators.filter((collaborator) => collaborator.roles.includes('owner')).map((owner) => owner.entity),

@@ -147,7 +147,7 @@ export async function notifyDeploymentModelOwners(
     [
       { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${deployment.id}` },
       { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
-      { name: 'Open Model', url: `${appBaseUrl}/modelId` },
+      { name: 'Open Model', url: `${appBaseUrl}/${model.kind}/${model.id}` },
     ],
     false,
   )
