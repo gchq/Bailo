@@ -62,7 +62,7 @@ export default function CreatePathDialog({ open, onClose, onConfirm, currentPath
         {path && !validationError && (
           <Alert severity='info' sx={{ mt: 2 }}>
             <Typography variant='body2'>
-              Files will be uploaded to: <strong>{fullPath}</strong>
+              Folder <strong>{fullPath}</strong> will be created
             </Typography>
           </Alert>
         )}
