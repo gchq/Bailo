@@ -1,13 +1,16 @@
 import Add from '@mui/icons-material/Add'
 import { Button, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
+import { createFolderMarker } from 'actions/file'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useContext, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import CreatePathDialog from 'src/entry/model/files/CreatePathDialog'
 import FileBrowser from 'src/entry/model/files/FileBrowser'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind } from 'types/types'
 
@@ -19,7 +22,38 @@ export default function Files({ model }: FilesProps) {
   const scanners = useContext(ArtefactScanningInfoContext)
   const { modelFiles, isModelFilesLoading, isModelFilesError, mutateModelFiles } = useGetModelFiles(model.id)
   const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false)
+  const [isCreatePathOpen, setIsCreatePathOpen] = useState(false)
+  const [createPathCurrentPath, setCreatePathCurrentPath] = useState('')
+  const [browsingPath, setBrowsingPath] = useState('')
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+  const sendNotification = useNotification()
+
+  const handleCreatePath = useCallback((currentPath: string) => {
+    setCreatePathCurrentPath(currentPath)
+    setIsCreatePathOpen(true)
+  }, [])
+
+  const handleCreatePathConfirm = useCallback(
+    async (path: string) => {
+      try {
+        await createFolderMarker(model.id, path)
+        mutateModelFiles()
+        sendNotification({
+          variant: 'success',
+          msg: `Folder "${path}" created`,
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      } catch (err) {
+        sendNotification({
+          variant: 'error',
+          msg: `Failed to create folder: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+      setIsCreatePathOpen(false)
+    },
+    [model.id, mutateModelFiles, sendNotification],
+  )
 
   if (isModelFilesError) {
     return <MessageAlert message={isModelFilesError.info.message} severity='error' />
@@ -80,6 +114,13 @@ export default function Files({ model }: FilesProps) {
               open={isFileUploadDialogOpen}
               onDialogClose={() => setIsFileUploadDialogOpen(false)}
               mutateModelFiles={mutateModelFiles}
+              uploadPath={browsingPath}
+            />
+            <CreatePathDialog
+              open={isCreatePathOpen}
+              onClose={() => setIsCreatePathOpen(false)}
+              onConfirm={handleCreatePathConfirm}
+              currentPath={createPathCurrentPath}
             />
           </Stack>
           <FileBrowser
@@ -88,6 +129,8 @@ export default function Files({ model }: FilesProps) {
             modelKind={model.kind}
             releases={releases}
             mutator={mutateModelFiles}
+            onCreatePath={handleCreatePath}
+            onPathChange={setBrowsingPath}
           />
         </Stack>
       </Container>

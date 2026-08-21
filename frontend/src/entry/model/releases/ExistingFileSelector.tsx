@@ -32,6 +32,7 @@ import {
   getBreadcrumbParts,
   getNodeAtPath,
   hasAnyNestedFiles,
+  isFolderMarker,
 } from 'utils/fileTreeUtils'
 
 interface ExistingFileSelectorProps {
@@ -298,7 +299,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
             </>
           ) : (
             <Paginate
-              list={files}
+              list={files.filter((f) => !isFolderMarker(f))}
               emptyListText='No files found'
               sortingProperties={[
                 { value: 'name', title: 'Name', iconKind: 'text' },

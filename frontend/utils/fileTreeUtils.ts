@@ -1,5 +1,9 @@
 import { FileInterface } from 'types/types'
 
+export function isFolderMarker(file: FileInterface): boolean {
+  return file.name.endsWith('/.folder')
+}
+
 export interface FileTreeNode {
   name: string
   fullPath: string
@@ -20,35 +24,28 @@ export function getFileBaseName(name: string): string {
  * slashes in their name become direct children of the root node.
  */
 export function buildFileTree(files: FileInterface[]): FileTreeNode {
+  const realFiles = files.filter((f) => !isFolderMarker(f))
   const root: FileTreeNode = {
     name: '',
     fullPath: '',
     isDirectory: true,
     children: [],
-    totalFileCount: files.length,
+    totalFileCount: realFiles.length,
   }
 
   for (const file of files) {
-    const segments = file.name.split('/')
+    const segments = file.name.split('/').filter((s) => s !== '')
+    if (segments.length === 0) {
+      continue
+    }
     let current = root
 
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i]
-      const isLast = i === segments.length - 1
-      const fullPath = segments.slice(0, i + 1).join('/')
-
-      if (isLast) {
-        // Leaf node: attach the actual file
-        current.children.push({
-          name: segment,
-          fullPath,
-          isDirectory: false,
-          children: [],
-          file,
-          totalFileCount: 0,
-        })
-      } else {
-        // Intermediate segment: find or create a directory node
+    if (isFolderMarker(file)) {
+      // Folder marker (e.g. "path/to/dir/.folder"): create directory nodes, skip the .folder leaf
+      const dirSegments = segments.slice(0, -1)
+      for (let i = 0; i < dirSegments.length; i++) {
+        const segment = dirSegments[i]
+        const fullPath = dirSegments.slice(0, i + 1).join('/')
         let dir = current.children.find((child) => child.isDirectory && child.name === segment)
         if (!dir) {
           dir = {
@@ -61,6 +58,36 @@ export function buildFileTree(files: FileInterface[]): FileTreeNode {
           current.children.push(dir)
         }
         current = dir
+      }
+    } else {
+      for (let i = 0; i < segments.length; i++) {
+        const segment = segments[i]
+        const isLast = i === segments.length - 1
+        const fullPath = segments.slice(0, i + 1).join('/')
+
+        if (isLast) {
+          current.children.push({
+            name: segment,
+            fullPath,
+            isDirectory: false,
+            children: [],
+            file,
+            totalFileCount: 0,
+          })
+        } else {
+          let dir = current.children.find((child) => child.isDirectory && child.name === segment)
+          if (!dir) {
+            dir = {
+              name: segment,
+              fullPath,
+              isDirectory: true,
+              children: [],
+              totalFileCount: 0,
+            }
+            current.children.push(dir)
+          }
+          current = dir
+        }
       }
     }
   }
@@ -114,7 +141,7 @@ export function getBreadcrumbParts(path: string): { name: string; fullPath: stri
 
 /** Returns true if any file in the array has a slash in its name, indicating folder structure. */
 export function hasAnyNestedFiles(files: FileInterface[]): boolean {
-  return files.some((file) => file.name.includes('/'))
+  return files.some((file) => file.name.includes('/') || isFolderMarker(file))
 }
 
 /** Collects all file names recursively under a tree node, for use as searchable text. */

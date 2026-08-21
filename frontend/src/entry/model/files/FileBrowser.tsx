@@ -1,4 +1,5 @@
 import AccountTree from '@mui/icons-material/AccountTree'
+import CreateNewFolder from '@mui/icons-material/CreateNewFolder'
 import Delete from '@mui/icons-material/Delete'
 import Folder from '@mui/icons-material/Folder'
 import Home from '@mui/icons-material/Home'
@@ -36,6 +37,7 @@ import {
   getBreadcrumbParts,
   getNodeAtPath,
   hasAnyNestedFiles,
+  isFolderMarker,
 } from 'utils/fileTreeUtils'
 
 type ViewMode = 'flat' | 'folder'
@@ -57,6 +59,8 @@ interface FileBrowserProps {
   releases: ReleaseInterface[]
   mutator?: MutateFiles | MutateReleases
   readOnly?: boolean
+  onCreatePath?: (currentPath: string) => void
+  onPathChange?: (currentPath: string) => void
 }
 
 export default function FileBrowser({
@@ -66,10 +70,19 @@ export default function FileBrowser({
   releases,
   mutator,
   readOnly = false,
+  onCreatePath,
+  onPathChange,
 }: FileBrowserProps) {
   const hasNested = useMemo(() => hasAnyNestedFiles(files), [files])
   const [viewMode, setViewMode] = useState<ViewMode>(hasNested ? 'folder' : 'flat')
-  const [currentPath, setCurrentPath] = useState('')
+  const [currentPath, _setCurrentPath] = useState('')
+  const setCurrentPath = useCallback(
+    (path: string) => {
+      _setCurrentPath(path)
+      onPathChange?.(path)
+    },
+    [onPathChange],
+  )
   const [folderSearchQuery, setFolderSearchQuery] = useState('')
 
   const tree = useMemo(() => buildFileTree(files), [files])
@@ -203,7 +216,7 @@ export default function FileBrowser({
             </Stack>
           )}
           <Paginate
-            list={files.map((f) => ({ key: f._id, ...f }))}
+            list={files.filter((f) => !isFolderMarker(f)).map((f) => ({ key: f._id, ...f }))}
             emptyListText='No files found'
             searchFilterProperty='name'
             sortingProperties={[
@@ -253,7 +266,16 @@ export default function FileBrowser({
                 )
               })}
             </Breadcrumbs>
-            {viewToggle}
+            <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
+              {onCreatePath && !readOnly && (
+                <Tooltip title='Create folder path'>
+                  <IconButton size='small' onClick={() => onCreatePath(currentPath)} data-test='createPathButton'>
+                    <CreateNewFolder fontSize='small' />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {viewToggle}
+            </Stack>
           </Stack>
           <Paginate
             list={browseItems}
@@ -300,10 +322,10 @@ function FolderRow({
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const sendNotification = useNotification()
-  const { mutateModelFiles } = useGetModelFiles(modelId)
+  const { modelFiles, mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
-  // Collect all files recursively under this folder
+  // Collect all real files recursively under this folder
   const allFilesInFolder = useMemo(() => {
     const result: FileInterface[] = []
     const collect = (n: FileTreeNode) => {
@@ -318,6 +340,15 @@ function FolderRow({
     return result
   }, [node])
 
+  // Find folder marker files (.folder) under this path
+  const folderMarkers = useMemo(
+    () =>
+      modelFiles.filter(
+        (f) => isFolderMarker(f) && (f.name === `${node.fullPath}/.folder` || f.name.startsWith(`${node.fullPath}/`)),
+      ),
+    [modelFiles, node.fullPath],
+  )
+
   // Find releases that reference any file in this folder
   const associatedReleases = useMemo(
     () => releases.filter((release) => allFilesInFolder.some((file) => release.fileIds.includes(file._id))),
@@ -331,7 +362,7 @@ function FolderRow({
     try {
       setIsDeleting(true)
       setDeleteError('')
-      for (const file of allFilesInFolder) {
+      for (const file of [...allFilesInFolder, ...folderMarkers]) {
         const res = await deleteEntryFile(modelId, file._id)
         if (!res.ok) {
           setDeleteError(await getErrorMessage(res))
@@ -351,7 +382,7 @@ function FolderRow({
     } finally {
       setIsDeleting(false)
     }
-  }, [isDeleting, allFilesInFolder, modelId, node.name, sendNotification, mutateModelFiles, router])
+  }, [isDeleting, allFilesInFolder, folderMarkers, modelId, node.name, sendNotification, mutateModelFiles, router])
 
   const canDelete = !readOnly && modelKind === EntryKind.MODEL
   const matchingCount = useMemo(() => countMatchingFiles(node, searchQuery), [node, searchQuery])
@@ -412,24 +443,32 @@ function FolderRow({
         errorMessage={deleteError}
       >
         <Stack spacing={1}>
-          <Typography>
-            This will delete <strong>{allFilesInFolder.length}</strong> file{allFilesInFolder.length !== 1 ? 's' : ''}{' '}
-            in this folder and all sub-folders.
-          </Typography>
+          {allFilesInFolder.length > 0 ? (
+            <Typography>
+              This will delete <strong>{allFilesInFolder.length}</strong> file
+              {allFilesInFolder.length !== 1 ? 's' : ''} in this folder and all sub-folders.
+            </Typography>
+          ) : (
+            <Typography>This will delete this empty folder.</Typography>
+          )}
           {associatedReleases.length > 0 && (
             <Typography color='error'>
               Warning: {associatedReleases.length} release{associatedReleases.length !== 1 ? 's' : ''} reference files
               in this folder: {associatedReleases.map((r) => r.semver).join(', ')}
             </Typography>
           )}
-          <Typography variant='caption'>Files to be deleted:</Typography>
-          <Box sx={{ maxHeight: 200, overflow: 'auto', pl: 2 }}>
-            {allFilesInFolder.map((file) => (
-              <Typography key={file._id} variant='body2'>
-                {file.name}
-              </Typography>
-            ))}
-          </Box>
+          {allFilesInFolder.length > 0 && (
+            <>
+              <Typography variant='caption'>Files to be deleted:</Typography>
+              <Box sx={{ maxHeight: 200, overflow: 'auto', pl: 2 }}>
+                {allFilesInFolder.map((file) => (
+                  <Typography key={file._id} variant='body2'>
+                    {file.name}
+                  </Typography>
+                ))}
+              </Box>
+            </>
+          )}
         </Stack>
       </ConfirmationDialogue>
     </>

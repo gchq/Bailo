@@ -72,6 +72,16 @@ export async function postFileForModelId(
   }
 }
 
+export async function createFolderMarker(modelId: string, path: string) {
+  const cleanPath = path.replace(/\/+$/, '')
+  const name = `${cleanPath}/.folder`
+  const body = new Blob(['\n'], { type: 'application/x-directory' })
+  return axios.post(
+    `/api/v2/model/${modelId}/files/upload/simple?name=${encodeURIComponent(name)}&mime=application/x-directory`,
+    body,
+  )
+}
+
 export async function patchFile(modelId: string, fileId: string, metadata: Pick<FileInterface, 'tags'>) {
   try {
     const response = await axios({

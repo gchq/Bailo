@@ -26,3 +26,6 @@ infrastructure/helm/bailo/local.yaml
 # MLFlow
 mlartifacts/
 mlruns/
+
+# Local dev overrides
+compose.local.yaml

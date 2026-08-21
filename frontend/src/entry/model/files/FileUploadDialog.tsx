@@ -18,13 +18,20 @@ interface FileUploadDialogProps {
   open: boolean
   onDialogClose: () => void
   mutateModelFiles: () => void
+  uploadPath?: string
 }
 
 const Input = styled('input')({
   display: 'none',
 })
 
-export default function FileUploadDialog({ open, onDialogClose, model, mutateModelFiles }: FileUploadDialogProps) {
+export default function FileUploadDialog({
+  open,
+  onDialogClose,
+  model,
+  mutateModelFiles,
+  uploadPath = '',
+}: FileUploadDialogProps) {
   const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
@@ -37,10 +44,15 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     async (event: ChangeEvent<HTMLInputElement>) => {
       const newFiles = event.target.files
         ? Array.from(event.target.files).map((newFile) => {
-            // For folder uploads, webkitRelativePath contains the path relative to the selected folder
-            const uploadPath = newFile.webkitRelativePath || undefined
-            const dedupeKey = uploadPath || newFile.name
-            return { file: newFile, uploadPath, _dedupeKey: dedupeKey }
+            // For folder uploads, webkitRelativePath contains the path relative to the selected folder.
+            // For individual files, prepend the current browsing path if set.
+            const fileUploadPath = newFile.webkitRelativePath
+              ? newFile.webkitRelativePath
+              : uploadPath
+                ? `${uploadPath}/${newFile.name}`
+                : undefined
+            const dedupeKey = fileUploadPath || newFile.name
+            return { file: newFile, uploadPath: fileUploadPath, _dedupeKey: dedupeKey }
           })
         : []
       const filteredNewFiles = newFiles.filter(
@@ -54,7 +66,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
       // Reset input value so re-selecting the same folder works
       event.target.value = ''
     },
-    [filesToBeUploaded],
+    [filesToBeUploaded, uploadPath],
   )
 
   const handleFileMetadataOnChange = useCallback(
@@ -164,6 +176,11 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
+          {uploadPath && (
+            <Alert severity='info'>
+              Uploading to: <strong>{uploadPath}/</strong>
+            </Alert>
+          )}
           <Stack direction='row' spacing={2} sx={{ justifyContent: 'center' }}>
             <label htmlFor='add-files-button'>
               <Button loading={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
