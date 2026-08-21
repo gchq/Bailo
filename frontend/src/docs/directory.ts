@@ -32,9 +32,8 @@ export const flatDirectory: DocumentationNavigationEntry[] = [
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
   { title: 'Browsing the Marketplace', slug: 'users/using-a-model/browsing-the-marketplace' },
-  { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access', header: true },
-  { title: 'Access Requests', slug: 'users/using-a-model/requesting-access/access-requests' },
-  { title: 'Deployment Assessments', slug: 'users/using-a-model/requesting-access/deployment-assessments' },
+  { title: 'Access Requests', slug: 'users/using-a-model/access-requests' },
+  { title: 'Deployment Assessments', slug: 'users/using-a-model/deployment-assessments' },
   { title: 'Using a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
   { title: 'Downloading Files', slug: 'users/using-a-model/downloading-files' },
 
