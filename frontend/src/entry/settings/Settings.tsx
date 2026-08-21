@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'
 import { useContext, useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
@@ -76,6 +77,7 @@ export default function Settings({ entry, mutateEntry }: SettingsProps) {
   const { category } = router.query
 
   const uiConfig = useContext(UiConfigContext)
+  const { unsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(
     isSettingsCategory(category, entry) ? category : SettingsCategory.DETAILS,
@@ -89,11 +91,19 @@ export default function Settings({ entry, mutateEntry }: SettingsProps) {
     }
   }, [category, entry, router])
 
-  const handleListItemClick = (category: SettingsCategoryKeys) => {
+  const navigateToCategory = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
     router.replace({
       query: { ...router.query, category },
     })
+  }
+
+  const handleListItemClick = (category: SettingsCategoryKeys) => {
+    if (unsavedChanges) {
+      sendWarning(() => navigateToCategory(category))
+    } else {
+      navigateToCategory(category)
+    }
   }
 
   return (

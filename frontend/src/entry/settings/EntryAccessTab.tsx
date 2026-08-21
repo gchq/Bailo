@@ -1,9 +1,10 @@
 import Save from '@mui/icons-material/Save'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
-import { useCallback, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import useNotification from 'src/hooks/useNotification'
@@ -20,17 +21,27 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const { isEntryError, mutateEntry } = useGetEntry(entry.id)
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
 
   const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const sendNotification = useNotification()
 
-  const handleCollaboratorsChange = useCallback(
-    (updatedCollaborators: CollaboratorEntry[]) => setCollaborators(updatedCollaborators),
-    [],
-  )
+  useEffect(() => {
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
+
+  const handleCollaboratorsChange = useCallback((updatedCollaborators: CollaboratorEntry[]) => {
+    setCollaborators(updatedCollaborators)
+    setHasUnsavedChanges(true)
+  }, [])
 
   async function updateCollaborators() {
     setLoading(true)
@@ -43,6 +54,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         msg: `${toSentenceCase(entry.kind)} access list updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      setHasUnsavedChanges(false)
       mutateEntry()
       mutateEntryUserPermissions()
     }
