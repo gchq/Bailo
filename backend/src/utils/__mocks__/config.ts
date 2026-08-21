@@ -136,6 +136,9 @@ const config: PartialDeep<Config> = {
     inference: {
       enabled: true,
     },
+    lifecycle: {
+      maxReviewInterval: '1 year',
+    },
     modelDetails: {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],

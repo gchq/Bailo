@@ -21,7 +21,11 @@ import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
-import { formatDateStringAsDayMonthAndYear, utcStartOfCurrentDate } from 'utils/dateUtils'
+import {
+  formatDateStringAsDayMonthAndYear,
+  increaseCurrentDateByHumanInterval,
+  utcStartOfCurrentDate,
+} from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -171,6 +175,11 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                       setReviewDate(newValue)
                     }}
                     minDate={dayjs('2000/01/01')}
+                    maxDate={
+                      uiConfig.lifecycle.maxReviewInterval === ''
+                        ? undefined
+                        : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
+                    }
                   />
                   <Button
                     disabled={!reviewDate}

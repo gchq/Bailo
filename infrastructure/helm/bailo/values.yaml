@@ -284,6 +284,9 @@ config:
     llmImport:
       enabled: false
 
+    lifecycle:
+      maxReviewInterval: ''
+
   smtp:
     #host: 'mail' #service name
     port: 1025

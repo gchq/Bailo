@@ -1,6 +1,7 @@
 import { Box, Divider, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import renderQueryState from 'src/common/renderQueryState'
+import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
@@ -33,7 +34,8 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {<ReviewBanner release={release} />}
+          <DraftBanner text='This is a draft release' draft={release.draft} showButton={false} />
+          <ReviewBanner release={release} />
           <Stack
             spacing={1}
             sx={{
