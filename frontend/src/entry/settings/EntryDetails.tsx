@@ -3,7 +3,8 @@ import LockOpen from '@mui/icons-material/LockOpen'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchEntry, useGetEntry } from 'actions/entry'
-import { SyntheticEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import useNotification from 'src/hooks/useNotification'
@@ -21,10 +22,21 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const sendNotification = useNotification()
+
+  useEffect(() => {
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
+
   const { mutateEntry: mutateEntry } = useGetEntry(entry.id, entry.kind)
 
   const isFormValid = useMemo(() => name && description, [name, description])
@@ -56,6 +68,7 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
         msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      setHasUnsavedChanges(false)
       mutateEntry()
       onSave?.()
     }
@@ -124,8 +137,22 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
             {`Details`}
           </Typography>
           <Divider />
-          <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
-          <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
+          <EntryNameInput
+            autoFocus
+            value={name}
+            kind={entry.kind}
+            onChange={(value) => {
+              setName(value)
+              setHasUnsavedChanges(true)
+            }}
+          />
+          <EntryDescriptionInput
+            value={description}
+            onChange={(value) => {
+              setDescription(value)
+              setHasUnsavedChanges(true)
+            }}
+          />
         </>
         <Divider />
         <>
@@ -139,7 +166,10 @@ export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
             <RadioGroup
               defaultValue='public'
               value={visibility}
-              onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
+              onChange={(e) => {
+                setVisibility(e.target.value as UpdateEntryForm['visibility'])
+                setHasUnsavedChanges(true)
+              }}
             >
               <FormControlLabel
                 value='public'

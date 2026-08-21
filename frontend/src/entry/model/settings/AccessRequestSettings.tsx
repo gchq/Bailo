@@ -1,7 +1,8 @@
 import Save from '@mui/icons-material/Save'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { patchEntry } from 'actions/entry'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
@@ -13,9 +14,20 @@ type AccessRequestSettingsProps = {
 
 export default function AccessRequestSettings({ model }: AccessRequestSettingsProps) {
   const [allowUngoverned, setAllowUngoverned] = useState(model.settings.ungovernedAccess)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const sendNotification = useNotification()
+
+  useEffect(() => {
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   async function handleSave() {
     setLoading(true)
@@ -37,6 +49,7 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
         msg: 'Access request settings updated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      setHasUnsavedChanges(false)
     }
     setLoading(false)
   }
@@ -51,7 +64,10 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
         label='Allow users to make ungoverned access requests'
         control={
           <Checkbox
-            onChange={(event) => setAllowUngoverned(event.target.checked)}
+            onChange={(event) => {
+              setAllowUngoverned(event.target.checked)
+              setHasUnsavedChanges(true)
+            }}
             checked={allowUngoverned}
             size='small'
           />

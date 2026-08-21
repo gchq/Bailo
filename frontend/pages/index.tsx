@@ -321,7 +321,7 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
-  const onFilterSubmit = (e: React.FormEvent) => {
+  const onFilterSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault()
   }
 

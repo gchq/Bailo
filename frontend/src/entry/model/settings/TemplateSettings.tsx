@@ -1,7 +1,8 @@
 import Save from '@mui/icons-material/Save'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { patchEntry } from 'actions/entry'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
@@ -13,9 +14,20 @@ type TemplateSettingsProps = {
 
 export default function TemplateSettings({ model }: TemplateSettingsProps) {
   const [allowTemplating, setAllowTemplating] = useState(model.settings.allowTemplating)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const sendNotification = useNotification()
+
+  useEffect(() => {
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   async function handleSave() {
     setLoading(true)
@@ -36,6 +48,7 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
         msg: 'Template settings updated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      setHasUnsavedChanges(false)
     }
     setLoading(false)
   }
@@ -50,7 +63,10 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
         label='Allow users to make a template'
         control={
           <Checkbox
-            onChange={(event) => setAllowTemplating(event.target.checked)}
+            onChange={(event) => {
+              setAllowTemplating(event.target.checked)
+              setHasUnsavedChanges(true)
+            }}
             checked={allowTemplating}
             size='small'
           />

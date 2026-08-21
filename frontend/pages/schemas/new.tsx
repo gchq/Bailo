@@ -16,7 +16,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { postSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { ChangeEvent, FormEvent, SyntheticEvent, useMemo, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Title from 'src/common/Title'
@@ -93,7 +93,7 @@ export default function NewSchema() {
     setNewReviewRoles(newValue)
   }
 
-  async function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: SyntheticEvent) {
     if (event) {
       event.preventDefault()
       setErrorMessage('')

@@ -1,30 +1,39 @@
 import router from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export type UnsavedChangesHook = {
   unsavedChanges: boolean
   setUnsavedChanges: (newValue: boolean) => void
-  sendWarning: () => boolean
+  sendWarning: (onConfirm: () => void) => void
 }
 
-export default function useUnsavedChanges(): UnsavedChangesHook {
+export type UseUnsavedChangesReturn = UnsavedChangesHook & {
+  dialogOpen: boolean
+  onDialogConfirm: () => void
+  onDialogCancel: () => void
+}
+
+export default function useUnsavedChanges(): UseUnsavedChangesReturn {
   const [unsavedChanges, setUnsavedChanges] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const pendingActionRef = useRef<(() => void) | null>(null)
+  const skipWarningRef = useRef(false)
 
   const warningText = 'Any unsaved changes will be lost - are you sure you wish to leave this page?'
 
   useEffect(() => {
-    const handleWindowClose = (e) => {
+    const handleWindowClose = (e: BeforeUnloadEvent) => {
       if (!unsavedChanges) {
         return
       }
       e.preventDefault()
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- required for cross-browser beforeunload support
       return (e.returnValue = warningText)
     }
 
     const getComparableUrl = (url: string) => {
       const [pathname, queryString = ''] = url.split('?')
       const params = new URLSearchParams(queryString)
-      // Ignore various query params when determining if the URL has meaningfully changed
       params.delete('page')
       params.delete('requiredByModelState')
       params.delete('isEdit')
@@ -32,22 +41,30 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
       const remaining = params.toString()
       return remaining ? `${pathname}?${remaining}` : pathname
     }
+
     const handleBrowseAway = (newUrl: string) => {
       if (!unsavedChanges) {
         return
       }
-      // Skip warning if the only difference between the URLs is the 'page' query param
+      if (skipWarningRef.current) {
+        skipWarningRef.current = false
+        return
+      }
       if (getComparableUrl(router.asPath) === getComparableUrl(newUrl)) {
         return
       }
-      const res = window.confirm(warningText)
-      if (res) {
+      // routeChangeStart does not expose the original method (push vs replace),
+      // so confirmed re-navigation always uses push
+      pendingActionRef.current = () => {
+        skipWarningRef.current = true
         setUnsavedChanges(false)
-        return
+        router.push(newUrl)
       }
+      setDialogOpen(true)
       router.events.emit('routeChangeError')
       throw 'routeChange aborted.'
     }
+
     window.addEventListener('beforeunload', handleWindowClose)
     router.events.on('routeChangeStart', handleBrowseAway)
     return () => {
@@ -56,17 +73,32 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
     }
   }, [unsavedChanges])
 
-  const sendWarning = () => {
-    const res = window.confirm(warningText)
-    if (res) {
+  const sendWarning = useCallback((onConfirm: () => void) => {
+    pendingActionRef.current = () => {
+      skipWarningRef.current = true
       setUnsavedChanges(false)
+      onConfirm()
     }
-    return res
-  }
+    setDialogOpen(true)
+  }, [])
+
+  const onDialogConfirm = useCallback(() => {
+    pendingActionRef.current?.()
+    pendingActionRef.current = null
+    setDialogOpen(false)
+  }, [])
+
+  const onDialogCancel = useCallback(() => {
+    pendingActionRef.current = null
+    setDialogOpen(false)
+  }, [])
 
   return {
     unsavedChanges,
     setUnsavedChanges,
     sendWarning,
+    dialogOpen,
+    onDialogConfirm,
+    onDialogCancel,
   }
 }

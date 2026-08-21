@@ -5,7 +5,7 @@ import { UnsavedChangesHook } from '../hooks/useUnsavedChanges'
 const UnsavedChangesContext = createContext<UnsavedChangesHook>({
   unsavedChanges: false,
   setUnsavedChanges: () => undefined,
-  sendWarning: () => false,
+  sendWarning: () => undefined,
 })
 
 export default UnsavedChangesContext

@@ -102,10 +102,7 @@ export default function PageWithTabs({
 
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
-      if (sendWarning()) {
-        continueNavigation(newValue)
-      }
-      // Do nothing if user does not confirm
+      sendWarning(() => continueNavigation(newValue))
     } else {
       continueNavigation(newValue)
     }

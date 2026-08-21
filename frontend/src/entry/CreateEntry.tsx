@@ -24,9 +24,10 @@ import {
 import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
@@ -57,6 +58,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const router = useRouter()
 
   const uiConfig = useContext(UiConfigContext)
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [name, setName] = useState('')
@@ -72,9 +74,18 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   )
   const [ungovernedAccess, setUngovernedAccess] = useState(false)
   const [allowTemplating, setAllowTemplating] = useState(false)
+  const [formTouched, setFormTouched] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [tags, setTags] = useState<string[]>([])
+
+  useEffect(() => {
+    setUnsavedChanges(formTouched)
+  }, [formTouched, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   const isFormValid = useMemo(
     () => name && description && (sourceModelId || createEntryKind !== EntryKind.MIRRORED_MODEL),
@@ -83,6 +94,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const handleCollaboratorsChange = useCallback((updatedCollaborators: CollaboratorEntry[]) => {
     setCollaborators(updatedCollaborators)
+    setFormTouched(true)
   }, [])
 
   const entryKindForRedirect = useMemo(() => {
@@ -136,6 +148,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       setLoading(false)
     } else {
       const data = await response.json()
+      setUnsavedChanges(false)
       router.push(`/${entryKindForRedirect}/${data.model.id}`)
     }
   }
@@ -261,7 +274,17 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       {isCurrentUserLoading && <Loading />}
       <Paper sx={{ p: 4, mb: 4 }}>
         <Stack spacing={1}>
-          <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
+          <Button
+            sx={{ width: 'fit-content' }}
+            startIcon={<ArrowBack />}
+            onClick={() => {
+              if (unsavedChanges) {
+                sendWarning(() => onBackClick())
+              } else {
+                onBackClick()
+              }
+            }}
+          >
             Back
           </Button>
           <Stack
@@ -286,18 +309,44 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                 <Box sx={{ width: '100%' }}>
-                  <EntryNameInput autoFocus value={name} kind={createEntryKind} onChange={(value) => setName(value)} />
+                  <EntryNameInput
+                    autoFocus
+                    value={name}
+                    kind={createEntryKind}
+                    onChange={(value) => {
+                      setName(value)
+                      setFormTouched(true)
+                    }}
+                  />
                 </Box>
                 <Box sx={{ width: '100%' }}>
-                  <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
+                  <EntryOrganisationInput
+                    value={organisation}
+                    onChange={(value) => {
+                      setOrganisation(value)
+                      setFormTouched(true)
+                    }}
+                  />
                 </Box>
                 {createEntryKind === EntryKind.MIRRORED_MODEL && (
                   <Box sx={{ width: '100%' }}>
-                    <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                    <SourceModelInput
+                      onChange={(value) => {
+                        setSourceModelId(value)
+                        setFormTouched(true)
+                      }}
+                      value={sourceModelId}
+                    />
                   </Box>
                 )}
               </Stack>
-              <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
+              <EntryDescriptionInput
+                value={description}
+                onChange={(value) => {
+                  setDescription(value)
+                  setFormTouched(true)
+                }}
+              />
             </>
             <Divider />
             <>
@@ -311,7 +360,10 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 <RadioGroup
                   defaultValue='public'
                   value={visibility}
-                  onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+                  onChange={(e) => {
+                    setVisibility(e.target.value as EntryForm['visibility'])
+                    setFormTouched(true)
+                  }}
                 >
                   <FormControlLabel
                     value='public'
@@ -370,7 +422,10 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       Tags
                     </Typography>
                     <TagSelector
-                      onChange={(newTags) => setTags(newTags)}
+                      onChange={(newTags) => {
+                        setTags(newTags)
+                        setFormTouched(true)
+                      }}
                       value={tags}
                       label=''
                       id='entry-tag-selector'
@@ -385,7 +440,10 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       <FormControlLabel
                         control={
                           <Switch
-                            onChange={(e) => setUngovernedAccess(e.target.checked)}
+                            onChange={(e) => {
+                              setUngovernedAccess(e.target.checked)
+                              setFormTouched(true)
+                            }}
                             checked={ungovernedAccess}
                             size='small'
                           />
@@ -395,7 +453,10 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                       <FormControlLabel
                         control={
                           <Switch
-                            onChange={(event) => setAllowTemplating(event.target.checked)}
+                            onChange={(event) => {
+                              setAllowTemplating(event.target.checked)
+                              setFormTouched(true)
+                            }}
                             checked={allowTemplating}
                             size='small'
                           />

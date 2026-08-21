@@ -12,8 +12,9 @@ import {
   Typography,
 } from '@mui/material'
 import { patchEntry } from 'actions/entry'
-import { ChangeEvent, SyntheticEvent, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useContext, useEffect, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -26,10 +27,20 @@ type ExportSettingsProps = {
 
 export default function ExportSettings({ model }: ExportSettingsProps) {
   const sendNotification = useNotification()
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const [destinationModelId, setDestinationModelId] = useState(model.settings.mirror?.destinationModelId || '')
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(destinationModelId === undefined || destinationModelId === '')
+
+  useEffect(() => {
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   const handleSave = async (event: SyntheticEvent<HTMLFormElement>) => {
     setLoading(true)
@@ -52,6 +63,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         msg: 'Model export settings updated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      setHasUnsavedChanges(false)
     }
 
     setLoading(false)
@@ -59,6 +71,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
 
   const handleDestinationModelId = (event: ChangeEvent<HTMLInputElement>) => {
     setDestinationModelId(event.target.value)
+    setHasUnsavedChanges(true)
   }
 
   return (

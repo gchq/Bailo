@@ -6,10 +6,11 @@ import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { SyntheticEvent, useCallback, useContext, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -40,8 +41,18 @@ export default function NewRelease() {
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
+  const [formTouched, setFormTouched] = useState(false)
 
   const router = useRouter()
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
+  useEffect(() => {
+    setUnsavedChanges(formTouched)
+  }, [formTouched, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   const { modelId }: { modelId?: string } = router.query
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
@@ -85,7 +96,7 @@ export default function NewRelease() {
     setFiles(newFiles)
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     setFailedFileUploads([])
@@ -186,6 +197,7 @@ export default function NewRelease() {
       const body = await response.json()
       setUploadedFiles([])
       setCurrentFileUploadProgress(undefined)
+      setUnsavedChanges(false)
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
     setLoading(false)
@@ -242,14 +254,35 @@ export default function NewRelease() {
                     imageList,
                     modelCardVersion,
                   }}
-                  onSemverChange={(value) => setSemver(value)}
-                  onReleaseNotesChange={(value) => setReleaseNotes(value)}
-                  onFilesChange={(value) => handleFileOnChange(value)}
-                  onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-                  onModelCardVersionChange={(value) => setModelCardVersion(value)}
+                  onSemverChange={(value) => {
+                    setSemver(value)
+                    setFormTouched(true)
+                  }}
+                  onReleaseNotesChange={(value) => {
+                    setReleaseNotes(value)
+                    setFormTouched(true)
+                  }}
+                  onMinorReleaseChange={(value) => {
+                    setIsMinorRelease(value)
+                    setFormTouched(true)
+                  }}
+                  onFilesChange={(value) => {
+                    handleFileOnChange(value)
+                    setFormTouched(true)
+                  }}
+                  onModelCardVersionChange={(value) => {
+                    setModelCardVersion(value)
+                    setFormTouched(true)
+                  }}
                   filesMetadata={filesMetadata}
-                  onFilesMetadataChange={(value) => setFilesMetadata(value)}
-                  onImageListChange={(value) => setImageList(value)}
+                  onFilesMetadataChange={(value) => {
+                    setFilesMetadata(value)
+                    setFormTouched(true)
+                  }}
+                  onImageListChange={(value) => {
+                    setImageList(value)
+                    setFormTouched(true)
+                  }}
                   onRegistryError={handleRegistryError}
                   currentFileUploadProgress={currentFileUploadProgress}
                   uploadedFiles={uploadedFiles}
