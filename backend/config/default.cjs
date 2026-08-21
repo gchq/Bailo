@@ -341,6 +341,10 @@ module.exports = {
     },
   },
 
+  deploymentAssessments: {
+    deployableModelState: 'Production',
+  },
+
   instrumentation: {
     enabled: false,
     serviceName: 'backend',

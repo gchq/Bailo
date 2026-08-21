@@ -171,6 +171,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 // Sadly, it is not possible to dynamically load and use a programmatic loop here as `vi.mock` is hoisted so runtime variables would not be initialised
 export const modelMocks = {
   AccessRequestModel: createMongooseModelMock('AccessRequest'),
+  DeploymentAssessmentModel: createMongooseModelMock('DeploymentAssessmentModel'),
   FileModel: createMongooseModelMock('FileModel', {
     id: 'mockFileId',
     _id: 'mockFileId',
@@ -203,6 +204,10 @@ export const modelMocks = {
 }
 
 vi.mock('../../src/models/AccessRequest.ts', () => ({ default: modelMocks.AccessRequestModel }))
+vi.mock('../../src/models/DeploymentAssessment.ts', async (importOriginal) => {
+  const actual = (await importOriginal()) as any
+  return { ...actual, default: modelMocks.DeploymentAssessmentModel }
+})
 vi.mock('../../src/models/File.ts', () => ({ default: modelMocks.FileModel }))
 vi.mock('../../src/models/Inference.ts', () => ({ default: modelMocks.InferenceModel }))
 vi.mock('../../src/models/Migration.ts', () => ({ default: modelMocks.MigrationModel }))

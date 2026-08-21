@@ -176,6 +176,10 @@ export interface Config {
 
   defaultReviewRoles: Array<DefaultReviewRole>
 
+  deploymentAssessments: {
+    deployableModelState: string
+  }
+
   instrumentation: {
     enabled: boolean
     serviceName: string

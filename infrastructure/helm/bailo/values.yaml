@@ -284,6 +284,9 @@ config:
     llmImport:
       enabled: false
 
+  deploymentAssessments:
+    deployableModelState: 'Production'
+
   smtp:
     #host: 'mail' #service name
     port: 1025

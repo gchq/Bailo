@@ -1,6 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
@@ -86,6 +87,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onDeleteReviewRole(_req: Request, _reviewRole: ReviewRoleDoc) {}
   async onViewMetric(_req: Request): Promise<void> {}
   async onCreateReview(_req: Request, _modelId: string) {}
+  async onCreateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
   async onNotifyReviewers(_req: Request, _reviewId: string): Promise<void> {}
   async onRegistryImagePulled(_req: Request, _userDn: string): Promise<void> {}

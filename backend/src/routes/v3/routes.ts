@@ -2,6 +2,7 @@ import { Router } from 'express'
 
 import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
+import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
 import { getLifecycleComplianceMetrics } from './metrics/getLifecycleComplianceMetrics.js'
@@ -20,6 +21,8 @@ const router = Router()
 router.get('/api-docs/swagger.json', (req, res) => res.json(generateV3SwaggerSpec()))
 
 router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
+
+router.post('/deployment-assessments', ...postDeploymentAssessment)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)

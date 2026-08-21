@@ -27,6 +27,9 @@ const config: PartialDeep<Config> = {
       registry: 'registry',
     },
   },
+  deploymentAssessments: {
+    deployableModelState: 'Production',
+  },
   connectors: {
     authentication: {
       kind: 'silly',
