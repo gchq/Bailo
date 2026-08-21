@@ -110,7 +110,7 @@ enable=c-extension-no-member
 
 # which contain the number of messages in each category, as well as 'statement'
 
-# which is the total number of statements analyzed. This score is used by the
+# which is the total number of statements analysed. This score is used by the
 
 # global evaluation report (RP0004).
 

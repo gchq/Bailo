@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "language": "en-GB, en_US",
+  "language": "en-GB",
   "caseSensitive": false,
   "dictionaries": [
     "bash",
@@ -360,6 +360,18 @@
     "zoneinfo",
     "zyxwvu",
     "seaweedfs",
-    "chrislusf"
+    "chrislusf",
+    "favorite",
+    "clearable",
+    "gotchas",
+    "reflow",
+    "unsatisfiable",
+    "elem",
+    "yellowtail",
+    "flavor",
+    "myst",
+    "teardown",
+    "resumable",
+    "pytorch"
   ]
 }
