@@ -3,6 +3,7 @@ import nodemailer, { Transporter } from 'nodemailer'
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
 import { SystemRoles } from '../../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
@@ -90,6 +91,33 @@ export async function getApprovedAccessRequests(modelId: string) {
   )
   const approvedAccessRequests = accessRequests.filter((_, index) => approvalResults[index])
   return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
+}
+
+export async function notifyDeploymentRiskOwner(riskOwner: string, deployment: DeploymentAssessmentInterface) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `You have been assigned as a risk owner for the deployment ${deployment.metadata.overview.name}`,
+    [
+      { title: 'Deployment ID', data: deployment.id },
+      {
+        title: 'Created By',
+        data:
+          (await authentication.getUserInformation(toEntity('user', deployment.createdBy))).name ||
+          deployment.createdBy,
+      },
+    ],
+    [
+      { name: 'Open Deployment', url: `${appBaseUrl}/deployments` },
+      { name: 'See Deployments', url: `${appBaseUrl}/deployments` },
+    ],
+    true,
+  )
+
+  await dispatchEmail([riskOwner], await emailContent)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {

@@ -11,7 +11,9 @@ import { fromEntity } from '../utils/entity.js'
 import { BadReq, Conflict } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { notifyDeploymentRiskOwner } from './smtp/smtp.js'
 
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
   metadata: unknown
@@ -82,6 +84,8 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
 
   if (riskOwner) {
     await validateRiskOwner(riskOwner)
+  } else {
+    throw BadReq('Invalid or missing deployment risk owner')
   }
   if (modelIds?.length) {
     await validateModels(modelIds)
@@ -105,6 +109,13 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     }
     throw error
   }
+
+  notifyDeploymentRiskOwner(riskOwner, deploymentAssessment).catch((error) =>
+    log.warn({ error }, 'Error when sending notifications requesting review for release.'),
+  )
+  // notifyDeploymentModelOwners(deploymentAssessment).catch((error) =>
+  //   log.warn({ error }, 'Error when sending notifications requesting review for release.'),
+  // )
 
   return deploymentAssessment
 }
