@@ -294,9 +294,14 @@ export default function JsonSchemaForm({
                 </Stack>
               )}
               <Typography sx={{ pt: 1 }}>
-                {`Required fields for the current state `}
-                {currentState && <span style={{ fontWeight: 'bold' }}>{`(${currentState})`}</span>}
-                {` are marked with an asterisk`}
+                Required fields
+                {currentState && (
+                  <>
+                    <span> for the current state</span>
+                    <span style={{ fontWeight: 'bold' }}>{` (${currentState})`}</span>
+                  </>
+                )}{' '}
+                are marked with an asterisk
                 <span style={{ color: theme.palette.error.main }}> *</span>
               </Typography>
             </Stack>
