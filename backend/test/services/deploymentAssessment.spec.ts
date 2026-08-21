@@ -42,6 +42,7 @@ const liveModel = {
   kind: EntryKind.Model,
   visibility: EntryVisibility.Public,
   state: 'Production',
+  collaborators: [{ entity: 'user:user', roles: ['owner'] }],
 }
 
 describe('services > deploymentAssessment', () => {
@@ -167,5 +168,17 @@ describe('services > deploymentAssessment', () => {
     DeploymentAssessmentModelMock.save.mockRejectedValueOnce(mongoError)
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toMatchObject({ code: 409 })
+  })
+
+  test('rejects a non-draft assessment without a risk owner', async () => {
+    const metadata = {
+      overview: {
+        name: 'Submitted assessment',
+      },
+    }
+
+    await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: false, metadata })).rejects.toThrow(
+      'Deployment risk owner is required',
+    )
   })
 })

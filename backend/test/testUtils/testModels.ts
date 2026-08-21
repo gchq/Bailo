@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 
+import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
 import {} from '../../src/models/SchemaMigration.js'
 import { ReviewKind, SchemaKind, SchemaMigrationKind } from '../../src/types/enums.js'
 
@@ -68,6 +69,51 @@ export const testReviewResponse = {
   kind: ReviewKind.Release,
   createdAt: '2024-05-17T06:13:41.690Z',
   updatedAt: '2024-05-17T06:13:41.690Z',
+}
+
+export const testDeploymentAssessment = {
+  id: 'my-deployment-assessment',
+  metadata: {
+    overview: {
+      name: 'My Deployment Assessment',
+      riskOwner: 'user:user',
+      riskOwnerJustification: 'Test',
+      modelIds: ['my-model-123'],
+    },
+  },
+  schemaId: 'test-deployment-assessment-schema',
+  draft: false,
+  createdBy: 'user:user',
+  createdAt: new Date('2023-07-28T10:50:00.928Z'),
+  updatedAt: new Date('2023-07-28T10:50:00.928Z'),
+}
+
+export const testModel = {
+  id: 'my-model-123',
+  name: 'My Model',
+  kind: EntryKind.Model,
+  collaborators: [
+    {
+      entity: 'user:user',
+      roles: ['owner'],
+    },
+  ],
+  description: 'My example model',
+  organisation: 'Example',
+  state: 'Production',
+  tags: [],
+  settings: {
+    ungovernedAccess: false,
+    allowTemplating: false,
+    mirror: {
+      sourceModelId: '',
+      destinationModelId: '',
+    },
+  },
+  deleted: false,
+  createdAt: new Date('2023-07-28T10:50:00.928Z'),
+  updatedAt: new Date('2023-07-28T10:50:00.928Z'),
+  visibility: EntryVisibility.Public,
 }
 
 export const testReleaseReview = {

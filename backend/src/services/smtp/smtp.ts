@@ -3,7 +3,8 @@ import nodemailer, { Transporter } from 'nodemailer'
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { SystemRoles } from '../../models/Model.js'
+import { DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
+import { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc, ReviewInterface } from '../../models/Review.js'
@@ -90,6 +91,71 @@ export async function getApprovedAccessRequests(modelId: string) {
   )
   const approvedAccessRequests = accessRequests.filter((_, index) => approvalResults[index])
   return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
+}
+
+export async function notifyDeploymentRiskOwner(
+  riskOwner: string,
+  deployment: DeploymentAssessmentInterface,
+  creatorName: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `A deployment assessment is ready for your review`,
+    [
+      { title: 'Deployment Assessment Name', data: deployment.metadata.overview.name },
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      {
+        title: 'Created By',
+        data: creatorName,
+      },
+    ],
+    [
+      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
+      { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
+    ],
+    true,
+  )
+
+  await dispatchEmail([riskOwner], await emailContent)
+}
+
+export async function notifyDeploymentModelOwners(
+  entities: string[],
+  deployment: DeploymentAssessmentInterface,
+  model: ModelInterface,
+  creatorName: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const modelUrl = `${appBaseUrl}/${encodeURIComponent(model.kind)}` + `/${encodeURIComponent(model.id)}`
+
+  const emailContent = buildEmail(
+    `A model you manage has been included in the deployment assessment ${deployment.metadata.overview.name}`,
+    [
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      { title: 'Model Name', data: model.name },
+      { title: 'Model ID', data: model.id },
+      {
+        title: 'Created By',
+        data: creatorName,
+      },
+    ],
+    [
+      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
+      { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
+      { name: 'Open Model', url: modelUrl },
+    ],
+    false,
+  )
+
+  await dispatchEmail(entities, await emailContent)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
