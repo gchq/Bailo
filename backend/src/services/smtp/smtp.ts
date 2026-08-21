@@ -106,16 +106,16 @@ export async function notifyDeploymentRiskOwner(
   const emailContent = buildEmail(
     `A deployment assessment is ready for your review`,
     [
-      { title: 'Deployment assessment name', data: deployment.metadata.overview.name },
-      { title: 'Deployment assessment ID', data: deployment.id },
+      { title: 'Deployment Assessment Name', data: deployment.metadata.overview.name },
+      { title: 'Deployment Assessment ID', data: deployment.id },
       {
         title: 'Created By',
         data: creatorName,
       },
     ],
     [
-      { name: 'Open Deployment assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'See Deployment assessments', url: `${appBaseUrl}/deployments` },
+      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
+      { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
     ],
     true,
   )
