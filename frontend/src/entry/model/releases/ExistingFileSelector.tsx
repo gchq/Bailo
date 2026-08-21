@@ -28,6 +28,7 @@ import { EntryInterface, FileInterface, isFileInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import {
   buildFileTree,
+  collectAllFiles,
   type FileTreeNode,
   getBreadcrumbParts,
   getNodeAtPath,
@@ -182,10 +183,59 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
     </ListItem>
   ))
 
+  const handleFolderToggle = useCallback(
+    (node: FileTreeNode) => {
+      const folderFiles = collectAllFiles(node)
+      const selectableFiles = folderFiles.filter((f) => !isFileDisabled(f))
+      const allSelected =
+        selectableFiles.length > 0 && selectableFiles.every((f) => checkedFiles.some((c) => c._id === f._id))
+
+      if (allSelected) {
+        const folderIds = new Set(folderFiles.map((f) => f._id))
+        setCheckedFiles(checkedFiles.filter((f) => !folderIds.has(f._id)))
+      } else {
+        const existing = new Set(checkedFiles.map((f) => f._id))
+        const toAdd = selectableFiles.filter((f) => !existing.has(f._id))
+        setCheckedFiles([...checkedFiles, ...toAdd])
+      }
+    },
+    [checkedFiles, isFileDisabled],
+  )
+
+  const getFolderCheckState = useCallback(
+    (node: FileTreeNode) => {
+      const folderFiles = collectAllFiles(node)
+      const selectedCount = folderFiles.filter(
+        (f) =>
+          checkedFiles.some((c) => c._id === f._id) ||
+          existingReleaseFiles.some((e) => isFileInterface(e) && e._id === f._id),
+      ).length
+      return {
+        checked: selectedCount === folderFiles.length && folderFiles.length > 0,
+        indeterminate: selectedCount > 0 && selectedCount < folderFiles.length,
+      }
+    },
+    [checkedFiles, existingReleaseFiles],
+  )
+
   const BrowseRow = ({ data }: { data: SelectorListItem }) => {
     if (data.kind === 'folder') {
+      const { checked, indeterminate } = getFolderCheckState(data.node)
       return (
         <ListItem key={data.key} disablePadding>
+          <ListItemIcon sx={{ minWidth: 'auto', pl: 2 }}>
+            <Checkbox
+              edge='start'
+              checked={checked}
+              indeterminate={indeterminate}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleFolderToggle(data.node)
+              }}
+              tabIndex={-1}
+              disableRipple
+            />
+          </ListItemIcon>
           <ListItemButton dense onClick={() => setCurrentPath(data.node.fullPath)}>
             <ListItemIcon>
               <Folder color='action' />

@@ -159,6 +159,21 @@ export function collectAllFileNames(node: FileTreeNode): string[] {
   return names
 }
 
+/** Collects all FileInterface objects recursively under a tree node. */
+export function collectAllFiles(node: FileTreeNode): FileInterface[] {
+  const files: FileInterface[] = []
+  const collect = (n: FileTreeNode) => {
+    if (!n.isDirectory && n.file) {
+      files.push(n.file)
+    }
+    for (const child of n.children) {
+      collect(child)
+    }
+  }
+  collect(node)
+  return files
+}
+
 /** Counts how many files under a tree node match a search query (case-insensitive). */
 export function countMatchingFiles(node: FileTreeNode, query: string): number {
   if (!query) {

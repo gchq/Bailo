@@ -32,6 +32,7 @@ import { getErrorMessage } from 'utils/fetcher'
 import {
   buildFileTree,
   collectAllFileNames,
+  collectAllFiles,
   countMatchingFiles,
   type FileTreeNode,
   getBreadcrumbParts,
@@ -325,20 +326,7 @@ function FolderRow({
   const { modelFiles, mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
-  // Collect all real files recursively under this folder
-  const allFilesInFolder = useMemo(() => {
-    const result: FileInterface[] = []
-    const collect = (n: FileTreeNode) => {
-      if (!n.isDirectory && n.file) {
-        result.push(n.file)
-      }
-      for (const child of n.children) {
-        collect(child)
-      }
-    }
-    collect(node)
-    return result
-  }, [node])
+  const allFilesInFolder = useMemo(() => collectAllFiles(node), [node])
 
   // Find folder marker files (.folder) under this path
   const folderMarkers = useMemo(
