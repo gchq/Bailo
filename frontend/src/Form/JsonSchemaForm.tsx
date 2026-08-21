@@ -55,6 +55,7 @@ export default function JsonSchemaForm({
   displayStats = false,
   compareMode = false,
   stateList,
+  currentState,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -66,6 +67,7 @@ export default function JsonSchemaForm({
   displayStats?: boolean
   compareMode?: boolean
   stateList?: string[]
+  currentState?: string
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -292,7 +294,9 @@ export default function JsonSchemaForm({
                 </Stack>
               )}
               <Typography sx={{ pt: 1 }}>
-                Required fields for this state are marked with an asterisk
+                {`Required fields for the current state `}
+                {currentState && <span style={{ fontWeight: 'bold' }}>{`(${currentState})`}</span>}
+                {` are marked with an asterisk`}
                 <span style={{ color: theme.palette.error.main }}> *</span>
               </Typography>
             </Stack>
