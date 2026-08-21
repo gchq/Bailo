@@ -4,7 +4,7 @@ import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
-import { SystemRoles } from '../../models/Model.js'
+import { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc, ReviewInterface } from '../../models/Review.js'
@@ -100,9 +100,10 @@ export async function notifyDeploymentRiskOwner(riskOwner: string, deployment: D
   }
 
   const emailContent = buildEmail(
-    `You have been assigned as a risk owner for the deployment ${deployment.metadata.overview.name}`,
+    `A deployment assessment is ready for your review`,
     [
-      { title: 'Deployment ID', data: deployment.id },
+      { title: 'Deployment assessment name', data: deployment.metadata.overview.name },
+      { title: 'Deployment assessment ID', data: deployment.id },
       {
         title: 'Created By',
         data:
@@ -111,13 +112,47 @@ export async function notifyDeploymentRiskOwner(riskOwner: string, deployment: D
       },
     ],
     [
-      { name: 'Open Deployment', url: `${appBaseUrl}/deployments` },
-      { name: 'See Deployments', url: `${appBaseUrl}/deployments` },
+      { name: 'Open Deployment assessment', url: `${appBaseUrl}/deployments/${deployment.id}` },
+      { name: 'See Deployment assessments', url: `${appBaseUrl}/deployments` },
     ],
     true,
   )
 
   await dispatchEmail([riskOwner], await emailContent)
+}
+
+export async function notifyDeploymentModelOwners(
+  entities: string[],
+  deployment: DeploymentAssessmentInterface,
+  model: ModelInterface,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `A model you manage has been included in the deployment assessment ${deployment.metadata.overview.name}`,
+    [
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      { title: 'Model Name', data: model.name },
+      { title: 'Model ID', data: model.id },
+      {
+        title: 'Created By',
+        data:
+          (await authentication.getUserInformation(toEntity('user', deployment.createdBy))).name ||
+          deployment.createdBy,
+      },
+    ],
+    [
+      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${deployment.id}` },
+      { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
+      { name: 'Open Model', url: `${appBaseUrl}/modelId` },
+    ],
+    false,
+  )
+
+  await dispatchEmail(entities, await emailContent)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {

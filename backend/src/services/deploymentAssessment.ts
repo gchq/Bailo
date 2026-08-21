@@ -13,7 +13,7 @@ import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import { notifyDeploymentRiskOwner } from './smtp/smtp.js'
+import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
   metadata: unknown
@@ -113,9 +113,15 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   notifyDeploymentRiskOwner(riskOwner, deploymentAssessment).catch((error) =>
     log.warn({ error }, 'Error when sending notifications requesting review for release.'),
   )
-  // notifyDeploymentModelOwners(deploymentAssessment).catch((error) =>
-  //   log.warn({ error }, 'Error when sending notifications requesting review for release.'),
-  // )
+
+  const models = await ModelModel.find({ id: deploymentAssessment.metadata.overview.modelIds })
+  for (const model of models) {
+    notifyDeploymentModelOwners(
+      model.collaborators.filter((collaborator) => collaborator.roles.includes('owner')).map((owner) => owner.entity),
+      deploymentAssessment,
+      model,
+    ).catch((error) => log.warn({ error }, 'Error when sending notifications requesting review for release.'))
+  }
 
   return deploymentAssessment
 }
