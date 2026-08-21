@@ -7,6 +7,8 @@ from typing import Any
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from bailo_artefactscan_api import __version__
+
 
 class Settings(BaseSettings):
     """Basic settings object for the FastAPI app.
@@ -23,7 +25,7 @@ class Settings(BaseSettings):
         "\n"
         "Clients can upload files or image layers and retrieve structured scan results via a REST interface."
     )
-    app_version: str = "4.2.0"
+    app_version: str = __version__
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB

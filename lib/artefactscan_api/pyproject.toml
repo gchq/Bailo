@@ -1,0 +1,38 @@
+[build-system]
+requires = ["flit_core >=4.0,<5"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "bailo-artefactscan-api"
+version = "4.3.0"
+description = "FastAPI scanning service for Bailo artefacts (ModelScan, Trivy, ClamAV)"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "content-size-limit-asgi==0.1.5",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.141.1",
+    "filelock==3.32.3",
+    "modelscan[tensorflow,h5py]==0.8.8",
+    "oras==0.2.43",
+    "pydantic_settings==2.15.0",
+    "python-multipart==0.0.32",
+    "uvicorn==0.52.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==26.5.1",
+    "pre-commit==4.6.2",
+    "pytest==9.1.1",
+    "pytest-github-actions-annotate-failures==0.4.2",
+    "pytest-mock==3.15.1",
+]
+
+[tool.flit.module]
+name = "bailo_artefactscan_api"
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]
+pythonpath = ["."]
+testpaths = ["tests"]
+junit_family = "xunit2"
+markers = ["integration: marks as integration test"]
