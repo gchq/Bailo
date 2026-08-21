@@ -4,6 +4,7 @@ import { useGetArtefactScannerInfo } from 'actions/artefactScanning'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUserV3 } from 'actions/user'
 import { ReactNode, useEffect } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -23,7 +24,7 @@ type AppContextProviderProps = {
 
 export default function AppContextProvider({ children }: AppContextProviderProps) {
   const themeModeValue = useThemeMode()
-  const unsavedChangesValue = useUnsavedChanges()
+  const { dialogOpen, onDialogConfirm, onDialogCancel, ...unsavedChangesValue } = useUnsavedChanges()
   const userPermissionsValue = useUserPermissions()
   const { scanners, isScannersError, isScannersLoading } = useGetArtefactScannerInfo()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -79,6 +80,13 @@ export default function AppContextProvider({ children }: AppContextProviderProps
     <ThemeProvider theme={themeModeValue.theme}>
       <CssBaseline />
       {content()}
+      <ConfirmationDialogue
+        open={dialogOpen}
+        title='Unsaved changes'
+        dialogMessage='You have unsaved changes on this page. If you leave now, your changes will not be saved.'
+        onConfirm={onDialogConfirm}
+        onCancel={onDialogCancel}
+      />
     </ThemeProvider>
   )
 }

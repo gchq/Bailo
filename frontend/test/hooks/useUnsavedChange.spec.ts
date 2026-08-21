@@ -4,10 +4,18 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import useUnsavedChanges from '../../src/hooks/useUnsavedChanges'
 
+async function triggerBlockedNavigation(url: string) {
+  await expect(
+    act(async () => {
+      await mockRouter.replace(url)
+    }),
+  ).rejects.toThrow('routeChange aborted.')
+  await act(async () => {})
+}
+
 describe('useUnsavedChanges', () => {
   beforeEach(() => {
     mockRouter.setCurrentUrl('/model/test-id?tab=overview&page=0')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
   })
 
   afterEach(() => {
@@ -16,13 +24,13 @@ describe('useUnsavedChanges', () => {
 
   describe('no warning', () => {
     test('unsavedChanges is false', async () => {
-      renderHook(() => useUnsavedChanges())
+      const { result } = renderHook(() => useUnsavedChanges())
 
       await act(async () => {
         await mockRouter.replace('/different-page')
       })
 
-      expect(window.confirm).not.toHaveBeenCalled()
+      expect(result.current.dialogOpen).toBe(false)
     })
 
     test('only the page query param changes', async () => {
@@ -36,7 +44,7 @@ describe('useUnsavedChanges', () => {
         await mockRouter.replace('/model/test-id?tab=overview&page=1')
       })
 
-      expect(window.confirm).not.toHaveBeenCalled()
+      expect(result.current.dialogOpen).toBe(false)
     })
 
     test('page param is added to a URL that had none', async () => {
@@ -51,115 +59,126 @@ describe('useUnsavedChanges', () => {
         await mockRouter.replace('/model/test-id?tab=overview&page=1')
       })
 
-      expect(window.confirm).not.toHaveBeenCalled()
+      expect(result.current.dialogOpen).toBe(false)
     })
   })
 
   describe('warning', () => {
-    test('navigating to a different page', async () => {
+    test('navigating to a different page opens dialog', async () => {
       const { result } = renderHook(() => useUnsavedChanges())
 
       act(() => {
         result.current.setUnsavedChanges(true)
       })
 
-      await act(async () => {
-        await mockRouter.replace('/different-page')
-      })
+      await triggerBlockedNavigation('/different-page')
 
-      expect(window.confirm).toHaveBeenCalled()
+      expect(result.current.dialogOpen).toBe(true)
     })
 
-    test('the tab query param changes', async () => {
+    test('the tab query param changes opens dialog', async () => {
       const { result } = renderHook(() => useUnsavedChanges())
 
       act(() => {
         result.current.setUnsavedChanges(true)
       })
 
-      await act(async () => {
-        await mockRouter.replace('/model/test-id?tab=settings')
-      })
+      await triggerBlockedNavigation('/model/test-id?tab=settings')
 
-      expect(window.confirm).toHaveBeenCalled()
+      expect(result.current.dialogOpen).toBe(true)
     })
 
-    test('both tab and page query params change', async () => {
+    test('both tab and page query params change opens dialog', async () => {
       const { result } = renderHook(() => useUnsavedChanges())
 
       act(() => {
         result.current.setUnsavedChanges(true)
       })
 
-      await act(async () => {
-        await mockRouter.replace('/model/test-id?tab=settings&page=0')
-      })
+      await triggerBlockedNavigation('/model/test-id?tab=settings&page=0')
 
-      expect(window.confirm).toHaveBeenCalled()
+      expect(result.current.dialogOpen).toBe(true)
     })
   })
 
-  test('set unsavedChanges to false when user confirms the warning', async () => {
+  test('confirming dialog resets unsavedChanges', async () => {
     const { result } = renderHook(() => useUnsavedChanges())
 
     act(() => {
       result.current.setUnsavedChanges(true)
     })
 
-    await act(async () => {
-      await mockRouter.replace('/different-page')
+    await triggerBlockedNavigation('/different-page')
+
+    act(() => {
+      result.current.onDialogConfirm()
     })
 
     expect(result.current.unsavedChanges).toBe(false)
+    expect(result.current.dialogOpen).toBe(false)
   })
 
-  test('abort navigation when user cancels the warning', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
+  test('cancelling dialog keeps unsavedChanges and closes dialog', async () => {
     const { result } = renderHook(() => useUnsavedChanges())
 
     act(() => {
       result.current.setUnsavedChanges(true)
     })
 
-    await expect(
-      act(async () => {
-        await mockRouter.replace('/different-page')
-      }),
-    ).rejects.toThrow('routeChange aborted.')
+    await triggerBlockedNavigation('/different-page')
+
+    act(() => {
+      result.current.onDialogCancel()
+    })
 
     expect(result.current.unsavedChanges).toBe(true)
+    expect(result.current.dialogOpen).toBe(false)
   })
 
-  test('sendWarning returns true and resets state when user confirms', () => {
+  test('sendWarning opens dialog and executes callback on confirm', () => {
     const { result } = renderHook(() => useUnsavedChanges())
+    const callback = vi.fn()
 
     act(() => {
       result.current.setUnsavedChanges(true)
     })
 
-    let returnValue: boolean
     act(() => {
-      returnValue = result.current.sendWarning()
+      result.current.sendWarning(callback)
     })
 
-    expect(returnValue!).toBe(true)
+    expect(result.current.dialogOpen).toBe(true)
+    expect(callback).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.onDialogConfirm()
+    })
+
+    expect(callback).toHaveBeenCalled()
     expect(result.current.unsavedChanges).toBe(false)
+    expect(result.current.dialogOpen).toBe(false)
   })
 
-  test('sendWarning returns false and keeps state when user cancels', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
+  test('sendWarning does not execute callback on cancel', () => {
     const { result } = renderHook(() => useUnsavedChanges())
+    const callback = vi.fn()
 
     act(() => {
       result.current.setUnsavedChanges(true)
     })
 
-    let returnValue: boolean
     act(() => {
-      returnValue = result.current.sendWarning()
+      result.current.sendWarning(callback)
     })
 
-    expect(returnValue!).toBe(false)
+    expect(result.current.dialogOpen).toBe(true)
+
+    act(() => {
+      result.current.onDialogCancel()
+    })
+
+    expect(callback).not.toHaveBeenCalled()
     expect(result.current.unsavedChanges).toBe(true)
+    expect(result.current.dialogOpen).toBe(false)
   })
 })
