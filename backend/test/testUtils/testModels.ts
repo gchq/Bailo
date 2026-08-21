@@ -70,6 +70,23 @@ export const testReviewResponse = {
   updatedAt: '2024-05-17T06:13:41.690Z',
 }
 
+export const testDeploymentAssessment = {
+  id: 'my-deployment-assessment',
+  metadata: {
+    overview: {
+      name: 'My Deployment Assessment',
+      riskOwner: 'user:user',
+      riskOwnerJustification: 'Test',
+      modelIds: ['my-model-123'],
+    },
+  },
+  schemaId: 'test-deployment-assessment-schema',
+  draft: false,
+  createdBy: 'user:user',
+  createdAt: new Date('2023-07-28T10:50:00.928Z'),
+  updatedAt: new Date('2023-07-28T10:50:00.928Z'),
+}
+
 export const testReleaseReview = {
   modelId: 'abc',
   semver: '3.0.3',

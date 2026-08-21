@@ -3,6 +3,8 @@ import { describe, expect, test, vi } from 'vitest'
 import { ReviewInterface } from '../../../src/models/Review.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
+  notifyDeploymentModelOwners,
+  notifyDeploymentRiskOwner,
   notifyLifeCycleReview,
   notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
@@ -14,7 +16,12 @@ import {
   transferCompleteNotification,
 } from '../../../src/services/smtp/smtp.js'
 import { fromEntity } from '../../../src/utils/entity.js'
-import { testRelease, testReleaseReview, testReviewResponse } from '../../testUtils/testModels.js'
+import {
+  testDeploymentAssessment,
+  testRelease,
+  testReleaseReview,
+  testReviewResponse,
+} from '../../testUtils/testModels.js'
 
 const configMock = vi.hoisted(() => ({
   app: { protocol: 'http', host: 'example.com', port: 80 },
@@ -190,6 +197,23 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
+  test('that an email is not sent to a DRO after a deployment assessment is created if disabled in config', async () => {
+    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    await notifyDeploymentRiskOwner('user:test', testDeploymentAssessment)
+
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
+  })
+
+  test('that an email is not sent to model owners after a deployment assessment is created if disabled in config', async () => {
+    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, {
+      id: 'my-model-123',
+      name: 'My Model',
+    } as any)
+
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
+  })
+
   test('that an email is sent for Release Reviews', async () => {
     await requestReviewForRelease(['user:user'], review, release)
 
@@ -323,6 +347,31 @@ describe('services > smtp > smtp', () => {
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
     } as any)
     await notifyReleaseOnApproval('modelId', release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to a DRO on deployment assessment creation', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyDeploymentRiskOwner('user:user', testDeploymentAssessment)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to all model owners on deployment assessment creation', async () => {
+    getModelByIdMock.mockReturnValue({
+      id: 'modelId',
+      name: 'Test Model',
+      kind: 'model',
+      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+    } as any)
+    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, {
+      id: 'my-model-123',
+      name: 'My Model',
+    } as any)
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })
