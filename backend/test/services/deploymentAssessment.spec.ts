@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authentication from '../../src/connectors/authentication/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
-import { createDeploymentAssessment } from '../../src/services/deploymentAssessment.js'
+import { createDeploymentAssessment, getDeploymentAssessmentById } from '../../src/services/deploymentAssessment.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -50,6 +50,25 @@ describe('services > deploymentAssessment', () => {
     schemaMocks.getSchemaById.mockResolvedValue({ kind: SchemaKind.DeploymentAssessment, hidden: false })
     schemaMocks.validateContentAgainstSchema.mockResolvedValue({ valid: true, errors: [] })
     ModelModelMock.find.mockResolvedValue([liveModel])
+  })
+
+  describe('getDeploymentAssessmentById', () => {
+    test('gets an existing DA by its ID', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce('mocked')
+
+      const result = await getDeploymentAssessmentById('da-id')
+
+      expect(DeploymentAssessmentModelMock.findOne).toHaveBeenCalled()
+      expect(result).toBe('mocked')
+    })
+
+    test('no DA', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      await expect(() => getDeploymentAssessmentById('da-id')).rejects.toThrow(
+        /^The requested deployment assessment was not found/,
+      )
+    })
   })
 
   test('creates an assessment with a generated ID and authenticated creator', async () => {
