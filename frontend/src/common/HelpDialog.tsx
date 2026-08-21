@@ -3,7 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, 
 import { ReactNode, useState } from 'react'
 import { Transition } from 'src/common/Transition'
 
-type HelpDialogProps = {
+export type HelpDialogProps = {
   title: string
   content: ReactNode
 }
