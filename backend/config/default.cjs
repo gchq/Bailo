@@ -346,8 +346,7 @@ module.exports = {
   },
 
   stroom: {
-    logOnlyMode: true,
-    feed: 'feed',
+    sendEvents: true,
     url: 'https://url',
     environment: 'local',
     interval: 1000 * 50,
@@ -356,6 +355,9 @@ module.exports = {
     xmlns: 'default-namespace',
     schemaLocation: 'default-namespace file://schema-location.xsd',
     version: '1.0.0',
+    headers: {
+      'Content-Encoding': 'gzip',
+    },
   },
 
   modelMirror: {
