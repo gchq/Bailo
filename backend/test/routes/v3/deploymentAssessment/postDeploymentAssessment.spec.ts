@@ -27,7 +27,7 @@ const serviceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
-describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
+describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => {
   test('creates a deployment assessment', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce(deploymentAssessment)
     const fixture = {
@@ -37,10 +37,10 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
         draft: false,
       },
     }
-    const res = await testPost('/api/v3/deployment-assessments', fixture)
+    const res = await testPost('/api/v3/deployment-assessment', fixture)
 
     expect(res.statusCode).toBe(201)
-    expect(res.headers.location).toBe('/api/v3/deployment-assessments/assessment-abc123')
+    expect(res.headers.location).toBe('/api/v3/deployment-assessment/assessment-abc123')
     expect(res.body).toEqual({
       deploymentAssessment: {
         ...deploymentAssessment,
@@ -69,7 +69,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
       draft: true,
     }
 
-    const res = await testPost('/api/v3/deployment-assessments', { body })
+    const res = await testPost('/api/v3/deployment-assessment', { body })
 
     expect(res.statusCode).toBe(201)
     expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
@@ -82,7 +82,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
       metadata: { overview: { name: 'Assessment' } },
     }
 
-    const res = await testPost('/api/v3/deployment-assessments', { body })
+    const res = await testPost('/api/v3/deployment-assessment', { body })
 
     expect(res.statusCode).toBe(201)
     expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
@@ -104,7 +104,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
       description: 'server-managed property',
     },
   ])('rejects malformed input: $description', async ({ body }) => {
-    const res = await testPost('/api/v3/deployment-assessments', { body })
+    const res = await testPost('/api/v3/deployment-assessment', { body })
 
     expect(res.statusCode).toBe(400)
     expect(serviceMock.createDeploymentAssessment).not.toHaveBeenCalled()

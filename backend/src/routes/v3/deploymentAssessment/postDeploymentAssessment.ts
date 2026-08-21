@@ -5,52 +5,15 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { DeploymentAssessmentInterface } from '../../../models/DeploymentAssessment.js'
 import { createDeploymentAssessment } from '../../../services/deploymentAssessment.js'
-import { registerPath } from '../../../services/specification.js'
+import { deploymentAssessmentInterfaceSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-const overview = z
-  .object({
-    name: z
-      .string()
-      .min(1, 'You must provide a deployment assessment name')
-      .openapi({ example: 'Just A Rather Very Intelligent System' }),
-    riskOwner: z.string().min(1, 'You must provide a risk owner').openapi({ example: 'user:tony' }).optional(),
-    justification: z
-      .string()
-      .min(1, 'You must provide a justification')
-      .openapi({ example: 'The risk owner is accountable for the deployed service.' })
-      .optional(),
-    modelIds: z
-      .array(z.string())
-      .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
-      .optional(),
-  })
-  .passthrough()
-
-const metadata = z.object({ overview }).passthrough()
-
-const schemaId = z
-  .string()
-  .min(1, 'You must provide a schema ID')
-  .openapi({ example: 'stark-deployment-assessment-schema-v1' })
-const draft = z.boolean().openapi({ example: true })
-
-export const deploymentAssessmentInterfaceSchema = z.object({
-  id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
-  schemaId,
-  metadata,
-  draft,
-  createdBy: z.string().openapi({ example: 'tony' }),
-  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-  updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-})
-
 export const postDeploymentAssessmentSchema = z.object({
-  body: z
-    .object({
-      schemaId,
-      metadata,
-      draft: draft.optional().default(true),
+  body: deploymentAssessmentInterfaceSchema
+    .pick({
+      schemaId: true,
+      metadata: true,
+      draft: true,
     })
     .strict(),
 })
@@ -58,7 +21,7 @@ export const postDeploymentAssessmentSchema = z.object({
 registerPath(
   {
     method: 'post',
-    path: '/api/v3/deployment-assessments',
+    path: '/api/v3/deployment-assessment',
     tags: ['deployment assessments'],
     description: 'Create a deployment assessment',
     schema: postDeploymentAssessmentSchema,
@@ -88,6 +51,6 @@ export const postDeploymentAssessment = [
     const deploymentAssessment = await createDeploymentAssessment(req.user, body)
     await audit.onCreateDeploymentAssessment(req, deploymentAssessment)
 
-    res.location(`/api/v3/deployment-assessments/${deploymentAssessment.id}`).status(201).json({ deploymentAssessment })
+    res.location(`/api/v3/deployment-assessment/${deploymentAssessment.id}`).status(201).json({ deploymentAssessment })
   },
 ]
