@@ -501,6 +501,13 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, deploymentAssessment.id)
   }
 
+  async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void> {
+    this.auditSearchEvent(
+      req,
+      deploymentAssessments.map((deploymentAssessment) => ({ Id: deploymentAssessment.id })),
+    )
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.auditGenericEvent(req, userInformation.user.dn)
   }

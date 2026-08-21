@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authentication from '../../src/connectors/authentication/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
-import { createDeploymentAssessment } from '../../src/services/deploymentAssessment.js'
+import { createDeploymentAssessment, searchDeploymentAssessments } from '../../src/services/deploymentAssessment.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -167,5 +167,70 @@ describe('services > deploymentAssessment', () => {
     DeploymentAssessmentModelMock.save.mockRejectedValueOnce(mongoError)
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toMatchObject({ code: 409 })
+  })
+
+  describe('searchDeploymentAssessments', () => {
+    test('returns visible deployment assessments ordered by draft status and most recently updated', async () => {
+      const deploymentAssessments = [{ id: 'assessment-one' }]
+      const sort = vi.fn().mockResolvedValue(deploymentAssessments)
+      DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+
+      const result = await searchDeploymentAssessments({ dn: 'creator' }, {})
+
+      expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
+        $and: [{ $or: [{ draft: false }, { draft: true, createdBy: 'creator' }] }],
+      })
+      expect(sort).toHaveBeenCalledWith({ draft: -1, updatedAt: -1 })
+      expect(result).toBe(deploymentAssessments)
+    })
+
+    test('combines model, risk owner, creator, creation window, and name filters', async () => {
+      const sort = vi.fn().mockResolvedValue([])
+      DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+
+      await searchDeploymentAssessments(
+        { dn: 'creator' },
+        {
+          schemaId: 'deployment-assessment-schema',
+          modelIds: ['model-one', 'model-two'],
+          riskOwner: 'user:risk-owner',
+          createdBy: 'creator',
+          createdAfter: '2026-01-01',
+          createdBefore: '2026-01-31',
+          draft: true,
+          search: 'Assessment.*',
+        },
+      )
+
+      expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
+        $and: [{ $or: [{ draft: false }, { draft: true, createdBy: 'creator' }] }],
+        schemaId: 'deployment-assessment-schema',
+        'metadata.overview.modelIds': { $all: ['model-one', 'model-two'] },
+        'metadata.overview.riskOwner': 'user:risk-owner',
+        createdBy: 'creator',
+        createdAt: {
+          $gte: new Date('2026-01-01T00:00:00.000Z'),
+          $lt: new Date('2026-02-01T00:00:00.000Z'),
+        },
+        draft: true,
+        'metadata.overview.name': { $regex: 'Assessment\\.\\*', $options: 'i' },
+      })
+      expect(sort).toHaveBeenCalledWith({ draft: -1, updatedAt: -1 })
+    })
+
+    test.each([
+      ['after', { createdAfter: '2026-01-01' }, { $gte: new Date('2026-01-01T00:00:00.000Z') }],
+      ['before', { createdBefore: '2026-01-31' }, { $lt: new Date('2026-02-01T00:00:00.000Z') }],
+    ])('supports a creation window with only a %s boundary', async (_boundary, params, expectedCreatedAt) => {
+      const sort = vi.fn().mockResolvedValue([])
+      DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+
+      await searchDeploymentAssessments({ dn: 'creator' }, params)
+
+      expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
+        $and: [{ $or: [{ draft: false }, { draft: true, createdBy: 'creator' }] }],
+        createdAt: expectedCreatedAt,
+      })
+    })
   })
 })

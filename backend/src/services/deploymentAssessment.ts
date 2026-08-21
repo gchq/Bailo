@@ -1,3 +1,5 @@
+import { escapeRegExp } from 'lodash-es'
+
 import authentication from '../connectors/authentication/index.js'
 import DeploymentAssessmentModel, {
   DeploymentAssessmentInterface,
@@ -12,6 +14,17 @@ import { BadReq, Conflict } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+
+export interface SearchDeploymentAssessmentsParams {
+  schemaId?: string
+  modelIds?: string[]
+  riskOwner?: string
+  createdBy?: string
+  createdAfter?: string
+  createdBefore?: string
+  draft?: boolean
+  search?: string
+}
 
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
   metadata: unknown
@@ -107,4 +120,40 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   }
 
   return deploymentAssessment
+}
+
+export async function searchDeploymentAssessments(user: UserInterface, params: SearchDeploymentAssessmentsParams) {
+  const query: Record<string, unknown> = {
+    $and: [{ $or: [{ draft: false }, { draft: true, createdBy: user.dn }] }],
+  }
+
+  if (params.schemaId) {
+    query.schemaId = params.schemaId
+  }
+  if (params.modelIds?.length) {
+    query['metadata.overview.modelIds'] = { $all: params.modelIds }
+  }
+  if (params.riskOwner) {
+    query['metadata.overview.riskOwner'] = params.riskOwner
+  }
+  if (params.createdBy) {
+    query.createdBy = params.createdBy
+  }
+  if (params.createdAfter || params.createdBefore) {
+    const beforeDate = params.createdBefore ? new Date(params.createdBefore) : undefined
+    beforeDate?.setUTCDate(beforeDate.getUTCDate() + 1)
+
+    query.createdAt = {
+      ...(params.createdAfter && { $gte: new Date(params.createdAfter) }),
+      ...(beforeDate && { $lt: beforeDate }),
+    }
+  }
+  if (params.draft !== undefined) {
+    query.draft = params.draft
+  }
+  if (params.search) {
+    query['metadata.overview.name'] = { $regex: escapeRegExp(params.search), $options: 'i' }
+  }
+
+  return DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
 }

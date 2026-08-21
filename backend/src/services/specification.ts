@@ -57,6 +57,63 @@ export const errorSchemaContent = {
   },
 }
 
+const deploymentAssessmentIdSchema = z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' })
+export const deploymentAssessmentSchemaIdSchema = z
+  .string()
+  .min(1, 'You must provide a schema ID')
+  .openapi({ example: 'stark-deployment-assessment-schema-v1' })
+const deploymentAssessmentNameSchema = z
+  .string()
+  .min(1, 'You must provide a deployment assessment name')
+  .openapi({ example: 'Just A Rather Very Intelligent System' })
+const deploymentAssessmentRiskOwnerSchema = z
+  .string()
+  .min(1, 'You must provide a risk owner')
+  .openapi({ example: 'user:tony' })
+const deploymentAssessmentJustificationSchema = z
+  .string()
+  .min(1, 'You must provide a risk owner justification')
+  .openapi({ example: 'Tony Stark is Iron Man.' })
+const deploymentAssessmentModelIdsSchema = z
+  .array(z.string())
+  .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
+export const deploymentAssessmentDraftSchema = z.boolean().openapi({ example: true })
+
+export const deploymentAssessmentMetadataSchema = z
+  .object({
+    overview: z
+      .object({
+        name: deploymentAssessmentNameSchema,
+        riskOwner: deploymentAssessmentRiskOwnerSchema.optional(),
+        justification: deploymentAssessmentJustificationSchema.optional(),
+        modelIds: deploymentAssessmentModelIdsSchema.optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentInterfaceSchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+  metadata: deploymentAssessmentMetadataSchema,
+  draft: deploymentAssessmentDraftSchema,
+  createdBy: z.string().openapi({ example: 'tony' }),
+  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+})
+
+export const deploymentAssessmentSummarySchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+  name: deploymentAssessmentNameSchema,
+  owner: deploymentAssessmentRiskOwnerSchema.optional(),
+  models: deploymentAssessmentModelIdsSchema.optional(),
+  justification: deploymentAssessmentJustificationSchema.optional(),
+  draft: deploymentAssessmentDraftSchema,
+  createdBy: z.string().openapi({ example: 'tony' }),
+  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+})
+
 export const systemStatusSchema = z.object({
   code: z.number().openapi({ example: 200 }),
   ping: z.string().openapi({ example: 'pong' }),
