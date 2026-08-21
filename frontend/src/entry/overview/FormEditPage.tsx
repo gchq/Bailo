@@ -447,6 +447,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           canEdit={isEdit}
           displayStats={displayFormStats}
           stateList={(schema?.jsonSchema as { stateList?: string[] } | undefined)?.stateList || []}
+          currentState={entry.state}
         />
         {isEdit && (
           <SaveAndCancelButtons
