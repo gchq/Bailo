@@ -5,7 +5,7 @@ import { Stack } from '@mui/system'
 import { useGetModel } from 'actions/entry'
 import { CreateInferenceParams, postInference } from 'actions/inferencing'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useState } from 'react'
+import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import InferenceForm from 'src/entry/model/inferencing/InferenceForm'
@@ -37,7 +37,7 @@ export default function NewInference() {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!model) {

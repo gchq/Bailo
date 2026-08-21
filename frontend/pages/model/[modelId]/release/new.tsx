@@ -6,7 +6,7 @@ import { postFileForModelId } from 'actions/file'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useContext, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -96,7 +96,7 @@ export default function NewRelease() {
     setFiles(newFiles)
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     setFailedFileUploads([])
