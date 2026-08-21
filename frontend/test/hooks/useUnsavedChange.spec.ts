@@ -61,6 +61,51 @@ describe('useUnsavedChanges', () => {
 
       expect(result.current.dialogOpen).toBe(false)
     })
+
+    test('only requiredByModelState query param changes', async () => {
+      mockRouter.setCurrentUrl('/model/test-id?tab=overview&requiredByModelState=draft')
+      const { result } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      await act(async () => {
+        await mockRouter.replace('/model/test-id?tab=overview&requiredByModelState=submitted')
+      })
+
+      expect(result.current.dialogOpen).toBe(false)
+    })
+
+    test('only isEdit query param changes', async () => {
+      mockRouter.setCurrentUrl('/model/test-id?tab=overview')
+      const { result } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      await act(async () => {
+        await mockRouter.replace('/model/test-id?tab=overview&isEdit=true')
+      })
+
+      expect(result.current.dialogOpen).toBe(false)
+    })
+
+    test('multiple ignored params change simultaneously', async () => {
+      mockRouter.setCurrentUrl('/model/test-id?tab=overview&page=0')
+      const { result } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      await act(async () => {
+        await mockRouter.replace('/model/test-id?tab=overview&page=5&isEdit=true&requiredByModelState=draft')
+      })
+
+      expect(result.current.dialogOpen).toBe(false)
+    })
   })
 
   describe('warning', () => {
@@ -135,50 +180,132 @@ describe('useUnsavedChanges', () => {
     expect(result.current.dialogOpen).toBe(false)
   })
 
-  test('sendWarning opens dialog and executes callback on confirm', () => {
+  test('re-blocks navigation after cancel', async () => {
     const { result } = renderHook(() => useUnsavedChanges())
-    const callback = vi.fn()
 
     act(() => {
       result.current.setUnsavedChanges(true)
     })
 
-    act(() => {
-      result.current.sendWarning(callback)
-    })
-
-    expect(result.current.dialogOpen).toBe(true)
-    expect(callback).not.toHaveBeenCalled()
-
-    act(() => {
-      result.current.onDialogConfirm()
-    })
-
-    expect(callback).toHaveBeenCalled()
-    expect(result.current.unsavedChanges).toBe(false)
-    expect(result.current.dialogOpen).toBe(false)
-  })
-
-  test('sendWarning does not execute callback on cancel', () => {
-    const { result } = renderHook(() => useUnsavedChanges())
-    const callback = vi.fn()
-
-    act(() => {
-      result.current.setUnsavedChanges(true)
-    })
-
-    act(() => {
-      result.current.sendWarning(callback)
-    })
-
-    expect(result.current.dialogOpen).toBe(true)
+    await triggerBlockedNavigation('/page-a')
 
     act(() => {
       result.current.onDialogCancel()
     })
 
-    expect(callback).not.toHaveBeenCalled()
-    expect(result.current.unsavedChanges).toBe(true)
     expect(result.current.dialogOpen).toBe(false)
+
+    await triggerBlockedNavigation('/page-b')
+
+    expect(result.current.dialogOpen).toBe(true)
+  })
+
+  describe('sendWarning', () => {
+    test('opens dialog and executes callback on confirm', () => {
+      const { result } = renderHook(() => useUnsavedChanges())
+      const callback = vi.fn()
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      act(() => {
+        result.current.sendWarning(callback)
+      })
+
+      expect(result.current.dialogOpen).toBe(true)
+      expect(callback).not.toHaveBeenCalled()
+
+      act(() => {
+        result.current.onDialogConfirm()
+      })
+
+      expect(callback).toHaveBeenCalled()
+      expect(result.current.unsavedChanges).toBe(false)
+      expect(result.current.dialogOpen).toBe(false)
+    })
+
+    test('does not execute callback on cancel', () => {
+      const { result } = renderHook(() => useUnsavedChanges())
+      const callback = vi.fn()
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      act(() => {
+        result.current.sendWarning(callback)
+      })
+
+      expect(result.current.dialogOpen).toBe(true)
+
+      act(() => {
+        result.current.onDialogCancel()
+      })
+
+      expect(callback).not.toHaveBeenCalled()
+      expect(result.current.unsavedChanges).toBe(true)
+      expect(result.current.dialogOpen).toBe(false)
+    })
+  })
+
+  describe('beforeunload', () => {
+    test('calls preventDefault when unsavedChanges is true', () => {
+      const { result } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(true)
+    })
+
+    test('does not call preventDefault when unsavedChanges is false', () => {
+      renderHook(() => useUnsavedChanges())
+
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    test('removes listener on unmount', () => {
+      const { result, unmount } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      unmount()
+
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(false)
+    })
+  })
+
+  describe('confirmed navigation proceeds', () => {
+    test('confirmed route change does not re-block', async () => {
+      const { result } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      await triggerBlockedNavigation('/different-page')
+
+      expect(result.current.dialogOpen).toBe(true)
+
+      await act(async () => {
+        result.current.onDialogConfirm()
+      })
+
+      expect(result.current.dialogOpen).toBe(false)
+      expect(result.current.unsavedChanges).toBe(false)
+    })
   })
 })
