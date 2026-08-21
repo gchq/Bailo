@@ -1,6 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { FileInterface, FileWithScanResultsAggregate } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
@@ -45,6 +46,7 @@ export const ResourceKind = {
   Metric: 'metric',
   User: 'user',
   Registry: 'registry',
+  DeploymentAssessment: 'deployment assessment',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -432,6 +434,12 @@ export const AuditInfo = {
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Review,
   },
+  CreateDeploymentAssessment: {
+    typeId: 'CreateDeploymentAssessment',
+    description: 'Deployment assessment created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
   ViewCurrentUserInformation: {
     typeId: 'ViewCurrentUserInformation',
     description: 'Viewed information about the user making the request',
@@ -548,6 +556,7 @@ export abstract class BaseAuditConnector {
   abstract onViewMetric(req: Request): Promise<void>
 
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
+  abstract onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>

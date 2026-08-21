@@ -1,6 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
@@ -435,6 +436,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onCreateReview(req: Request, modelId: string) {
     this.checkEventType(AuditInfo.CreateReview, req)
     const event = this.generateEvent(req, { modelId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc) {
+    this.checkEventType(AuditInfo.CreateDeploymentAssessment, req)
+    const event = this.generateEvent(req, { id: deploymentAssessment.id })
     req.log.info(event, req.audit.description)
   }
 

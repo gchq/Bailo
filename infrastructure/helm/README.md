@@ -416,6 +416,7 @@ The following tables describe selected configuration options available in `value
 | `config.helpPopoverText.manualEntryAccess` | Help text for manually adding a user to a model | `null` |
 | `config.modelDetails.organisations` | Organisation options for models | `[]` |
 | `config.modelDetails.states` | States options for models | `[]` |
+| `config.deploymentAssessments.deployableModelState` | Model state required for deployment assessments | `Production` |
 | `config.smtp.port` | Backend connection port to mail server <https://nodemailer.com/smtp> | `1025` |
 | `config.smtp.secure` | Enable to use TLS | `false` |
 | `config.smtp.rejectUnauthorized` | TLS option | `false` |

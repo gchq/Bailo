@@ -246,6 +246,10 @@ data:
         },
       },
 
+      deploymentAssessments: {
+        deployableModelState: '{{ .Values.config.deploymentAssessments.deployableModelState }}',
+      },
+
       connectors: {
         authentication: {
           kind: '{{ .Values.connectors.authentication.kind }}',

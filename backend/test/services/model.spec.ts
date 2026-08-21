@@ -735,7 +735,7 @@ describe('services > model', () => {
     expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
       'test-schema',
       { overview: { name: 'Local Name', description: 'Mirrored Description' } },
-      'Production',
+      { modelState: 'Production' },
     )
     expect(saveMock).toHaveBeenCalled()
   })
@@ -790,7 +790,7 @@ describe('services > model', () => {
     expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
       'test-schema',
       { overview: { name: 'Local' } },
-      'Production',
+      { modelState: 'Production' },
     )
   })
 
