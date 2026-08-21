@@ -42,6 +42,7 @@ const liveModel = {
   kind: EntryKind.Model,
   visibility: EntryVisibility.Public,
   state: 'Production',
+  collaborators: [{ entity: 'user:user', roles: 'owner' }],
 }
 
 describe('services > deploymentAssessment', () => {
@@ -73,13 +74,13 @@ describe('services > deploymentAssessment', () => {
   })
 
   test('creates an incomplete draft without requiring optional fields', async () => {
-    const metadata = { overview: { name: 'Draft assessment' } }
+    const metadata = { overview: { name: 'Draft assessment', riskOwner: 'user:user' } }
 
     await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ draft: true }))
     expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: true })
-    expect(authentication.getUserInformation).not.toHaveBeenCalled()
+    expect(authentication.getUserInformation).toHaveBeenCalled()
     expect(ModelModelMock.find).not.toHaveBeenCalled()
     expect(idMocks.convertStringToId).toHaveBeenCalledWith('Draft assessment')
   })

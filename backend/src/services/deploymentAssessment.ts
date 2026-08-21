@@ -110,20 +110,22 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw error
   }
 
-  notifyDeploymentRiskOwner(riskOwner, deploymentAssessment).catch((error) =>
-    log.warn({ error }, 'Error when sending notifications requesting review for release.'),
-  )
+  if (!params.draft) {
+    notifyDeploymentRiskOwner(riskOwner, deploymentAssessment).catch((error) =>
+      log.warn({ error }, 'Error when sending notifications requesting review for release.'),
+    )
 
-  const models = await ModelModel.find({
-    id: { $in: modelIds ?? [] },
-  })
+    const models = await ModelModel.find({
+      id: { $in: modelIds ?? [] },
+    })
 
-  for (const model of models) {
-    notifyDeploymentModelOwners(
-      model.collaborators.filter((collaborator) => collaborator.roles.includes('owner')).map((owner) => owner.entity),
-      deploymentAssessment,
-      model,
-    ).catch((error) => log.warn({ error }, 'Error when sending notifications requesting review for release.'))
+    for (const model of models) {
+      notifyDeploymentModelOwners(
+        model.collaborators.filter((collaborator) => collaborator.roles.includes('owner')).map((owner) => owner.entity),
+        deploymentAssessment,
+        model,
+      ).catch((error) => log.warn({ error }, 'Error when sending notifications requesting review for release.'))
+    }
   }
 
   return deploymentAssessment
