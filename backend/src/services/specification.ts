@@ -123,6 +123,9 @@ export const systemStatusSchema = z.object({
   }),
 })
 
+const schemaId = z.string().min(1, 'You must provide a schema ID')
+const draft = z.boolean().openapi({ example: true })
+
 export const modelTransferSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   modelId: z.string().openapi({ example: 'model-123456' }),
@@ -157,7 +160,7 @@ export const peersConfigStatusSchema = z.object({
 })
 
 export const modelCardInterfaceSchema = z.object({
-  schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
+  schemaId: schemaId.openapi({ example: 'minimal-general-v10-beta' }),
   version: z.number().openapi({ example: 5 }),
   createdBy: z.string().openapi({ example: 'user' }),
   metadata: z.object({
@@ -167,7 +170,7 @@ export const modelCardInterfaceSchema = z.object({
 
 export const modelCardRevisionInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
-  schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
+  schemaId: schemaId.openapi({ example: 'minimal-general-v10-beta' }),
 
   version: z.number().openapi({ example: 5 }),
   metadata: z.object({
@@ -339,7 +342,7 @@ export const releaseInterfaceSchema = z.object({
   notes: z.string().openapi({ example: 'An example release' }),
 
   minor: z.boolean().openapi({ example: false }),
-  draft: z.boolean().openapi({ example: false }),
+  draft,
 
   fileIds: z.array(z.string()).openapi({ example: ['507f1f77bcf86cd799439011'] }),
   images: z.array(z.string()).openapi({ example: ['/yolo-v4-abcdef/example:v1.0.0'] }),
@@ -395,7 +398,7 @@ export const accessRequestInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'looking-at-pictures-zyxwvu' }),
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
 
-  schemaId: z.string().openapi({ example: 'minimal-access-request-v1' }),
+  schemaId: schemaId.openapi({ example: 'minimal-access-request-v1' }),
   metadata: z.object({
     overview: z.object({
       name: z.string().openapi({ example: 'Looking at Pictures' }),
@@ -420,6 +423,35 @@ export const accessRequestInterfaceSchema = z.object({
   createdBy: z.string().openapi({ example: 'user' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+const deploymentAssessmentOverview = z
+  .object({
+    name: z
+      .string()
+      .min(1, 'You must provide a deployment assessment name')
+      .openapi({ example: 'Just A Rather Very Intelligent System' }),
+    riskOwner: z.string().min(1, 'You must provide a risk owner').openapi({ example: 'user:tony' }).optional(),
+    justification: z
+      .string()
+      .min(1, 'You must provide a justification')
+      .openapi({ example: 'The risk owner is accountable for the deployed service.' })
+      .optional(),
+    modelIds: z
+      .array(z.string())
+      .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
+      .optional(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentInterfaceSchema = z.object({
+  id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
+  schemaId: schemaId.openapi({ example: 'stark-deployment-assessment-schema-v1' }),
+  metadata: z.object({ overview: deploymentAssessmentOverview }).passthrough(),
+  draft: draft.optional().default(true).openapi({ example: true }),
+  createdBy: z.string().openapi({ example: 'tony' }),
+  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
 })
 
 export const schemaInterfaceSchema = z.object({

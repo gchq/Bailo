@@ -2,6 +2,7 @@ import { Router } from 'express'
 
 import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
+import { getDeploymentAssessment } from './deploymentAssessment/getDeploymentAssessment.js'
 import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
@@ -25,6 +26,7 @@ router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
 router.get('/deployment-assessments', ...getDeploymentAssessments)
 router.post('/deployment-assessments', ...postDeploymentAssessment)
+router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
