@@ -1,4 +1,6 @@
 import authentication from '../connectors/authentication/index.js'
+import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
+import authorisation from '../connectors/authorisation/index.js'
 import DeploymentAssessmentModel, {
   DeploymentAssessmentInterface,
   DeploymentAssessmentMetadata,
@@ -8,7 +10,7 @@ import { UserInterface } from '../models/User.js'
 import { SchemaKind } from '../types/enums.js'
 import config from '../utils/config.js'
 import { fromEntity } from '../utils/entity.js'
-import { BadReq, Conflict, NotFound } from '../utils/error.js'
+import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
@@ -61,10 +63,15 @@ async function validateModels(modelIds: string[]) {
   }
 }
 
-export async function getDeploymentAssessmentById(deploymentAssessmentId: string) {
+export async function getDeploymentAssessmentById(user: UserInterface, deploymentAssessmentId: string) {
   const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
   if (!deploymentAssessment) {
     throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
+  }
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
   return deploymentAssessment
@@ -96,13 +103,19 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     await validateModels(modelIds)
   }
 
+  const deploymentAssessmentId = convertStringToId(name)
   const deploymentAssessment = new DeploymentAssessmentModel({
-    id: convertStringToId(name),
+    id: deploymentAssessmentId,
     schemaId: params.schemaId,
     metadata,
     draft: params.draft,
     createdBy: user.dn,
   })
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
 
   try {
     await deploymentAssessment.save()

@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { Roles } from '../../../src/connectors/authentication/constants.js'
 import {
   AccessRequestAction,
+  DeploymentAssessmentAction,
   FileAction,
   ModelAction,
   ReleaseAction,
@@ -1029,6 +1030,119 @@ describe('connectors > authorisation > base', () => {
       id: 'role1',
       success: false,
       info: 'You cannot upload or modify a review role if you are not an admin.',
+    })
+  })
+
+  describe('Deployment assessments', () => {
+    const connector = new BasicAuthorisationConnector()
+
+    const deploymentAssessment = {
+      id: 'da-1',
+      createdBy: 'creator',
+      draft: false,
+      metadata: { overview: { riskOwner: 'riskOwner' } },
+    } as any
+
+    test('view non-draft DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('view draft DA as creator', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'creator' } as UserInterface,
+        { ...deploymentAssessment, draft: true },
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('view draft DA as risk owner', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'riskOwner' } as UserInterface,
+        { ...deploymentAssessment, draft: true },
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('view draft DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        { ...deploymentAssessment, draft: true },
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({
+        id: 'da-1',
+        success: false,
+        info: 'You do not have permission to view this Deployment Assessment',
+      })
+    })
+
+    test('delete DA as creator', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'creator' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Delete,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('delete DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Delete,
+      )
+
+      expect(result).toStrictEqual({
+        id: 'da-1',
+        success: false,
+        info: 'You do not have permission to delete this Deployment Assessment',
+      })
+    })
+
+    test('update DA as risk owner', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'riskOwner' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Update,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('update DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Update,
+      )
+
+      expect(result).toStrictEqual({
+        id: 'da-1',
+        success: false,
+        info: 'You do not have permission to update this Deployment Assessment',
+      })
+    })
+
+    test('create DA as any user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'anyUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Create,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
     })
   })
 

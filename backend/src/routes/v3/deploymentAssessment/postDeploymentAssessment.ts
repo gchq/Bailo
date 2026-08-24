@@ -21,7 +21,7 @@ export const postDeploymentAssessmentSchema = z.object({
 registerPath(
   {
     method: 'post',
-    path: '/api/v3/deployment-assessment',
+    path: '/api/v3/deployment-assessments',
     tags: ['deployment assessments'],
     description: 'Create a deployment assessment',
     schema: postDeploymentAssessmentSchema,
@@ -51,6 +51,6 @@ export const postDeploymentAssessment = [
     const deploymentAssessment = await createDeploymentAssessment(req.user, body)
     await audit.onCreateDeploymentAssessment(req, deploymentAssessment)
 
-    res.location(`/api/v3/deployment-assessment/${deploymentAssessment.id}`).status(201).json({ deploymentAssessment })
+    res.location(`/api/v3/deployment-assessments/${deploymentAssessment.id}`).status(201).json({ deploymentAssessment })
   },
 ]

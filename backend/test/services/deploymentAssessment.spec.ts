@@ -2,6 +2,7 @@ import { MongoServerError } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authentication from '../../src/connectors/authentication/index.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
 import { createDeploymentAssessment, getDeploymentAssessmentById } from '../../src/services/deploymentAssessment.js'
 import { SchemaKind } from '../../src/types/enums.js'
@@ -10,6 +11,8 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 vi.mock('../../src/connectors/authentication/index.js', () => ({
   default: { getUserInformation: vi.fn() },
 }))
+
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'assessment-abc123') }))
 vi.mock('../../src/utils/id.js', () => idMocks)
@@ -54,19 +57,40 @@ describe('services > deploymentAssessment', () => {
 
   describe('getDeploymentAssessmentById', () => {
     test('gets an existing DA by its ID', async () => {
-      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce('mocked')
+      const mockDA = {
+        createdBy: 'creator',
+        metadata: { overview: { riskOwner: 'user' } },
+      }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
 
-      const result = await getDeploymentAssessmentById('da-id')
+      const result = await getDeploymentAssessmentById({ dn: 'creator' }, 'da-id')
 
       expect(DeploymentAssessmentModelMock.findOne).toHaveBeenCalled()
-      expect(result).toBe('mocked')
+      expect(result).toBe(mockDA)
     })
 
     test('no DA', async () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(undefined)
 
-      await expect(() => getDeploymentAssessmentById('da-id')).rejects.toThrow(
+      await expect(() => getDeploymentAssessmentById({ dn: 'creator' }, 'da-id')).rejects.toThrow(
         /^The requested deployment assessment was not found/,
+      )
+    })
+
+    test('forbidden when authorisation fails', async () => {
+      const mockDA = {
+        createdBy: 'creator',
+        metadata: { overview: { riskOwner: 'user' } },
+      }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
+      vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
+        success: false,
+        info: 'You do not have permission to view this Deployment Assessment',
+        id: 'da-id',
+      })
+
+      await expect(() => getDeploymentAssessmentById({ dn: 'otherUser' }, 'da-id')).rejects.toThrow(
+        /^You do not have permission to view this Deployment Assessment/,
       )
     })
   })
@@ -178,6 +202,19 @@ describe('services > deploymentAssessment', () => {
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })).rejects.toThrow(message)
     expect(DeploymentAssessmentModelMock).not.toHaveBeenCalled()
+  })
+
+  test('rejects creation when authorisation fails', async () => {
+    vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
+      success: false,
+      info: 'You do not have permission to create this Deployment Assessment',
+      id: 'assessment-abc123',
+    })
+
+    await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
+      /^You do not have permission to create this Deployment Assessment/,
+    )
+    expect(DeploymentAssessmentModelMock.save).not.toHaveBeenCalled()
   })
 
   test('returns a conflict when the generated ID already exists', async () => {

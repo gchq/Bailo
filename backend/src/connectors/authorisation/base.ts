@@ -1,4 +1,5 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { FileInterface } from '../../models/File.js'
 import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
@@ -21,6 +22,8 @@ import {
   AccessRequestAction,
   AccessRequestActionKeys,
   ActionLookup,
+  DeploymentAssessmentAction,
+  DeploymentAssessmentActionKeys,
   FileAction,
   FileActionKeys,
   ImageAction,
@@ -94,6 +97,14 @@ export class BasicAuthorisationConnector {
     action: AccessRequestActionKeys,
   ) {
     return (await this.accessRequests(user, model, [accessRequest], action))[0]
+  }
+
+  async deploymentAssessment(
+    user: UserInterface,
+    deploymentAssessment: DeploymentAssessmentDoc,
+    action: DeploymentAssessmentActionKeys,
+  ) {
+    return (await this.deploymentAssessments(user, [deploymentAssessment], action))[0]
   }
 
   async response(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys) {
@@ -313,6 +324,53 @@ export class BasicAuthorisationConnector {
 
         // Otherwise they either own the model, access request or this is a read-only action.
         return { success: true, id: request.id }
+      }),
+    )
+  }
+
+  async deploymentAssessments(
+    user: UserInterface,
+    deploymentAssessments: Array<DeploymentAssessmentDoc>,
+    action: DeploymentAssessmentActionKeys,
+  ): Promise<Array<Response>> {
+    return Promise.all(
+      deploymentAssessments.map(async (deploymentAssessment) => {
+        const isNamedUser = [deploymentAssessment.createdBy, deploymentAssessment.metadata.overview.riskOwner].includes(
+          user.dn,
+        )
+
+        let errorInfo: string | undefined
+        switch (action) {
+          case DeploymentAssessmentAction.View: {
+            // Only allow GET requests if the DA is not a draft, otherwise restrict to creator or risk owner
+            if (deploymentAssessment.draft && !isNamedUser) {
+              errorInfo = 'You do not have permission to view this Deployment Assessment'
+            }
+            break
+          }
+          case DeploymentAssessmentAction.Delete: {
+            if (!isNamedUser) {
+              errorInfo = 'You do not have permission to delete this Deployment Assessment'
+            }
+            break
+          }
+          case DeploymentAssessmentAction.Update: {
+            if (!isNamedUser) {
+              errorInfo = 'You do not have permission to update this Deployment Assessment'
+            }
+            break
+          }
+        }
+
+        if (errorInfo !== undefined) {
+          return {
+            success: false,
+            info: errorInfo,
+            id: deploymentAssessment.id,
+          }
+        }
+
+        return { success: true, id: deploymentAssessment.id }
       }),
     )
   }

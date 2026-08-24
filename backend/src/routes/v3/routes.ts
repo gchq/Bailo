@@ -23,8 +23,8 @@ router.get('/api-docs/swagger.json', (req, res) => res.json(generateV3SwaggerSpe
 
 router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
-router.post('/deployment-assessment', ...postDeploymentAssessment)
-router.get('/deployment-assessment/:deploymentAssessmentId', ...getDeploymentAssessment)
+router.post('/deployment-assessments', ...postDeploymentAssessment)
+router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)

@@ -14,25 +14,28 @@ export const getDeploymentAssessmentSchema = z.object({
   }),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/deployment-assessment/{deploymentAssessmentId}',
-  tags: ['deployment assessment'],
-  description: 'Get a deployment assessment.',
-  schema: getDeploymentAssessmentSchema,
-  responses: {
-    200: {
-      description: 'A deployment assessment.',
-      content: {
-        'application/json': {
-          schema: z.object({
-            deploymentAssessment: deploymentAssessmentInterfaceSchema,
-          }),
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}',
+    tags: ['deployment assessments'],
+    description: 'Get a deployment assessment.',
+    schema: getDeploymentAssessmentSchema,
+    responses: {
+      200: {
+        description: 'A deployment assessment.',
+        content: {
+          'application/json': {
+            schema: z.object({
+              deploymentAssessment: deploymentAssessmentInterfaceSchema,
+            }),
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 interface GetDeploymentAssessmentResponse {
   deploymentAssessment: DeploymentAssessmentInterface
@@ -43,7 +46,7 @@ export const getDeploymentAssessment = [
     req.audit = AuditInfo.ViewDeploymentAssessment
     const { params } = parse(req, getDeploymentAssessmentSchema)
 
-    const deploymentAssessment = await getDeploymentAssessmentById(params.deploymentAssessmentId)
+    const deploymentAssessment = await getDeploymentAssessmentById(req.user, params.deploymentAssessmentId)
 
     await audit.onViewDeploymentAssessment(req, deploymentAssessment)
 

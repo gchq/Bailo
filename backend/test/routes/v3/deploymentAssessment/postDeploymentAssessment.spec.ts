@@ -37,10 +37,10 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
         draft: false,
       },
     }
-    const res = await testPost('/api/v3/deployment-assessment', fixture)
+    const res = await testPost('/api/v3/deployment-assessments', fixture)
 
     expect(res.statusCode).toBe(201)
-    expect(res.headers.location).toBe('/api/v3/deployment-assessment/assessment-abc123')
+    expect(res.headers.location).toBe('/api/v3/deployment-assessments/assessment-abc123')
     expect(res.body).toEqual({
       deploymentAssessment: {
         ...deploymentAssessment,
@@ -69,7 +69,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
       draft: true,
     }
 
-    const res = await testPost('/api/v3/deployment-assessment', { body })
+    const res = await testPost('/api/v3/deployment-assessments', { body })
 
     expect(res.statusCode).toBe(201)
     expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
@@ -82,7 +82,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
       metadata: { overview: { name: 'Assessment' } },
     }
 
-    const res = await testPost('/api/v3/deployment-assessment', { body })
+    const res = await testPost('/api/v3/deployment-assessments', { body })
 
     expect(res.statusCode).toBe(201)
     expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
@@ -104,7 +104,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
       description: 'server-managed property',
     },
   ])('rejects malformed input: $description', async ({ body }) => {
-    const res = await testPost('/api/v3/deployment-assessment', { body })
+    const res = await testPost('/api/v3/deployment-assessments', { body })
 
     expect(res.statusCode).toBe(400)
     expect(serviceMock.createDeploymentAssessment).not.toHaveBeenCalled()

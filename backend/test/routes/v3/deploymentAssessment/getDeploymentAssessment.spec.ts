@@ -14,7 +14,7 @@ vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 describe('routes > v3 > deploymentAssessment > getDeploymentAssessment', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getDeploymentAssessmentSchema)
-    const res = await testGet(`/api/v3/deployment-assessment/${fixture.params.deploymentAssessmentId}`)
+    const res = await testGet(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -22,7 +22,7 @@ describe('routes > v3 > deploymentAssessment > getDeploymentAssessment', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(getDeploymentAssessmentSchema)
-    const res = await testGet(`/api/v3/deployment-assessment/${fixture.params.deploymentAssessmentId}`)
+    const res = await testGet(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewDeploymentAssessment).toHaveBeenCalled()
