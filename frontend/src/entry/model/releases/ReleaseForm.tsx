@@ -39,6 +39,7 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, FileInterface, FileWithMetadataAndTags, FlattenedModelImage } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
+import { getFileUploadName } from 'utils/fileTreeUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -154,7 +155,8 @@ export default function ReleaseForm({
 
   const handleDeleteFile = (fileToDelete: File | FileInterface) => {
     if (formData.files) {
-      const updatedFileList = formData.files.filter((file) => file.name !== fileToDelete.name)
+      const deleteName = getFileUploadName(fileToDelete)
+      const updatedFileList = formData.files.filter((file) => getFileUploadName(file) !== deleteName)
       onFilesChange(updatedFileList)
     }
   }
@@ -384,16 +386,20 @@ export default function ReleaseForm({
                         mt: 1,
                       }}
                     >
-                      {formData.files.map((file, index) => (
-                        <div key={`${file.name}-${file.size}-${index}`}>
-                          <MultiFileInputFileDisplay
-                            file={file}
-                            readOnly={isReadOnly}
-                            onDelete={handleDeleteFile}
-                            onMetadataChange={handleMetadataChange}
-                          />
-                        </div>
-                      ))}
+                      {formData.files.map((file, index) => {
+                        const uploadName = getFileUploadName(file)
+                        return (
+                          <div key={`${uploadName}-${file.size}-${index}`}>
+                            <MultiFileInputFileDisplay
+                              file={file}
+                              displayName={uploadName}
+                              readOnly={isReadOnly}
+                              onDelete={handleDeleteFile}
+                              onMetadataChange={handleMetadataChange}
+                            />
+                          </div>
+                        )
+                      })}
                     </Stack>
                   )}
                 </Stack>

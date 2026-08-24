@@ -10,6 +10,7 @@ import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInter
 
 interface MultiFileInputDisplayProps {
   file: File | FileInterface
+  displayName?: string
   onDelete: (file: File | FileInterface) => void
   onMetadataChange: (fileWithMetadata: FileWithMetadataAndTags) => void
   readOnly?: boolean
@@ -17,6 +18,7 @@ interface MultiFileInputDisplayProps {
 
 export default function MultiFileInputFileDisplay({
   file,
+  displayName,
   onDelete,
   onMetadataChange,
   readOnly = false,
@@ -33,9 +35,11 @@ export default function MultiFileInputFileDisplay({
     onDelete(file)
   }
 
+  const name = displayName ?? file.name
+
   const handleMetadataChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMetadata({ ...metadata, text: event.target.value })
-    onMetadataChange({ fileName: file.name, metadata })
+    onMetadataChange({ fileName: name, metadata })
   }
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
@@ -61,7 +65,7 @@ export default function MultiFileInputFileDisplay({
     } else {
       setNewFileTags(newTags)
       onMetadataChange({
-        fileName: file.name,
+        fileName: name,
         metadata: {
           text: '',
           tags: newTags.filter((newTag) => newTag !== ''),
@@ -80,8 +84,8 @@ export default function MultiFileInputFileDisplay({
       }}
     >
       <Grid size={{ xs: 4 }}>
-        <Tooltip title={file.name}>
-          <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
+        <Tooltip title={name}>
+          <Chip color='primary' label={name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>
       </Grid>
       <Grid size={{ xs: 7 }}>

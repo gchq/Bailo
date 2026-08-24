@@ -1,5 +1,12 @@
 import { FileInterface } from 'types/types'
 
+export function getFileUploadName(file: File | FileInterface): string {
+  if (file instanceof File && file.webkitRelativePath) {
+    return file.webkitRelativePath
+  }
+  return file.name
+}
+
 export function isFolderMarker(file: FileInterface): boolean {
   return file.name.endsWith('/.folder')
 }

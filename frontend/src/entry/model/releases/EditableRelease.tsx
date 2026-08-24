@@ -28,6 +28,7 @@ import {
   SuccessfulFileUpload,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getFileUploadName } from 'utils/fileTreeUtils'
 import { plural } from 'utils/stringUtils'
 
 type EditableReleaseProps = {
@@ -111,9 +112,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   }, [isEdit, setUnsavedChanges])
 
   const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
-    // Filter out any deleted files from success list
     const filteredUploads = successfulFileUploads.filter((file) =>
-      newFiles.some((newFile) => file.fileName !== newFile.name),
+      newFiles.some((newFile) => file.fileName !== getFileUploadName(newFile)),
     )
     setSuccessfulFileUploads(filteredUploads)
     setFiles(newFiles)
@@ -159,35 +159,39 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         continue
       }
 
-      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
-        const fileWithMetadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)
+      const uploadName = getFileUploadName(file)
+      const fileWithMetadata = filesMetadata.find((m) => m.fileName === uploadName)
 
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === uploadName)) {
         const textMetadata = fileWithMetadata?.metadata?.text ?? ''
         const tags = fileWithMetadata?.metadata?.tags ?? []
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+            setCurrentFileUploadProgress({ fileName: uploadName, uploadProgress: percentCompleted })
           }
         }
 
         try {
-          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, {
-            text: textMetadata,
-            tags,
-          })
+          const fileUploadResponse = await postFileForModelId(
+            model.id,
+            file,
+            handleUploadProgress,
+            { text: textMetadata, tags },
+            uploadName,
+          )
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
-            setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-            successfulFiles.push({ fileName: file.name, fileId: fileUploadResponse.data.file._id })
+            setUploadedFiles((uploadedFiles) => [...uploadedFiles, uploadName])
+            successfulFiles.push({ fileName: uploadName, fileId: fileUploadResponse.data.file._id })
           } else {
             setCurrentFileUploadProgress(undefined)
             return setIsLoading(false)
           }
         } catch (e) {
           const message = e instanceof Error ? e.message : 'Unknown upload error'
-          const failed = { fileName: file.name, error: message }
+          const failed = { fileName: uploadName, error: message }
           failedFiles.push(failed)
 
           setFailedFileUploads((prev) => [...prev, failed])

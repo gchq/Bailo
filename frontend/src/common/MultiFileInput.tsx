@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
 import { ChangeEvent, useCallback, useMemo, useRef } from 'react'
 import { FileInterface, FileWithMetadataAndTags } from 'types/types'
+import { getFileUploadName } from 'utils/fileTreeUtils'
 const Input = styled('input')({
   display: 'none',
 })
@@ -36,18 +37,13 @@ export default function MultiFileInput({
 
   const handleAddFile = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const rawFiles = event.target.files ? Array.from(event.target.files) : []
-      // For folder uploads, use webkitRelativePath as the file name so paths are preserved
-      const newFiles = rawFiles.map((file) => {
-        if (file.webkitRelativePath) {
-          Object.defineProperty(file, 'name', { value: file.webkitRelativePath, writable: false })
-        }
-        return file
-      })
+      const newFiles = event.target.files ? Array.from(event.target.files) : []
       if (newFiles.length) {
         if (files) {
           const updatedFiles = [
-            ...files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+            ...files.filter(
+              (file) => !newFiles.some((newFile) => getFileUploadName(newFile) === getFileUploadName(file)),
+            ),
             ...newFiles,
           ]
           onFilesChange(updatedFiles)
@@ -56,9 +52,12 @@ export default function MultiFileInput({
         }
         onFilesMetadataChange([
           ...filesMetadata.filter(
-            (fileMetadata) => !newFiles.some((newFile) => newFile.name === fileMetadata.fileName),
+            (fileMetadata) => !newFiles.some((newFile) => getFileUploadName(newFile) === fileMetadata.fileName),
           ),
-          ...newFiles.map((newFile) => ({ fileName: newFile.name, metadata: { text: '', tags: [] } })),
+          ...newFiles.map((newFile) => ({
+            fileName: getFileUploadName(newFile),
+            metadata: { text: '', tags: [] },
+          })),
         ])
       }
       event.target.value = ''

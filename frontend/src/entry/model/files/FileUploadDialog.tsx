@@ -47,7 +47,9 @@ export default function FileUploadDialog({
             // For folder uploads, webkitRelativePath contains the path relative to the selected folder.
             // For individual files, prepend the current browsing path if set.
             const fileUploadPath = newFile.webkitRelativePath
-              ? newFile.webkitRelativePath
+              ? uploadPath
+                ? `${uploadPath}/${newFile.webkitRelativePath}`
+                : newFile.webkitRelativePath
               : uploadPath
                 ? `${uploadPath}/${newFile.name}`
                 : undefined
