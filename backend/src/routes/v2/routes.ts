@@ -19,6 +19,7 @@ import { postAccessRequest } from './model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './model/accessRequest/postAccessRequestComment.js'
 import { deleteModel } from './model/deleteModel.js'
 import { deleteFile } from './model/file/deleteFile.js'
+import { deleteFiles } from './model/file/deleteFiles.js'
 import { getDownloadFile } from './model/file/getDownloadFile.js'
 import { getFiles } from './model/file/getFiles.js'
 import { patchFile } from './model/file/patchFile.js'
@@ -150,6 +151,7 @@ router.post('/model/:modelId/files/upload/multipart/start', ...postStartMultipar
 router.post('/model/:modelId/files/upload/multipart/part', ...postMultipartUploadPart)
 router.post('/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 router.delete('/model/:modelId/file/:fileId', ...deleteFile)
+router.delete('/model/:modelId/files', ...deleteFiles)
 router.patch('/model/:modelId/file/:fileId', ...patchFile)
 
 router.post('/model/:modelId/webhooks', ...postWebhook)

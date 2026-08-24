@@ -512,6 +512,28 @@ describe('services > file', () => {
     expect(result).toMatchSnapshot()
   })
 
+  test('removeFiles > passes session to downstream calls', async () => {
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+    const mockSession = {} as any
+
+    vi.mocked(FileModelMock.aggregate).mockResolvedValueOnce([
+      { modelId: 'testModel', id: testFileId, _id: { toString: vi.fn(() => testFileId) } },
+    ])
+
+    await removeFiles(user, modelId, [testFileId], false, false, mockSession)
+
+    expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      testFileId,
+      false,
+      mockSession,
+    )
+    expect(ScanModelMock.deleteMany).toHaveBeenCalledWith({ fileId: { $eq: testFileId } }, mockSession)
+    expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledWith(expect.anything(), mockSession)
+  })
+
   test('removeFiles > throw on mirrored model', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       kind: 'mirrored-model',

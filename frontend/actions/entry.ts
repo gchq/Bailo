@@ -183,6 +183,14 @@ export function deleteEntryFile(modelId: string, fileId: string) {
   })
 }
 
+export function deleteEntryFiles(modelId: string, fileIds: string[]) {
+  return fetch(`/api/v2/model/${modelId}/files`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fileIds }),
+  })
+}
+
 export function deleteEntryImage(modelId: string, name: string, tag: string) {
   const encodedName = encodeURIComponent(name)
   const encodedTag = encodeURIComponent(tag)

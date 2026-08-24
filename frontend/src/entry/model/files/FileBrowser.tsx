@@ -20,7 +20,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { deleteEntryFile, useGetModelFiles } from 'actions/entry'
+import { deleteEntryFiles, useGetModelFiles } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -350,12 +350,11 @@ function FolderRow({
     try {
       setIsDeleting(true)
       setDeleteError('')
-      for (const file of [...allFilesInFolder, ...folderMarkers]) {
-        const res = await deleteEntryFile(modelId, file._id)
-        if (!res.ok) {
-          setDeleteError(await getErrorMessage(res))
-          return
-        }
+      const allFileIds = [...allFilesInFolder, ...folderMarkers].map((file) => file._id)
+      const res = await deleteEntryFiles(modelId, allFileIds)
+      if (!res.ok) {
+        setDeleteError(await getErrorMessage(res))
+        return
       }
       sendNotification({
         variant: 'success',

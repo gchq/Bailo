@@ -31,6 +31,9 @@ export function testDelete(path: string, fixture?: Fixture) {
   let request = supertest(server).delete(path)
   if (fixture) {
     request = applyHeaders(request, fixture)
+    if (fixture.body) {
+      return request.send(fixture.body as object)
+    }
   }
   return request
 }
