@@ -27,7 +27,7 @@ const serviceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
-describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
+describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => {
   test('creates a deployment assessment', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce(deploymentAssessment)
     const fixture = {
