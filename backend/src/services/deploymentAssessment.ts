@@ -8,15 +8,17 @@ import DeploymentAssessmentModel, {
   DeploymentAssessmentInterface,
   DeploymentAssessmentMetadata,
 } from '../models/DeploymentAssessment.js'
-import ModelModel, { EntryKind, EntryVisibility } from '../models/Model.js'
+import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind } from '../types/enums.js'
 import config from '../utils/config.js'
-import { fromEntity } from '../utils/entity.js'
+import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
@@ -77,6 +79,58 @@ async function validateModels(modelIds: string[]) {
   }
 }
 
+async function notifyDeploymentStakeholders(
+  riskOwner: string,
+  modelIds: string[],
+  deploymentAssessment: DeploymentAssessmentInterface,
+): Promise<void> {
+  try {
+    const models = await ModelModel.find({
+      id: { $in: modelIds },
+    }).lean()
+
+    const creator = await authentication.getUserInformation(toEntity('user', deploymentAssessment.createdBy))
+    const creatorName = creator.name || deploymentAssessment.createdBy
+
+    const notifications = [
+      notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName),
+      ...models.flatMap((model) => {
+        const owners = [
+          ...new Set(
+            model.collaborators
+              .filter((collaborator) => collaborator.roles.includes(SystemRoles.Owner))
+              .map((collaborator) => collaborator.entity),
+          ),
+        ]
+
+        return owners.length ? [notifyDeploymentModelOwners(owners, deploymentAssessment, model, creatorName)] : []
+      }),
+    ]
+
+    const results = await Promise.allSettled(notifications)
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        log.warn(
+          {
+            error: result.reason,
+            deploymentAssessmentId: deploymentAssessment.id,
+          },
+          'Failed to send deployment assessment notification',
+        )
+      }
+    }
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+      },
+      'Failed to prepare deployment assessment notifications',
+    )
+  }
+}
+
 export async function getDeploymentAssessmentById(user: UserInterface, deploymentAssessmentId: string) {
   const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
   if (!deploymentAssessment) {
@@ -110,6 +164,10 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   const metadata = params.metadata as DeploymentAssessmentMetadata
   const { name, riskOwner, modelIds } = metadata.overview
 
+  if (!params.draft && !riskOwner) {
+    throw BadReq('Deployment risk owner is required')
+  }
+
   if (riskOwner) {
     await validateRiskOwner(riskOwner)
   }
@@ -140,6 +198,10 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
       })
     }
     throw error
+  }
+
+  if (!params.draft && riskOwner) {
+    await notifyDeploymentStakeholders(riskOwner, modelIds ?? [], deploymentAssessment)
   }
 
   return deploymentAssessment
