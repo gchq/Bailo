@@ -26,6 +26,7 @@ node_modules/
 dist
 docs/_build
 docs/python-docs
+docs/bailo_docs.egg-info
 
 # Python venv
 docs/backenddocsvenv

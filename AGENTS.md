@@ -81,7 +81,7 @@ pip install -e .[test]
 
 ```bash
 python3 -m venv artefactscanvenv && source artefactscanvenv/bin/activate
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 ```
 
 - Unit tests: `pytest`
