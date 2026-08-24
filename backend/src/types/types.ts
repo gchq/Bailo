@@ -5,7 +5,14 @@ import type { ZodSchema, ZodTypeDef } from 'zod'
 import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
-import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
+import {
+  CollaboratorEntry,
+  EntryKind,
+  EntryKindKeys,
+  EntryVisibility,
+  EntryVisibilityKeys,
+  SystemRolesKeys,
+} from '../models/Model.js'
 import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
   DocumentsMirrorMetadata,
@@ -212,37 +219,23 @@ export interface EntrySearchResultWithErrors {
   errors?: Record<string, BailoError>
 }
 
-export interface EntrySearchOptions {
-  kind: Array<EntryKindKeys>
-  libraries: Array<string>
-  organisations: Array<string>
-  states: Array<string>
-  filters: Array<string>
-  search: string
-  task: string
-  peers: Array<string>
-  allowTemplating: boolean
-  schemaId: string
-  adminAccess: boolean
-  titleOnly: boolean
-}
-
-export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
-
-export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
-  kind: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
+export const EntrySearchOptionsSchema = z.object({
+  kind: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
   task: z.string().toLowerCase().optional(),
-  libraries: coerceArray(z.array(z.string().toLowerCase()).optional()),
-  organisations: coerceArray(z.array(z.string()).optional()),
-  states: coerceArray(z.array(z.string()).optional()),
-  filters: coerceArray(z.array(z.string()).optional()),
+  libraries: coerceArray(z.array(z.string().toLowerCase())).optional(),
+  organisations: coerceArray(z.array(z.string())).optional(),
+  states: coerceArray(z.array(z.string())).optional(),
+  filters: coerceArray(z.array(z.string())).optional(),
   search: z.string().optional(),
-  allowTemplating: strictCoerceBoolean(z.boolean().optional()),
+  allowTemplating: strictCoerceBoolean(z.boolean()).optional(),
   schemaId: z.string().optional(),
-  adminAccess: strictCoerceBoolean(z.boolean().optional()),
-  peers: coerceArray(z.array(z.string()).optional()),
-  titleOnly: strictCoerceBoolean(z.boolean().optional()),
+  adminAccess: strictCoerceBoolean(z.boolean()).optional(),
+  peers: coerceArray(z.array(z.string())).optional(),
+  titleOnly: strictCoerceBoolean(z.boolean()).optional(),
+  visibility: z.nativeEnum(EntryVisibility).optional(),
 })
+
+export type EntrySearchOptionsParams = z.infer<typeof EntrySearchOptionsSchema>
 
 export const EntryFilter = {
   WITH: 'with',
@@ -267,7 +260,7 @@ export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOption
     organisation: z.string().optional(),
     state: z.string().optional(),
     schemaId: z.string().optional(),
-    kinds: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
+    kinds: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
     release: z.enum(getEnumValues(EntryFilter)).optional(),
     accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
     startMonth: z

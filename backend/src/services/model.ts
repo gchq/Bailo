@@ -404,6 +404,10 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     query['settings.allowTemplating'] = true
   }
 
+  if (opts.visibility) {
+    query.visibility = opts.visibility
+  }
+
   if (opts.filters && opts.filters.length > 0) {
     if (opts.filters?.includes('mine')) {
       query.collaborators = {

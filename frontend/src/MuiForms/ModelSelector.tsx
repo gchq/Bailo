@@ -45,9 +45,21 @@ export default function ModelSelector({
     entries: models,
     isEntriesLoading: isModelsLoading,
     isEntriesError: isModelsError,
-  } = useListEntries(EntryKind.MODEL, undefined, undefined, undefined, undefined, [
-    uiConfig.deploymentAssessments.deployableModelState,
-  ])
+  } = useListEntries(
+    EntryKind.MODEL,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    [uiConfig.deploymentAssessments.deployableModelState],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    'public',
+  )
 
   const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
 
