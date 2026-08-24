@@ -5,6 +5,7 @@ import { ParsedUrlQuery } from 'querystring'
 import { ReactElement, SyntheticEvent, useContext, useMemo } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import ExpandableTypography from 'src/common/ExpandableTypography'
+import HelpDialog, { HelpDialogProps } from 'src/common/HelpDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -30,6 +31,7 @@ interface PageWithTabsProps {
   subheadingToCopy?: string
   additionalHeaderDisplay?: ReactElement
   actionButtonIcon?: ReactElement
+  buttonHelpDialog?: HelpDialogProps
 }
 
 export default function PageWithTabs({
@@ -45,6 +47,7 @@ export default function PageWithTabs({
   subheadingToCopy = '',
   additionalHeaderDisplay,
   actionButtonIcon,
+  buttonHelpDialog,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
@@ -184,14 +187,17 @@ export default function PageWithTabs({
           </>
         </Stack>
         {displayActionButton && (
-          <Button
-            sx={{ minWidth: '154px' }}
-            variant='contained'
-            onClick={actionButtonOnClick}
-            startIcon={actionButtonIcon ? actionButtonIcon : <></>}
-          >
-            {actionButtonTitle}
-          </Button>
+          <Stack direction='row'>
+            <Button
+              sx={{ minWidth: '154px' }}
+              variant='contained'
+              onClick={actionButtonOnClick}
+              startIcon={actionButtonIcon ? actionButtonIcon : <></>}
+            >
+              {actionButtonTitle}
+            </Button>
+            {buttonHelpDialog && <HelpDialog title={buttonHelpDialog.title} content={buttonHelpDialog.content} />}
+          </Stack>
         )}
         {additionalHeaderDisplay && <div>{additionalHeaderDisplay}</div>}
       </Stack>
