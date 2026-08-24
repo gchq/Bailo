@@ -14,7 +14,7 @@ import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { PathConfig, registerPath } from '../../../../services/specification.js'
 import { HttpHeader } from '../../../../types/enums.js'
 import { BailoError } from '../../../../types/error.js'
-import { getFileBaseName } from '../../../../utils/fileUtils.js'
+import { getFileBaseName, validateFileName } from '../../../../utils/fileUtils.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -69,7 +69,10 @@ const fileIdParam = z.object({ fileId: z.string() })
 const semverParam = z.object({ semver: z.string() })
 // Wildcard route (*fileName) returns path segments as an array, join them back into a slash-delimited filename
 const fileNameParam = z.object({
-  fileName: z.union([z.string(), z.array(z.string())]).transform((v) => (Array.isArray(v) ? v.join('/') : v)),
+  fileName: z
+    .union([z.string(), z.array(z.string())])
+    .transform((v) => (Array.isArray(v) ? v.join('/') : v))
+    .transform((v) => validateFileName(v)),
 })
 
 const modelIdWithSemverAndFileName = modelIdParam.merge(semverParam).merge(fileNameParam)
